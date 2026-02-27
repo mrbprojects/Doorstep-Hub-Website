@@ -200,7 +200,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     // COD or Wallet payment successful
                     toast.success('Booking created successfully!');
                     clearCart(); // Clear cart only on successful booking
-                    onSuccess && onSuccess(data);
+                    if (onSuccess) onSuccess(data);
                 }
             } else {
                 toast.error(data.message || 'Checkout failed');

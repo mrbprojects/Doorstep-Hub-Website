@@ -151,7 +151,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 } else {
                     // COD or Wallet payment successful
                     toast.success('Booking created successfully!');
-                    onSuccess && onSuccess(data);
+                    if (onSuccess) onSuccess(data);
                 }
             } else {
                 toast.error(data.message || 'Checkout failed');

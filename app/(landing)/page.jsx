@@ -12,6 +12,9 @@ import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
+
 export default async function Home() {
     let showHomeScreen = false;
 

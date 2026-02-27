@@ -17,10 +17,11 @@ import { ServiceDetail } from './components/ServiceDetail';
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'service'>('home');
 
-  // Make setCurrentView globally available for service card clicks
+  // Make navigation globally available for service card clicks
   React.useEffect(() => {
-    (window as any).navigateToService = () => setCurrentView('service');
-    (window as any).navigateToHome = () => setCurrentView('home');
+    const win = window as unknown as { navigateToService: () => void; navigateToHome: () => void };
+    win.navigateToService = () => setCurrentView('service');
+    win.navigateToHome = () => setCurrentView('home');
   }, []);
 
   if (currentView === 'service') {

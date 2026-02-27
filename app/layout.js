@@ -8,6 +8,7 @@ import { CartProvider } from './context/CartContext';
 import { ServiceCartProvider } from './context/ServiceCartContext';
 import { ClientProviders } from './components/providers/ClientProviders';
 import ErrorBoundary from './components/ErrorBoundary';
+import { FloatingActionButtons } from './components/ui/FloatingActionButtons';
 
 
 const ubuntu = Ubuntu({
@@ -39,6 +40,7 @@ export default function RootLayout({ children }) {
                         strategy="beforeInteractive"
                       />
                       {children}
+                      <FloatingActionButtons />
                     </ClientProviders>
                   </ServiceCartProvider>
                 </CartProvider>

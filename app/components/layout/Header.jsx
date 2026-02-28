@@ -85,52 +85,32 @@ export function Header({ theme = {}, navItems = [] }) {
         const isHomeEnabled = screenSettingsData.success && screenSettingsData.data?.homescreen;
         setShowHomeScreen(isHomeEnabled);
 
-        if (data.success && data.data) {
-          const mappedItems = data.data.map(service => {
-            let href = '#';
-            const name = service.name.trim();
+        // Fetch Navbar CMS Items
+        const navResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-navbar');
+        const navData = await navResponse.json();
 
-            if (name.toUpperCase().includes('APPLIANCE')) href = `/${newSlugs.appliances}`;
-            else if (name.toUpperCase().includes('RELIGIOUS')) href = `/${newSlugs.religious}`;
-            else if (name.toUpperCase().includes('PG')) href = `/${newSlugs.pg}`;
-            else if (name.toUpperCase().includes('SPA')) href = `/${newSlugs.spa}`;
+        if (navData.success && navData.data) {
+          const visibleItems = navData.data
+            .filter(item => item.isVisible)
+            .sort((a, b) => a.order - b.order)
+            .map(item => ({
+              name: item.label,
+              href: item.url,
+              originalService: null
+            }));
 
-            // Special Formatting for specific categories
-            let formattedName = name;
-            const upperName = name.toUpperCase();
-
-            if (upperName === 'SPA SALONS') {
-              formattedName = 'Spa Saloon';
-            } else {
-              formattedName = name
-                .toLowerCase()
-                .split(' ')
-                .map(word => word.toUpperCase() === 'PG' ? 'PG' : (word.charAt(0).toUpperCase() + word.slice(1)))
-                .join(' ');
-            }
-
-            return { name: formattedName, href, originalService: service };
-          });
-
-          /*
-          // Add 'More' dropdown
-          mappedItems.push({
-            name: 'More',
-            dropdown: [
-              { name: 'Become a Partner', href: '/partner' },
-              { name: 'Share Ride', href: '#share-ride' }
-            ]
-          });
-          */
-
-          // Filter based on home screen setting
-          if (isHomeEnabled) {
-            setApiNavItems(mappedItems);
+          let finalNavItems = [];
+          if (visibleItems.length > 4) {
+            finalNavItems = visibleItems.slice(0, 4);
+            finalNavItems.push({
+              name: 'More',
+              dropdown: visibleItems.slice(4)
+            });
           } else {
-            setApiNavItems(mappedItems.filter(item =>
-              false // item.name.toLowerCase().includes('appliance') // || item.name === 'More'
-            ));
+            finalNavItems = visibleItems;
           }
+
+          setApiNavItems(finalNavItems);
         }
       } catch (error) {
         console.error("Failed to fetch nav data:", error);

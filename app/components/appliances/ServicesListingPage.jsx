@@ -68,19 +68,44 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
       setLoading(true);
       try {
+        let resolvedSubcategoryId = subCategoryId;
+
+        // If navigating by slug (e.g. /ac-repair/cassette-ac), resolve subcategoryId first
+        if (slug && !subCategoryId && !childCategoryId && category) {
+          try {
+            const subCatRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ slug: category })
+            });
+            const subCatData = await subCatRes.json();
+            if (subCatData.success && subCatData.data) {
+              const matchedSubCat = subCatData.data.find(s =>
+                s.slug === slug || s.name?.toLowerCase().replace(/\s+/g, '-') === slug
+              );
+              if (matchedSubCat) {
+                resolvedSubcategoryId = matchedSubCat._id;
+                setPageTitle(matchedSubCat.name);
+              }
+            }
+          } catch (err) {
+            console.error('Error resolving subcategory from slug:', err);
+          }
+        }
+
         let apiUrl = 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory';
         let body = {
           lattitude: location.lat,
           longitude: location.lng,
         };
 
-        if (slug) {
-          body.slug = slug;
+        if (resolvedSubcategoryId) {
+          body.subcategoryId = resolvedSubcategoryId;
         } else if (childCategoryId) {
           apiUrl = 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_childcategory';
           body.childcategoryId = childCategoryId;
-        } else {
-          body.subcategoryId = subCategoryId;
+        } else if (slug) {
+          body.slug = slug; // Fallback only
         }
 
         // Add minRating to payload if set
@@ -152,7 +177,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     };
 
     fetchServices();
-  }, [subCategoryId, childCategoryId, slug, location?.lat, location?.lng, minRating]);
+  }, [subCategoryId, childCategoryId, slug, category, location?.lat, location?.lng, minRating]);
 
   // Fetch Categories for Sidebar
   useEffect(() => {

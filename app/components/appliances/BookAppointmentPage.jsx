@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ClipboardList, PlusSquare, IndianRupee, CheckSquare, Search, Phone, Mail, User } from 'lucide-react';
 import Image from 'next/image';
+import { useLocationContext } from '@/context/LocationContext';
+import { toast } from 'sonner';
 
 const STEPS = [
     {
@@ -33,6 +36,7 @@ const STEPS = [
 ];
 
 export function BookAppointmentPage() {
+    const router = useRouter();
     const [currentStep, setCurrentStep] = useState(0);
     const [agreed, setAgreed] = useState(false);
     const [location, setLocation] = useState({ latitude: '', longitude: '' });
@@ -43,46 +47,32 @@ export function BookAppointmentPage() {
         payAtServiceDelivery: true
     });
 
+    const getMinDate = () => new Date().toISOString().split('T')[0];
+
+    const getMinTime = () => {
+        if (formData.bookingDate === getMinDate()) {
+            const minDateTime = new Date();
+            minDateTime.setHours(minDateTime.getHours() + 3);
+            return minDateTime.toTimeString().slice(0, 5); // returns HH:MM
+        }
+        return '';
+    };
+
     const [categories, setCategories] = useState([]);
     const [subcategories, setSubcategories] = useState([]);
     const [services, setServices] = useState([]);
+    const { location: contextLocation } = useLocationContext();
 
-    // Get location from localStorage on component mount
+    // Sync context location to our local state when it becomes available
     useEffect(() => {
-        const getLocationFromStorage = () => {
-            try {
-                // Try to get from various possible storage keys
-                const possibleKeys = ['userLocation', 'location', 'userCoordinates', 'latitude', 'longitude'];
-                let lat = '';
-                let lng = '';
-
-                for (const key of possibleKeys) {
-                    const stored = localStorage.getItem(key);
-                    if (stored) {
-                        try {
-                            const parsed = JSON.parse(stored);
-                            if (parsed.latitude || parsed.lat) {
-                                lat = parsed.latitude || parsed.lat;
-                                lng = parsed.longitude || parsed.lng || parsed.lon;
-                                break;
-                            }
-                        } catch {
-                            // If not JSON, check if it's a direct coordinate
-                            if (key === 'latitude') lat = stored;
-                            if (key === 'longitude') lng = stored;
-                        }
-                    }
-                }
-
-                setLocation({ latitude: lat, longitude: lng });
-                console.log('Location retrieved from localStorage:', { lat, lng });
-            } catch (error) {
-                console.error('Error reading location from localStorage:', error);
-            }
-        };
-
-        getLocationFromStorage();
-    }, []);
+        if (contextLocation?.lat && contextLocation?.lng) {
+            setLocation({
+                latitude: contextLocation.lat,
+                longitude: contextLocation.lng
+            });
+            console.log("Location set from context:", contextLocation);
+        }
+    }, [contextLocation]);
 
     React.useEffect(() => {
         const fetchCategories = async () => {
@@ -90,7 +80,10 @@ export function BookAppointmentPage() {
                 const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({}) // Emtpy payload as requested
+                    body: JSON.stringify({
+                        lattitude: location.latitude || "17.3850",
+                        longitude: location.longitude || "78.4867"
+                    })
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -101,7 +94,7 @@ export function BookAppointmentPage() {
             }
         };
         fetchCategories();
-    }, []);
+    }, [location.latitude, location.longitude]);
 
     const handleCategoryChange = async (e) => {
         const selectedId = e.target.value;
@@ -152,11 +145,15 @@ export function BookAppointmentPage() {
             const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subcategoryId: selectedId })
+                body: JSON.stringify({
+                    subcategoryId: selectedId,
+                    lattitude: location.latitude || "17.3850",
+                    longitude: location.longitude || "78.4867"
+                })
             });
             const data = await res.json();
             if (data.success) {
-                setServices(data.data || data.services || []);
+                setServices(data.data || data.services || data.dhubServices || []);
             }
         } catch (err) {
             console.error('Error fetching services:', err);
@@ -183,7 +180,7 @@ export function BookAppointmentPage() {
 
     const handleSubmit = async () => {
         if (!agreed) {
-            alert('Please agree to terms and conditions');
+            toast.error('Please agree to terms and conditions');
             return;
         }
 
@@ -218,14 +215,23 @@ export function BookAppointmentPage() {
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                alert('Booking Successful!');
-                window.location.reload();
+                toast.success(
+                    <div className="flex flex-col gap-1">
+                        <span className="font-bold">Booking Confirmed!</span>
+                        {/* <span className="text-sm">Our service partner will meet you at your doorstep.</span> */}
+                    </div>,
+                    { duration: 5000 }
+                );
+
+                setTimeout(() => {
+                    router.push('/appliances');
+                }, 5000);
             } else {
-                alert('Booking Failed: ' + (data.message || 'Unknown error'));
+                toast.error('Booking Failed: ' + (data.message || 'Unknown error'));
             }
         } catch (err) {
             console.error(err);
-            alert('An error occurred during booking.');
+            toast.error('An error occurred during booking.');
         }
     };
 
@@ -283,8 +289,20 @@ export function BookAppointmentPage() {
                             </select>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <input type="date" className="w-full px-6 py-4 bg-white border border-gray-100 rounded-xl text-gray-500 text-lg" value={formData.bookingDate} onChange={(e) => setFormData({ ...formData, bookingDate: e.target.value })} />
-                            <input type="time" className="w-full px-6 py-4 bg-white border border-gray-100 rounded-xl text-gray-500 text-lg" value={formData.bookingTime} onChange={(e) => setFormData({ ...formData, bookingTime: e.target.value })} />
+                            <input
+                                type="date"
+                                min={getMinDate()}
+                                className="w-full px-6 py-4 bg-white border border-gray-100 rounded-xl text-gray-500 text-lg"
+                                value={formData.bookingDate}
+                                onChange={(e) => setFormData({ ...formData, bookingDate: e.target.value })}
+                            />
+                            <input
+                                type="time"
+                                min={getMinTime()}
+                                className="w-full px-6 py-4 bg-white border border-gray-100 rounded-xl text-gray-500 text-lg"
+                                value={formData.bookingTime}
+                                onChange={(e) => setFormData({ ...formData, bookingTime: e.target.value })}
+                            />
                         </div>
                         <textarea placeholder="Message (e.g. loud noise)" className="w-full px-6 py-4 bg-white border border-gray-100 rounded-xl text-gray-500 text-lg h-32" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} />
                     </div>

@@ -21,6 +21,11 @@ const ubuntu = Ubuntu({
 export const metadata = {
   title: 'DoorstepHub',
   description: 'DoorstepHub - Your All-in-One Service Platform',
+  icons: {
+    icon: '/d-hub-logo.png',
+    shortcut: '/d-hub-logo.png',
+    apple: '/d-hub-logo.png',
+  },
 };
 
 export default function RootLayout({ children }) {

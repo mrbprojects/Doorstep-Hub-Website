@@ -12,7 +12,6 @@ function ThankYouContent() {
         const savedAddress = sessionStorage.getItem('selected_address');
         const sessionAddress = savedAddress ? JSON.parse(savedAddress) : null;
 
-        // Prioritize URL params for social/redirect cases, fallback to sessionStorage
         const urlAddress = searchParams.get('address');
 
         // Format Date if it exists
@@ -28,44 +27,21 @@ function ThankYouContent() {
         // Clean up duplicated address parts from URL
         let cleanAddress = urlAddress;
         if (urlAddress) {
-            // Split by comma to get all segments
             const segments = urlAddress.split(',').map(s => s.trim()).filter(s => s);
-
-            // Remove consecutive duplicate segments
+            const seen = new Set();
             const uniqueSegments = [];
-            for (let i = 0; i < segments.length; i++) {
-                // Check if this segment is the same as the previous one
-                if (i === 0 || segments[i] !== segments[i - 1]) {
-                    uniqueSegments.push(segments[i]);
-                }
+
+            for (const seg of segments) {
+                const normalized = seg.toLowerCase();
+                // Skip segments already seen
+                if (seen.has(normalized)) continue;
+                // Skip trailing "City - State - PIN" style suffix (e.g. "Hyderabad - Telangana - 500082")
+                if (/^.+\s-\s.+\s-\s\d+$/.test(seg)) continue;
+                seen.add(normalized);
+                uniqueSegments.push(seg);
             }
 
-            // Also check for repeated patterns (e.g., "A, B, C, A, B, C")
-            // Find the longest repeating pattern from the middle
-            let finalSegments = uniqueSegments;
-            for (let patternLength = 1; patternLength <= Math.floor(uniqueSegments.length / 2); patternLength++) {
-                const midPoint = Math.floor(uniqueSegments.length / 2);
-                let isRepeating = true;
-
-                // Check if segments repeat around the middle
-                for (let i = 0; i < patternLength && (midPoint - patternLength + i) >= 0 && (midPoint + i) < uniqueSegments.length; i++) {
-                    if (uniqueSegments[midPoint - patternLength + i] !== uniqueSegments[midPoint + i]) {
-                        isRepeating = false;
-                        break;
-                    }
-                }
-
-                if (isRepeating && midPoint >= patternLength) {
-                    // Remove the repeated pattern
-                    finalSegments = [
-                        ...uniqueSegments.slice(0, midPoint),
-                        ...uniqueSegments.slice(midPoint + patternLength)
-                    ];
-                    break;
-                }
-            }
-
-            cleanAddress = finalSegments.join(', ');
+            cleanAddress = uniqueSegments.join(', ');
         }
 
         // Use URL address if available (already cleaned), otherwise build from sessionStorage

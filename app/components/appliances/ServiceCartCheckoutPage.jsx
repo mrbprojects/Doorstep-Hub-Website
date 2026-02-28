@@ -24,6 +24,23 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [technicianPreference, setTechnicianPreference] = useState('any');
     const [walletBalance, setWalletBalance] = useState(0);
     const [walletLoading, setWalletLoading] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+
+    // On mount: check if returning from Easebuzz payment gateway
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        if (status === 'success') {
+            setPaymentStatus('success');
+            // Payment confirmed — now safe to clear cart
+            clearCart();
+            sessionStorage.removeItem('pending_booking');
+            toast.success('Payment successful! Booking confirmed.');
+        } else if (status === 'failure') {
+            setPaymentStatus('failure');
+            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+        }
+    }, []);
 
     // Fetch Wallet Balance
     useEffect(() => {
@@ -183,18 +200,20 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
             if (data.success) {
                 if (methodToSend === 'ONLINE' && data.access_key) {
-                    // Save pending details for post-payment retrieval
+                    // Save pending booking details to sessionStorage before redirect
+                    // DO NOT clear cart here — data must survive the redirect
                     sessionStorage.setItem('pending_booking', JSON.stringify({
                         bookedDate,
                         bookedTime,
                         address: selectedAddress,
-                        orderId: data.bookingId || data.orderId // Assuming API returns this
+                        orderId: data.bookingId || data.orderId || null
                     }));
 
                     // Redirect to Easebuzz payment gateway with access_key
                     const easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
                     console.log('🔗 Redirecting to Easebuzz:', easebuzzUrl);
                     toast.success('Redirecting to payment gateway...');
+                    // Cart will be cleared on return when ?status=success is detected
                     window.location.href = easebuzzUrl;
                 } else {
                     // COD or Wallet payment successful

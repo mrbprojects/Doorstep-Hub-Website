@@ -17,16 +17,11 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageIds, o
         const hasValidPackages = Array.isArray(selectedPackageIds) && selectedPackageIds.length > 0;
 
         if (isOpen && isValidId(providerId) && hasValidPackages) {
-            console.log("✅ Fetching addons...");
             fetchAddons();
         } else {
-            if (isOpen) {
-                console.warn("⚠️ AddonsModal skipping fetch due to invalid params:", { isOpen, providerId, selectedPackageIds });
-            }
-            // Reset state or handle empty
             setAddons([]);
             setSelectedAddons([]);
-            setLoading(false); // Stop loading if parameters are missing
+            setLoading(false);
         }
     }, [isOpen, providerId, selectedPackageIds]);
 
@@ -49,21 +44,17 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageIds, o
                 if (allAddons.length > 0) {
                     setAddons(allAddons);
                 } else {
-                    // No addons found, skip modal
-                    console.log("⚠️ No add-ons found in data, skipping...");
                     setAddons([]);
                     onContinue([]);
                 }
             } else {
-                console.log("⚠️ No add-ons data returned, skipping...");
                 setAddons([]);
                 onContinue([]);
             }
         } catch (err) {
-            console.error("❌ Error fetching add-ons:", err);
+            console.error("Error fetching add-ons:", err);
             setError("Failed to load add-ons.");
         } finally {
-            console.log("🏁 Fetch finished (loading set to false)");
             setLoading(false);
         }
     };

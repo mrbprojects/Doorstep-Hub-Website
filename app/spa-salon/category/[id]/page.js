@@ -68,9 +68,29 @@ function SpaCategoryContent() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white pt-24 pb-10 flex flex-col items-center justify-center">
-                <Sparkles className="w-10 h-10 text-[#C06C84] animate-spin mb-4" />
-                <p className="text-gray-500">Loading Wellness Options...</p>
+            <div className="min-h-screen bg-gray-50 pt-24">
+                {/* Gradient hero shimmer */}
+                <div className="relative pt-32 pb-20 bg-gradient-to-br from-[#C06C84] to-[#6C5CE7]">
+                    <div className="container mx-auto px-4 flex flex-col items-center gap-4">
+                        <div className="h-10 bg-white/20 rounded-full w-40 animate-pulse" />
+                        <div className="h-14 bg-white/20 rounded-xl w-72 animate-pulse" />
+                        <div className="h-6 bg-white/10 rounded-xl w-96 animate-pulse" />
+                    </div>
+                </div>
+                <div className="container mx-auto px-4 -mt-16 pb-24">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div key={i} className="bg-white rounded-[2rem] overflow-hidden shadow-xl animate-pulse">
+                                <div className="h-56 bg-gray-200" />
+                                <div className="p-6 space-y-3">
+                                    <div className="h-5 bg-gray-200 rounded-lg w-3/4" />
+                                    <div className="h-4 bg-gray-100 rounded-lg w-full" />
+                                    <div className="h-4 bg-gray-100 rounded-lg w-2/3" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }

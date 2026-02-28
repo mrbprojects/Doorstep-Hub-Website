@@ -69,11 +69,11 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                     });
                     const catData = await catResponse.json();
 
-                    if (catData.success) {
+                    if (catData.success && catData.category) {
                         const catQuestion = {
                             id: 'categoryId',
                             question: 'Which service category are you looking for?',
-                            options: catData.data.map(cat => ({
+                            options: catData.category.map(cat => ({
                                 value: cat._id,
                                 label: cat.name,
                                 icon: '🎯',

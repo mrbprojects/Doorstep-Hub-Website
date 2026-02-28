@@ -58,8 +58,8 @@ export function HomePage() {
     const { location, detectWithIP } = useLocationContext();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const [categories, setCategories] = useState(MOCK_CATEGORIES);
-    // const [loading, setLoading] = useState(true); // Renamed to accurately reflect category loading if needed, or just use general loading
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
 
     // Featured Packages State
     const [featuredPackages, setFeaturedPackages] = useState([]);
@@ -109,9 +109,15 @@ export function HomePage() {
                         description: cat.description
                     }));
                     setCategories(mappedCategories);
+                } else {
+                    // Fallback to MOCK only if API fails completely
+                    setCategories(MOCK_CATEGORIES);
                 }
             } catch (error) {
                 console.error("Failed to fetch categories:", error);
+                setCategories(MOCK_CATEGORIES);
+            } finally {
+                setLoadingCategories(false);
             }
         };
 
@@ -148,9 +154,8 @@ export function HomePage() {
             try {
                 setLoadingNearby(true);
 
-                // Use user location if available, otherwise fallback to provided coordinates
-                const lat = location?.lat || "17.4065";
-                const lng = location?.lng || "78.4772";
+                const lat = location?.coords?.latitude || "17.4065";
+                const lng = location?.coords?.longitude || "78.4772";
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/nearby_spa_centers', {
                     method: 'POST',
@@ -168,7 +173,7 @@ export function HomePage() {
                         name: store.storeName,
                         image: store.image
                             ? (store.image.startsWith('http') ? store.image : `https://api.doorstephub.com/${store.image}`)
-                            : 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80',
+                            : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
                         rating: store.totalRatings || 0,
                         reviews: store.totalRatings || 0,
                         price: store.startingAt || 499,
@@ -447,7 +452,19 @@ export function HomePage() {
                     </motion.div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {categories.map((category, index) => (
+                        {loadingCategories ? (
+                            // Shimmer skeleton for categories
+                            [1, 2, 3, 4, 5, 6].map((i) => (
+                                <div key={i} className="relative aspect-[3/4] rounded-3xl overflow-hidden animate-pulse">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+                                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                                        <div className="h-8 bg-gray-300 rounded-lg w-12 mb-3" />
+                                        <div className="h-6 bg-gray-300 rounded-lg w-3/4 mb-2" />
+                                        <div className="h-4 bg-gray-200 rounded-lg w-full" />
+                                    </div>
+                                </div>
+                            ))
+                        ) : categories.map((category, index) => (
                             <motion.div
                                 key={category._id || category.id}
                                 initial={{ opacity: 0, y: 30 }}

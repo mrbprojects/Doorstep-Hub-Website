@@ -174,8 +174,35 @@ export default function SpaServiceDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Loader2 className="w-12 h-12 text-[#C06C84] animate-spin" />
+            <div className="min-h-screen bg-gray-50 pb-32">
+                {/* Banner shimmer */}
+                <div className="h-[420px] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                {/* Header card shimmer */}
+                <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-10">
+                    <div className="bg-white/95 rounded-3xl shadow-2xl border border-gray-200 p-8 animate-pulse">
+                        <div className="flex items-start gap-4 mb-6">
+                            <div className="w-20 h-20 rounded-2xl bg-gray-200" />
+                            <div className="space-y-3 flex-1">
+                                <div className="h-8 bg-gray-200 rounded-lg w-1/2" />
+                                <div className="h-5 bg-gray-100 rounded-lg w-1/3" />
+                            </div>
+                            <div className="h-16 w-28 bg-gray-200 rounded-2xl" />
+                        </div>
+                        <div className="h-12 bg-gray-100 rounded-2xl mb-8" />
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="bg-gray-100 rounded-2xl overflow-hidden">
+                                    <div className="h-48 bg-gray-200" />
+                                    <div className="p-4 space-y-2">
+                                        <div className="h-5 bg-gray-200 rounded w-3/4" />
+                                        <div className="h-4 bg-gray-100 rounded w-full" />
+                                        <div className="h-6 bg-gray-200 rounded w-1/3" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -399,7 +426,7 @@ export default function SpaServiceDetailPage() {
                 isOpen={showAddonsModal}
                 onClose={() => setShowAddonsModal(false)}
                 providerId={id}
-                selectedPackageId={selectedPackages.map(p => p._id).join(',')}
+                selectedPackageIds={selectedPackages.map(p => p._id)}
                 onContinue={handleAddonsContinue}
             />
         </div >

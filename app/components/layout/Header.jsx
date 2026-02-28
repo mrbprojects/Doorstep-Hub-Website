@@ -170,7 +170,7 @@ export function Header({ theme = {}, navItems = [] }) {
     */
   ];
 
-  const menuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : defaultNavItems);
+  const menuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : apiNavItems);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -195,14 +195,18 @@ export function Header({ theme = {}, navItems = [] }) {
     pathname?.includes('/listings') ||
     Object.values(serviceSlugs).some(slug => pathname?.includes(slug));
 
+  // Header is transparent only on the landing page when not scrolled
+  const isLandingPage = pathname === '/';
+  const isHeaderSolid = isScrolled || !isLandingPage;
+
   return (
     <>
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled || isServicePage
-          ? `${currentTheme.bgScrolled} glass-premium border-b ${currentTheme.border} shadow-lg ${currentTheme.isLight ? 'shadow-[#C06C84]/5' : 'shadow-[#037166]/5'}`
-          : 'bg-transparent'
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isHeaderSolid
+            ? `${currentTheme.bgScrolled} glass-premium border-b ${currentTheme.border} shadow-lg`
+            : 'bg-transparent'
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -235,7 +239,7 @@ export function Header({ theme = {}, navItems = [] }) {
                       <motion.button
                         onClick={() => setActiveDropdown(activeDropdown === index ? null : index)}
                         whileHover={{ y: -2 }}
-                        className={`${currentTheme.textMain} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#037166]'} transition-colors relative font-medium whitespace-nowrap flex items-center gap-1`}
+                        className={`text-white hover:text-[#04a99d] transition-colors relative font-medium whitespace-nowrap flex items-center gap-1`}
                       >
                         {item.name}
                         <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${activeDropdown === index ? 'rotate-90' : ''}`} />
@@ -265,7 +269,7 @@ export function Header({ theme = {}, navItems = [] }) {
                   ) : (
                     <Link href={item.href} onClick={() => handleServiceClick(item)}>
                       <motion.span
-                        className={`${currentTheme.textMain} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#037166]'} transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
+                        className={`text-white hover:text-[#04a99d] transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
                         whileHover={{ y: -2 }}
                       >
                         {item.name}

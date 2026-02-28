@@ -37,14 +37,14 @@ export function DetailsPage() {
                         id: store._id || params.id,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
                         provider: store.business_name || 'Professional Service',
-                        image: store.logo ? `https://api.doorstephub.com/${store.logo}` : 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80',
+                        image: store.logo ? `https://api.doorstephub.com/${store.logo}` : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
                         rating: parseFloat(store.avgRating || 4.5).toFixed(1),
                         reviewCount: store.totalOrders || 0,
                         price: store.BasePrice || store.minFare || 999,
                         duration: '60 min',
-                        distance: '2.5 km',
+                        distance: store.distance || 'Nearby',
                         address: store.address || 'Address not available',
-                        description: store.description || store.bio || 'Experience the ultimate relaxation with our premium services.',
+                        description: store.description || store.bio || store.aboutUs || 'Experience the ultimate relaxation with our premium services.',
                         includes: store.services ? store.services.split(',') : [
                             'Premium Service',
                             'Expert Staff',
@@ -85,7 +85,31 @@ export function DetailsPage() {
         });
     };
 
-    if (loading || !service) return <div className="min-h-screen pt-20 flex justify-center items-center">Loading...</div>;
+    if (loading) return (
+        <div className="min-h-screen pt-20 bg-gray-50">
+            {/* Hero shimmer */}
+            <div className="h-[400px] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+            <div className="max-w-7xl mx-auto px-4 -mt-32 relative z-10">
+                <div className="bg-white/95 rounded-3xl shadow-2xl border border-gray-200 p-8 animate-pulse">
+                    <div className="flex justify-between items-start mb-8">
+                        <div className="space-y-3">
+                            <div className="h-8 bg-gray-200 rounded-lg w-64" />
+                            <div className="h-5 bg-gray-100 rounded-lg w-40" />
+                        </div>
+                        <div className="h-16 w-28 bg-gray-200 rounded-2xl" />
+                    </div>
+                    <div className="h-12 bg-gray-100 rounded-2xl mb-8" />
+                    <div className="space-y-4">
+                        <div className="h-32 bg-gray-100 rounded-2xl" />
+                        <div className="h-24 bg-gray-100 rounded-2xl" />
+                        <div className="h-24 bg-gray-100 rounded-2xl" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    if (!service) return <div className="min-h-screen pt-20 flex justify-center items-center text-gray-500">Service not found.</div>;
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-32 pt-16">
@@ -283,7 +307,9 @@ export function DetailsPage() {
                                     <h3 className="text-2xl font-bold text-gray-900 mb-4">About {service.provider}</h3>
                                     <p className="text-gray-700 leading-relaxed text-lg">
                                         {service.provider} is a premium wellness center offering top-quality spa and salon services.
-                                        Our expert staff is dedicated to providing you with the best experience.
+                                        {service.description && service.description !== 'Experience the ultimate relaxation with our premium services.'
+                                            ? ` ${service.description}`
+                                            : ' Our expert staff is dedicated to providing you with the best experience.'}
                                     </p>
                                 </div>
 

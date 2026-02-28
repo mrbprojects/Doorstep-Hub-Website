@@ -407,22 +407,21 @@ export default function SpaConfirmPage() {
                                 <Wallet className="w-5 h-5 text-[#C06C84]" />
                                 Select Payment Method
                             </h3>
-                            <div className="grid md:grid-cols-3 gap-3">
+                            <div className="grid md:grid-cols-1 gap-3">
                                 {[
                                     { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
-                                    { id: 'WALLET', label: 'Wallet Pay', icon: Wallet },
-                                    { id: 'COD', label: 'Pay at Store', icon: Truck },
                                 ].map((method) => (
                                     <button
                                         key={method.id}
                                         onClick={() => setPaymentMethod(method.id)}
-                                        className={`p-5 rounded-xl flex flex-col items-center gap-2 transition-all ${paymentMethod === method.id
-                                            ? 'bg-[#C06C84] text-white shadow-lg'
-                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                                        className={`p-5 rounded-xl flex items-center gap-3 transition-all ${paymentMethod === method.id
+                                                ? 'bg-[#C06C84] text-white shadow-lg'
+                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                                             }`}
                                     >
                                         <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-white' : 'text-[#C06C84]'}`} />
                                         <span className="text-sm font-medium">{method.label}</span>
+                                        {paymentMethod === method.id && <CheckCircle className="w-5 h-5 ml-auto" />}
                                     </button>
                                 ))}
                             </div>

@@ -274,7 +274,7 @@ export const AuthProvider = ({ children }) => {
             const { signInWithApple } = await import('@/config/firebase');
             const { user, idToken } = await signInWithApple();
 
-            console.log('🍎 Firebase Apple Sign-In successful, calling backend API...');
+            console.log(' Firebase Apple Sign-In successful, calling backend API...');
 
             const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/auth/loginWithApple', {
                 method: 'POST',

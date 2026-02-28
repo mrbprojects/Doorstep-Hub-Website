@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 const footerLinks = {
 
   Quicklinks: [
-    { name: 'About Us', href: '#' },
+    { name: 'About Us', href: '/about-us' },
     { name: 'Careers', href: '/careers' },
     // { name: 'Press Kit', href: '#' },
     // { name: 'Contact', href: '#' },
@@ -366,19 +366,24 @@ export function Footer({ theme = {} }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <div className="relative w-48 h-14 overflow-hidden mb-6">
-                <Image
-                  src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
-                  alt={globalSettings?.applicationName || "Doorstep Hub"}
-                  fill
-                  sizes="192px"
-                  className="object-contain object-left cursor-pointer"
-                  onClick={() => router.push('/')}
-                />
+              {/* Logo + About side by side */}
+              <div className="flex flex-col sm:flex-row items-start gap-3 mb-6">
+                {/* Logo - increased size */}
+                <div className="relative w-36 h-20 flex-shrink-0 overflow-hidden">
+                  <Image
+                    src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                    alt={globalSettings?.applicationName || "Doorstep Hub"}
+                    fill
+                    sizes="224px"
+                    className="object-contain object-left cursor-pointer"
+                    onClick={() => router.push('/')}
+                  />
+                </div>
+                {/* About text */}
+                <p className={`${t.textMuted} leading-relaxed max-w-sm text-sm`}>
+                  {globalSettings?.aboutus || "Your trusted partner for all home service needs. Connecting you with verified professionals for quick, reliable, and affordable solutions."}
+                </p>
               </div>
-              <p className={`${t.textMuted} mb-6 leading-relaxed max-w-sm`}>
-                {globalSettings?.aboutus || "Your trusted partner for all home service needs. Connecting you with verified professionals for quick, reliable, and affordable solutions."}
-              </p>
 
               {/* Contact Info */}
               <div className="space-y-4">
@@ -561,6 +566,6 @@ export function Footer({ theme = {} }) {
 
       {/* Bottom Gradient Line */}
       <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${t.accentColor}80, transparent)` }} />
-    </footer>
+    </footer >
   );
 }

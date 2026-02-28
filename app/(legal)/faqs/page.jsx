@@ -158,14 +158,14 @@ export default function FAQPage() {
                             href={`mailto:${globalSettings?.email || "help@doorstephub.com"}`}
                             className="px-8 py-3 bg-[#037166] hover:bg-[#04a99d] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#037166]/20"
                         >
-                            {globalSettings?.email || "Email Support"}
+                            {globalSettings?.email2 || "Email Support"}
                         </a>
-                        <a
+                        {/* <a
                             href="/contact"
                             className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all border border-white/10"
                         >
                             Contact Us
-                        </a>
+                        </a> */}
                     </div>
                 </div>
             </motion.div>

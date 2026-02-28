@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     MapPin, Star, Search, Sliders, Heart, TrendingUp, X, Wifi, Utensils,
-    Shirt, Zap, Award, Sparkles, ChevronRight, Check
+    Shirt, Zap, Award, Sparkles, ChevronRight, Check, ArrowLeft
 } from 'lucide-react';
 import { Input } from '@/components/pghostels/ui/input';
 import { useLocationContext } from '@/context/LocationContext';
@@ -23,14 +23,18 @@ function PGResultsContent() {
     const searchParams = useSearchParams();
     const { location, detectWithIP } = useLocationContext();
 
-    // Params
+    // Params — questionnaire sends categoryId; subcategoryId is optional (from subcategory picker)
     const categoryName = searchParams.get('categoryName');
-    const subcategoryId = searchParams.get('subcategoryId');
+    const categoryId = searchParams.get('categoryId');       // Primary: sent by questionnaire
+    const subcategoryId = searchParams.get('subcategoryId'); // Optional: sent if user picked a subcategory
     const roomType = searchParams.get('roomType');
     const budget = searchParams.get('budget');
     const duration = searchParams.get('duration');
     const food = searchParams.get('food');
     const moveIn = searchParams.get('moveIn');
+
+    // The API lookup id: prefer subcategoryId, fall back to categoryId
+    const lookupId = subcategoryId || categoryId;
 
     // State
     const [listings, setListings] = useState([]);
@@ -41,7 +45,6 @@ function PGResultsContent() {
 
     // Initial load
     useEffect(() => {
-        // If no location, try to detect it
         if (!location) {
             detectWithIP().catch(err => console.log("Auto detect failed", err));
         }
@@ -50,37 +53,46 @@ function PGResultsContent() {
     // Fetch listings
     useEffect(() => {
         const fetchListings = async () => {
-            if (!subcategoryId) return; // Wait for subcategoryId (or handle 'all' case later)
+            if (!lookupId) return; // Nothing to fetch yet
 
             setLoading(true);
+            setError(null);
             try {
-                // Default to Hyderabad coords if location is missing (or handle gracefully)
+                // Safely read location from localStorage
+                let lat = '17.4065';
+                let lng = '78.4772';
+                try {
+                    const userLocationData = localStorage.getItem('user_location_data');
+                    if (userLocationData) {
+                        const locationData = JSON.parse(userLocationData);
+                        if (locationData?.lat) lat = locationData.lat;
+                        if (locationData?.lng) lng = locationData.lng;
+                    }
+                } catch (locErr) {
+                    console.warn('Could not read location from localStorage, using default');
+                }
 
+                // Build request body — use subcategoryId if present, otherwise categoryId
+                const requestBody = {
+                    lattitude: lat,
+                    longitude: lng,
+                    roomType,
+                    budget,
+                    duration,
+                    food,
+                    moveIn
+                };
 
-                const userLocationData = localStorage.getItem('user_location_data');
-                const locationData = JSON.parse(userLocationData);
-
-
-                console.log("locationData", locationData)
-
-
-                const lat = locationData?.lat;
-                const lng = locationData?.lng;
+                if (subcategoryId) {
+                    requestBody.subcategoryId = subcategoryId;
+                } else {
+                    requestBody.categoryId = categoryId;
+                }
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        lattitude: lat, // Note: API uses 'lattitude' with double 't'
-                        longitude: lng,
-                        subcategoryId: subcategoryId,
-                        // Include questionnaire responses
-                        roomType,
-                        budget,
-                        duration,
-                        food,
-                        moveIn
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
@@ -121,7 +133,7 @@ function PGResultsContent() {
         };
 
         fetchListings();
-    }, [subcategoryId, location]); // Re-fetch if location updates
+    }, [lookupId, location]); // Re-fetch when ID or location changes
 
     const toggleSave = (id) => {
         setSavedItems(prev =>
@@ -278,9 +290,20 @@ function PGResultsContent() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-16">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-[#037166] to-[#025951] py-12">
+            {/* Header — pt-20 clears the fixed site navbar */}
+            <div className="bg-gradient-to-r from-[#037166] to-[#025951] pt-20 pb-12">
                 <div className="max-w-7xl mx-auto px-4">
+                    {/* Back Button */}
+                    <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-white hover:bg-white/25 transition-all text-sm font-medium"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back
+                    </motion.button>
+
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -367,7 +390,7 @@ function PGResultsContent() {
                         </motion.div>
 
                         {/* Tabs */}
-                        <div className="flex items-center justify-between mb-6">
+                        {/* <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-2 bg-white border border-gray-200 p-1 rounded-xl shadow-sm">
                                 <button
                                     onClick={() => setShowNearby(false)}
@@ -388,7 +411,7 @@ function PGResultsContent() {
                                     Nearby PGs
                                 </button>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Listings Grid */}
                         <div className="grid md:grid-cols-2 gap-6">

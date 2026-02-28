@@ -338,7 +338,7 @@ export function PremiumHomePage() {
 
             {/* Quick Search Strip */}
             <section className="relative -mt-20 z-20">
-                <div className="max-w-4xl mr-10 px-4">
+                <div className="max-w-2xl mr-10 px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -359,7 +359,7 @@ export function PremiumHomePage() {
                             </div>
 
                             {/* Filter Chips */}
-                            <div className="flex flex-wrap gap-1.5 hidden md:flex">
+                            {/* <div className="flex flex-wrap gap-1.5 hidden md:flex">
                                 {['Boys', 'Girls', 'Co-living', 'Dorm', 'With Food'].map((chip, i) => (
                                     <motion.button
                                         key={chip}
@@ -374,7 +374,7 @@ export function PremiumHomePage() {
                                         {chip}
                                     </motion.button>
                                 ))}
-                            </div>
+                            </div> */}
 
                             {/* Search Button */}
                             <motion.button

@@ -88,9 +88,23 @@ function SpaSubCategoryContent() {
             {/* Service List */}
             <div className="container mx-auto px-4 pb-12">
                 {loading ? (
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="h-40 bg-gray-200 rounded-2xl animate-pulse" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <div key={i} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
+                                <div className="h-48 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+                                <div className="p-4 space-y-3">
+                                    <div className="flex justify-between">
+                                        <div className="h-5 bg-gray-200 rounded-lg w-2/3" />
+                                        <div className="h-5 bg-gray-100 rounded-lg w-12" />
+                                    </div>
+                                    <div className="h-4 bg-gray-100 rounded-lg w-1/3" />
+                                    <div className="h-4 bg-gray-100 rounded-lg w-1/2" />
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-50">
+                                        <div className="h-7 bg-gray-200 rounded-lg w-20" />
+                                        <div className="h-9 bg-gray-200 rounded-xl w-20" />
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 ) : (
@@ -136,10 +150,12 @@ function SpaSubCategoryContent() {
                                             </div>
 
                                             <div className="flex items-center text-gray-500 text-sm mb-2 space-x-4">
-                                                <div className="flex items-center">
-                                                    <Clock className="w-4 h-4 mr-1 text-[#C06C84]" />
-                                                    {service.duration || '45 mins'}
-                                                </div>
+                                                {service.duration && (
+                                                    <div className="flex items-center">
+                                                        <Clock className="w-4 h-4 mr-1 text-[#C06C84]" />
+                                                        {service.duration}
+                                                    </div>
+                                                )}
                                             </div>
                                             {service.address && (
                                                 <p className="text-xs text-gray-400 line-clamp-1 mb-2">{service.address}</p>

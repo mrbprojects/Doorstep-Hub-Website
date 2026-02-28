@@ -24,14 +24,15 @@ export function BookingConfirmationPage({
   const [isConfirming, setIsConfirming] = useState(false);
   const [paymentMethod] = useState('online');
   const [directBookingItems, setDirectBookingItems] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
   const processingRef = useRef(false);
   const idempotencyKeyRef = useRef(null);
 
-
   React.useEffect(() => {
+    // 1. Load saved booking items from localStorage
     const stored = localStorage.getItem('booking_package_details');
     if (stored) {
       try {
@@ -40,6 +41,22 @@ export function BookingConfirmationPage({
       } catch (e) {
         console.error('Failed to parse direct booking items');
       }
+    }
+
+    // 2. Check if returning from Easebuzz payment gateway
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    if (status === 'success') {
+      setPaymentStatus('success');
+      // Payment confirmed — now safe to clear cart and localStorage
+      clearCart();
+      localStorage.removeItem('booking_package_details');
+      localStorage.removeItem('last_service_id');
+      sessionStorage.removeItem('pending_booking');
+      toast.success('Payment successful! Booking confirmed.');
+    } else if (status === 'failure') {
+      setPaymentStatus('failure');
+      toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
     }
   }, []);
 
@@ -255,10 +272,17 @@ export function BookingConfirmationPage({
             duration: 2000
           });
 
-          // No changes needed if not enforcing auth via modal on mount.st easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
-          // Fixed Easebuzz URL format
+          // Save booking state to sessionStorage so it survives the redirect
+          // DO NOT clear localStorage/cart here — data must be preserved until payment is confirmed
+          sessionStorage.setItem('pending_booking', JSON.stringify({
+            bookedDate: selectedDate,
+            bookedTime: selectedTime,
+            address,
+            orderId: data.bookingId || data.orderId || null
+          }));
+
           const easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
-          cleanup();
+          // Redirect — cleanup will happen on return when ?status=success is detected
           window.location.href = easebuzzUrl;
         } else {
           throw new Error(data.message || 'Failed to initiate online payment');
@@ -277,12 +301,12 @@ export function BookingConfirmationPage({
     }
   };
 
+  // cleanup() is called ONLY after confirmed payment (COD/wallet success, or on return with ?status=success)
   const cleanup = () => {
-    if (!directBookingItems) {
-      clearCart();
-    }
+    clearCart();
     localStorage.removeItem('booking_package_details');
     localStorage.removeItem('last_service_id');
+    sessionStorage.removeItem('pending_booking');
   };
 
   return (

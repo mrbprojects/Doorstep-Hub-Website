@@ -228,25 +228,6 @@ export function CartPage({
         )}
       </div>
 
-      {/* Mobile Sticky Footer */}
-      {cartItems.length > 0 && (
-        <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-black via-black/95 to-transparent backdrop-blur-xl border-t border-white/10"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-white/80">Total</span>
-            <span className="text-2xl font-bold text-white">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
-          </div>
-          <button
-            onClick={onProceedToAddress}
-            className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/40 transition-all"
-          >
-            Proceed to Address
-          </button>
-        </motion.div>
-      )}
     </motion.div>
   );
 }

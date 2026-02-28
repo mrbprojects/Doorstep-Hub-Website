@@ -28,11 +28,6 @@ export function ResultsPage() {
     const [showFilters, setShowFilters] = useState(false);
 
     // Location Context
-    // We need to import useLocationContext. Since I cannot change imports easily with replace_file_content if they are far apart, 
-    // I will assume I can add it or I'll have to do a larger replace. 
-    // Actually, I should probably do a full file replace or a larger chunk replace to handle imports and the main component body cleanly. 
-    // But let's try to do it with valid JS.
-
     const { location, detectWithIP } = useLocationContext();
 
     useEffect(() => {
@@ -99,7 +94,7 @@ export function ResultsPage() {
                             id: service._id,
                             name: service.business_name || `${service.firstName} ${service.lastName}`,
                             provider: service.business_name || 'Professional Service',
-                            image: service.logo ? `https://api.doorstephub.com/${service.logo}` : 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80',
+                            image: service.logo ? `https://api.doorstephub.com/${service.logo}` : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
                             rating: parseFloat(service.rating) || 4.5,
                             reviews: service.totalOrders || 0,
                             price: service.startingAt || service.BasePrice || service.minFare || 0,
@@ -229,12 +224,7 @@ export function ResultsPage() {
                         >
                             All Services
                         </TabButton>
-                        <TabButton
-                            active={activeTab === 'nearby'}
-                            onClick={() => setActiveTab('nearby')}
-                        >
-                            Nearby Centers
-                        </TabButton>
+
                     </div>
                 </div>
             </div>
@@ -244,7 +234,24 @@ export function ResultsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {loading ? (
                         [1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="h-[400px] bg-white rounded-2xl border border-[#E8ECF2] animate-pulse" />
+                            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] shadow-md animate-pulse">
+                                {/* Image shimmer */}
+                                <div className="h-56 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                                {/* Content shimmer */}
+                                <div className="p-6">
+                                    <div className="h-5 bg-gray-200 rounded-lg w-3/4 mb-2" />
+                                    <div className="h-4 bg-gray-100 rounded-lg w-1/2 mb-5" />
+                                    <div className="flex gap-3 mb-4">
+                                        <div className="h-4 bg-gray-200 rounded-lg w-20" />
+                                        <div className="h-4 bg-gray-100 rounded-lg w-16" />
+                                    </div>
+                                    <div className="h-4 bg-gray-100 rounded-lg w-28 mb-6" />
+                                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                                        <div className="h-7 bg-gray-200 rounded-lg w-20" />
+                                        <div className="h-9 bg-gray-200 rounded-xl w-28" />
+                                    </div>
+                                </div>
+                            </div>
                         ))
                     ) : filteredServices.map((service, index) => (
                         <ServiceCard

@@ -141,10 +141,13 @@ export function DownloadApp() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-3xl z-20" />
 
                 {/* Screen Content */}
-                <div className="absolute inset-3 rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-[#0f1614] to-[#0a0a0a]">
-                  <img
-                    src="https://images.unsplash.com/photo-1629697776809-f37ceac39e77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2JpbGUlMjBhcHAlMjBtb2NrdXB8ZW58MXx8fHwxNzY4MDE3MDA3fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="App Interface"
+                <div className="absolute inset-3 rounded-[2.5rem] overflow-hidden bg-black">
+                  <video
+                    src="/dhubvideo.mp4"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#037166]/20 to-transparent" />
@@ -168,7 +171,7 @@ export function DownloadApp() {
                     rotate: [0, -5, 0],
                   }}
                   transition={{ duration: 3.5, repeat: Infinity, delay: 1 }}
-                  className="absolute -left-4 bottom-32 w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-xl flex items-center justify-center"
+                  className="absolute -left-4 bottom-32 w-14 h-14 rounded-xl bg-gradient-to-br from-[#037166] to-[#065f46] shadow-xl flex items-center justify-center"
                 >
                   <Smartphone className="w-7 h-7 text-white" />
                 </motion.div>

@@ -69,14 +69,11 @@ export default function ServicePartnerPage() {
                 const data = await response.json();
                 if (data.success && data.policy) {
                     setAppLinks({
-                        // Try partner-specific fields first, fall back to customer fields
-                        android: data.policy.partnerAndroidAppLink
-                            || data.policy.providerAndroidAppLink
-                            || data.policy.partnerAppLink
+                        android: data.policy.vendorAndroidAppLink
+                            || data.policy.partnerAndroidAppLink
                             || 'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
-                        ios: data.policy.partnerIosAppLink
-                            || data.policy.providerIosAppLink
-                            || data.policy.partnerIosLink
+                        ios: data.policy.vendorIosAppLink
+                            || data.policy.partnerIosAppLink
                             || 'https://apps.apple.com/in/app/doorstep-hub-partner/id6504071357'
                     });
                 }

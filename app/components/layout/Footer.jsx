@@ -12,21 +12,18 @@ const footerLinks = {
 
   Quicklinks: [
     { name: 'About Us', href: '/about-us' },
+    { name: 'Contact Us', href: '/contact-us' },
     { name: 'Careers', href: '/careers' },
-    // { name: 'Press Kit', href: '#' },
-    // { name: 'Contact', href: '#' },
-    { name: 'Become a Service Partner', href: '/partner' },
-
+    { name: 'Become a Service Partner', href: '/service-partner' },
+    { name: 'Book Appointment', href: '/book-appointment' },
     { name: 'Download Android App', href: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner' },
-
-    { name: 'Download Ios App', href: 'https://apps.apple.com/in/app/doorstep-hub/id6448539336' },
+    { name: 'Download iOS App', href: 'https://apps.apple.com/in/app/doorstep-hub/id6448539336' },
   ],
   Moreinfo: [
     { name: 'FAQs', href: '/faqs' },
     { name: 'Terms of Service', href: '/terms-conditions' },
     { name: 'Privacy Policy', href: '/privacy-policy' },
-    { name: 'Help Center', href: '#' },
-    // { name: 'All Services', href: '/services' },
+    { name: 'Help Center', href: '/contact-us' },
   ],
 };
 

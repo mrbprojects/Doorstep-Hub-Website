@@ -327,16 +327,27 @@ export default function ServicePartnerPage() {
                                         ))}
                                     </div>
 
-                                    {/* Download App Button — uses partner Android link from global settings */}
-                                    <a
-                                        href={appLinks.android}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-8 py-4 mt-8 rounded-xl bg-white text-[#037166] font-bold hover:shadow-xl transition-all inline-flex items-center justify-center gap-2"
-                                    >
-                                        <Download className="w-5 h-5" />
-                                        Download App
-                                    </a>
+                                    {/* Download Buttons — Android + iOS partner links */}
+                                    <div className="flex flex-col sm:flex-row gap-3 mt-8">
+                                        <a
+                                            href={appLinks.android}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex-1 px-6 py-4 rounded-xl bg-white text-[#037166] font-bold hover:shadow-xl transition-all inline-flex items-center justify-center gap-2"
+                                        >
+                                            <Download className="w-5 h-5" />
+                                            Android App
+                                        </a>
+                                        <a
+                                            href={appLinks.ios}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex-1 px-6 py-4 rounded-xl bg-white/20 border-2 border-white text-white font-bold hover:bg-white hover:text-[#037166] transition-all inline-flex items-center justify-center gap-2"
+                                        >
+                                            <Download className="w-5 h-5" />
+                                            iOS App
+                                        </a>
+                                    </div>
 
                                 </div>
 

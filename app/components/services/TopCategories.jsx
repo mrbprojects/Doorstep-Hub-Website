@@ -215,7 +215,7 @@ export function TopCategories({ onViewAll }) {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide pb-4">
+          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="flex gap-6 min-w-max">
               {isLoading
                 ? Array.from({ length: 8 }).map((_, index) => (
@@ -232,7 +232,7 @@ export function TopCategories({ onViewAll }) {
                     onClick={() => router.push(`/services/category/${category._id}?name=${encodeURIComponent(category.title)}`)}
                     className="group cursor-pointer"
                   >
-                    <div className="relative w-72 lg:w-[210px] h-54 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+                    <div className="relative w-72 lg:w-[210px] h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
                       {/* Image */}
                       <div className="absolute inset-0">
                         <img

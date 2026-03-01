@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, Navigation, Star, Phone, Clock, ArrowRight, Loader2 } from 'lucide-react';
+import { Navigation, Star, /* Phone, */ Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useLocation } from '@/hooks/useLocation';
@@ -73,7 +73,7 @@ export function NearbyServiceCenters({ onViewAll }) {
 
             return {
               id: service?._id || index,
-              name: service?.name || service?.business_name || `${service?.firstName || ''} ${service?.lastName || ''}` || 'Unknown Service',
+              name: service?.business_name,
               distance: `${dist.toFixed(1)} km`,
               rating: parseFloat(service?.rating) || 4.5,
               status: service?.storeHours || 'Open Now',
@@ -102,7 +102,7 @@ export function NearbyServiceCenters({ onViewAll }) {
     fetchNearestServiceCenters();
   }, [location]);
 
-  const MapComponent = React.useCallback(() => {
+  const MapComponent = useCallback(() => {
     if (!isMapsLoaded || !location) return null;
 
     return (
@@ -143,6 +143,67 @@ export function NearbyServiceCenters({ onViewAll }) {
     );
   }, [isMapsLoaded, location, services, selectedService]);
 
+  // ─── Service Card ─────────────────────────────────────────────────────────────
+  const ServiceCard = ({ service, index, actualIndex }) => (
+    <motion.div
+      key={service.id}
+      onClick={() => setSelectedService(actualIndex)}
+      whileHover={{ x: 10 }}
+      className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm ${selectedService === actualIndex
+        ? 'bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/10'
+        : 'bg-[#1a1a1a]/50 border-white/10 hover:border-[#037166]/30'
+        }`}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d]">
+              {service.distance} AWAY
+            </span>
+            <div className="flex items-center gap-1">
+              <Star className="w-3 h-3 fill-[#04a99d] text-[#04a99d]" />
+              <span className="text-xs font-bold text-white">{service.rating}</span>
+            </div>
+          </div>
+          <h4 className="text-xl font-bold text-white mb-1 group-hover:text-[#04a99d] transition-colors">
+            {service.name}
+          </h4>
+          <p className="text-white/40 text-sm line-clamp-1">{service.address}</p>
+        </div>
+
+        {/* WhatsApp button */}
+        <a
+          href="https://api.whatsapp.com/send/?phone=918886688666&text=Hi&type=phone_number&app_absent=0"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="p-3 rounded-xl bg-[#037166]/10 hover:bg-[#25D366] text-[#25D366] hover:text-white transition-all border border-[#037166]/20 flex-shrink-0"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+          </svg>
+        </a>
+
+      </div>
+
+      <div className="mt-4 flex items-center justify-between">
+        <span className="text-xs text-gray-400 flex items-center gap-1">
+          <Clock className="w-3 h-3 text-green-400" />
+          {service.status}
+        </span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/appliances/store/${service.id}`);
+          }}
+          className="text-xs font-bold text-[#04a99d] hover:text-white flex items-center gap-1"
+        >
+          View Details
+          <ArrowRight className="w-3 h-3" />
+        </button>
+      </div>
+    </motion.div>
+  );
 
 
   return (
@@ -168,7 +229,7 @@ export function NearbyServiceCenters({ onViewAll }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-10"
         >
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6 mx-auto">
             <Navigation className="w-4 h-4 text-[#037166]" />
@@ -182,16 +243,6 @@ export function NearbyServiceCenters({ onViewAll }) {
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Find expert repair centers near you for all your home appliances.
           </p>
-
-          {/* <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onViewAll}
-            className="mt-8 px-8 py-3 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-full font-medium shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center gap-2 mx-auto"
-          >
-            Explore Service Centers
-            <ArrowRight className="w-4 h-4" />
-          </motion.button> */}
 
           {!location && (
             <div className="mt-8 flex flex-col items-center">
@@ -208,169 +259,63 @@ export function NearbyServiceCenters({ onViewAll }) {
           )}
         </motion.div>
 
-        {/* Services Grid */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* 🎯 DARK MAP - LOADS INSTANTLY */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative h-[600px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 shadow-2xl"
-          >
-            <MapComponent />
+        {/* ── Main Content: Map + Service List ────────────────────────────────────── */}
+        <div>
+          {/* Services Grid */}
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* 🎯 DARK MAP */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative h-[600px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 shadow-2xl"
+            >
+              <MapComponent />
 
-            {!isMapsLoaded && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a]/95 backdrop-blur-sm z-50">
-                <Loader2 className="w-10 h-10 text-[#037166] animate-spin mb-4" />
-                <span className="text-[#037166] text-sm font-medium animate-pulse">Loading Map...</span>
-              </div>
-            )}
-          </motion.div>
+              {!isMapsLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a]/95 backdrop-blur-sm z-50">
+                  <Loader2 className="w-10 h-10 text-[#037166] animate-spin mb-4" />
+                  <span className="text-[#037166] text-sm font-medium animate-pulse">Loading Map...</span>
+                </div>
+              )}
+            </motion.div>
 
-          {/* Service List - First 4 */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-4"
-          >
-            {loading ? (
-              Array(4).fill(0).map((_, i) => (
-                <div key={i} className="h-32 rounded-2xl bg-white/5 animate-pulse border border-white/10" />
-              ))
-            ) : services.length > 0 ? (
-              services.slice(0, 4).map((service, index) => (
-                <motion.div
-                  key={service.id}
-                  onClick={() => setSelectedService(index)}
-                  whileHover={{ x: 10 }}
-                  className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm ${selectedService === index
-                    ? 'bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/10'
-                    : 'bg-[#1a1a1a]/50 border-white/10 hover:border-[#037166]/30'
-                    }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d]">
-                          {service.distance} AWAY
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-[#04a99d] text-[#04a99d]" />
-                          <span className="text-xs font-bold text-white">{service.rating}</span>
-                        </div>
-                      </div>
-                      <h4 className="text-xl font-bold text-white mb-1 group-hover:text-[#04a99d] transition-colors">
-                        {service.name}
-                      </h4>
-                      <p className="text-white/40 text-sm line-clamp-1">{service.address}</p>
-                    </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = `tel:${service.phone}`;
-                      }}
-                      className="p-3 rounded-xl bg-[#037166]/10 hover:bg-[#037166] text-[#037166] hover:text-white transition-all border border-[#037166]/20"
-                    >
-                      <Phone className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs text-gray-400 flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-green-400" />
-                      {service.status}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/appliances/store/${service.id}`);
-                      }}
-                      className="text-xs font-bold text-[#04a99d] hover:text-white flex items-center gap-1"
-                    >
-                      View Details
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <div className="text-center py-20 text-gray-500 border-2 border-dashed border-gray-700 rounded-3xl">
-                <p>No service centers found nearby</p>
-                <button onClick={detectWithGPS} className="mt-4 px-6 py-2 bg-[#037166] text-white rounded-xl">Retry Detection</button>
-              </div>
-            )}
-          </motion.div>
-        </div>
-
-        {/* Last 2 Service Centers - Side by Side Below Map */}
-        {!loading && services.length >= 6 && (
-          <div className="grid lg:grid-cols-2 gap-8 mt-8">
-            {services.slice(4, 6).map((service, index) => {
-              const actualIndex = index + 4;
-              return (
-                <motion.div
-                  key={service.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  onClick={() => setSelectedService(actualIndex)}
-                  whileHover={{ x: 5 }}
-                  className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm ${selectedService === actualIndex
-                    ? 'bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/10'
-                    : 'bg-[#1a1a1a]/50 border-white/10 hover:border-[#037166]/30'
-                    }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d]">
-                          {service.distance} AWAY
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-[#04a99d] text-[#04a99d]" />
-                          <span className="text-xs font-bold text-white">{service.rating}</span>
-                        </div>
-                      </div>
-                      <h4 className="text-xl font-bold text-white mb-1 group-hover:text-[#04a99d] transition-colors">
-                        {service.name}
-                      </h4>
-                      <p className="text-white/40 text-sm line-clamp-1">{service.address}</p>
-                    </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = `tel:${service.phone}`;
-                      }}
-                      className="p-3 rounded-xl bg-[#037166]/10 hover:bg-[#037166] text-[#037166] hover:text-white transition-all border border-[#037166]/20"
-                    >
-                      <Phone className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs text-gray-400 flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-green-400" />
-                      {service.status}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/appliances/store/${service.id}`);
-                      }}
-                      className="text-xs font-bold text-[#04a99d] hover:text-white flex items-center gap-1"
-                    >
-                      View Details
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            })}
+            {/* Service List - First 4 */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="space-y-4"
+            >
+              {loading ? (
+                Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="h-32 rounded-2xl bg-white/5 animate-pulse border border-white/10" />
+                ))
+              ) : services.length > 0 ? (
+                services.slice(0, 4).map((service, index) => (
+                  <ServiceCard key={service.id} service={service} index={index} actualIndex={index} />
+                ))
+              ) : (
+                <div className="text-center py-20 text-gray-500 border-2 border-dashed border-gray-700 rounded-3xl">
+                  <p>No service centers found nearby</p>
+                  <button onClick={detectWithGPS} className="mt-4 px-6 py-2 bg-[#037166] text-white rounded-xl">Retry Detection</button>
+                </div>
+              )}
+            </motion.div>
           </div>
-        )}
+
+          {/* Last 2 Service Centers - Side by Side Below Map */}
+          {!loading && services.length >= 6 && (
+            <div className="grid lg:grid-cols-2 gap-8 mt-8">
+              {services.slice(4, 6).map((service, index) => {
+                const actualIndex = index + 4;
+                return (
+                  <ServiceCard key={service.id} service={service} index={index} actualIndex={actualIndex} />
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* View All Button */}
         <motion.div
@@ -390,6 +335,7 @@ export function NearbyServiceCenters({ onViewAll }) {
           </motion.button>
         </motion.div>
       </div>
+
       <style jsx>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }
@@ -399,6 +345,13 @@ export function NearbyServiceCenters({ onViewAll }) {
           background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
           background-size: 200% 100%;
           animation: shimmer 2s infinite;
+        }
+        .scrollbar-hide {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
     </section >

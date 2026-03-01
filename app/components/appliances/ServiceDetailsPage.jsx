@@ -236,176 +236,150 @@ export function ServiceDetailsPage({
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  // Book-now handler extracted for reuse
+  const handleBookNow = () => {
+    const finalServiceId = storeData.id || storeData._id || serviceId;
+    if (!finalServiceId) { toast.error('Service information missing'); return; }
+    localStorage.setItem('last_service_id', finalServiceId);
+    if (serviceSlug) localStorage.setItem('last_service_slug', serviceSlug);
+    const firstPackage = provider_rate_cards[0];
+    const rawPrice = firstPackage?.price || 0;
+    const cleanPrice = typeof rawPrice === 'string' ? parseInt(rawPrice.replace(/[^0-9]/g, '')) || 0 : rawPrice;
+    localStorage.setItem('booking_package_details', JSON.stringify([{
+      ...(firstPackage || {}),
+      id: firstPackage?.id || `direct-${finalServiceId}`,
+      serviceId: finalServiceId,
+      serviceName: storeData.name || 'Professional Service',
+      packageName: firstPackage?.title || 'Standard Package',
+      price: cleanPrice,
+      bookingCost: storeData.serviceBookingCost || 0,
+      inspectionCost: storeData.inspectionCost || 0,
+      quantity: 1
+    }]));
+    router.push('/appliances/address');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-20"
+      className="min-h-screen pt-20 pb-24 lg:pb-0"
     >
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(3, 113, 102, 0.5);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(3, 113, 102, 0.8);
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(3,113,102,0.5); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(3,113,102,0.8); }
       `}</style>
-      {/* Hero Section with Service Accent Color */}
-      <section className="relative py-12">
+
+      {/* ── MOBILE: Sticky bottom Book-Now bar (hidden on lg+) ─────────────── */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden px-4 pb-4 pt-2"
+        style={{ background: 'linear-gradient(to top, rgba(10,10,10,1) 60%, transparent)' }}
+      >
+        <button
+          onClick={handleBookNow}
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-base shadow-2xl shadow-[#037166]/40 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+        >
+          Book Now
+          <ArrowRight className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* ── HERO SECTION ────────────────────────────────────────────────────── */}
+      <section className="relative py-6 lg:py-12">
         <div
           className="absolute inset-0 opacity-30"
-          style={{
-            background: `linear-gradient(135deg, #025a51 0%, ${accentColor} 50%, #037166 100%)`,
-          }}
+          style={{ background: `linear-gradient(135deg, #025a51 0%, ${accentColor} 50%, #037166 100%)` }}
         />
-
-        {/* Animated glow orb */}
         <motion.div
-
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
           transition={{ duration: 8, repeat: Infinity }}
           className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-[120px]"
           style={{ backgroundColor: accentColor }}
         />
 
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
-          {/* Back Button */}
-          <motion.button
+        <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* Back + Breadcrumb row */}
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            onClick={() => {
-              // Try to find the correct listing URL based on metadata in URL
-              const params = new URLSearchParams(window.location.search);
-              const catSlug = params.get('categorySlug');
-              const subCatSlug = params.get('subCategorySlug');
-
-              // If we have precise slugs, navigate to the specific subcategory listing
-              if (catSlug && subCatSlug) {
-                router.push(`/${catSlug}/${subCatSlug}`);
-                return;
-              }
-
-              // Fallback to category listing if subcategory is missing
-              if (catSlug) {
-                router.push(`/${catSlug}`);
-                return;
-              }
-
-              // Final robust fallback to the home page requested by user
-              // This ensures if they went back from address page, they don't get stuck in history
-              router.push('/');
-            }}
-            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all"
+            className="flex flex-wrap items-center gap-3 mb-4"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Services
-          </motion.button>
-
-          {/* Breadcrumb */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-white/60 text-sm mb-6 flex items-center gap-2"
-          >
-            <button
-              onClick={() => {
-                const params = new URLSearchParams(window.location.search);
-                const catSlug = params.get('categorySlug');
-                if (catSlug) router.push(`/${catSlug}`);
-                else router.push('/');
-              }}
-              className="hover:text-[#04a99d] transition-colors"
-            >
-              {category}
-            </button>
-            <span>→</span>
             <button
               onClick={() => {
                 const params = new URLSearchParams(window.location.search);
                 const catSlug = params.get('categorySlug');
                 const subCatSlug = params.get('subCategorySlug');
-                if (catSlug && subCatSlug) router.push(`/${catSlug}/${subCatSlug}`);
-                else if (catSlug) router.push(`/${catSlug}`);
-                else router.push('/');
+                if (catSlug && subCatSlug) { router.push(`/${catSlug}/${subCatSlug}`); return; }
+                if (catSlug) { router.push(`/${catSlug}`); return; }
+                router.push('/');
               }}
-              className="hover:text-[#04a99d] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
             >
-              {subCategory}
+              <ArrowLeft className="w-4 h-4" />
+              Back
             </button>
-            <span>→</span>
-            <span className="text-white/40">{storeData?.name || 'Details'}</span>
+            <div className="text-white/50 text-xs flex items-center gap-1.5 flex-wrap">
+              <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); router.push(c ? `/${c}` : '/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[100px]">{category}</button>
+              <ChevronRight className="w-3 h-3 flex-shrink-0" />
+              <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[100px]">{subCategory}</button>
+              <ChevronRight className="w-3 h-3 flex-shrink-0" />
+              <span className="text-white/30 truncate max-w-[120px]">{storeData?.name}</span>
+            </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-8 items-start relative">
-            {/* Left Column: Gallery + Tabs */}
-            <div className="lg:col-span-1 space-y-8 h-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
+          {/* ── MOBILE-FIRST: Info block at top on mobile, right col on desktop ── */}
+          {/* On mobile this is ORDER-1, on desktop it becomes the right sticky column */}
+
+          {/* ── Desktop 2-col grid ─────────────────────────────────────────────── */}
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+
+            {/* LEFT col: Gallery + Tabs (order-2 on mobile, order-none on desktop) */}
+            <div className="order-2 lg:order-none space-y-6 lg:space-y-8">
+
+              {/* Image Gallery */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
                 <div className="relative rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm border border-white/10">
                   <div
-                    className="relative aspect-video cursor-pointer"
-                    onClick={() => {
-                      setSelectedImageIndex(currentImageIndex);
-                      setIsLightboxOpen(true);
-                    }}
+                    className="relative w-full overflow-hidden"
+                    style={{ aspectRatio: '16/9' }}
+                    onClick={() => { setSelectedImageIndex(currentImageIndex); setIsLightboxOpen(true); }}
                   >
                     <img
                       src={images[currentImageIndex]}
                       alt={storeData.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-
-                    {/* Navigation Arrows */}
+                    {/* Dots indicator on mobile */}
+                    {images.length > 1 && (
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 lg:hidden">
+                        {images.map((_, i) => (
+                          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentImageIndex ? 'bg-[#04a99d] w-4' : 'bg-white/40'}`} />
+                        ))}
+                      </div>
+                    )}
                     {images.length > 1 && (
                       <>
-                        <button
-                          onClick={prevImage}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all flex items-center justify-center"
-                        >
+                        <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-all flex items-center justify-center">
                           <ChevronLeft className="w-5 h-5 text-white" />
                         </button>
-                        <button
-                          onClick={nextImage}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all flex items-center justify-center"
-                        >
+                        <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-all flex items-center justify-center">
                           <ChevronRight className="w-5 h-5 text-white" />
                         </button>
                       </>
                     )}
                   </div>
-
-                  {/* Thumbnail Navigation */}
+                  {/* Thumbnails — hidden on mobile, shown on md+ */}
                   {images.length > 1 && (
-                    <div className="flex gap-2 p-4 overflow-x-auto">
+                    <div className="hidden md:flex gap-2 p-3 overflow-x-auto">
                       {images.map((img, idx) => (
                         <button
                           key={idx}
-                          onClick={() => {
-                            setCurrentImageIndex(idx);
-                            setSelectedImageIndex(idx);
-                            setIsLightboxOpen(true);
-                          }}
-                          className={`relative w-20 h-20 rounded-lg overflow-hidden transition-all flex-shrink-0 ${currentImageIndex === idx
-                            ? 'ring-2 ring-[#037166] scale-105'
-                            : 'opacity-60 hover:opacity-100'
-                            }`}
+                          onClick={() => { setCurrentImageIndex(idx); setSelectedImageIndex(idx); setIsLightboxOpen(true); }}
+                          className={`relative w-16 h-16 rounded-lg overflow-hidden transition-all flex-shrink-0 ${currentImageIndex === idx ? 'ring-2 ring-[#037166] scale-105' : 'opacity-60 hover:opacity-100'}`}
                         >
                           <img src={img} alt="" className="w-full h-full object-cover" />
                         </button>
@@ -415,17 +389,17 @@ export function ServiceDetailsPage({
                 </div>
               </motion.div>
 
-              {/* Tabbed Content Section (Moved Here) */}
-              <div className="bg-[#1a1a1a]/40 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden p-6 md:p-8">
-                {/* Tab Navigation */}
-                <div className="flex gap-2 mb-8 border-b border-white/10 pb-4 overflow-x-auto">
+              {/* Tabbed Content */}
+              <div className="bg-[#1a1a1a]/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
+                {/* Tab bar */}
+                <div className="flex border-b border-white/10 overflow-x-auto scrollbar-hide">
                   {['About Service', 'Working Images', 'Ratings'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-6 py-2.5 rounded-xl font-semibold transition-all whitespace-nowrap text-sm tracking-wide ${activeTab === tab
-                        ? 'bg-[#037166] text-white shadow-lg shadow-[#037166]/20'
-                        : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                      className={`flex-1 min-w-max px-4 py-3.5 text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab
+                        ? 'bg-[#037166]/20 text-[#04a99d] border-b-2 border-[#037166]'
+                        : 'text-white/50 hover:text-white hover:bg-white/5'
                         }`}
                     >
                       {tab}
@@ -433,239 +407,159 @@ export function ServiceDetailsPage({
                   ))}
                 </div>
 
-                <AnimatePresence mode="wait">
-                  {/* About Service Tab */}
-                  {(activeTab === 'About Service' || activeTab === 'services') && (
-                    <motion.div
-                      key="services"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="mb-6">
-                        <h3 className="text-xl font-bold text-white mb-1">About Service</h3>
-                        <p className="text-white/40 text-xs italic">Approximate service rates</p>
-                      </div>
-                      <div className="grid gap-4">
-                        {provider_rate_cards.map((card, index) => (
-                          <div
-                            key={card.id || index}
-                            className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group"
-                          >
-                            <h6 className="text-white font-medium group-hover:text-[#04a99d] transition-colors pr-4">{card.title}</h6>
-                            <span className="text-[#04a99d] font-bold text-lg whitespace-nowrap">₹{card.price}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
+                <div className="p-4 sm:p-6">
+                  <AnimatePresence mode="wait">
+                    {/* About Service Tab */}
+                    {(activeTab === 'About Service' || activeTab === 'services') && (
+                      <motion.div key="services" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                        <div className="mb-4">
+                          <h3 className="text-lg font-bold text-white mb-0.5">About Service</h3>
+                          <p className="text-white/40 text-xs italic">Approximate service rates</p>
 
-                  {/* Working Images Tab */}
-                  {(activeTab === 'Working Images' || activeTab === 'portfolio') && (
-                    <motion.div
-                      key="portfolio"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <h3 className="text-xl font-bold text-white mb-6">Working Images</h3>
-                      {serviceImages.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {serviceImages.map((img, idx) => (
-                            <div
-                              key={idx}
-                              onClick={() => {
-                                // The images array has [banner, ...serviceImages]
-                                // So the index for the lightbox should be idx + 1
-                                setSelectedImageIndex(idx + 1);
-                                setIsLightboxOpen(true);
-                              }}
-                              className="aspect-square rounded-2xl overflow-hidden group cursor-pointer relative border border-white/10"
-                            >
-                              <img
-                                src={`https://api.doorstephub.com/${img}`}
-                                alt={`Portfolio ${idx + 1}`}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                        </div>
+                        <div className="grid gap-3">
+                          {provider_rate_cards.map((card, index) => (
+                            <div key={card.id || index} className="flex items-start justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group">
+                              <div className="flex-1 pr-4">
+                                <h6 className="text-white text-sm font-medium group-hover:text-[#04a99d] transition-colors leading-snug mb-1">{card.title}</h6>
+                                {card.reason && (
+                                  <p className="text-white/40 text-xs leading-relaxed">{card.reason}</p>
+                                )}
+                              </div>
+                              <span className="text-[#04a99d] font-bold text-base whitespace-nowrap flex-shrink-0">₹{card.price}</span>
                             </div>
+
                           ))}
                         </div>
-                      ) : (
-                        <div className="text-center py-12 text-white/60 bg-white/5 rounded-2xl border border-white/10 border-dashed">
-                          No portfolio images available
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
+                      </motion.div>
+                    )}
 
-                  {/* Ratings Tab */}
-                  {(activeTab === 'Ratings' || activeTab === 'reviews') && (
-                    <motion.div
-                      key="reviews"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <h3 className="text-xl font-bold text-white mb-6">Ratings</h3>
-                      {customerRatings.length > 0 ? (
-                        <div className="space-y-4">
-                          {customerRatings.slice(0, visibleReviews).map((review, idx) => (
-                            <div
-                              key={idx}
-                              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#037166]/30 transition-all"
-                            >
-                              <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-full bg-[#037166] flex items-center justify-center font-bold text-white flex-shrink-0">
-                                  {review.name.charAt(0)}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h5 className="text-white font-bold">{review.name}</h5>
-                                    <span className="text-white/40 text-xs">
-                                      {new Date(review.date).toLocaleDateString()}
-                                    </span>
+                    {/* Working Images Tab */}
+                    {(activeTab === 'Working Images' || activeTab === 'portfolio') && (
+                      <motion.div key="portfolio" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                        <h3 className="text-lg font-bold text-white mb-4">Working Images</h3>
+                        {serviceImages.length > 0 ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {serviceImages.map((img, idx) => (
+                              <div
+                                key={idx}
+                                onClick={() => { setSelectedImageIndex(idx + 1); setIsLightboxOpen(true); }}
+                                className="aspect-square rounded-xl overflow-hidden group cursor-pointer relative border border-white/10"
+                              >
+                                <img src={`https://api.doorstephub.com/${img}`} alt={`Portfolio ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No portfolio images available</div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* Ratings Tab */}
+                    {(activeTab === 'Ratings' || activeTab === 'reviews') && (
+                      <motion.div key="reviews" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                        <h3 className="text-lg font-bold text-white mb-4">Ratings</h3>
+                        {customerRatings.length > 0 ? (
+                          <div className="space-y-3">
+                            {customerRatings.slice(0, visibleReviews).map((review, idx) => (
+                              <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-[#037166]/30 transition-all">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-9 h-9 rounded-full bg-[#037166] flex items-center justify-center font-bold text-white flex-shrink-0 text-sm">{review.name.charAt(0)}</div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <h5 className="text-white font-bold text-sm truncate">{review.name}</h5>
+                                      <span className="text-white/40 text-[10px] flex-shrink-0 ml-2">{new Date(review.date).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex items-center gap-0.5 mb-2">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-[#fbbf24] text-[#fbbf24]' : 'text-white/20'}`} />
+                                      ))}
+                                    </div>
+                                    <p className="text-white/70 text-sm leading-relaxed">{review.comment}</p>
                                   </div>
-                                  <div className="flex items-center gap-1 mb-3">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star
-                                        key={i}
-                                        className={`w-3.5 h-3.5 ${i < review.rating
-                                          ? 'fill-[#fbbf24] text-[#fbbf24]'
-                                          : 'text-white/20'
-                                          }`}
-                                      />
-                                    ))}
-                                  </div>
-                                  <p className="text-white/80 leading-relaxed text-sm">{review.comment}</p>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                          {customerRatings.length > visibleReviews && (
-                            <div className="flex justify-center mt-6">
-                              <button
-                                onClick={() => setVisibleReviews(prev => prev + 4)}
-                                className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl transition-colors border border-white/20"
-                              >
-                                Show More Reviews
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center py-12 text-white/60 bg-white/5 rounded-2xl border border-white/10 border-dashed">
-                          No reviews available yet
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                            ))}
+                            {customerRatings.length > visibleReviews && (
+                              <div className="flex justify-center mt-4">
+                                <button onClick={() => setVisibleReviews(prev => prev + 4)} className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl transition-colors border border-white/20">Show More</button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No reviews available yet</div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
 
-            {/* Right: Service Info (Sticky) */}
+            {/* RIGHT col / MOBILE TOP: Service Info */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="lg:col-span-1 sticky top-28"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="order-1 lg:order-none lg:sticky lg:top-28 space-y-4"
             >
-              <h1 className="text-4xl font-bold text-white mb-4">
-                {storeData.name}
-              </h1>
-              <p className="text-white/80 text-lg mb-4">Professional Service</p>
-
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 fill-[#04a99d] text-[#04a99d]" />
-                  <span className="text-white font-medium text-lg">{storeData.avgRating}</span>
-                  <span className="text-white/60">({storeData.totalRatings} ratings)</span>
-                </div>
-                <div className="text-white/60">
-                  {storeData.totalOrders}+ Orders
+              {/* Title + Rating */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2">
+                  {storeData.name}
+                </h1>
+                <p className="text-white/60 text-sm mb-3">Professional Service</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                    <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
+                    <span className="text-white font-bold text-sm">{storeData.avgRating}</span>
+                    <span className="text-white/50 text-xs">({storeData.totalRatings} ratings)</span>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/60 text-xs">
+                    {storeData.totalOrders}+ Orders
+                  </div>
                 </div>
               </div>
 
-              <div className="mb-6">
-                <p className="text-white/80 text-lg leading-relaxed whitespace-pre-line inline">
-                  {isExpanded ? storeData.description : storeData.description?.slice(0, 250) + (storeData.description?.length > 250 ? '...' : '')}
+              {/* Description */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line inline">
+                  {isExpanded ? storeData.description : storeData.description?.slice(0, 125) + (storeData.description?.length > 125 ? '...' : '')}
                 </p>
-                {storeData.description?.length > 250 && (
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="text-[#04a99d] font-bold ml-2 hover:underline focus:outline-none inline-block"
-                  >
+                {storeData.description?.length > 125 && (
+                  <button onClick={() => setIsExpanded(!isExpanded)} className="text-[#04a99d] font-bold ml-1.5 text-sm hover:underline focus:outline-none">
                     {isExpanded ? 'Read Less' : 'Read More'}
                   </button>
                 )}
               </div>
 
-              {/* Service Highlights */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Service Highlights — 2-col compact grid */}
+              <div className="grid grid-cols-2 gap-2.5">
                 {[
-                  { icon: Shield, text: 'Verified & Insured Professional' },
-                  { icon: Award, text: '30-90 Days Service Warranty On Repairs' },
+                  { icon: Shield, text: 'Verified & Insured' },
+                  { icon: Award, text: '30-90 Day Warranty' },
                   { icon: Clock, text: 'Same-Day Service' },
                   { icon: ThumbsUp, text: 'Satisfaction Guaranteed' },
                 ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
-                  >
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: `${accentColor}40` }}
-                    >
-                      <item.icon className="w-5 h-5" style={{ color: accentColor }} />
+                  <div key={idx} className="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: `${accentColor}40` }}>
+                      <item.icon className="w-4 h-4" style={{ color: accentColor }} />
                     </div>
-                    <h6 className="text-white/90 text-sm font-normal">{item.text}</h6>
+                    <span className="text-white/80 text-xs font-medium leading-tight">{item.text}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="flex gap-4 mt-6">
+              {/* Desktop Book Now button (hidden on mobile — use sticky bar) */}
+              <div className="hidden lg:block">
                 <motion.button
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  onClick={() => {
-                    const finalServiceId = storeData.id || storeData._id || serviceId;
-                    if (!finalServiceId) {
-                      toast.error("Service information missing");
-                      return;
-                    }
-
-                    localStorage.setItem('last_service_id', finalServiceId);
-                    if (serviceSlug) localStorage.setItem('last_service_slug', serviceSlug);
-                    const firstPackage = provider_rate_cards[0];
-
-                    const rawPrice = firstPackage?.price || 0;
-                    const cleanPrice = typeof rawPrice === 'string'
-                      ? parseInt(rawPrice.replace(/[^0-9]/g, '')) || 0
-                      : rawPrice;
-
-                    const itemsToBook = [{
-                      ...(firstPackage || {}),
-                      id: firstPackage?.id || `direct-${finalServiceId}`,
-                      serviceId: finalServiceId,
-                      serviceName: storeData.name || 'Professional Service',
-                      packageName: firstPackage?.title || 'Standard Package',
-                      price: cleanPrice,
-                      bookingCost: storeData.serviceBookingCost || 0,
-                      inspectionCost: storeData.inspectionCost || 0,
-                      quantity: 1
-                    }];
-
-                    localStorage.setItem('booking_package_details', JSON.stringify(itemsToBook));
-
-                    // Navigate to address page
-                    // Since dynamic slugs are root-level, we use the standard appliances/address route
-                    router.push('/appliances/address');
-                  }}
+                  transition={{ delay: 0.3 }}
+                  onClick={handleBookNow}
                   className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"
                 >
                   Book Now

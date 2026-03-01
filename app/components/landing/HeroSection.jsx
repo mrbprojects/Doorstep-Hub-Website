@@ -82,7 +82,7 @@
 //                 alt={service.name}
 //                 fill
 //                 className="object-cover transition-transform duration-300 group-hover:scale-110"
-//                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 14vw"
+//                 sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 14vw"
 //               />
 //               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
@@ -124,7 +124,7 @@
 //   }, []);
 
 //   return (
-//     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+//     <section className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20">
 //       {/* Animated Background */}
 //       <div className="absolute inset-0">
 //         {/* Grid Pattern */}
@@ -355,7 +355,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
       animate="visible"
       className="mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
     >
-      <div className="flex flex-wrap justify-center gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4">
         {services.map((service, index) => {
           const isActive = index === activeIndex;
           return (
@@ -364,7 +364,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
               variants={cardVariants}
               // ✅ FIXED: Pass full service object
               onClick={() => handleServiceClick(service)}
-              className={`group cursor-pointer w-[calc(50%-0.6rem)] sm:w-[calc(33.333%-0.7rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(14.28%-0.9rem)] transition-all duration-500`}
+              className={`group cursor-pointer transition-all duration-500`}
             >
               <div
                 className={`
@@ -381,7 +381,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
                   alt={service.name}
                   fill
                   className={`object-cover transition-transform duration-500 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 14vw"
+                  sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 14vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
@@ -477,7 +477,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, [services, isPaused]); // Re-run if services load/change or pause state changes
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20">
       {/* Standardized Architectural World Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />

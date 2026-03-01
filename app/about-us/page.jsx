@@ -97,13 +97,13 @@ export default function AboutUsPage() {
 
             <div>
                 {/* ── Hero ── */}
-                <section className="relative pt-36 pb-20 px-6 overflow-hidden">
+                <section className="relative pt-36 pb-20 px-10 overflow-hidden">
                     <div className="absolute inset-0 pointer-events-none">
                         <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-[#037166]/10 rounded-full blur-[150px]" />
                         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#04a99d]/8 rounded-full blur-[120px]" />
                     </div>
 
-                    <div className="max-w-6xl mx-auto relative z-10">
+                    <div className="max-w-7xl mx-auto relative z-10">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -112,17 +112,33 @@ export default function AboutUsPage() {
                         >
                             {/* Left: Text */}
                             <div>
+                                {/* EXISTING CONTENT COMMENTED OUT:
                                 <span className="inline-block px-4 py-1.5 mb-6 text-sm font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full tracking-wider uppercase">
                                     {aboutData?.title || 'About Us'}
                                 </span>
                                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight bg-gradient-to-r from-white via-white to-[#04a99d] bg-clip-text text-transparent">
-                                    {settings?.applicationName || 'Doorstep Hub'}
+                                    {'Mr Bharath'}
                                 </h1>
                                 <p className="text-lg text-[#04a99d] font-medium mb-6">
                                     {aboutData?.subTitle || 'India\'s Trusted Doorstep Service Provider'}
                                 </p>
                                 <p className="text-gray-300 leading-relaxed text-base">
                                     {settings?.aboutus}
+                                </p>
+                                */}
+
+                                {/* NEW CONTENT */}
+                                <span className="inline-block px-4 py-1.5 mb-6 text-sm font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full tracking-wider uppercase">
+                                    About Us
+                                </span>
+                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight bg-gradient-to-r from-white via-white to-[#04a99d] bg-clip-text text-transparent">
+                                    Founder & CEO – Mr. Bharath Ch
+                                </h1>
+                                <p className="text-gray-300 leading-relaxed text-base mb-4">
+                                    Doorstep Hub is led by its visionary Founder & CEO, Mr. Bharath, an entrepreneur driven by innovation and service excellence. With a strong passion for building customer-centric businesses, he established Doorstep Hub in 2016 with a focus on organized, professional home services.
+                                </p>
+                                <p className="text-gray-300 leading-relaxed text-base">
+                                    Under his leadership, Doorstep Hub has grown from a local appliance repair service into a multi-city platform and is now expanding into a nationwide digital service ecosystem. His vision is to create a one-stop solution for essential home, lifestyle, and religious services across India.
                                 </p>
 
                                 {/* Stats row */}
@@ -150,6 +166,7 @@ export default function AboutUsPage() {
                             </div>
 
                             {/* Right: Image */}
+                            {/* EXISTING IMAGE COMMENTED OUT:
                             {aboutData?.image && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
@@ -160,8 +177,8 @@ export default function AboutUsPage() {
                                     <div className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 rounded-3xl blur-2xl" />
                                     <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#037166]/20 aspect-[4/3]">
                                         <img
-                                            src={`https://api.doorstephub.com${aboutData.image}`}
-                                            alt={aboutData.title || 'About Doorstep Hub'}
+                                            src={aboutData?.image}
+                                            alt={aboutData?.title || 'About Doorstep Hub'}
                                             className="w-full h-full object-cover"
                                             onError={(e) => { e.target.style.display = 'none'; }}
                                         />
@@ -169,6 +186,25 @@ export default function AboutUsPage() {
                                     </div>
                                 </motion.div>
                             )}
+                            */}
+
+                            {/* NEW IMAGE */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.7, delay: 0.2 }}
+                                className="relative"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 rounded-3xl blur-2xl" />
+                                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#037166]/20 aspect-[4/3] sm:aspect-square md:aspect-[4/3] lg:aspect-[3/4]">
+                                    <img
+                                        src="/Bharath.png"
+                                        alt="Mr. Bharath Ch - Founder & CEO"
+                                        className="w-full h-full object-cover rounded-3xl object-top"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 via-transparent to-transparent pointer-events-none" />
+                                </div>
+                            </motion.div>
                         </motion.div>
                     </div>
                 </section>
@@ -176,7 +212,7 @@ export default function AboutUsPage() {
                 {/* ── Rich Description (HTML from API) ── */}
                 {aboutData?.description && (
                     <section className="py-16 px-6 border-t border-white/5">
-                        <div className="max-w-4xl mx-auto">
+                        <div className="max-w-5xl mx-auto">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -194,7 +230,7 @@ export default function AboutUsPage() {
 
                 {/* ── Contact Info ── */}
                 <section className="py-16 px-6 border-t border-white/5">
-                    <div className="max-w-6xl mx-auto">
+                    <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-12">
                             <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
                                 Contact Us
@@ -236,7 +272,7 @@ export default function AboutUsPage() {
                 {/* ── Google Map ── */}
                 {settings?.map && (
                     <section className="py-16 px-6">
-                        <div className="max-w-6xl mx-auto">
+                        <div className="max-w-7xl mx-auto">
                             <div className="text-center mb-10">
                                 <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
                                     Our Location
@@ -262,7 +298,7 @@ export default function AboutUsPage() {
                 {/* ── Social Media ── */}
                 {socialLinks.length > 0 && (
                     <section className="py-16 px-6 border-t border-white/5">
-                        <div className="max-w-4xl mx-auto text-center">
+                        <div className="max-w-5xl mx-auto text-center">
                             <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
                                 Follow Us
                             </span>
@@ -291,7 +327,7 @@ export default function AboutUsPage() {
                 {/* ── App Download ── */}
                 {(settings?.customerAndroidAppLink || settings?.customerIosAppLink) && (
                     <section className="py-16 px-6">
-                        <div className="max-w-4xl mx-auto">
+                        <div className="max-w-5xl mx-auto">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}

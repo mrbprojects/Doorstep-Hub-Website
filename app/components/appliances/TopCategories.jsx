@@ -141,7 +141,7 @@ export function TopCategories({ onViewAll }) {
       whileHover={{ y: -12 }}
       className="group cursor-pointer"
     >
-      <div className="relative w-72 lg:w-[210px] h-64 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+      <div className="relative w-72 lg:w-[210px] h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
         {/* Skeleton Image */}
         <div className="absolute inset-0 animate-shimmer">
           <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 rounded-3xl" />
@@ -216,7 +216,7 @@ export function TopCategories({ onViewAll }) {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide pb-4">
+          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="flex gap-6 min-w-max">
               {isLoading
                 ? Array.from({ length: 8 }).map((_, index) => (
@@ -233,7 +233,7 @@ export function TopCategories({ onViewAll }) {
                     onClick={() => router.push(`/${category.slug}`)}
                     className="group cursor-pointer"
                   >
-                    <div className="relative w-72 lg:w-[210px] h-54 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+                    <div className="relative w-72 lg:w-[210px] h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
                       {/* Image */}
                       <div className="absolute inset-0">
                         <img

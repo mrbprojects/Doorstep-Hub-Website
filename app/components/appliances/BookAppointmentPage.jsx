@@ -27,7 +27,7 @@ const STEPS = [
     {
         id: 'review',
         title: 'Review',
-        subtitle: 'Confirm your booking details & pay',
+        subtitle: 'Confirm Your Service Booking Details',
         icon: CheckSquare,
     },
 ];
@@ -288,8 +288,8 @@ export function BookAppointmentPage() {
                         <div className="mt-2 p-4 rounded-xl bg-[#065f46]/5 border border-[#065f46]/20 flex items-start gap-3">
                             <Info className="w-5 h-5 text-[#065f46] flex-shrink-0 mt-0.5" />
                             <div className="text-sm text-gray-600 space-y-1">
-                                <p><span className="font-semibold text-[#065f46]">Online Consultation Fee</span> — paid now via secure payment gateway.</p>
-                                <p><span className="font-semibold text-gray-700">Doorstep Inspection Fee</span> — collected by our technician at your location.</p>
+                                <p><span className="font-semibold text-[#065f46]">Online Booking Fee -125/-</span> — paid now via secure payment gateway.</p>
+                                <p><span className="font-semibold text-gray-700">Doorstep Inspection Fee -175/-</span> — collected by our technician at your location.</p>
                             </div>
                         </div>
                     </div>
@@ -342,12 +342,12 @@ export function BookAppointmentPage() {
                         {/* Fee Breakdown Card */}
                         <div className="rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
                             <div className="bg-[#065f46] px-5 py-3">
-                                <p className="text-white font-semibold text-sm">Fee Summary</p>
+                                <p className="text-white font-semibold text-sm">Doorstep Services Booking Summary</p>
                             </div>
                             <div className="divide-y divide-gray-100">
                                 <div className="flex items-start justify-between px-5 py-4 gap-4">
                                     <div>
-                                        <p className="font-medium text-gray-800">Online Consultation Fee</p>
+                                        <p className="font-medium text-gray-800">Online Booking Fee -125/-</p>
                                         <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                                             <Info className="w-3 h-3" /> Charged now · Secure online payment
                                         </p>
@@ -356,7 +356,7 @@ export function BookAppointmentPage() {
                                 </div>
                                 <div className="flex items-start justify-between px-5 py-4 gap-4">
                                     <div>
-                                        <p className="font-medium text-gray-800">Doorstep Inspection Fee</p>
+                                        <p className="font-medium text-gray-800">Doorstep Inspection Fee -175/-</p>
                                         <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                                             <Info className="w-3 h-3" /> Collected by technician at your location
                                         </p>
@@ -396,21 +396,21 @@ export function BookAppointmentPage() {
                     <div className="space-y-5">
                         {/* Personal Details */}
                         <div className="rounded-xl bg-gray-50 border border-gray-100 px-5 py-4 space-y-1.5">
-                            <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-2">Personal Details</h3>
-                            <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">Name</span>{formData.firstName} {formData.lastName}</p>
-                            <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">Phone</span>{formData.phone}</p>
-                            <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">Email</span>{formData.email}</p>
+                            <h3 className="font-bold text-gray-800 text-l uppercase tracking-wide mb-2">Personal Details</h3>
+                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Name</span>{formData.firstName} {formData.lastName}</p>
+                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Phone</span>{formData.phone}</p>
+                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Email</span>{formData.email}</p>
                         </div>
 
                         {/* Booking Details */}
                         <div className="rounded-xl bg-gray-50 border border-gray-100 px-5 py-4 space-y-1.5">
-                            <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-2">Booking Details</h3>
-                            <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">City</span>{formData.cityName || '—'}</p>
-                            <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">Category</span>{formData.categoryName || '—'}</p>
-                            <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">Date</span>{formData.bookingDate || '—'}</p>
-                            <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">Time</span>{formData.bookingTime || '—'}</p>
+                            <h3 className="font-bold text-gray-800 text-l uppercase tracking-wide mb-2">Booking Details</h3>
+                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">City</span>{formData.cityName || '—'}</p>
+                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Category</span>{formData.categoryName || '—'}</p>
+                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Date</span>{formData.bookingDate || '—'}</p>
+                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Time</span>{formData.bookingTime || '—'}</p>
                             {formData.message && (
-                                <p className="text-gray-600 text-sm"><span className="font-medium w-28 inline-block text-gray-700">Message</span>{formData.message}</p>
+                                <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Message</span>{formData.message}</p>
                             )}
                         </div>
 
@@ -418,11 +418,11 @@ export function BookAppointmentPage() {
                         <div className="rounded-xl border border-[#065f46]/20 bg-[#065f46]/5 px-5 py-4 space-y-2">
                             <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-2">Payment</h3>
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-600">Online Consultation Fee</span>
+                                <span className="text-gray-600">Online Booking Fee -125/-</span>
                                 <span className="font-semibold text-[#065f46]">Pay via Gateway</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-600">Doorstep Inspection Fee</span>
+                                <span className="text-gray-600">Doorstep Inspection Fee -175/-</span>
                                 <span className="font-semibold text-gray-600">Collected at Doorstep</span>
                             </div>
                         </div>

@@ -70,8 +70,8 @@ export default function AboutUsPage() {
 
     // Stats from websiteAboutus
     const stats = aboutData ? [
-        { icon: Users, label: 'Happy Customers', value: aboutData.totalCustomers > 0 ? `${(aboutData.totalCustomers / 1000).toFixed(0)}K+` : '28 Lakh+' },
-        { icon: Briefcase, label: 'Service Partners', value: aboutData.totalVendors > 0 ? `${aboutData.totalVendors.toLocaleString()}+` : '1,000+' },
+        { icon: Users, label: 'Verified Service Centers', value: aboutData.totalCustomers > 0 ? `${(aboutData.totalCustomers / 1000).toFixed(0)}K+` : '10 K+' },
+        { icon: Briefcase, label: 'Certified Service Partners', value: aboutData.totalVendors > 0 ? `${aboutData.totalVendors.toLocaleString()}+` : '1,000+' },
         { icon: ShoppingBag, label: 'Bookings Completed', value: aboutData.totalSales > 0 ? `${(aboutData.totalSales / 1000).toFixed(0)}K+` : '36 Lakh+' },
         { icon: Star, label: 'Cities Served', value: '10+' },
     ] : [];

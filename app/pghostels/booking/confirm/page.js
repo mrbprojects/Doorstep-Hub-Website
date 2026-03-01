@@ -153,7 +153,7 @@ function PGConfirmContent() {
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
                     toast.success('Redirecting to payment gateway...');
-                    window.location.href = `https://testpay.easebuzz.in/pay/${data.access_key}`;
+                    window.location.href = `https://pay.easebuzz.in/pay/${data.access_key}`;
                 } else {
                     sessionStorage.removeItem('pg_booking_data');
                     toast.success('Booking confirmed! Welcome to your new home.');

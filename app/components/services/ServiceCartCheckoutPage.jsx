@@ -144,7 +144,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
                     // Redirect to Easebuzz payment gateway with access_key
-                    const easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
+                    const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     console.log('🔗 Redirecting to Easebuzz:', easebuzzUrl);
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = easebuzzUrl;

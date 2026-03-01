@@ -210,7 +210,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     }));
 
                     // Redirect to Easebuzz payment gateway with access_key
-                    const easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
+                    const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     console.log('🔗 Redirecting to Easebuzz:', easebuzzUrl);
                     toast.success('Redirecting to payment gateway...');
                     // Cart will be cleared on return when ?status=success is detected

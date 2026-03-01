@@ -274,7 +274,7 @@ export function BookingConfirmationPage({
           });
 
           // Fixed Easebuzz URL format
-          const easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
+          const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
           cleanup();
           window.location.href = easebuzzUrl;
         } else {

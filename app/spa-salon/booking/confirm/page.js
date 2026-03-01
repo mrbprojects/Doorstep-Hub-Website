@@ -176,7 +176,7 @@ export default function SpaConfirmPage() {
 
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
-                    const easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
+                    const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = easebuzzUrl;
                 } else {
@@ -415,8 +415,8 @@ export default function SpaConfirmPage() {
                                         key={method.id}
                                         onClick={() => setPaymentMethod(method.id)}
                                         className={`p-5 rounded-xl flex items-center gap-3 transition-all ${paymentMethod === method.id
-                                                ? 'bg-[#C06C84] text-white shadow-lg'
-                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                                            ? 'bg-[#C06C84] text-white shadow-lg'
+                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                                             }`}
                                     >
                                         <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-white' : 'text-[#C06C84]'}`} />

@@ -281,7 +281,7 @@ export function BookingConfirmationPage({
             orderId: data.bookingId || data.orderId || null
           }));
 
-          const easebuzzUrl = `https://testpay.easebuzz.in/pay/${data.access_key}`;
+          const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
           // Redirect — cleanup will happen on return when ?status=success is detected
           window.location.href = easebuzzUrl;
         } else {

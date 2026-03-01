@@ -70,9 +70,9 @@ export default function AboutUsPage() {
 
     // Stats from websiteAboutus
     const stats = aboutData ? [
-        { icon: Users, label: 'Happy Customers', value: aboutData.totalCustomers > 0 ? `${(aboutData.totalCustomers / 1000).toFixed(0)}K+` : '50K+' },
+        { icon: Users, label: 'Happy Customers', value: aboutData.totalCustomers > 0 ? `${(aboutData.totalCustomers / 1000).toFixed(0)}K+` : '28 Lakh+' },
         { icon: Briefcase, label: 'Service Partners', value: aboutData.totalVendors > 0 ? `${aboutData.totalVendors.toLocaleString()}+` : '1,000+' },
-        { icon: ShoppingBag, label: 'Bookings Completed', value: aboutData.totalSales > 0 ? `${(aboutData.totalSales / 1000).toFixed(0)}K+` : '5Cr+' },
+        { icon: ShoppingBag, label: 'Bookings Completed', value: aboutData.totalSales > 0 ? `${(aboutData.totalSales / 1000).toFixed(0)}K+` : '36 Lakh+' },
         { icon: Star, label: 'Cities Served', value: '10+' },
     ] : [];
 
@@ -132,7 +132,7 @@ export default function AboutUsPage() {
                                     About Us
                                 </span>
                                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight bg-gradient-to-r from-white via-white to-[#04a99d] bg-clip-text text-transparent">
-                                    Founder & CEO – Mr. Bharath Ch
+                                    Mr. Bharath <br /> <span className="text-[#04a99d] text-[30px]">Founder & CEO</span>
                                 </h1>
                                 <p className="text-gray-300 leading-relaxed text-base mb-4">
                                     Doorstep Hub is led by its visionary Founder & CEO, Mr. Bharath, an entrepreneur driven by innovation and service excellence. With a strong passion for building customer-centric businesses, he established Doorstep Hub in 2016 with a focus on organized, professional home services.
@@ -196,7 +196,7 @@ export default function AboutUsPage() {
                                 className="relative"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 rounded-3xl blur-2xl" />
-                                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#037166]/20 aspect-[4/3] sm:aspect-square md:aspect-[4/3] lg:aspect-[3/4]">
+                                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#037166]/20 aspect-[4/3] sm:aspect-square md:aspect-[4/3] lg:aspect-square">
                                     <img
                                         src="/Bharath.png"
                                         alt="Mr. Bharath Ch - Founder & CEO"
@@ -211,8 +211,8 @@ export default function AboutUsPage() {
 
                 {/* ── Rich Description (HTML from API) ── */}
                 {aboutData?.description && (
-                    <section className="py-16 px-6 border-t border-white/5">
-                        <div className="max-w-5xl mx-auto">
+                    <section className="py-16 px-10 border-t border-white/5">
+                        <div className="max-w-7xl mx-auto">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -229,7 +229,7 @@ export default function AboutUsPage() {
                 )}
 
                 {/* ── Contact Info ── */}
-                <section className="py-16 px-6 border-t border-white/5">
+                <section className="py-16 px-10 border-t border-white/5">
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-12">
                             <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
@@ -271,7 +271,7 @@ export default function AboutUsPage() {
 
                 {/* ── Google Map ── */}
                 {settings?.map && (
-                    <section className="py-16 px-6">
+                    <section className="py-16 px-10">
                         <div className="max-w-7xl mx-auto">
                             <div className="text-center mb-10">
                                 <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
@@ -297,8 +297,8 @@ export default function AboutUsPage() {
 
                 {/* ── Social Media ── */}
                 {socialLinks.length > 0 && (
-                    <section className="py-16 px-6 border-t border-white/5">
-                        <div className="max-w-5xl mx-auto text-center">
+                    <section className="py-16 px-10 border-t border-white/5">
+                        <div className="max-w-7xl mx-auto text-center">
                             <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
                                 Follow Us
                             </span>
@@ -326,8 +326,8 @@ export default function AboutUsPage() {
 
                 {/* ── App Download ── */}
                 {(settings?.customerAndroidAppLink || settings?.customerIosAppLink) && (
-                    <section className="py-16 px-6">
-                        <div className="max-w-5xl mx-auto">
+                    <section className="py-16 px-10">
+                        <div className="max-w-7xl mx-auto">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -344,15 +344,24 @@ export default function AboutUsPage() {
                                 <p className="text-white/80 mb-8 max-w-xl mx-auto relative z-10">
                                     Book services, track your order and manage everything from your mobile. Available on Android &amp; iOS.
                                 </p>
-                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10 font-sans">
                                     {settings?.customerAndroidAppLink && (
                                         <a
                                             href={settings.customerAndroidAppLink}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="px-8 py-3.5 bg-white text-[#037166] font-bold rounded-xl hover:bg-gray-100 transition-all shadow-lg inline-flex items-center gap-2"
+                                            className="group flex items-center gap-3 bg-white hover:bg-white/95 text-black px-6 py-2.5 rounded-xl transition-all shadow-xl hover:shadow-[#037166]/20 border border-transparent"
                                         >
-                                            📱 Google Play
+                                            <svg className="w-8 h-8 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M5.53982 3.16104C5.23982 3.48104 5.05981 4.02104 5.05981 4.70104V19.291C5.05981 19.981 5.23982 20.511 5.53982 20.841L5.61981 20.911L14.0798 12.451V12.281L5.61981 3.82104L5.53982 3.16104Z" fill="#2196F3" />
+                                                <path d="M16.8898 15.261L14.0798 12.451V12.281L16.8998 9.47101L16.9798 9.53101L20.3198 11.431C21.2698 11.971 21.2698 12.761 20.3198 13.311L16.9798 15.211L16.8898 15.261Z" fill="#FFC107" />
+                                                <path d="M16.9798 15.211L14.0798 12.331L5.53979 20.871C5.84979 21.201 6.36979 21.241 6.96979 20.891L16.9798 15.211Z" fill="#F44336" />
+                                                <path d="M16.9798 9.53101L6.96979 3.84102C6.36979 3.50102 5.84979 3.54102 5.53979 3.87102L14.0798 12.421L16.9798 9.53101Z" fill="#4CAF50" />
+                                            </svg>
+                                            <div className="flex flex-col items-start leading-none">
+                                                <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">GET IT ON</span>
+                                                <span className="text-lg font-bold">Google Play</span>
+                                            </div>
                                         </a>
                                     )}
                                     {settings?.customerIosAppLink && (
@@ -360,9 +369,15 @@ export default function AboutUsPage() {
                                             href={settings.customerIosAppLink}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="px-8 py-3.5 bg-white/15 border border-white/30 text-white font-bold rounded-xl hover:bg-white/25 transition-all inline-flex items-center gap-2"
+                                            className="group flex items-center gap-3 bg-black hover:bg-black/90 text-white px-6 py-2.5 rounded-xl border border-white/20 transition-all shadow-xl hover:shadow-[#037166]/20"
                                         >
-                                            🍎 App Store
+                                            <svg className="w-8 h-8 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.24-1.99 1.1-3.14-1.02.04-2.26.67-3 1.54-.66.76-1.24 1.88-1.08 3 1.14.08 2.27-.58 2.98-1.4z" />
+                                            </svg>
+                                            <div className="flex flex-col items-start leading-none font-sans">
+                                                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Download on the</span>
+                                                <span className="text-lg font-bold">App Store</span>
+                                            </div>
                                         </a>
                                     )}
                                 </div>

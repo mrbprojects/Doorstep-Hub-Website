@@ -21,12 +21,12 @@ export function FloatingActionButtons() {
 
     return (
         <>
-            {/* WhatsApp — small fixed icon, top-right corner, always visible */}
+            {/* WhatsApp — small fixed icon, bottom-right corner, always visible */}
             <a
                 href="https://api.whatsapp.com/send/?phone=918886688666&text=Hi&type=phone_number&app_absent=0"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fixed top-20 right-4 z-50"
+                className="fixed bottom-24 right-4 sm:right-6 z-[60]"
                 aria-label="Chat on WhatsApp"
             >
                 <motion.div

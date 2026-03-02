@@ -9,7 +9,7 @@ function BookingContent() {
     const [address, setAddress] = useState(null);
 
     useEffect(() => {
-        // Get address from session storage or context
+        // Get the selected address from session storage or context
         const savedAddress = sessionStorage.getItem('selected_address');
         if (savedAddress) {
             setAddress(JSON.parse(savedAddress));

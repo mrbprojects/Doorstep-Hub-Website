@@ -10,6 +10,7 @@ import { ClientProviders } from './components/providers/ClientProviders';
 import ErrorBoundary from './components/ErrorBoundary';
 import { FloatingActionButtons } from './components/ui/FloatingActionButtons';
 import { CanonicalLink } from './components/ui/CanonicalLink';
+import { DynamicSEO } from './components/ui/DynamicSEO';
 
 const ubuntu = Ubuntu({
   subsets: ['latin'],
@@ -65,6 +66,7 @@ export default function RootLayout({ children }) {
         <noscript dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P35XQW2B" height="0" width="0" style="display:none;visibility:hidden"></iframe>` }} />
         {/* End Google Tag Manager (noscript) */}
         <ErrorBoundary>
+          <DynamicSEO />
           <LocationProvider>
             <AuthProvider>
               <AuthModalProvider>

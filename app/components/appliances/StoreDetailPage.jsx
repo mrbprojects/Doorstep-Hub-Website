@@ -72,6 +72,45 @@ export function StoreDetailPage({ storeId, serviceId }) {
           // Set center data
           setCenterData(data.serviceCenter);
 
+          // Apply Dynamic SEO from Service Center Model
+          if (data.serviceCenter?.seo) {
+            const seo = data.serviceCenter.seo;
+            document.title = seo.title || document.title;
+
+            if (seo.description) {
+              let metaDesc = document.querySelector('meta[name="description"]');
+              if (!metaDesc) {
+                metaDesc = document.createElement('meta');
+                metaDesc.name = 'description';
+                document.head.appendChild(metaDesc);
+              }
+              metaDesc.setAttribute("content", seo.description);
+            }
+
+            const keywords = Array.isArray(seo.keywords) ? seo.keywords.join(", ") : seo.keywords;
+            if (keywords) {
+              let metaKeywords = document.querySelector('meta[name="keywords"]');
+              if (!metaKeywords) {
+                metaKeywords = document.createElement('meta');
+                metaKeywords.name = 'keywords';
+                document.head.appendChild(metaKeywords);
+              }
+              metaKeywords.setAttribute("content", keywords);
+            }
+            console.log("[Store SEO] Applied:", seo.title);
+          }
+
+          // Apply Canonical URL
+          const currentPath = window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/$/, "");
+          const canonicalUrl = `https://doorstephub.com${currentPath}`;
+          let linkCanonical = document.querySelector('link[rel="canonical"]');
+          if (!linkCanonical) {
+            linkCanonical = document.createElement('link');
+            linkCanonical.rel = "canonical";
+            document.head.appendChild(linkCanonical);
+          }
+          linkCanonical.href = canonicalUrl;
+
           // Set services
           setServices(data.services || []);
 

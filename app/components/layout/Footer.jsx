@@ -23,7 +23,8 @@ const footerLinks = {
     { name: 'FAQs', href: '/faqs' },
     { name: 'Terms of Service', href: '/terms-conditions' },
     { name: 'Privacy Policy', href: '/privacy-policy' },
-    { name: 'Help Center', href: '/contact-us' },
+    { name: 'Refund Policy', href: '/refund-policy' },
+    // { name: 'Help Center', href: '/contact-us' },
   ],
 };
 
@@ -357,7 +358,7 @@ export function Footer({ theme = {} }) {
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand Column */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -436,34 +437,45 @@ export function Footer({ theme = {} }) {
           </motion.div> */}
 
           {/* Services Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <h4 className={`${t.textMain} font-bold mb-4`}>Quick Links</h4>
-            <ul className="space-y-3">
-              {dynamicQuickLinks.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    target={link.href?.startsWith('http') ? "_blank" : undefined}
-                    rel={link.href?.startsWith('http') ? "noopener noreferrer" : undefined}
-                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block`}
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {(() => {
+            const chunks = [];
+            for (let i = 0; i < dynamicQuickLinks.length; i += 4) {
+              chunks.push(dynamicQuickLinks.slice(i, i + 4));
+            }
+            return chunks.map((chunk, idx) => (
+              <motion.div
+                key={`quick-links-${idx}`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 + (idx * 0.1) }}
+              >
+                <h4 className={`${t.textMain} font-bold mb-4 whitespace-nowrap`}>
+                  {idx === 0 ? 'Quick Links' : '\u00A0'}
+                </h4>
+                <ul className="space-y-3">
+                  {chunk.map((link) => (
+                    <li key={link.name}>
+                      <a
+                        href={link.href}
+                        target={link.href?.startsWith('http') ? "_blank" : undefined}
+                        rel={link.href?.startsWith('http') ? "noopener noreferrer" : undefined}
+                        className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block whitespace-nowrap`}
+                      >
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ));
+          })()}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 + (Math.ceil(dynamicQuickLinks.length / 4) * 0.1) }}
           >
             <h4 className={`${t.textMain} font-bold mb-4`}>More Info</h4>
             <ul className="space-y-3">

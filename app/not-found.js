@@ -1,7 +1,5 @@
-'use client';
-
-import { BookAppointmentPage } from '@/components/appliances/BookAppointmentPage';
+import { redirect } from 'next/navigation';
 
 export default function NotFound() {
-  return <BookAppointmentPage />;
+  redirect('/book-appointment');
 }

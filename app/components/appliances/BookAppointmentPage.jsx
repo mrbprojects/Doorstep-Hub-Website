@@ -341,7 +341,7 @@ export function BookAppointmentPage() {
                     <div className="space-y-5">
                         {/* Fee Breakdown Card */}
                         <div className="rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-                            <div className="bg-[#065f46] px-5 py-3">
+                            <div className="bg-[#00231f] px-5 py-3">
                                 <p className="text-white font-semibold text-sm">Doorstep Services Booking Summary</p>
                             </div>
                             <div className="divide-y divide-gray-100">
@@ -397,20 +397,20 @@ export function BookAppointmentPage() {
                         {/* Personal Details */}
                         <div className="rounded-xl bg-gray-50 border border-gray-100 px-5 py-4 space-y-1.5">
                             <h3 className="font-bold text-gray-800 text-l uppercase tracking-wide mb-2">Personal Details</h3>
-                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Name</span>{formData.firstName} {formData.lastName}</p>
-                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Phone</span>{formData.phone}</p>
-                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Email</span>{formData.email}</p>
+                            <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">Name</span>{formData.firstName} {formData.lastName}</p>
+                            <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">Phone</span>{formData.phone}</p>
+                            <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">Email</span>{formData.email}</p>
                         </div>
 
                         {/* Booking Details */}
                         <div className="rounded-xl bg-gray-50 border border-gray-100 px-5 py-4 space-y-1.5">
                             <h3 className="font-bold text-gray-800 text-l uppercase tracking-wide mb-2">Booking Details</h3>
-                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">City</span>{formData.cityName || '—'}</p>
-                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Category</span>{formData.categoryName || '—'}</p>
-                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Date</span>{formData.bookingDate || '—'}</p>
-                            <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Time</span>{formData.bookingTime || '—'}</p>
+                            <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">City</span>{formData.cityName || '—'}</p>
+                            <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">Category</span>{formData.categoryName || '—'}</p>
+                            <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">Date</span>{formData.bookingDate || '—'}</p>
+                            <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">Time</span>{formData.bookingTime || '—'}</p>
                             {formData.message && (
-                                <p className="text-gray-600 text-l"><span className="font-medium w-28 inline-block text-gray-700">Message</span>{formData.message}</p>
+                                <p className="text-gray-600 text-xl"><span className="font-medium w-28 inline-block text-gray-700">Message</span>{formData.message}</p>
                             )}
                         </div>
 
@@ -492,7 +492,7 @@ export function BookAppointmentPage() {
                         {currentStep < 3 ? (
                             <button
                                 onClick={handleNext}
-                                className="flex-1 md:flex-none md:px-10 py-4 bg-[#04a99d] hover:bg-[#038f84] text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-base"
+                                className="flex-1 md:flex-none md:px-10 py-4 bg-[#00231f] hover:bg-[#038f84] text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-base"
                             >
                                 Next →
                             </button>
@@ -500,7 +500,7 @@ export function BookAppointmentPage() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitting}
-                                className="flex-1 py-4 bg-[#04a99d] hover:bg-[#038f84] text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-base flex items-center justify-center gap-2"
+                                className="flex-1 py-4 bg-[#00231f]  text-white text-xl  rounded-xl transition-all shadow-lg active:scale-95 text-l flex items-center justify-center gap-2"
                             >
                                 {submitting ? (
                                     <>
@@ -517,7 +517,7 @@ export function BookAppointmentPage() {
             </div>
 
             {/* ── Right Section — Desktop Steps Panel ── */}
-            <div className="hidden md:flex w-full md:w-[380px] lg:w-[460px] bg-[#04a99d] min-h-screen flex-col justify-center">
+            <div className="hidden md:flex w-full md:w-[380px] lg:w-[460px] bg-[#00231f] min-h-screen flex-col justify-center">
                 <div className="space-y-14 px-4">
                     {STEPS.map((step, index) => {
                         const isActiveOrCompleted = index <= currentStep;

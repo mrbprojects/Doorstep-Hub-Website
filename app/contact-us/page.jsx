@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
     MapPin, Phone, Mail, Facebook, Instagram, Linkedin,
     Twitter, Youtube, ExternalLink, Send, CheckCircle, Loader2,
@@ -15,10 +15,68 @@ export default function ContactUsPage() {
     const [settings, setSettings] = useState(null);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
-        name: '', email: '', phone: '', subject: '', message: ''
+        name: '', email: '', whatsapp: '', iam: '', message: '', whatsappOtp: ''
     });
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [isOtpSent, setIsOtpSent] = useState(false);
+    const [sendingOtp, setSendingOtp] = useState(false);
+    const [otpValues, setOtpValues] = useState(['', '', '', '']);
+
+    const handleOtpChange = (index, value) => {
+        const val = value.replace(/[^0-9]/g, '');
+        const newOtp = [...otpValues];
+        newOtp[index] = val.slice(-1);
+        setOtpValues(newOtp);
+        setFormData(prev => ({ ...prev, whatsappOtp: newOtp.join('') }));
+
+        if (val && index < 3) {
+            const nextInput = document.getElementById(`otp-${index + 1}`);
+            if (nextInput) nextInput.focus();
+        }
+    };
+
+    const handleOtpKeyDown = (index, e) => {
+        if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+            const prevInput = document.getElementById(`otp-${index - 1}`);
+            if (prevInput) prevInput.focus();
+        }
+    };
+
+    const triggerSendOtp = async (phone) => {
+        if (!phone || phone.length < 10) return;
+
+        setSendingOtp(true);
+        try {
+            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/website-leads/send-otps', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ whatsapp: phone })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setIsOtpSent(true);
+                toast.success('OTP sent to your WhatsApp number');
+            } else {
+                toast.error(data.message || 'Failed to send OTP');
+            }
+        } catch (error) {
+            console.error('Error sending OTP:', error);
+            toast.error('Something went wrong. Please try again.');
+        } finally {
+            setSendingOtp(false);
+        }
+    };
+
+    const handleWhatsappChange = (e) => {
+        const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+        setFormData(prev => ({ ...prev, whatsapp: val }));
+
+        if (val.length === 10 && !isOtpSent) {
+            triggerSendOtp(val);
+        }
+    };
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -75,18 +133,81 @@ export default function ContactUsPage() {
         },
     ] : [];
 
+    const handleSendOtp = async () => {
+        if (!formData.whatsapp || formData.whatsapp.length < 10) {
+            toast.error('Please enter a valid 10-digit WhatsApp number');
+            return;
+        }
+
+        setSendingOtp(true);
+        try {
+            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/website-leads/send-otps', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ whatsapp: formData.whatsapp })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setIsOtpSent(true);
+                toast.success('OTP sent to your WhatsApp number');
+            } else {
+                toast.error(data.message || 'Failed to send OTP');
+            }
+        } catch (error) {
+            console.error('Error sending OTP:', error);
+            toast.error('Something went wrong. Please try again.');
+        } finally {
+            setSendingOtp(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.email || !formData.message) {
+
+        if (!isOtpSent) {
+            if (formData.whatsapp.length === 10) {
+                triggerSendOtp(formData.whatsapp);
+            } else {
+                toast.error('Please enter a valid 10-digit WhatsApp number');
+            }
+            return;
+        }
+
+        if (!formData.whatsappOtp || formData.whatsappOtp.length < 4) {
+            toast.error('Please enter the 4-digit OTP');
+            return;
+        }
+
+        if (!formData.name || !formData.email || !formData.message || !formData.iam) {
             toast.error('Please fill in all required fields');
             return;
         }
+
         setSubmitting(true);
-        // Simulate form submission (replace with actual API if available)
-        await new Promise(r => setTimeout(r, 1500));
-        setSubmitting(false);
-        setSubmitted(true);
-        toast.success('Message sent! We\'ll get back to you soon.');
+        try {
+            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/website-leads/verify-and-submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setSubmitted(true);
+                setFormData({ name: '', email: '', whatsapp: '', iam: '', message: '', whatsappOtp: '' });
+                setOtpValues(['', '', '', '']);
+                setIsOtpSent(false);
+                toast.success('Message verified and sent successfully!');
+            } else {
+                toast.error(data.message || 'Verification failed. Please check your OTP.');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            toast.error('Something went wrong. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const inputCls = 'w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/50 focus:border-[#037166]/50 transition-all';
@@ -257,75 +378,139 @@ export default function ContactUsPage() {
 
                                             <div className="grid sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Full Name *</label>
+                                                    <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Full Name *</label>
                                                     <input
                                                         type="text"
-                                                        placeholder="John Doe"
+                                                        placeholder="Your Name"
                                                         className={inputCls}
                                                         value={formData.name}
                                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                                        required
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Email Address *</label>
+                                                    <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Email Address *</label>
                                                     <input
                                                         type="email"
-                                                        placeholder="you@example.com"
+                                                        placeholder="Enter Your Valid Email"
                                                         className={inputCls}
                                                         value={formData.email}
                                                         onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                                        required
                                                     />
                                                 </div>
                                             </div>
 
                                             <div className="grid sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Phone Number</label>
+                                                    <div className="flex justify-between items-center mb-1.5 ">
+                                                        <label className="block text-xs font-bold text-gray-400  uppercase tracking-wide">Valid WhatsApp Number *</label>
+                                                        {isOtpSent && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setIsOtpSent(false);
+                                                                    setOtpValues(['', '', '', '']);
+                                                                    setFormData(prev => ({ ...prev, whatsappOtp: '' }));
+                                                                }}
+                                                                className="text-[#04a99d] text-[10px] uppercase font-bold hover:underline"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                     <input
                                                         type="tel"
-                                                        placeholder="+91 98765 43210"
-                                                        className={inputCls}
-                                                        value={formData.phone}
-                                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                                        placeholder="8886688666"
+                                                        disabled={isOtpSent || sendingOtp}
+                                                        className={`${inputCls} ${isOtpSent ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        value={formData.whatsapp}
+                                                        onChange={handleWhatsappChange}
+                                                        required
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Subject</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="How can we help?"
-                                                        className={inputCls}
-                                                        value={formData.subject}
-                                                        onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                                                    />
+                                                    <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">I Am A *</label>
+                                                    <select
+                                                        className={`${inputCls} appearance-none cursor-pointer`}
+                                                        value={formData.iam}
+                                                        onChange={e => setFormData({ ...formData, iam: e.target.value })}
+                                                        required
+                                                    >
+                                                        <option value="" className="bg-[#1a1a1a]">Select Here</option>
+                                                        <option value="Customer" className="bg-[#1a1a1a]">Customer</option>
+                                                        <option value="Business Owner" className="bg-[#1a1a1a]">Business Owner</option>
+                                                    </select>
                                                 </div>
                                             </div>
 
+                                            <AnimatePresence>
+                                                {isOtpSent && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: 'auto' }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        className="overflow-hidden space-y-3 mt-4"
+                                                    >
+                                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wide">Verification OTP *</label>
+                                                        <div className="flex gap-3 max-w-[280px]">
+                                                            {otpValues.map((digit, idx) => (
+                                                                <input
+                                                                    key={idx}
+                                                                    id={`otp-${idx}`}
+                                                                    type="text"
+                                                                    inputMode="numeric"
+                                                                    autoComplete="one-time-code"
+                                                                    maxLength={1}
+                                                                    className={`${inputCls} !w-12 !h-12 text-center text-xl font-bold !p-0 focus:ring-[#04a99d]/50 bg-white/10`}
+                                                                    value={digit}
+                                                                    onChange={e => handleOtpChange(idx, e.target.value)}
+                                                                    onKeyDown={e => handleOtpKeyDown(idx, e)}
+                                                                    required
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        <p className="text-[10px] text-gray-500 px-1 italic">Please enter the 4-digit code sent to your WhatsApp.</p>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-400 mb-1.5">Message *</label>
+                                                <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Message *</label>
                                                 <textarea
                                                     placeholder="Write your message here..."
-                                                    rows={5}
+                                                    rows={4}
                                                     className={`${inputCls} resize-none`}
                                                     value={formData.message}
                                                     onChange={e => setFormData({ ...formData, message: e.target.value })}
+                                                    required
                                                 />
                                             </div>
 
                                             <button
                                                 type="submit"
-                                                disabled={submitting}
-                                                className="w-full py-4 bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#04a99d] hover:to-[#037166] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#037166]/20 flex items-center justify-center gap-2 active:scale-[0.98]"
+                                                disabled={submitting || sendingOtp}
+                                                className="w-full py-4 bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#04a99d] hover:to-[#037166] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#037166]/20 flex items-center justify-center gap-2 active:scale-[0.98] uppercase tracking-wider text-sm"
                                             >
-                                                {submitting ? (
+                                                {sendingOtp ? (
                                                     <>
                                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                                        Sending...
+                                                        Sending OTP...
+                                                    </>
+                                                ) : submitting ? (
+                                                    <>
+                                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                                        Verifying...
+                                                    </>
+                                                ) : isOtpSent ? (
+                                                    <>
+                                                        <CheckCircle className="w-5 h-5" />
+                                                        Verify & Submit Message
                                                     </>
                                                 ) : (
                                                     <>
                                                         <Send className="w-5 h-5" />
-                                                        Send Message
+                                                        Send OTP
                                                     </>
                                                 )}
                                             </button>

@@ -55,6 +55,15 @@ service_details.json
 service_details_utf8.json
 test-api.js
 
+# build artifacts and logs
+lint_results.json
+eslint_output.json
+eslint_res.json
+build_output.txt
+build_log.txt
+build_check_final.txt
+build_final_cmd.txt
+
 # typescript
 *.tsbuildinfo
 

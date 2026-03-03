@@ -336,6 +336,22 @@ export function StoreDetailPage({ storeId, serviceId }) {
     </div>
   );
 
+  if (!loading && !centerData) {
+    return (
+      <div className="min-h-screen pt-20 flex flex-col items-center justify-center text-white">
+        <h2 className="text-2xl font-bold mb-4">Store Not Found</h2>
+        <p className="text-white/60 mb-6">Redirecting you to book an appointment...</p>
+        <button
+          onClick={() => router.push('/book-appointment')}
+          className="px-8 py-3 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full font-bold shadow-lg"
+        >
+          Book Appointment
+        </button>
+        <script dangerouslySetInnerHTML={{ __html: `setTimeout(() => { window.location.href = '/book-appointment'; }, 2000);` }} />
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

@@ -129,8 +129,19 @@ export function CategoryOrListingPage({ slug }) {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
-            <p>Page not found</p>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] text-white p-6 text-center">
+            <h2 className="text-3xl font-bold mb-4">Page Not Found</h2>
+            <p className="text-white/60 mb-8 max-w-md mx-auto">
+                We couldn't find exactly what you were looking for.
+                Let us help you book an appointment directly.
+            </p>
+            <button
+                onClick={() => window.location.href = '/book-appointment'}
+                className="px-8 py-3 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full font-bold shadow-xl hover:scale-105 transition-transform"
+            >
+                Book Appointment
+            </button>
+            <script dangerouslySetInnerHTML={{ __html: `setTimeout(() => { window.location.href = '/book-appointment'; }, 3000);` }} />
         </div>
     );
 }

@@ -76,6 +76,12 @@ export function DetailsPage() {
         fetchServiceDetails();
     }, [params?.id]);
 
+    useEffect(() => {
+        if (!loading && !service) {
+            router.replace('/book-appointment');
+        }
+    }, [loading, service, router]);
+
     const togglePackage = (pkg) => {
         setSelectedPackages(prev => {
             const isSelected = prev.some(p => p._id === pkg._id);
@@ -111,7 +117,7 @@ export function DetailsPage() {
         </div>
     );
 
-    if (!service) return <div className="min-h-screen pt-20 flex justify-center items-center text-gray-500">Service not found.</div>;
+    if (!service) return <div className="min-h-screen pt-20 bg-gray-50" />;
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-32 pt-16">

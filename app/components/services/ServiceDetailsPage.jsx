@@ -120,6 +120,12 @@ export function ServiceDetailsPage({
     fetchServiceDetails();
   }, [serviceId, category, subCategory, router]);
 
+  useEffect(() => {
+    if (!loading && !serviceDetails?.storeData) {
+      router.replace('/book-appointment');
+    }
+  }, [loading, serviceDetails, router]);
+
   if (loading) {
     return (
       <div className="min-h-screen pt-32 bg-[#0a0a0a]">
@@ -145,12 +151,7 @@ export function ServiceDetailsPage({
   }
 
   if (!serviceDetails?.storeData) {
-    return (
-      <div className="min-h-screen pt-20 flex flex-col items-center justify-center text-white">
-        <h2 className="text-2xl font-bold mb-4">Service Not Found</h2>
-        <button onClick={() => router.back()} className="px-6 py-2 bg-white/10 rounded-full">Go Back</button>
-      </div>
-    );
+    return <div className="min-h-screen bg-[#0a0a0a]" />;
   }
 
   const { storeData, provider_rate_cards = [], serviceImages = [], customerRatings = [] } = serviceDetails;

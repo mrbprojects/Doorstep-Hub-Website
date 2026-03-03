@@ -6,14 +6,22 @@ import { ServicesListingPage } from '@/components/appliances/ServicesListingPage
 import { ServiceDetailsPage } from '@/components/appliances/ServiceDetailsPage';
 import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
 import { Loader2 } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 export function CategoryOrListingPage({ slug }) {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const queryServiceId = searchParams.get('id');
     const [viewType, setViewType] = useState('loading'); // 'loading', 'category', 'listing', 'detail', '404'
     const [categoryData, setCategoryData] = useState(null);
     const [serviceId, setServiceId] = useState(queryServiceId);
+
+    // Immediate redirection for 404/not found state
+    useEffect(() => {
+        if (viewType === '404') {
+            router.replace('/book-appointment');
+        }
+    }, [viewType, router]);
 
     useEffect(() => {
         const checkSlugType = async () => {
@@ -129,19 +137,6 @@ export function CategoryOrListingPage({ slug }) {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] text-white p-6 text-center">
-            <h2 className="text-3xl font-bold mb-4">Page Not Found</h2>
-            <p className="text-white/60 mb-8 max-w-md mx-auto">
-                We couldn't find exactly what you were looking for.
-                Let us help you book an appointment directly.
-            </p>
-            <button
-                onClick={() => window.location.href = '/book-appointment'}
-                className="px-8 py-3 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full font-bold shadow-xl hover:scale-105 transition-transform"
-            >
-                Book Appointment
-            </button>
-            <script dangerouslySetInnerHTML={{ __html: `setTimeout(() => { window.location.href = '/book-appointment'; }, 3000);` }} />
-        </div>
+        <div className="min-h-screen bg-[#0a0a0a]" />
     );
 }

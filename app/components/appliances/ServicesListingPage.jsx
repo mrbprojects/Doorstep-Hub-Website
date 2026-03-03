@@ -185,6 +185,15 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     fetchServices();
   }, [subCategoryId, childCategoryId, slug, category, location?.lat, location?.lng, minRating]);
 
+  useEffect(() => {
+    if (!loading && (services.length === 0 && centers.length === 0)) {
+      // Only redirect if a slug/category was provided but matched nothing
+      if (slug || category) {
+        router.replace('/book-appointment');
+      }
+    }
+  }, [loading, services, centers, slug, category, router]);
+
   // Fetch Categories for Sidebar
   useEffect(() => {
     const fetchAllCategories = async () => {

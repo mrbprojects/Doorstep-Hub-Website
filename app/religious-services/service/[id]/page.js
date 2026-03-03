@@ -58,6 +58,12 @@ export default function ReligiousServiceDetailPage() {
     };
 
     useEffect(() => {
+        if (!loading && !serviceData) {
+            router.replace('/book-appointment');
+        }
+    }, [loading, serviceData, router]);
+
+    useEffect(() => {
         const fetchServiceData = async () => {
             if (!id) return;
 
@@ -158,11 +164,7 @@ export default function ReligiousServiceDetailPage() {
     }
 
     if (!serviceData) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[var(--off-white)]">
-                <p className="text-gray-500 text-lg">Service details not found. 🙏</p>
-            </div>
-        );
+        return <div className="min-h-screen bg-[var(--off-white)]" />;
     }
 
     return (

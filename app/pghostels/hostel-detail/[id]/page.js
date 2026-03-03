@@ -138,6 +138,13 @@ export default function NewHostelDetailPage() {
         fetchHostelData();
     }, [id]);
 
+    // Immediate redirection logic
+    useEffect(() => {
+        if (!loading && (fetchError || !hostelData)) {
+            router.replace('/book-appointment');
+        }
+    }, [loading, fetchError, hostelData, router]);
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
@@ -146,25 +153,8 @@ export default function NewHostelDetailPage() {
         );
     }
 
-    if (fetchError) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-4 px-4">
-                <p className="text-gray-700 text-lg font-medium text-center">Failed to load hostel details.</p>
-                <p className="text-gray-400 text-sm text-center">Please check your connection and try again.</p>
-                <button
-                    onClick={() => { setFetchError(false); setLoading(true); }}
-                    className="px-6 py-3 bg-[#037166] text-white rounded-xl font-semibold hover:bg-[#025951] transition-colors"
-                >
-                    Retry
-                </button>
-                <button
-                    onClick={() => router.back()}
-                    className="text-sm text-gray-500 hover:text-gray-700 underline"
-                >
-                    Go Back
-                </button>
-            </div>
-        );
+    if (fetchError || !hostelData) {
+        return <div className="min-h-screen bg-white" />;
     }
 
     const handleContinueToBook = async () => {
@@ -264,13 +254,6 @@ export default function NewHostelDetailPage() {
         }
     };
 
-    if (!hostelData) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
-                <p className="text-gray-500 text-lg">Hostel details not found.</p>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-32">

@@ -63,6 +63,12 @@ export function ArticleViewPage({ slug }) {
         }
     }, [slug]);
 
+    useEffect(() => {
+        if (!loading && !article) {
+            router.replace('/book-appointment');
+        }
+    }, [loading, article, router]);
+
     const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
     const handleShare = (platform) => {
@@ -105,17 +111,7 @@ export function ArticleViewPage({ slug }) {
 
     if (!article) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-4">
-                <h1 className="text-3xl font-bold mb-4">Article Not Found</h1>
-                <p className="text-gray-400 mb-8">The article you are looking for does not exist or has been removed.</p>
-                <button
-                    onClick={() => router.back()}
-                    className="px-6 py-3 bg-[#037166] hover:bg-[#025951] rounded-full transition-colors flex items-center gap-2"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Go Back
-                </button>
-            </div>
+            <div className="min-h-screen bg-[#0a0a0a]" />
         );
     }
 

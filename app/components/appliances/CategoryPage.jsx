@@ -182,6 +182,12 @@ export function CategoryPage({ slug, initialData }) {
     fetchSubCategories();
   }, [slug, initialData]);
 
+  useEffect(() => {
+    if (!loading && subCategories.length === 0) {
+      router.replace('/book-appointment');
+    }
+  }, [loading, subCategories, router]);
+
   // Auto-correct URL if slug doesn't match canonical slug (e.g. "AC Repair" vs "ac-repair")
   useEffect(() => {
     if (categoryMetadata.slug && slug && categoryMetadata.slug !== slug) {

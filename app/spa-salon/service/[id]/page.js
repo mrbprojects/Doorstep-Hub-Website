@@ -51,6 +51,12 @@ export default function SpaServiceDetailPage() {
     };
 
     useEffect(() => {
+        if (!loading && !serviceData) {
+            router.replace('/book-appointment');
+        }
+    }, [loading, serviceData, router]);
+
+    useEffect(() => {
         const fetchServiceData = async () => {
             if (!id) return;
 
@@ -208,11 +214,7 @@ export default function SpaServiceDetailPage() {
     }
 
     if (!serviceData) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <p className="text-gray-500 text-lg">Service details not found.</p>
-            </div>
-        );
+        return <div className="min-h-screen bg-gray-50" />;
     }
 
     return (

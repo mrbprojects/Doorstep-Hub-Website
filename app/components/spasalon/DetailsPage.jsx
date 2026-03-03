@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, Heart, ChevronRight, Check } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/spasalon/ui/tabs';
@@ -15,6 +15,8 @@ export function DetailsPage() {
     const [service, setService] = useState(null);
     const [selectedPackages, setSelectedPackages] = useState([]);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
+    const [viewingRateCard, setViewingRateCard] = useState(null);
+    const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -236,8 +238,25 @@ export function DetailsPage() {
                                                 {/* Package Details */}
                                                 <div className="flex-1">
                                                     <div className="flex justify-between items-start">
-                                                        <h3 className="font-bold text-gray-900 line-clamp-1">{pkg.name}</h3>
-                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
+                                                        <div className="flex-1">
+                                                            <div className="flex justify-between items-center mb-1">
+                                                                <h3 className="font-bold text-gray-900 line-clamp-1">{pkg.name}</h3>
+                                                                {pkg.banner_images && pkg.banner_images.length > 0 && (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setViewingRateCard(pkg);
+                                                                            setRateCardImageIndex(0);
+                                                                        }}
+                                                                        className="text-xs font-semibold text-[#6C5CE7] hover:underline flex items-center gap-1 ml-2"
+                                                                    >
+                                                                        See more
+                                                                        <ChevronRight className="w-3 h-3" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 ${isSelected
                                                             ? 'border-[#C06C84] bg-[#C06C84]'
                                                             : 'border-gray-300'
                                                             }`}>
@@ -367,6 +386,102 @@ export function DetailsPage() {
                     router.push(`/spa-salon/booking/address?providerId=${params.id}&packageId=${packageIds}&addons=${addonIds}`);
                 }}
             />
+
+            {/* Rate Card Gallery Modal */}
+            {viewingRateCard && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 bg-black/90 backdrop-blur-md"
+                        onClick={() => setViewingRateCard(null)}
+                    />
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="relative w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                    >
+                        {/* Navigation Header */}
+                        <div className="p-4 border-b flex items-center justify-between bg-white z-10">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-900 truncate">
+                                    {viewingRateCard.name}
+                                </h3>
+                                {viewingRateCard.banner_images?.length > 1 && (
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        Image {rateCardImageIndex + 1} of {viewingRateCard.banner_images.length}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                {viewingRateCard.banner_images?.length > 1 && (
+                                    <div className="flex items-center bg-gray-100 rounded-full p-1 mr-4">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setRateCardImageIndex(prev => (prev - 1 + viewingRateCard.banner_images.length) % viewingRateCard.banner_images.length);
+                                            }}
+                                            className="p-1.5 rounded-full hover:bg-white transition-colors"
+                                        >
+                                            <ChevronRight className="w-5 h-5 text-gray-700 rotate-180" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setRateCardImageIndex(prev => (prev + 1) % viewingRateCard.banner_images.length);
+                                            }}
+                                            className="p-1.5 rounded-full hover:bg-white transition-colors"
+                                        >
+                                            <ChevronRight className="w-5 h-5 text-gray-700" />
+                                        </button>
+                                    </div>
+                                )}
+                                <button
+                                    onClick={() => setViewingRateCard(null)}
+                                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                >
+                                    <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Image Container */}
+                        <div className="flex-1 overflow-hidden bg-gray-50 flex items-center justify-center p-4 min-h-[300px]">
+                            <motion.img
+                                key={rateCardImageIndex}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                src={`https://api.doorstephub.com/${viewingRateCard.banner_images[rateCardImageIndex]}`}
+                                alt={viewingRateCard.name}
+                                className="max-w-full max-h-[70vh] object-contain shadow-lg rounded-xl"
+                            />
+                        </div>
+
+                        {/* Thumbnail bar if multiple images */}
+                        {viewingRateCard.banner_images?.length > 1 && (
+                            <div className="p-4 bg-white border-t overflow-x-auto flex gap-2 justify-center">
+                                {viewingRateCard.banner_images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setRateCardImageIndex(idx)}
+                                        className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[#C06C84] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
+                                    >
+                                        <img
+                                            src={`https://api.doorstephub.com/${img}`}
+                                            className="w-full h-full object-cover"
+                                            alt=""
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 }

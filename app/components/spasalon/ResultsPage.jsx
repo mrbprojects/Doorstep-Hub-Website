@@ -102,7 +102,8 @@ export function ResultsPage() {
                             distance: service.distance || distanceStr,
                             availability: service.badges?.[0] || 'Available',
                             isNearby: true,
-                            address: service.address
+                            address: service.address,
+                            slug: service.slug
                         };
                     });
                     setServices(mappedServices);
@@ -308,7 +309,7 @@ function ServiceCard({ service, index, router }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: -10 }}
-            onClick={() => router.push(`/spa-salon/detail/${service.id}?serviceId=${service.id}`)}
+            onClick={() => router.push(`/${service.slug || service.id}`)}
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-md hover:shadow-xl transition-all"
         >
             {/* Image */}
@@ -380,7 +381,7 @@ function ServiceCard({ service, index, router }) {
                         whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            router.push(`/spa-salon/detail/${service.id}?serviceId=${service.id}`);
+                            router.push(`/${service.slug || service.id}`);
                         }}
                         className="px-6 py-2 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#C06C84]/50 transition-all"
                     >

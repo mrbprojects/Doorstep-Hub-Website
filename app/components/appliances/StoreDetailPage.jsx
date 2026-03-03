@@ -102,13 +102,27 @@ export function StoreDetailPage({ storeId, serviceId }) {
 
         if (data.success) {
           // Set center data
-          setCenterData(data.serviceCenter);
+          const center = data.nearByServiceCenters?.[0] || data.data || data.serviceCenter;
+          setCenterData(center);
 
           // Set services
-          setServices(data.services || []);
+          // Map array if it exists, otherwise try to find it in the center object
+          const rawServices = data.services || center?.services || [];
+          const mappedServices = rawServices.map(s => ({
+            id: s._id || s.id,
+            name: s.name || s.title,
+            description: s.description || s.bio,
+            price: s.price || s.minFare || s.inspectionCost || 0,
+            image: s.image || s.logo,
+            rating: s.rating || 4.5,
+            totalOrders: s.totalOrders || 0,
+            duration: s.duration || '60 mins',
+            subcategoryName: s.subcategoryName || center?.speciality
+          }));
+          setServices(mappedServices);
 
           // Set reviews
-          setReviews(data.reviews || []);
+          setReviews(data.reviews || center?.reviews || []);
 
           // Set portfolio images
           const portfolioUrls = data.portfolio?.images?.map((img) =>
@@ -365,7 +379,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
           <div className="absolute bottom-8 left-8 right-8">
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
               <h1 className="text-4xl font-bold text-white mb-3">
-                {center.firstName} {center.lastName}
+                {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
               </h1>
 
               <div className="flex flex-wrap items-center gap-6 mb-4">
@@ -376,9 +390,9 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Star className="w-5 h-5 fill-[#037166] text-[#037166]" />
-                    <span className="text-white font-semibold">{center.avgRating?.toFixed(1) || '0.0'}</span>
+                    <span className="text-white font-semibold">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
                   </div>
-                  <span className="text-white/60">({center.totalRatings || 0} reviews)</span>
+                  <span className="text-white/60">({center.totalRatings || center.reviews?.length || 0} reviews)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-[#037166]" />

@@ -269,11 +269,11 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                                 transition={{ duration: 0.3 }}
                                             >
                                                 <h3 className="text-xl font-semibold text-[#0F172A] mb-6">
-                                                    {currentQuestion.question}
+                                                    {currentQuestion?.question}
                                                 </h3>
 
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                    {currentQuestion.options.map((option) => (
+                                                    {currentQuestion?.options?.map((option) => (
                                                         <motion.button
                                                             key={option.value}
                                                             onClick={() => handleAnswer(option.value)}

@@ -140,6 +140,7 @@ export function HomePage() {
                         reviews: store.totalRatings || 0,
                         location: store.cityName || 'Nearby',
                         address: store.address || store.cityName, // Added address for NearbyCenterCard
+                        slug: store.slug
                     }));
                     setFeaturedPackages(mappedPackages);
                 }
@@ -178,7 +179,8 @@ export function HomePage() {
                         reviews: store.totalRatings || 0,
                         price: store.startingAt || 499,
                         address: store.address || store.cityName,
-                        isAvailable: true
+                        isAvailable: true,
+                        slug: store.slug
                     }));
                     setNearbyCenters(mappedCenters);
                 }
@@ -759,7 +761,7 @@ function PackageCard({ package: pkg, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -10 }}
-            onClick={() => router.push(`/spa-salon/detail/${pkg.id}`)}
+            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-52 overflow-hidden">
@@ -804,7 +806,7 @@ function PackageCard({ package: pkg, index, router }) {
                     </motion.button>
                 </div>
             </div>
-        </motion.div>
+        </motion.div >
     );
 }
 
@@ -812,7 +814,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/spa-salon/detail/${pkg.id}`)}
+            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-xl overflow-hidden border border-[#E8ECF2] cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
         >
             <div className="relative h-40">
@@ -844,7 +846,7 @@ function NearbyCenterCard({ center, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/spa-salon/detail/${center.id}`)}
+            onClick={() => router.push(`/${center.slug || center.id}`)}
             className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] cursor-pointer group hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-48 overflow-hidden">
@@ -890,7 +892,7 @@ function MoodCard({ mood, service, image, color, router }) {
     return (
         <motion.div
             whileHover={{ scale: 1.05 }}
-            onClick={() => router.push('/spa-salon/detail/1')}
+            onClick={() => router.push('/spa-salon')}
             className="relative h-80 rounded-2xl overflow-hidden cursor-pointer group"
         >
             <img

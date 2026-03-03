@@ -111,6 +111,7 @@ export function ViewAllPage({
           if (result.success && result.nearestServiceCenters) {
             setStores(result.nearestServiceCenters.map(item => ({
               id: item._id,
+              slug: item.slug, // Map the slug
               name: item.name || `${item.firstName} ${item.lastName}`,
               address: item.address || item.cityName || 'Location not specified',
               rating: item.rating || 4.5,
@@ -393,7 +394,7 @@ export function ViewAllPage({
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                       whileHover={{ y: -8 }}
-                      onClick={() => onStoreClick?.(store.id)}
+                      onClick={() => onStoreClick?.(store.slug || store.id)}
                       className="group cursor-pointer"
                     >
                       <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full">

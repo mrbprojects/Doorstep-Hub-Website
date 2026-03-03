@@ -105,7 +105,7 @@ export function ApplianceHomePage() {
             <PopularCenters onStoreClick={(store) => {
                 const categoryParam = encodeURIComponent('General');
                 const subCategoryParam = encodeURIComponent(store.speciality || 'Service');
-                router.push(`/${serviceSlugs.home}/detail/${store.id}?category=${categoryParam}&subCategory=${subCategoryParam}`);
+                router.push(`/${store.slug || store.id}`);
             }} />
             <KnowledgeSpace />
             <Newsletter />

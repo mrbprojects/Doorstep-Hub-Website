@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { CategoryPage } from '@/components/appliances/CategoryPage';
 import { ServicesListingPage } from '@/components/appliances/ServicesListingPage';
 import { ServiceDetailsPage } from '@/components/appliances/ServiceDetailsPage';
+import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
@@ -74,7 +75,21 @@ export function CategoryOrListingPage({ slug }) {
                     }
                 }
 
-                // 3. Final Fallback: Assume it's a Service Detail slug
+                // 3. Try to fetch as a Store (Service Center)
+                const storeResponse = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service_center_services/${slug}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (storeResponse.ok) {
+                    const storeDataResult = await storeResponse.json();
+                    if (storeDataResult.success) {
+                        setViewType('store');
+                        return;
+                    }
+                }
+
+                // 4. Final Fallback: Assume it's a Service Detail slug
                 // Let ServiceDetailsPage try to handle it.
                 setViewType('detail');
 
@@ -107,6 +122,10 @@ export function CategoryOrListingPage({ slug }) {
 
     if (viewType === 'listing') {
         return <ServicesListingPage slug={slug} />;
+    }
+
+    if (viewType === 'store') {
+        return <StoreDetailPage storeId={slug} />;
     }
 
     return (

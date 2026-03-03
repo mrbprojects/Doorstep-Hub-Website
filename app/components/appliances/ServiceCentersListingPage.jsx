@@ -66,6 +66,7 @@ export function ServiceCentersListingPage() {
                 if (result.success && result.nearByServiceCenters) {
                     setStores(result.nearByServiceCenters.map(item => ({
                         id: item._id,
+                        slug: item.slug, // Map the slug
                         name: item.business_name || `${item.firstName} ${item.lastName}`,
                         address: item.address || item.cityName || 'Location not specified',
                         rating: item.rating || 4.5,
@@ -87,8 +88,8 @@ export function ServiceCentersListingPage() {
         setSelectedRating(rating === selectedRating ? null : rating);
     };
 
-    const handleStoreClick = (storeId) => {
-        router.push(`/${serviceSlugs.home}/store/${storeId}`);
+    const handleStoreClick = (slug) => {
+        router.push(`/${slug}`);
     };
 
     const ShimmerGrid = () => {
@@ -227,7 +228,7 @@ export function ServiceCentersListingPage() {
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.05 }}
                                             whileHover={{ y: -8 }}
-                                            onClick={() => handleStoreClick(store.id)}
+                                            onClick={() => handleStoreClick(store.slug)}
                                             className="group cursor-pointer"
                                         >
                                             <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full flex flex-col">

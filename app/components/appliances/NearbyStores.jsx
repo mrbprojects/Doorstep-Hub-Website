@@ -73,6 +73,7 @@ export function NearbyServiceCenters({ onViewAll }) {
 
             return {
               id: service?._id || index,
+              slug: service?.slug, // Added slug
               name: service?.business_name,
               distance: `${dist.toFixed(1)} km`,
               rating: parseFloat(service?.rating) || 4.5,
@@ -194,7 +195,7 @@ export function NearbyServiceCenters({ onViewAll }) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            router.push(`/appliances/store/${service.id}`);
+            router.push(`/${service.slug || service.id}`);
           }}
           className="text-xs font-bold text-[#04a99d] hover:text-white flex items-center gap-1"
         >

@@ -54,8 +54,40 @@ export function StoreDetailPage({ storeId, serviceId }) {
     const fetchCenterDetails = async () => {
       setLoading(true);
       try {
+        let resolvedStoreId = storeId;
+
+        // If storeId is not a valid MongoDB ID (typically 24 characters), treat it as a slug
+        const isMongoId = /^[0-9a-fA-F]{24}$/.test(storeId);
+
+        if (!isMongoId) {
+          // Resolve slug to ID
+          try {
+            const centersRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                lattitude: 17.3850, // Default to Hyderabad for resolution search
+                longitude: 78.4867,
+                page: 1,
+                limit: 100
+              })
+            });
+            const centersData = await centersRes.json();
+            if (centersData.success && Array.isArray(centersData.nearByServiceCenters)) {
+              const matched = centersData.nearByServiceCenters.find(c =>
+                c.slug === storeId || c._id === storeId
+              );
+              if (matched) {
+                resolvedStoreId = matched._id;
+              }
+            }
+          } catch (resError) {
+            console.error('Error resolving slug to ID:', resError);
+          }
+        }
+
         const response = await fetch(
-          `https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service_center_services/${storeId}`,
+          `https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service_center_services/${resolvedStoreId}`,
           {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }

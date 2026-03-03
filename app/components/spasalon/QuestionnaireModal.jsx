@@ -65,11 +65,11 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                     const catResponse = await fetch(`${API_BASE_URL}/professional-services-flow/public/categories`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ serviceId: '6790757755050f22d997d95d' })
+                        body: JSON.stringify({ serviceId: '69524f4a57bb211ca094e5e6' })
                     });
                     const catData = await catResponse.json();
 
-                    if (catData.success && catData.category) {
+                    if (catData.success && catData.category && catData.category.length > 0) {
                         const catQuestion = {
                             id: 'categoryId',
                             question: 'Which service category are you looking for?',
@@ -81,6 +81,10 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                             }))
                         };
                         setQuestions([catQuestion]);
+                        setCurrentStep(0);
+                    } else {
+                        // Fallback to static if no categories found
+                        setQuestions(staticQuestions);
                         setCurrentStep(0);
                     }
                 } else {
@@ -184,12 +188,10 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
     };
 
     const currentQuestion = questions[currentStep];
-    const isLastStep = currentStep === questions.length - 1;
+    const isLastStep = questions.length > 0 && currentStep === questions.length - 1;
     const progress = questions.length > 0 ? ((currentStep + 1) / questions.length) * 100 : 0;
     // Check if current question is answered
-    const canProceed = answers[currentQuestion?.id];
-
-    if (!currentQuestion && !loading) return null;
+    const canProceed = currentQuestion ? answers[currentQuestion.id] : false;
 
     return (
         <AnimatePresence>
@@ -258,48 +260,50 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                     </div>
                                 ) : (
                                     <AnimatePresence mode="wait">
-                                        <motion.div
-                                            key={currentStep}
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <h3 className="text-xl font-semibold text-[#0F172A] mb-6">
-                                                {currentQuestion.question}
-                                            </h3>
+                                        {currentQuestion && (
+                                            <motion.div
+                                                key={currentStep}
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <h3 className="text-xl font-semibold text-[#0F172A] mb-6">
+                                                    {currentQuestion.question}
+                                                </h3>
 
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {currentQuestion.options.map((option) => (
-                                                    <motion.button
-                                                        key={option.value}
-                                                        onClick={() => handleAnswer(option.value)}
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                        className={`p-6 rounded-xl border-2 transition-all text-left ${answers[currentQuestion.id] === option.value
-                                                            ? 'border-[#C06C84] bg-[#C06C84]/10 shadow-lg shadow-[#C06C84]/20'
-                                                            : 'border-[#E8ECF2] bg-[#F6F7FB] hover:border-[#C06C84]/50 hover:bg-[#FBEAF0]'
-                                                            }`}
-                                                    >
-                                                        <div className="flex items-center gap-4">
-                                                            {option.image ? (
-                                                                <div
-                                                                    className="w-16 h-16 rounded-xl bg-cover bg-center shadow-inner flex-shrink-0"
-                                                                    style={{
-                                                                        backgroundImage: `url('${option.image.startsWith('http') ? option.image : `https://api.doorstephub.com/${option.image}`}')`
-                                                                    }}
-                                                                />
-                                                            ) : (
-                                                                <div className="w-16 h-16 rounded-xl bg-[#F6F7FB] flex items-center justify-center text-3xl flex-shrink-0">
-                                                                    {option.icon}
-                                                                </div>
-                                                            )}
-                                                            <span className="text-[#0F172A] font-semibold text-lg">{option.label}</span>
-                                                        </div>
-                                                    </motion.button>
-                                                ))}
-                                            </div>
-                                        </motion.div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {currentQuestion.options.map((option) => (
+                                                        <motion.button
+                                                            key={option.value}
+                                                            onClick={() => handleAnswer(option.value)}
+                                                            whileHover={{ scale: 1.02 }}
+                                                            whileTap={{ scale: 0.98 }}
+                                                            className={`p-6 rounded-xl border-2 transition-all text-left ${answers[currentQuestion.id] === option.value
+                                                                ? 'border-[#C06C84] bg-[#C06C84]/10 shadow-lg shadow-[#C06C84]/20'
+                                                                : 'border-[#E8ECF2] bg-[#F6F7FB] hover:border-[#C06C84]/50 hover:bg-[#FBEAF0]'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-center gap-4">
+                                                                {option.image ? (
+                                                                    <div
+                                                                        className="w-16 h-16 rounded-xl bg-cover bg-center shadow-inner flex-shrink-0"
+                                                                        style={{
+                                                                            backgroundImage: `url('${option.image.startsWith('http') ? option.image : `https://api.doorstephub.com/${option.image}`}')`
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-16 h-16 rounded-xl bg-[#F6F7FB] flex items-center justify-center text-3xl flex-shrink-0">
+                                                                        {option.icon}
+                                                                    </div>
+                                                                )}
+                                                                <span className="text-[#0F172A] font-semibold text-lg">{option.label}</span>
+                                                            </div>
+                                                        </motion.button>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
                                     </AnimatePresence>
                                 )}
                             </div>

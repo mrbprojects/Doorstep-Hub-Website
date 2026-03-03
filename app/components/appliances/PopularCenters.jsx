@@ -40,6 +40,7 @@ export function PopularCenters({ onStoreClick }) {
         if (data.success && Array.isArray(data.featuredServiceCenters)) {
           const mappedCenters = data.featuredServiceCenters.map(center => ({
             id: center._id,
+            slug: center.slug, // Map the slug
             // Use image if available, otherwise logo, otherwise fallback
             image: center.image ? `https://api.doorstephub.com/${center.image}` :
               (center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80'),

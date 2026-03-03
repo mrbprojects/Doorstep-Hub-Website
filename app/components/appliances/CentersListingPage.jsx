@@ -170,7 +170,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                                     transition={{ delay: index * 0.1 }}
                                     whileHover={{ y: -5 }}
                                     className="group cursor-pointer"
-                                    onClick={() => router.push(`/appliances/store/${center._id}`)}
+                                    onClick={() => router.push(`/${center.slug || center._id}`)}
                                 >
                                     <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-blue-500/50 transition-all duration-300">
                                         <div className="flex flex-col md:flex-row">

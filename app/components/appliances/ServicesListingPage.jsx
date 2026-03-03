@@ -163,7 +163,13 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         if (centersResponse.ok) {
           const centersData = await centersResponse.json();
           if (centersData.success) {
-            setCenters(centersData.nearByServiceCenters || []);
+            const enrichedCenters = (centersData.nearByServiceCenters || []).map(center => {
+              if (center.slug) return center;
+              const generatedSlug = (center.business_name || center.name || 'service-center')
+                .toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+              return { ...center, slug: generatedSlug };
+            });
+            setCenters(enrichedCenters);
           }
         }
 
@@ -565,7 +571,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -8, scale: 1.02 }}
                         className="group cursor-pointer h-full"
-                        onClick={() => router.push(`/${service.slug}`)}
+                        onClick={() => router.push(`/${service.slug || service._id}`)}
                       >
                         <div className="flex flex-col relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                           {/* Image */}
@@ -620,7 +626,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
                             {/* CTA Button */}
                             <button
-                              onClick={() => router.push(`/${service.slug}`)}
+                              onClick={() => router.push(`/${service.slug || service._id}`)}
                               className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
                             >
                               Book Now
@@ -665,6 +671,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -5 }}
                         className="group cursor-pointer"
+                        onClick={() => router.push(`/${center.slug || center._id}`)}
                       >
                         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                           <div className="flex flex-col md:flex-row">
@@ -714,7 +721,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                               </div>
 
                               <button
-                                onClick={() => router.push(`/appliances/store/${center._id}?serviceId=${subCategoryId}`)}
+                                onClick={() => router.push(`/${center.slug || center._id}`)}
                                 className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
                               >
                                 View Center

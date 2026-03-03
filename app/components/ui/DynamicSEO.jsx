@@ -7,39 +7,71 @@ export function DynamicSEO() {
     const pathname = usePathname();
 
     useEffect(() => {
+        if (!pathname) return;
+
         const updateSEO = async () => {
             try {
                 // 1. Path Normalization
-                // Normalizes trailing slashes and ensures the path is clean
                 const currentPath = pathname === '/' ? '/' : pathname.replace(/\/$/, "");
+                const origin = (typeof window !== 'undefined' && window.location.hostname !== 'localhost')
+                    ? 'https://doorstephub.com'
+                    : (typeof window !== 'undefined' ? window.location.origin : 'https://doorstephub.com');
+                const canonicalUrl = `${origin}${currentPath}`;
 
-                // 2. API Call
-                const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/web/seo/get-page-seo?path=${currentPath}`);
-                const result = await response.json();
+                // 2. Updated Canonical (stripping query params by using pathname)
+                let linkCanonical = document.querySelector('link[rel="canonical"]');
+                if (!linkCanonical) {
+                    linkCanonical = document.createElement('link');
+                    linkCanonical.rel = "canonical";
+                    document.head.appendChild(linkCanonical);
+                }
+                linkCanonical.setAttribute('href', canonicalUrl);
+                console.log(`[SEO] Setting Canonical: ${canonicalUrl}`);
 
-                if (result.success && result.data) {
-                    // Check if nested data exists based on the request's 'res.data.data' specification
-                    const seo = result.data.data || result.data;
-                    const { title, description, keywords } = seo;
+                // 3. Dynamic API Mapping
+                let seoData = null;
 
-                    console.log(`[SEO Debug] Path: ${currentPath} | Title: ${title}`);
+                // Pattern detection for primary APIs
+                if (currentPath.includes('/details/')) {
+                    const slug = currentPath.split('/details/').pop();
+                    const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${slug}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                    const result = await response.json();
+                    if (result.success && result.seo) {
+                        seoData = result.seo;
+                        console.log(`[SEO] Resolved from Service API: ${slug}`);
+                    }
+                } else if (currentPath.includes('/store/')) {
+                    const id = currentPath.split('/store/').pop().split('?')[0];
+                    const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service_center_services/${id}`);
+                    const result = await response.json();
+                    if (result.success && result.serviceCenter?.seo) {
+                        seoData = result.serviceCenter.seo;
+                        console.log(`[SEO] Resolved from Store API: ${id}`);
+                    }
+                }
 
-                    // 3. Metadata Injection
+                // Fallback to Smart API if primary not found or not dynamic page (handles /nearby-service-centers etc.)
+                if (!seoData) {
+                    const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/web/seo/get-page-seo?path=${currentPath}`);
+                    const result = await response.json();
+                    if (result.success && result.data) {
+                        seoData = result.data.data || result.data;
+                        console.log(`[SEO] Resolved from Smart API: ${currentPath}`);
+                    }
+                }
+
+                // 4. Metadata Injection
+                if (seoData) {
+                    const { title, description, keywords } = seoData;
 
                     // Update Title
                     if (title) document.title = title;
 
-                    // 3. Update Canonical (Automated)
-                    const canonicalUrl = `https://doorstephub.com${currentPath}`;
-                    let linkCanonical = document.querySelector('link[rel="canonical"]');
-                    if (!linkCanonical) {
-                        linkCanonical = document.createElement('link');
-                        linkCanonical.rel = "canonical";
-                        document.head.appendChild(linkCanonical);
-                    }
-                    linkCanonical.href = canonicalUrl;
-
-                    // 4. Update Description
+                    // Update Description
                     let metaDescription = document.querySelector('meta[name="description"]');
                     if (!metaDescription) {
                         metaDescription = document.createElement('meta');
@@ -48,36 +80,23 @@ export function DynamicSEO() {
                     }
                     if (description) metaDescription.content = description;
 
-                    // 5. Update Keywords
+                    // Update Keywords
                     let metaKeywords = document.querySelector('meta[name="keywords"]');
                     if (!metaKeywords) {
                         metaKeywords = document.createElement('meta');
                         metaKeywords.name = "keywords";
                         document.head.appendChild(metaKeywords);
                     }
-                    // Handle array or string keywords
                     const keywordsStr = Array.isArray(keywords) ? keywords.join(', ') : keywords;
                     if (keywordsStr) metaKeywords.content = keywordsStr;
-                } else {
-                    // Fallback Canonical even if API fails
-                    const currentPath = pathname === '/' ? '/' : pathname.replace(/\/$/, "");
-                    const canonicalUrl = `https://doorstephub.com${currentPath}`;
-                    let linkCanonical = document.querySelector('link[rel="canonical"]');
-                    if (!linkCanonical) {
-                        linkCanonical = document.createElement('link');
-                        linkCanonical.rel = "canonical";
-                        document.head.appendChild(linkCanonical);
-                    }
-                    linkCanonical.href = canonicalUrl;
                 }
             } catch (error) {
-                console.error("Error updating dynamic SEO:", error);
-                // Fallback to defaults or leave as is - root layout metadata acts as default
+                console.error("Error updating global SEO:", error);
             }
         };
 
         updateSEO();
     }, [pathname]);
 
-    return null; // This component doesn't render anything visible
+    return null;
 }

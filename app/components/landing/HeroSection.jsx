@@ -355,16 +355,15 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
       animate="visible"
       className="mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
     >
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4">
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
         {services.map((service, index) => {
           const isActive = index === activeIndex;
           return (
             <motion.div
               key={service._id}
               variants={cardVariants}
-              // ✅ FIXED: Pass full service object
               onClick={() => handleServiceClick(service)}
-              className={`group cursor-pointer transition-all duration-500`}
+              className="group cursor-pointer transition-all duration-500 w-16 sm:w-20 md:w-24 flex-shrink-0"
             >
               <div
                 className={`

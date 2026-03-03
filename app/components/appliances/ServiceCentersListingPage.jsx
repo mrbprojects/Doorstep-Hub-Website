@@ -60,13 +60,15 @@ export function ServiceCentersListingPage() {
 
                 if (!response.ok) throw new Error('Failed to fetch stores');
                 const result = await response.json();
+                console.log(result)
+
 
                 if (result.success && result.nearByServiceCenters) {
                     setStores(result.nearByServiceCenters.map(item => ({
                         id: item._id,
-                        name: item.name || `${item.firstName} ${item.lastName}`,
+                        name: item.business_name || `${item.firstName} ${item.lastName}`,
                         address: item.address || item.cityName || 'Location not specified',
-                        rating: parseFloat(item.rating) || 4.5,
+                        rating: item.rating || 4.5,
                         image: item.image ? `https://api.doorstephub.com/${item.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400',
                         reviews: item.reviews || 'New'
                     })));
@@ -235,6 +237,13 @@ export function ServiceCentersListingPage() {
                                                         alt={store.name}
                                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                     />
+                                                    {/* Rating Badge - Bottom Left Flush */}
+                                                    <div className="absolute bottom-0 left-0 z-20">
+                                                        <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
+                                                            <Star className="w-3.5 h-3.5 fill-[#04a99d] text-[#04a99d]" />
+                                                            <span className="text-white text-xs font-bold">{store.rating}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div className="p-6 flex flex-col flex-1">
                                                     <h4 className="text-xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-1">
@@ -244,11 +253,6 @@ export function ServiceCentersListingPage() {
                                                         <MapPin className="w-4 h-4 text-[#04a99d]" />
                                                         {store.address}
                                                     </p>
-                                                    <div className="flex items-center gap-1 mb-4">
-                                                        <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                                                        <span className="text-white font-medium">{store.rating}</span>
-                                                        <span className="text-white/40">({store.reviews} reviews)</span>
-                                                    </div>
                                                     <button className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2">
                                                         View Center
                                                         <ArrowRight className="w-4 h-4" />

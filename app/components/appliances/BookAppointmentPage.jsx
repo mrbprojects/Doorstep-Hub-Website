@@ -201,7 +201,7 @@ export function BookAppointmentPage() {
             /* ─── STEP 0: Personal Details + City + Category ─── */
             case 0:
                 return (
-                    <div className="space-y-4">
+                    <div className="space-y-4 ">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <input
                                 type="text"
@@ -468,8 +468,8 @@ export function BookAppointmentPage() {
             <div className="flex-1 px-5 py-8 md:px-16 md:py-20 flex flex-col relative z-20 min-h-[calc(100vh-80px)] md:min-h-screen">
                 <div className="max-w-xl w-full mx-auto md:mx-0">
                     {/* Step Title */}
-                    <div className="mb-8">
-                        <p className="text-[10px] font-bold text-[#04a99d] uppercase tracking-[0.2em] mb-2 opacity-80">Step {currentStep + 1} of {STEPS.length}</p>
+                    <div className="mb-8 mt-6">
+                        <p className="text-[10px] font-bold text-[#04a99d] uppercase tracking-[0.2em]  mb-2 opacity-80">Step {currentStep + 1} of {STEPS.length}</p>
                         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight leading-none mb-2">
                             {STEPS[currentStep].title}
                         </h2>

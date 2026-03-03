@@ -98,45 +98,6 @@ export function ServiceDetailsPage({
         if (data.success) {
           setServiceDetails(data);
 
-          // Apply Dynamic SEO from Service Model
-          if (data.seo) {
-            const seo = data.seo;
-            document.title = seo.title || document.title;
-
-            if (seo.description) {
-              let metaDesc = document.querySelector('meta[name="description"]');
-              if (!metaDesc) {
-                metaDesc = document.createElement('meta');
-                metaDesc.name = 'description';
-                document.head.appendChild(metaDesc);
-              }
-              metaDesc.setAttribute("content", seo.description);
-            }
-
-            const keywords = Array.isArray(seo.keywords) ? seo.keywords.join(", ") : seo.keywords;
-            if (keywords) {
-              let metaKeywords = document.querySelector('meta[name="keywords"]');
-              if (!metaKeywords) {
-                metaKeywords = document.createElement('meta');
-                metaKeywords.name = 'keywords';
-                document.head.appendChild(metaKeywords);
-              }
-              metaKeywords.setAttribute("content", keywords);
-            }
-            console.log("[Service SEO] Applied:", seo.title);
-          }
-
-          // Apply Canonical URL
-          const currentPath = window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/$/, "");
-          const canonicalUrl = `https://doorstephub.com${currentPath}`;
-          let linkCanonical = document.querySelector('link[rel="canonical"]');
-          if (!linkCanonical) {
-            linkCanonical = document.createElement('link');
-            linkCanonical.rel = "canonical";
-            document.head.appendChild(linkCanonical);
-          }
-          linkCanonical.href = canonicalUrl;
-
           // Auto-enrich URL if metadata is missing
           if (!category || !subCategory || !subCategoryId) {
             try {

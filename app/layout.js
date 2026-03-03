@@ -9,7 +9,6 @@ import { ServiceCartProvider } from './context/ServiceCartContext';
 import { ClientProviders } from './components/providers/ClientProviders';
 import ErrorBoundary from './components/ErrorBoundary';
 import { FloatingActionButtons } from './components/ui/FloatingActionButtons';
-import { CanonicalLink } from './components/ui/CanonicalLink';
 import { DynamicSEO } from './components/ui/DynamicSEO';
 
 const ubuntu = Ubuntu({
@@ -48,7 +47,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <CanonicalLink />
         {/* Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{

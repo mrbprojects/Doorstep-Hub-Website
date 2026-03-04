@@ -8,7 +8,7 @@ import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-export function CategoryOrListingPage({ slug }) {
+export function CategoryOrListingPage({ slug, onBack }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const queryServiceId = searchParams.get('id');
@@ -110,7 +110,7 @@ export function CategoryOrListingPage({ slug }) {
         if (slug) {
             checkSlugType();
         }
-    }, [slug]);
+    }, [slug, queryServiceId]);
 
     if (viewType === 'loading') {
         return (
@@ -121,19 +121,19 @@ export function CategoryOrListingPage({ slug }) {
     }
 
     if (viewType === 'category') {
-        return <CategoryPage slug={slug} initialData={categoryData} />;
+        return <CategoryPage slug={slug} initialData={categoryData} onBack={onBack} />;
     }
 
     if (viewType === 'detail') {
-        return <ServiceDetailsPage serviceSlug={slug} serviceId={serviceId} />;
+        return <ServiceDetailsPage serviceSlug={slug} serviceId={serviceId} onBack={onBack} />;
     }
 
     if (viewType === 'listing') {
-        return <ServicesListingPage slug={slug} />;
+        return <ServicesListingPage slug={slug} onBack={onBack} />;
     }
 
     if (viewType === 'store') {
-        return <StoreDetailPage storeId={slug} />;
+        return <StoreDetailPage storeId={slug} onBack={onBack} />;
     }
 
     return (

@@ -12,18 +12,7 @@ export default function AddressRoute() {
         <AddressPage
             selectedAddress={selectedAddress}
             onSelectAddress={setSelectedAddress}
-            onBack={() => {
-                const serviceSlug = localStorage.getItem('last_service_slug');
-                const serviceId = localStorage.getItem('last_service_id');
-
-                if (serviceSlug) {
-                    router.push(`/${serviceSlug}`);
-                } else if (serviceId) {
-                    router.push(`/appliances/detail/${serviceId}`);
-                } else {
-                    router.push('/appliances/cart');
-                }
-            }}
+            onBack={() => router.back()}
             onContinue={() => {
                 const isServiceCartFlow = localStorage.getItem('service_cart_flow');
                 if (isServiceCartFlow) {

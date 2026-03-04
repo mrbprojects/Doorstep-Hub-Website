@@ -26,7 +26,8 @@ export function ServiceDetailsPage({
   serviceSlug, // Added Slug support
   category,
   subCategory,
-  subCategoryId
+  subCategoryId,
+  onBack
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -311,12 +312,16 @@ export function ServiceDetailsPage({
           >
             <button
               onClick={() => {
+                if (onBack) {
+                  onBack();
+                  return;
+                }
                 const params = new URLSearchParams(window.location.search);
                 const catSlug = params.get('categorySlug');
                 const subCatSlug = params.get('subCategorySlug');
                 if (catSlug && subCatSlug) { router.push(`/${catSlug}/${subCatSlug}`); return; }
                 if (catSlug) { router.push(`/${catSlug}`); return; }
-                router.push('/');
+                router.back();
               }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
             >

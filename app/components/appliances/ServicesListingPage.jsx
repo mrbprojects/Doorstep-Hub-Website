@@ -6,7 +6,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, DollarSign, Filter, X, Zap, RotateCcw, ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
 
-export function ServicesListingPage({ category, subCategory, subCategoryId, childCategoryId, slug }) {
+export function ServicesListingPage({ category, subCategory, subCategoryId, childCategoryId, slug, onBack }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -322,10 +322,13 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             onClick={() => {
+              if (onBack) {
+                onBack();
+                return;
+              }
               if (categoryName) {
                 const activeCat = allCategories.find(c => c.name === categoryName);
                 if (activeCat?.slug) {
-                  // Navigate to Category Page
                   router.push(`/${activeCat.slug}`);
                 } else {
                   router.back();
@@ -839,6 +842,6 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
           </>
         )}
       </AnimatePresence>
-    </motion.div>
+    </motion.div >
   );
 }

@@ -442,7 +442,7 @@ export function BookAppointmentPage() {
         <div className="min-h-screen bg-white flex flex-col md:flex-row overflow-hidden font-sans relative">
 
             {/* ── Mobile Top Step Indicator ── */}
-            <div className="md:hidden bg-[#04a99d] px-4 pt-12 pb-5 sticky top-0 z-[100] shadow-xl">
+            <div className="md:hidden bg-[#04a99d] px-4 pt-1.5 pb-5 sticky top-20 z-[100] shadow-xl">
                 <div className="flex items-center justify-between relative max-w-sm mx-auto">
                     {/* Connecting Line */}
                     <div className="absolute top-[16px] left-[15%] right-[15%] h-[2px] bg-white/20 z-0" />
@@ -465,7 +465,7 @@ export function BookAppointmentPage() {
             </div>
 
             {/* ── Main Form Section ── */}
-            <div className="flex-1 px-5 py-8 md:px-16 md:py-20 flex flex-col relative z-20 min-h-[calc(100vh-80px)] md:min-h-screen">
+            <div className="flex-1 px-4 py-8 md:px-16 md:py-20 flex flex-col relative z-20 min-h-[calc(100vh-80px)] md:min-h-screen">
                 <div className="max-w-xl w-full mx-auto md:mx-0">
                     {/* Step Title */}
                     <div className="mb-8 mt-6">

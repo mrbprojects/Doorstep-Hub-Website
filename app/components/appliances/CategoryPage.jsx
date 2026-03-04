@@ -59,7 +59,7 @@ function CategorySkeleton() {
   );
 }
 
-export function CategoryPage({ slug, initialData }) {
+export function CategoryPage({ slug, initialData, onBack }) {
   const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [subCategories, setSubCategories] = useState([]);
@@ -103,7 +103,11 @@ export function CategoryPage({ slug, initialData }) {
   };
 
   const handleBack = () => {
-    router.push('/appliances');
+    if (onBack) {
+      onBack();
+    } else {
+      router.push('/appliance-repair-services');
+    }
   };
 
   useEffect(() => {

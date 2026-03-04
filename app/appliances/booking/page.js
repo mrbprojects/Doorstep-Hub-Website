@@ -19,7 +19,7 @@ function BookingContent() {
     return (
         <BookingConfirmationPage
             address={address}
-            onBack={() => router.push('/appliances/address')}
+            onBack={() => router.back()}
             onConfirmBooking={(data) => {
                 router.push(`/appliances/thank-you?date=${data?.bookedDate || ''}&time=${data?.bookedTime || ''}`);
             }}

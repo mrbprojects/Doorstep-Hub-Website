@@ -22,7 +22,7 @@ import {
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 
-export function StoreDetailPage({ storeId, serviceId }) {
+export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('services');
   const [lightboxImage, setLightboxImage] = useState(null);
@@ -358,7 +358,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
         <motion.button
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          onClick={() => router.back()}
+          onClick={() => onBack ? onBack() : router.back()}
           className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 hover:bg-white/10 hover:border-[#037166]/50 transition-all"
         >
           <ArrowLeft className="w-4 h-4" />

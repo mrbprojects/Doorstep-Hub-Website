@@ -43,8 +43,8 @@ export function ResultsPage() {
                 const userLocationData = localStorage.getItem('user_location_data');
                 const storedLocation = userLocationData ? JSON.parse(userLocationData) : null;
 
-                const lat = (location?.coords?.latitude || storedLocation?.lat || 17.3850).toString();
-                const lng = (location?.coords?.longitude || storedLocation?.lng || 78.4867).toString();
+                const lat = (location?.lat || storedLocation?.lat || 17.3850).toString();
+                const lng = (location?.lng || storedLocation?.lng || 78.4867).toString();
 
                 const subcategoryId = searchParams.get('subcategoryId') || "6957be10cc45593206b6e6c8"; // Fallback for testing
                 const categoryId = searchParams.get('categoryId') || "";

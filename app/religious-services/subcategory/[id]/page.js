@@ -30,10 +30,8 @@ function SubCategoryServicesContent() {
         const fetchServices = async () => {
             setLoading(true);
             try {
-                const userLocationData = localStorage.getItem('user_location_data');
-                const locationData = userLocationData ? JSON.parse(userLocationData) : null;
-                const lat = locationData?.lat || 17.3850;
-                const lng = locationData?.lng || 78.4867;
+                const lat = location?.lat || 17.3850;
+                const lng = location?.lng || 78.4867;
 
                 // Providing `subcategoryId` to the API
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {

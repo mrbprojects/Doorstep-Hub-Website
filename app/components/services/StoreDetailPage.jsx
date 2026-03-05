@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { useLocationContext } from '@/context/LocationContext';
 
 export function StoreDetailPage({ storeId, serviceId }) {
   const router = useRouter();
@@ -28,6 +29,8 @@ export function StoreDetailPage({ storeId, serviceId }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [reviewsToShow, setReviewsToShow] = useState(3);
   const [selectedPackages, setSelectedPackages] = useState([]);
+  const [resolvedProviderId, setResolvedProviderId] = useState(null);
+  const { location } = useLocationContext();
 
   // API data state
   const [loading, setLoading] = useState(true);
@@ -69,6 +72,9 @@ export function StoreDetailPage({ storeId, serviceId }) {
         const data = await response.json();
 
         if (data.success) {
+          // Set resolved ID for cart operations
+          setResolvedProviderId(data.serviceCenter?._id);
+
           // Set center data
           setCenterData(data.serviceCenter);
 
@@ -108,7 +114,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
     if (storeId) {
       fetchCenterDetails();
     }
-  }, [storeId]);
+  }, [storeId, location?.lat, location?.lng]);
 
   // Get center data or use fallback
   const center = centerData || {
@@ -143,7 +149,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             serviceIds: [serviceId],
-            providerId: storeId
+            providerId: resolvedProviderId || storeId
           })
         }
       );
@@ -197,7 +203,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
       // Step 2: Add parent service
       console.log('Adding parent service to cart:', service);
       const parentAdded = await addToServiceCart(
-        storeId,        // providerId
+        resolvedProviderId || storeId,        // providerId
         service.id,     // itemId (using id from old API)
         'service',      // itemType
         1               // quantity
@@ -213,7 +219,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
         console.log('Adding addons to cart:', addons);
         for (const addon of addons) {
           await addToServiceCart(
-            storeId,        // providerId
+            resolvedProviderId || storeId,        // providerId
             addon._id,      // itemId (addons use _id)
             'addon',        // itemType
             1,              // quantity

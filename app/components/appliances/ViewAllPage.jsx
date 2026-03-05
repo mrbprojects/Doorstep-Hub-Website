@@ -48,10 +48,10 @@ export function ViewAllPage({
     if (type === 'categories') {
       const fetchCategories = async () => {
         try {
-          // Using default coordinates only if needed, or empty body as per Postman snippet
+          // Use real location if available
           const body = {
-            lattitude: '17.4391296',
-            longitude: '78.4433152',
+            lattitude: location?.lat || '17.4391296',
+            longitude: location?.lng || '78.4433152',
           };
 
           const response = await fetch(
@@ -87,12 +87,8 @@ export function ViewAllPage({
       const fetchStores = async () => {
         try {
           setIsLoading(true);
-          // Use location if available, otherwise try to detect
-          let currentLoc = location;
-          if (!currentLoc) {
-            // Default to Hyderabad if detection fails or is pending
-            currentLoc = { lat: 17.3850, lng: 78.4867 };
-          }
+          // Use location if available, otherwise default as fallback
+          const currentLoc = location || { lat: 17.3850, lng: 78.4867 };
 
           const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/nearest_service_centers', {
             method: 'POST',

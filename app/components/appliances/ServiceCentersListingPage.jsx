@@ -38,12 +38,8 @@ export function ServiceCentersListingPage() {
         const fetchStores = async () => {
             try {
                 setIsLoading(true);
-                // Use location if available, otherwise try to detect or default
-                let currentLoc = location;
-                if (!currentLoc) {
-                    // Default to Hyderabad if detection fails or is pending (matches ViewAllPage logic)
-                    currentLoc = { lat: 17.3850, lng: 78.4867 };
-                }
+                // Use location if available, otherwise default as fallback
+                const currentLoc = location || { lat: 17.3850, lng: 78.4867 };
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
                     method: 'POST',

@@ -7,6 +7,7 @@ import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, C
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useLocationContext } from '@/context/LocationContext';
 
 const footerLinks = {
 
@@ -40,6 +41,7 @@ const socialLinks = [
 
 export function Footer({ theme = {} }) {
   const router = useRouter();
+  const { location } = useLocationContext();
 
   // Default dark theme (landing page)
   const defaultTheme = {
@@ -89,7 +91,10 @@ export function Footer({ theme = {} }) {
         const catResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lattitude: '17.3850', longitude: '78.4866' })
+          body: JSON.stringify({
+            lattitude: location?.lat || '17.3850',
+            longitude: location?.lng || '78.4866'
+          })
         });
         const catData = await catResponse.json();
 
@@ -174,7 +179,7 @@ export function Footer({ theme = {} }) {
     };
 
     fetchFooterData();
-  }, []);
+  }, [location?.lat, location?.lng]);
 
   const dynamicQuickLinks = [
     ...footerLinks.Quicklinks.map(link => {

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { useLocationContext } from '@/context/LocationContext';
 
 export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const router = useRouter();
@@ -32,6 +33,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   // API data state
   const [loading, setLoading] = useState(true);
   const [centerData, setCenterData] = useState(null);
+  const [resolvedProviderId, setResolvedProviderId] = useState(null); // Always a real MongoDB _id
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [portfolioImages, setPortfolioImages] = useState([]);
@@ -48,6 +50,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
   // Get service cart functions from context
   const { addToCart: addToServiceCart, clearCart } = useServiceCart();
+  // Get user's real location
+  const { location } = useLocationContext();
 
   // Fetch service center details from API
   useEffect(() => {
@@ -56,18 +60,21 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
       try {
         let resolvedStoreId = storeId;
 
-        // If storeId is not a valid MongoDB ID (typically 24 characters), treat it as a slug
+        // If storeId is not a valid MongoDB ID (24 hex chars), treat it as a slug
         const isMongoId = /^[0-9a-fA-F]{24}$/.test(storeId);
 
-        if (!isMongoId) {
-          // Resolve slug to ID
+        if (isMongoId) {
+          // Already a real ID — use directly
+          setResolvedProviderId(storeId);
+        } else {
+          // Resolve slug to real MongoDB _id
           try {
             const centersRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                lattitude: 17.3850, // Default to Hyderabad for resolution search
-                longitude: 78.4867,
+                lattitude: location?.lat ?? 17.3850,  // Use real user location, fallback to Hyderabad
+                longitude: location?.lng ?? 78.4867,
                 page: 1,
                 limit: 100
               })
@@ -79,6 +86,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               );
               if (matched) {
                 resolvedStoreId = matched._id;
+                setResolvedProviderId(matched._id);
+                console.log('Resolved slug to provider _id:', matched._id);
               }
             }
           } catch (resError) {
@@ -104,6 +113,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           // Set center data
           const center = data.nearByServiceCenters?.[0] || data.data || data.serviceCenter;
           setCenterData(center);
+
+          // If we still don't have a resolved provider ID, extract it from center data
+          if (center?._id) {
+            setResolvedProviderId(prev => prev || center._id);
+          }
 
           // Set services
           // Map array if it exists, otherwise try to find it in the center object
@@ -154,7 +168,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     if (storeId) {
       fetchCenterDetails();
     }
-  }, [storeId]);
+  }, [storeId, location?.lat, location?.lng]);
 
   // Immediate redirection logic
   useEffect(() => {
@@ -205,7 +219,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             serviceIds: [serviceId],
-            providerId: storeId
+            providerId: resolvedProviderId || storeId
           })
         }
       );
@@ -259,10 +273,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
       // Step 2: Add parent service
       console.log('Adding parent service to cart:', service);
       const parentAdded = await addToServiceCart(
-        storeId,        // providerId
-        service.id,     // itemId (using id from old API)
-        'service',      // itemType
-        1               // quantity
+        resolvedProviderId || storeId, // Use real MongoDB _id, not slug
+        service.id,                    // itemId
+        'service',                     // itemType
+        1                              // quantity
       );
 
       if (!parentAdded) {
@@ -275,11 +289,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         console.log('Adding addons to cart:', addons);
         for (const addon of addons) {
           await addToServiceCart(
-            storeId,        // providerId
-            addon._id,      // itemId (addons use _id)
-            'addon',        // itemType
-            1,              // quantity
-            service.id      // parentServiceId (using id from old API)
+            resolvedProviderId || storeId, // Use real MongoDB _id, not slug
+            addon._id,                     // itemId (addons use _id)
+            'addon',                       // itemType
+            1,                             // quantity
+            service.id                     // parentServiceId
           );
         }
       }

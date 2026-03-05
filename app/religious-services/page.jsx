@@ -54,10 +54,8 @@ export default function ReligiousServicesPage() {
     const fetchServices = async () => {
       setLoading(true);
       try {
-        const userLocationData = localStorage.getItem('user_location_data');
-        const locationData = userLocationData ? JSON.parse(userLocationData) : null;
-        const lat = locationData?.lat || 17.3850;
-        const lng = locationData?.lng || 78.4867;
+        const lat = location?.lat || 17.3850;
+        const lng = location?.lng || 78.4867;
 
         // Get religious services serviceId from localStorage, fallback to hardcoded ID
         const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';

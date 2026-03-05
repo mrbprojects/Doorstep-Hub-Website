@@ -36,20 +36,9 @@ export function LocationProvider({ children }) {
             return () => clearInterval(checkGoogleMaps);
         }
 
-        // 3. Silent IP-based detection as fallback (only if no saved location)
-        const detectIPLocation = async () => {
-            try {
-                setLoading(true);
-                const ipLocation = await locationManager.detectWithIP();
-                setLocation(ipLocation);
-            } catch (err) {
-                console.error('IP detection failed:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+        // 3. No IP Silencing
+        // We only rely on stored location or explicitly requested GPS/Manual input
 
-        detectIPLocation();
         return () => clearInterval(checkGoogleMaps);
     }, []);
 
@@ -61,14 +50,8 @@ export function LocationProvider({ children }) {
             const saved = locationManager.getSavedLocation();
 
             if (!saved) {
-                console.log('Location cache expired, performing silent refresh...');
-                try {
-                    // Silent update (bypass setLoading to avoid UI flicker)
-                    const ipLocation = await locationManager.detectWithIP();
-                    setLocation(ipLocation);
-                } catch (err) {
-                    console.warn('Silent location refresh failed:', err);
-                }
+                console.log('Location cache expired.');
+                setLocation(null); // Force empty state on expiry
             }
         };
 
@@ -91,36 +74,15 @@ export function LocationProvider({ children }) {
             setLocation(gpsLocation);
             return gpsLocation;
         } catch (err) {
-            // Log as warning instead of error for "denied" which is a common user action
-            console.warn('GPS access unavailable (Permission Denied), falling back to Network Location.');
+            // Log as error, GPS access denied/failed
+            console.warn('GPS access unavailable (Permission Denied). User must select location manually.');
+            setError('Location permission denied. Please select your location manually.');
 
-            // Fallback to IP detection on GPS failure
-            try {
-                const ipLocation = await locationManager.detectWithIP();
+            // Explicitly Clear the location state if GPS fails and we have no fallback
+            // setLocation(null); 
 
-                // CRITICAL FIX: Since IP detection is vague (city-level), 
-                // we perform a reverse geocode on the IP coords to fill details properly.
-                try {
-                    const detailedData = await locationManager.reverseGeocode(ipLocation.lat, ipLocation.lng);
-                    const processedLoc = {
-                        ...ipLocation,
-                        ...detailedData,
-                        isEstimated: true,
-                        lat: ipLocation.lat, // Keep original IP lat/lng
-                        lng: ipLocation.lng
-                    };
-                    setLocation(processedLoc);
-                    return processedLoc;
-                } catch (geoErr) {
-                    const processedLoc = { ...ipLocation, isEstimated: true };
-                    setLocation(processedLoc);
-                    return processedLoc;
-                }
-            } catch (ipErr) {
-                console.error('Total location failure:', ipErr);
-                setError('Unable to detect location. Please search manually.');
-                return null;
-            }
+            // We do NOT return fallback IP anymore, enforcing exact match/manual selection
+            throw err;
         } finally {
             setLoading(false);
         }

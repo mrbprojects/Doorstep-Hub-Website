@@ -1,6 +1,7 @@
 import './globals.css';
 import { Ubuntu } from 'next/font/google';
 import Script from 'next/script';
+import { Suspense } from 'react';
 import { LocationProvider } from './context/LocationContext';
 import { AuthProvider } from './context/AuthContext';
 import { AuthModalProvider } from './context/AuthModalContext';
@@ -8,6 +9,7 @@ import { CartProvider } from './context/CartContext';
 import { ServiceCartProvider } from './context/ServiceCartContext';
 import { ClientProviders } from './components/providers/ClientProviders';
 import ErrorBoundary from './components/ErrorBoundary';
+import { InitialLocationModal } from './components/location/InitialLocationModal';
 import { FloatingActionButtons } from './components/ui/FloatingActionButtons';
 import { DynamicSEO } from './components/ui/DynamicSEO';
 
@@ -63,6 +65,11 @@ export default function RootLayout({ children }) {
         {/* Google Tag Manager (noscript) */}
         <noscript dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P35XQW2B" height="0" width="0" style="display:none;visibility:hidden"></iframe>` }} />
         {/* End Google Tag Manager (noscript) */}
+        <Script
+          id="google-maps-script"
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&loading=async&v=weekly`}
+          strategy="beforeInteractive"
+        />
         <ErrorBoundary>
           <DynamicSEO />
           <LocationProvider>
@@ -71,12 +78,10 @@ export default function RootLayout({ children }) {
                 <CartProvider>
                   <ServiceCartProvider>
                     <ClientProviders>
-                      <Script
-                        id="google-maps-script"
-                        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&loading=async&v=weekly`}
-                        strategy="beforeInteractive"
-                      />
-                      {children}
+                      <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a]" />}>
+                        {children}
+                      </Suspense>
+                      <InitialLocationModal />
                       <FloatingActionButtons />
                     </ClientProviders>
                   </ServiceCartProvider>

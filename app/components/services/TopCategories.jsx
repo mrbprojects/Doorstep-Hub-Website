@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MapPin } from 'lucide-react';
+import { useLocationContext } from '@/context/LocationContext';
 
 export function TopCategories({ onViewAll }) {
   const router = useRouter();
+  const { location } = useLocationContext();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const sectionRef = useRef(null);
@@ -17,9 +19,6 @@ export function TopCategories({ onViewAll }) {
   useEffect(() => {
     const container = scrollRef.current;
     if (!isLoading && categories.length > 0 && container) {
-      // Disable CSS smooth scrolling for manual control if needed, quite abrupt otherwise?
-      // Actually simply setting scrollLeft works well for marquee.
-
       let animationId;
       const scroll = () => {
         if (!isPaused && container) {
@@ -47,51 +46,17 @@ export function TopCategories({ onViewAll }) {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        // 1. Check localStorage first
-        if (typeof window !== 'undefined') {
-          const savedLocation = localStorage.getItem('user_location_data');
-          if (savedLocation) {
-            try {
-              const parsed = JSON.parse(savedLocation);
-              // Use lat/lng and look for alternatives too
-              const lat = parsed.lat || parsed.lattitude;
-              const lng = parsed.lng || parsed.longitude;
-
-              if (lat && lng) {
-                await fetchCategoriesFromAPI(lat.toString(), lng.toString());
-                return;
-              }
-            } catch (e) {
-              console.error('Error parsing saved location:', e);
-            }
-          }
-        }
-
-        // 2. Fallback to GPS or Default
-        if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const { latitude, longitude } = position.coords;
-              await fetchCategoriesFromAPI(latitude.toString(), longitude.toString());
-            },
-            () => {
-              fetchWithDefaultLocation();
-            },
-            { timeout: 5000 } // Add a timeout for safety
-          );
-        } else {
-          fetchWithDefaultLocation();
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+      if (!location?.lat || !location?.lng) {
         setIsLoading(false);
+        return;
       }
-    };
 
-    const fetchCategoriesFromAPI = async (lattitude, longitude) => {
+      setIsLoading(true);
       try {
-        const body = lattitude && longitude ? { lattitude, longitude } : {};
+        const body = {
+          lattitude: location.lat.toString(),
+          longitude: location.lng.toString()
+        };
         const response = await fetch(
           'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys',
           {
@@ -115,6 +80,7 @@ export function TopCategories({ onViewAll }) {
             image: `https://api.doorstephub.com/${item.image}`,
             _id: item._id,
             status: item.status,
+            slug: item.slug,
           }));
           setCategories(mappedCategories);
         }
@@ -125,14 +91,9 @@ export function TopCategories({ onViewAll }) {
       }
     };
 
-    const fetchWithDefaultLocation = async () => {
-      await fetchCategoriesFromAPI('17.4391296', '78.4433152'); // Hyderabad
-    };
-
     fetchCategories();
-  }, []);
+  }, [location?.lat, location?.lng]);
 
-  // Skeleton Shimmer Component
   const SkeletonCategoryCard = () => (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -140,22 +101,17 @@ export function TopCategories({ onViewAll }) {
       whileHover={{ y: -12 }}
       className="group cursor-pointer"
     >
-      <div className="relative w-72 lg:w-[210px] h-64 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
-        {/* Skeleton Image */}
+      <div className="relative w-72 lg:w-[210px] h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
         <div className="absolute inset-0 animate-shimmer">
           <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 rounded-3xl" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
-
-        {/* Skeleton Content */}
         <div className="absolute inset-0 flex flex-col justify-end p-6">
           <div className="relative z-10">
             <div className="h-8 w-48 mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
             <div className="h-1 w-16 bg-gradient-to-r from-gray-600 via-gray-500 to-gray-600 rounded-full animate-shimmer" />
           </div>
         </div>
-
-        {/* Skeleton Arrow */}
         <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center animate-shimmer" />
       </div>
     </motion.div>
@@ -164,7 +120,6 @@ export function TopCategories({ onViewAll }) {
   return (
     <section ref={sectionRef} className="py-1 relative overflow-hidden">
       <motion.div style={{ opacity, y }} className="max-w-[1400px] mx-auto px-6 lg:px-8">
-        {/* Section Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
             <motion.div
@@ -209,7 +164,6 @@ export function TopCategories({ onViewAll }) {
           </motion.button>
         </div>
 
-        {/* Horizontal Scrolling Cards */}
         <div
           className="relative"
           onMouseEnter={() => setIsPaused(true)}
@@ -221,7 +175,7 @@ export function TopCategories({ onViewAll }) {
                 ? Array.from({ length: 8 }).map((_, index) => (
                   <SkeletonCategoryCard key={`skeleton-${index}`} />
                 ))
-                : categories.map((category, index) => (
+                : categories.length > 0 ? categories.map((category, index) => (
                   <motion.div
                     key={category._id || index}
                     initial={{ opacity: 0, y: 30 }}
@@ -229,11 +183,10 @@ export function TopCategories({ onViewAll }) {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ y: -12 }}
-                    onClick={() => router.push(`/services/category/${category._id}?name=${encodeURIComponent(category.title)}`)}
+                    onClick={() => router.push(`/${category.slug}`)}
                     className="group cursor-pointer"
                   >
                     <div className="relative w-72 lg:w-[210px] h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
-                      {/* Image */}
                       <div className="absolute inset-0">
                         <img
                           src={category.image}
@@ -243,15 +196,11 @@ export function TopCategories({ onViewAll }) {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                       </div>
-
-                      {/* Hover Glow Effect */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
                         className="absolute inset-0 bg-gradient-to-t from-[#037166]/40 via-[#037166]/10 to-transparent"
                       />
-
-                      {/* Glass Card Overlay */}
                       <div className="absolute inset-0 flex flex-col justify-end p-6">
                         <div className="relative z-10">
                           <h4 className="text-xl  bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-bold mb-2 group-hover:text-[#04a99d] transition-colors">
@@ -264,16 +213,12 @@ export function TopCategories({ onViewAll }) {
                           />
                         </div>
                       </div>
-
-                      {/* Glassmorphism Border on Hover */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
                         className="absolute inset-0 rounded-3xl border-2 border-[#037166]/50 pointer-events-none"
                         style={{ boxShadow: '0 0 20px rgba(3, 113, 102, 0.3)' }}
                       />
-
-                      {/* Floating Arrow */}
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         whileHover={{ opacity: 1, x: 0 }}
@@ -283,12 +228,23 @@ export function TopCategories({ onViewAll }) {
                       </motion.div>
                     </div>
                   </motion.div>
-                ))
+                )) : !location ? (
+                  <div className="w-full py-12 flex flex-col items-center justify-center text-center">
+                    <MapPin className="w-8 h-8 text-[#037166] mb-3 opacity-50" />
+                    <p className="text-gray-500 text-sm mb-4">Set your location to view popular categories</p>
+                    <button
+                      onClick={() => document.querySelector('[data-location-trigger]')?.click()}
+                      className="text-xs font-bold text-[#04a99d] uppercase tracking-wider hover:underline"
+                    >
+                      Select Location
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-full py-12 text-center text-gray-500">No categories found for this location</div>
+                )
               }
             </div>
           </div>
-
-          {/* Fade Edges */}
           <div className="absolute left-0 top-0 bottom-4 w-20 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none" />
         </div>
@@ -296,12 +252,8 @@ export function TopCategories({ onViewAll }) {
 
       <style jsx>{`
         @keyframes shimmer {
-          0% { 
-            background-position: -200% 0; 
-          }
-          100% { 
-            background-position: 200% 0; 
-          }
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
         .animate-shimmer {
           background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);

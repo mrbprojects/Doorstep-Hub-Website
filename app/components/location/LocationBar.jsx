@@ -77,6 +77,7 @@ export function LocationBar({ theme = {} }) {
             {/* Navbar Trigger */}
             <motion.button
                 onClick={() => setIsOpen(true)}
+                data-location-trigger
                 className={`hidden lg:flex items-center space-x-2 px-3 py-2 rounded-xl glass-button-premium border transition-all group mr-2 ${t.buttonBg} hover:bg-opacity-80 ${t.border}`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

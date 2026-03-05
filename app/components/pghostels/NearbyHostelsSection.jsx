@@ -13,9 +13,13 @@ export function NearbyHostelsSection({ router }) {
 
     useEffect(() => {
         const fetchNearbyHostels = async () => {
+            if (!location?.lat || !location?.lng) {
+                setLoading(false);
+                return;
+            }
+
             setLoading(true);
             try {
-                // Using 'latest_pg_hostels' as requested for the nearby section
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_pg_hostels');
 
                 if (!response.ok) {
@@ -37,9 +41,33 @@ export function NearbyHostelsSection({ router }) {
                 setLoading(false);
             }
         };
-
         fetchNearbyHostels();
-    }, []);
+    }, [location?.lat, location?.lng]);
+
+    if (!location) {
+        return (
+            <section className="py-20 bg-gray-50/50">
+                <div className="max-w-7xl mx-auto px-4 text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#037166]/10 mb-6">
+                        <MapPin className="w-8 h-8 text-[#037166]" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Location Required</h2>
+                    <p className="text-gray-600 max-w-lg mx-auto mb-8">
+                        Please provide your location to see the best PG hostels near you.
+                    </p>
+                    <button
+                        onClick={() => {
+                            const locationBtn = document.querySelector('[data-location-trigger]');
+                            if (locationBtn) locationBtn.click();
+                        }}
+                        className="px-8 py-3 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-full font-bold shadow-lg shadow-[#037166]/30 hover:scale-105 transition-all"
+                    >
+                        Select Location
+                    </button>
+                </div>
+            </section>
+        )
+    }
 
     if (loading) {
         return (

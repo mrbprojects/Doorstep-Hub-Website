@@ -55,6 +55,12 @@ export function ServiceDetailsPage({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [rateCardModal, setRateCardModal] = useState({
+    isOpen: false,
+    images: [],
+    currentIndex: 0,
+    title: ''
+  });
   const accentColor = serviceAccents[category] || '#5a8b9d';
 
   useEffect(() => {
@@ -346,10 +352,33 @@ export function ServiceDetailsPage({
                         {provider_rate_cards.map((card, index) => (
                           <div
                             key={card.id || index}
-                            className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group"
+                            className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group"
                           >
-                            <h6 className="text-white font-medium group-hover:text-[#04a99d] transition-colors pr-4">{card.title}</h6>
-                            <span className="text-[#04a99d] font-bold text-lg whitespace-nowrap">₹{card.price}</span>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 pr-4">
+                                <h6 className="text-white font-medium group-hover:text-[#04a99d] transition-colors leading-snug mb-1">{card.title}</h6>
+                                {card.reason && (
+                                  <p className="text-white/40 text-xs leading-relaxed">{card.reason}</p>
+                                )}
+
+                                {/* See More Button if images exist */}
+                                {(card.serviceCardImages?.length > 0 || card.images?.length > 0) && (
+                                  <button
+                                    onClick={() => setRateCardModal({
+                                      isOpen: true,
+                                      images: card.serviceCardImages || card.images,
+                                      currentIndex: 0,
+                                      title: card.title
+                                    })}
+                                    className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#04a99d] hover:text-[#037166] transition-colors"
+                                  >
+                                    See More
+                                    <ArrowRight className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
+                              <span className="text-[#04a99d] font-bold text-lg whitespace-nowrap flex-shrink-0">₹{card.price}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -634,6 +663,93 @@ export function ServiceDetailsPage({
               <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-white/60 text-sm font-medium">
                 {selectedImageIndex + 1} / {images.length}
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Rate Card Images Modal */}
+      <AnimatePresence>
+        {rateCardModal.isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/95 backdrop-blur-3xl p-4 sm:p-8"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setRateCardModal(prev => ({ ...prev, isOpen: false }))}
+              className="absolute top-6 right-6 p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md z-[120]"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Service Title */}
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center w-full px-12 z-[120]">
+              <h4 className="text-lg sm:text-2xl font-bold text-white mb-1 drop-shadow-lg">
+                {rateCardModal.title}
+              </h4>
+              <p className="text-white/40 text-xs sm:text-sm uppercase tracking-widest font-medium">Service Reference</p>
+            </div>
+
+            {/* Navigation Arrows */}
+            {rateCardModal.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRateCardModal(prev => ({
+                      ...prev,
+                      currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+                    }));
+                  }}
+                  className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 p-3 sm:p-4 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 transition-all z-[120]"
+                >
+                  <ChevronLeft className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRateCardModal(prev => ({
+                      ...prev,
+                      currentIndex: (prev.currentIndex + 1) % prev.images.length
+                    }));
+                  }}
+                  className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 p-3 sm:p-4 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 transition-all z-[120]"
+                >
+                  <ChevronRight className="w-8 h-8" />
+                </button>
+              </>
+            )}
+
+            {/* Main Image Container */}
+            <motion.div
+              layoutId={`rate-card-image-${rateCardModal.currentIndex}`}
+              className="relative max-w-4xl w-full h-[60vh] sm:h-[70vh] flex items-center justify-center rounded-3xl overflow-hidden"
+            >
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={rateCardModal.currentIndex}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  src={`https://api.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
+                  alt={rateCardModal.title}
+                  className="w-full h-full object-contain shadow-2xl"
+                />
+              </AnimatePresence>
+
+              {/* Counter Indicator */}
+              {rateCardModal.images.length > 1 && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-black/60 border border-white/10 backdrop-blur-md text-white/80 text-xs font-bold flex gap-2">
+                  {rateCardModal.images.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${i === rateCardModal.currentIndex ? 'bg-[#04a99d] w-4' : 'bg-white/20'}`}
+                    />
+                  ))}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

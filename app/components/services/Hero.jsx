@@ -1,38 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sparkles, Shield, Clock, Search } from 'lucide-react';
+import { ArrowRight, Sparkles, Shield, Clock, Search, MapPin } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useLocationContext } from '@/context/LocationContext';
 import { ServicePreviewCard } from '@/components/appliances/ServicePreviewCard';
 
 export function Hero({ onViewServices, onBookService }) {
   const router = useRouter();
+  const { location } = useLocationContext();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        if ('geolocation' in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const { latitude, longitude } = position.coords;
-              await fetchCategoriesFromAPI(latitude.toString(), longitude.toString());
-            },
-            () => {
-              fetchWithDefaultLocation();
-            }
-          );
-        } else {
-          fetchWithDefaultLocation();
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+      if (!location?.lat || !location?.lng) {
         setIsLoading(false);
+        return;
       }
-    };
 
-    const fetchCategoriesFromAPI = async (lattitude, longitude) => {
+      setIsLoading(true);
       try {
-        const body = lattitude && longitude ? { lattitude, longitude } : {};
+        const body = {
+          lattitude: location.lat.toString(),
+          longitude: location.lng.toString()
+        };
         const response = await fetch(
           'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys',
           {
@@ -40,7 +31,7 @@ export function Hero({ onViewServices, onBookService }) {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
+            body: JSON.stringify(body),
           }
         );
 
@@ -66,12 +57,10 @@ export function Hero({ onViewServices, onBookService }) {
       }
     };
 
-    const fetchWithDefaultLocation = async () => {
-      await fetchCategoriesFromAPI('17.4391296', '78.4433152'); // Hyderabad
-    };
+
 
     fetchCategories();
-  }, []);
+  }, [location?.lat, location?.lng]);
 
   return (
     <section className="relative min-h-screen pt-32 pb-20 overflow-hidden">
@@ -149,6 +138,24 @@ export function Hero({ onViewServices, onBookService }) {
               </div>
             ))}
           </div>
+
+          {!location && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-16 p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md max-w-2xl mx-auto"
+            >
+              <MapPin className="w-12 h-12 text-[#04a99d] mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-bold text-white mb-2">Service Availability</h3>
+              <p className="text-gray-400 mb-6">Please select your location to see featured categories and services available in your area.</p>
+              <button
+                onClick={() => document.querySelector('[data-location-trigger]')?.click()}
+                className="px-8 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-lg transition-all"
+              >
+                Set Your Location
+              </button>
+            </motion.div>
+          )}
         </div>
 
         {/* Service Preview Cards */}

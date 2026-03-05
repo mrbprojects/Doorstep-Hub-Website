@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MapPin } from 'lucide-react';
+import { useLocationContext } from '@/context/LocationContext';
 
 export function TopCategories({ onViewAll }) {
   const router = useRouter();
+  const { location } = useLocationContext();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const sectionRef = useRef(null);
@@ -47,51 +49,17 @@ export function TopCategories({ onViewAll }) {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        // 1. Check localStorage first
-        if (typeof window !== 'undefined') {
-          const savedLocation = localStorage.getItem('user_location_data');
-          if (savedLocation) {
-            try {
-              const parsed = JSON.parse(savedLocation);
-              // Use lat/lng and look for alternatives too
-              const lat = parsed.lat || parsed.lattitude;
-              const lng = parsed.lng || parsed.longitude;
-
-              if (lat && lng) {
-                await fetchCategoriesFromAPI(lat.toString(), lng.toString());
-                return;
-              }
-            } catch (e) {
-              console.error('Error parsing saved location:', e);
-            }
-          }
-        }
-
-        // 2. Fallback to GPS or Default
-        if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const { latitude, longitude } = position.coords;
-              await fetchCategoriesFromAPI(latitude.toString(), longitude.toString());
-            },
-            () => {
-              fetchWithDefaultLocation();
-            },
-            { timeout: 5000 } // Add a timeout for safety
-          );
-        } else {
-          fetchWithDefaultLocation();
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        setIsLoading(false);
+      if (!location?.lat || !location?.lng) {
+        setIsLoading(false); // Stop loading, wait for location
+        return;
       }
-    };
 
-    const fetchCategoriesFromAPI = async (lattitude, longitude) => {
+      setIsLoading(true);
       try {
-        const body = lattitude && longitude ? { lattitude, longitude } : {};
+        const body = {
+          lattitude: location.lat.toString(),
+          longitude: location.lng.toString()
+        };
         const response = await fetch(
           'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys',
           {
@@ -126,12 +94,8 @@ export function TopCategories({ onViewAll }) {
       }
     };
 
-    const fetchWithDefaultLocation = async () => {
-      await fetchCategoriesFromAPI('17.4391296', '78.4433152'); // Hyderabad
-    };
-
     fetchCategories();
-  }, []);
+  }, [location?.lat, location?.lng]);
 
   // Skeleton Shimmer Component
   const SkeletonCategoryCard = () => (
@@ -222,7 +186,7 @@ export function TopCategories({ onViewAll }) {
                 ? Array.from({ length: 8 }).map((_, index) => (
                   <SkeletonCategoryCard key={`skeleton-${index}`} />
                 ))
-                : categories.map((category, index) => (
+                : categories.length > 0 ? categories.map((category, index) => (
                   <motion.div
                     key={category._id || index}
                     initial={{ opacity: 0, y: 30 }}
@@ -284,7 +248,20 @@ export function TopCategories({ onViewAll }) {
                       </motion.div>
                     </div>
                   </motion.div>
-                ))
+                )) : !location ? (
+                  <div className="w-full py-12 flex flex-col items-center justify-center text-center">
+                    <MapPin className="w-8 h-8 text-[#037166] mb-3 opacity-50" />
+                    <p className="text-gray-500 text-sm mb-4">Set your location to view popular categories</p>
+                    <button
+                      onClick={() => document.querySelector('[data-location-trigger]')?.click()}
+                      className="text-xs font-bold text-[#04a99d] uppercase tracking-wider hover:underline"
+                    >
+                      Select Location
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-full py-12 text-center text-gray-500">No categories found for this location</div>
+                )
               }
             </div>
           </div>

@@ -17,7 +17,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   const [services, setServices] = useState([]);
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { location } = useLocationContext();
+  const { location, detectWithGPS } = useLocationContext();
 
   // Categories & Subcategories State
   const [allCategories, setAllCategories] = useState([]);
@@ -186,12 +186,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   }, [subCategoryId, childCategoryId, slug, category, location?.lat, location?.lng, minRating]);
 
   useEffect(() => {
-    if (!loading && (services.length === 0 && centers.length === 0)) {
-      // Only redirect if a slug/category was provided but matched nothing
-      if (slug || category) {
-        router.replace('/book-appointment');
-      }
-    }
+    // Deliberately disabled automatic redirects.
+    // Users will now see the localized Empty State message instead of being forcefully redirected.
   }, [loading, services, centers, slug, category, router]);
 
   // Fetch Categories for Sidebar
@@ -656,7 +652,58 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       </motion.div>
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-20 text-white/60">
+                    <div className="col-span-full py-20">
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex flex-col items-center text-center max-w-md mx-auto p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm"
+                      >
+                        <div className="w-20 h-20 rounded-full bg-[#037166]/20 flex items-center justify-center mb-6">
+                          <MapPin className="w-10 h-10 text-[#04a99d]" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-3">
+                          {!location ? 'Location Required' : 'No Services Available'}
+                        </h3>
+                        <p className="text-white/60 mb-8">
+                          {!location
+                            ? 'Please provide your location to discover services in your area.'
+                            : `We currently don't have service for this location. Please change the location to get our services at your area: `}
+                          {location && <span className="text-white font-medium">{location.shortAddress || 'this location'}</span>}
+                          {location && '.'}
+                        </p>
+                        <div className="flex flex-col w-full gap-3">
+                          {!location && (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  if (detectWithGPS) {
+                                    await detectWithGPS();
+                                    // Context handles the state update
+                                  }
+                                } catch (err) {
+                                  console.error("Detection failed:", err);
+                                  // Triggers manual selection if GPS denied
+                                  const locationBtn = document.querySelector('[data-location-trigger]');
+                                  if (locationBtn) locationBtn.click();
+                                }
+                              }}
+                              className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
+                            >
+                              Detect My Location
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              // Trigger location bar search
+                              const locationBtn = document.querySelector('[data-location-trigger]');
+                              if (locationBtn) locationBtn.click();
+                            }}
+                            className={!location ? "w-full px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white/80 font-medium hover:bg-white/10 transition-all" : "w-full px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-lg hover:shadow-[#037166]/30 transition-all"}
+                          >
+                            {!location ? 'Select Location Manually' : 'Change Location'}
+                          </button>
+                        </div>
+                      </motion.div>
                     </div>
                   )}
                 </motion.div>

@@ -23,6 +23,7 @@ const testimonials = [
 
 export function PremiumHomePage() {
     const router = useRouter();
+    const { location, detectWithGPS } = useLocationContext();
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState({ id: '', name: '' });
@@ -212,20 +213,15 @@ export function PremiumHomePage() {
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={() => {
-                                    if (navigator.geolocation) {
-                                        navigator.geolocation.getCurrentPosition(
-                                            (position) => {
-                                                const { latitude, longitude } = position.coords;
-                                                router.push(`/pghostels/listings/nearby?lat=${latitude}&lng=${longitude}`);
-                                            },
-                                            (error) => {
-                                                console.error("Error getting location:", error);
-                                                // If error, just go to nearby (listings page will use fallback/localStorage)
-                                                router.push('/pghostels/listings/nearby');
-                                            }
-                                        );
-                                    } else {
+                                onClick={async () => {
+                                    try {
+                                        const loc = await detectWithGPS();
+                                        if (loc) {
+                                            router.push(`/pghostels/listings/nearby?lat=${loc.lat}&lng=${loc.lng}`);
+                                        } else {
+                                            router.push('/pghostels/listings/nearby');
+                                        }
+                                    } catch (err) {
                                         router.push('/pghostels/listings/nearby');
                                     }
                                 }}

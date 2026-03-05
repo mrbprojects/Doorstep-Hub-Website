@@ -63,12 +63,20 @@ class LocationManager {
 
             const parsed = JSON.parse(stored);
 
-            // Check if cache is still fresh
+            // Check if cache is still fresh or if it's a persistent source
             if (this.isLocationFresh(parsed)) {
                 return parsed;
             }
 
-            // Cache expired, clear it
+            // For IP-based locations, we can return them but flag them as expired
+            // However, to keep it simple, we'll let LocationContext handle the refresh
+            // We won't ruthlessly delete MANUAL or GPS locations.
+            if (parsed.source === LOCATION_CONFIG.SOURCES.MANUAL || parsed.source === LOCATION_CONFIG.SOURCES.GPS) {
+                // Return them anyway so they don't get lost, update timestamp to prevent constant refreshing
+                return this.saveLocation(parsed, parsed.source);
+            }
+
+            // Cache expired for IP, clear it and allow re-detection
             this.clearLocation();
             return null;
         } catch (error) {
@@ -79,10 +87,13 @@ class LocationManager {
 
     /**
      * Check if cached location is still valid
-     * Why: Prevent stale data, re-detect after 5 minutes
+     * Why: Prevent stale data
      */
     isLocationFresh(locationData) {
         if (!locationData || !locationData.timestamp) return false;
+
+        // Explicit manual selections never expire
+        if (locationData.source === LOCATION_CONFIG.SOURCES.MANUAL) return true;
 
         const age = Date.now() - locationData.timestamp;
         return age < LOCATION_CONFIG.CACHE_DURATION;
@@ -288,31 +299,24 @@ class LocationManager {
 
             // Mapping for ipwho.is
             const locationData = {
-                lat: Number(data.latitude) || 17.3850,
-                lng: Number(data.longitude) || 78.4867,
-                city: data.city || 'Hyderabad',
+                lat: Number(data.latitude),
+                lng: Number(data.longitude),
+                city: data.city || '',
                 area: data.region || '',
                 postalCode: data.postal || '',
-                state: data.region || 'Telangana',
-                address: `${data.city || 'Hyderabad'}, ${data.region || ''}`,
-                shortAddress: data.city || 'Hyderabad'
+                state: data.region || '',
+                address: data.city ? `${data.city}, ${data.region || ''}` : '',
+                shortAddress: data.city || ''
             };
+
+            if (!locationData.lat || !locationData.lng) throw new Error('Incomplete IP location data');
 
             return this.saveLocation(locationData, LOCATION_CONFIG.SOURCES.IP);
         } catch (error) {
             clearTimeout(timeoutId);
             console.error('IP detection failure:', error);
-            // Absolute fallback to avoid crashes
-            return {
-                lat: 17.3850,
-                lng: 78.4867,
-                city: "Hyderabad",
-                area: "Madhapur",
-                postalCode: "500081",
-                state: "Telangana",
-                address: "Hyderabad, Telangana",
-                shortAddress: "Hyderabad"
-            };
+            // IP detection failed, intentionally throw so caller handles empty state
+            throw new Error('IP detection failed, no fallback location provided.');
         }
     }
 

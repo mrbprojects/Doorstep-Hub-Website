@@ -38,8 +38,10 @@ export function ServiceCentersListingPage() {
         const fetchStores = async () => {
             try {
                 setIsLoading(true);
-                // Use location if available, otherwise default as fallback
-                const currentLoc = location || { lat: 17.3850, lng: 78.4867 };
+                if (!location) {
+                    setIsLoading(false);
+                    return;
+                }
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
                     method: 'POST',
@@ -47,8 +49,8 @@ export function ServiceCentersListingPage() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        lattitude: currentLoc.lat,
-                        longitude: currentLoc.lng,
+                        lattitude: location.lat,
+                        longitude: location.lng,
                         page: 1,
                         limit: 50
                     }),
@@ -192,7 +194,25 @@ export function ServiceCentersListingPage() {
 
                     {/* Main Content */}
                     <div className="flex-1">
-                        {isLoading ? (
+                        {!location && !isLoading ? (
+                            <div className="flex flex-col items-center justify-center py-20 bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] rounded-[2.5rem] border border-white/10 backdrop-blur-sm shadow-2xl">
+                                <div className="p-6 rounded-full bg-white/5 mb-6">
+                                    <MapPin className="h-12 w-12 text-[#04a99d] animate-pulse" />
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Location Required</h2>
+                                <p className="text-white/60 text-center max-w-md mb-8 px-6 leading-relaxed">
+                                    To find the best service centers near you, we need to know your current location.
+                                </p>
+                                <motion.button
+                                    whileHover={{ scale: 1.05, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => detectLocation()}
+                                    className="px-10 py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold shadow-[0_0_30px_rgba(3,113,102,0.3)] hover:shadow-[0_0_40px_rgba(3,113,102,0.5)] transition-all"
+                                >
+                                    Detect My Location
+                                </motion.button>
+                            </div>
+                        ) : isLoading ? (
                             <>
                                 <ShimmerGrid />
                                 <style jsx>{`

@@ -18,7 +18,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('COD');
+    const [paymentMethod, setPaymentMethod] = useState('online');
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [technicianPreference, setTechnicianPreference] = useState('any');
@@ -385,15 +385,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 <CreditCard className="w-5 h-5 text-[#04a99d]" />
                                 Select Payment Method
                             </h4>
-                            <div className="grid md:grid-cols-3 gap-3">
+                            <div className="grid md:grid-cols-2 gap-3">
                                 {[
-                                    {
-                                        id: 'COD',
-                                        label: 'Cash on Service Delivery',
-                                        icon: Truck,
-                                        disabled: true,
-                                        tooltip: 'For Premium Subscribers Only'
-                                    },
                                     {
                                         id: 'wallet',
                                         label: 'Wallet Pay',

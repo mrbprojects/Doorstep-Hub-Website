@@ -39,23 +39,25 @@ function SectionReveal({ children, delay = 0 }) {
 
 export default function ReligiousServicesPage() {
   const router = useRouter();
-  const { location, detectWithIP } = useLocationContext();
+  const { location, detectLocation } = useLocationContext();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!location) {
-      detectWithIP().catch(err => console.log("Auto detect failed", err));
-    }
+    // No auto-detect, let user trigger or context handle
   }, [location]);
 
   useEffect(() => {
     const fetchServices = async () => {
       setLoading(true);
       try {
-        const lat = location?.lat || 17.3850;
-        const lng = location?.lng || 78.4867;
+        if (!location) {
+          setLoading(false);
+          return;
+        }
+        const lat = location.lat;
+        const lng = location.lng;
 
         // Get religious services serviceId from localStorage, fallback to hardcoded ID
         const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
@@ -549,7 +551,21 @@ export default function ReligiousServicesPage() {
 
               <TabsContent value="services">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {services.length > 0 ? (
+                  {!location && !loading ? (
+                    <div className="col-span-full flex flex-col items-center justify-center py-20 bg-[var(--soft-cream)] rounded-3xl border border-dashed border-[var(--saffron)]/30">
+                      <MapPin className="h-16 w-16 text-[var(--saffron)] mb-6 opacity-50 animate-bounce" />
+                      <h3 className="text-2xl font-bold text-[var(--deep-charcoal)] mb-3">Divine Presence Near You</h3>
+                      <p className="text-[var(--muted-foreground)] text-center max-w-md mb-8 px-6">
+                        To show you verified priests and rituals available in your city, please set your location.
+                      </p>
+                      <Button
+                        onClick={() => detectLocation()}
+                        className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white px-10 py-6 rounded-2xl text-lg shadow-xl shadow-[var(--saffron)]/20"
+                      >
+                        Find My Location
+                      </Button>
+                    </div>
+                  ) : services.length > 0 ? (
                     services.map((service, i) => (
                       <Card
                         key={service._id || i}

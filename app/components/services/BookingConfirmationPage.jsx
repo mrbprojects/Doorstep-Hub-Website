@@ -21,7 +21,7 @@ export function BookingConfirmationPage({
   const [selectedTime, setSelectedTime] = useState('');
   const [technicianPreference, setTechnicianPreference] = useState('any');
   const [isConfirming, setIsConfirming] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('COD');
+  const [paymentMethod, setPaymentMethod] = useState('online');
   const [directBookingItems, setDirectBookingItems] = useState(null);
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletLoading, setWalletLoading] = useState(false);
@@ -456,15 +456,8 @@ export function BookingConfirmationPage({
                 <CreditCard className="w-5 h-5 text-[#04a99d]" />
                 Select Payment Method
               </h4>
-              <div className="grid md:grid-cols-3 gap-3">
+              <div className="grid md:grid-cols-2 gap-3">
                 {[
-                  {
-                    id: 'COD',
-                    label: 'Cash on Service Delivery',
-                    icon: Truck,
-                    disabled: true,
-                    tooltip: 'For Premium Subscribers Only'
-                  },
                   {
                     id: 'wallet',
                     label: 'Wallet Pay',

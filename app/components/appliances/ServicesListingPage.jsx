@@ -138,6 +138,16 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
           setServices(enrichedServices);
 
+          // Use nearByServiceCenters from the SAME API response
+          // (These are already filtered to this subcategory)
+          const enrichedCenters = (servicesData.nearByServiceCenters || []).map(center => {
+            if (center.slug) return center;
+            const generatedSlug = (center.business_name || center.firstName || center.name || 'service-center')
+              .toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+            return { ...center, slug: generatedSlug };
+          });
+          setCenters(enrichedCenters);
+
           // Update metadata if missing
           if ((!subCategory || !category) && enrichedServices.length > 0) {
             const firstService = enrichedServices[0];
@@ -146,31 +156,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
           }
         } else {
           setServices([]);
-        }
-
-        // Fetch centers separately from the new API
-        const centersResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lattitude: location.lat,
-            longitude: location.lng,
-            page: 1,
-            limit: 10
-          })
-        });
-
-        if (centersResponse.ok) {
-          const centersData = await centersResponse.json();
-          if (centersData.success) {
-            const enrichedCenters = (centersData.nearByServiceCenters || []).map(center => {
-              if (center.slug) return center;
-              const generatedSlug = (center.business_name || center.name || 'service-center')
-                .toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-              return { ...center, slug: generatedSlug };
-            });
-            setCenters(enrichedCenters);
-          }
+          setCenters([]);
         }
 
       } catch (error) {
@@ -791,8 +777,27 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       </motion.div>
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-20 text-white/60">
-                      🥺 No service centers found nearby.
+                    <div className="py-20">
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex flex-col items-center text-center max-w-md mx-auto p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm"
+                      >
+                        <div className="w-20 h-20 rounded-full bg-[#037166]/20 flex items-center justify-center mb-6">
+                          <MapPin className="w-10 h-10 text-[#04a99d]" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-3">No Centers Available</h3>
+                        <p className="text-white/60 mb-6 text-sm leading-relaxed">
+                          No dedicated service centers are available for <span className="text-white font-medium">{pageTitle}</span> in your area right now.
+                          You can still book this service directly from the <span className="text-[#04a99d] font-medium">All Services</span> tab.
+                        </p>
+                        <button
+                          onClick={() => setActiveTab('services')}
+                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
+                        >
+                          Browse Services
+                        </button>
+                      </motion.div>
                     </div>
                   )}
                 </motion.div>

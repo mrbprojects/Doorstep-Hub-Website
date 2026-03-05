@@ -111,6 +111,21 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         try {
             const data = await verifyOtp(mobile, otp);
             if (data.success || data.status === 'success') {
+                // Seed profile data immediately from the API response so fields
+                // are pre-filled for existing users BEFORE the step changes.
+                const returnedUser = data.data || data.user || null;
+                if (returnedUser) {
+                    const hasProfile = returnedUser.name || returnedUser.firstName || returnedUser.lastName;
+                    setProfileData({
+                        name: returnedUser.name || `${returnedUser.firstName || ''} ${returnedUser.lastName || ''}`.trim(),
+                        email: returnedUser.email || ''
+                    });
+                    // Existing user → view mode; new user → edit mode
+                    setIsEditing(!hasProfile);
+                } else {
+                    // Fallback: will be handled by useEffect once user loads
+                    setIsEditing(false);
+                }
                 setStep('profile');
             } else {
                 toast.error(data.message || 'Invalid OTP');
@@ -123,13 +138,24 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     };
 
     // Auto-enable edit mode for first-time users (no name) and show toast
+    // Also seeds profile data once the user object arrives from context
     React.useEffect(() => {
         if (isAuthenticated && user && step === 'profile') {
             const hasProfile = user.name || user.firstName || user.lastName;
+            // Always re-seed profileData from the latest user object
+            setProfileData({
+                name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+                email: user.email || ''
+            });
             if (!hasProfile) {
                 setIsEditing(true);
                 if (!profileToastShown.current) {
-                    toast.info('Please complete your profile');
+                    toast.info('Please complete your profile to continue');
+                    profileToastShown.current = true;
+                }
+            } else {
+                // Existing user — ensure we're NOT in edit mode on first open
+                if (!profileToastShown.current) {
                     profileToastShown.current = true;
                 }
             }

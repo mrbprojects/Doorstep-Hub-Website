@@ -25,7 +25,7 @@ import { useServiceCart } from '@/context/ServiceCartContext';
 export function StoreDetailPage({ storeId, serviceId }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('services');
-  const [lightboxImage, setLightboxImage] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   const [reviewsToShow, setReviewsToShow] = useState(3);
   const [selectedPackages, setSelectedPackages] = useState([]);
 
@@ -80,7 +80,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
 
           // Set portfolio images
           const portfolioUrls = data.portfolio?.images?.map((img) =>
-            `https://api.doorstephub.com${img}`
+            `https://api.doorstephub.com/${img.startsWith('/') ? img.slice(1) : img}`
           ) || [];
           setPortfolioImages(portfolioUrls);
 
@@ -616,16 +616,16 @@ export function StoreDetailPage({ storeId, serviceId }) {
               <h2 className="text-3xl font-bold text-white mb-2">Our Work</h2>
               <p className="text-white/60 mb-8 text-lg">See examples of our repair and service projects</p>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {portfolioImages && portfolioImages.length > 0 ? (
                   portfolioImages.map((image, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ scale: 1.05 }}
-                      onClick={() => setLightboxImage(image)}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.03 }}
+                      onClick={() => setLightboxIndex(index)}
                       className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer group"
                     >
                       <img
@@ -634,6 +634,11 @@ export function StoreDetailPage({ storeId, serviceId }) {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                          <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
                     </motion.div>
                   ))
                 ) : (
@@ -643,30 +648,71 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 )}
               </div>
 
-              {/* Lightbox */}
+              {/* Lightbox with navigation */}
               <AnimatePresence>
-                {lightboxImage && (
+                {lightboxIndex !== null && portfolioImages.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    onClick={() => setLightboxImage(null)}
-                    className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() => setLightboxIndex(null)}
+                    className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
                   >
+                    {/* Close */}
                     <button
-                      onClick={() => setLightboxImage(null)}
-                      className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
+                      onClick={() => setLightboxIndex(null)}
+                      className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
                     >
                       <X className="w-6 h-6 text-white" />
                     </button>
+
+                    {/* Counter */}
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium">
+                      {lightboxIndex + 1} / {portfolioImages.length}
+                    </div>
+
+                    {/* Prev Button */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + portfolioImages.length) % portfolioImages.length); }}
+                      className="absolute left-4 md:left-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
+                    >
+                      <ArrowLeft className="w-5 h-5 text-white" />
+                    </button>
+
+                    {/* Next Button */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % portfolioImages.length); }}
+                      className="absolute right-4 md:right-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
+                    >
+                      <ArrowLeft className="w-5 h-5 text-white rotate-180" />
+                    </button>
+
+                    {/* Image */}
                     <motion.img
-                      initial={{ scale: 0.9 }}
-                      animate={{ scale: 1 }}
-                      src={lightboxImage}
-                      alt="Portfolio"
-                      className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl"
+                      key={lightboxIndex}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      src={portfolioImages[lightboxIndex]}
+                      alt={`Portfolio ${lightboxIndex + 1}`}
+                      className="max-w-[calc(100%-120px)] max-h-[85vh] rounded-2xl shadow-2xl object-contain"
                       onClick={(e) => e.stopPropagation()}
                     />
+
+                    {/* Thumbnail strip */}
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 px-4 overflow-x-auto max-w-[90vw]">
+                      {portfolioImages.map((img, i) => (
+                        <button
+                          key={i}
+                          onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); }}
+                          className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-[#037166] scale-110' : 'border-white/20 opacity-50 hover:opacity-80'
+                            }`}
+                        >
+                          <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

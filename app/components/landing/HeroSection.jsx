@@ -315,7 +315,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
 
   // ✅ FIXED: Pass full service object, not just serviceName
   const handleServiceClick = (service) => {
-    // Store service ID and details in localStorage
+    // Store service details in localStorage
     localStorage.setItem('selectedService', JSON.stringify({
       id: service._id,
       name: service.name,
@@ -323,11 +323,11 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
       image: service.image
     }));
 
-    // Generate slug from service.name
-    let slug = service.name.toLowerCase().replace(/\s+/g, '-');
+    // Generate fallback slug from name
+    let slug = service.name ? service.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : service._id;
 
-    // Use dynamic slugs for specific services
-    const upperName = service.name.toUpperCase();
+    // Use dynamic slugs for hubs
+    const upperName = service.name ? service.name.toUpperCase() : '';
     if (upperName.includes('APPLIANCE')) slug = serviceSlugs.appliances;
     else if (upperName.includes('RELIGIOUS')) slug = serviceSlugs.religious;
     else if (upperName.includes('PG')) slug = serviceSlugs.pg;
@@ -415,16 +415,16 @@ function HeroContent({ services = [], loading = false, error = null }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [serviceSlugs, setServiceSlugs] = useState({
-    appliances: 'appliances',
-    religious: 'religious-services',
-    spa: 'spa-salon',
-    pg: 'pghostels'
+    appliances: 'appliance-repair-services',
+    religious: 'pandit-ji-for-puja-services',
+    spa: 'salon-at-home-services',
+    pg: 'pg-hostels-near-me'
   });
 
   // Fetch Service Slugs
   useEffect(() => {
     const fetchSlugs = async () => {
-      const services = [
+      const servicesToFetch = [
         { id: '683daaa8f261c1548bdf7442', key: 'appliances' },
         { id: '695250aa57bb211ca094e5fd', key: 'religious' },
         { id: '69524f4a57bb211ca094e5e6', key: 'spa' },
@@ -432,25 +432,37 @@ function HeroContent({ services = [], loading = false, error = null }) {
       ];
 
       try {
-        const results = await Promise.all(
-          services.map(s =>
-            fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${s.id}`)
-              .then(res => res.json())
-              .then(data => data.success && data.data?.home ? { [s.key]: data.data.home } : null)
-              .catch(() => null)
-          )
+        const results = await Promise.allSettled(
+          servicesToFetch.map(async (s) => {
+            try {
+              const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${s.id}`);
+              const data = await res.json();
+              if (data.success && data.data?.home) {
+                // Ensure we don't accidentally map everything to 'appliance-repair-services'
+                // if the API is buggy or returning generic data.
+                if (s.key === 'appliances' || (data.data.home !== 'appliance-repair-services' && data.data.home !== 'appliances')) {
+                  return { [s.key]: data.data.home };
+                }
+              }
+            } catch (e) {
+              console.warn(`Failed to fetch slug for ${s.key}:`, e);
+            }
+            return null;
+          })
         );
 
-        const newSlugs = {};
-        results.forEach(res => {
-          if (res) Object.assign(newSlugs, res);
+        const fetchedSlugs = {};
+        results.forEach(result => {
+          if (result.status === 'fulfilled' && result.value) {
+            Object.assign(fetchedSlugs, result.value);
+          }
         });
 
-        if (Object.keys(newSlugs).length > 0) {
-          setServiceSlugs(prev => ({ ...prev, ...newSlugs }));
+        if (Object.keys(fetchedSlugs).length > 0) {
+          setServiceSlugs(prev => ({ ...prev, ...fetchedSlugs }));
         }
       } catch (error) {
-        console.error("Failed to fetch service slugs:", error);
+        console.error("Critical error fetching service slugs:", error);
       }
     };
     fetchSlugs();

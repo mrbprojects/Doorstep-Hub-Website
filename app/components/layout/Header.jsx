@@ -45,10 +45,10 @@ export function Header({ theme = {}, navItems = [] }) {
 
   const [apiNavItems, setApiNavItems] = useState([]);
   const [serviceSlugs, setServiceSlugs] = useState({
-    appliances: 'appliances',
-    religious: 'religious-services',
-    spa: 'spa-salon',
-    pg: 'pghostels'
+    appliances: 'appliance-repair-services',
+    religious: 'pandit-ji-for-puja-services',
+    spa: 'salon-at-home-services',
+    pg: 'pg-hostels-near-me'
   });
   const [showHomeScreen, setShowHomeScreen] = useState(false);
 
@@ -64,20 +64,28 @@ export function Header({ theme = {}, navItems = [] }) {
           { id: '69524fb157bb211ca094e5ee', key: 'pg' }
         ];
 
-        const slugResults = await Promise.all(
-          servicesToFetchSlugs.map(s =>
-            fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${s.id}`)
-              .then(res => res.json())
-              .then(data => data.success && data.data?.home ? { [s.key]: data.data.home } : null)
-              .catch(() => null)
-          )
+        const slugResults = await Promise.allSettled(
+          servicesToFetchSlugs.map(async (s) => {
+            try {
+              const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${s.id}`);
+              const data = await res.json();
+              if (data.success && data.data?.home) {
+                if (s.key === 'appliances' || (data.data.home !== 'appliance-repair-services' && data.data.home !== 'appliances')) {
+                  return { [s.key]: data.data.home };
+                }
+              }
+            } catch (e) { }
+            return null;
+          })
         );
 
-        const newSlugs = { ...serviceSlugs };
-        slugResults.forEach(res => {
-          if (res) Object.assign(newSlugs, res);
+        const fetchedSlugs = { ...serviceSlugs };
+        slugResults.forEach(result => {
+          if (result.status === 'fulfilled' && result.value) {
+            Object.assign(fetchedSlugs, result.value);
+          }
         });
-        setServiceSlugs(newSlugs);
+        setServiceSlugs(fetchedSlugs);
 
         // 3. Fetch Screen Settings
         const screenSettingsResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-screen-settings');

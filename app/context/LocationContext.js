@@ -110,6 +110,17 @@ export function LocationProvider({ children }) {
     };
 
     /**
+     * Unified detection helper
+     */
+    const detectLocation = async () => {
+        try {
+            return await detectWithGPS();
+        } catch (err) {
+            return await detectWithIP();
+        }
+    };
+
+    /**
      * Search for locations
      * Why: Enable manual location selection
      */
@@ -178,6 +189,7 @@ export function LocationProvider({ children }) {
                 error,
                 detectWithGPS,
                 detectWithIP,
+                detectLocation,
                 searchLocation,
                 setManualLocation,
                 clearLocation,

@@ -14,16 +14,14 @@ function ReligiousCategoryContent() {
     const searchParams = useSearchParams();
     const categoryName = searchParams.get('name') || 'Category';
 
-    const { location, detectWithIP } = useLocationContext();
+    const { location, detectLocation } = useLocationContext();
     const [subCategories, setSubCategories] = useState([]);
     const [services, setServices] = useState([]); // Fallback services
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('loading'); // 'loading', 'subcategories', 'services', 'empty'
 
     useEffect(() => {
-        if (!location) {
-            detectWithIP().catch(err => console.log("Auto detect failed", err));
-        }
+        // No auto-detect here
     }, [location]);
 
     // Fetch DATA
@@ -55,8 +53,13 @@ function ReligiousCategoryContent() {
                 }
 
                 // 2. If No Sub-Categories, Fetch Direct Services (Fallback to old behavior)
-                const lat = location?.lat || 17.3850;
-                const lng = location?.lng || 78.4867;
+                if (!location) {
+                    setViewMode('location_required');
+                    setLoading(false);
+                    return;
+                }
+                const lat = location.lat;
+                const lng = location.lng;
 
                 // Get religious services serviceId from localStorage, fallback to hardcoded ID
                 const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
@@ -252,6 +255,38 @@ function ReligiousCategoryContent() {
                                 </CardContent>
                             </Card>
                         ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // LOCATION REQUIRED
+    if (viewMode === 'location_required') {
+        return (
+            <div className="min-h-screen bg-[var(--off-white)] pt-24 pb-10 flex flex-col items-center justify-center container mx-auto px-4">
+                <div className="bg-white p-12 rounded-[3rem] shadow-2xl border border-gray-100 flex flex-col items-center text-center max-w-2xl w-full">
+                    <div className="p-6 rounded-full bg-[var(--off-white)] mb-8">
+                        <MapPin className="h-16 w-16 text-[var(--saffron)] animate-bounce" />
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4">Set Your Sacred Spcae</h1>
+                    <p className="text-lg text-gray-500 mb-10 leading-relaxed">
+                        To find divine services and priests specifically available in your locality, please share your current location.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <Button
+                            onClick={() => detectLocation()}
+                            className="flex-1 bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white h-14 rounded-2xl text-lg font-bold shadow-xl shadow-[var(--saffron)]/20"
+                        >
+                            Find Near Me
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => router.back()}
+                            className="flex-1 h-14 rounded-2xl text-lg font-bold"
+                        >
+                            Go Back
+                        </Button>
                     </div>
                 </div>
             </div>

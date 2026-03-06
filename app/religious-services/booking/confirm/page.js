@@ -22,7 +22,7 @@ export default function ReligiousConfirmPage() {
 
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('COD');
+    const [paymentMethod, setPaymentMethod] = useState('ONLINE');
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [technicianPreference, setTechnicianPreference] = useState('any');
@@ -366,9 +366,8 @@ export default function ReligiousConfirmPage() {
                                 <CreditCard className="w-5 h-5 text-[var(--saffron)]" />
                                 Select Payment Method
                             </h3>
-                            <div className="grid md:grid-cols-3 gap-3">
+                            <div className="grid md:grid-cols-2 gap-3">
                                 {[
-                                    { id: 'COD', label: 'Pay after Service', icon: Truck },
                                     { id: 'WALLET', label: 'Wallet Pay', icon: Wallet },
                                     { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
                                 ].map((method) => (

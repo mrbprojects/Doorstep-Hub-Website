@@ -28,23 +28,23 @@ export function ResultsPage() {
     const [showFilters, setShowFilters] = useState(false);
 
     // Location Context
-    const { location, detectWithIP } = useLocationContext();
+    const { location, detectLocation } = useLocationContext();
 
     useEffect(() => {
-        if (!location) {
-            detectWithIP().catch(err => console.log("Auto detect failed", err));
-        }
+        // No auto-detection, let the user trigger or wait for context
     }, [location]);
 
     useEffect(() => {
         const fetchServices = async () => {
             setLoading(true);
             try {
-                const userLocationData = localStorage.getItem('user_location_data');
-                const storedLocation = userLocationData ? JSON.parse(userLocationData) : null;
+                if (!location) {
+                    setLoading(false);
+                    return;
+                }
 
-                const lat = (location?.lat || storedLocation?.lat || 17.3850).toString();
-                const lng = (location?.lng || storedLocation?.lng || 78.4867).toString();
+                const lat = location.lat.toString();
+                const lng = location.lng.toString();
 
                 const subcategoryId = searchParams.get('subcategoryId') || "6957be10cc45593206b6e6c8"; // Fallback for testing
                 const categoryId = searchParams.get('categoryId') || "";
@@ -232,37 +232,57 @@ export function ResultsPage() {
 
             {/* Services Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {loading ? (
-                        [1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] shadow-md animate-pulse">
-                                {/* Image shimmer */}
-                                <div className="h-56 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                                {/* Content shimmer */}
-                                <div className="p-6">
-                                    <div className="h-5 bg-gray-200 rounded-lg w-3/4 mb-2" />
-                                    <div className="h-4 bg-gray-100 rounded-lg w-1/2 mb-5" />
-                                    <div className="flex gap-3 mb-4">
-                                        <div className="h-4 bg-gray-200 rounded-lg w-20" />
-                                        <div className="h-4 bg-gray-100 rounded-lg w-16" />
-                                    </div>
-                                    <div className="h-4 bg-gray-100 rounded-lg w-28 mb-6" />
-                                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                                        <div className="h-7 bg-gray-200 rounded-lg w-20" />
-                                        <div className="h-9 bg-gray-200 rounded-xl w-28" />
+                {!location && !loading ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-[#E8ECF2] shadow-xl">
+                        <div className="p-6 rounded-full bg-[#F6F7FB] mb-6">
+                            <MapPin className="h-12 w-12 text-[#C06C84] animate-bounce" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-[#0F172A] mb-3">Where are you?</h2>
+                        <p className="text-[#64748B] text-center max-w-md mb-8 px-6 leading-relaxed">
+                            Discover the best spas and salons in your neighborhood. Please set your location to continue.
+                        </p>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => detectLocation()}
+                            className="px-10 py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-2xl font-bold shadow-lg shadow-[#C06C84]/30 hover:shadow-[#C06C84]/50 transition-all"
+                        >
+                            Find Near Me
+                        </motion.button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {loading ? (
+                            [1, 2, 3, 4, 5, 6].map((i) => (
+                                <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] shadow-md animate-pulse">
+                                    {/* Image shimmer */}
+                                    <div className="h-56 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                                    {/* Content shimmer */}
+                                    <div className="p-6">
+                                        <div className="h-5 bg-gray-200 rounded-lg w-3/4 mb-2" />
+                                        <div className="h-4 bg-gray-100 rounded-lg w-1/2 mb-5" />
+                                        <div className="flex gap-3 mb-4">
+                                            <div className="h-4 bg-gray-200 rounded-lg w-20" />
+                                            <div className="h-4 bg-gray-100 rounded-lg w-16" />
+                                        </div>
+                                        <div className="h-4 bg-gray-100 rounded-lg w-28 mb-6" />
+                                        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                                            <div className="h-7 bg-gray-200 rounded-lg w-20" />
+                                            <div className="h-9 bg-gray-200 rounded-xl w-28" />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
-                    ) : filteredServices.map((service, index) => (
-                        <ServiceCard
-                            key={service.id}
-                            service={service}
-                            index={index}
-                            router={router}
-                        />
-                    ))}
-                </div>
+                            ))
+                        ) : filteredServices.map((service, index) => (
+                            <ServiceCard
+                                key={service.id}
+                                service={service}
+                                index={index}
+                                router={router}
+                            />
+                        ))}
+                    </div>
+                )}
 
                 {!loading && filteredServices.length === 0 && (
                     <div className="text-center py-20">

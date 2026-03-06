@@ -433,31 +433,50 @@ export function ServiceDetailsPage({
                         </div>
                         <div className="grid gap-3">
                           {provider_rate_cards.map((card, index) => (
-                            <div key={card.id || index} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 pr-4">
-                                  <h6 className="text-white text-sm font-medium group-hover:text-[#04a99d] transition-colors leading-snug mb-1">{card.title}</h6>
-                                  {card.reason && (
-                                    <p className="text-white/40 text-xs leading-relaxed">{card.reason}</p>
-                                  )}
+                            <div key={card.id || index} className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group">
+                              <div className="flex gap-3">
+                                {/* Rate Card Thumbnail */}
+                                {card.image && (
+                                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
+                                    <img
+                                      src={`https://api.doorstephub.com/${card.image}`}
+                                      alt={card.title}
+                                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                      onError={(e) => { e.target.style.display = 'none'; }}
+                                    />
+                                  </div>
+                                )}
 
-                                  {/* See More Button if images exist */}
-                                  {(card.serviceCardImages?.length > 0 || card.images?.length > 0) && (
-                                    <button
-                                      onClick={() => setRateCardModal({
-                                        isOpen: true,
-                                        images: card.serviceCardImages || card.images,
-                                        currentIndex: 0,
-                                        title: card.title
-                                      })}
-                                      className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#04a99d] hover:text-[#037166] transition-colors"
-                                    >
-                                      See More
-                                      <ArrowRight className="w-3 h-3" />
-                                    </button>
-                                  )}
+                                <div className="flex-1 flex flex-col justify-between min-w-0">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <h6 className="text-white text-sm font-bold group-hover:text-[#04a99d] transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal">{card.title}</h6>
+                                      {card.reason && (
+                                        <p className="text-white/40 text-[10px] leading-relaxed line-clamp-1">{card.reason}</p>
+                                      )}
+                                    </div>
+
+                                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                      <span className="text-[#04a99d] font-bold text-lg whitespace-nowrap">₹{card.price}</span>
+
+                                      {/* See More Button - Below Price */}
+                                      {card.banner_images?.length > 0 && (
+                                        <button
+                                          onClick={() => setRateCardModal({
+                                            isOpen: true,
+                                            images: card.banner_images,
+                                            currentIndex: 0,
+                                            title: card.title
+                                          })}
+                                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[10px] font-bold uppercase tracking-wider border border-[#037166]/20"
+                                        >
+                                          See More
+                                          <ArrowRight className="w-3 h-3" />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
-                                <span className="text-[#04a99d] font-bold text-base whitespace-nowrap flex-shrink-0">₹{card.price}</span>
                               </div>
                             </div>
                           ))}
@@ -466,8 +485,8 @@ export function ServiceDetailsPage({
                     )}
 
                     {/* Working Images Tab */}
-                    {(activeTab === 'Working Images' || activeTab === 'portfolio') && (
-                      <motion.div key="portfolio" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                    {activeTab === 'Working Images' && (
+                      <motion.div key="Working Images" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
                         <h3 className="text-lg font-bold text-white mb-4">Working Images</h3>
                         {serviceImages.length > 0 ? (
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -477,13 +496,13 @@ export function ServiceDetailsPage({
                                 onClick={() => { setSelectedImageIndex(idx + 1); setIsLightboxOpen(true); }}
                                 className="aspect-square rounded-xl overflow-hidden group cursor-pointer relative border border-white/10"
                               >
-                                <img src={`https://api.doorstephub.com/${img}`} alt={`Portfolio ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                <img src={`https://api.doorstephub.com/${img}`} alt={`Working Images ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No portfolio images available</div>
+                          <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No working images available</div>
                         )}
                       </motion.div>
                     )}

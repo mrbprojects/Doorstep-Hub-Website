@@ -51,22 +51,24 @@ function ReligiousCategoryContent() {
     const attendees = searchParams.get('attendees') || '';
     const timing = searchParams.get('timing') || '';
 
-    const { location, detectWithIP } = useLocationContext();
+    const { location, detectLocation } = useLocationContext();
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!location) {
-            detectWithIP().catch(err => console.log('Auto detect failed', err));
-        }
+        // No auto-detect here
     }, [location]);
 
     useEffect(() => {
         const fetchServices = async () => {
             setLoading(true);
             try {
-                const lat = location?.lat || 17.3850;
-                const lng = location?.lng || 78.4867;
+                if (!location) {
+                    setLoading(false);
+                    return;
+                }
+                const lat = location.lat;
+                const lng = location.lng;
 
                 // Get religious services serviceId from localStorage, fallback to hardcoded ID
                 const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
@@ -214,6 +216,22 @@ function ReligiousCategoryContent() {
                         </div>
                         <p className="text-[var(--deep-charcoal,#1a1a2e)] font-medium">Finding divine services nearby...</p>
                         <p className="text-gray-400 text-sm mt-1">Matching your spiritual requirements</p>
+                    </div>
+                ) : !location ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[3rem] shadow-2xl border border-[var(--saffron)]/10">
+                        <div className="p-6 rounded-full bg-[var(--soft-cream)] mb-6">
+                            <MapPin className="h-12 w-12 text-[var(--saffron)] animate-bounce" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-[var(--deep-charcoal)] mb-3">Divine Seekers, Where are You?</h2>
+                        <p className="text-[var(--muted-foreground)] text-center max-w-md mb-8 px-6 leading-relaxed">
+                            Every sacred ritual is bound to its space. Please share your location so we can find the most revered priests in your vicinity.
+                        </p>
+                        <Button
+                            onClick={() => detectLocation()}
+                            className="bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white px-12 py-7 rounded-2xl text-xl font-bold hover:scale-105 transition-transform shadow-2xl shadow-[var(--saffron)]/30"
+                        >
+                            Find Near Me
+                        </Button>
                     </div>
                 ) : services.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

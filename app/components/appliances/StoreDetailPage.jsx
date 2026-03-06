@@ -131,7 +131,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             rating: s.rating || 4.5,
             totalOrders: s.totalOrders || 0,
             duration: s.duration || '60 mins',
-            subcategoryName: s.subcategoryName || center?.speciality
+            subcategoryName: s.subcategoryName || center?.speciality,
+            bannerImages: s.banner_images || []
           }));
           setServices(mappedServices);
 
@@ -367,6 +368,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
       animate={{ opacity: 1 }}
       className="min-h-screen pt-24 pb-20 bg-gradient-to-b from-[#0a0a0a] via-[#0f1614] to-[#0a0a0a]"
     >
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         {/* Back Button */}
         <motion.button
@@ -444,7 +449,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <div className="sticky top-20 z-40 mb-8 bg-[#0a0a0a]/80 backdrop-blur-xl border-y border-white/5 -mx-6 px-6 lg:-mx-8 lg:px-8">
           <div className="max-w-[1400px] mx-auto">
             <div className="flex gap-2 overflow-x-auto py-1">
-              {['services', 'about', 'portfolio', 'location', 'reviews'].map((tab) => (
+              {['services', 'about', 'Working Images', 'location', 'reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -478,29 +483,29 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               transition={{ duration: 0.3 }}
             >
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-8 max-w-3xl">
                 <h2 className="text-3xl font-bold text-white mb-2">Available Services</h2>
                 <p className="text-white/60 text-lg">Choose from our professional repair packages</p>
               </div>
 
               {/* Service Cards - Using API data */}
               {loading ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-96 rounded-3xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
+                <div className="flex flex-col gap-3 mb-8 max-w-3xl">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-28 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
                       <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                      <div className="h-48 bg-gray-800" />
-                      <div className="p-6 space-y-4">
-                        <div className="h-6 w-3/4 bg-gray-700 rounded animate-pulse" />
-                        <div className="h-4 w-full bg-gray-700/50 rounded animate-pulse" />
-                        <div className="h-8 w-24 bg-gray-700 rounded-lg animate-pulse" />
-                        <div className="h-12 w-full bg-gray-700 rounded-xl animate-pulse" />
+                      <div className="flex flex-col sm:flex-row h-full">
+                        <div className="w-full sm:w-32 bg-gray-800" />
+                        <div className="flex-1 p-4 space-y-3">
+                          <div className="h-4 w-3/4 bg-gray-700 rounded animate-pulse" />
+                          <div className="h-2 w-full bg-gray-700/50 rounded animate-pulse" />
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : services && services.length > 0 ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="flex flex-col gap-4 mb-8 max-w-3xl">
                   {services.map((service, index) => (
                     <motion.div
                       key={service.id || index}
@@ -508,86 +513,107 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleSelectPackage(service.id)}
-                      className={`relative bg-white/5 backdrop-blur-sm border-2 rounded-3xl overflow-hidden cursor-pointer transition-all hover:scale-105 ${selectedPackages.includes(service.id)
+                      className={`relative bg-white/5 backdrop-blur-sm border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
                         ? 'border-[#037166] shadow-xl shadow-[#037166]/20'
                         : 'border-white/10 hover:border-white/20'
                         }`}
                     >
-                      {/* Service Image */}
-                      {service.image && (
-                        <div className="relative h-48 overflow-hidden">
-                          <img
-                            src={`https://api.doorstephub.com/${service.image}`}
-                            alt={service.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="flex flex-col sm:flex-row h-full">
+                        {/* Service Image */}
+                        {service.image && (
+                          <div className="relative w-full sm:w-32 h-32 sm:h-auto overflow-hidden">
+                            <img
+                              src={`https://api.doorstephub.com/${service.image}`}
+                              alt={service.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
-                          {/* Rating Badge */}
-                          {service.rating && (
-                            <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-white font-semibold text-sm">{service.rating}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="p-6">
-                        {/* Selection Indicator */}
-                        {selectedPackages.includes(service.id) && (
-                          <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-[#037166] flex items-center justify-center z-10">
-                            <Check className="w-5 h-5 text-white" />
-                          </div>
-                        )}
-
-                        {/* Service Name */}
-                        <h4 className="text-xl font-bold text-white mb-2">{service.name}</h4>
-
-                        {/* Service Description */}
-                        <p className="text-white/60 text-sm mb-4 line-clamp-2">{service.description}</p>
-
-                        {/* Price and Stats */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-[#037166]">₹{service.price}</span>
-                            {service.priceUnit && (
-                              <span className="text-white/40 text-xs">/{service.priceUnit}</span>
+                            {/* Rating Badge */}
+                            {service.rating && (
+                              <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center gap-1">
+                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                                <span className="text-white font-semibold text-xs">{service.rating}</span>
+                              </div>
                             )}
                           </div>
-                          {service.totalOrders > 0 && (
-                            <div className="flex items-center gap-1 text-white/60 text-sm">
-                              <Users className="w-4 h-4" />
-                              <span>{service.totalOrders} orders</span>
+                        )}
+
+                        <div className="p-5 flex-1 flex flex-col justify-between">
+                          <div className="flex-1 mb-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                {/* Selection Indicator */}
+                                {selectedPackages.includes(service.id) && (
+                                  <div className="inline-flex items-center gap-1.5 text-[#037166] mb-1">
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">Selected</span>
+                                  </div>
+                                )}
+                                <h4 className="text-lg font-bold text-white mb-1">{service.name}</h4>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-2xl font-bold text-[#037166]">₹{service.price}</span>
+                                {service.priceUnit && (
+                                  <span className="text-white/40 text-[10px] ml-1">/{service.priceUnit}</span>
+                                )}
+                              </div>
                             </div>
-                          )}
+
+                            {/* Service Description */}
+                            <p className="text-white/60 text-xs line-clamp-2 max-w-2xl">{service.description}</p>
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-3">
+                            <div className="flex flex-wrap items-center gap-5">
+                              {service.totalOrders > 0 && (
+                                <div className="flex items-center gap-2.5">
+                                  <div className="flex items-center gap-1 text-white/60 text-xs whitespace-nowrap">
+                                    <Users className="w-3.5 h-3.5 text-[#037166]" />
+                                    <span>{service.totalOrders} orders</span>
+                                  </div>
+
+                                  {service.bannerImages?.length > 0 && (
+                                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide max-w-[120px] py-1">
+                                      {service.bannerImages.map((img, idx) => (
+                                        <div key={idx} className="w-6 h-6 rounded-md overflow-hidden flex-shrink-0 border border-white/10 ring-1 ring-white/5 shadow-sm">
+                                          <img
+                                            src={`https://api.doorstephub.com/${img}`}
+                                            alt=""
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {service.duration && service.duration !== 'N/A' && (
+                                <div className="flex items-center gap-1.5 text-white/60 text-sm">
+                                  <Clock className="w-4 h-4 text-[#037166]" />
+                                  <span>{service.duration}</span>
+                                </div>
+                              )}
+                              {service.subcategoryName && (
+                                <div className="px-3 py-1 rounded-full bg-[#037166]/20 border border-[#037166]/30">
+                                  <span className="text-[#037166] text-[10px] font-bold uppercase tracking-wider">{service.subcategoryName}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(service);
+                              }}
+                              className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
+                            >
+                              Book Now
+                              <ArrowLeft className="w-4 h-4 rotate-180" />
+                            </button>
+                          </div>
                         </div>
-
-                        {/* Duration */}
-                        {service.duration && service.duration !== 'N/A' && (
-                          <div className="flex items-center gap-2 text-white/60 mb-4">
-                            <Clock className="w-4 h-4 text-[#037166]" />
-                            <span className="text-sm">{service.duration}</span>
-                          </div>
-                        )}
-
-                        {/* Subcategory Badge */}
-                        {service.subcategoryName && (
-                          <div className="inline-block px-3 py-1 rounded-full bg-[#037166]/20 border border-[#037166]/30 mb-4">
-                            <h6 className="text-[#037166] text-xs font-semibold">{service.subcategoryName}</h6>
-                          </div>
-                        )}
-
-                        {/* CTA Button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToCart(service);
-                          }}
-                          className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-xl hover:shadow-[#037166]/30 transition-all"
-                        >
-                          Book Now
-                        </button>
                       </div>
                     </motion.div>
                   ))}
@@ -601,7 +627,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
               {/* Action Buttons */}
               {services && services.length > 0 && (
-                <div className="flex gap-4">
+                <div className="flex gap-4 max-w-3xl">
                   <button
                     onClick={() => {
                       localStorage.setItem('service_cart_flow', 'true');
@@ -690,10 +716,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             </motion.div>
           )}
 
-          {/* PORTFOLIO TAB */}
-          {activeTab === 'portfolio' && (
+          {/* WORKING IMAGES TAB */}
+          {activeTab === 'Working Images' && (
             <motion.div
-              key="portfolio"
+              key="Working Images"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -729,7 +755,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   ))
                 ) : (
                   <div className="col-span-full text-center py-12 text-white/60">
-                    No portfolio images available
+                    No working images available
                   </div>
                 )}
               </div>

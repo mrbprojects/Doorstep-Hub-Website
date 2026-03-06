@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Calendar, IndianRupee, CheckSquare, Info, Loader2, CheckCircle } from 'lucide-react';
+import { ClipboardList, Calendar, IndianRupee, CheckSquare, Info, Loader2, CheckCircle, X, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
 
 const STEPS = [
@@ -48,6 +48,11 @@ export function BookAppointmentPage() {
         websiteCategoryId: '', categoryName: '',
         bookingDate: '', bookingTime: '', message: '',
     });
+
+    // Terms Modal State
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsContent, setTermsContent] = useState(null);
+    const [termsLoading, setTermsLoading] = useState(false);
 
     // Cities & Categories state
     const [cities, setCities] = useState([]);
@@ -95,24 +100,51 @@ export function BookAppointmentPage() {
         fetchCategories();
     }, [formData.websiteCityId]);
 
+    // Fetch Terms Content
+    useEffect(() => {
+        const fetchTerms = async () => {
+            setTermsLoading(true);
+            try {
+                const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/privacy-policies?applicationType=customer%20app');
+                const data = await res.json();
+                if (data.success) setTermsContent(data.data);
+            } catch (err) {
+                console.error('Error fetching terms:', err);
+            } finally {
+                setTermsLoading(false);
+            }
+        };
+        fetchTerms();
+    }, []);
+
     const getMinDate = () => new Date().toISOString().split('T')[0];
+
+    // Field Validations Helper
+    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(phone);
 
     // Step validation
     const validateStep = () => {
         switch (currentStep) {
             case 0:
                 if (!formData.firstName.trim()) { toast.error('Please enter your first name'); return false; }
-                if (!formData.phone.trim() || formData.phone.length < 10) { toast.error('Please enter a valid phone number'); return false; }
-                if (!formData.email.trim() || !formData.email.includes('@')) { toast.error('Please enter a valid email'); return false; }
+                if (formData.firstName.length < 2) { toast.error('First name must be at least 2 characters'); return false; }
+
+                if (!formData.phone.trim()) { toast.error('Please enter your phone number'); return false; }
+                if (!isValidPhone(formData.phone.trim())) { toast.error('Please enter a valid 10-digit phone number starting with 6-9'); return false; }
+
+                if (!formData.email.trim()) { toast.error('Please enter your email address'); return false; }
+                if (!isValidEmail(formData.email.trim())) { toast.error('Please enter a valid email address'); return false; }
+
                 if (!formData.websiteCityId) { toast.error('Please select your city'); return false; }
                 if (!formData.websiteCategoryId) { toast.error('Please select a service category'); return false; }
                 return true;
             case 1:
                 if (!formData.bookingDate) { toast.error('Please select a booking date'); return false; }
-                if (!formData.bookingTime) { toast.error('Please select a booking time'); return false; }
+                if (!formData.bookingTime) { toast.error('Please select a preferred time slot'); return false; }
                 return true;
             case 2:
-                if (!agreed) { toast.error('Please agree to the terms and conditions'); return false; }
+                if (!agreed) { toast.error('You must agree to the Terms & Conditions to proceed'); return false; }
                 return true;
             default:
                 return true;
@@ -384,7 +416,7 @@ export function BookAppointmentPage() {
                                 </div>
                             </div>
                             <span className="text-gray-600 text-sm leading-snug">
-                                I agree to the <span className="text-[#065f46] underline cursor-pointer">Terms &amp; Conditions</span> and authorize Doorstep Hub to collect payment for this booking.
+                                I agree to the <span onClick={() => setShowTermsModal(true)} className="text-[#065f46] underline cursor-pointer font-bold">Terms & Conditions</span> and authorize Doorstep Hub to collect payment for this booking.
                             </span>
                         </label>
                     </div>
@@ -544,6 +576,64 @@ export function BookAppointmentPage() {
                         );
                     })}
                 </div>
+                {/* ── Terms & Conditions Modal ── */}
+                {showTermsModal && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTermsModal(false)} />
+                        <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                            {/* Modal Header */}
+                            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#04a99d]/10 flex items-center justify-center">
+                                        <ScrollText className="w-5 h-5 text-[#04a99d]" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900">Terms & Conditions</h3>
+                                        <p className="text-xs text-gray-500">Please read carefully before booking</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowTermsModal(false)}
+                                    className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-gray-400" />
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                                {termsLoading ? (
+                                    <div className="py-20 flex flex-col items-center justify-center gap-4">
+                                        <Loader2 className="w-10 h-10 text-[#04a99d] animate-spin" />
+                                        <p className="text-gray-500 font-medium">Loading content...</p>
+                                    </div>
+                                ) : termsContent ? (
+                                    <div
+                                        className="prose prose-sm max-w-none text-gray-600"
+                                        dangerouslySetInnerHTML={{ __html: termsContent.termsAndConditions }}
+                                    />
+                                ) : (
+                                    <div className="text-center py-20 text-gray-500">
+                                        Failed to load content. Please try again later.
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                                <button
+                                    onClick={() => {
+                                        setAgreed(true);
+                                        setShowTermsModal(false);
+                                    }}
+                                    className="px-8 py-3 bg-[#00231f] text-white font-bold rounded-xl hover:bg-[#038f84] transition-all shadow-lg active:scale-95"
+                                >
+                                    I Agree
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

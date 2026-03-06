@@ -187,56 +187,86 @@ export function CartPage({
               >
                 <h4 className="text-xl font-bold text-white mb-6">Order Summary</h4>
 
-                <div className="space-y-2 mb-2">
-                  <div className="flex justify-between items-start text-white/80">
-                    <div className="flex flex-col">
-                      <span>Online Consultation Fee</span>
-                      <div className="flex items-center gap-1 text-[#04a99d] text-xs font-normal">
-                        <Info className="w-3 h-3" />
-                        <span>pay online</span>
-                      </div>
+                {/* Pricing Breakdown */}
+                <div className="space-y-4 mb-6">
+                  {/* Services Subtotal */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-white/50 text-xs uppercase tracking-wider font-bold">
+                      <span>Services Cost</span>
+                      <span>₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
                     </div>
-                    <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                    <div className="h-px bg-white/5" />
                   </div>
 
-                  {inspectionCost > 0 && (
-                    <div className="flex flex-col gap-1">
-                      <div className="flex justify-between items-start text-white/80">
-                        <div className="flex flex-col">
-                          <span>Doorstep Inspection Fee</span>
-                          <div className="flex items-center gap-1 text-[#04a99d] text-xs font-normal">
-                            <Info className="w-3 h-3" />
-                            <span>pay at Doorstep</span>
-                          </div>
+                  {/* Taxes & Fees */}
+                  <div className="space-y-3">
+                    {(cartData?.totalServiceCost || 0) > 0 && (
+                      <div className="flex justify-between items-center text-white/70 text-sm">
+                        <div className="flex items-center gap-1.5">
+                          <span>GST</span>
+                          <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10">18%</span>
                         </div>
-                        <span>₹{inspectionCost.toFixed(2)}</span>
+                        <span>₹{((cartData?.totalServiceCost || 0) * 0.18).toFixed(2)}</span>
                       </div>
-                      <div className="flex items-start gap-2 text-[10px] text-white/50 bg-white/5 p-2 rounded">
-                        <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-[#04a99d]" />
-                        <p>Note: This is the online consultation fee only. The Doorstep Inspection Fee will be collected at Doorstep.</p>
+                    )}
+
+                    <div className="flex justify-between items-start text-white/70 text-sm">
+                      <div className="flex flex-col">
+                        <span>Online Consultation Fee</span>
+                        <div className="flex items-center gap-1 text-[#04a99d] text-[10px] font-normal">
+                          <Info className="w-3 h-3" />
+                          <span>Payable Online</span>
+                        </div>
                       </div>
+                      <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
                     </div>
-                  )}
+
+                    {inspectionCost > 0 && (
+                      <div className="flex flex-col gap-2 pt-1">
+                        <div className="flex justify-between items-start text-white/70 text-sm italic">
+                          <span>Doorstep Inspection Fee</span>
+                          <span>+ ₹{inspectionCost.toFixed(2)}</span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
+                          <p className="text-[10px] text-white/40 leading-relaxed">
+                            <span className="text-[#04a99d]">Note:</span> Inspection fee is collected at your doorstep during the visit.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="h-px bg-white/10" />
+
+                  {/* Total to Pay */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-end">
+                      <div className="flex flex-col">
+                        <span className="text-white/60 text-xs uppercase font-bold">Payable Now</span>
+                        <span className="text-white font-bold text-2xl">
+                          ₹{((cartData?.totalServiceCost || 0) * 1.18 + (cartData?.finalAmount || 0)).toFixed(2)}
+                        </span>
+                      </div>
+                      <span className="text-[#04a99d] text-[10px] font-bold uppercase py-1 px-2 bg-[#04a99d]/10 rounded-lg border border-[#04a99d]/20">
+                        Secure Payment
+                      </span>
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={onProceedToAddress}
+                      className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
+                    >
+                      Proceed to Address
+                      <ArrowLeft className="w-5 h-5 rotate-180" />
+                    </motion.button>
+                  </div>
                 </div>
 
-                <div className="h-px bg-white/10 my-4" />
-                <div className="flex justify-between text-xl font-bold text-white mb-6">
-                  <span>Payable</span>
-                  <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onProceedToAddress}
-                  className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-lg hover:shadow-lg hover:shadow-[#037166]/40 transition-all"
-                >
-                  Proceed to Address
-                </motion.button>
-
-                <div className="mt-6 p-4 rounded-lg bg-[#037166]/10 border border-[#037166]/20">
-                  <p className="text-white/80 text-sm text-center">
-                    <span className="font-medium text-[#04a99d]"></span> This is the online booking fee
+                <div className="p-3 rounded-xl bg-[#037166]/5 border border-[#037166]/10">
+                  <p className="text-[11px] text-white/60 text-center leading-relaxed">
+                    By proceeding, you agree to our service terms and conditions regarding scheduling and cancellations.
                   </p>
                 </div>
               </motion.div>

@@ -487,7 +487,7 @@ export function ServiceDetailsPage({
                                     </div>
 
                                     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                                      <span className="text-[#04a99d] font-bold text-base sm:text-lg whitespace-nowrap">₹{card.price}</span>
+                                      <span className="text-[#04a99d] font-bold text-base sm:text-lg whitespace-nowrap"><span className='italic font-normal text-[10px] text-white/80'>Starts from </span>₹{card.price}</span>
 
                                       {/* See More Button - Below Price */}
                                       {card.banner_images?.length > 0 && (
@@ -590,7 +590,7 @@ export function ServiceDetailsPage({
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2 break-words">
                   {storeData.name}
                 </h1>
-                <p className="text-white/60 text-sm mb-3">Professional Service</p>
+                <p className="text-white/60 text-sm mb-3">On-Demand Home Services</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
                     <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />

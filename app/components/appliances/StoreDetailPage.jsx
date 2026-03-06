@@ -17,7 +17,7 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp, CheckCheck
+  ThumbsUp, CheckCheck, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -342,6 +342,42 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     );
   };
 
+  const handleContinueBooking = async () => {
+    if (selectedPackages.length === 0) {
+      toast.error('Please select at least one service');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Step 1: Clear the cart first
+      console.log('Clearing cart before adding multiple items...');
+      await clearCart();
+
+      // Step 2: Add all selected services
+      const servicesToAdd = services.filter(s => selectedPackages.includes(s.id));
+      console.log('Adding multiple services to cart:', servicesToAdd);
+
+      for (const service of servicesToAdd) {
+        await addToServiceCart(
+          resolvedProviderId || storeId,
+          service.id,
+          'service',
+          1
+        );
+      }
+
+      // Step 3: Navigate to address
+      localStorage.setItem('service_cart_flow', 'true');
+      router.push('/appliances/address');
+    } catch (error) {
+      console.error('Error in multiple selection cart update:', error);
+      toast.error('Failed to update cart');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const ShimmerServiceCard = () => (
     <div className="h-80 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
       <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
@@ -398,13 +434,13 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative h-[320px] xs:h-[350px] md:h-[400px] lg:h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
+          className="relative  h-[320px] xs:h-[350px] md:h-[400px] lg:h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
         >
           {bannerImage ? (
             <img
               src={bannerImage}
               alt="Service Center Banner"
-              className="w-full h-full object-cover"
+              className="w-full  object-fit"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] flex items-center justify-center">
@@ -491,7 +527,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             >
               {/* Header */}
               <div className="mb-6 w-full px-1">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1.5">Available Services</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1.5">Our Services & Rate Cards</h2>
                 <p className="text-white/60 text-sm sm:text-base">Choose from our professional repair packages</p>
               </div>
 
@@ -571,8 +607,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             <p className="text-white/60 text-xs line-clamp-2 max-w-2xl">{service.description}</p>
                           </div>
 
-                          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-3">
-                            <div className="flex flex-wrap items-center gap-5">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-white/5 pt-4">
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-5">
                               {service.totalOrders > 0 && (
                                 <div className="flex items-center gap-2.5">
                                   <div className="flex items-center gap-1 text-white/60 text-xs whitespace-nowrap">
@@ -614,9 +650,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 e.stopPropagation();
                                 handleAddToCart(service);
                               }}
-                              className="px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-xs sm:text-sm hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
+                              className="w-full sm:w-auto px-6 py-3 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-sm hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
                             >
-                              Book
+                              Book Now
                               <ArrowLeft className="w-3 h-3 rotate-180" />
                             </button>
                           </div>
@@ -634,15 +670,14 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
               {/* Action Buttons */}
               {services && services.length > 0 && (
-                <div className="flex gap-4 w-full mb-8">
+                <div className="flex justify-center sm:justify-start gap-4 w-full mb-8">
                   <button
-                    onClick={() => {
-                      localStorage.setItem('service_cart_flow', 'true');
-                      router.push('/appliances/address');
-                    }}
-                    className="px-8 py-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all"
+                    onClick={handleContinueBooking}
+                    disabled={loading || selectedPackages.length === 0}
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-xl hover:shadow-[#037166]/30 transition-all text-center flex items-center justify-center gap-2"
                   >
-                    Proceed to Address ({selectedPackages.length})
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : `Continue Booking (${selectedPackages.length})`}
+                    {!loading && <ArrowLeft className="w-4 h-4 rotate-180" />}
                   </button>
                 </div>
               )}
@@ -1136,6 +1171,35 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Sticky Bottom Bar */}
+      <AnimatePresence>
+        {selectedPackages.length > 0 && activeTab === 'services' && (
+          <motion.div
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
+            exit={{ y: 100 }}
+            className="fixed bottom-0 left-0 right-0 z-[60] p-4 bg-[#0a0a0a]/80 backdrop-blur-xl border-t border-white/10"
+          >
+            <div className="max-w-[1400px] w-full mx-auto flex flex-row items-center justify-between gap-4">
+              <div className="flex flex-col">
+                <span className="text-white font-bold text-base sm:text-lg">{selectedPackages.length} Service{selectedPackages.length > 1 ? 's' : ''} Selected</span>
+                <span className="text-white/60 text-xs sm:text-sm">
+                  Total: ₹{services.filter(s => selectedPackages.includes(s.id)).reduce((acc, curr) => acc + curr.price, 0)}
+                </span>
+              </div>
+              <button
+                onClick={handleContinueBooking}
+                disabled={loading}
+                className="px-6 py-3 sm:px-10 sm:py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-sm sm:text-lg shadow-xl shadow-[#037166]/20 hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-2 sm:gap-3"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Continue Booking'}
+                {!loading && <ArrowLeft className="w-4 h-4 rotate-180" />}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <style jsx>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }

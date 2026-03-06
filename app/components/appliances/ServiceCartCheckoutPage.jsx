@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Plus, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -10,10 +10,14 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 
 export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
-    const { cartData, cartItems, clearCart } = useServiceCart();
+    const { cartData, cartItems, clearCart, addToCart, removeFromCart } = useServiceCart();
     const { token, isAuthenticated, loading: authLoading } = useAuth();
 
-    const bookingCost = cartData?.finalAmount || 0;
+    // Calculate final payable amount: Service Cost + 18% GST + Consultation Fee (finalAmount)
+    const baseServiceCost = cartData?.totalServiceCost || 0;
+    const gstAmount = baseServiceCost * 0.18;
+    const bookingCost = baseServiceCost + gstAmount + (cartData?.finalAmount || 0);
+
     const inspectionCost = cartItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0);
 
     const [bookedDate, setBookedDate] = useState('');
@@ -148,6 +152,27 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     useEffect(() => {
         setBookedTime('');
     }, [bookedDate]);
+
+    const handleUpdateQuantity = async (item, delta) => {
+        const newQuantity = (item.quantity || 1) + delta;
+
+        if (newQuantity < 1) {
+            await removeFromCart(item.itemId, item.itemType);
+            return;
+        }
+
+        const providerId = cartData?.provider?._id;
+        if (!providerId) return;
+
+        await addToCart(
+            providerId,
+            item.itemId,
+            item.itemType,
+            delta,
+            item.parentServiceId,
+            cartData?.providerType || 'regular'
+        );
+    };
 
     const handleCheckout = async () => {
         if (!selectedAddress) {
@@ -472,15 +497,34 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             <h4 className="text-xl font-bold text-white mb-6">Booking Summary</h4>
 
                             {/* Cart Items */}
-                            <div className="space-y-3 mb-6">
+                            <div className="space-y-4 mb-6">
                                 {cartItems.map((item) => (
                                     <div key={item.itemId} className="flex justify-between text-sm">
                                         <div className="flex-1">
-                                            <h6 className="text-white/90 font-bold">{item.itemName}</h6>
-                                            <p className="text-[#04a99d] text-[10px] font-semibold uppercase tracking-wider mb-1">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h6 className="text-white/90 font-bold max-w-[180px] leading-tight">{item.itemName}</h6>
+                                                <span className="text-white font-bold whitespace-nowrap ml-2">₹{item.price}</span>
+                                            </div>
+                                            <p className="text-[#04a99d] text-[10px] font-semibold uppercase tracking-wider mb-2">
                                                 {item.packageName || 'Standard Package'}
                                             </p>
-                                            <p className="text-white/40 text-[10px]">Qty: {item.quantity || 1}</p>
+
+                                            {/* Quantity Controls */}
+                                            <div className="flex items-center gap-2.5">
+                                                <button
+                                                    onClick={() => handleUpdateQuantity(item, -1)}
+                                                    className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+                                                >
+                                                    <Minus className="w-3 h-3" />
+                                                </button>
+                                                <span className="text-white text-sm font-bold w-4 text-center">{item.quantity || 1}</span>
+                                                <button
+                                                    onClick={() => handleUpdateQuantity(item, 1)}
+                                                    className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -488,46 +532,70 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
                             <div className="h-px bg-white/10 mb-4" />
 
-                            {/* Pricing */}
-                            <div className="space-y-2 mb-2">
-                                {bookingCost > 0 && (
-                                    <div className="flex justify-between items-start text-white/80">
-                                        <div className="flex flex-col">
-                                            <span>Online Consultation Fee</span>
-                                            <div className="flex items-center gap-1 text-[#04a99d] text-xs font-normal">
-                                                <Info className="w-3 h-3" />
-                                                <span>pay online</span>
-                                            </div>
-                                        </div>
-                                        <span>₹{bookingCost.toFixed(2)}</span>
+                            {/* Pricing Breakdown */}
+                            <div className="space-y-4 mb-6">
+                                {/* Item Subtotal */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center text-white/50 text-xs uppercase tracking-wider font-bold">
+                                        <span>Services Subtotal</span>
+                                        <span>₹{baseServiceCost.toFixed(2)}</span>
                                     </div>
-                                )}
+                                    <div className="h-px bg-white/5" />
+                                </div>
 
-                                {inspectionCost > 0 && (
-                                    <div className="flex flex-col gap-1 mt-4">
-                                        <div className="flex justify-between items-start text-white/80">
+                                {/* Fees & Taxes */}
+                                <div className="space-y-3">
+                                    {gstAmount > 0 && (
+                                        <div className="flex justify-between items-center text-white/70 text-sm">
+                                            <div className="flex items-center gap-1.5">
+                                                <span>GST</span>
+                                                <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10">18%</span>
+                                            </div>
+                                            <span>₹{gstAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    {cartData?.platformFee > 0 && (
+                                        <div className="flex justify-between items-center text-white/70 text-sm">
+                                            <span>Platform Fee</span>
+                                            <span>₹{cartData.platformFee.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    {(cartData?.finalAmount || 0) > 0 && (
+                                        <div className="flex justify-between items-center text-white/70 text-sm">
                                             <div className="flex flex-col">
-                                                <span>Doorstep Inspection Fee</span>
-                                                <div className="flex items-center gap-1 text-[#04a99d] text-xs font-normal">
-                                                    <Info className="w-3 h-3" />
-                                                    <span>pay at Doorstep</span>
-                                                </div>
+                                                <span>Online Consultation Fee</span>
+                                                <span className="text-[10px] text-[#04a99d]">Non-refundable booking fee</span>
                                             </div>
-                                            <span>₹{inspectionCost.toFixed(2)}</span>
+                                            <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
                                         </div>
-                                        <div className="flex items-start gap-2 text-[10px] text-white/50 bg-white/5 p-2 rounded">
-                                            <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-[#04a99d]" />
-                                            <p>Note: This is the online consultation fee only. The Doorstep Inspection Fee will be collected at Doorstep.</p>
+                                    )}
+                                </div>
+
+                                <div className="h-px bg-white/10" />
+
+                                {/* Final Total */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-end">
+                                        <div className="flex flex-col">
+                                            <span className="text-white/60 text-xs uppercase font-bold">Grand Total</span>
+                                            <span className="text-white font-bold text-2xl">₹{bookingCost.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[#04a99d] text-[10px] font-bold uppercase py-1 px-2 bg-[#04a99d]/10 rounded-lg border border-[#04a99d]/20">
+                                                All inclusive
+                                            </span>
                                         </div>
                                     </div>
-                                )}
-                            </div>
 
-                            <div className="h-px bg-white/10 mb-4" />
-
-                            <div className="flex justify-between text-xl font-bold text-white mb-6">
-                                <span>Total</span>
-                                <span>₹{bookingCost.toFixed(2)}</span>
+                                    <div className="flex items-start gap-2 p-3 rounded-xl bg-[#04a99d]/5 border border-[#04a99d]/10 mt-4">
+                                        <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
+                                        <p className="text-[11px] text-white/70 leading-relaxed">
+                                            This is the total amount to be paid online. All taxes and service charges are included in this quote.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Selected Date/Time Preview */}

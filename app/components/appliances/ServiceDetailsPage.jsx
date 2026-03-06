@@ -301,7 +301,7 @@ export function ServiceDetailsPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-20 pb-24 lg:pb-0"
+      className="min-h-screen pt-20 pb-24 lg:pb-0 overflow-x-hidden"
     >
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
@@ -324,7 +324,7 @@ export function ServiceDetailsPage({
       </div>
 
       {/* ── HERO SECTION ────────────────────────────────────────────────────── */}
-      <section className="relative py-6 lg:py-12">
+      <section className="relative py-6 lg:py-12 overflow-hidden">
         <div
           className="absolute inset-0 opacity-30"
           style={{ background: `linear-gradient(135deg, #025a51 0%, ${accentColor} 50%, #037166 100%)` }}
@@ -342,7 +342,7 @@ export function ServiceDetailsPage({
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex flex-wrap items-center gap-3 mb-4"
+            className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4"
           >
             <button
               onClick={() => {
@@ -362,12 +362,14 @@ export function ServiceDetailsPage({
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
-            <div className="text-white/50 text-xs flex items-center gap-1.5 flex-wrap">
-              <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); router.push(c ? `/${c}` : '/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[100px]">{category}</button>
-              <ChevronRight className="w-3 h-3 flex-shrink-0" />
-              <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[100px]">{subCategory}</button>
-              <ChevronRight className="w-3 h-3 flex-shrink-0" />
-              <span className="text-white/30 truncate max-w-[120px]">{storeData?.name}</span>
+            <div className="flex-1 min-w-0 pr-2 overflow-hidden">
+              <div className="text-white/50 text-[10px] sm:text-xs flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); router.push(c ? `/${c}` : '/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[70px] sm:max-w-[100px]">{category}</button>
+                <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[70px] sm:max-w-[100px]">{subCategory}</button>
+                <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                <span className="text-white/30 truncate max-w-[90px] sm:max-w-[120px]">{storeData?.name}</span>
+              </div>
             </div>
           </motion.div>
 
@@ -381,7 +383,7 @@ export function ServiceDetailsPage({
             <div className="order-2 lg:order-none space-y-6 lg:space-y-8">
 
               {/* Image Gallery */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="w-full">
                 <div className="relative rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm border border-white/10">
                   <div
                     className="relative w-full overflow-hidden"
@@ -448,7 +450,7 @@ export function ServiceDetailsPage({
                   ))}
                 </div>
 
-                <div className="p-4 sm:p-6">
+                <div className="p-3 sm:p-6">
                   <AnimatePresence mode="wait">
                     {/* About Service Tab */}
                     {(activeTab === 'About Service' || activeTab === 'services') && (
@@ -459,13 +461,13 @@ export function ServiceDetailsPage({
 
 
                         </div>
-                        <div className="grid gap-3">
+                        <div className="grid gap-2.5">
                           {provider_rate_cards.map((card, index) => (
-                            <div key={card.id || index} className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group">
-                              <div className="flex gap-3">
+                            <div key={card.id || index} className="p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group overflow-hidden">
+                              <div className="flex gap-2 sm:gap-3 items-center">
                                 {/* Rate Card Thumbnail */}
                                 {card.image && (
-                                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
+                                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
                                     <img
                                       src={`https://api.doorstephub.com/${card.image}`}
                                       alt={card.title}
@@ -484,8 +486,8 @@ export function ServiceDetailsPage({
                                       )}
                                     </div>
 
-                                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                      <span className="text-[#04a99d] font-bold text-lg whitespace-nowrap">₹{card.price}</span>
+                                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                                      <span className="text-[#04a99d] font-bold text-base sm:text-lg whitespace-nowrap">₹{card.price}</span>
 
                                       {/* See More Button - Below Price */}
                                       {card.banner_images?.length > 0 && (
@@ -496,9 +498,9 @@ export function ServiceDetailsPage({
                                             currentIndex: 0,
                                             title: card.title
                                           })}
-                                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[10px] font-bold  tracking-wider border border-[#037166]/20"
+                                          className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[9px] sm:text-[10px] font-bold border border-[#037166]/20"
                                         >
-                                          View Service Images
+                                          <span className="hidden xs:inline">View </span>Images
                                           <ArrowRight className="w-3 h-3" />
                                         </button>
                                       )}
@@ -585,17 +587,17 @@ export function ServiceDetailsPage({
             >
               {/* Title + Rating */}
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2 break-words">
                   {storeData.name}
                 </h1>
                 <p className="text-white/60 text-sm mb-3">Professional Service</p>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
                     <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
                     <span className="text-white font-bold text-sm">{storeData.avgRating}</span>
-                    <span className="text-white/50 text-xs">({storeData.totalRatings} ratings)</span>
+                    <span className="text-white/50 text-[10px] sm:text-xs">({storeData.totalRatings})</span>
                   </div>
-                  <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/60 text-xs">
+                  <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/60 text-xs flex-shrink-0">
                     {storeData.totalOrders}+ Orders
                   </div>
                 </div>
@@ -621,11 +623,11 @@ export function ServiceDetailsPage({
                   { icon: Clock, text: 'Same-Day Service' },
                   { icon: ThumbsUp, text: 'Satisfaction Guaranteed' },
                 ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 border border-white/10">
-                    <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: `${accentColor}40` }}>
-                      <item.icon className="w-4 h-4" style={{ color: accentColor }} />
+                  <div key={idx} className="flex items-center gap-2 p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: `${accentColor}40` }}>
+                      <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: accentColor }} />
                     </div>
-                    <span className="text-white/80 text-xs font-medium leading-tight">{item.text}</span>
+                    <span className="text-white/80 text-[10px] sm:text-xs font-medium leading-tight truncate">{item.text}</span>
                   </div>
                 ))}
               </div>
@@ -653,8 +655,8 @@ export function ServiceDetailsPage({
         <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 border-t border-white/5">
           <div className="flex items-center justify-between mb-6 lg:mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Related Services</h2>
-              <p className="text-white/60">Other popular services in {subCategory}</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Related Services</h2>
+              <p className="text-white/60 text-sm">Other popular services in {subCategory}</p>
             </div>
             <button
               onClick={() => {

@@ -581,11 +581,12 @@ export function CategoryPage({ slug, initialData, onBack }) {
                     <div className="flex gap-4">
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all whitespace-nowrap"
+                        className="flex items-center gap-2 px-2 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all whitespace-nowrap"
                       >
                         <TicketCheck className="w-4 h-4 text-[#04a99d]" />
                         Raise A Ticket
                       </button>
+              
                       <button
                         onClick={() => setShowAppModal(true)}
                         className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all whitespace-nowrap"

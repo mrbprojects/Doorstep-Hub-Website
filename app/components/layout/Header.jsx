@@ -205,8 +205,8 @@ export function Header({ theme = {}, navItems = [] }) {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isHeaderSolid
-            ? `${currentTheme.bgScrolled} glass-premium border-b ${currentTheme.border} shadow-lg`
-            : 'bg-transparent'
+          ? `${currentTheme.bgScrolled} glass-premium border-b ${currentTheme.border} shadow-lg`
+          : 'bg-transparent'
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -217,12 +217,12 @@ export function Header({ theme = {}, navItems = [] }) {
                 whileHover={{ scale: 1.02 }}
                 className="flex items-center relative group flex-shrink-0"
               >
-                <div className="relative w-36 sm:w-48 h-10 sm:h-14 overflow-hidden flex-shrink-0">
+                <div className="relative w-24 sm:w-48 h-10 sm:h-14 overflow-hidden flex-shrink-0">
                   <Image
                     src="/d-hub-logo.png"
                     alt="Doorstep Hub Logo"
                     fill
-                    sizes="(max-width: 640px) 144px, 192px"
+                    sizes="(max-width: 640px) 96px, 192px"
                     className="object-contain object-left transition-all duration-300"
                     priority
                   />
@@ -282,7 +282,7 @@ export function Header({ theme = {}, navItems = [] }) {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center space-x-2 sm:space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-3">
               <div id="location-bar">
                 <LocationBar theme={currentTheme} />
               </div>
@@ -292,7 +292,7 @@ export function Header({ theme = {}, navItems = [] }) {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => router.push(`/${serviceSlugs.appliances}/cart`)}
-                className={`hidden sm:flex items-center justify-center w-11 h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all relative shadow-md hover:shadow-lg`}
+                className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all relative shadow-md hover:shadow-lg`}
               >
                 <ShoppingCart className={`w-5 h-5 ${currentTheme.textHover ? currentTheme.textHover : 'text-[#037166]'}`} />
                 {cartItemsCount > 0 && (
@@ -311,7 +311,7 @@ export function Header({ theme = {}, navItems = [] }) {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setAuthModalOpen(true)}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all overflow-hidden shadow-md hover:shadow-lg`}
+                className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all overflow-hidden shadow-md hover:shadow-lg`}
               >
                 {isAuthenticated && user?.image ? (
                   <img
@@ -341,7 +341,7 @@ export function Header({ theme = {}, navItems = [] }) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-xl ${currentTheme.buttonBg} border ${currentTheme.border} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} transition-all shadow-md hover:shadow-lg mr-2`}
+                className={`lg:hidden p-1.5 sm:p-2 rounded-xl ${currentTheme.buttonBg} border ${currentTheme.border} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} transition-all shadow-md hover:shadow-lg`}
               >
                 {mobileMenuOpen ? (
                   <X className={`w-6 h-6 ${currentTheme.textHover ? currentTheme.textHover : 'text-[#037166]'}`} />

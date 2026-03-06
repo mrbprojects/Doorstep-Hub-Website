@@ -388,7 +388,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => onBack ? onBack() : router.back()}
-          className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 hover:bg-white/10 hover:border-[#037166]/50 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 mb-4 sm:mb-8 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 hover:bg-white/10 hover:border-[#037166]/50 transition-all text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -398,7 +398,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
+          className="relative h-[320px] xs:h-[350px] md:h-[400px] lg:h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
         >
           {bannerImage ? (
             <img
@@ -417,40 +417,35 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
           {/* Store Info Overlay */}
           <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 md:mb-3">
+            <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-3.5 sm:p-5 md:p-6">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1.5 md:mb-3 leading-tight">
                 {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-3 md:gap-6 mb-3 md:mb-4">
-                <div className="flex items-center gap-1.5 md:gap-2">
-                  <MapPin className="w-5 h-5 text-[#037166]" />
-                  <span className="text-white/80">{center.address}</span>
+              <div className="flex flex-col gap-2 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-6 mb-3 md:mb-4">
+                <div className="flex items-start gap-1.5 md:gap-2">
+                  <MapPin className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
+                  <span className="text-white/80 text-xs sm:text-sm line-clamp-1">{center.address}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 fill-[#037166] text-[#037166]" />
-                    <span className="text-white font-semibold">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <Star className="w-4 h-4 fill-[#037166] text-[#037166]" />
+                    <span className="text-white font-semibold text-xs sm:text-sm">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
+                    <span className="text-white/50 text-[10px] sm:text-xs">({center.totalRatings || center.reviews?.length || 0})</span>
                   </div>
-                  <span className="text-white/60">({center.totalRatings || center.reviews?.length || 0} reviews)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#037166]/20">
-                    <CheckCheck className="w-3.5 h-3.5 text-[#037166]" />
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-[#037166]/20">
+                      <CheckCheck className="w-2.5 h-2.5 text-[#037166]" />
+                    </div>
+                    <span className="text-white/80 text-xs sm:text-sm">{center.totalOrders || 0}+ Jobs Done</span>
                   </div>
-                  <span className="text-white/80">{center.totalOrders || 0}+ Jobs Done</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
-                {/* <div className="px-4 py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold">
-                  Starting from ₹{center.BasePrice || center.serviceBookingCost || 0}
-                </div> */}
-                <div className="flex gap-2">
-                  <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#037166]" />
-                    <span className="text-white/80 text-sm">Express Service</span>
-                  </div>
+                <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-[#037166]" />
+                  <span className="text-white/80 text-[10px] sm:text-xs">Express Service</span>
                 </div>
               </div>
             </div>
@@ -495,9 +490,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               transition={{ duration: 0.3 }}
             >
               {/* Header */}
-              <div className="mb-6 w-full">
-                <h2 className="text-3xl font-bold text-white mb-2">Available Services</h2>
-                <p className="text-white/60 text-lg">Choose from our professional repair packages</p>
+              <div className="mb-6 w-full px-1">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1.5">Available Services</h2>
+                <p className="text-white/60 text-sm sm:text-base">Choose from our professional repair packages</p>
               </div>
 
               {/* Service Cards - Using API data */}
@@ -551,7 +546,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                           </div>
                         )}
 
-                        <div className="p-5 flex-1 flex flex-col justify-between">
+                        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                           <div className="flex-1 mb-3">
                             <div className="flex items-start justify-between">
                               <div>
@@ -562,10 +557,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                     <span className="text-[10px] font-bold uppercase tracking-wider">Selected</span>
                                   </div>
                                 )}
-                                <h4 className="text-lg font-bold text-white mb-1">{service.name}</h4>
+                                <h4 className="text-base sm:text-lg font-bold text-white mb-1 leading-snug">{service.name}</h4>
                               </div>
-                              <div className="text-right">
-                                <span className="text-2xl font-bold text-[#037166]">₹{service.price}</span>
+                              <div className="text-right flex-shrink-0 ml-2">
+                                <span className="text-xl sm:text-2xl font-bold text-[#037166]">₹{service.price}</span>
                                 {service.priceUnit && (
                                   <span className="text-white/40 text-[10px] ml-1">/{service.priceUnit}</span>
                                 )}
@@ -619,9 +614,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 e.stopPropagation();
                                 handleAddToCart(service);
                               }}
-                              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
+                              className="px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-xs sm:text-sm hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
                             >
-                              Book Now
+                              Book
                               <ArrowLeft className="w-3 h-3 rotate-180" />
                             </button>
                           </div>

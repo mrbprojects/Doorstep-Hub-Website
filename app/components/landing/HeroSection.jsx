@@ -476,7 +476,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, [services, isPaused]); // Re-run if services load/change or pause state changes
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-28 sm:pt-20">
       {/* Standardized Architectural World Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />

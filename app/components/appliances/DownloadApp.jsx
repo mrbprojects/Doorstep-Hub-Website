@@ -32,11 +32,12 @@ export function DownloadApp() {
               <h6 className="text-xs font-medium text-[#04a99d]">MOBILE APP</h6>
             </div>
 
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <h2 className="text-[28px] md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                 Download the App &
               </span>
               <br />
+            
               <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent">
                 Grow Your Service Business
               </span>
@@ -72,23 +73,24 @@ export function DownloadApp() {
             </div>
 
             {/* App Store Buttons */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-row flex-wrap sm:flex-nowrap gap-2 sm:gap-4">
               <a
                 href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="flex-1 sm:flex-none"
               >
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(3, 113, 102, 0.4)' }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium shadow-xl shadow-[#037166]/30 transition-all group"
+                  className="w-full flex items-center justify-center gap-2 sm:gap-3 px-3 py-3 sm:px-6 sm:py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium shadow-xl shadow-[#037166]/30 transition-all group"
                 >
-                  <Apple className="w-6 h-6" />
+                  <Apple className="w-5 h-5 sm:w-6 sm:h-6" />
                   <div className="text-left">
-                    <div className="text-xs opacity-80">Download on the</div>
-                    <span className="text-sm font-bold">App Store</span>
+                    <div className="text-[10px] sm:text-[12px] opacity-80">Download on the</div>
+                    <span className="text-xs sm:text-sm font-bold">App Store</span>
                   </div>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform ml-2" />
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform ml-1 sm:ml-2" />
                 </motion.button>
               </a>
 
@@ -96,18 +98,19 @@ export function DownloadApp() {
                 href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="flex-1 sm:flex-none"
               >
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#037166]/50 text-white font-medium backdrop-blur-sm transition-all group"
+                  className="w-full flex items-center justify-center gap-2 sm:gap-3 px-3 py-3 sm:px-6 sm:py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#037166]/50 text-white font-medium backdrop-blur-sm transition-all group"
                 >
-                  <Smartphone className="w-6 h-6" />
+                  <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
                   <div className="text-left">
-                    <div className="text-xs opacity-80">Get it on</div>
-                    <span className="text-sm font-bold">Google Play</span>
+                    <div className="text-[10px] sm:text-xs opacity-80">Get it on</div>
+                    <span className="text-xs sm:text-sm font-bold">Google Play</span>
                   </div>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform ml-2" />
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform ml-1 sm:ml-2" />
                 </motion.button>
               </a>
             </div>

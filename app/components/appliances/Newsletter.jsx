@@ -241,10 +241,10 @@ export function Newsletter() {
             rotate: [0, 8, 0],
           }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-10 left-10 w-24 h-24 rounded-3xl bg-gradient-to-br from-[#037166]/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-[#037166]/20"
+          className="absolute -top-12 -left-4 md:top-10 md:left-10 w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-[#037166]/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-[#037166]/20"
         >
           <img
-            src="/error.gif"
+            src="/electric-appliance.png"
             alt="Repair Service"
             className="w-full h-full object-contain filter drop-shadow-xl"
           />
@@ -256,7 +256,7 @@ export function Newsletter() {
             rotate: [0, -8, 0],
           }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-10 right-10 w-24 h-24 rounded-3xl bg-gradient-to-br from-cyan-500/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-cyan-500/20"
+          className="absolute -top-12 -right-4 md:top-10 md:right-10 w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-cyan-500/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-cyan-500/20"
         >
           <img
             src="/fridge-storage.png"

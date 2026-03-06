@@ -173,7 +173,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         >
             {/* Header */}
             <section className="sticky top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                     <motion.button
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -196,7 +196,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 </div>
 
                 {/* Progress Indicator */}
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6">
                     <BookingSteps
                         flowType={FLOW_TYPES.SERVICE_CENTER}
                         currentStep="address"
@@ -205,10 +205,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 </div>
             </section>
 
-            <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-8">
-                <div className="grid lg:grid-cols-3 gap-8">
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
                     {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                         {/* Date Selection */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}

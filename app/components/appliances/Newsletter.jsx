@@ -237,20 +237,33 @@ export function Newsletter() {
         {/* Decorative Elements */}
         <motion.div
           animate={{
-            y: [0, -10, 0],
-            rotate: [0, 5, 0],
+            y: [0, -15, 0],
+            rotate: [0, 8, 0],
           }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="absolute top-10 left-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-[#037166]/20 to-transparent backdrop-blur-sm border border-white/10"
-        />
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-10 left-10 w-24 h-24 rounded-3xl bg-gradient-to-br from-[#037166]/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-[#037166]/20"
+        >
+          <img
+            src="/error.gif"
+            alt="Repair Service"
+            className="w-full h-full object-contain filter drop-shadow-xl"
+          />
+        </motion.div>
+
         <motion.div
           animate={{
-            y: [0, 10, 0],
-            rotate: [0, -5, 0],
+            y: [0, 15, 0],
+            rotate: [0, -8, 0],
           }}
-          transition={{ duration: 4, repeat: Infinity }}
-          className="absolute bottom-10 right-10 w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500/20 to-transparent backdrop-blur-sm border border-white/10"
-        />
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-10 right-10 w-24 h-24 rounded-3xl bg-gradient-to-br from-cyan-500/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-cyan-500/20"
+        >
+          <img
+            src="/fridge-storage.png"
+            alt="Fridge Service"
+            className="w-full h-full object-contain filter drop-shadow-xl"
+          />
+        </motion.div>
       </div>
     </section>
   );

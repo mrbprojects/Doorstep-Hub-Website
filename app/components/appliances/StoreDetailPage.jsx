@@ -17,7 +17,7 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp
+  ThumbsUp, CheckCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -54,6 +54,16 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const { location } = useLocationContext();
 
   // Fetch service center details from API
+  useEffect(() => {
+    let interval;
+    if (lightboxIndex !== null && portfolioImages.length > 1) {
+      interval = setInterval(() => {
+        setLightboxIndex((prev) => (prev + 1) % portfolioImages.length);
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [lightboxIndex, portfolioImages.length]);
+
   useEffect(() => {
     const fetchCenterDetails = async () => {
       setLoading(true);
@@ -372,7 +382,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <motion.button
           initial={{ opacity: 0, x: -20 }}
@@ -388,7 +398,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
+          className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
         >
           {bannerImage ? (
             <img
@@ -406,14 +416,14 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
           {/* Store Info Overlay */}
-          <div className="absolute bottom-8 left-8 right-8">
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h1 className="text-4xl font-bold text-white mb-3">
+          <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 md:mb-3">
                 {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-6 mb-4">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-3 md:gap-6 mb-3 md:mb-4">
+                <div className="flex items-center gap-1.5 md:gap-2">
                   <MapPin className="w-5 h-5 text-[#037166]" />
                   <span className="text-white/80">{center.address}</span>
                 </div>
@@ -425,7 +435,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   <span className="text-white/60">({center.totalRatings || center.reviews?.length || 0} reviews)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-[#037166]" />
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#037166]/20">
+                    <CheckCheck className="w-3.5 h-3.5 text-[#037166]" />
+                  </div>
                   <span className="text-white/80">{center.totalOrders || 0}+ Jobs Done</span>
                 </div>
               </div>
@@ -483,14 +495,14 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               transition={{ duration: 0.3 }}
             >
               {/* Header */}
-              <div className="mb-8 max-w-3xl">
+              <div className="mb-6 w-full">
                 <h2 className="text-3xl font-bold text-white mb-2">Available Services</h2>
                 <p className="text-white/60 text-lg">Choose from our professional repair packages</p>
               </div>
 
               {/* Service Cards - Using API data */}
               {loading ? (
-                <div className="flex flex-col gap-3 mb-8 max-w-3xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 w-full">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="h-28 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
                       <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
@@ -505,7 +517,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   ))}
                 </div>
               ) : services && services.length > 0 ? (
-                <div className="flex flex-col gap-4 mb-8 max-w-3xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 w-full">
                   {services.map((service, index) => (
                     <motion.div
                       key={service.id || index}
@@ -569,7 +581,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                               {service.totalOrders > 0 && (
                                 <div className="flex items-center gap-2.5">
                                   <div className="flex items-center gap-1 text-white/60 text-xs whitespace-nowrap">
-                                    <Users className="w-3.5 h-3.5 text-[#037166]" />
+                                    <CheckCheck className="w-4 h-4 text-[#037166]" />
                                     <span>{service.totalOrders} orders</span>
                                   </div>
 
@@ -607,10 +619,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 e.stopPropagation();
                                 handleAddToCart(service);
                               }}
-                              className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
+                              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
                             >
                               Book Now
-                              <ArrowLeft className="w-4 h-4 rotate-180" />
+                              <ArrowLeft className="w-3 h-3 rotate-180" />
                             </button>
                           </div>
                         </div>
@@ -627,7 +639,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
               {/* Action Buttons */}
               {services && services.length > 0 && (
-                <div className="flex gap-4 max-w-3xl">
+                <div className="flex gap-4 w-full mb-8">
                   <button
                     onClick={() => {
                       localStorage.setItem('service_cart_flow', 'true');
@@ -663,26 +675,32 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               {/* Trust Indicators */}
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#037166]/50 transition-all">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center mb-4">
-                    <Users className="w-7 h-7 text-white" />
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex-shrink-0 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <h4 className="text-lg sm:text-xl font-bold text-white">Expert Technicians</h4>
                   </div>
-                  <h4 className="text-xl font-bold text-white mb-2">Expert Technicians</h4>
                   <p className="text-white/60">Certified professionals with years of experience</p>
                 </div>
 
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#037166]/50 transition-all">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center mb-4">
-                    <Shield className="w-7 h-7 text-white" />
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex-shrink-0 flex items-center justify-center">
+                      <Shield className="w-6 h-6 text-white" />
+                    </div>
+                    <h4 className="text-lg sm:text-xl font-bold text-white leading-tight">30 - 90 Days Service Warranty On Repairs</h4>
                   </div>
-                  <h4 className="text-xl font-bold text-white mb-2">90-Day Warranty</h4>
                   <p className="text-white/60">All repairs backed by our guarantee</p>
                 </div>
 
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#037166]/50 transition-all">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center mb-4">
-                    <Clock className="w-7 h-7 text-white" />
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex-shrink-0 flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-white" />
+                    </div>
+                    <h4 className="text-lg sm:text-xl font-bold text-white">Same-Day Service</h4>
                   </div>
-                  <h4 className="text-xl font-bold text-white mb-2">Same-Day Service</h4>
                   <p className="text-white/60">Fast turnaround for urgent repairs</p>
                 </div>
               </div>
@@ -728,7 +746,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               <h2 className="text-3xl font-bold text-white mb-2">Our Work</h2>
               <p className="text-white/60 mb-8 text-lg">See examples of our repair and service projects</p>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {portfolioImages && portfolioImages.length > 0 ? (
                   portfolioImages.map((image, index) => (
                     <motion.div
@@ -772,21 +790,21 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   >
                     {/* Close */}
                     <button
-                      onClick={() => setLightboxIndex(null)}
-                      className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
+                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+                      className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-[120]"
                     >
                       <X className="w-6 h-6 text-white" />
                     </button>
 
                     {/* Counter */}
-                    <div className="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium">
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium z-[120]">
                       {lightboxIndex + 1} / {portfolioImages.length}
                     </div>
 
                     {/* Prev Button */}
                     <button
                       onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + portfolioImages.length) % portfolioImages.length); }}
-                      className="absolute left-4 md:left-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
+                      className="absolute left-4 md:left-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-[120]"
                     >
                       <ArrowLeft className="w-5 h-5 text-white" />
                     </button>
@@ -794,7 +812,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     {/* Next Button */}
                     <button
                       onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % portfolioImages.length); }}
-                      className="absolute right-4 md:right-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
+                      className="absolute right-4 md:right-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-[120]"
                     >
                       <ArrowLeft className="w-5 h-5 text-white rotate-180" />
                     </button>

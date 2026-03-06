@@ -200,6 +200,41 @@ export function ServiceDetailsPage({
     }
   }, [loading, serviceDetails, router]);
 
+  // Prepare images list (banner + service images)
+  const images = serviceDetails?.storeData ? [
+    serviceDetails.storeData.bannerImage ? `https://api.doorstephub.com/${serviceDetails.storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
+    ...(serviceDetails.serviceImages || []).map(img => `https://api.doorstephub.com/${img}`)
+  ].filter(Boolean) : []; // Remove any null/undefined images
+
+  // Auto-scroll for Main Image Gallery & Lightbox
+  useEffect(() => {
+    let interval;
+    if (images.length > 1) {
+      interval = setInterval(() => {
+        if (isLightboxOpen) {
+          setSelectedImageIndex((prev) => (prev + 1) % images.length);
+        } else {
+          setCurrentImageIndex((prev) => (prev + 1) % images.length);
+        }
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [isLightboxOpen, images.length]);
+
+  // Auto-scroll for Rate Card Modal
+  useEffect(() => {
+    let interval;
+    if (rateCardModal.isOpen && rateCardModal.images.length > 1) {
+      interval = setInterval(() => {
+        setRateCardModal((prev) => ({
+          ...prev,
+          currentIndex: (prev.currentIndex + 1) % prev.images.length,
+        }));
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [rateCardModal.isOpen, rateCardModal.images.length]);
+
   if (loading) {
     return (
       <div className="min-h-screen pt-32 bg-[#0a0a0a]">
@@ -229,13 +264,6 @@ export function ServiceDetailsPage({
   }
 
   const { storeData, provider_rate_cards = [], serviceImages = [], customerRatings = [] } = serviceDetails;
-
-  // Prepare images list (banner + service images)
-  // FIXED CODE:
-  const images = [
-    storeData.bannerImage ? `https://api.doorstephub.com/${storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
-    ...serviceImages.map(img => `https://api.doorstephub.com/${img}`)
-  ].filter(Boolean); // Remove any null/undefined images
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -468,9 +496,9 @@ export function ServiceDetailsPage({
                                             currentIndex: 0,
                                             title: card.title
                                           })}
-                                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[10px] font-bold uppercase tracking-wider border border-[#037166]/20"
+                                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[10px] font-bold  tracking-wider border border-[#037166]/20"
                                         >
-                                          See More
+                                          View Service Images
                                           <ArrowRight className="w-3 h-3" />
                                         </button>
                                       )}
@@ -609,10 +637,10 @@ export function ServiceDetailsPage({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                   onClick={handleBookNow}
-                  className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"
+                  className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"
                 >
                   Book Now
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-2 h-5 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
               </div>
             </motion.div>
@@ -622,8 +650,8 @@ export function ServiceDetailsPage({
 
       {/* Related Services Section */}
       {relatedServices.length > 0 && (
-        <section className="max-w-[1400px] mx-auto px-6 lg:px-8 py-16 border-t border-white/5">
-          <div className="flex items-center justify-between mb-8">
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 border-t border-white/5">
+          <div className="flex items-center justify-between mb-6 lg:mb-8">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2">Related Services</h2>
               <p className="text-white/60">Other popular services in {subCategory}</p>
@@ -642,7 +670,7 @@ export function ServiceDetailsPage({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {relatedServices.map((service, index) => (
               <motion.div
                 key={service._id}
@@ -694,8 +722,8 @@ export function ServiceDetailsPage({
           >
             {/* Close Button */}
             <button
-              onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-10"
+              onClick={(e) => { e.stopPropagation(); setIsLightboxOpen(false); }}
+              className="absolute top-6 right-6 p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md z-[120]"
             >
               <X className="w-6 h-6" />
             </button>
@@ -708,18 +736,18 @@ export function ServiceDetailsPage({
                     e.stopPropagation();
                     setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length);
                   }}
-                  className="absolute left-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-10"
+                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 sm:p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[120]"
                 >
-                  <ChevronLeft className="w-8 h-8" />
+                  <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedImageIndex((prev) => (prev + 1) % images.length);
                   }}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-10"
+                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 sm:p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[120]"
                 >
-                  <ChevronRight className="w-8 h-8" />
+                  <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
                 </button>
               </>
             )}
@@ -760,14 +788,14 @@ export function ServiceDetailsPage({
           >
             {/* Close Button */}
             <button
-              onClick={() => setRateCardModal(prev => ({ ...prev, isOpen: false }))}
+              onClick={(e) => { e.stopPropagation(); setRateCardModal(prev => ({ ...prev, isOpen: false })); }}
               className="absolute top-6 right-6 p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md z-[120]"
             >
               <X className="w-6 h-6" />
             </button>
 
             {/* Service Title */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center w-full px-12 z-[120]">
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center w-full px-12 z-[120] pointer-events-none">
               <h4 className="text-lg sm:text-2xl font-bold text-white mb-1 drop-shadow-lg">
                 {rateCardModal.title}
               </h4>

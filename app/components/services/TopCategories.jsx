@@ -119,7 +119,7 @@ export function TopCategories({ onViewAll }) {
 
   return (
     <section ref={sectionRef} className="py-1 relative overflow-hidden">
-      <motion.div style={{ opacity, y }} className="max-w-[1400px] mx-auto px-6 lg:px-8">
+      <motion.div style={{ opacity, y }} className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-12">
           <div>
             <motion.div
@@ -186,7 +186,7 @@ export function TopCategories({ onViewAll }) {
                     onClick={() => router.push(`/${category.slug}`)}
                     className="group cursor-pointer"
                   >
-                    <div className="relative w-72 lg:w-[210px] h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+                    <div className="relative w-56 sm:w-64 lg:w-[210px] h-48 sm:h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
                       <div className="absolute inset-0">
                         <img
                           src={category.image}

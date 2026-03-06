@@ -136,7 +136,7 @@ export function ServiceDetail() {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left: Service Info */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -165,32 +165,32 @@ export function ServiceDetail() {
               </p>
 
               {/* Metadata Badges */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-0">
                 <motion.div
                   whileHover={{ y: -5 }}
-                  className="p-4 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-2xl"
+                  className="p-3 sm:p-4 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-left"
                 >
-                  <Clock className="w-6 h-6 text-[#037166] mb-2" />
-                  <div className="text-2xl font-bold text-white mb-1">2hrs</div>
-                  <div className="text-xs text-gray-400">Last Booking</div>
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-[#037166] mb-2" />
+                  <div className="text-xl sm:text-2xl font-bold text-white mb-1">2hrs</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400">Last Booking</div>
                 </motion.div>
 
                 <motion.div
                   whileHover={{ y: -5 }}
-                  className="p-4 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-2xl"
+                  className="p-3 sm:p-4 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-left"
                 >
-                  <Users className="w-6 h-6 text-[#037166] mb-2" />
-                  <div className="text-2xl font-bold text-white mb-1">2.3K</div>
-                  <div className="text-xs text-gray-400">Total Bookings</div>
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#037166] mb-2" />
+                  <div className="text-xl sm:text-2xl font-bold text-white mb-1">2.3K</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400">Total Bookings</div>
                 </motion.div>
 
                 <motion.div
                   whileHover={{ y: -5 }}
-                  className="p-4 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-2xl"
+                  className="p-3 sm:p-4 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-left"
                 >
-                  <DollarSign className="w-6 h-6 text-[#037166] mb-2" />
-                  <div className="text-2xl font-bold text-white mb-1">$25</div>
-                  <div className="text-xs text-gray-400">Inspection Fee</div>
+                  <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-[#037166] mb-2" />
+                  <div className="text-xl sm:text-2xl font-bold text-white mb-1">$25</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400">Inspection Fee</div>
                 </motion.div>
               </div>
             </motion.div>
@@ -484,9 +484,9 @@ export function ServiceDetail() {
             onClick={() => setShowBookingModal(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
-            className="px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-2xl text-white font-semibold shadow-xl shadow-[#037166]/40 hover:shadow-2xl hover:shadow-[#037166]/50 transition-all flex items-center space-x-2"
+            className="px-6 py-2 bg-gradient-to-r from-[#037166] to-[#025951] rounded-2xl text-white font-semibold shadow-xl shadow-[#037166]/40 hover:shadow-2xl hover:shadow-[#037166]/50 transition-all flex items-center space-x-2"
           >
-            <Calendar className="w-5 h-5" />
+            <Calendar className="w-3 h-3" />
             <span>{selectedDate ? 'Continue' : 'Book Now'}</span>
           </motion.button>
         </div>

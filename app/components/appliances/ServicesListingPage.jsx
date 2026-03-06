@@ -723,8 +723,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             {/* Image */}
                             <div className="relative w-full md:w-64 h-48 md:h-auto overflow-hidden">
                               <img
-                                src={center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
-                                alt={center.name}
+                                src={center.image ? `https://api.doorstephub.com/${center.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
+                                alt={center.business_name}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               />
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a1a1a]/60" />

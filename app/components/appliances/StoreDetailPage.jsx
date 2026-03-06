@@ -658,7 +658,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h2 className="text-3xl font-bold text-white mb-6">About {center.firstName} {center.lastName}</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">About {center.business_name}</h2>
 
               {/* Description */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-8">

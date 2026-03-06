@@ -13,10 +13,11 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const { cartData, cartItems, clearCart, addToCart, removeFromCart } = useServiceCart();
     const { token, isAuthenticated, loading: authLoading } = useAuth();
 
-    // Calculate final payable amount: Service Cost + 18% GST + Consultation Fee (finalAmount)
+    // Calculate final payable amount: Service Cost + 18% GST + Fixed Consultation Fee (125)
     const baseServiceCost = cartData?.totalServiceCost || 0;
     const gstAmount = baseServiceCost * 0.18;
-    const bookingCost = baseServiceCost + gstAmount + (cartData?.finalAmount || 0);
+    const consultationFee = 125; // Fixed Consultation Fee
+    const bookingCost = baseServiceCost + gstAmount + consultationFee;
 
     const inspectionCost = cartItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0);
 
@@ -562,13 +563,13 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         </div>
                                     )}
 
-                                    {(cartData?.finalAmount || 0) > 0 && (
+                                    {(
                                         <div className="flex justify-between items-center text-white/70 text-sm">
                                             <div className="flex flex-col">
                                                 <span>Online Consultation Fee</span>
                                                 <span className="text-[10px] text-[#04a99d]">Non-refundable booking fee</span>
                                             </div>
-                                            <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                                            <span>₹{consultationFee.toFixed(2)}</span>
                                         </div>
                                     )}
                                 </div>

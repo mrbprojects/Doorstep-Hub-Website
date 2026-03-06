@@ -218,7 +218,7 @@ export function CartPage({
                           <span>Payable Online</span>
                         </div>
                       </div>
-                      <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                      <span>₹{125.00.toFixed(2)}</span>
                     </div>
 
                     {inspectionCost > 0 && (
@@ -244,7 +244,7 @@ export function CartPage({
                       <div className="flex flex-col">
                         <span className="text-white/60 text-xs uppercase font-bold">Payable Now</span>
                         <span className="text-white font-bold text-2xl">
-                          ₹{((cartData?.totalServiceCost || 0) * 1.18 + (cartData?.finalAmount || 0)).toFixed(2)}
+                          ₹{((cartData?.totalServiceCost || 0) * 1.18 + 125).toFixed(2)}
                         </span>
                       </div>
                       <span className="text-[#04a99d] text-[10px] font-bold uppercase py-1 px-2 bg-[#04a99d]/10 rounded-lg border border-[#04a99d]/20">

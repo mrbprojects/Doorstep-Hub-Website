@@ -60,6 +60,8 @@ export function HomePage() {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
+    const [subcategories, setSubcategories] = useState([]);
+    const [loadingSubcategories, setLoadingSubcategories] = useState(true);
 
     // Featured Packages State
     const [featuredPackages, setFeaturedPackages] = useState([]);
@@ -109,6 +111,33 @@ export function HomePage() {
                         description: cat.description
                     }));
                     setCategories(mappedCategories);
+
+                    // Fetch subcategories for the first few categories as featured ones for Hero
+                    try {
+                        const subcatPromises = data.category.slice(0, 3).map(cat =>
+                            fetch(`${API_BASE_URL}/professional-services-flow/public/subcategories`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ categoryId: cat._id })
+                            }).then(res => res.json())
+                        );
+
+                        const subcatResults = await Promise.all(subcatPromises);
+                        let allSubs = [];
+                        subcatResults.forEach((res, index) => {
+                            if (res.success && res.data) {
+                                const catId = data.category[index]._id;
+                                const subsWithCat = res.data.map(s => ({ ...s, parentCategoryId: catId }));
+                                allSubs = [...allSubs, ...subsWithCat];
+                            }
+                        });
+
+                        if (allSubs.length > 0) {
+                            setSubcategories(allSubs.slice(0, 5));
+                        }
+                    } catch (e) {
+                        console.error("Error fetching subcategories for hero:", e);
+                    }
                 } else {
                     // Fallback to MOCK only if API fails completely
                     setCategories(MOCK_CATEGORIES);
@@ -118,6 +147,7 @@ export function HomePage() {
                 setCategories(MOCK_CATEGORIES);
             } finally {
                 setLoadingCategories(false);
+                setLoadingSubcategories(false);
             }
         };
 
@@ -128,24 +158,31 @@ export function HomePage() {
                 const data = await response.json();
 
                 if (data.success && data.stores) {
-                    const mappedPackages = data.stores.map(store => ({
-                        id: store._id,
-                        name: store.storeName || 'Spa Center',
-                        image: store.image
-                            ? (store.image.startsWith('http') ? store.image : `https://api.doorstephub.com/${store.image}`)
-                            : 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80',
-                        rating: store.totalRatings || 0,
-                        price: store.startingAt || 499,
-                        duration: store.duration || '60 min',
-                        reviews: store.totalRatings || 0,
-                        location: store.cityName || 'Nearby',
-                        address: store.address || store.cityName, // Added address for NearbyCenterCard
-                        slug: store.slug
-                    }));
-                    setFeaturedPackages(mappedPackages);
+                    const mappedStores = data.stores.map(store => {
+                        const logo = store.logo || store.image || "";
+                        const imageUrl = logo && logo.startsWith('http')
+                            ? logo
+                            : logo
+                                ? `https://api.doorstephub.com/${logo.startsWith('/') ? logo.substring(1) : logo}`
+                                : 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
+
+                        return {
+                            id: store._id,
+                            name: store.storeName || store.business_name || store.firstName,
+                            provider: store.business_name || 'Professional',
+                            image: imageUrl,
+                            rating: store.rating || store.totalRatings || 4.5,
+                            reviews: store.totalOrders || store.totalRatings || 0,
+                            price: store.startingAt || store.BasePrice || store.minFare || 0,
+                            duration: '60 min',
+                            slug: store.slug,
+                            badges: store.badges || []
+                        };
+                    });
+                    setFeaturedPackages(mappedStores);
                 }
             } catch (error) {
-                console.error("Failed to fetch featured spa stores:", error);
+                console.error("Failed to fetch featured packages:", error);
             } finally {
                 setLoadingFeatured(false);
             }
@@ -155,8 +192,8 @@ export function HomePage() {
             try {
                 setLoadingNearby(true);
 
-                const lat = location?.coords?.latitude || "17.4065";
-                const lng = location?.coords?.longitude || "78.4772";
+                const lat = location?.coords?.latitude || "17.4483";
+                const lng = location?.coords?.longitude || "78.3915";
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/nearby_spa_centers', {
                     method: 'POST',
@@ -169,19 +206,25 @@ export function HomePage() {
                 const data = await response.json();
 
                 if (data.success && data.stores) {
-                    const mappedCenters = data.stores.map(store => ({
-                        id: store._id,
-                        name: store.storeName,
-                        image: store.image
-                            ? (store.image.startsWith('http') ? store.image : `https://api.doorstephub.com/${store.image}`)
-                            : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
-                        rating: store.totalRatings || 0,
-                        reviews: store.totalRatings || 0,
-                        price: store.startingAt || 499,
-                        address: store.address || store.cityName,
-                        isAvailable: true,
-                        slug: store.slug
-                    }));
+                    const mappedCenters = data.stores.map(center => {
+                        const logo = center.logo || center.image || "";
+                        const imageUrl = logo && logo.startsWith('http')
+                            ? logo
+                            : logo
+                                ? `https://api.doorstephub.com/${logo.startsWith('/') ? logo.substring(1) : logo}`
+                                : 'https://images.unsplash.com/photo-1544161515-436cead60470?auto=format&fit=crop&q=80&w=800';
+
+                        return {
+                            id: center._id,
+                            name: center.storeName || center.business_name || 'Premium Spa',
+                            location: center.address || center.cityName || 'Nearby',
+                            rating: center.rating || center.totalRatings || 4.5,
+                            image: imageUrl,
+                            distance: center.distance || '2.5 km',
+                            price: center.startingAt || center.BasePrice || center.minFare || 0,
+                            slug: center.slug
+                        };
+                    });
                     setNearbyCenters(mappedCenters);
                 }
             } catch (error) {
@@ -194,7 +237,7 @@ export function HomePage() {
         fetchCategories();
         fetchFeaturedPackages();
         fetchNearbyCenters();
-    }, [location]);
+    }, []);
 
     useEffect(() => {
         if (!location) {
@@ -385,10 +428,16 @@ export function HomePage() {
                             transition={{ duration: 0.8 }}
                             className="relative h-[600px] hidden lg:block"
                         >
-                            {['Facial', 'Hair Spa', 'Massage', 'Makeup', 'Mani-Pedi'].map((service, index) => (
+                            {(subcategories.length > 0 ? subcategories : [
+                                { name: 'Facial', icon: '✨', rating: 4.8 },
+                                { name: 'Hair Spa', icon: '💇', rating: 4.7 },
+                                { name: 'Massage', icon: '💆', rating: 4.6 },
+                                { name: 'Makeup', icon: '💄', rating: 4.5 },
+                                { name: 'Mani-Pedi', icon: '💅', rating: 4.4 }
+                            ]).map((sub, index) => (
                                 <motion.div
-                                    key={service}
-                                    className="absolute bg-white border border-[#E8ECF2] rounded-2xl p-6 shadow-xl"
+                                    key={sub._id || sub.name}
+                                    className="absolute bg-white border border-[#E8ECF2] rounded-2xl p-6 shadow-xl cursor-pointer"
                                     style={{
                                         left: `${(index % 2) * 50}%`,
                                         top: `${index * 15}%`,
@@ -402,17 +451,35 @@ export function HomePage() {
                                         repeat: Infinity,
                                         delay: index * 0.2,
                                     }}
+                                    onClick={() => {
+                                        if (sub._id) {
+                                            router.push(`/spa-salon/results?subcategoryId=${sub._id}&categoryId=${sub.parentCategoryId || categories[0]?._id}`);
+                                        } else {
+                                            setModalOpen(true);
+                                        }
+                                    }}
                                     whileHover={{ scale: 1.1, zIndex: 10 }}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-gradient-to-r from-[#C06C84]/20 to-[#6C5CE7]/20 rounded-xl flex items-center justify-center text-2xl">
-                                            {['✨', '💇', '💆', '💄', '💅'][index]}
+                                        <div className="w-12 h-12 bg-gradient-to-r from-[#C06C84]/20 to-[#6C5CE7]/20 rounded-xl flex items-center justify-center text-2xl overflow-hidden">
+                                            {sub.image ? (
+                                                <img
+                                                    src={sub.image.startsWith('http') ? sub.image : `https://api.doorstephub.com/${sub.image.startsWith('/') ? sub.image.substring(1) : sub.image}`}
+                                                    alt={sub.name}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        e.target.src = 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=200';
+                                                    }}
+                                                />
+                                            ) : (
+                                                <span>{sub.icon || ['✨', '💇', '💆', '💄', '💅'][index % 5]}</span>
+                                            )}
                                         </div>
                                         <div>
-                                            <p className="text-[#0F172A] font-semibold">{service}</p>
+                                            <p className="text-[#0F172A] font-semibold">{sub.name}</p>
                                             <div className="flex items-center gap-1 text-[#FBBF24] text-sm">
                                                 <Star className="w-3 h-3 fill-current" />
-                                                <span className="text-[#0F172A]">4.{8 - index}</span>
+                                                <span className="text-[#0F172A]">{sub.rating || (4.8 - (index * 0.1)).toFixed(1)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -769,6 +836,9 @@ function PackageCard({ package: pkg, index, router }) {
                     src={pkg.image}
                     alt={pkg.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
+                    }}
                 />
             </div>
 
@@ -822,6 +892,9 @@ function RecentlyBookedCard({ package: pkg, router }) {
                     src={pkg.image}
                     alt={pkg.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
+                    }}
                 />
             </div>
 
@@ -854,6 +927,9 @@ function NearbyCenterCard({ center, index, router }) {
                     src={center.image}
                     alt={center.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1544161515-436cead60470?auto=format&fit=crop&q=80&w=800';
+                    }}
                 />
             </div>
 

@@ -62,28 +62,61 @@ const staticQuestions = [
     },
 ];
 
-export function QuestionnaireModal({ isOpen, onClose, categoryName, categoryId }) {
+export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCategoryName, categoryId: initialCategoryId, allCategories = [], lat, lng }) {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState({});
     const [questions, setQuestions] = useState(staticQuestions);
     const [loading, setLoading] = useState(false);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
+    const [selectedCategoryName, setSelectedCategoryName] = useState(initialCategoryName);
 
+    // Reset state when modal opens/closes
+    useEffect(() => {
+        if (isOpen) {
+            setCurrentStep(0);
+            setAnswers({});
+            setSelectedCategoryId(initialCategoryId);
+            setSelectedCategoryName(initialCategoryName);
+
+            // Initial question set
+            if (!initialCategoryId && allCategories && allCategories.length > 0) {
+                const categoryQuestion = {
+                    id: 'categoryId',
+                    title: 'What type of hostel are you looking for?',
+                    icon: Bed,
+                    options: allCategories.map(cat => ({
+                        value: cat._id,
+                        label: cat.name,
+                        desc: 'Top quality stays',
+                        image: cat.image
+                    }))
+                };
+                setQuestions([categoryQuestion, ...staticQuestions]);
+            } else {
+                setQuestions(staticQuestions);
+            }
+        }
+    }, [isOpen, initialCategoryId, initialCategoryName, allCategories]);
+
+    // Fetch Subcategories when category changes
     useEffect(() => {
         const fetchSubcategories = async () => {
-            if (!categoryId || !isOpen) return;
+            const currentCatId = selectedCategoryId || answers.categoryId;
+            if (!currentCatId || !isOpen) return;
 
             setLoading(true);
             try {
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId })
+                    body: JSON.stringify({ categoryId: currentCatId })
                 });
                 const data = await response.json();
 
+                let subQuestion = null;
                 if (data.success && data.data && data.data.length > 0) {
-                    const subcategoryQuestion = {
+                    subQuestion = {
                         id: 'subcategoryId',
                         title: 'Select a subcategory',
                         icon: Layers,
@@ -91,38 +124,78 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName, categoryId }
                             value: sub._id,
                             label: sub.name,
                             desc: sub.categoryName,
-                            image: sub.image // Optional: if we want to show images
+                            image: sub.image
                         }))
                     };
-
-                    setQuestions([subcategoryQuestion, ...staticQuestions]);
-                } else {
-                    setQuestions(staticQuestions);
                 }
+
+                // Rebuild questions list
+                const newQuestions = [];
+
+                // 1. Add Category selection if needed
+                if (!initialCategoryId) {
+                    const categoryQuestion = {
+                        id: 'categoryId',
+                        title: 'What type of hostel are you looking for?',
+                        icon: Bed,
+                        options: allCategories.map(cat => ({
+                            value: cat._id,
+                            label: cat.name,
+                            desc: 'Top quality stays',
+                            image: cat.image
+                        }))
+                    };
+                    newQuestions.push(categoryQuestion);
+                }
+
+                // 2. Add Subcategory if found
+                if (subQuestion) {
+                    newQuestions.push(subQuestion);
+                }
+
+                // 3. Add Static Questions
+                newQuestions.push(...staticQuestions);
+
+                setQuestions(newQuestions);
             } catch (error) {
                 console.error("Error fetching subcategories", error);
-                setQuestions(staticQuestions);
+                // Fallback to basic questions
+                const fallbackQuestions = [];
+                if (!initialCategoryId) {
+                    fallbackQuestions.push({
+                        id: 'categoryId',
+                        title: 'What type of hostel are you looking for?',
+                        icon: Bed,
+                        options: allCategories.map(cat => ({
+                            value: cat._id,
+                            label: cat.name,
+                            desc: 'Top quality stays',
+                            image: cat.image
+                        }))
+                    });
+                }
+                fallbackQuestions.push(...staticQuestions);
+                setQuestions(fallbackQuestions);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchSubcategories();
-    }, [categoryId, isOpen]);
-
-    // Reset state when modal closes
-    useEffect(() => {
-        if (!isOpen) {
-            setCurrentStep(0);
-            setAnswers({});
-        }
-    }, [isOpen]);
+    }, [selectedCategoryId, answers.categoryId, isOpen, initialCategoryId, allCategories]);
 
     const currentQuestion = questions[currentStep];
     const progress = ((currentStep + 1) / questions.length) * 100;
 
     const handleSelect = (value) => {
         setAnswers({ ...answers, [currentQuestion.id]: value });
+
+        // If they just selected a category, update local state to trigger subcategory fetch
+        if (currentQuestion.id === 'categoryId') {
+            setSelectedCategoryId(value);
+            const cat = allCategories.find(c => c._id === value);
+            if (cat) setSelectedCategoryName(cat.name);
+        }
     };
 
     const handleNext = () => {
@@ -130,12 +203,24 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName, categoryId }
             setCurrentStep(currentStep + 1);
         } else {
             // Navigate to results page with answers
+            const finalCategoryId = selectedCategoryId || answers.categoryId || initialCategoryId;
+            const finalCategoryName = selectedCategoryName || initialCategoryName;
+
             const queryParams = new URLSearchParams({
-                categoryId,
-                categoryName,
+                categoryId: finalCategoryId,
+                categoryName: finalCategoryName,
                 ...answers
             });
-            router.push(`/pghostels/results?${queryParams.toString()}`);
+
+            if (lat) queryParams.append('lat', lat);
+            if (lng) queryParams.append('lng', lng);
+
+            // Check if it should be nearby specific or general results
+            if (lat && lng) {
+                router.push(`/pghostels/listings/nearby?${queryParams.toString()}`);
+            } else {
+                router.push(`/pghostels/results?${queryParams.toString()}`);
+            }
             onClose();
         }
     };

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Star, MapPin, Heart, Wifi, Utensils, Shirt, TrendingUp } from 'lucide-react';
+import { Star, MapPin, Heart, Wifi, Utensils, Shirt, TrendingUp, ChevronRight } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
 
 export function NearbyHostelsSection({ router }) {
@@ -99,18 +99,28 @@ export function NearbyHostelsSection({ router }) {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="mb-12"
+                    className="flex justify-between items-end mb-12"
                 >
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4">
-                        <MapPin className="w-3 h-3 text-[#037166]" />
-                        <span className="text-xs font-medium text-[#037166]">NEAR YOU</span>
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4">
+                            <MapPin className="w-3 h-3 text-[#037166]" />
+                            <span className="text-xs font-medium text-[#037166]">NEAR YOU</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
+                            Hostels Near You
+                        </h2>
+                        <p className="text-xl text-gray-600">
+                            {location?.city ? `Best PG hostels in ${location.city}` : 'Discover nearby accommodations'}
+                        </p>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
-                        Hostels Near You
-                    </h2>
-                    <p className="text-xl text-gray-600">
-                        {location?.city ? `Best PG hostels in ${location.city}` : 'Discover nearby accommodations'}
-                    </p>
+
+                    <button
+                        onClick={() => router.push('/pghostels/listings/nearby')}
+                        className="hidden md:flex items-center space-x-2 text-[#037166] font-semibold hover:text-[#025951] transition-colors mb-2"
+                    >
+                        <span>View All</span>
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
                 </motion.div>
 
                 {/* Horizontal Scroll */}

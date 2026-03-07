@@ -46,7 +46,7 @@ export function ResultsPage() {
                 const lat = location.lat.toString();
                 const lng = location.lng.toString();
 
-                const subcategoryId = searchParams.get('subcategoryId') || "6957be10cc45593206b6e6c8"; // Fallback for testing
+                const subcategoryId = searchParams.get('subcategoryId') || searchParams.get('subCategoryId') || "";
                 const categoryId = searchParams.get('categoryId') || "";
 
                 const filterMap = {
@@ -62,21 +62,23 @@ export function ResultsPage() {
                     currentSortBy = 'nearest';
                 }
 
+                const payload = {
+                    serviceId: '69524f4a57bb211ca094e5e6',
+                    subCategoryId: subcategoryId,
+                    subcategoryId: subcategoryId,
+                    // If we have a subcategory, don't send categoryId to avoid filtering conflicts
+                    ...(subcategoryId ? {} : { categoryId }),
+                    searchQuery: searchQuery || "",
+                    sortBy: currentSortBy,
+                    latitude: lat,
+                    lattitude: lat,
+                    longitude: lng
+                };
+
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subcategoryId: subcategoryId,
-                        categoryId: categoryId,
-                        serviceId: "",
-                        searchQuery: searchQuery,
-                        minPrice: 100,
-                        maxPrice: 500000,
-                        minRating: 4,
-                        sortBy: currentSortBy,
-                        lattitude: lat,
-                        longitude: lng
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
@@ -90,11 +92,18 @@ export function ResultsPage() {
                             distanceStr = `${dist.toFixed(1)} km`;
                         }
 
+                        const logo = service.logo || service.image || service.storeImage || "";
+                        const imageUrl = logo && logo.startsWith('http')
+                            ? logo
+                            : logo
+                                ? `https://api.doorstephub.com/${logo}`
+                                : 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=800';
+
                         return {
                             id: service._id,
                             name: service.business_name || `${service.firstName} ${service.lastName}`,
                             provider: service.business_name || 'Professional Service',
-                            image: service.logo ? `https://api.doorstephub.com/${service.logo}` : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
+                            image: imageUrl,
                             rating: parseFloat(service.rating) || 4.5,
                             reviews: service.totalOrders || 0,
                             price: service.startingAt || service.BasePrice || service.minFare || 0,
@@ -338,6 +347,9 @@ function ServiceCard({ service, index, router }) {
                     src={service.image}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=800';
+                    }}
                 />
 
                 {/* Wishlist Button */}

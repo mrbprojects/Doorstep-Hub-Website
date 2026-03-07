@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, useInView } from 'motion/react';
+import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
     MapPin, Search, Users, Home, Bed, Sparkles, Star, ChevronRight,
@@ -21,6 +21,31 @@ const testimonials = [
     { name: 'Sneha Patel', role: 'Designer', review: 'The co-living space is amazing. Made so many new friends here.', avatar: '👩‍🎨', rating: 5 },
 ];
 
+// Helper to get the best image for the category
+const getCategoryImage = (categoryName, apiImage) => {
+    if (!categoryName) return 'https://images.unsplash.com/photo-1520277739336-7bf67edfa768?q=80&w=2070&auto=format&fit=crop';
+
+    const name = categoryName.toLowerCase();
+    const images = {
+        'boys': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
+        'girls': 'https://images.unsplash.com/photo-1626015504767-542e58e4585c?q=80&w=1956&auto=format&fit=crop',
+        'womens': 'https://images.unsplash.com/photo-1626015504767-542e58e4585c?q=80&w=1956&auto=format&fit=crop',
+        'co-living': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop',
+        'dorm': 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop',
+        'with food': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1980&auto=format&fit=crop',
+    };
+
+    for (const [key, url] of Object.entries(images)) {
+        if (name.includes(key)) return url;
+    }
+
+    if (apiImage) {
+        return apiImage.startsWith('http') ? apiImage : `https://api.doorstephub.com/${apiImage}`;
+    }
+
+    return 'https://images.unsplash.com/photo-1520277739336-7bf67edfa768?q=80&w=2070&auto=format&fit=crop';
+};
+
 export function PremiumHomePage() {
     const router = useRouter();
     const { location, detectWithGPS } = useLocationContext();
@@ -37,6 +62,16 @@ export function PremiumHomePage() {
     const isCategoriesInView = useInView(categoriesRef, { once: true });
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+
+    useEffect(() => {
+        if (apiCategories.length > 0) {
+            const timer = setInterval(() => {
+                setHeroSlideIndex((prev) => (prev + 1) % apiCategories.length);
+            }, 4000);
+            return () => clearInterval(timer);
+        }
+    }, [apiCategories.length]);
 
     useEffect(() => {
         const handleMouseMove = (e) => {
@@ -179,7 +214,7 @@ export function PremiumHomePage() {
                                 <span className="bg-gradient-to-r from-gray-900 to-[#037166] bg-clip-text text-transparent">
                                     Find your next stay
                                 </span>
-                                <br />
+                                <span>{" "}</span>
                                 <span className="text-gray-900">in minutes.</span>
                             </motion.h1>
 
@@ -191,6 +226,58 @@ export function PremiumHomePage() {
                             >
                                 Verified PGs, co-living spaces, and hostels near your college or office.
                             </motion.p>
+                            <section className="relative -mt-20 z-20">
+                                <div className="max-w-2xl mr-10 px-1">
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-gray-200 p-3 max-w-4xl mx-auto"
+                                    >
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            {/* Search Input */}
+                                            <div className="flex-1 min-w-[250px] relative">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <Input
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    onKeyDown={handleKeyDown}
+                                                    placeholder="Search by area, college, landmark..."
+                                                    className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
+                                                />
+                                            </div>
+
+                                            {/* Filter Chips */}
+                                            {/* <div className="flex flex-wrap gap-1.5 hidden md:flex">
+                                {['Boys', 'Girls', 'Co-living', 'Dorm', 'With Food'].map((chip, i) => (
+                                    <motion.button
+                                        key={chip}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.05 }}
+                                        whileHover={{ scale: 0.95 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        className="px-3 py-1.5 bg-gray-100 hover:bg-[#037166] hover:text-white text-gray-700 rounded-lg text-xs font-medium transition-all"
+                                    >
+                                        {chip}
+                                    </motion.button>
+                                ))}
+                            </div> */}
+
+                                            {/* Search Button */}
+                                            <motion.button
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={handleSearch}
+                                                className="px-6 py-2.5 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/20 text-sm"
+                                            >
+                                                Search
+                                            </motion.button>
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            </section>
                         </div>
 
                         {/* CTAs */}
@@ -215,14 +302,12 @@ export function PremiumHomePage() {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={async () => {
                                     try {
-                                        const loc = await detectWithGPS();
-                                        if (loc) {
-                                            router.push(`/pghostels/listings/nearby?lat=${loc.lat}&lng=${loc.lng}`);
-                                        } else {
-                                            router.push('/pghostels/listings/nearby');
-                                        }
+                                        await detectWithGPS();
                                     } catch (err) {
-                                        router.push('/pghostels/listings/nearby');
+                                        console.log('Location detection failed');
+                                    } finally {
+                                        setSelectedCategory({ id: '', name: '' });
+                                        setIsModalOpen(true);
                                     }
                                 }}
                                 className="px-8 py-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 text-gray-900 rounded-2xl font-semibold hover:border-[#037166] transition-all flex items-center space-x-2"
@@ -264,9 +349,9 @@ export function PremiumHomePage() {
                             transform: typeof window !== 'undefined' ? `perspective(1000px) rotateY(${(mousePosition.x - window.innerWidth / 2) / 60}deg) rotateX(${-(mousePosition.y - window.innerHeight / 2) / 60}deg)` : 'none'
                         }}
                     >
-                        {/* Main Card */}
+                        {/* Main Card Slider */}
                         <motion.div
-                            className="relative w-80 md:w-96 h-[450px] md:h-[550px] rounded-3xl overflow-hidden shadow-2xl z-10"
+                            className="relative w-80 md:w-96 h-[450px] md:h-[550px] rounded-[2.5rem] overflow-hidden shadow-2xl z-10 bg-gray-900"
                             animate={{
                                 y: [0, -15, 0],
                             }}
@@ -276,11 +361,43 @@ export function PremiumHomePage() {
                                 ease: "easeInOut"
                             }}
                         >
-                            <div
-                                className="absolute inset-0 bg-cover bg-center"
-                                style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1617430690223-3e165b390e25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBob3N0ZWwlMjBpbnRlcmlvcnxlbnwxfHx8fDE3Njg2NDU4OTJ8MA&ixlib=rb-4.1.0&q=80&w=1080)' }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <AnimatePresence mode='wait'>
+                                <motion.div
+                                    key={heroSlideIndex}
+                                    initial={{ opacity: 0, scale: 1.1 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.8 }}
+                                    className="absolute inset-0"
+                                >
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110"
+                                        style={{
+                                            backgroundImage: `url("${apiCategories.length > 0 ? getCategoryImage(apiCategories[heroSlideIndex]?.name, apiCategories[heroSlideIndex]?.image) : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?auto=format&fit=crop&q=80&w=1080'}")`
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                                    {/* Category Info Overlay */}
+                                    <div className="absolute bottom-10 left-8 right-8">
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.3 }}
+                                            className="space-y-2"
+                                        >
+                                            <div className="w-12 h-1 bg-[#037166] rounded-full" />
+                                            <h3 className="text-3xl font-bold text-white mb-1">
+                                                {apiCategories.length > 0 ? apiCategories[heroSlideIndex]?.name : 'Modern Stay'}
+                                            </h3>
+                                            <div className="flex items-center text-white/80 text-sm">
+                                                <Users className="w-4 h-4 mr-2" />
+                                                <span>Verified Listings</span>
+                                            </div>
+                                        </motion.div>
+                                    </div>
+                                </motion.div>
+                            </AnimatePresence>
                         </motion.div>
 
                         {/* Floating Price Card */}
@@ -333,61 +450,10 @@ export function PremiumHomePage() {
             </section>
 
             {/* Quick Search Strip */}
-            <section className="relative -mt-20 z-20">
-                <div className="max-w-2xl mr-10 px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-gray-200 p-3 max-w-4xl mx-auto"
-                    >
-                        <div className="flex flex-wrap items-center gap-3">
-                            {/* Search Input */}
-                            <div className="flex-1 min-w-[250px] relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <Input
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyDown={handleKeyDown}
-                                    placeholder="Search by area, college, landmark..."
-                                    className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
-                                />
-                            </div>
 
-                            {/* Filter Chips */}
-                            {/* <div className="flex flex-wrap gap-1.5 hidden md:flex">
-                                {['Boys', 'Girls', 'Co-living', 'Dorm', 'With Food'].map((chip, i) => (
-                                    <motion.button
-                                        key={chip}
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        whileInView={{ opacity: 1, scale: 1 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: i * 0.05 }}
-                                        whileHover={{ scale: 0.95 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        className="px-3 py-1.5 bg-gray-100 hover:bg-[#037166] hover:text-white text-gray-700 rounded-lg text-xs font-medium transition-all"
-                                    >
-                                        {chip}
-                                    </motion.button>
-                                ))}
-                            </div> */}
-
-                            {/* Search Button */}
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleSearch}
-                                className="px-6 py-2.5 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/20 text-sm"
-                            >
-                                Search
-                            </motion.button>
-                        </div>
-                    </motion.div>
-                </div>
-            </section>
 
             {/* Featured Categories Grid */}
-            <section ref={categoriesRef} className="py-24 relative">
+            <section ref={categoriesRef} className="py-15 relative">
                 <div className="max-w-7xl mx-auto px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -401,10 +467,10 @@ export function PremiumHomePage() {
                         <p className="text-xl text-gray-600">Choose what fits your comfort & budget</p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {loading ? (
                             // Shimmer skeleton for categories
-                            [...Array(6)].map((_, i) => (
+                            [...Array(4)].map((_, i) => (
                                 <div key={i} className="relative h-80 rounded-3xl overflow-hidden bg-gray-200 animate-pulse">
                                     <div className="absolute inset-0 bg-gradient-to-t from-gray-300 to-gray-200" />
                                     <div className="absolute inset-0 p-6 flex flex-col justify-end">
@@ -417,29 +483,6 @@ export function PremiumHomePage() {
                         ) : (
                             apiCategories.map((cat, i) => {
                                 // Helper to get the best image for the category
-                                const getCategoryImage = (categoryName, apiImage) => {
-                                    const name = categoryName.toLowerCase();
-                                    const images = {
-                                        'boys': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop', // Modern room
-                                        'girls': 'https://images.unsplash.com/photo-1626015504767-542e58e4585c?q=80&w=1956&auto=format&fit=crop', // Cozy aesthetic room
-                                        'co-living': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop', // Group/Social
-                                        'dorm': 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop', // Bunk beds
-                                        'with food': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1980&auto=format&fit=crop', // Healthy food
-                                    };
-
-                                    // Check for exact match or partial match
-                                    for (const [key, url] of Object.entries(images)) {
-                                        if (name.includes(key)) return url;
-                                    }
-
-                                    // Fallback to API image or a default generic one
-                                    if (apiImage) {
-                                        return apiImage.startsWith('http') ? apiImage : `https://api.doorstephub.com/${apiImage}`;
-                                    }
-
-                                    return 'https://images.unsplash.com/photo-1520277739336-7bf67edfa768?q=80&w=2070&auto=format&fit=crop'; // Default fancy interior
-                                };
-
                                 const bgImage = getCategoryImage(cat.name, cat.image);
 
                                 return (
@@ -472,7 +515,7 @@ export function PremiumHomePage() {
                                             <div className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#037166] group-hover:border-[#037166] group-hover:scale-110 transition-all duration-300 shadow-lg">
                                                 <Users className="w-8 h-8 text-white" />
                                             </div>
-                                            <h4 className="text-3xl font-bold text-white mb-3 tracking-tight">{cat.name}</h4>
+                                            <h4 className="text-xl font-bold text-white mb-3 tracking-tight">{cat.name}</h4>
                                             <div className="h-1 w-12 bg-[#037166] rounded-full group-hover:w-24 transition-all duration-300" />
                                         </div>
 
@@ -507,6 +550,9 @@ export function PremiumHomePage() {
                 onClose={() => setIsModalOpen(false)}
                 categoryName={selectedCategory.name}
                 categoryId={selectedCategory.id}
+                allCategories={apiCategories}
+                lat={location?.lat}
+                lng={location?.lng}
             />
         </div>
     );
@@ -615,7 +661,7 @@ function TopDealsSection({ router }) {
     ];
 
     return (
-        <section className="py-20">
+        <section className="py-15 bg-gray-50/50">
             <div className="max-w-7xl mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -717,54 +763,71 @@ function HowItWorksSection() {
 
 // Testimonials Section
 function TestimonialsSection({ testimonials }) {
+    // Double the testimonials for seamless infinite loop
+    const doubledTestimonials = [...testimonials, ...testimonials, ...testimonials];
+
     return (
-        <section className="py-24 overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4">
+        <section className="py-24 overflow-hidden bg-gray-50/50">
+            <div className="max-w-7xl mx-auto px-4 mb-16">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-16"
+                    className="text-center"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold text-white-900 mb-4">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                         Why users love us
                     </h2>
+                    <p className="text-xl text-gray-600">Join thousands of happy residents</p>
                 </motion.div>
+            </div>
 
-                <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-                    {testimonials.map((test, i) => (
-                        <motion.div
+            {/* Marquee Container */}
+            <div className="flex relative overflow-hidden group">
+                {/* Initial Scroller */}
+                <motion.div
+                    animate={{
+                        x: [0, -1920], // Adjust based on content width
+                    }}
+                    transition={{
+                        duration: 30,
+                        repeat: Infinity,
+                        ease: "linear",
+                    }}
+                    className="flex gap-6 whitespace-nowrap"
+                >
+                    {doubledTestimonials.map((test, i) => (
+                        <div
                             key={i}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            whileHover={{ scale: 1.05 }}
-                            className="flex-shrink-0 w-96 snap-start bg-white rounded-3xl p-8 shadow-lg border border-gray-100"
+                            className="flex-shrink-0 w-[400px] bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300"
                         >
-                            <div className="flex items-center space-x-4 mb-4">
-                                <div className="w-16 h-16 bg-gradient-to-br from-[#037166] to-[#025951] rounded-full flex items-center justify-center text-3xl">
+                            <div className="flex items-center space-x-4 mb-6">
+                                <div className="w-14 h-14 bg-gradient-to-br from-[#037166] to-[#025951] rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-[#037166]/20">
                                     {test.avatar}
                                 </div>
                                 <div>
-                                    <h5 className="font-bold text-gray-900">{test.name}</h5>
+                                    <h5 className="font-bold text-gray-900 whitespace-normal">{test.name}</h5>
                                     <p className="text-sm text-gray-500">{test.role}</p>
                                 </div>
                             </div>
                             <div className="flex mb-4">
                                 {[...Array(test.rating)].map((_, j) => (
-                                    <Star key={j} className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B]" />
+                                    <Star key={j} className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
                                 ))}
                             </div>
-                            <p className="text-gray-700 leading-relaxed">{test.review}</p>
-                            <div className="mt-4 flex items-center text-sm text-[#037166]">
-                                <Check className="w-4 h-4 mr-1" />
-                                <span>Verified User</span>
+                            <p className="text-gray-700 leading-relaxed whitespace-normal italic">"{test.review}"</p>
+                            <div className="mt-6 pt-6 border-t border-gray-50 flex items-center text-sm text-[#037166] font-medium">
+                                <div className="w-2 h-2 bg-[#037166] rounded-full mr-2" />
+                                <span>Verified Resident</span>
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
-                </div>
+                </motion.div>
             </div>
+
+            {/* Fading Edges Overlay */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-gray-50/50 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-gray-50/50 to-transparent z-10" />
         </section>
     );
 }
@@ -841,7 +904,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                     </button>
                 </motion.div>
 
-                <div className="grid md:grid-cols-2 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {loading ? (
                         // Shimmer skeleton for featured hostels
                         [...Array(4)].map((_, i) => (
@@ -887,9 +950,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                             <div className="px-4 py-2 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
                                                 <span className="text-white text-sm font-semibold tracking-wide">FEATURED</span>
                                             </div>
-                                            <button className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-white hover:text-red-500 transition-all">
-                                                <Heart className="w-6 h-6" />
-                                            </button>
+                                            <div />
                                         </div>
 
                                         <div>
@@ -902,10 +963,10 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                                 ))}
                                             </div>
 
-                                            <h3 className="text-3xl font-bold text-white mb-2 leading-tight">{hostelName}</h3>
-                                            <div className="flex items-center text-white/80 text-lg mb-6">
-                                                <MapPin className="w-5 h-5 mr-2" />
-                                                {hostelArea}
+                                            <h3 className="text-3xl font-bold text-white mb-2 leading-tight line-clamp-2 overflow-hidden">{hostelName}</h3>
+                                            <div className="grid grid-cols-[auto_1fr] items-start text-white/80 text-sm mb-6">
+                                                <MapPin className="w-5 h-5 mr-2 mt-0.5" />
+                                                <span className="line-clamp-2 overflow-hidden">{hostelArea}</span>
                                             </div>
 
                                             <div className="flex items-center justify-between pt-6 border-t border-white/20">

@@ -104,33 +104,37 @@ function SpaCategoryContent() {
                     <Flower className="w-64 h-64 text-white" />
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white/10 backdrop-blur-md inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white mb-6 cursor-pointer hover:bg-white/20 transition-colors"
-                        onClick={() => router.push('/spa-salon')}
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        <span className="text-sm font-medium">Back to Services</span>
-                    </motion.div>
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="flex justify-start mb-6">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white/10 backdrop-blur-md inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white cursor-pointer hover:bg-white/20 transition-colors"
+                            onClick={() => router.push('/spa-salon')}
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span className="text-sm font-medium">Back to Services</span>
+                        </motion.div>
+                    </div>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg"
-                    >
-                        {categoryName}
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-xl text-white/90 max-w-2xl mx-auto font-light"
-                    >
-                        Premium treatments designed for your relaxation and beauty.
-                    </motion.p>
+                    <div className="text-center">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg"
+                        >
+                            {categoryName}
+                        </motion.h1>
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-xl text-white/90 max-w-2xl mx-auto font-light"
+                        >
+                            Premium treatments designed for your relaxation and beauty.
+                        </motion.p>
+                    </div>
                 </div>
             </div>
 

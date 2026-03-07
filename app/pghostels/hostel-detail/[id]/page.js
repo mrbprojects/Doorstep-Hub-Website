@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Star, TrendingUp, DollarSign, Wifi, Utensils, Shirt, Zap,
-    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, ChevronRight
+    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, ChevronRight, Home
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
 import Slider from 'react-slick';
@@ -34,7 +34,7 @@ export default function NewHostelDetailPage() {
     const id = params.id;
     const searchParams = useSearchParams();
     const fromListing = searchParams.get('fromListing') || 'all';
-    const [activeTab, setActiveTab] = useState('portfolio');
+    const [activeTab, setActiveTab] = useState('roomTypes');
     const [viewingRateCard, setViewingRateCard] = useState(null);
     const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
     const { scrollY } = useScroll();
@@ -160,7 +160,7 @@ export default function NewHostelDetailPage() {
     const handleContinueToBook = async () => {
         if (!selectedPackage) {
             toast.error("Please select a package first.");
-            setActiveTab('portfolio');
+            setActiveTab('roomTypes');
             window.scrollTo({ top: 500, behavior: 'smooth' });
             return;
         }
@@ -262,7 +262,7 @@ export default function NewHostelDetailPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => router.push(`/pghostels/listings/${fromListing}`)}
-                className="fixed top-24 left-4 z-50 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
+                className="fixed top-24 left-4 z-50 w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
             >
                 <ArrowLeft className="w-5 h-5 text-gray-900" />
             </motion.button>
@@ -290,48 +290,46 @@ export default function NewHostelDetailPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-8"
+                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-5 sm:p-8"
                 >
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-4">
                         {/* Left - Name & Logo */}
-                        <div className="flex items-start space-x-4">
-                            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                        <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-gray-100 flex-shrink-0 shadow-sm">
                                 <img
                                     src={hostelData.logo}
                                     alt={hostelData.name}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                            <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                            <div className="min-w-0">
+                                <h1 className="text-xl sm:text-3xl font-bold text-gray-900 line-clamp-1 leading-tight mb-0.5 sm:mb-1">
                                     {hostelData.name}
                                 </h1>
-                                <div className="flex items-center text-gray-600">
-                                    <MapPin className="w-4 h-4 mr-1" />
-                                    <span>{hostelData.location}</span>
+                                <div className="flex items-center text-gray-500 text-xs sm:text-sm">
+                                    <MapPin className="w-3.5 h-3.5 mr-1 text-[#037166]/60" />
+                                    <span className="truncate">{hostelData.location}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Right - Quick Stats */}
-                        <div className="flex flex-wrap gap-4">
-                            {/* Rating Card */}
-                            <div className="bg-gradient-to-br from-[#F59E0B]/10 to-[#F59E0B]/5 rounded-2xl p-4 border border-[#F59E0B]/20 min-w-[120px]">
-                                <div className="flex items-center justify-center mb-1">
-                                    <Star className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B] mr-1" />
-                                    <span className="text-2xl font-bold text-gray-900">{hostelData.rating}</span>
+                        <div className="flex flex-row items-center gap-2 sm:gap-4 flex-shrink-0">
+                            {/* Rating pill */}
+                            <div className="flex-1 sm:flex-none bg-gradient-to-br from-[#F59E0B]/10 to-[#F59E0B]/5 rounded-2xl p-2.5 sm:p-4 border border-[#F59E0B]/20 min-w-[90px] sm:min-w-[120px] text-center shadow-sm">
+                                <div className="flex items-center justify-center mb-0.5">
+                                    <Star className="w-3.5 h-3.5 sm:w-4 h-4 fill-[#F59E0B] text-[#F59E0B] mr-1" />
+                                    <span className="text-lg sm:text-2xl font-bold text-gray-900">{hostelData.rating}</span>
                                 </div>
-                                <div className="text-xs text-gray-500 text-center">Rating</div>
+                                <div className="text-[9px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider">Rating</div>
                             </div>
 
-
-                            {/* Base Price Card */}
-                            <div className="bg-gradient-to-br from-[#037166]/10 to-[#037166]/5 rounded-2xl p-4 border border-[#037166]/20 min-w-[120px]">
-                                <div className="flex items-center justify-center mb-1">
-                                    <DollarSign className="w-5 h-5 text-[#037166] mr-1" />
-                                    <span className="text-2xl font-bold text-gray-900">₹{hostelData.basePrice}</span>
+                            {/* Base Price pill */}
+                            <div className="flex-1 sm:flex-none bg-gradient-to-br from-[#037166]/10 to-[#037166]/5 rounded-2xl p-2.5 sm:p-4 border border-[#037166]/20 min-w-[90px] sm:min-w-[120px] text-center shadow-sm">
+                                <div className="flex items-center justify-center mb-0.5">
+                                    <span className="text-lg sm:text-2xl font-bold text-gray-900">₹{hostelData.basePrice}</span>
                                 </div>
-                                <div className="text-xs text-gray-500 text-center">Base Price</div>
+                                <div className="text-[9px] sm:text-xs text-[#037166] font-bold uppercase tracking-wider whitespace-nowrap">From / Mo</div>
                             </div>
                         </div>
                     </div>
@@ -342,39 +340,44 @@ export default function NewHostelDetailPage() {
             <div className="max-w-7xl mx-auto px-4 mt-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     {/* Sticky Tab Navigation */}
-                    <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-2">
-                        <TabsList className="bg-transparent w-full grid grid-cols-5 gap-2">
+                    <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200">
+                        <style dangerouslySetInnerHTML={{
+                            __html: `
+                            .hide-scrollbar::-webkit-scrollbar { display: none; }
+                            .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                        ` }} />
+                        <TabsList className="bg-transparent w-full flex flex-row items-center gap-3 overflow-x-auto flex-nowrap p-3 hide-scrollbar">
                             <TabsTrigger
-                                value="portfolio"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors"
+                                value="roomTypes"
+                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
                             >
-                                <Camera className="w-4 h-4 mr-2" />
-                                Portfolio
+                                <Home className="w-4 h-4 mr-2" />
+                                Room Sharings
                             </TabsTrigger>
                             <TabsTrigger
                                 value="reviews"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors"
+                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
                             >
                                 <MessageSquare className="w-4 h-4 mr-2" />
                                 Reviews
                             </TabsTrigger>
                             <TabsTrigger
                                 value="gallery"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors"
+                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
                             >
                                 <Camera className="w-4 h-4 mr-2" />
                                 Gallery
                             </TabsTrigger>
                             <TabsTrigger
                                 value="amenities"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors"
+                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
                             >
                                 <Sparkles className="w-4 h-4 mr-2" />
                                 Amenities
                             </TabsTrigger>
                             <TabsTrigger
                                 value="about"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors"
+                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
                             >
                                 <MapPin className="w-4 h-4 mr-2" />
                                 About
@@ -382,38 +385,49 @@ export default function NewHostelDetailPage() {
                         </TabsList>
                     </div>
 
-                    {/* Portfolio Tab */}
-                    <TabsContent value="portfolio" className="space-y-4">
-                        <div className="mb-4 text-sm text-gray-500 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-[#037166]" />
-                            Please select a package to proceed:
+                    {/* Room Types Tab */}
+                    <TabsContent value="roomTypes" className="space-y-4">
+                        <div className="mb-4 text-xs sm:text-sm text-gray-500 flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5 sm:w-4 h-4 text-[#037166]" />
+                            Please select a room type to proceed:
                         </div>
                         {hostelData.packages.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                                 {hostelData.packages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => setSelectedPackage(pkg)}
-                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative ${selectedPackage?._id === pkg._id
+                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-row h-auto min-h-[130px] sm:min-h-[160px] ${selectedPackage?._id === pkg._id
                                             ? 'border-2 border-[#037166] ring-2 ring-[#037166]/10'
                                             : 'border-gray-100'
                                             }`}
                                     >
                                         {selectedPackage?._id === pkg._id && (
-                                            <div className="absolute top-3 right-3 z-10 bg-[#037166] text-white p-1 rounded-full shadow-lg">
-                                                <Check className="w-4 h-4" />
+                                            <div className="absolute top-2 right-2 z-10 bg-[#037166] text-white p-1 rounded-full shadow-lg">
+                                                <Check className="w-3.5 h-3.5" />
                                             </div>
                                         )}
-                                        <div className="h-48 bg-gray-100 relative">
+                                        <div className="w-24 sm:w-48 h-auto sm:h-full bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
                                                 <img src={`https://api.doorstephub.com/${pkg.image}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
-                                                <div className="flex items-center justify-center h-full text-gray-400">No Image</div>
+                                                <div className="flex items-center justify-center h-full text-gray-400 text-xs">No Image</div>
                                             )}
                                         </div>
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <h3 className="font-bold text-gray-900 line-clamp-1">{pkg.name}</h3>
+                                        <div className="p-3.5 sm:p-5 flex flex-col justify-between flex-1 min-w-0">
+                                            <div className="min-w-0">
+                                                <div className="flex justify-between items-start mb-0.5">
+                                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{pkg.name}</h3>
+                                                </div>
+                                                <p className="text-gray-500 text-xs sm:text-sm mb-2 line-clamp-2 leading-snug">{pkg.description}</p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[#037166] font-bold text-xl sm:text-2xl">₹{pkg.price}</span>
+                                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">{pkg.priceUnit || 'per month'}</span>
+                                                </div>
+
                                                 {pkg.banner_images && pkg.banner_images.length > 0 && (
                                                     <button
                                                         onClick={(e) => {
@@ -421,24 +435,19 @@ export default function NewHostelDetailPage() {
                                                             setViewingRateCard(pkg);
                                                             setRateCardImageIndex(0);
                                                         }}
-                                                        className="text-xs font-semibold text-[#037166] hover:underline flex items-center gap-1"
+                                                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#037166]/10 text-[#037166] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#037166] hover:text-white transition-all flex items-center gap-1"
                                                     >
-                                                        See more
-                                                        <ChevronRight className="w-3 h-3" />
+                                                        Details
+                                                        <ChevronRight className="w-3 h-3 sm:w-3.5 h-3.5" />
                                                     </button>
                                                 )}
-                                            </div>
-                                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{pkg.description}</p>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[#037166] font-bold text-lg">₹{pkg.price}</span>
-                                                <span className="text-xs text-gray-500">{pkg.priceUnit}</span>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-10 text-gray-500">No packages/portfolio available.</div>
+                            <div className="text-center py-10 text-gray-500">No room types available.</div>
                         )}
                     </TabsContent>
 
@@ -649,9 +658,9 @@ export default function NewHostelDetailPage() {
                     <button
                         onClick={handleContinueToBook}
                         disabled={isCheckingAddons}
-                        className="px-12 py-4 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#037166]/40 transition-all transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-6 sm:px-12 py-3.5 sm:py-4 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-[#037166]/40 transition-all transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                        {isCheckingAddons && <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>}
+                        {isCheckingAddons && <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>}
                         {isCheckingAddons ? 'Checking...' : 'Continue to Book'}
                     </button>
                 </div>
@@ -764,6 +773,6 @@ export default function NewHostelDetailPage() {
                     </div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 }

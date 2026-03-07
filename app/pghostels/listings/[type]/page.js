@@ -367,7 +367,7 @@ function PGListingsContent() {
                         </div>
                     )}
                     {/* Image Section */}
-                    <div className="relative h-64 overflow-hidden">
+                    <div className="relative h-48 sm:h-64 overflow-hidden">
                         <div
                             className={`absolute inset-0 bg-cover bg-center ${isClickable ? 'group-hover:scale-110' : ''} transition-transform duration-500`}
                             style={{ backgroundImage: `url(${listing.image})` }}
@@ -396,11 +396,11 @@ function PGListingsContent() {
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: 'spring' }}
-                            className="absolute top-4 right-4 bg-gradient-to-br from-[#037166] to-[#025951] text-white px-4 py-2 rounded-2xl shadow-lg flex items-center space-x-2"
+                            className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 bg-gradient-to-br from-[#037166] to-[#025951] text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg flex items-center space-x-1.5"
                         >
-                            <Award className="w-4 h-4" />
-                            <span className="font-bold">{listing.matchScore}%</span>
-                            <span className="text-xs">match</span>
+                            <Award className="w-3 h-3 sm:w-4 h-4" />
+                            <span className="font-bold text-xs sm:text-base">{listing.matchScore}%</span>
+                            <span className="text-[10px] hidden sm:inline">match</span>
                         </motion.div>
 
                         {/* Distance Badge (Nearby only) */}
@@ -413,16 +413,16 @@ function PGListingsContent() {
 
                         {/* Action Buttons */}
                         {isClickable && (
-                            <div className="absolute bottom-4 right-4 flex space-x-2">
+                            <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex space-x-1.5">
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         toggleSave(listing.id);
                                     }}
-                                    className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
                                 >
                                     <Heart
-                                        className={`w-5 h-5 transition-all ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-600'
+                                        className={`w-4 h-4 sm:w-5 h-5 transition-all ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-600'
                                             }`}
                                     />
                                 </button>
@@ -431,35 +431,35 @@ function PGListingsContent() {
                                         e.stopPropagation();
                                         toggleCompare(listing.id);
                                     }}
-                                    className={`px-4 py-2 backdrop-blur-sm rounded-full text-sm font-semibold transition-all shadow-lg ${isComparing
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm rounded-full text-[10px] sm:text-sm font-bold transition-all shadow-lg ${isComparing
                                         ? 'bg-[#037166] text-white'
                                         : 'bg-white/90 text-gray-900 hover:bg-white'
                                         }`}
                                 >
-                                    {isComparing ? '✓ Compare' : 'Compare'}
+                                    {isComparing ? '✓' : 'Compare'}
                                 </button>
                             </div>
                         )}
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-6" onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${listing.id}?fromListing=${params.type}`)}>
+                    <div className="p-4 sm:p-6" onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${listing.id}?fromListing=${params.type}`)}>
                         {/* PG Name & Location */}
-                        <div className="mb-4">
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#037166] transition-colors">
+                        <div className="mb-3 sm:mb-4">
+                            <h3 className="text-lg sm:text-2xl font-bold text-gray-900 mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">
                                 {listing.name}
                             </h3>
-                            <div className="flex items-center text-gray-600">
-                                <MapPin className="w-4 h-4 mr-1" />
-                                <span>{listing.location}</span>
+                            <div className="flex items-center text-gray-500 text-xs sm:text-sm">
+                                <MapPin className="w-3 h-3 sm:w-4 h-4 mr-1 text-[#037166]/60" />
+                                <span className="truncate">{listing.location}</span>
                             </div>
                         </div>
 
                         {/* Stats Row */}
-                        <div className="flex items-center space-x-4 mb-4">
-                            <div className="flex items-center space-x-1">
-                                <Star className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B]" />
-                                <span className="font-bold text-gray-900">{listing.rating}</span>
+                        <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
+                            <div className="flex items-center space-x-1 px-2 py-1 bg-amber-50 rounded-lg">
+                                <Star className="w-3.5 h-3.5 sm:w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
+                                <span className="font-bold text-gray-900 text-sm sm:text-base">{listing.rating}</span>
                             </div>
 
                             {/* {listing.availableBeds <= 5 && (
@@ -471,40 +471,43 @@ function PGListingsContent() {
                         </div>
 
                         {/* Amenities */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {listing.amenities.map((amenity, i) => {
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+                            {listing.amenities.slice(0, 3).map((amenity, i) => {
                                 const Icon = amenityIcons[amenity];
                                 return (
                                     <div
                                         key={i}
-                                        className="px-3 py-1.5 bg-gray-100 rounded-lg flex items-center space-x-1.5 text-sm text-gray-700"
+                                        className="px-2 py-1 bg-gray-50 rounded-lg flex items-center space-x-1 text-[10px] sm:text-xs text-gray-600 border border-gray-100"
                                     >
-                                        {Icon && <Icon className="w-4 h-4" />}
+                                        {Icon && <Icon className="w-3 h-3 sm:w-3.5 h-3.5" />}
                                         <span>{amenity}</span>
                                     </div>
                                 );
                             })}
+                            {listing.amenities.length > 3 && (
+                                <span className="text-[10px] text-gray-400 flex items-center">+{listing.amenities.length - 3} more</span>
+                            )}
                         </div>
 
                         {/* Price & CTA */}
-                        <div className="flex items-end justify-between pt-4 border-t border-gray-100">
-                            <div>
-                                <div className="text-sm text-gray-500 mb-1">Starting from</div>
-                                <div className="flex items-baseline space-x-1">
-                                    <span className="text-3xl font-bold text-gray-900">₹{listing.monthlyPrice.toLocaleString()}</span>
-                                    <span className="text-sm text-gray-500">/month</span>
+                        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-50">
+                            <div className="min-w-0">
+                                <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-0.5">Starts at</div>
+                                <div className="flex items-baseline space-x-0.5">
+                                    <span className="text-xl sm:text-2xl font-black text-gray-900">₹{listing.monthlyPrice.toLocaleString()}</span>
+                                    <span className="text-[10px] sm:text-xs text-gray-400">/mo</span>
                                 </div>
                             </div>
 
                             <button
                                 disabled={!isClickable}
-                                className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center space-x-2 ${isClickable
-                                    ? 'bg-gradient-to-r from-[#037166] to-[#025951] text-white hover:shadow-lg hover:shadow-[#037166]/30'
+                                className={`px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-bold shrink-0 transition-all flex items-center space-x-1.5 ${isClickable
+                                    ? 'bg-gradient-to-r from-[#037166] to-[#025951] text-white shadow-md active:scale-95'
                                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     }`}
                             >
-                                <span>{isClickable ? 'View Details' : 'Preview Only'}</span>
-                                {isClickable && <ChevronRight className="w-4 h-4" />}
+                                <span className="text-xs sm:text-sm">{isClickable ? 'View Details' : 'Preview'}</span>
+                                {isClickable && <ChevronRight className="w-3.5 h-3.5" />}
                             </button>
                         </div>
                     </div>
@@ -516,24 +519,24 @@ function PGListingsContent() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-16">
             {/* Header */}
-            <div className="bg-gradient-to-r from-[#037166] to-[#025951] pt-20 pb-12">
-                <div className="max-w-7xl mx-auto px-4">
+            <div className="bg-gray-100/80 border-b border-gray-200 pt-16 sm:pt-20 pb-10 sm:pb-12 relative overflow-hidden">
+                <div className="absolute inset-0 bg-grid-gray-200/50 [mask-image:linear-gradient(0deg,white,transparent)]" />
+                <div className="max-w-7xl mx-auto px-4 relative z-10">
                     <button
-                        onClick={() => router.back()}
-                        className="mb-8 mt-4 flex items-center text-white/80 hover:text-white transition-colors"
+                        onClick={() => router.push('/pghostels')}
+                        className="mb-6 sm:mb-8 mt-2 sm:mt-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-200 hover:shadow-lg transition-all text-gray-700 hover:text-[#037166]"
                     >
-                        <ArrowLeft className="w-5 h-5 mr-2" />
-                        Back
+                        <ArrowLeft className="w-5 h-5" />
                     </button>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-white"
+                        className="text-gray-900"
                     >
-                        <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                        <h1 className="text-2xl sm:text-4xl font-black mb-1 sm:mb-2 tracking-tight">
                             PGs matched for you
                         </h1>
-                        <p className="text-white/90 text-lg mb-4">
+                        <p className="text-gray-600 text-sm sm:text-lg mb-4 font-medium">
                             {searchQuery ? `Results for "${searchQuery}"` : 'Based on your preferences + location'}
                         </p>
 
@@ -543,11 +546,11 @@ function PGListingsContent() {
                                 {filterChips.map((chip, i) => (
                                     <span
                                         key={i}
-                                        className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-sm font-medium flex items-center space-x-2"
+                                        className="px-4 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-bold text-gray-700 flex items-center space-x-2 shadow-sm"
                                     >
                                         <span>{chip}</span>
-                                        <button className="hover:bg-white/10 rounded-full p-0.5">
-                                            <X className="w-3.5 h-3.5" />
+                                        <button className="hover:bg-gray-100 rounded-full p-0.5 transition-colors">
+                                            <X className="w-3 h-3" />
                                         </button>
                                     </span>
                                 ))}
@@ -588,7 +591,7 @@ function PGListingsContent() {
                         </div>
                         <Sheet>
                             <SheetTrigger asChild>
-                                <button className="flex items-center space-x-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                                <button className="flex items-center space-x-2 p-3 sm:px-6 sm:py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors shrink-0">
                                     <Sliders className="w-5 h-5" />
                                     <span className="hidden md:inline font-medium">Filters</span>
                                 </button>
@@ -634,10 +637,14 @@ function PGListingsContent() {
                             <h2 className="text-2xl font-bold text-gray-900">Recommended for you</h2>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-6">
+                        <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:px-0 sm:mx-0 sm:pb-0">
                             {recommendedListings.map((listing) => (
-                                <PGCard key={listing.id} listing={listing} />
+                                <div key={listing.id} className="min-w-[280px] sm:min-w-0 flex-shrink-0">
+                                    <PGCard listing={listing} />
+                                </div>
                             ))}
+                            {/* End Spacer for Scroll */}
+                            <div className="min-w-[1px] sm:hidden" />
                         </div>
                     </motion.div>
                 )}
@@ -669,19 +676,19 @@ function PGListingsContent() {
                     }}
                     className="space-y-6 text-black shadow-sm"
                 >
-                    <div className="flex items-center justify-between">
-                        <TabsList className="bg-white border border-gray-200 p-1 shadow-sm">
+                    <div className="flex items-center justify-between gap-4">
+                        <TabsList className="bg-white border border-gray-200 p-1 shadow-sm flex-1 sm:flex-none">
                             <TabsTrigger
                                 value="all"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white px-6"
+                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white px-4 sm:px-6 text-xs sm:text-sm flex-1 sm:flex-none"
                             >
-                                All PGs ({sortedListings.length})
+                                All ({sortedListings.length})
                             </TabsTrigger>
                             <TabsTrigger
                                 value="nearby"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white px-6"
+                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white px-4 sm:px-6 text-xs sm:text-sm flex-1 sm:flex-none"
                             >
-                                Nearby PGs
+                                Nearby
                             </TabsTrigger>
                         </TabsList>
 
@@ -722,7 +729,7 @@ function PGListingsContent() {
                                         ))}
                                     </div>
                                 ) : sortedListings.length > 0 ? (
-                                    <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                         {sortedListings.map((listing) => (
                                             <PGCard key={listing.id} listing={listing} />
                                         ))}
@@ -743,7 +750,7 @@ function PGListingsContent() {
                             </TabsContent>
 
                             <TabsContent value="nearby" className="mt-0">
-                                <div className="grid md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                     {sortedListings
                                         .sort((a, b) => a.distance - b.distance)
                                         .map((listing) => (

@@ -11,7 +11,7 @@ const staticQuestions = [
         question: 'Where would you like the service?',
         options: [
             { value: 'home', label: 'Home Service', icon: '🏠' },
-            { value: 'center', label: 'Visit Center', icon: '🏢' },
+            { value: 'center', label: 'Visit Nearby Center', icon: '🏢' },
         ],
     },
     {
@@ -297,7 +297,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                                                         {option.icon}
                                                                     </div>
                                                                 )}
-                                                                <span className="text-[#0F172A] font-semibold text-lg">{option.label}</span>
+                                                                <span className="text-[#0F172A] font-semibold text-l">{option.label}</span>
                                                             </div>
                                                         </motion.button>
                                                     ))}

@@ -13,11 +13,30 @@ export function FloatingActionButtons() {
     const pathname = usePathname();
     const isBookingPage = pathname === '/book-appointment';
 
+    // Services to hide icons for: SPA, PG Hostels, Religious Services, and General Services (Professional Services)
+    const hideForServices = [
+        '/spa-salon',
+        '/pg-hostels',
+        '/pghostels',
+        '/salon-at-home-services',
+        '/pg-hostel',
+        '/religious-services',
+        '/religious',
+        '/services',
+        '/professional-services'
+    ];
+
+    // Check if the current path should hide the floating buttons
+    const shouldHide = hideForServices.some(path => pathname.startsWith(path));
+
     // Hide global Book Now pill on service detail pages (dynamic [slug] routes at root)
     // These pages have their own sticky Book Now bar
     const isServiceDetailPage = pathname.split('/').length === 2
         && !KNOWN_SECTIONS.some(s => pathname.startsWith(s))
         && pathname !== '/';
+
+    // If we should hide for specific services, return null
+    if (shouldHide) return null;
 
     return (
         <>
@@ -31,7 +50,7 @@ export function FloatingActionButtons() {
             >
                 <motion.div
                     whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileTap={{ scale: 0.95 }}
                     className="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-shadow cursor-pointer"
                 >
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -73,3 +92,4 @@ export function FloatingActionButtons() {
         </>
     );
 }
+

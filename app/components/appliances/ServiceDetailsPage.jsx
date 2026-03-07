@@ -583,7 +583,7 @@ export function ServiceDetailsPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="order-1 lg:order-none lg:sticky lg:top-28 space-y-4"
+              className="order-1 lg:order-none lg:sticky lg:top-18 space-y-4"
             >
               {/* Title + Rating */}
               <div>

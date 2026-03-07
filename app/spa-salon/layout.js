@@ -10,7 +10,7 @@ export default function SpaSalonLayout({ children }) {
     const spaSalonTheme = {
         bgScrolled: 'bg-white/80',
         bgMobile: 'bg-white/95',
-        textMain: 'text-[#0F172A]',
+        textMain: 'text-[#C06C84]',
         textHover: 'text-[#C06C84]',
         border: 'border-[#C06C84]/10',
         accent: 'bg-[#C06C84]',

@@ -721,7 +721,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                           <div className="flex flex-col md:flex-row">
                             {/* Image */}
-                            <div className="relative w-full md:w-64 h-48 md:h-auto overflow-hidden">
+                            <div className="relative w-full md:w-80 h-44 md:h-44 overflow-hidden shrink-0">
                               <img
                                 src={center.image ? `https://api.doorstephub.com/${center.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                 alt={center.business_name}
@@ -736,23 +736,23 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             </div>
 
                             {/* Content */}
-                            <div className="flex-1 p-6">
-                              <h4 className="text-2xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors">
+                            <div className="flex-1 p-5 flex flex-col items-center md:items-start text-center md:text-left">
+                              <h4 className="text-xl font-bold text-white mb-1 group-hover:text-[#04a99d] transition-colors">
                                 {center.business_name || center.name}
                               </h4>
-                              <p className="text-white/60 text-sm mb-4 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
+                              <p className="text-white/60 text-xs mb-3 flex items-center gap-2">
+                                <MapPin className="w-3.5 h-3.5" />
                                 {center.address}
                               </p>
 
-                              <div className="flex flex-wrap items-center gap-4 mb-6">
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-4">
                                 <div className="flex items-center gap-1">
                                   <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                                  <span className="text-white font-medium">{center.rating}</span>
-                                  <span className="text-white/40 text-sm">({center.totalOrders} orders)</span>
+                                  <span className="text-white font-medium text-sm">{center.rating}</span>
+                                  <span className="text-white/40 text-xs">({center.totalOrders} orders)</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-white/60 text-sm">
-                                  <MapPin className="w-4 h-4" />
+                                <div className="flex items-center gap-1 text-white/60 text-xs">
+                                  <MapPin className="w-3.5 h-3.5" />
                                   2.3 km away
                                 </div>
                                 {/* <div className="text-white/60 text-sm">
@@ -767,9 +767,9 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
                               <button
                                 onClick={() => router.push(`/${center.slug || center._id}`)}
-                                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
+                                className="px-8 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center"
                               >
-                                View Center
+                                Visit Service Center
                               </button>
                             </div>
                           </div>

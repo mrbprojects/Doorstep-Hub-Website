@@ -586,7 +586,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
                         <TicketCheck className="w-4 h-4 text-[#04a99d]" />
                         Raise A Ticket
                       </button>
-              
+
                       <button
                         onClick={() => setShowAppModal(true)}
                         className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all whitespace-nowrap"

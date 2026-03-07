@@ -358,7 +358,7 @@ export function ViewAllPage({
                             <div className="flex items-center justify-between mt-2">
                               <div className="flex items-center gap-1.5 text-white/30 text-[9px]">
                                 <Zap className="w-3 h-3 text-[#04a99d]" />
-                                <span>Verified Hub</span>
+                                <span>Verified Services</span>
                               </div>
                               <button className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg transition-all text-[11px] flex items-center gap-1">
                                 Book

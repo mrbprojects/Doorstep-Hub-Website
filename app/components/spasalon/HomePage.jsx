@@ -357,7 +357,7 @@ export function HomePage() {
                                     <ChevronRight className="w-5 h-5" />
                                 </motion.button>
 
-                                <motion.button
+                                {/* <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => {
@@ -367,7 +367,7 @@ export function HomePage() {
                                     className="px-8 py-4 bg-white text-[#C06C84] rounded-xl font-medium border-2 border-[#C06C84] hover:bg-[#C06C84] hover:text-white transition-all"
                                 >
                                     Book Appointment Now
-                                </motion.button>
+                                </motion.button> */}
                             </div>
 
                             {/* Stats */}
@@ -484,7 +484,7 @@ export function HomePage() {
                                 />
 
                                 {/* White Glass Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-white/95 via-white/40 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#C06C84]/90 via-[#C06C84]/40 to-transparent" />
 
                                 <div className="absolute inset-0 p-6 flex flex-col justify-end">
                                     <div className="text-5xl mb-3">{category.icon}</div>
@@ -761,7 +761,7 @@ function PackageCard({ package: pkg, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -10 }}
-            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
+            onClick={() => router.push(`/spa-salon/detail/${pkg.id}`)}
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-52 overflow-hidden">
@@ -814,7 +814,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
+            onClick={() => router.push(`/spa-salon/detail/${pkg.id}`)}
             className="bg-white rounded-xl overflow-hidden border border-[#E8ECF2] cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
         >
             <div className="relative h-40">
@@ -846,7 +846,7 @@ function NearbyCenterCard({ center, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/${center.slug || center.id}`)}
+            onClick={() => router.push(`/spa-salon/detail/${center.id}`)}
             className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] cursor-pointer group hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-48 overflow-hidden">
@@ -872,7 +872,7 @@ function NearbyCenterCard({ center, index, router }) {
                             <Star className="w-4 h-4 fill-current" />
                             <span className="text-[#0F172A] font-semibold">{center.rating}</span>
                         </div>
-                        <p className="text-[#C06C84] font-bold text-xl">₹{center.price}</p>
+                        <p className="text-[#C06C84] font-bold text-xl"><span className='text-black text-[10px] mr-2 font-italic'>Starts from</span>₹{center.price}</p>
                     </div>
 
                     <motion.button

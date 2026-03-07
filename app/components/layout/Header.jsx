@@ -247,7 +247,7 @@ export function Header({ theme = {}, navItems = [] }) {
                       <motion.button
                         onClick={() => setActiveDropdown(activeDropdown === index ? null : index)}
                         whileHover={{ y: -2 }}
-                        className={`text-white hover:text-[#04a99d] transition-colors relative font-medium whitespace-nowrap flex items-center gap-1`}
+                        className={`${currentTheme.textMain || 'text-white'} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative font-medium whitespace-nowrap flex items-center gap-1`}
                       >
                         {item.name}
                         <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${activeDropdown === index ? 'rotate-90' : ''}`} />
@@ -277,7 +277,7 @@ export function Header({ theme = {}, navItems = [] }) {
                   ) : (
                     <Link href={item.href} onClick={() => handleServiceClick(item)}>
                       <motion.span
-                        className={`text-white hover:text-[#04a99d] transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
+                        className={`${currentTheme.textMain || 'text-white'} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
                         whileHover={{ y: -2 }}
                       >
                         {item.name}

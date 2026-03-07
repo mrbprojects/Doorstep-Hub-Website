@@ -20,11 +20,11 @@ export function ApplianceHomePage() {
     const [showExploreModal, setShowExploreModal] = useState(false);
     const [serviceSlugs, setServiceSlugs] = useState({
         home: 'appliance-repair-services',
-        category: 'service-list/category/appliance-repair-service',
-        recentlyBooked: 'all-service-categories',
-        featuredServices: 'all-service-categories',
-        serviceCenter: 'nearby-service-centers',
-        verifiedPartner: 'verified-appliance-repair-partners'
+        category: 'appliances/categories',
+        recentlyBooked: 'appliances/recent',
+        featuredServices: 'appliances/featured',
+        serviceCenter: 'appliances/centers',
+        verifiedPartner: 'appliances/verified'
     });
 
     // Fetch Slugs for this service

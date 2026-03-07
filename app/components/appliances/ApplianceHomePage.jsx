@@ -58,20 +58,10 @@ export function ApplianceHomePage() {
     const openExploreModal = () => setShowExploreModal(true);
 
     const handleExploreSelect = (type) => {
-        const typeToId = {
-            'partner': '683dbbfbb62d2a241de0f7e3',
-            'center': '683dbc04b62d2a241de0f7e8'
-        };
-
-        const id = typeToId[type];
-        if (id) {
-            const baseUrl = `/${serviceSlugs.home}`;
-            if (type === 'partner') {
-                router.push(`/${serviceSlugs.verifiedPartner}`);
-            } else {
-                // Align with the slug used in the "Nearest Appliance Service Centers" section
-                router.push(`/${serviceSlugs.serviceCenter}`);
-            }
+        if (type === 'partner') {
+            router.push(`/${serviceSlugs.category}`);
+        } else if (type === 'center') {
+            router.push(`/${serviceSlugs.serviceCenter}`);
         }
         setShowExploreModal(false);
     };

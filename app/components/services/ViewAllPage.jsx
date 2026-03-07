@@ -311,7 +311,7 @@ export function ViewAllPage({
                     `}</style>
               </>
             ) : (
-              <div className={type === 'featured' ? "flex flex-col gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
+              <div className={(type === 'featured' || type === 'categories') ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
                 {type === 'categories' && categories
                   .map((category, index) => (
                     <motion.div
@@ -323,28 +323,45 @@ export function ViewAllPage({
                       onClick={() => onCategoryClick?.(category)}
                       className="group cursor-pointer"
                     >
-                      <div className="flex flex-col h-full rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 shadow-lg hover:shadow-[#037166]/20 transition-all duration-300">
+                      <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 shadow-lg hover:shadow-[#037166]/20 transition-all duration-300 overflow-hidden">
                         {/* Image Section */}
-                        <div className="relative h-48 overflow-hidden">
+                        <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
                           <img
                             src={category.image}
                             alt={category.title}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
                         </div>
 
                         {/* Content Section */}
-                        <div className="p-6 flex flex-col flex-1 relative">
-                          <h4 className="text-xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-1">
-                            {category.title}
-                          </h4>
-                          {/* Optional: Add description if available, or just a CTA */}
-                          <div className="mt-auto flex items-center justify-between">
-                            <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors">Explore All Services</span>
-                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#037166] transition-all">
-                              <ArrowRight className="w-4 h-4 text-white/60 group-hover:text-white transition-colors" />
+                        <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">
+                          <div>
+                            <div className="flex items-start justify-between mb-1 gap-2">
+                              <h4 className="text-lg font-bold text-white group-hover:text-[#04a99d] transition-colors truncate">
+                                {category.title}
+                              </h4>
+                              <div className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded-lg border border-white/10 flex-shrink-0">
+                                <Star className="w-3 h-3 fill-[#04a99d] text-[#04a99d]" />
+                                <span className="text-white text-[10px] font-bold">{category.rating || '4.8'}</span>
+                              </div>
                             </div>
+                            <p className="text-white/50 text-xs mb-2 line-clamp-1 italic">
+                              {category.totalOrders || '1.1k+'} Successfully Completed
+                            </p>
+                            <p className="text-white/40 text-[11px] line-clamp-1 leading-tight">
+                              {category.description || `Professional ${category.title} services by experts.`}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex items-center gap-1.5 text-white/30 text-[9px]">
+                              <Zap className="w-3 h-3 text-[#04a99d]" />
+                              <span>Verified Hub</span>
+                            </div>
+                            <button className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg transition-all text-[11px] flex items-center gap-1">
+                              Book
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -364,40 +381,41 @@ export function ViewAllPage({
                       onClick={() => onServiceClick?.(service._id, service.categoryName, service.subcategoryName)}
                       className="group cursor-pointer"
                     >
-                      <div className="flex flex-col md:flex-row gap-6 p-4 rounded-3xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full overflow-hidden">
-                        <div className="relative w-full md:w-80 h-56 rounded-2xl overflow-hidden flex-shrink-0">
+                      <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full overflow-hidden">
+                        <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
                           <img
                             src={imageLoader({ src: service.mainImage })}
                             alt={service.serviceName}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
-                          <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-xs font-bold flex items-center gap-1 shadow-lg">
-                            <Zap className="w-3 h-3" />
+                          <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-[9px] font-bold flex items-center gap-1 shadow-lg">
+                            <Zap className="w-2.5 h-2.5" />
                             {service.serviceDelhiveryType || 'Featured'}
                           </div>
                         </div>
-                        <div className="flex-1 py-2 flex flex-col justify-between">
+                        <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">
                           <div>
-                            <div className="flex items-start justify-between mb-2">
-                              <h4 className="text-2xl font-bold text-white group-hover:text-[#04a99d] transition-colors line-clamp-1">
+                            <div className="flex items-start justify-between mb-1 gap-2">
+                              <h4 className="text-lg font-bold text-white group-hover:text-[#04a99d] transition-colors truncate">
                                 {service.serviceName}
                               </h4>
-                              <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10">
-                                <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                                <span className="text-white font-medium text-sm">{service.rating || 4.8}</span>
+                              <div className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded-lg border border-white/10 flex-shrink-0">
+                                <Star className="w-3 h-3 fill-[#04a99d] text-[#04a99d]" />
+                                <span className="text-white font-medium text-[10px]">{service.rating || 4.8}</span>
                               </div>
                             </div>
-                            <p className="text-white/60 text-base mb-4 line-clamp-2">{service.description}</p>
+                            <p className="text-white/50 text-xs mb-2 line-clamp-1 italic">
+                              {service.totalOrders || '2.2k+'} Services Booked
+                            </p>
+                            <p className="text-white/40 text-[11px] line-clamp-1 leading-tight">{service.description}</p>
                           </div>
 
-                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                          <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
                             <div className="flex flex-col">
-                              {/* <span className="text-xs text-white/40 mb-1">Service Cost</span>
-                                  <p className="text-2xl font-bold text-white">₹{service.serviceCharge}</p> */}
                             </div>
-                            <button className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all text-sm flex items-center gap-2">
-                              Book Now
-                              <ArrowRight className="w-4 h-4" />
+                            <button className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg transition-all text-[11px] flex items-center gap-1">
+                              Book
+                              <ArrowRight className="w-3 h-3" />
                             </button>
                           </div>
                         </div>

@@ -34,8 +34,8 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                         >
                             <X className="w-5 h-5" />
                         </button>
-                        <h3 className="text-2xl font-bold text-white">What are you looking for?</h3>
-                        <p className="text-gray-400 mt-1">Select the type of service you need</p>
+                        <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Book Doorstep Hub Services</h3>
+                        <p className="text-gray-400 mt-2 font-medium">Select the type of service you need</p>
                     </div>
 
                     {/* Options */}
@@ -49,7 +49,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                                 <ShieldCheck className="w-6 h-6 text-[#037166] group-hover:text-white transition-colors" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="font-bold text-white group-hover:text-[#04a99d] transition-colors">Verified Partner</h4>
+                                <h4 className="font-bold text-white group-hover:text-[#04a99d] transition-colors">Book Doorstep Hub Services</h4>
                                 <p className="text-sm text-gray-400 group-hover:text-gray-300">Book certified professionals for doorstep service</p>
                             </div>
                         </button>
@@ -63,7 +63,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                                 <Store className="w-6 h-6 text-blue-500 group-hover:text-white transition-colors" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="font-bold text-white group-hover:text-blue-400 transition-colors">Service Center</h4>
+                                <h4 className="font-bold text-white group-hover:text-blue-400 transition-colors">Nearby Service Centers</h4>
                                 <p className="text-sm text-gray-400 group-hover:text-gray-300">Find nearby authorized service centers</p>
                             </div>
                         </button>
@@ -71,7 +71,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
 
                     {/* Footer */}
                     <div className="p-4 bg-[#111] border-t border-[#333] text-center text-xs text-gray-500">
-                        DoorstepHub • Trusted Services
+                        Doorstep Hub • India's Trusted Doortsep Service Provider
                     </div>
                 </motion.div>
             </div>

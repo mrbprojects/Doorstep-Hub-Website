@@ -19,6 +19,7 @@ export function FloatingActionButtons() {
         '/pg-hostels',
         '/pghostels',
         '/salon-at-home-services',
+        '/pandit-ji-for-puja-services',
         '/pg-hostel',
         '/religious-services',
         '/religious',

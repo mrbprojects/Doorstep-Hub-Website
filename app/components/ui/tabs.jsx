@@ -1,48 +1,57 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+const TabsContext = React.createContext(null);
+
 const Tabs = ({ defaultValue, className, children, ...props }) => {
   const [value, setValue] = React.useState(defaultValue);
 
   return (
-    <div className={cn("w-full", className)} {...props}>
-      {React.Children.map(children, child =>
-        React.isValidElement(child)
-          ? React.cloneElement(child, { value, setValue })
-          : child
-      )}
-    </div>
+    <TabsContext.Provider value={{ value, setValue }}>
+      <div className={cn("w-full", className)} {...props}>
+        {children}
+      </div>
+    </TabsContext.Provider>
   );
 };
 
-const TabsList = ({ className, children, value, setValue, ...props }) => (
-  <div
-    className={cn("inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground", className)}
-    {...props}
-  >
-    {React.Children.map(children, child =>
-      React.isValidElement(child)
-        ? React.cloneElement(child, { currentValue: value, setValue })
-        : child
-    )}
-  </div>
-);
+const TabsList = ({ className, children, ...props }) => {
+  return (
+    <div
+      className={cn("inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
 
-const TabsTrigger = ({ value, currentValue, setValue, className, children, ...props }) => (
-  <button
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50",
-      currentValue === value ? "bg-background text-foreground shadow-sm" : "",
-      className
-    )}
-    onClick={() => setValue(value)}
-    {...props}
-  >
-    {children}
-  </button>
-);
+const TabsTrigger = ({ value, className, children, ...props }) => {
+  const context = React.useContext(TabsContext);
+  if (!context) return null;
+  const { value: currentValue, setValue } = context;
 
-const TabsContent = ({ value, currentValue, className, children, ...props }) => {
+  return (
+    <button
+      type="button"
+      data-state={currentValue === value ? "active" : "inactive"}
+      className={cn(
+        "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50",
+        className
+      )}
+      onClick={() => setValue(value)}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+const TabsContent = ({ value, className, children, ...props }) => {
+  const context = React.useContext(TabsContext);
+  if (!context) return null;
+  const { value: currentValue } = context;
+
   if (value !== currentValue) return null;
 
   return (

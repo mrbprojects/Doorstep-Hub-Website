@@ -8,11 +8,13 @@ import { LocationBar } from '@/components/location/LocationBar';
 import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useLocation } from '@/hooks/useLocation';
+import { useServiceCart } from '@/context/ServiceCartContext';
 
 export function SpaSalonNavbar() {
     const router = useRouter();
     const { location } = useLocation();
     const { user, isAuthenticated } = useAuth();
+    const { cartItems: serviceCartItems } = useServiceCart();
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [moreOpen, setMoreOpen] = useState(false);
@@ -97,12 +99,15 @@ export function SpaSalonNavbar() {
                         <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
+                            onClick={() => router.push('/spa-salon/cart')}
                             className="relative p-2 text-[#0F172A] hover:text-[#C06C84] transition-colors"
                         >
                             <ShoppingCart className="w-5 h-5" />
-                            <span className="absolute -top-1 -right-1 bg-[#C06C84] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                                0
-                            </span>
+                            {serviceCartItems?.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-[#C06C84] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-sm">
+                                    {serviceCartItems.length}
+                                </span>
+                            )}
                         </motion.button>
 
                         {/* Contact Us */}

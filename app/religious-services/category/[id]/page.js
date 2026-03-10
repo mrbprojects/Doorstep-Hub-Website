@@ -103,7 +103,7 @@ function ReligiousCategoryContent() {
     }, [location, params.id]);
 
     const handleSubCategoryClick = (subCat) => {
-        router.push(`/religious-services/subcategory/${subCat._id}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCat.name)}`);
+        router.push(`/religious-services/subcategory/${subCat._id}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCat.name)}&categoryId=${params.id}`);
     };
 
     if (loading) {
@@ -247,7 +247,7 @@ function ReligiousCategoryContent() {
                                         {service.business_name || `${service.firstName} ${service.lastName}`}
                                     </h3>
                                     <div className="flex items-center justify-between mt-4">
-                                        <span className="text-2xl font-bold text-[var(--saffron)]">₹{(service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
+                                        <span className="text-2xl font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
                                         <Button size="sm" className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white">
                                             Book Now
                                         </Button>

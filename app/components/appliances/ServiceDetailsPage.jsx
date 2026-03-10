@@ -289,7 +289,7 @@ export function ServiceDetailsPage({
       serviceName: storeData.name || 'Professional Service',
       packageName: firstPackage?.title || 'Standard Package',
       price: cleanPrice,
-      bookingCost: storeData.serviceBookingCost || 0,
+      bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
       inspectionCost: storeData.inspectionCost || 0,
       quantity: 1
     }]));

@@ -10,7 +10,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 
 export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
-    const { cartData, cartItems } = useServiceCart();
+    const { cartData, cartItems, clearCart } = useServiceCart();
     const { token, isAuthenticated } = useAuth();
 
     const bookingCost = cartData?.finalAmount || 0;
@@ -22,6 +22,35 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [technicianPreference, setTechnicianPreference] = useState('any');
+    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+
+    // On mount: check if returning from Easebuzz payment gateway
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        if (status === 'success') {
+            setPaymentStatus('success');
+            // Payment confirmed — now safe to clear cart
+            clearCart();
+
+            const pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+            sessionStorage.removeItem('pending_booking');
+
+            toast.success('Payment successful! Booking confirmed.');
+
+            if (onSuccess) {
+                onSuccess({
+                    bookingId: pendingBooking.orderId,
+                    bookedDate: pendingBooking.bookedDate,
+                    bookedTime: pendingBooking.bookedTime,
+                    amount: bookingCost
+                }, 'ONLINE');
+            }
+        } else if (status === 'failure') {
+            setPaymentStatus('failure');
+            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+        }
+    }, [clearCart, onSuccess, bookingCost]);
 
     // Check authentication on mount
     useEffect(() => {
@@ -134,7 +163,9 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     bookedDate,
                     bookedTime,
                     paymentMethod,
-                    sourceOfLead: 'website'
+                    sourceOfLead: 'website',
+                    surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
+                    furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=failure`
                 })
             });
 
@@ -143,6 +174,14 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
+                    // Save pending booking details to sessionStorage before redirect
+                    sessionStorage.setItem('pending_booking', JSON.stringify({
+                        bookedDate,
+                        bookedTime,
+                        address: selectedAddress,
+                        orderId: data.bookingId || data.orderId || null
+                    }));
+
                     // Redirect to Easebuzz payment gateway with access_key
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     console.log('🔗 Redirecting to Easebuzz:', easebuzzUrl);
@@ -151,7 +190,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 } else {
                     // COD or Wallet payment successful
                     toast.success('Booking created successfully!');
-                    if (onSuccess) onSuccess(data);
+                    clearCart(); // Clear cart only on successful booking
+                    if (onSuccess) onSuccess(data, paymentMethod);
                 }
             } else {
                 toast.error(data.message || 'Checkout failed');
@@ -321,6 +361,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 {[
                                     { id: 'WALLET', label: 'Wallet Pay', icon: Wallet },
                                     { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
+                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
                                 ].map((method) => (
                                     <button
                                         key={method.id}

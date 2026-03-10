@@ -11,7 +11,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 
 export default function SpaConfirmPage() {
     const router = useRouter();
-    const { cartData, cartItems, loading: cartLoading } = useServiceCart();
+    const { cartData, cartItems, loading: cartLoading, clearCart } = useServiceCart();
     const { token, isAuthenticated } = useAuth();
 
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -21,6 +21,27 @@ export default function SpaConfirmPage() {
     const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+
+    // On mount: check if returning from Easebuzz payment gateway
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        if (status === 'success') {
+            setPaymentStatus('success');
+            // Payment confirmed — now safe to clear cart
+            clearCart();
+
+            const pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+            sessionStorage.removeItem('pending_booking');
+
+            toast.success('Payment successful! Booking confirmed.');
+            router.push(`/spa-salon/thank-you?orderId=${pendingBooking.orderId || ''}&date=${pendingBooking.bookedDate || ''}&time=${pendingBooking.bookedTime || ''}&paid=${pendingBooking.paid || '0'}&remaining=${pendingBooking.remaining || '0'}`);
+        } else if (status === 'failure') {
+            setPaymentStatus('failure');
+            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+        }
+    }, [clearCart, router]);
 
     const PLATFORM_FEE = 125;
 
@@ -154,7 +175,9 @@ export default function SpaConfirmPage() {
                 paymentMethod,
                 paymentOption, // 'ADVANCE' or 'FULL'
                 sourceOfLead: 'website',
-                providerType: checkoutProviderType
+                providerType: checkoutProviderType,
+                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
+                furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=failure`
             };
 
             if (paymentMethod === 'ONLINE') {
@@ -176,11 +199,6 @@ export default function SpaConfirmPage() {
 
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
-                    const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
-                    toast.success('Redirecting to payment gateway...');
-                    window.location.href = easebuzzUrl;
-                } else {
-                    toast.success('Booking confirmed! Relax and enjoy.');
                     const paid = paymentOption === 'ADVANCE'
                         ? ((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)
                         : ((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0);
@@ -188,7 +206,34 @@ export default function SpaConfirmPage() {
                         ? ((cartData?.totalServiceCost || 0) * 0.75).toFixed(0)
                         : '0';
 
-                    router.push(`/spa-salon/thank-you?date=${bookedDate}&time=${bookedTime}&paid=${paid}&remaining=${remaining}`);
+                    // Save pending booking details to sessionStorage before redirect
+                    sessionStorage.setItem('pending_booking', JSON.stringify({
+                        bookedDate,
+                        bookedTime,
+                        address: selectedAddress,
+                        orderId: data.bookingId || data.orderId || null,
+                        paid,
+                        remaining
+                    }));
+
+                    const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
+                    toast.success('Redirecting to payment gateway...');
+                    window.location.href = easebuzzUrl;
+                } else {
+                    const paid = paymentOption === 'ADVANCE'
+                        ? ((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)
+                        : ((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0);
+                    const remaining = paymentOption === 'ADVANCE'
+                        ? ((cartData?.totalServiceCost || 0) * 0.75).toFixed(0)
+                        : '0';
+
+                    toast.success('Booking created successfully!');
+                    clearCart();
+                    if (paymentMethod === 'COD') {
+                        router.push(`/spa-salon/thank-you-cod?date=${bookedDate}&time=${bookedTime}`);
+                    } else {
+                        router.push(`/spa-salon/thank-you?date=${bookedDate}&time=${bookedTime}&paid=${paid}&remaining=${remaining}`);
+                    }
                 }
             } else {
                 toast.error(data.message || 'Checkout failed');
@@ -410,6 +455,7 @@ export default function SpaConfirmPage() {
                             <div className="grid md:grid-cols-1 gap-3">
                                 {[
                                     { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
+                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
                                 ].map((method) => (
                                     <button
                                         key={method.id}

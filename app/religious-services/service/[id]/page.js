@@ -44,6 +44,7 @@ export default function ReligiousServiceDetailPage() {
     const [loading, setLoading] = useState(true);
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
+    const [isCheckingAddons, setIsCheckingAddons] = useState(false);
     const [viewingRateCard, setViewingRateCard] = useState(null);
     const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
 
@@ -139,14 +140,41 @@ export default function ReligiousServiceDetailPage() {
         fetchServiceData();
     }, [id]);
 
-    const handleContinueToBook = () => {
+    const handleContinueToBook = async () => {
         if (!selectedPackage) {
             alert("Please select a service package from the Portfolio tab.");
             setActiveTab('portfolio');
             window.scrollTo({ top: 500, behavior: 'smooth' });
             return;
         }
-        setShowAddonsModal(true);
+
+        setIsCheckingAddons(true);
+        try {
+            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-service-addons', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    serviceIds: [selectedPackage._id],
+                    professionalProviderId: id
+                })
+            });
+            const data = await response.json();
+
+            if (data.success && data.data && data.data.length > 0) {
+                const allAddons = data.data.flatMap(item => item.addons || []);
+                if (allAddons.length > 0) {
+                    setShowAddonsModal(true);
+                    return;
+                }
+            }
+            // If no addons or API fails to return addons, proceed without them
+            handleAddonsContinue([]);
+        } catch (error) {
+            console.error("Error checking add-ons:", error);
+            handleAddonsContinue([]);
+        } finally {
+            setIsCheckingAddons(false);
+        }
     };
 
     const handleAddonsContinue = (selectedAddons) => {
@@ -241,7 +269,6 @@ export default function ReligiousServiceDetailPage() {
 
                             <div className="bg-[var(--temple-red)]/5 rounded-2xl p-4 border border-[var(--temple-red)]/20 min-w-[120px]">
                                 <div className="flex items-center justify-center mb-1">
-                                    <DollarSign className="w-5 h-5 text-[var(--temple-red)] mr-1" />
                                     <span className="text-2xl font-bold text-[var(--deep-charcoal)]">₹{serviceData.basePrice}</span>
                                 </div>
                                 <div className="text-xs text-gray-500 text-center">Starts From</div>
@@ -258,28 +285,28 @@ export default function ReligiousServiceDetailPage() {
                         <TabsList className="bg-transparent w-full grid grid-cols-4 gap-2">
                             <TabsTrigger
                                 value="portfolio"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
+                                className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
                             >
                                 <Flower2 className="w-4 h-4 mr-2" />
                                 Services
                             </TabsTrigger>
                             <TabsTrigger
                                 value="reviews"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
+                                className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
                             >
                                 <MessageSquare className="w-4 h-4 mr-2" />
                                 Reviews
                             </TabsTrigger>
                             <TabsTrigger
                                 value="amenities"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
+                                className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
                             >
                                 <Sparkles className="w-4 h-4 mr-2" />
                                 Amenities
                             </TabsTrigger>
                             <TabsTrigger
                                 value="about"
-                                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
+                                className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
                             >
                                 <MapPin className="w-4 h-4 mr-2" />
                                 About
@@ -430,9 +457,17 @@ export default function ReligiousServiceDetailPage() {
 
                     <button
                         onClick={handleContinueToBook}
-                        className="px-12 py-4 bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[var(--saffron)]/40 transition-all transform hover:scale-105"
+                        disabled={isCheckingAddons}
+                        className="px-12 py-4 bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white rounded-2xl font-bold text-lg hover:shadow-xl flex items-center gap-2 hover:shadow-[var(--saffron)]/40 transition-all transform hover:scale-105 disabled:opacity-75 disabled:scale-100 disabled:cursor-not-allowed"
                     >
-                        Book Now
+                        {isCheckingAddons ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <span>Verifying...</span>
+                            </>
+                        ) : (
+                            <span>Book Now</span>
+                        )}
                     </button>
                 </div>
             </motion.div>

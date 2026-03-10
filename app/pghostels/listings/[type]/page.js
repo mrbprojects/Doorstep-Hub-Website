@@ -141,16 +141,19 @@ function PGListingsContent() {
     const [usingFallback, setUsingFallback] = useState(false);
     const [minRating, setMinRating] = useState(0);
 
-    // BUG-12 FIX: Restore last active tab from localStorage so back-navigation preserves the user's tab
-    const getInitialTab = () => {
-        if (searchParams.get('lat')) return 'nearby';
+    const [activeTab, setActiveTab] = useState('all');
+
+    // BUG-12 FIX: Restore last active tab from localStorage inside useEffect to avoid Hydration Error
+    useEffect(() => {
         try {
             const saved = localStorage.getItem('pg_listings_last_tab');
-            if (saved) return saved;
+            if (saved && (saved === 'all' || saved === 'nearby')) {
+                setActiveTab(saved);
+            } else if (searchParams.get('lat')) {
+                setActiveTab('nearby');
+            }
         } catch { /* ignore */ }
-        return 'all';
-    };
-    const [activeTab, setActiveTab] = useState(getInitialTab);
+    }, []);
 
     // PG Hostels Service ID (from PremiumHomePage) - You might want to move these to a config file
     const SERVICE_ID = '69524fb157bb211ca094e5ee';
@@ -375,17 +378,17 @@ function PGListingsContent() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
                         {/* Top Badges */}
-                        <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                        <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex flex-wrap gap-1.5 sm:gap-2">
                             {listing.badges.map((badge, i) => (
                                 <span
                                     key={i}
-                                    className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-900"
+                                    className="px-2 py-0.5 sm:px-3 sm:py-1 bg-white/90 backdrop-blur-sm rounded-full text-[9px] sm:text-xs font-semibold text-gray-900"
                                 >
                                     {badge}
                                 </span>
                             ))}
                             {listing.availableBeds <= 3 && (
-                                <span className="px-3 py-1 bg-red-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">
+                                <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-red-500/90 backdrop-blur-sm rounded-full text-[9px] sm:text-xs font-semibold text-white">
                                     Few beds left
                                 </span>
                             )}
@@ -396,10 +399,10 @@ function PGListingsContent() {
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: 'spring' }}
-                            className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 bg-gradient-to-br from-[#037166] to-[#025951] text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg flex items-center space-x-1.5"
+                            className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-gradient-to-br from-[#037166] to-[#025951] text-white px-2 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg flex items-center space-x-1 sm:space-x-1.5"
                         >
                             <Award className="w-3 h-3 sm:w-4 h-4" />
-                            <span className="font-bold text-xs sm:text-base">{listing.matchScore}%</span>
+                            <span className="font-bold text-[10px] sm:text-base">{listing.matchScore}%</span>
                             <span className="text-[10px] hidden sm:inline">match</span>
                         </motion.div>
 
@@ -443,13 +446,13 @@ function PGListingsContent() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-4 sm:p-6" onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${listing.id}?fromListing=${params.type}`)}>
+                    <div className="p-3 sm:p-6" onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${listing.id}?fromListing=${params.type}`)}>
                         {/* PG Name & Location */}
-                        <div className="mb-3 sm:mb-4">
-                            <h3 className="text-lg sm:text-2xl font-bold text-gray-900 mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">
+                        <div className="mb-2 sm:mb-4">
+                            <h3 className="text-base sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">
                                 {listing.name}
                             </h3>
-                            <div className="flex items-center text-gray-500 text-xs sm:text-sm">
+                            <div className="flex items-center text-gray-500 text-[10px] sm:text-sm">
                                 <MapPin className="w-3 h-3 sm:w-4 h-4 mr-1 text-[#037166]/60" />
                                 <span className="truncate">{listing.location}</span>
                             </div>
@@ -457,9 +460,9 @@ function PGListingsContent() {
 
                         {/* Stats Row */}
                         <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
-                            <div className="flex items-center space-x-1 px-2 py-1 bg-amber-50 rounded-lg">
-                                <Star className="w-3.5 h-3.5 sm:w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
-                                <span className="font-bold text-gray-900 text-sm sm:text-base">{listing.rating}</span>
+                            <div className="flex items-center space-x-1 px-1.5 py-0.5 sm:px-2 sm:py-1 bg-amber-50 rounded-lg">
+                                <Star className="w-3 h-3 sm:w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
+                                <span className="font-bold text-gray-900 text-xs sm:text-base">{listing.rating}</span>
                             </div>
 
                             {/* {listing.availableBeds <= 5 && (
@@ -524,7 +527,7 @@ function PGListingsContent() {
                 <div className="max-w-7xl mx-auto px-4 relative z-10">
                     <button
                         onClick={() => router.push('/pghostels')}
-                        className="mb-6 sm:mb-8 mt-2 sm:mt-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-200 hover:shadow-lg transition-all text-gray-700 hover:text-[#037166]"
+                        className="mb-6 sm:mb-8 mt-5 sm:mt-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-200 hover:shadow-lg transition-all text-gray-700 hover:text-[#037166]"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
@@ -533,7 +536,7 @@ function PGListingsContent() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-gray-900"
                     >
-                        <h1 className="text-2xl sm:text-4xl font-black mb-1 sm:mb-2 tracking-tight">
+                        <h1 className="text-xl sm:text-4xl font-black mb-1 sm:mb-2 tracking-tight">
                             PGs matched for you
                         </h1>
                         <p className="text-gray-600 text-sm sm:text-lg mb-4 font-medium">
@@ -630,21 +633,19 @@ function PGListingsContent() {
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-12"
                     >
-                        <div className="flex items-center space-x-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-[#037166] to-[#025951] rounded-xl flex items-center justify-center">
-                                <Sparkles className="w-6 h-6 text-white" />
+                        <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#037166] to-[#025951] rounded-lg sm:rounded-xl flex items-center justify-center">
+                                <Sparkles className="w-4 h-4 sm:w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Recommended for you</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Recommended for you</h2>
                         </div>
 
                         <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:px-0 sm:mx-0 sm:pb-0">
                             {recommendedListings.map((listing) => (
-                                <div key={listing.id} className="min-w-[280px] sm:min-w-0 flex-shrink-0">
+                                <div key={listing.id} className="w-[300px] sm:w-auto flex-shrink-0">
                                     <PGCard listing={listing} />
                                 </div>
                             ))}
-                            {/* End Spacer for Scroll */}
-                            <div className="min-w-[1px] sm:hidden" />
                         </div>
                     </motion.div>
                 )}

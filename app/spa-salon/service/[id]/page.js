@@ -230,7 +230,7 @@ export default function SpaServiceDetailPage() {
                         router.back();
                     }
                 }}
-                className="fixed top-20 left-4 z-50 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
+                className="fixed top-20 mt-5 left-4 z-50 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
             >
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
             </motion.button>
@@ -263,11 +263,11 @@ export default function SpaServiceDetailPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-8"
+                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-5 md:p-8"
                 >
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div className="flex items-start space-x-4">
-                            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-[#C06C84] flex-shrink-0">
+                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 border-[#C06C84] flex-shrink-0">
                                 {serviceData.logo ? (
                                     <img src={serviceData.logo} alt={serviceData.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -275,23 +275,23 @@ export default function SpaServiceDetailPage() {
                                 )}
                             </div>
                             <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                                <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-1 leading-tight">
                                     {serviceData.name}
                                 </h1>
-                                <div className="flex items-center text-gray-600">
-                                    <MapPin className="w-4 h-4 mr-1 text-[#C06C84]" />
-                                    <span>{serviceData.location}</span>
+                                <div className="flex items-start text-gray-600 text-sm md:text-base">
+                                    <MapPin className="w-4 h-4 mr-2 text-[#C06C84] mt-1 shrink-0" />
+                                    <span className="leading-relaxed">{serviceData.location}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-4">
-                            <div className="bg-[#C06C84]/10 rounded-2xl p-4 border border-[#C06C84]/20 min-w-[120px]">
-                                <div className="flex items-center justify-center mb-1">
-                                    <Star className="w-5 h-5 fill-[#C06C84] text-[#C06C84] mr-1" />
-                                    <span className="text-2xl font-bold text-gray-900">{serviceData.rating}</span>
+                        <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                            <div className="bg-[#C06C84]/10 rounded-2xl p-3 md:p-4 border border-[#C06C84]/20 min-w-[100px] md:min-w-[120px] flex flex-col items-center">
+                                <div className="flex items-center justify-center mb-0.5">
+                                    <Star className="w-4 h-4 md:w-5 md:h-5 fill-[#C06C84] text-[#C06C84] mr-1" />
+                                    <span className="text-xl md:text-2xl font-bold text-gray-900">{serviceData.rating}</span>
                                 </div>
-                                <div className="text-xs text-gray-500 text-center">Rating</div>
+                                <div className="text-[10px] md:text-xs text-gray-500 text-center uppercase font-semibold">Rating</div>
                             </div>
                             {/* <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100 min-w-[120px]">
                                 <div className="flex items-center justify-center mb-1">
@@ -306,15 +306,15 @@ export default function SpaServiceDetailPage() {
             </div >
 
             {/* Tabs */}
-            < div className="max-w-7xl mx-auto px-4 mt-8" >
+            <div className="max-w-7xl mx-auto px-4 mt-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <div className="sticky top-[72px] z-40 bg-gray-50/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-2">
-                        <TabsList className="bg-transparent w-full grid grid-cols-4 gap-2">
+                    <div className="sticky top-[72px] z-40 bg-gray-50/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-1.5 md:p-2 overflow-hidden">
+                        <TabsList className="bg-transparent w-full flex overflow-x-auto hide-scrollbar gap-1 md:gap-2 no-scrollbar justify-start md:justify-around">
                             {['Services', 'Reviews', 'Amenities', 'About'].map((tab) => (
                                 <TabsTrigger
                                     key={tab.toLowerCase()}
                                     value={tab === 'Services' ? 'portfolio' : tab.toLowerCase()}
-                                    className="text-gray-900 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#C06C84] data-[state=active]:to-[#6C5CE7] data-[state=active]:text-white rounded-xl"
+                                    className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#C06C84] data-[state=active]:to-[#6C5CE7] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap"
                                 >
                                     {tab}
                                 </TabsTrigger>
@@ -322,9 +322,9 @@ export default function SpaServiceDetailPage() {
                         </TabsList>
                     </div>
 
-                    <TabsContent value="portfolio" className="space-y-4">
+                    <TabsContent value="portfolio" className="space-y-4 outline-none">
                         {serviceData.packages.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {serviceData.packages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
@@ -341,7 +341,7 @@ export default function SpaServiceDetailPage() {
                                         )}
                                         <div className="h-48 bg-gray-100 relative">
                                             {pkg.image ? (
-                                                <img src={`https://api.doorstephub.com/${pkg.image}`} alt={pkg.name} className="w-full h-full object-cover" />
+                                                <img src={`https://api.doorstephub.com/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full text-gray-400 bg-gray-100">
                                                     <Scissors className="w-12 h-12 opacity-20" />
@@ -364,60 +364,81 @@ export default function SpaServiceDetailPage() {
                         )}
                     </TabsContent>
 
-                    <TabsContent value="reviews">
+                    <TabsContent value="reviews" className="outline-none">
                         <div className="space-y-4">
                             {serviceData.reviews.length > 0 ? (
                                 serviceData.reviews.map((r, i) => (
-                                    <div key={i} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                                        <p className="font-bold">{r.name}</p>
-                                        <p className="text-gray-600">{r.comment}</p>
+                                    <div key={i} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-lg">{r.avatar || '👤'}</div>
+                                            <div>
+                                                <p className="font-bold text-gray-900 text-sm">{r.name}</p>
+                                                <div className="flex items-center">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-600 text-sm leading-relaxed">{r.comment}</p>
                                     </div>
                                 ))
-                            ) : <p className="text-gray-500">No reviews yet.</p>}
+                            ) : (
+                                <div className="bg-white p-8 rounded-2xl border border-dashed border-gray-200 text-center">
+                                    <p className="text-gray-500">No reviews yet for this service.</p>
+                                </div>
+                            )}
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="amenities">
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <TabsContent value="amenities" className="outline-none">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             {serviceData.amenities.map((a, i) => (
-                                <div key={i} className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-2">
-                                    <a.icon className="w-5 h-5 text-[#C06C84]" />
-                                    <span>{a.label}</span>
+                                <div key={i} className="bg-white p-4 rounded-xl border border-gray-100 flex items-start gap-3 shadow-sm">
+                                    <div className="w-8 h-8 rounded-lg bg-[#C06C84]/10 flex items-center justify-center shrink-0">
+                                        <a.icon className="w-4 h-4 text-[#C06C84]" />
+                                    </div>
+                                    <span className='text-gray-700 font-medium text-sm leading-tight pt-1'>{a.label}</span>
                                 </div>
                             ))}
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="about">
-                        <div className="bg-white p-6 rounded-xl border border-gray-100">
-                            <h3 className="font-bold mb-4">About</h3>
-                            <p className="text-gray-600">{serviceData.about}</p>
+                    <TabsContent value="about" className="outline-none">
+                        <div className="bg-white p-5 md:p-8 rounded-2xl border border-gray-100 shadow-sm">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <ShieldCheck className="w-5 h-5 text-[#C06C84]" />
+                                About this Service
+                            </h3>
+                            <p className="text-gray-600 text-sm md:text-base leading-relaxed whitespace-pre-line">
+                                {serviceData.about}
+                            </p>
                         </div>
                     </TabsContent>
                 </Tabs>
             </div >
 
             {/* Bottom CTA */}
-            < motion.div
+            <motion.div
                 initial={{ y: 100 }}
                 animate={{ y: 0 }}
                 className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl z-50"
             >
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
                     <div>
-                        <div className="text-xs text-gray-500 mb-1">
+                        <div className="text-[10px] md:text-xs text-gray-500 mb-1 font-medium">
                             {selectedPackages.length > 0 ? `${selectedPackages.length} service(s) selected` : 'No service selected'}
                         </div>
-                        <div className="flex items-baseline space-x-2">
-                            <span className="text-3xl font-bold text-gray-900">
+                        <div className="flex items-baseline space-x-1.5">
+                            <span className="text-2xl md:text-3xl font-bold text-gray-900">
                                 ₹{totalPrice > 0 ? totalPrice.toLocaleString() : serviceData.basePrice.toLocaleString()}
                             </span>
-                            <span className="text-sm text-gray-500">/total</span>
+                            <span className="text-[10px] md:text-sm text-gray-500 font-medium">/total</span>
                         </div>
                     </div>
                     <button
                         onClick={handleContinueToBook}
-                        className="px-12 py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#C06C84]/40 transition-all transform hover:scale-105"
+                        className="px-8 md:px-12 py-3.5 md:py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-2xl font-bold text-base md:text-lg hover:shadow-xl hover:shadow-[#C06C84]/40 transition-all transform hover:scale-105"
                     >
                         Book Now
                     </button>

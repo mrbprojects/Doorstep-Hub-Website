@@ -14,7 +14,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 
 export default function ReligiousConfirmPage() {
     const router = useRouter();
-    const { cartData, cartItems, loading: cartLoading } = useServiceCart();
+    const { cartData, cartItems, loading: cartLoading, clearCart } = useServiceCart();
     const { token, isAuthenticated } = useAuth();
 
     // Address from session storage (selected in previous step - standardized key)
@@ -25,6 +25,27 @@ export default function ReligiousConfirmPage() {
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+
+    // On mount: check if returning from Easebuzz payment gateway
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        if (status === 'success') {
+            setPaymentStatus('success');
+            // Payment confirmed — now safe to clear cart
+            clearCart();
+
+            const pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+            sessionStorage.removeItem('pending_booking');
+
+            toast.success('Payment successful! Booking confirmed.');
+            router.push(`/religious-services/thank-you?orderId=${pendingBooking.orderId || ''}&date=${pendingBooking.bookedDate || ''}&time=${pendingBooking.bookedTime || ''}`);
+        } else if (status === 'failure') {
+            setPaymentStatus('failure');
+            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+        }
+    }, [clearCart, router]);
     const [technicianPreference, setTechnicianPreference] = useState('any');
 
     // Load address - using 'religious_booking_address' as set in previous step
@@ -156,7 +177,9 @@ export default function ReligiousConfirmPage() {
                 bookedTime,
                 paymentMethod,
                 sourceOfLead: 'website',
-                providerType: checkoutProviderType
+                providerType: checkoutProviderType,
+                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
+                furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=failure`
             };
 
             if (paymentMethod === 'ONLINE') {
@@ -178,12 +201,25 @@ export default function ReligiousConfirmPage() {
 
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
+                    // Save pending booking details to sessionStorage before redirect
+                    sessionStorage.setItem('pending_booking', JSON.stringify({
+                        bookedDate,
+                        bookedTime,
+                        address: selectedAddress,
+                        orderId: data.bookingId || data.orderId || null
+                    }));
+
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = easebuzzUrl;
                 } else {
                     toast.success('Booking created successfully!');
-                    router.push(`/religious-services/thank-you?date=${bookedDate}&time=${bookedTime}`);
+                    clearCart();
+                    if (paymentMethod === 'COD') {
+                        router.push(`/religious-services/thank-you-cod?date=${bookedDate}&time=${bookedTime}`);
+                    } else {
+                        router.push(`/religious-services/thank-you?date=${bookedDate}&time=${bookedTime}`);
+                    }
                 }
             } else {
                 toast.error(data.message || 'Checkout failed');
@@ -370,6 +406,7 @@ export default function ReligiousConfirmPage() {
                                 {[
                                     { id: 'WALLET', label: 'Wallet Pay', icon: Wallet },
                                     { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
+                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
                                 ].map((method) => (
                                     <button
                                         key={method.id}
@@ -444,7 +481,7 @@ export default function ReligiousConfirmPage() {
                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span>Platform Fee</span>
-                                    <span>₹{(cartData?.platformFee || 0).toFixed(2)}</span>
+                                    <span>₹{(cartData?.consultationFee || 0).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span>GST</span>

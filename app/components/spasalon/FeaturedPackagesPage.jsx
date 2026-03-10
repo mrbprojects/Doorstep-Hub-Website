@@ -69,52 +69,52 @@ export function FeaturedPackagesPage() {
     return (
         <div className="min-h-screen bg-[#F6F7FB] pt-20">
             {/* Header */}
-            <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-xl border-b border-[#E8ECF2] shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="relative md:sticky md:top-16 z-40 bg-white/95 backdrop-blur-xl border-b border-[#E8ECF2] shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
                     <motion.button
                         whileHover={{ x: -5 }}
                         onClick={() => router.push('/spa-salon')}
-                        className="flex items-center gap-2 text-[#64748B] hover:text-[#0F172A] mb-6 transition-colors"
+                        className="flex items-center gap-2 text-[#64748B] hover:text-[#0F172A] mb-4 md:mb-6 transition-colors text-sm"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                         Back to Spa & Salon
                     </motion.button>
 
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 md:gap-6">
                         <div>
-                            <h1 className="text-3xl font-bold mb-2">
+                            <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2 leading-tight">
                                 <span className="bg-gradient-to-r from-[#026b60] via-[#9b435a] to-[#026b60] bg-clip-text text-transparent">
                                     Featured Packages
                                 </span>
                             </h1>
-                            <p className="text-[#64748B]">
+                            <p className="text-[#64748B] text-xs md:text-base">
                                 {filteredStores.length} exclusive wellness centers available
                             </p>
                         </div>
 
                         <div className="flex-1 max-w-md w-full">
                             <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748B]" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-[#64748B]" />
                                 <input
                                     type="text"
                                     placeholder="Search by center name or location..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-white border border-[#E8ECF2] rounded-xl text-[#0F172A] placeholder:text-[#64748B] focus:outline-none focus:border-[#C06C84] transition-colors shadow-sm"
+                                    className="w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 bg-white border border-[#E8ECF2] rounded-xl text-sm md:text-base text-[#0F172A] placeholder:text-[#64748B] focus:outline-none focus:border-[#C06C84] transition-colors shadow-sm"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* Filter Chips */}
-                    <div className="flex flex-wrap gap-3 mt-8">
+                    {/* Filter Chips - Horizontally Scrollable on Mobile */}
+                    <div className="flex overflow-x-auto hide-scrollbar gap-2 md:gap-3 mt-6 md:mt-8 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
                         {filters.map((filter) => (
                             <motion.button
                                 key={filter}
                                 whileHover={{ y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setSelectedFilter(filter)}
-                                className={`px-6 py-2 rounded-full text-sm font-medium transition-all shadow-sm border ${selectedFilter === filter
+                                className={`px-5 md:px-6 py-2 rounded-full text-xs md:text-sm font-medium transition-all shadow-sm border whitespace-nowrap ${selectedFilter === filter
                                     ? 'bg-[#C06C84] border-[#C06C84] text-white shadow-[#C06C84]/20'
                                     : 'bg-white border-[#E8ECF2] text-[#64748B] hover:border-[#C06C84] hover:text-[#C06C84]'
                                     }`}

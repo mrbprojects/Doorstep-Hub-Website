@@ -15,6 +15,7 @@ function SubCategoryServicesContent() {
     const searchParams = useSearchParams();
     const categoryName = searchParams.get('category') || 'Services';
     const subCategoryName = searchParams.get('name') || 'Available Services';
+    const categoryId = searchParams.get('categoryId') || null;
 
     const { location, detectWithIP } = useLocationContext();
     const [services, setServices] = useState([]);
@@ -65,7 +66,13 @@ function SubCategoryServicesContent() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => router.back()}
+                        onClick={() => {
+                            if (categoryId) {
+                                router.push(`/religious-services/category/${categoryId}?name=${encodeURIComponent(categoryName)}`);
+                            } else {
+                                router.push('/religious-services');
+                            }
+                        }}
                         className="mb-4 text-gray-500 hover:text-[var(--saffron)] pl-0"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -107,7 +114,7 @@ function SubCategoryServicesContent() {
                                 >
                                     <div className="relative h-52 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                                         <img
-                                            src={service.logo ? `https://api.doorstephub.com/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
+                                            src={service.image ? `https://api.doorstephub.com/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                             alt={service.business_name}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         />
@@ -137,7 +144,7 @@ function SubCategoryServicesContent() {
                                         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                                             <div className="flex flex-col">
                                                 <span className="text-xs text-gray-400">Starts from</span>
-                                                <span className="text-xl font-bold text-[var(--saffron)]">₹{(service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
+                                                <span className="text-xl font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
                                             </div>
                                             <Button className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white shadow-lg hover:shadow-[var(--saffron)]/30">
                                                 Book Now

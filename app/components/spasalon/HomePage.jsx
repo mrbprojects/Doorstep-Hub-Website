@@ -71,6 +71,7 @@ export function HomePage() {
     const nearbyScrollRef = useRef(null);
     const bookedScrollRef = useRef(null);
     const featuredScrollRef = useRef(null);
+    const categoriesScrollRef = useRef(null);
 
     // Recent/Booked Near You State - This state is now replaced by featuredPackages for the scrolling section
     // const [recentStores, setRecentStores] = useState([]);
@@ -278,6 +279,23 @@ export function HomePage() {
             return () => clearInterval(interval);
         }
     }, [loadingNearby, nearbyCenters]);
+
+    // Auto-scroll effect for Categories
+    useEffect(() => {
+        if (!loadingCategories && categories.length > 0) {
+            const interval = setInterval(() => {
+                if (categoriesScrollRef.current) {
+                    const { scrollLeft, scrollWidth, clientWidth } = categoriesScrollRef.current;
+                    if (scrollLeft + clientWidth >= scrollWidth - 5) {
+                        categoriesScrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        categoriesScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+                    }
+                }
+            }, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [loadingCategories, categories]);
 
     // Auto-scroll effect for Recently Booked
     useEffect(() => {
@@ -500,10 +518,10 @@ export function HomePage() {
                         className="flex items-center justify-between mb-8"
                     >
                         <div>
-                            <h2 className="text-4xl md:text-5xl font-bold text-[#0F172A] mb-2">
+                            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#0F172A] mb-2">
                                 Explore <span className="text-[#C06C84]">Categories</span>
                             </h2>
-                            <p className="text-xl text-[#64748B]">
+                            <p className="text-sm sm:text-xl text-[#64748B]">
                                 Step into different worlds of wellness
                             </p>
                         </div>
@@ -513,18 +531,21 @@ export function HomePage() {
                                 setSelectedCategory(null);
                                 setModalOpen(true);
                             }}
-                            className="text-[#C06C84] hover:text-[#6C5CE7] flex items-center gap-2 transition-colors font-semibold"
+                            className="text-[#C06C84] hover:text-[#6C5CE7] flex items-center gap-2 transition-colors font-semibold text-xs sm:text-base"
                         >
                             Explore Spa Services
-                            <ChevronRight className="w-5 h-5" />
+                            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                         </motion.button>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div
+                        ref={categoriesScrollRef}
+                        className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar scroll-smooth"
+                    >
                         {loadingCategories ? (
                             // Shimmer skeleton for categories
                             [1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="relative aspect-[3/4] rounded-3xl overflow-hidden animate-pulse">
+                                <div key={i} className="flex-shrink-0 w-64 md:w-80 relative aspect-[3/4] rounded-3xl overflow-hidden animate-pulse">
                                     <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
                                     <div className="absolute bottom-0 left-0 right-0 p-6">
                                         <div className="h-8 bg-gray-300 rounded-lg w-12 mb-3" />
@@ -536,13 +557,13 @@ export function HomePage() {
                         ) : categories.map((category, index) => (
                             <motion.div
                                 key={category._id || category.id}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
                                 whileHover={{ scale: 1.05, y: -5 }}
                                 onClick={() => handleCategoryClick(category)}
-                                className="relative aspect-[3/4] rounded-3xl overflow-hidden cursor-pointer group"
+                                className="flex-shrink-0 w-64 md:w-80 relative aspect-[3/4] rounded-3xl overflow-hidden cursor-pointer group"
                             >
                                 <img
                                     src={category.image}
@@ -553,10 +574,10 @@ export function HomePage() {
                                 {/* White Glass Overlay */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-[#C06C84]/90 via-[#C06C84]/40 to-transparent" />
 
-                                <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                                    <div className="text-5xl mb-3">{category.icon}</div>
-                                    <h4 className="text-2xl font-bold text-[#0F172A] mb-2">{category.name}</h4>
-                                    <p className="text-[#64748B]">{category.description}</p>
+                                <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-end">
+                                    <div className="text-3xl sm:text-5xl mb-2 sm:mb-3">{category.icon}</div>
+                                    <h4 className="text-lg sm:text-2xl font-bold text-[#0F172A] mb-1 sm:mb-2">{category.name}</h4>
+                                    <p className="text-[#64748B] text-xs sm:text-base line-clamp-2">{category.description}</p>
                                 </div>
 
                                 {/* Hover Glow Effect */}

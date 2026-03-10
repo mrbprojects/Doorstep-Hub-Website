@@ -8,20 +8,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const questions = [
-    {
-        id: 'serviceType',
-        title: 'What type of service do you need?',
-        icon: Flame,
-        options: [
-            { value: 'pooja', label: 'Pooja / Homam', desc: 'Traditional rituals & fire ceremonies' },
-            { value: 'astrology', label: 'Astrology Consultation', desc: 'Jyotish, horoscope & predictions' },
-            { value: 'wedding', label: 'Wedding Ceremonies', desc: 'Mangalsutra, weddings & engagement rituals' },
-            { value: 'vastu', label: 'Vastu Shastra', desc: 'Home & office energy consultation' },
-            { value: 'festival', label: 'Festival Rituals', desc: 'Navratri, Diwali, Ganesh & more' },
-            { value: 'grieving', label: 'Last Rites / Shraadh', desc: 'Antima Samskara & annual rituals' },
-        ],
-    },
+const staticQuestions = [
     {
         id: 'occasion',
         title: 'What is the occasion?',
@@ -64,27 +51,132 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState({});
 
+    // Dynamic lists fetched from API
+    const [categories, setCategories] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
+    const [loadingData, setLoadingData] = useState(false);
+
     useEffect(() => {
         if (!isOpen) {
             setCurrentStep(0);
             setAnswers({});
+            setSubcategories([]);
+        } else {
+            // Fetch categories when modal opens
+            fetchCategories();
         }
     }, [isOpen]);
+
+    const fetchCategories = async () => {
+        setLoadingData(true);
+        try {
+            const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
+            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serviceId: RELIGIOUS_SERVICE_ID })
+            });
+            const data = await response.json();
+            if (data.success && data.category) {
+                setCategories(data.category);
+            }
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
+    const fetchSubcategories = async (categoryId) => {
+        setLoadingData(true);
+        try {
+            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryId })
+            });
+            const data = await response.json();
+            if (data.success && Array.isArray(data.data)) {
+                setSubcategories(data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching subcategories:", error);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
+    // Construct the dynamic questions array
+    const questions = [
+        {
+            id: 'category',
+            title: 'What type of service do you need?',
+            icon: Flame,
+            options: categories.map(cat => ({
+                value: cat._id,
+                label: cat.categoryName,
+                desc: 'Select to explore related services',
+                categoryName: cat.categoryName // storing this to pass through
+            }))
+        },
+        {
+            id: 'subcategory',
+            title: 'Please choose a specific service',
+            icon: Sparkles,
+            options: subcategories.map(sub => ({
+                value: sub._id,
+                label: sub.name,
+                desc: sub.description || 'Proceed with this specific service',
+                subcategoryName: sub.name
+            }))
+        },
+        ...staticQuestions
+    ];
 
     const currentQuestion = questions[currentStep];
     const progress = ((currentStep + 1) / questions.length) * 100;
     const isAnswered = answers[currentQuestion?.id];
 
-    const handleSelect = (value) => {
-        setAnswers({ ...answers, [currentQuestion.id]: value });
+    const handleSelect = (option) => {
+        const updatedAnswers = { ...answers, [currentQuestion.id]: option.value };
+
+        // If we are selecting a category, clear subcategory since it will change, and save categoryName
+        if (currentQuestion.id === 'category') {
+            updatedAnswers.subcategory = undefined;
+            updatedAnswers.categoryName = option.categoryName;
+        }
+
+        // If selecting subcategory, save the subcategoryName
+        if (currentQuestion.id === 'subcategory') {
+            updatedAnswers.subcategoryName = option.subcategoryName;
+        }
+
+        setAnswers(updatedAnswers);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentStep < questions.length - 1) {
+            if (currentQuestion.id === 'category') {
+                // Now we fetch subcategories for the selected category before showing step 2
+                await fetchSubcategories(answers.category);
+                // If API returned an empty list, skip to the static questions or show empty state? Let's just proceed.
+            }
             setCurrentStep(currentStep + 1);
         } else {
-            const queryParams = new URLSearchParams(answers);
-            router.push(`/religious-services/category?${queryParams.toString()}`);
+            // FINISH - Navigate to subcategory page
+            const queryParams = new URLSearchParams({
+                category: answers.categoryName || '',
+                categoryId: answers.category || '',
+                name: answers.subcategoryName || '',
+                occasion: answers.occasion || '',
+                attendees: answers.attendees || '',
+                timing: answers.timing || ''
+            });
+
+            // The URL structure uses the selected subcategoryId as the path parameter
+            const subcategoryId = answers.subcategory || 'all';
+
+            router.push(`/religious-services/subcategory/${subcategoryId}?${queryParams.toString()}`);
             onClose();
         }
     };
@@ -93,7 +185,7 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
         if (currentStep > 0) setCurrentStep(currentStep - 1);
     };
 
-    const QuestionIcon = currentQuestion?.icon;
+    const QuestionIcon = currentQuestion?.icon || Flame;
 
     return (
         <AnimatePresence>
@@ -178,12 +270,21 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
 
                                     {/* Options */}
                                     <div className="grid gap-3">
-                                        {currentQuestion?.options.map((option) => {
+                                        {loadingData && (currentQuestion?.id === 'category' || currentQuestion?.id === 'subcategory') ? (
+                                            <div className="flex flex-col items-center justify-center p-8">
+                                                <div className="w-8 h-8 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin mb-4" />
+                                                <p className="text-gray-500 font-medium">Fetching options...</p>
+                                            </div>
+                                        ) : currentQuestion?.options.length === 0 ? (
+                                            <div className="p-8 text-center text-gray-500 border border-dashed border-gray-300 rounded-2xl bg-gray-50">
+                                                No options available for this selection.
+                                            </div>
+                                        ) : currentQuestion?.options.map((option) => {
                                             const isSelected = answers[currentQuestion.id] === option.value;
                                             return (
                                                 <motion.button
                                                     key={option.value}
-                                                    onClick={() => handleSelect(option.value)}
+                                                    onClick={() => handleSelect(option)}
                                                     whileHover={{ scale: 1.02 }}
                                                     whileTap={{ scale: 0.98 }}
                                                     className={`relative p-4 rounded-2xl border-2 transition-all text-left ${isSelected

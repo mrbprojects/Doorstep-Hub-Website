@@ -72,7 +72,8 @@ function SpaSubCategoryContent() {
                         if (categoryId) {
                             router.push(`/spa-salon/category/${categoryId}?name=${encodeURIComponent(categoryName)}`);
                         } else {
-                            router.back();
+                            // router.back();
+                            router.push('/spa-salon')
                         }
                     }}
                     className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex-shrink-0"
@@ -121,9 +122,9 @@ function SpaSubCategoryContent() {
                                 >
                                     <div className="bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl hover:shadow-[#C06C84]/10 transition-all border border-gray-100 h-full flex flex-col">
                                         <div className="relative h-48 rounded-2xl overflow-hidden mb-4 bg-gray-100">
-                                            {service.logo ? (
+                                            {service.image ? (
                                                 <img
-                                                    src={`https://api.doorstephub.com/${service.logo}`}
+                                                    src={`https://api.doorstephub.com/${service.image}`}
                                                     alt={service.business_name || service.serviceName}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />

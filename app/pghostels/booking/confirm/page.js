@@ -30,7 +30,7 @@ const safeNum = (val, fallback = 0) => {
 
 function PGConfirmContent() {
     const router = useRouter();
-    const { cartData, cartItems, loading: cartLoading, cartError, fetchCart, addToCart } = useServiceCart();
+    const { cartData, cartItems, loading: cartLoading, cartError, fetchCart, addToCart, clearCart } = useServiceCart();
     const { token, isAuthenticated } = useAuth();
 
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -38,6 +38,28 @@ function PGConfirmContent() {
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+
+    // On mount: check if returning from Easebuzz payment gateway
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        if (status === 'success') {
+            setPaymentStatus('success');
+            // Payment confirmed — now safe to clear cart
+            clearCart();
+
+            const pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+            sessionStorage.removeItem('pending_booking');
+            sessionStorage.removeItem('pg_booking_data');
+
+            toast.success('Payment successful! Booking confirmed.');
+            router.push(`/pghostels/booking/success?date=${pendingBooking.bookedDate || ''}&time=10:00&bookingId=${pendingBooking.bookingId || ''}`);
+        } else if (status === 'failure') {
+            setPaymentStatus('failure');
+            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+        }
+    }, [clearCart, router]);
 
     // Service window: 9 AM to 9 PM
     const SERVICE_END_HOUR = 21;
@@ -136,6 +158,8 @@ function PGConfirmContent() {
                 paymentMethod, // BUG-R2-02 FIX: Use state variable instead of hardcoded 'ONLINE'
                 sourceOfLead: 'website',
                 providerType: 'professional',
+                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
+                furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=failure`
             };
 
             const endpoint = paymentMethod === 'ONLINE'
@@ -152,13 +176,25 @@ function PGConfirmContent() {
 
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
+                    // Save pending booking details to sessionStorage before redirect
+                    sessionStorage.setItem('pending_booking', JSON.stringify({
+                        bookedDate,
+                        address: selectedAddress,
+                        bookingId: data.bookingId || data.orderId || data._id || null
+                    }));
+
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = `https://pay.easebuzz.in/pay/${data.access_key}`;
                 } else {
                     sessionStorage.removeItem('pg_booking_data');
                     toast.success('Booking confirmed! Welcome to your new home.');
+                    clearCart();
                     const bookingId = data.bookingId || data.orderId || data._id || '';
-                    router.push(`/pghostels/booking/success?date=${bookedDate}&time=10:00&bookingId=${bookingId}`);
+                    if (paymentMethod === 'COD') {
+                        router.push(`/pghostels/booking/success-cod?date=${bookedDate}&bookingId=${bookingId}`);
+                    } else {
+                        router.push(`/pghostels/booking/success?date=${bookedDate}&time=10:00&bookingId=${bookingId}`);
+                    }
                 }
             } else {
                 toast.error(data.message || 'Checkout failed');
@@ -366,14 +402,25 @@ function PGConfirmContent() {
                                 <CreditCard className="w-5 h-5 text-[#037166]" />
                                 Payment Method
                             </h3>
-                            <p className="text-xs text-gray-400 mb-4">Only online payment is accepted for PG bookings</p>
-                            <div className="p-5 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg flex items-center gap-4">
-                                <CreditCard className="w-6 h-6" />
-                                <div>
-                                    <p className="font-semibold">Online Payment</p>
-                                    <p className="text-xs text-white/70">Secure payment via payment gateway</p>
-                                </div>
-                                <CheckCircle className="w-5 h-5 ml-auto" />
+                            <p className="text-xs text-gray-400 mb-4">Select your preferred payment method</p>
+                            <div className="grid md:grid-cols-2 gap-3">
+                                {[
+                                    { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
+                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
+                                ].map((method) => (
+                                    <button
+                                        key={method.id}
+                                        onClick={() => setPaymentMethod(method.id)}
+                                        className={`p-5 rounded-xl flex flex-col items-center gap-2 transition-all ${paymentMethod === method.id
+                                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg'
+                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                                            }`}
+                                    >
+                                        <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-white' : 'text-[#037166]'}`} />
+                                        <span className="text-sm font-semibold">{method.label}</span>
+                                        {paymentMethod === method.id && <CheckCircle className="w-4 h-4 mt-1" />}
+                                    </button>
+                                ))}
                             </div>
                         </motion.div>
 

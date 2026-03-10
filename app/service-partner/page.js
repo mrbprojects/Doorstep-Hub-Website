@@ -12,15 +12,18 @@ import {
     Download,
     Star,
     Wallet,
+    Zap,
     Clock,
     UserCheck,
     MapPin,
     Calendar,
-    DollarSign
+    DollarSign,
+    Apple 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
+import { NewsletterWidget } from '@/components/shared/NewsletterWidget';
 
 const PartnerBenefits = [
     {
@@ -58,6 +61,20 @@ export default function ServicePartnerPage() {
         android: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
         ios: 'https://apps.apple.com/in/app/doorstep-hub-partner/id6504071357'
     });
+
+
+    const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+
+
+     const videoRef = React.useRef(null);
+    
+      React.useEffect(() => {
+        if (videoRef.current) {
+          videoRef.current.play().catch(error => {
+            console.log("Video autoplay failed:", error);
+          });
+        }
+      }, []);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -138,29 +155,19 @@ export default function ServicePartnerPage() {
                                         href={appLinks.android}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="group relative flex-1 flex items-center gap-4 px-8 py-5 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold shadow-2xl hover:shadow-[#037166]/40 hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+                                        className="transition-all duration-300 hover:-translate-y-1 active:scale-95"
                                     >
-                                        <Download className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                                        <div className="text-left">
-                                            <span className="block text-xs opacity-80">Available on</span>
-                                            <span className="text-lg leading-none font-black">Android</span>
-                                        </div>
-                                        <ArrowRight className="w-5 h-5 ml-auto group-hover:translate-x-2 transition-transform" />
+                                        <img src="/googleplay.png" alt="Get it on Google Play" className="h-14 md:h-16 w-auto" />
                                     </a>
 
                                     <a
                                         href={appLinks.ios}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="group flex-1 flex items-center gap-4 px-8 py-5 rounded-2xl bg-white/8 border-2 border-white/20 backdrop-blur-xl text-white font-bold hover:bg-white/20 hover:border-[#04a99d] hover:shadow-2xl hover:shadow-[#04a99d]/30 transition-all duration-300 hover:-translate-y-2"
+                                        className="transition-all duration-300 hover:-translate-y-1 active:scale-95"
                                     >
-                                        <Download className="w-6 h-6" />
-                                        <div className="text-left">
-                                            <span className="block text-xs opacity-80">Available on</span>
-                                            <span className="text-lg leading-none font-black">iOS</span>
-                                        </div>
+                                        <img src="/apple2.png" alt="Download on the App Store" className="h-14 md:h-16 w-auto" />
                                     </a>
-
                                 </div>
 
                                 {/* Quick Stats */}
@@ -242,7 +249,7 @@ export default function ServicePartnerPage() {
                 </section>
 
                 {/* Benefits Section */}
-                <section className="py-24 lg:py-32 relative">
+                <section className="py-20 lg:py-22 relative">
                     <div className="absolute inset-0 bg-gradient-to-b from-[#0f1614]/30 to-transparent pointer-events-none" />
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -252,14 +259,15 @@ export default function ServicePartnerPage() {
                             viewport={{ once: true }}
                             className="text-center max-w-4xl mx-auto mb-20"
                         >
-                            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">
-                                Why 10K+ Partners{' '}
+                            <h2 className="text-4xl md:text-5xl lg:text-5xl font-black mb-6 bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">
+                                Why Business Owners{' '}
                                 <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent">
                                     Choose Us
                                 </span>
                             </h2>
-                            <p className="text-xl md:text-2xl text-white/70 mx-auto max-w-2xl leading-relaxed">
-                                Built for service professionals. Get everything you need to scale your business.
+                            <p className="text-xl md:text-lg text-white/70 mx-auto max-w-xl leading-relaxed">
+                               Subscribe to our Services and Unlock New Opportunities to Grow your Business. Get Access to More Service Requests, Manage your Bookings Smoothly, and Connect with Customers Looking for your Services Nearby.
+
                             </p>
                         </motion.div>
 
@@ -272,26 +280,29 @@ export default function ServicePartnerPage() {
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
                                     whileHover={{ y: -10 }}
-                                    className="group relative p-10 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-[#037166]/50 hover:bg-white/10 transition-all duration-500 overflow-hidden"
+                                    className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-[#037166]/50 hover:bg-white/10 transition-all duration-500 overflow-hidden"
                                 >
                                     {/* Background Gradient */}
                                     <div className={`absolute inset-0 bg-gradient-to-br ${benefit.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
 
                                     <div className="relative">
-                                        <motion.div
-                                            className="w-20 h-20 rounded-3xl bg-gradient-to-r from-white/10 to-white/5 border-2 border-white/20 flex items-center justify-center mb-8 group-hover:scale-110 transition-all duration-500"
-                                            whileHover={{ rotate: 5 }}
-                                        >
-                                            <benefit.icon className="w-10 h-10 text-[#04a99d] shadow-lg" />
-                                        </motion.div>
-
-                                        <div className="mb-4">
-                                            <div className="inline-flex items-center gap-2 bg-[#037166]/20 text-[#04a99d] px-3 py-1 rounded-full text-sm font-bold mb-4">
-                                                {benefit.stats}
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <motion.div
+                                                className="w-14 h-14 rounded-2xl bg-gradient-to-r from-white/10 to-white/5 border border-white/20 flex items-center justify-center group-hover:scale-110 transition-all duration-500 flex-shrink-0"
+                                                whileHover={{ rotate: 5 }}
+                                            >
+                                                <benefit.icon className="w-7 h-7 text-[#04a99d]" />
+                                            </motion.div>
+                                            <div>
+                                                <div className="inline-flex items-center gap-2 bg-[#037166]/20 text-[#04a99d] px-2 py-0.5 rounded-full text-[10px] font-bold mb-1">
+                                                    {benefit.stats}
+                                                </div>
+                                                <h3 className="text-xl font-bold text-white group-hover:text-[#04a99d] transition-colors leading-tight">
+                                                    {benefit.title}
+                                                </h3>
                                             </div>
-                                            <h3 className="text-2xl md:text-3xl font-black text-white mb-4 group-hover:text-[#04a99d] transition-colors">{benefit.title}</h3>
                                         </div>
-                                        <p className="text-white/70 leading-relaxed text-lg">{benefit.desc}</p>
+                                        <p className="text-white/70 leading-relaxed text-base">{benefit.desc}</p>
                                     </div>
                                 </motion.div>
                             ))}
@@ -300,63 +311,232 @@ export default function ServicePartnerPage() {
                 </section>
 
                 {/* How It Works — Download App CTA */}
-                <section className="py-24 relative overflow-hidden">
-                    <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                        <div className="bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-[3rem] p-12 md:p-24 relative overflow-hidden">
-                            {/* Pattern Overlay */}
-                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+               <section id="app-download" className="relative min-h-screen flex items-center overflow-hidden py-16">
+      {/* Architectural World Background */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
 
-                            <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
-                                <div>
-                                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-8">Ready to Start Earning?</h2>
-                                    <div className="space-y-8">
-                                        {[
-                                            { step: "01", text: "Download the Partner App" },
-                                            { step: "02", text: "Complete your profile & verification" },
-                                            { step: "03", text: "Start accepting bookings" }
-                                        ].map((item, i) => (
-                                            <div key={i} className="flex items-center gap-6">
-                                                <div className="w-12 h-12 rounded-full bg-white text-[#037166] font-bold text-xl flex items-center justify-center flex-shrink-0">
-                                                    {item.step}
-                                                </div>
-                                                <p className="text-xl text-white font-medium">{item.text}</p>
-                                            </div>
-                                        ))}
-                                    </div>
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-                                    {/* Download Buttons — Android + iOS partner links */}
-                                    <div className="flex flex-col sm:flex-row gap-3 mt-8">
-                                        <a
-                                            href={appLinks.android}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex-1 px-6 py-4 rounded-xl bg-white text-[#037166] font-bold hover:shadow-xl transition-all inline-flex items-center justify-center gap-2"
-                                        >
-                                            <Download className="w-5 h-5" />
-                                            Android App
-                                        </a>
-                                        <a
-                                            href={appLinks.ios}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex-1 px-6 py-4 rounded-xl bg-white/20 border-2 border-white text-white font-bold hover:bg-white hover:text-[#037166] transition-all inline-flex items-center justify-center gap-2"
-                                        >
-                                            <Download className="w-5 h-5" />
-                                            iOS App
-                                        </a>
-                                    </div>
+        {/* Gradient Orbs - Intensified */}
+        <motion.div
+          animate={{
+            x: mousePosition.x * 0.02,
+            y: mousePosition.y * 0.02,
+          }}
+          transition={{ type: 'spring', damping: 30 }}
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            x: -mousePosition.x * 0.02,
+            y: -mousePosition.y * 0.02,
+          }}
+          transition={{ type: 'spring', damping: 30 }}
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+        />
+      </div>
 
-                                </div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          {/* Left: Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            {/* Badge */}
+            <a href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share" target="_blank" rel="noopener noreferrer">
+              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-8">
+                <Download className="w-4 h-4 text-[#037166]" />
+                <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Download Our App</h6>
+              </div>
+            </a>
 
-                                <div className="hidden lg:block relative">
-                                    <div className="absolute -inset-4 bg-white/20 blur-3xl rounded-full" />
-                                    <Smartphone className="w-96 h-96 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 rotate-12" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            {/* Heading */}
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent whitespace-nowrap">
+                Everything in Your Pocket
+              </span>
+            </h2>
+
+            <p className="text-[24px] text-gray-400 mb-8 leading-relaxed">
+             Join the Doorstep Hub Platform that helps you Earn More, Manage Work Easily, and Reach More Customers
+            </p>
+
+            {/* Features */}
+            <div className="space-y-4 mb-10">
+              {[
+                { icon: Zap, text: 'We bring the customers to you' },
+                { icon: Shield, text: 'Manage Appointments Easily' },
+                { icon: Star, text: 'Increase Your Earnings' },
+              ].map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex items-center space-x-4"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#037166]/20 to-[#025951]/20 border border-[#037166]/30 rounded-xl flex items-center justify-center">
+                    <feature.icon className="w-6 h-6 text-[#037166]" />
+                  </div>
+                  <h5 className="text-lg text-white">{feature.text}</h5>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Download Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a
+                href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center justify-center space-x-3 px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-2xl text-white font-semibold shadow-xl shadow-[#037166]/40 hover:shadow-2xl hover:shadow-[#037166]/50 transition-all w-full"
+                >
+                  <Apple className="w-6 h-6" />
+                  <div className="text-left">
+                    <div className="text-xs text-white/90">Download on the</div>
+                    <h5 className="text-base ">App Store</h5>
+                  </div>
+                </motion.button>
+              </a>
+
+              <a
+                href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center justify-center space-x-3 px-8 py-4 bg-[#1a1a1a]/80 backdrop-blur-sm border-2 border-[#037166]/30 rounded-2xl text-white font-semibold hover:bg-[#037166]/10 transition-all w-full"
+                >
+                  <Smartphone className="w-6 h-6" />
+                  <div className="text-left">
+                    <div className="text-xs text-white/90">Get it on</div>
+                    <h5 className="text-white font-bold text-transparent">Google Play</h5>
+                  </div>
+                </motion.button>
+              </a>
+            </div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="flex items-center space-x-8 mt-10 pt-10 border-t border-[#037166]/20"
+            >
+              <div>
+                <div className="text-3xl font-bold text-[#037166] mb-1">4.8★</div>
+                <h6 className="text-sm text-gray-400">App Rating</h6>
+              </div>
+              <div className="h-12 w-px bg-[#037166]/20" />
+              <div>
+                <div className="text-3xl font-bold text-[#037166] mb-1">50K+</div>
+                <h6 className="text-sm text-gray-400">Downloads</h6>
+              </div>
+              <div className="h-12 w-px bg-[#037166]/20" />
+              <div>
+                <div className="text-3xl font-bold text-[#037166] mb-1">10K+</div>
+                <h6 className="text-sm text-gray-400">Reviews</h6>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Right: Floating Phone Mockups */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative h-[700px] hidden lg:block"
+          >
+            {/* Main Phone */}
+            <motion.div
+              animate={{
+                y: [0, -20, 0],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute top-20 left-[32%] -translate-x-1/2 z-10"
+            >
+              <div className="relative w-72 h-[580px] bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-[3rem] border-8 border-[#2a2a2a] shadow-2xl overflow-hidden">
+                {/* Notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-[#0a0a0a] rounded-b-3xl z-20" />
+
+                {/* Screen */}
+                <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden rounded-[2.5rem]">
+                  <video
+                    ref={videoRef}
+                    src="/dhubvideo.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover scale-110"
+                  />
+                </div>
+
+                {/* Screen Glow */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/30 to-[#02b39a]/30 blur-2xl -z-10" />
+              </div>
+            </motion.div>
+
+            {/* Secondary Phone (Behind) */}
+            <motion.div
+              animate={{
+                y: [0, 20, 0],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              className="absolute top-28 left-[32%] -translate-x-1/2 opacity-40 scale-90 -rotate-12"
+            >
+              <div className="w-72 h-[580px] bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-[3rem] border-8 border-[#2a2a2a] shadow-2xl" />
+            </motion.div>
+
+            {/* Floating Icons */}
+            {[
+              { Icon: Download, position: { top: '15%', right: '20%' } },
+              { Icon: Star, position: { top: '30%', right: '5%' } },
+              { Icon: Shield, position: { bottom: '25%', right: '20%' } },
+              { Icon: Zap, position: { bottom: '15%', right: '5%' } },
+            ].map(({ Icon, position }, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                animate={{
+                  y: [0, -10, 0],
+                  rotate: [0, 5, 0],
+                }}
+                transition={{
+                  delay: 0.5 + index * 0.1,
+                  y: { duration: 2 + index, repeat: Infinity },
+                  rotate: { duration: 3 + index, repeat: Infinity },
+                }}
+                className="absolute"
+                style={position}
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-[#037166]/30 to-[#025951]/30 backdrop-blur-md border border-[#037166]/40 rounded-2xl flex items-center justify-center shadow-lg shadow-[#037166]/20">
+                  <Icon className="w-8 h-8 text-[#037166]" />
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </section>
             </main>
+
+            <NewsletterWidget/>
 
             <Footer />
         </div>

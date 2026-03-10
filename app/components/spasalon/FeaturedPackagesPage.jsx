@@ -203,7 +203,7 @@ function StoreListingCard({ store, index, router }) {
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 bg-[#C06C84] text-white rounded-xl font-semibold text-sm hover:bg-[#A3526D] transition-colors shadow-md"
+                        className="w-full py-3 bg-[#1A0515] text-white rounded-xl font-semibold text-sm hover:bg-[#1A0515]/90 transition-colors shadow-md"
                     >
                         Book Appointment
                     </motion.button>

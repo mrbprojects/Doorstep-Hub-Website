@@ -118,7 +118,7 @@ export function SpaNavbar() {
                     {/* "Book Now" Button */}
                     <Button
                         onClick={() => router.push('/spa-salon')}
-                        className="hidden sm:flex bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white hover:opacity-90 transition-opacity rounded-full px-6"
+                        className="hidden sm:flex bg-[#6d1357] text-white hover:opacity-90 transition-opacity rounded-full px-6"
                     >
                         Book Appointment
                     </Button>

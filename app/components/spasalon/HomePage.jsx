@@ -412,7 +412,7 @@ export function HomePage() {
                                         setSelectedCategory(null);
                                         setModalOpen(true);
                                     }}
-                                    className="px-8 py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-xl font-medium hover:shadow-lg hover:shadow-[#C06C84]/50 transition-all flex items-center justify-center gap-2"
+                                    className="px-8 py-4 bg-[#6d1357] text-white rounded-xl font-medium hover:shadow-lg hover:shadow-[#1A0515]/50 transition-all flex items-center justify-center gap-2 font-bold"
                                 >
                                     Explore Spa Services
                                     <ChevronRight className="w-5 h-5" />
@@ -600,7 +600,7 @@ export function HomePage() {
                         <div>
                             <h2 className="text-4xl font-bold mb-2">
                                 <span className="bg-gradient-to-r from-[#026b60] via-[#9b435a] to-[#026b60] bg-clip-text text-transparent">
-                                    Featured Packages
+                                    Budget Friendly
                                 </span>
                             </h2>
                             <p className="text-xl text-[#64748B]">Most booked this week</p>
@@ -885,13 +885,13 @@ function PackageCard({ package: pkg, index, router }) {
 
                 <div className="flex items-center justify-between mt-4">
                     <div>
-                        <p className="text-2xl font-bold text-[#0F172A]">₹{pkg.price}</p>
+                        <p className="text-2xl font-bold text-[#0F172A]">₹{pkg.price}/-</p>
                         <p className="text-[10px] text-[#64748B] uppercase tracking-wider">Starting Price</p>
                     </div>
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-2.5 bg-[#C06C84] text-white rounded-xl font-semibold text-sm hover:bg-[#A3526D] transition-colors"
+                        className="px-6 py-2.5 bg-[#6d1357] text-white rounded-xl font-semibold text-sm hover:bg-[#1E293B] transition-colors"
                     >
                         Book Now
                     </motion.button>
@@ -927,10 +927,14 @@ function RecentlyBookedCard({ package: pkg, router }) {
                         <span className="text-[#0F172A]">{pkg.rating}</span>
                     </div>
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                    <p className="text-[#C06C84] font-bold text-lg">Starting at ₹{pkg.price}</p>
-                    <span className="text-[10px] text-[#64748B] uppercase font-medium">Booked</span>
-                </div>
+              <div className="flex items-center justify-between mt-2">
+  <p className="flex items-center gap-2 text-[#C06C84] font-bold text-lg">
+    <span className="text-[#64748B] text-[10px] italic">
+      Starting at
+    </span>
+    ₹{pkg.price}/-
+  </p>
+</div>
             </div>
         </motion.div>
     );
@@ -969,13 +973,13 @@ function NearbyCenterCard({ center, index, router }) {
                             <Star className="w-4 h-4 fill-current" />
                             <span className="text-[#0F172A] font-semibold">{center.rating}</span>
                         </div>
-                        <p className="text-[#C06C84] font-bold text-xl"><span className='text-black text-[10px] mr-2 font-italic'>Starts from</span>₹{center.price}</p>
+                        <p className="text-[#C06C84] font-bold text-xl"><span className='text-black text-[10px] mr-2 italic'>Starts from</span>₹{center.price}/-</p>
                     </div>
 
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 bg-[#0F172A] text-white rounded-xl font-semibold text-sm hover:bg-[#1E293B] transition-colors"
+                        className="w-full py-3 bg-[#6d1357] text-white rounded-xl font-semibold text-sm transition-colors"
                     >
                         Book Appointment
                     </motion.button>

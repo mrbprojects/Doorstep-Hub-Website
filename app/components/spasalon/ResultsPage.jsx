@@ -415,7 +415,7 @@ function ServiceCard({ service, index, router }) {
                             e.stopPropagation();
                             router.push(`/spa-salon/detail/${service.id}`);
                         }}
-                        className="px-6 py-2 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#C06C84]/50 transition-all"
+                        className="px-6 py-2 bg-[#6d1357] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#1A0515]/50 transition-all font-bold"
                     >
                         View Details
                     </motion.button>

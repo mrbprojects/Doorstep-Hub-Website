@@ -455,7 +455,7 @@ export default function SpaConfirmPage() {
                             <div className="grid md:grid-cols-1 gap-3">
                                 {[
                                     { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
-                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
+                                    // { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
                                 ].map((method) => (
                                     <button
                                         key={method.id}

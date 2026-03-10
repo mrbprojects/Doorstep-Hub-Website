@@ -438,7 +438,7 @@ export default function SpaServiceDetailPage() {
                     </div>
                     <button
                         onClick={handleContinueToBook}
-                        className="px-8 md:px-12 py-3.5 md:py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-2xl font-bold text-base md:text-lg hover:shadow-xl hover:shadow-[#C06C84]/40 transition-all transform hover:scale-105"
+                        className="px-8 md:px-12 py-3.5 md:py-4 bg-[#1A0515] text-white rounded-2xl font-bold text-base md:text-lg hover:shadow-xl hover:shadow-[#1A0515]/40 transition-all transform hover:scale-105"
                     >
                         Book Now
                     </button>

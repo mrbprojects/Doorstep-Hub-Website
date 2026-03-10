@@ -151,7 +151,7 @@ export function DetailsPage() {
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
                         {/* Left - Name & Provider */}
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                            <h1 className="text-3xl md:text-4xl font-bold text-[#6d1357] mb-2">
                                 {service.name}
                             </h1>
                             <p className="text-xl text-gray-600">{service.provider}</p>
@@ -235,7 +235,7 @@ export function DetailsPage() {
                                                 {/* Package Image */}
                                                 <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                                                     <img
-                                                        src={pkg.image ? `https://api.doorstephub.com/${pkg.image}` : service.image}
+                                                        src={pkg.image ? `https://api.doorstephub.com/${pkg.image[0]}` : service.image}
                                                         alt={pkg.name}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -371,7 +371,7 @@ export function DetailsPage() {
                             }
                             setShowAddonsModal(true);
                         }}
-                        className="w-full md:w-auto md:px-24 py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#C06C84]/40 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                        className="w-full md:w-auto md:px-24 py-4 bg-[#6d1357] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#6d1357]/40 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
                     >
                         Book Now
                         <ChevronRight className="w-5 h-5" />
@@ -461,7 +461,7 @@ export function DetailsPage() {
                                 key={rateCardImageIndex}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                src={`https://api.doorstephub.com/${viewingRateCard.banner_images[rateCardImageIndex]}`}
+                                src={`https://api.doorstephub.com/${viewingRateCard.image[0]}`}
                                 alt={viewingRateCard.name}
                                 className="max-w-full max-h-[70vh] object-contain shadow-lg rounded-xl"
                             />

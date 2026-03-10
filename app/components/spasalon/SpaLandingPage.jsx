@@ -153,7 +153,7 @@ export function SpaLandingPage() {
                                 el?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             size="lg"
-                            className="bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white hover:opacity-90 shadow-xl px-10 py-6 text-lg rounded-full"
+                            className="bg-[#6d1357] text-white hover:opacity-90 shadow-xl px-10 py-6 text-lg rounded-full"
                         >
                             Book a Service
                             <ArrowRight className="ml-2 h-5 w-5" />

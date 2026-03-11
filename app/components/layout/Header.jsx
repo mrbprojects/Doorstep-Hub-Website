@@ -234,7 +234,7 @@ export function Header({ theme = {}, navItems = [] }) {
                 whileHover={{ scale: 1.02 }}
                 className="flex items-center relative group flex-shrink-0"
               >
-                <div className="relative w-24 sm:w-48 h-10 sm:h-14 overflow-hidden flex-shrink-0">
+                <div className="relative w-24 sm:w-48 h-10 sm:h-16 overflow-hidden flex-shrink-0">
                   <Image
                     src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
                     alt={globalSettings?.applicationName || "Doorstep Hub Logo"}

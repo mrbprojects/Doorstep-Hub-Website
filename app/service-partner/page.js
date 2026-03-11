@@ -61,6 +61,7 @@ export default function ServicePartnerPage() {
         android: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
         ios: 'https://apps.apple.com/in/app/doorstep-hub-partner/id6504071357'
     });
+    const [globalSettings, setGlobalSettings] = useState(null);
 
 
     const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
@@ -85,6 +86,7 @@ export default function ServicePartnerPage() {
                 });
                 const data = await response.json();
                 if (data.success && data.policy) {
+                    setGlobalSettings(data.policy);
                     setAppLinks({
                         android: data.policy.vendorAndroidAppLink
                             || data.policy.partnerAndroidAppLink
@@ -150,23 +152,25 @@ export default function ServicePartnerPage() {
                                     Transform your service business today.
                                 </p>
 
-                                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                                <div className="flex flex-row gap-4 mb-8">
                                     <a
                                         href={appLinks.android}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="transition-all duration-300 hover:-translate-y-1 active:scale-95"
+                                        className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
+                                        title="Get it on Google Play"
                                     >
-                                        <img src="/googleplay.png" alt="Get it on Google Play" className="h-14 md:h-16 w-auto" />
+                                        <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
                                     </a>
 
                                     <a
                                         href={appLinks.ios}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="transition-all duration-300 hover:-translate-y-1 active:scale-95"
+                                        className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
+                                        title="Download on the App Store"
                                     >
-                                        <img src="/apple2.png" alt="Download on the App Store" className="h-14 md:h-16 w-auto" />
+                                        <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
                                     </a>
                                 </div>
 
@@ -204,8 +208,16 @@ export default function ServicePartnerPage() {
                                         <div className="h-full relative flex flex-col p-6">
                                             {/* App Header */}
                                             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
-                                                <div className="w-12 h-12 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-xl flex items-center justify-center">
-                                                    <TrendingUp className="w-5 h-5 text-white" />
+                                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden">
+                                                    {globalSettings?.workerLogo ? (
+                                                        <img 
+                                                            src={`https://api.doorstephub.com/${globalSettings.workerLogo}`} 
+                                                            alt="Partner Logo" 
+                                                            className="w-full h-full object-contain p-2"
+                                                        />
+                                                    ) : (
+                                                        <TrendingUp className="w-5 h-5 text-[#037166]" />
+                                                    )}
                                                 </div>
                                                 <div className="text-right">
                                                     <div className="text-xs text-white/50">₹74000</div>
@@ -390,43 +402,28 @@ export default function ServicePartnerPage() {
             </div>
 
             {/* Download Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-row gap-4">
               <a
-                href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
+                href={appLinks.android}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
+                title="Get it on Google Play"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-3 px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-2xl text-white font-semibold shadow-xl shadow-[#037166]/40 hover:shadow-2xl hover:shadow-[#037166]/50 transition-all w-full"
-                >
-                  <Apple className="w-6 h-6" />
-                  <div className="text-left">
-                    <div className="text-xs text-white/90">Download on the</div>
-                    <h5 className="text-base ">App Store</h5>
-                  </div>
-                </motion.button>
+                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
               </a>
 
               <a
-                href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
+                href={appLinks.ios}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
+                title="Download on the App Store"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-3 px-8 py-4 bg-[#1a1a1a]/80 backdrop-blur-sm border-2 border-[#037166]/30 rounded-2xl text-white font-semibold hover:bg-[#037166]/10 transition-all w-full"
-                >
-                  <Smartphone className="w-6 h-6" />
-                  <div className="text-left">
-                    <div className="text-xs text-white/90">Get it on</div>
-                    <h5 className="text-white font-bold text-transparent">Google Play</h5>
-                  </div>
-                </motion.button>
+                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
               </a>
             </div>
+
 
             {/* Stats */}
             <motion.div

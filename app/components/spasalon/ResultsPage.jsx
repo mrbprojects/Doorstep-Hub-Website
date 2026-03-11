@@ -64,6 +64,7 @@ export function ResultsPage() {
 
                 const payload = {
                     serviceId: '69524f4a57bb211ca094e5e6',
+                    categoryId: categoryId,
                     subCategoryId: subcategoryId,
                     subcategoryId: subcategoryId,
                     // If we have a subcategory, don't send categoryId to avoid filtering conflicts

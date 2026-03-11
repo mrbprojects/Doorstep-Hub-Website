@@ -329,7 +329,7 @@ export default function NewHostelDetailPage() {
                                 <div className="flex items-center justify-center mb-0.5">
                                     <span className="text-lg sm:text-2xl font-bold text-gray-900">₹{hostelData.basePrice}</span>
                                 </div>
-                                <div className="text-[9px] sm:text-xs text-[#037166] font-bold uppercase tracking-wider whitespace-nowrap">From / Mo</div>
+                                <div className="text-[9px] sm:text-xs text-[#037166] font-bold uppercase tracking-wider whitespace-nowrap">/Month</div>
                             </div>
                         </div>
                     </div>

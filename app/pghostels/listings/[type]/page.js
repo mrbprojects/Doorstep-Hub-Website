@@ -252,10 +252,6 @@ function PGListingsContent() {
                     payload.subcategoryId = dynamicSubcategoryId;
                 } else if (dynamicCategoryId) {
                     payload.categoryId = dynamicCategoryId;
-                } else {
-                    // Fallbacks for testing if neither is provided in URL
-                    payload.categoryId = '65b2f234567890abcdef456';
-                    payload.subcategoryId = '65b2f34567890abcdef789';
                 }
 
 

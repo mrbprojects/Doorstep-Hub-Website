@@ -171,6 +171,7 @@ export function HomePage() {
                             id: store._id,
                             name: store.storeName || store.business_name || store.firstName,
                             provider: store.business_name || 'Professional',
+                            address: store.address || store.cityName || 'Nearby',
                             image: imageUrl,
                             rating: store.rating || store.totalRatings || 4.5,
                             reviews: store.totalOrders || store.totalRatings || 0,
@@ -219,6 +220,7 @@ export function HomePage() {
                             id: center._id,
                             name: center.storeName || center.business_name || 'Premium Spa',
                             location: center.address || center.cityName || 'Nearby',
+                            address: center.address || center.cityName || 'Nearby',
                             rating: center.rating || center.totalRatings || 4.5,
                             image: imageUrl,
                             distance: center.distance || '2.5 km',
@@ -962,8 +964,8 @@ function NearbyCenterCard({ center, index, router }) {
                 <div>
                     <h4 className="text-xl font-bold text-[#0F172A] mb-2 line-clamp-1">{center.name}</h4>
                     <div className="flex items-center gap-2 text-[#64748B] text-sm mb-4">
-                        <MapPin className="w-4 h-4 text-[#C06C84]" />
-                        <span className="line-clamp-1">{center.address}</span>
+                        <MapPin className="w-5 h-5 text-[#C06C84]" />
+                        <span className="line-clamp-1">{center.location}</span>
                     </div>
                 </div>
 

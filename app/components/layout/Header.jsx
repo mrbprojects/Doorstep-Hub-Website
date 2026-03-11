@@ -51,6 +51,7 @@ export function Header({ theme = {}, navItems = [] }) {
     pg: 'pg-hostels-near-me'
   });
   const [showHomeScreen, setShowHomeScreen] = useState(false);
+  const [globalSettings, setGlobalSettings] = useState(null);
 
   // Fetch Slugs and Services for Navigation
   useEffect(() => {
@@ -90,8 +91,16 @@ export function Header({ theme = {}, navItems = [] }) {
         // 3. Fetch Screen Settings
         const screenSettingsResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-screen-settings');
         const screenSettingsData = await screenSettingsResponse.json();
-        const isHomeEnabled = screenSettingsData.success && screenSettingsData.data?.homescreen;
-        setShowHomeScreen(isHomeEnabled);
+        if (screenSettingsData.success && screenSettingsData.data?.homescreen) {
+          setShowHomeScreen(true);
+        }
+
+        // 4. Fetch Global Settings
+        const globalSettingsResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+        const globalSettingsData = await globalSettingsResponse.json();
+        if (globalSettingsData.success && globalSettingsData.policy) {
+          setGlobalSettings(globalSettingsData.policy);
+        }
 
         // Fetch Navbar CMS Items
         const navResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-navbar');
@@ -227,8 +236,8 @@ export function Header({ theme = {}, navItems = [] }) {
               >
                 <div className="relative w-24 sm:w-48 h-10 sm:h-14 overflow-hidden flex-shrink-0">
                   <Image
-                    src="/d-hub-logo.png"
-                    alt="Doorstep Hub Logo"
+                    src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                    alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
                     fill
                     sizes="(max-width: 640px) 96px, 192px"
                     className="object-contain object-left transition-all duration-300"

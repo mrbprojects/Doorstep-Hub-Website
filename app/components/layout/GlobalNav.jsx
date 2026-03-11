@@ -15,6 +15,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [globalSettings, setGlobalSettings] = useState(null);
 
   const cartItemsCount = (productCartItems?.length || 0) + (serviceCartItems?.length || 0);
 
@@ -24,6 +25,19 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
   };
 
   useEffect(() => {
+    const fetchGlobalSettings = async () => {
+      try {
+        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+        const data = await response.json();
+        if (data.success && data.policy) {
+          setGlobalSettings(data.policy);
+        }
+      } catch (error) {
+        console.error("Failed to fetch global settings:", error);
+      }
+    };
+    fetchGlobalSettings();
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -67,8 +81,8 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
             >
               <div className="relative w-48 h-14 overflow-hidden flex-shrink-0">
                 <Image
-                  src="/d-hub-logo.png"
-                  alt="Doorstep Hub Logo"
+                  src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                  alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
                   fill
                   sizes="192px"
                   className="object-contain "

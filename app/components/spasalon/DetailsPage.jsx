@@ -357,7 +357,26 @@ export function DetailsPage() {
                 animate={{ y: 0 }}
                 className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl z-50"
             >
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-center">
+              <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+  {selectedPackages.length > 0 && (
+    <div className="flex flex-col min-w-0">
+      <span className="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wider">
+        Selected Service
+      </span>
+
+      {/* Package Name */}
+      <span className="text-gray-900 font-bold text-sm md:text-lg truncate max-w-[150px] md:max-w-md">
+        {selectedPackages.length === 1
+          ? selectedPackages[0].name
+          : `${selectedPackages.length} Services`}
+      </span>
+
+      {/* Price */}
+      <span className="text-[#6d1357] font-extrabold text-lg md:text-2xl mt-1">
+        ₹{selectedPackages.reduce((sum, pkg) => sum + Number(pkg.price || 0), 0)}
+      </span>
+    </div>
+  )}
                     <button
                         onClick={() => {
                             if (selectedPackages.length === 0) {
@@ -371,7 +390,7 @@ export function DetailsPage() {
                             }
                             setShowAddonsModal(true);
                         }}
-                        className="w-full md:w-auto md:px-24 py-4 bg-[#6d1357] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#6d1357]/40 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                        className={`${selectedPackages.length > 0 ? 'px-8 md:px-24' : 'w-full md:w-auto md:px-24'} py-4 bg-[#6d1357] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#6d1357]/40 transition-all transform hover:scale-105 flex items-center justify-center gap-2`}
                     >
                         Book Now
                         <ChevronRight className="w-5 h-5" />

@@ -384,7 +384,9 @@ export function Footer({ theme = {} }) {
                 </div>
                 {/* About text */}
                 <p className={`${t.textMuted} leading-relaxed max-w-sm text-sm`}>
-                  {globalSettings?.aboutus || "Your trusted partner for all home service needs. Connecting you with verified professionals for quick, reliable, and affordable solutions."}
+                  {globalSettings?.aboutus
+                    ? globalSettings.aboutus.trim().replace(/^<p>/i, '').replace(/<\/p>$/i, '').trim()
+                    : "Your trusted partner for all home service needs. Connecting you with verified professionals for quick, reliable, and affordable solutions."}
                 </p>
               </div>
 

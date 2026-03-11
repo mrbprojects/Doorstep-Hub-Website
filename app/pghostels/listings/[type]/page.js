@@ -157,8 +157,6 @@ function PGListingsContent() {
 
     // PG Hostels Service ID (from PremiumHomePage) - You might want to move these to a config file
     const SERVICE_ID = '69524fb157bb211ca094e5ee';
-    const CATEGORY_ID = '65b2f234567890abcdef456'; // Replace with actual Category ID if known
-    const SUBCATEGORY_ID = '65b2f34567890abcdef789'; // Replace with actual Subcategory ID if known
 
     const mapApiResponseToListing = (item) => {
         if (!item) return null;
@@ -240,12 +238,25 @@ function PGListingsContent() {
                     longitude: lng,
                     searchQuery: searchQuery || undefined,
                     serviceId: SERVICE_ID,
-                    categoryId: CATEGORY_ID,
-                    subcategoryId: SUBCATEGORY_ID,
                     minPrice: priceRange?.[0] || 0,
                     maxPrice: priceRange?.[1] || 100000,
-                    minRating: minRating || 0
+                    minRating: minRating || 0,
+                    ...Object.fromEntries(searchParams.entries())
                 };
+
+                // Prioritize subcategoryId if present, otherwise categoryId
+                const dynamicCategoryId = searchParams.get('categoryId');
+                const dynamicSubcategoryId = searchParams.get('subcategoryId');
+
+                if (dynamicSubcategoryId) {
+                    payload.subcategoryId = dynamicSubcategoryId;
+                } else if (dynamicCategoryId) {
+                    payload.categoryId = dynamicCategoryId;
+                } else {
+                    // Fallbacks for testing if neither is provided in URL
+                    payload.categoryId = '65b2f234567890abcdef456';
+                    payload.subcategoryId = '65b2f34567890abcdef789';
+                }
 
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {

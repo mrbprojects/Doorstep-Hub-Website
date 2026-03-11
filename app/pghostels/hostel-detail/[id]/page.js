@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Star, TrendingUp, DollarSign, Wifi, Utensils, Shirt, Zap,
-    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, ChevronRight, Home
+    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, ChevronRight, Home,ChevronLeft 
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
 import Slider from 'react-slick';
@@ -37,6 +37,8 @@ export default function NewHostelDetailPage() {
     const [activeTab, setActiveTab] = useState('roomTypes');
     const [viewingRateCard, setViewingRateCard] = useState(null);
     const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
+    const [viewingGalleryIndex, setViewingGalleryIndex] = useState(null);
+    const [galleryAutoPlay, setGalleryAutoPlay] = useState(true);
     const { scrollY } = useScroll();
     const headerOpacity = useTransform(scrollY, [0, 300], [1, 0.8]);
 
@@ -274,7 +276,7 @@ export default function NewHostelDetailPage() {
   className="relative h-[500px] overflow-hidden"
 >
   <div
-    className="absolute inset-0 bg-cover bg-center"
+    className="absolute inset-0 bg-fit bg-center"
     style={{
       backgroundImage: `url(${hostelData.image})`
     }}
@@ -509,14 +511,17 @@ export default function NewHostelDetailPage() {
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: index * 0.1 }}
-                                        className="relative aspect-video rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
+                                        onClick={() => setViewingGalleryIndex(index)}
+                                        className="relative aspect-video rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group cursor-pointer"
                                     >
                                         <img
                                             src={img}
                                             alt={`Gallery Image ${index + 1}`}
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                         />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                            <Sparkles className="text-white opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8" />
+                                        </div>
                                     </motion.div>
                                 ))}
                             </div>
@@ -771,6 +776,118 @@ export default function NewHostelDetailPage() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Gallery Fullscreen Modal */}
+            <AnimatePresence>
+                {viewingGalleryIndex !== null && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 sm:p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setViewingGalleryIndex(null)}
+                            className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+                        />
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="relative w-full h-full sm:max-h-[90vh] max-w-6xl flex flex-col"
+                        >
+                            {/* Header */}
+                            <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-20 bg-gradient-to-b from-black/60 to-transparent">
+                                <div className="text-white">
+                                    <h3 className="text-lg font-bold">Hostel Gallery</h3>
+                                    <p className="text-sm opacity-70">Image {viewingGalleryIndex + 1} of {hostelData.images.length}</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        onClick={() => setGalleryAutoPlay(!galleryAutoPlay)}
+                                        className={`p-2 rounded-full transition-colors ${galleryAutoPlay ? 'bg-[#037166] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                                        title={galleryAutoPlay ? "Pause Slideshow" : "Play Slideshow"}
+                                    >
+                                        {galleryAutoPlay ? <Clock className="w-5 h-5 animate-pulse" /> : <TrendingUp className="w-5 h-5" />}
+                                    </button>
+                                    <button
+                                        onClick={() => setViewingGalleryIndex(null)}
+                                        className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Main Slider */}
+                            <div className="flex-1 flex items-center justify-center relative">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setViewingGalleryIndex(prev => (prev - 1 + hostelData.images.length) % hostelData.images.length);
+                                    }}
+                                    className="absolute left-4 z-10 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                                >
+                                    <ChevronLeft className="w-8 h-8" />
+                                </button>
+
+                                <motion.div
+                                    key={viewingGalleryIndex}
+                                    initial={{ opacity: 0, x: 100 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -100 }}
+                                    className="w-full h-full flex items-center justify-center p-4 sm:p-12"
+                                >
+                                    <img
+                                        src={hostelData.images[viewingGalleryIndex]}
+                                        className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                                        alt=""
+                                    />
+                                </motion.div>
+
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setViewingGalleryIndex(prev => (prev + 1) % hostelData.images.length);
+                                    }}
+                                    className="absolute right-4 z-10 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                                >
+                                    <ChevronRight className="w-8 h-8" />
+                                </button>
+                            </div>
+
+                            {/* Thumbnails */}
+                            <div className="p-6 bg-black/20 backdrop-blur-sm overflow-x-auto flex gap-3 justify-center hide-scrollbar">
+                                {hostelData.images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setViewingGalleryIndex(idx)}
+                                        className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 transition-all ${viewingGalleryIndex === idx ? 'ring-2 ring-[#037166] scale-110 shadow-lg' : 'opacity-40 hover:opacity-100'}`}
+                                    >
+                                        <img src={img} className="w-full h-full object-cover" alt="" />
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* AutoPlay Script Effect */}
+            <AutoPlayHelper
+                active={galleryAutoPlay && viewingGalleryIndex !== null}
+                onNext={() => setViewingGalleryIndex(prev => (prev + 1) % hostelData.images.length)}
+                interval={4000}
+            />
         </div >
     );
+}
+
+// Internal component to handle interval cleanup easily
+function AutoPlayHelper({ active, onNext, interval }) {
+    useEffect(() => {
+        if (!active) return;
+        const timer = setInterval(onNext, interval);
+        return () => clearInterval(timer);
+    }, [active, onNext, interval]);
+    return null;
 }

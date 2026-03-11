@@ -542,7 +542,7 @@ export function HomePage() {
 
                     <div
                         ref={categoriesScrollRef}
-                        className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar scroll-smooth"
+                        className="flex overflow-x-auto gap-6 pb-8 scroll-smooth text-[#64748B]"
                     >
                         {loadingCategories ? (
                             // Shimmer skeleton for categories
@@ -619,7 +619,7 @@ export function HomePage() {
 
                     <div
                         ref={featuredScrollRef}
-                        className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar scroll-smooth"
+                        className="flex overflow-x-auto gap-6 pb-8 scroll-smooth"
                     >
                         {loadingFeatured ? (
                             // Skeleton Loading
@@ -661,7 +661,7 @@ export function HomePage() {
                         <p className="text-[#64748B]">Popular choices in your area</p>
                     </motion.div>
 
-                    <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                    <div className="flex gap-6 overflow-x-auto pb-4">
                         {loadingFeatured ? ( // Using loadingFeatured as recentStores is removed
                             [1, 2, 3].map((i) => (
                                 <div key={i} className="flex-shrink-0 w-80 h-48 bg-gray-200 rounded-xl animate-pulse" />
@@ -669,7 +669,7 @@ export function HomePage() {
                         ) : featuredPackages.length > 0 ? ( // Using featuredPackages for recently booked
                             <div
                                 ref={bookedScrollRef}
-                                className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar scroll-smooth"
+                                className="flex overflow-x-auto gap-6 pb-8 scroll-smooth"
                             >
                                 {featuredPackages.slice(0, 8).map((pkg, index) => (
                                     <motion.div
@@ -718,7 +718,7 @@ export function HomePage() {
 
                     <div
                         ref={nearbyScrollRef}
-                        className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar scroll-smooth"
+                        className="flex overflow-x-auto gap-6 pb-8 scroll-smooth"
                     >
                         {loadingNearby ? (
                             // Skeleton Loading

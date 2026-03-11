@@ -46,7 +46,7 @@ export function NearbyHostelsSection({ router }) {
 
     if (!location) {
         return (
-            <section className="py-20 bg-gray-50/50">
+            <section className="py-20 mt-5 bg-transparent">
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#037166]/10 mb-6">
                         <MapPin className="w-8 h-8 text-[#037166]" />
@@ -71,7 +71,7 @@ export function NearbyHostelsSection({ router }) {
 
     if (loading) {
         return (
-            <section className="py-20 bg-gray-50/50">
+            <section className="py-20 bg-transparent">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="mb-12">
                         <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
@@ -92,7 +92,7 @@ export function NearbyHostelsSection({ router }) {
     }
 
     return (
-        <section className="py-20 bg-gray-50/50">
+        <section className="py-20 mt-5 bg-transparent">
             <div className="max-w-7xl mx-auto px-4">
                 {/* Section Header */}
                 <motion.div
@@ -138,14 +138,14 @@ export function NearbyHostelsSection({ router }) {
                                     onClick={() => router.push(`/pghostels/hostel-detail/${hostel._id}`)}
                                     className="group relative flex-shrink-0 w-[22rem] cursor-pointer pl-2 py-4"
                                 >
-                                    <div className="relative h-[30rem] rounded-[2.5rem] overflow-hidden bg-white">
+                                    <div className="relative h-[30rem] rounded-[1.5rem] overflow-hidden bg-white">
                                         <div className="absolute inset-0">
                                             <div
-                                                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                                                className="absolute inset-0 bg-[length:100%_auto] bg-top bg-no-repeat transition-all duration-700 group-hover:scale-110 group-hover:-translate-y-2"
                                                 style={{ backgroundImage: `url("https://api.doorstephub.com/${hostel.image}")` }}
                                             />
-                                            {/* Grey Finish Gradient */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent opacity-90" />
+                                            {/* Grey Finish Gradient - Enhanced for readability */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent opacity-95" />
                                         </div>
 
                                         {/* Top Badges */}

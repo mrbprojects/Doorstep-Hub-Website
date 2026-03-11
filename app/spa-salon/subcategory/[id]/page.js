@@ -168,9 +168,9 @@ function SpaSubCategoryContent() {
                                                 <p className="text-xs text-gray-500">Starts at</p>
                                                 <p className="text-xl font-bold text-gray-900">₹{service.startingAt || service.minFare || service.price || '499'}</p>
                                             </div>
-                                            <Button className="bg-[#C06C84] hover:bg-[#A0556C] text-white rounded-xl px-6">
-                                                View
-                                            </Button>
+                                          <Button className="bg-[#64748B] hover:bg-[#475569] text-white rounded-xl px-6">
+  View
+</Button>
                                         </div>
                                     </div>
                                 </motion.div>

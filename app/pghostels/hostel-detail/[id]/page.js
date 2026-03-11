@@ -90,6 +90,7 @@ export default function NewHostelDetailPage() {
                         bookingCost: store.startingAt || 0,
                         monthlyPrice: store.startingAt || 0, // Roughly estimating if not provided directly
                         logo: store.logo ? `https://api.doorstephub.com/${store.logo}` : 'https://images.unsplash.com/photo-1730096081994-73f1fa5f189a?fit=max&fm=jpg&w=200',
+                        image: store.image ? `https://api.doorstephub.com/${store.image}` : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?fit=max&fm=jpg&w=1080',
                         images: data.serviceImages && data.serviceImages.length > 0
                             ? data.serviceImages.map(img => img.startsWith('/')
                                 ? `https://api.doorstephub.com${img}`
@@ -256,7 +257,7 @@ export default function NewHostelDetailPage() {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-32">
+        <div className="min-h-screen bg-transparent pb-32">
             {/* Back Button */}
             <motion.button
                 initial={{ opacity: 0, x: -20 }}
@@ -268,22 +269,19 @@ export default function NewHostelDetailPage() {
             </motion.button>
 
             {/* Image Gallery Slider */}
-            <motion.div
-                style={{ opacity: headerOpacity }}
-                className="relative h-[500px] overflow-hidden"
-            >
-                <Slider {...sliderSettings}>
-                    {hostelData.images.map((image, index) => (
-                        <div key={index} className="relative h-[500px]">
-                            <div
-                                className="absolute inset-0 bg-cover bg-center"
-                                style={{ backgroundImage: `url(${image})` }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                        </div>
-                    ))}
-                </Slider>
-            </motion.div>
+          <motion.div
+  style={{ opacity: headerOpacity }}
+  className="relative h-[500px] overflow-hidden"
+>
+  <div
+    className="absolute inset-0 bg-cover bg-center"
+    style={{
+      backgroundImage: `url(${hostelData.image})`
+    }}
+  />
+
+  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+</motion.div>
 
             {/* Hostel Header Info - Floating Card */}
             <div className="max-w-7xl mx-auto px-4 -mt-32 relative z-10">
@@ -337,50 +335,50 @@ export default function NewHostelDetailPage() {
             </div>
 
             {/* Tabs Section */}
-            <div className="max-w-7xl mx-auto px-4 mt-8">
+            <div className="max-w-7xl mx-auto px-4 mt-8 relative">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     {/* Sticky Tab Navigation */}
-                    <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200">
+                    <div className="sticky top-[80px] sm:top-[90px] z-40 bg-white shadow-xl shadow-black/5 rounded-2xl border border-gray-100 p-1.5 overflow-hidden">
                         <style dangerouslySetInnerHTML={{
                             __html: `
                             .hide-scrollbar::-webkit-scrollbar { display: none; }
                             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                         ` }} />
-                        <TabsList className="bg-transparent w-full flex flex-row items-center gap-3 overflow-x-auto flex-nowrap p-3 hide-scrollbar">
+                        <TabsList className="bg-transparent w-full flex flex-row items-center gap-1 sm:gap-3 overflow-x-auto flex-nowrap hide-scrollbar h-12 sm:h-14">
                             <TabsTrigger
                                 value="roomTypes"
-                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
+                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
                             >
                                 <Home className="w-4 h-4 mr-2" />
-                                Room Sharings
+                                <span>Room Sharings</span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value="reviews"
-                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
+                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
                             >
                                 <MessageSquare className="w-4 h-4 mr-2" />
-                                Reviews
+                                <span>Reviews</span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value="gallery"
-                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
+                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
                             >
                                 <Camera className="w-4 h-4 mr-2" />
-                                Gallery
+                                <span>Gallery</span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value="amenities"
-                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
+                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
                             >
                                 <Sparkles className="w-4 h-4 mr-2" />
-                                Amenities
+                                <span>Amenities</span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value="about"
-                                className="flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white text-gray-600 hover:text-gray-900 rounded-xl transition-colors whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 font-bold flex items-center h-auto"
+                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
                             >
                                 <MapPin className="w-4 h-4 mr-2" />
-                                About
+                                <span>About</span>
                             </TabsTrigger>
                         </TabsList>
                     </div>

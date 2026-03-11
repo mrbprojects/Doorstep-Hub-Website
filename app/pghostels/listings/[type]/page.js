@@ -520,9 +520,9 @@ function PGListingsContent() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-16">
+        <div className="min-h-screen bg-transparent pb-16">
             {/* Header */}
-            <div className="bg-gray-100/80 border-b border-gray-200 pt-16 sm:pt-20 pb-10 sm:pb-12 relative overflow-hidden">
+            <div className="bg-[#E2E6E6]/80 border-b border-gray-300 pt-16 sm:pt-20 pb-10 sm:pb-12 relative overflow-hidden">
                 <div className="absolute inset-0 bg-grid-gray-200/50 [mask-image:linear-gradient(0deg,white,transparent)]" />
                 <div className="max-w-7xl mx-auto px-4 relative z-10">
                     <button

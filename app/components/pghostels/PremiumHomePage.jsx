@@ -28,11 +28,14 @@ const getCategoryImage = (categoryName, apiImage) => {
     const name = categoryName.toLowerCase();
     const images = {
         'boys': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
-        'girls': 'https://images.unsplash.com/photo-1626015504767-542e58e4585c?q=80&w=1956&auto=format&fit=crop',
-        'womens': 'https://images.unsplash.com/photo-1626015504767-542e58e4585c?q=80&w=1956&auto=format&fit=crop',
+        'girls': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop',
+        'womens': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop',
+        'women': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop',
+        'mens': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
+        'men': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
         'co-living': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop',
         'dorm': 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop',
-        'with food': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1980&auto=format&fit=crop',
+        'food': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1980&auto=format&fit=crop',
     };
 
     for (const [key, url] of Object.entries(images)) {
@@ -161,7 +164,7 @@ export function PremiumHomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white via-[#037166]/5 to-[#05080D] overflow-hidden">
+        <div className="min-h-screen bg-[#E2E6E6] overflow-hidden">
             {/* Floating Particles Background */}
             <div className="fixed inset-0 pointer-events-none">
                 {[...Array(20)].map((_, i) => (
@@ -226,13 +229,13 @@ export function PremiumHomePage() {
                             >
                                 Verified PGs, co-living spaces, and hostels near your college or office.
                             </motion.p>
-                            <section className="relative -mt-20 z-20">
+                            <section className="relative md:-mt-20 mt-0 z-20">
                                 <div className="max-w-2xl mr-10 px-1">
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
-                                        className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-gray-200 p-3 max-w-4xl mx-auto"
+                                        className="bg-white/40 md:bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-gray-200 p-3 max-w-4xl mx-auto"
                                     >
                                         <div className="flex flex-wrap items-center gap-3">
                                             {/* Search Input */}
@@ -243,7 +246,7 @@ export function PremiumHomePage() {
                                                     onChange={(e) => setSearchQuery(e.target.value)}
                                                     onKeyDown={handleKeyDown}
                                                     placeholder="Search by area, college, landmark..."
-                                                    className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
+                                                    className="pl-10 h-12 bg-white/30 md:bg-white/50 border-gray-200 focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
                                                 />
                                             </div>
 
@@ -453,81 +456,97 @@ export function PremiumHomePage() {
 
 
             {/* Featured Categories Grid */}
-            <section ref={categoriesRef} className="py-15 relative">
-                <div className="max-w-7xl mx-auto px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-16"
-                    >
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                            Browse by lifestyle
-                        </h2>
-                        <p className="text-xl text-gray-600">Choose what fits your comfort & budget</p>
-                    </motion.div>
+           <section ref={categoriesRef} className="py-15 relative">
+  <div className="max-w-7xl mx-auto px-4">
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {loading ? (
-                            // Shimmer skeleton for categories
-                            [...Array(4)].map((_, i) => (
-                                <div key={i} className="relative h-80 rounded-3xl overflow-hidden bg-gray-200 animate-pulse">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-300 to-gray-200" />
-                                    <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                                        <div className="w-14 h-14 bg-gray-300 rounded-2xl mb-4" />
-                                        <div className="h-8 bg-gray-300 rounded w-3/4 mb-2" />
-                                        <div className="h-4 bg-gray-300 rounded w-1/2" />
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            apiCategories.map((cat, i) => {
-                                // Helper to get the best image for the category
-                                const bgImage = getCategoryImage(cat.name, cat.image);
+    {/* Heading */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="text-center mb-12"
+    >
+      <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+        Browse by lifestyle
+      </h2>
+      <p className="text-lg md:text-xl text-gray-600">
+        Choose what fits your comfort & budget
+      </p>
+    </motion.div>
 
-                                return (
-                                    <motion.div
-                                        key={cat._id}
-                                        initial={{ opacity: 0, y: 30 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: i * 0.1 }}
-                                        whileHover={{ y: -12, scale: 1.03 }}
-                                        onClick={() => handleCategoryClick(cat._id, cat.name)}
-                                        className="group cursor-pointer relative h-96 rounded-[2.5rem] overflow-hidden shadow-xl"
-                                    >
-                                        {/* Image */}
-                                        <div
-                                            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                                            style={{
-                                                backgroundImage: `url("${bgImage}")`,
-                                                backgroundPosition: 'center',
-                                                backgroundSize: 'cover',
-                                                backgroundRepeat: 'no-repeat'
-                                            }}
-                                        />
+    {/* Container */}
+    <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 px-1 md:px-0 hide-scrollbar scroll-smooth">
 
-                                        {/* Gradient Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+      {loading ? (
+        [...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="relative h-80 min-w-[260px] md:min-w-0 rounded-3xl overflow-hidden bg-gray-200 animate-pulse"
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-300 to-gray-200" />
+            <div className="absolute inset-0 p-6 flex flex-col justify-end">
+              <div className="w-14 h-14 bg-gray-300 rounded-2xl mb-4" />
+              <div className="h-8 bg-gray-300 rounded w-3/4 mb-2" />
+              <div className="h-4 bg-gray-300 rounded w-1/2" />
+            </div>
+          </div>
+        ))
+      ) : (
+        apiCategories.map((cat, i) => {
+          const bgImage = getCategoryImage(cat.name, cat.image);
 
-                                        {/* Content */}
-                                        <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                                            <div className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#037166] group-hover:border-[#037166] group-hover:scale-110 transition-all duration-300 shadow-lg">
-                                                <Users className="w-8 h-8 text-white" />
-                                            </div>
-                                            <h4 className="text-xl font-bold text-white mb-3 tracking-tight">{cat.name}</h4>
-                                            <div className="h-1 w-12 bg-[#037166] rounded-full group-hover:w-24 transition-all duration-300" />
-                                        </div>
+          return (
+            <motion.div
+              key={cat._id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -12, scale: 1.03 }}
+              onClick={() => handleCategoryClick(cat._id, cat.name)}
+              className="group cursor-pointer relative h-96 min-w-[260px] md:min-w-0 rounded-[2.5rem] overflow-hidden shadow-xl snap-start"
+            >
 
-                                        {/* Hover Border Glow */}
-                                        <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#037166]/50 rounded-[2.5rem] transition-colors duration-300" />
-                                    </motion.div>
-                                );
-                            })
-                        )}
-                    </div>
+              {/* Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                style={{
+                  backgroundImage: `url("${bgImage}")`,
+                  backgroundPosition: "center",
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+
+              {/* Content */}
+              <div className="absolute inset-0 p-8 flex flex-col justify-end">
+
+                <div className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#037166] group-hover:border-[#037166] group-hover:scale-110 transition-all duration-300 shadow-lg">
+                  <Users className="w-8 h-8 text-white" />
                 </div>
-            </section>
+
+                <h4 className="text-xl font-bold text-white mb-3 tracking-tight">
+                  {cat.name}
+                </h4>
+
+                <div className="h-1 w-12 bg-[#037166] rounded-full group-hover:w-24 transition-all duration-300" />
+
+              </div>
+
+              {/* Hover Border Glow */}
+              <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#037166]/50 rounded-[2.5rem] transition-colors duration-300" />
+
+            </motion.div>
+          );
+        })
+      )}
+
+    </div>
+  </div>
+</section>
 
             {/* Near You Section */}
             <NearbyHostelsSection router={router} />
@@ -539,7 +558,7 @@ export function PremiumHomePage() {
             <HowItWorksSection />
 
             {/* Testimonials */}
-            <TestimonialsSection testimonials={testimonials} />
+            {/* <TestimonialsSection testimonials={testimonials} /> */}
 
             {/* Featured Hostels */}
             <FeaturedHostelsSection listings={featuredHostels} loading={loading} router={router} />
@@ -647,7 +666,7 @@ function TopDealsSection({ router }) {
             icon: '🏠',
         },
         {
-            title: 'Meals Included PGs',
+            title: 'Without Meals PGs',
             desc: 'Home-cooked food included',
             gradient: 'from-orange-500 to-red-500',
             icon: '🍽️',
@@ -661,7 +680,7 @@ function TopDealsSection({ router }) {
     ];
 
     return (
-        <section className="py-15 bg-gray-50/50">
+        <section className="py-15 bg-transparent">
             <div className="max-w-7xl mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -669,7 +688,7 @@ function TopDealsSection({ router }) {
                     viewport={{ once: true }}
                     className="mb-12"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold text-white-900 mb-2">
+                    <h2 className="text-4xl md:text-5xl font-bold text-black mb-2">
                         Top Deals
                     </h2>
                     <p className="text-xl text-gray-600">Exclusive offers just for you</p>
@@ -684,7 +703,7 @@ function TopDealsSection({ router }) {
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
                             whileHover={{ scale: 1.05, y: -5 }}
-                            className={`relative h-64 rounded-3xl overflow-hidden cursor-pointer bg-gradient-to-br ${deal.gradient} p-8 flex flex-col justify-between`}
+                            className={`relative h-50 rounded-3xl overflow-hidden cursor-pointer bg-gradient-to-br ${deal.gradient} p-8 flex flex-col justify-between`}
                         >
                             <div>
                                 <motion.div
@@ -697,9 +716,9 @@ function TopDealsSection({ router }) {
                                 <h4 className="text-2xl font-bold text-white mb-2">{deal.title}</h4>
                                 <p className="text-white/90">{deal.desc}</p>
                             </div>
-                            <button className="self-start px-6 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl font-medium hover:bg-white/30 transition-colors border border-white/30">
+                            {/* <button className="self-start px-6 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl font-medium hover:bg-white/30 transition-colors border border-white/30">
                                 Explore
-                            </button>
+                            </button> */}
                         </motion.div>
                     ))}
                 </div>
@@ -711,53 +730,71 @@ function TopDealsSection({ router }) {
 // How It Works Section
 function HowItWorksSection() {
     const steps = [
-        { icon: Search, title: 'Select Category', desc: 'Choose your preferred type of stay' },
-        { icon: Star, title: 'Compare PGs & Hostels', desc: 'View ratings, amenities, and prices' },
+        { icon: Search, title: 'Select Category', desc: 'Choose your Preferred type of stay' },
+        { icon: Star, title: 'Compare PGs & Hostels', desc: 'View Room Images, Amenities, and Prices' },
         { icon: Check, title: 'Book & Move In', desc: 'Confirm booking and move in hassle-free' },
     ];
 
     return (
-        <section className="py-24 bg-gradient-to-b from-gray-50/50 to-white">
-            <div className="max-w-7xl mx-auto px-4">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-16"
-                >
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                        Book in 3 simple steps
-                    </h2>
-                </motion.div>
+<section className="py-14 md:py-24 bg-transparent">
+  <div className="max-w-7xl mx-auto px-4">
 
-                <div className="grid md:grid-cols-3 gap-12">
-                    {steps.map((step, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.2 }}
-                            className="text-center relative"
-                        >
-                            <motion.div
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
-                                className="w-20 h-20 bg-gradient-to-br from-[#037166] to-[#025951] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#037166]/30"
-                            >
-                                <step.icon className="w-10 h-10 text-white" />
-                            </motion.div>
-                            <h4 className="text-2xl font-bold text-gray-900 mb-3">{step.title}</h4>
-                            <p className="text-gray-600">{step.desc}</p>
+    {/* Heading */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="text-center mb-10 md:mb-16"
+    >
+      <h2 className="text-3xl md:text-5xl font-bold text-gray-900">
+        Book in 3 simple steps
+      </h2>
+    </motion.div>
 
-                            {i < steps.length - 1 && (
-                                <div className="hidden md:block absolute top-10 left-[60%] w-full h-0.5 bg-gradient-to-r from-[#037166]/30 to-transparent" />
-                            )}
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </section>
+    {/* Steps */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+
+      {steps.map((step, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: i * 0.2 }}
+          className="text-center relative"
+        >
+
+          {/* Icon */}
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+            className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-[#037166] to-[#025951] rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-lg shadow-[#037166]/30"
+          >
+            <step.icon className="w-7 h-7 md:w-10 md:h-10 text-white" />
+          </motion.div>
+
+          {/* Title */}
+          <h4 className="text-lg md:text-2xl font-bold text-gray-900 mb-1 md:mb-3">
+            {step.title}
+          </h4>
+
+          {/* Description */}
+          <p className="text-gray-600 text-sm md:text-base max-w-xs mx-auto">
+            {step.desc}
+          </p>
+
+          {/* Desktop connector line */}
+          {i < steps.length - 1 && (
+            <div className="hidden md:block absolute top-10 left-[60%] w-full h-[2px] bg-gradient-to-r from-[#037166]/30 to-transparent" />
+          )}
+
+        </motion.div>
+      ))}
+
+    </div>
+
+  </div>
+</section>
     );
 }
 
@@ -767,7 +804,7 @@ function TestimonialsSection({ testimonials }) {
     const doubledTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
     return (
-        <section className="py-24 overflow-hidden bg-gray-50/50">
+        <section className="py-15 overflow-hidden bg-transparent relative">
             <div className="max-w-7xl mx-auto px-4 mb-16">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -826,8 +863,8 @@ function TestimonialsSection({ testimonials }) {
             </div>
 
             {/* Fading Edges Overlay */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-gray-50/50 to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-gray-50/50 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#E2E6E6] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#E2E6E6] to-transparent z-10" />
         </section>
     );
 }
@@ -881,7 +918,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
     const displayListings = hasData ? listings.slice(0, 4) : fallbackListings;
 
     return (
-        <section className="py-24 bg-gray-50/50">
+        <section className="py-24 bg-transparent">
             <div className="max-w-7xl mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -904,90 +941,80 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                     </button>
                 </motion.div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {loading ? (
-                        // Shimmer skeleton for featured hostels
-                        [...Array(4)].map((_, i) => (
-                            <div key={i} className="bg-gray-200 rounded-[2.5rem] h-[30rem] animate-pulse" />
-                        ))
-                    ) : (
-                        displayListings.map((listing, i) => {
-                            const hostelId = listing._id;
-                            const hostelName = listing.hostelName;
-                            const hostelArea = listing.address || listing.cityName;
-                            const hostelPrice = listing.startingAt || 250;
-                            // Handle image URL: use directly if absolute (fallback), else prepend API URL
-                            const hostelImage = listing.image?.startsWith('http')
-                                ? listing.image
-                                : `https://api.doorstephub.com/${listing.image}`;
-                            const hostelRating = listing.rating || 4.5;
-                            const isClickable = !listing.isFallback;
+                <div className="relative">
+                    <div className="overflow-x-auto px-4 md:px-0 scrollbar-hide pb-8">
+                        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 min-w-max md:min-w-full">
+                            {loading ? (
+                                [...Array(4)].map((_, i) => (
+                                    <div key={i} className="bg-gray-200 rounded-[1.5rem] h-[30rem] min-w-[280px] md:min-w-0 flex-shrink-0 animate-pulse" />
+                                ))
+                            ) : (
+                                displayListings.map((listing, i) => {
+                                    const hostelId = listing._id;
+                                    const hostelName = listing.hostelName;
+                                    const hostelArea = listing.address || listing.cityName;
+                                    const hostelPrice = listing.startingAt || 250;
+                                    const hostelImage = listing.image?.startsWith('http')
+                                        ? listing.image
+                                        : `https://api.doorstephub.com/${listing.image}`;
+                                    const isClickable = !listing.isFallback;
 
-                            return (
-                                <motion.div
-                                    key={hostelId}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.1 }}
-                                    whileHover={isClickable ? { y: -5 } : {}}
-                                    onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${hostelId}`)}
-                                    className={`group relative rounded-[2.5rem] overflow-hidden h-[30rem] bg-white ${isClickable ? 'cursor-pointer' : ''}`}
-                                >
-                                    {/* Image Background */}
-                                    <div className="absolute inset-0">
-                                        <div
-                                            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                            style={{ backgroundImage: `url("${hostelImage}")` }}
-                                        />
-                                        {/* Grey Finish Gradient */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent opacity-80" />
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                                        <div className="flex justify-between items-start">
-                                            <div className="px-4 py-2 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
-                                                <span className="text-white text-sm font-semibold tracking-wide">FEATURED</span>
-                                            </div>
-                                            <div />
-                                        </div>
-
-                                        <div>
-                                            <div className="flex gap-3 mb-6">
-                                                {/* Amenities */}
-                                                {[Wifi, Utensils, Shirt].map((Icon, j) => (
-                                                    <div key={j} className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
-                                                        <Icon className="w-5 h-5" />
-                                                    </div>
-                                                ))}
+                                    return (
+                                        <motion.div
+                                            key={hostelId}
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: i * 0.1 }}
+                                            whileHover={isClickable ? { y: -5 } : {}}
+                                            onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${hostelId}`)}
+                                            className={`group relative rounded-[1.5rem] overflow-hidden h-[30rem] min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white ${isClickable ? 'cursor-pointer' : ''}`}
+                                        >
+                                            <div className="absolute inset-0">
+                                                <div
+                                                    className="absolute inset-0 bg-[length:100%_auto] bg-top bg-no-repeat transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-2"
+                                                    style={{ backgroundImage: `url("${hostelImage}")` }}
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent opacity-90" />
                                             </div>
 
-                                            <h3 className="text-3xl font-bold text-white mb-2 leading-tight line-clamp-2 overflow-hidden">{hostelName}</h3>
-                                            <div className="grid grid-cols-[auto_1fr] items-start text-white/80 text-sm mb-6">
-                                                <MapPin className="w-5 h-5 mr-2 mt-0.5" />
-                                                <span className="line-clamp-2 overflow-hidden">{hostelArea}</span>
-                                            </div>
-
-                                            <div className="flex items-center justify-between pt-6 border-t border-white/20">
-                                                <div>
-                                                    <p className="text-white/60 text-sm font-medium uppercase tracking-wider mb-1">Starting from</p>
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-3xl font-bold text-white">₹{hostelPrice.toLocaleString()}</span>
-                                                        <span className="text-white/60">/month</span>
+                                            <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="px-4 py-2 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
+                                                        <span className="text-white text-sm font-semibold tracking-wide">Featured</span>
                                                     </div>
                                                 </div>
-                                                {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl">
-                                                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                                                    <span className="text-white font-bold text-lg">{hostelRating}</span>
-                                                </div> */}
+
+                                                <div>
+                                                    <div className="flex gap-3 mb-6">
+                                                        {[Wifi, Utensils, Shirt].map((Icon, j) => (
+                                                            <div key={j} className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
+                                                                <Icon className="w-5 h-5" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <h3 className="text-base font-bold text-white mt-5 mb-1.5 leading-tight line-clamp-2 uppercase tracking-wide">{hostelName}</h3>
+                                                    <div className="grid grid-cols-[auto_1fr] items-start text-white/70 text-[13px] mb-4">
+                                                        <MapPin className="w-4 h-4 mr-2 mt-0.5" />
+                                                        <span className="line-clamp-2">{hostelArea}</span>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between pt-2 border-t border-white/20">
+                                                        <p className="text-white/60 text-sm italic">Starts at</p>
+                                                        <div className="flex items-baseline gap-1">
+                                                            <span className="text-3xl font-bold text-white">₹{hostelPrice.toLocaleString()}</span>
+                                                            <span className="text-white/60 text-sm">/month</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            );
-                        })
-                    )}
+                                        </motion.div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

@@ -289,7 +289,7 @@ function PGResultsContent() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pb-16">
+        <div className="min-h-screen bg-transparent pb-16">
             {/* Header — pt-20 clears the fixed site navbar */}
             <div className="bg-gradient-to-r from-[#037166] to-[#025951] pt-20 pb-12">
                 <div className="max-w-7xl mx-auto px-4">

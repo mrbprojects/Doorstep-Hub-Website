@@ -10,8 +10,8 @@ export const metadata = {
 
 export default function PGHostelsLayout({ children }) {
     const pgTheme = {
-        bgScrolled: 'bg-white/95',
-        bgMobile: 'bg-white/95',
+        bgScrolled: 'bg-[#E2E6E6]/95',
+        bgMobile: 'bg-[#E2E6E6]',
         textMain: 'text-gray-700',
         textHover: 'text-[#037166]',
         border: 'border-gray-200',
@@ -48,12 +48,12 @@ export default function PGHostelsLayout({ children }) {
     };
 
     return (
-        <>
+        <div className="bg-[#E2E6E6] min-h-screen">
             <NetworkStatus />
             <SessionManager />
             <Header theme={pgTheme} />
-            {children}
+            <main>{children}</main>
             <Footer theme={footerTheme} />
-        </>
+        </div>
     );
 }

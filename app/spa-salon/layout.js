@@ -46,7 +46,7 @@ export default function SpaSalonLayout({ children }) {
     };
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white spa-salon-section">
             <Header theme={spaSalonTheme} />
             {children}
             <Footer theme={footerTheme} />

@@ -414,7 +414,7 @@ export default function SpaConfirmPage() {
                                         </h4>
                                         {paymentOption === 'ADVANCE' && <CheckCircle className="w-5 h-5 text-[#C06C84]" />}
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-2">Pay platform fee + 25% deposit to confirm your slot.</p>
+                                    <p className="text-sm text-gray-600 mb-2">Pay platform fee + 25% Pay in Advance to confirm your slot.</p>
                                     <p className="text-2xl font-bold text-gray-900">₹{((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)}</p>
                                     <div className="mt-2 text-[10px] text-gray-400 uppercase font-bold tracking-wider">Slot Confirmed</div>
                                 </button>
@@ -432,7 +432,7 @@ export default function SpaConfirmPage() {
                                         </h4>
                                         {paymentOption === 'FULL' && <CheckCircle className="w-5 h-5 text-[#C06C84]" />}
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-2">Pay total amount including service cost upfront.</p>
+                                    <p className="text-sm text-gray-600 mb-2">Pay total amount including platform fee upfront.</p>
                                     <p className="text-2xl font-bold text-gray-900">
                                         ₹{((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0)}
                                     </p>
@@ -520,14 +520,20 @@ export default function SpaConfirmPage() {
                                             <p className="text-gray-900 font-bold">{cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}</p>
                                         </div>
                                     </div>
-                                    <div className="mt-2 space-y-1 pl-1">
-                                        {cartItems.map((item, idx) => (
-                                            <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                                                <div className="w-1 h-1 rounded-full bg-[#C06C84]" />
-                                                <span className="line-clamp-1">{item.itemName}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                   <div className="mt-2 space-y-2 pl-1">
+  {cartItems.map((item, idx) => (
+    <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+      
+      <div className="w-1.5 h-1.5 rounded-full bg-[#6D1357] mt-2"></div>
+
+      <div className="flex justify-between w-full">
+        <span className="line-clamp-1">{item.itemName}</span>
+        <span className="font-medium text-gray-900">₹{item.price}</span>
+      </div>
+
+    </div>
+  ))}
+</div>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">

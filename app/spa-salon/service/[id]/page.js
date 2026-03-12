@@ -328,7 +328,7 @@ export default function SpaServiceDetailPage() {
 
                     <TabsContent value="portfolio" className="space-y-4 outline-none">
                         {serviceData.packages.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 {serviceData.packages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}

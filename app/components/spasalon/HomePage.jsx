@@ -931,7 +931,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
                 </div>
               <div className="flex items-center justify-between mt-2">
   <p className="flex items-center gap-2 text-[#C06C84] font-bold text-lg">
-    <span className="text-[#64748B] text-[10px] italic">
+    <span className="text-[#6D1357] text-[10px] italic">
       Starting at
     </span>
     ₹{pkg.price}/-

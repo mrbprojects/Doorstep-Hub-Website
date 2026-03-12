@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Info } from 'lucide-react';
 
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -513,7 +513,7 @@ export default function ReligiousConfirmPage() {
                                             <div className="w-1.5 h-1.5 rounded-full bg-[var(--saffron)] flex-shrink-0 mt-1.5" />
                                             <p className="text-gray-800 font-medium line-clamp-1">{item.itemName}</p>
                                         </div>
-                                        <span className="text-gray-700 font-semibold ml-2">₹{item.subtotal?.toFixed(0)}</span>
+                                        <span className="text-gray-700 font-semibold ml-2">₹{item.subtotal?.toFixed(2)}</span>
                                     </div>
                                 ))}
                             </div>
@@ -524,7 +524,7 @@ export default function ReligiousConfirmPage() {
                             <div className="space-y-2.5">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-500">Subtotal</span>
-                                    <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0)}</span>
+                                    <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
                                 </div>
 
                                 {(cartData?.consultationFee ?? 0) > 0 && (
@@ -533,14 +533,14 @@ export default function ReligiousConfirmPage() {
                                             <span className="text-gray-500">Platform Fee</span>
                                             <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
                                         </div>
-                                        <span className="text-gray-900 font-semibold">₹{cartData?.consultationFee}</span>
+                                        <span className="text-gray-900 font-semibold">₹{(cartData?.consultationFee ?? 0).toFixed(2)}</span>
                                     </div>
                                 )}
 
                                 {(cartData?.gstAmount ?? 0) > 0 && (
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">GST (18%)</span>
-                                        <span className="text-gray-900 font-semibold">₹{cartData?.gstAmount}</span>
+                                        <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
                                     </div>
                                 )}
 
@@ -548,7 +548,7 @@ export default function ReligiousConfirmPage() {
                                 <div className="border-t border-gray-200 pt-2.5">
                                     <div className="flex justify-between font-bold text-sm">
                                         <span className="text-gray-800">Total Amount</span>
-                                        <span className="text-gray-900">₹{(cartData?.finalAmount || 0)}</span>
+                                        <span className="text-gray-900">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
                                 </div>
@@ -567,7 +567,7 @@ export default function ReligiousConfirmPage() {
                                 <div className="flex justify-between mb-1">
                                     <span className="text-gray-600 font-medium text-sm">Payable Now</span>
                                     <span className="text-2xl font-black text-[var(--saffron)]">
-                                        ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0) : (cartData?.finalAmount ?? 0)}
+                                        ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : (cartData?.finalAmount ?? 0).toFixed(2)}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[var(--saffron)] uppercase font-bold">
@@ -579,7 +579,7 @@ export default function ReligiousConfirmPage() {
                                 <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500 text-sm">Remaining to Pay</span>
-                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0))}</span>
+                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0)).toFixed(2)}</span>
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at location after service</p>
                                 </div>
@@ -623,11 +623,9 @@ export default function ReligiousConfirmPage() {
                                 <p className="text-[10px] text-gray-400">
                                     By booking, you agree to our Terms &amp; Cancellation Policy.
                                 </p>
-                                <div className="flex items-start justify-center gap-1 text-[10px] text-gray-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
-                                    </svg>
-                                    <span>As per RBI guidelines, payment gateway charges may apply depending on the payment mode.</span>
+                                <div className="flex items-center justify-center gap-2 text-[10px] text-[#ff9933] bg-[#ff9933]/5 p-2.5 rounded-xl border border-[#ff9933]/10">
+                                    <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                    <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
                                 </div>
                             </div>
                         </motion.div>

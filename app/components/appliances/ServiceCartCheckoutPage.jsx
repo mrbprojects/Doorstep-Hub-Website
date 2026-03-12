@@ -633,9 +633,13 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 )}
                             </motion.button>
 
-                            <p className="text-white/60 text-xs text-center mt-4">
-                                You'll receive a confirmation email and SMS
+                            <p className="text-white/60 text-[10px] text-center mt-4">
+                                By booking, you agree to our Terms & Cancellation Policy.
                             </p>
+                            <div className="flex items-center justify-center gap-2 text-[10px] text-[#037166] bg-[#037166]/5 p-2.5 rounded-xl border border-[#037166]/10 mt-3">
+                                <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
+                            </div>
                         </motion.div>
                     </div>
                 </div>

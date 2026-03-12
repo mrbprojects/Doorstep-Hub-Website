@@ -406,7 +406,7 @@ function ServiceCard({ service, index, router }) {
                 {/* Price & CTA */}
                 <div className="flex items-center justify-between pt-4 border-t border-[#E8ECF2]">
                     <div>
-                        <p className="text-[10px] text-[#64748B] font-bold uppercase tracking-wider mb-0.5">Starting at</p>
+                        <p className="text-[10px] text-[#6D1357] font-bold uppercase tracking-wider mb-0.5">Starting at</p>
                         <p className="text-2xl font-bold text-[#0F172A]">₹{service.price}</p>
                     </div>
                     <motion.button

@@ -588,7 +588,7 @@ export default function ReligiousServicesPage() {
                       </p>
 
                       <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-2">
-                        <span className="text-[11px] uppercase font-bold text-[var(--saffron)] tracking-wider">
+                        <span className="text-[11px] uppercase  font-bold text-[var(--saffron)] tracking-wider">
                           Starting at ₹{service.startingAt || service.serviceBookingCost || 500}
                         </span>
                         {/* <span className="text-[10px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter">

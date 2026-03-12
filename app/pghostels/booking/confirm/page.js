@@ -535,7 +535,7 @@ function PGConfirmContent() {
                                     {/* Monthly Rent */}
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Monthly Rent</span>
-                                        <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.totalServiceCost)}</span>
+                                        <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.totalServiceCost).toFixed(2)}</span>
                                     </div>
 
                                     {/* Platform Fee */}
@@ -545,7 +545,7 @@ function PGConfirmContent() {
                                                 <span className="text-gray-500">Platform Fee</span>
                                                 <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
                                             </div>
-                                            <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.consultationFee)}</span>
+                                            <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.consultationFee).toFixed(2)}</span>
                                         </div>
                                     )}
 
@@ -553,7 +553,7 @@ function PGConfirmContent() {
                                     {safeNum(cartData?.gstAmount) > 0 && (
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-500">GST (18%)</span>
-                                            <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.gstAmount)}</span>
+                                            <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.gstAmount).toFixed(2)}</span>
                                         </div>
                                     )}
 
@@ -561,7 +561,7 @@ function PGConfirmContent() {
                                     <div className="border-t border-gray-200 pt-2.5">
                                         <div className="flex justify-between text-sm font-bold">
                                             <span className="text-gray-700">Total Booking Fee</span>
-                                            <span className="text-gray-900">₹{safeNum(cartData?.finalAmount || cartData?.totalServiceCost)}</span>
+                                            <span className="text-gray-900">₹{safeNum(cartData?.finalAmount || cartData?.totalServiceCost).toFixed(2)}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
                                     </div>
@@ -581,7 +581,7 @@ function PGConfirmContent() {
                                 <div className="flex justify-between mb-1">
                                     <span className="text-gray-600 font-medium">Payable Now</span>
                                     <span className="text-2xl font-black text-[#037166]">
-                                        ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0) : safeNum(cartData?.finalAmount || cartData?.totalServiceCost)}
+                                        ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : safeNum(cartData?.finalAmount || cartData?.totalServiceCost).toFixed(2)}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[#037166] uppercase font-bold">
@@ -593,11 +593,11 @@ function PGConfirmContent() {
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500 text-sm">Remaining Amount</span>
                                     <span className="text-gray-900 font-bold">
-                                        ₹{safeNum(cartData?.totalServiceCost) + (paymentOption === 'ADVANCE' ? (safeNum(cartData?.finalAmount || cartData?.totalServiceCost) - safeNum(cartData?.advPayment)) : 0)}
+                                        ₹{(safeNum(cartData?.totalServiceCost) + (paymentOption === 'ADVANCE' ? (safeNum(cartData?.finalAmount || cartData?.totalServiceCost) - safeNum(cartData?.advPayment)) : 0)).toFixed(2)}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-gray-400 mt-1 uppercase leading-tight">
-                                    Monthly rent of ₹{safeNum(cartData?.totalServiceCost)} + dues to be paid directly at hostel
+                                    Monthly rent of ₹{safeNum(cartData?.totalServiceCost).toFixed(2)} + dues to be paid directly at hostel
                                 </p>
                             </div>
 
@@ -626,11 +626,9 @@ function PGConfirmContent() {
                                     <p className="text-[10px] text-gray-400">
                                         By booking, you agree to our Terms &amp; Cancellation Policy.
                                     </p>
-                                    <div className="flex items-start justify-center gap-1 text-[10px] text-gray-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
-                                        </svg>
-                                        <span>As per RBI guidelines, payment gateway charges may apply depending on the payment mode.</span>
+                                    <div className="flex items-center justify-center gap-2 text-[10px] text-[#037166] bg-[#037166]/5 p-2.5 rounded-xl border border-[#037166]/10">
+                                        <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                        <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
                                     </div>
                                 </div>
                         </motion.div>

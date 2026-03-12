@@ -37,7 +37,7 @@ export function PGCartPage({
             className="min-h-screen pt-20 pb-32 bg-[#0a0a0a]"
         >
             {/* Header - Refined Premium Header */}
-            <section className="sticky top-20 z-40 bg-gradient-to-r from-[#0f1614] via-[#025a51] to-[#037166] border-b border-white/5 shadow-2xl overflow-hidden">
+            <section className=" top-20 z-40 bg-gradient-to-r from-[#0f1614] via-[#025a51] to-[#037166] border-b border-white/5 shadow-2xl overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-[80px]" />
 
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-8 relative z-10">
@@ -206,19 +206,20 @@ export function PGCartPage({
                                     </div>
 
                                     <div className="space-y-3.5 pt-1">
-                                        {/* Platform Fee */}
+                                     
+
+                                        {/* GST */}
+                                        <div className="flex justify-between items-center text-white/40 text-sm">
+                                            <span>GST (18%)</span>
+                                            <span className="text-white/70 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
+                                        </div>4
+                                           {/* Platform Fee */}
                                         <div className="flex justify-between items-center text-white/40 text-sm">
                                             <div className="flex items-center gap-2">
                                                 <span>Platform Fee</span>
                                                 <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px] text-white/40 cursor-help" title="Non-refundable booking fee">?</div>
                                             </div>
                                             <span className="text-white/70 font-semibold">₹{(cartData?.consultationFee || 0).toFixed(0)}</span>
-                                        </div>
-
-                                        {/* GST */}
-                                        <div className="flex justify-between items-center text-white/40 text-sm">
-                                            <span>GST (18%)</span>
-                                            <span className="text-white/70 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
                                         </div>
                                     </div>
 
@@ -237,7 +238,7 @@ export function PGCartPage({
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
                                             onClick={onProceedToAddress}
-                                            className="w-full px-8 py-5 rounded-2xl bg-[#037166] text-white font-black text-xl shadow-2xl shadow-[#037166]/20 hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 border border-white/10"
+                                            className="w-full px-6 py-5 rounded-2xl bg-[#037166] text-white font-black text-xl shadow-2xl shadow-[#037166]/20 hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 border border-white/10"
                                         >
                                             Confirm Stay Booking
                                             <ArrowLeft className="w-6 h-6 rotate-180" />

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, CheckCircle, User, Loader2, Scissors } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, CheckCircle, User, Loader2, Scissors, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -268,8 +268,8 @@ export default function SpaConfirmPage() {
             className="min-h-screen pt-20 pb-32 bg-gray-50"
         >
             {/* Header */}
-            <section className="sticky top-20 z-40 bg-gradient-to-r from-[#C06C84] via-pink-600 to-[#6C5CE7] border-b border-white/10 shadow-lg">
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
+            <section className=" top-20 z-40 bg-gradient-to-r from-[#C06C84] via-pink-600 to-[#6C5CE7] border-b border-white/10 shadow-lg">
+                <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6">
                     <motion.button
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -421,7 +421,7 @@ export default function SpaConfirmPage() {
                                         {paymentOption === 'ADVANCE' && <CheckCircle className="w-5 h-5 text-[#6D1357]" />}
                                     </div>
                                     <p className="text-sm text-gray-600 mb-2">Pay consultation fee + advance amount to confirm your slot.</p>
-                                    <p className="text-2xl font-bold text-gray-900">₹{cartData?.advPayment ?? 0}</p>
+                                    <p className="text-2xl font-bold text-gray-900">₹{(cartData?.advPayment ?? 0).toFixed(2)}</p>
                                     <div className="mt-2 text-[10px] text-gray-400 uppercase font-bold tracking-wider">Slot Confirmed</div>
                                 </button>
 
@@ -440,7 +440,7 @@ export default function SpaConfirmPage() {
                                     </div>
                                     <p className="text-sm text-gray-600 mb-2">Pay total amount including all fees upfront.</p>
                                     <p className="text-2xl font-bold text-gray-900">
-                                        ₹{cartData?.finalAmount ?? 0}
+                                        ₹{(cartData?.finalAmount ?? 0).toFixed(2)}
                                     </p>
                                     <div className="mt-2 text-[10px] text-gray-400 uppercase font-bold tracking-wider">Hassle Free</div>
                                 </button>
@@ -524,7 +524,7 @@ export default function SpaConfirmPage() {
 
       <div className="flex justify-between w-full">
         <span className="line-clamp-1">{item.itemName}</span>
-        <span className="font-medium text-gray-900">₹{item.price}</span>
+        <span className="font-medium text-gray-900">₹{Number(item.price).toFixed(2)}</span>
       </div>
 
     </div>
@@ -535,25 +535,27 @@ export default function SpaConfirmPage() {
                                     {/* Subtotal */}
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Subtotal</span>
-                                        <span className="text-gray-900 font-semibold">₹{cartData?.totalServiceCost ?? 0}</span>
+                                        <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost ?? 0).toFixed(2)}</span>
                                     </div>
 
-                                    {/* Consultation / Platform Fee */}
+                                  
+
+                                    {/* GST */}
+                                    {(cartData?.gstAmount ?? 0) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">GST (18%)</span>
+                                            <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                      {/* Consultation / Platform Fee */}
                                     {(cartData?.consultationFee ?? 0) > 0 && (
                                         <div className="flex justify-between text-sm">
                                             <div className="flex items-center gap-1">
                                                 <span className="text-gray-500">Platform Fee</span>
                                                 <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
                                             </div>
-                                            <span className="text-gray-900 font-semibold">₹{cartData?.consultationFee}</span>
-                                        </div>
-                                    )}
-
-                                    {/* GST */}
-                                    {(cartData?.gstAmount ?? 0) > 0 && (
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">GST (18%)</span>
-                                            <span className="text-gray-900 font-semibold">₹{cartData?.gstAmount}</span>
+                                            <span className="text-gray-900 font-semibold">₹{(cartData?.consultationFee ?? 0).toFixed(2)}</span>
                                         </div>
                                     )}
 
@@ -561,7 +563,7 @@ export default function SpaConfirmPage() {
                                     <div className="border-t border-gray-200 pt-2.5">
                                         <div className="flex justify-between text-sm font-bold">
                                             <span className="text-gray-700">Total Amount</span>
-                                            <span className="text-gray-900">₹{cartData?.finalAmount ?? 0}</span>
+                                            <span className="text-gray-900">₹{(cartData?.finalAmount ?? 0).toFixed(2)}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes & fees</p>
                                     </div>
@@ -582,8 +584,8 @@ export default function SpaConfirmPage() {
                                     <span className="text-gray-600 font-medium">Payable Now</span>
                                     <span className="text-2xl font-black text-[#6D1357]">
                                         ₹{paymentOption === 'ADVANCE'
-                                            ? (cartData?.advPayment ?? 0)
-                                            : (cartData?.finalAmount ?? 0)}
+                                            ? (cartData?.advPayment ?? 0).toFixed(2)
+                                            : (cartData?.finalAmount ?? 0).toFixed(2)}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[#6D1357] uppercase font-bold">
@@ -595,7 +597,7 @@ export default function SpaConfirmPage() {
                                 <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500 text-sm">Remaining to Pay</span>
-                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0))}</span>
+                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0)).toFixed(2)}</span>
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at store after service</p>
                                 </div>
@@ -626,11 +628,9 @@ export default function SpaConfirmPage() {
                                     <p className="text-[10px] text-gray-400">
                                         By booking, you agree to our Terms &amp; Cancellation Policy.
                                     </p>
-                                    <div className="flex items-start justify-center gap-1 text-[10px] text-gray-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
-                                        </svg>
-                                        <span>As per RBI guidelines, payment gateway charges may apply depending on the payment mode.</span>
+                                    <div className="flex items-center justify-center gap-2 text-[10px] text-[#6D1357] bg-[#6D1357]/5 p-2.5 rounded-xl border border-[#6D1357]/10">
+                                        <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                        <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
                                     </div>
                                 </div>
 

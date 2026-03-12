@@ -372,7 +372,7 @@ export function RecommendedSpaSalon() {
                         <h6 className="text-[10px] text-gray-400 mb-0.5 font-ubuntu">
                           Starting at
                         </h6>
-                        <div className="text-sm font-bold text-[#037166] font-ubuntu">
+                        <div className="text-sm font-bold text-[#6D1357] font-ubuntu">
                           {place.price}
                         </div>
                       </div>

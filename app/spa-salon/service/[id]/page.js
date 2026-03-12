@@ -105,10 +105,15 @@ export default function SpaServiceDetailPage() {
                         location: store.address || 'Location available on request',
                         rating: parseFloat(store.avgRating || 4.8).toFixed(1),
                         basePrice: store.BasePrice || 500,
-                        logo: store.logo ? `https://api.doorstephub.com/${store.logo}` : '',
-                        images: data.serviceImages && data.serviceImages.length > 0
-                            ? data.serviceImages.map(img => `https://api.doorstephub.com${img}`)
-                            : ['https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800'],
+                        logo: store.logo ? (store.logo.startsWith('http') ? store.logo : `https://api.doorstephub.com/${store.logo}`) : '',
+                        images: (() => {
+                            const mainImg = store.image || store.logo;
+                            const portfolio = data.serviceImages || [];
+                            const combined = mainImg ? [mainImg, ...portfolio.filter(i => i !== mainImg)] : portfolio;
+                            return combined.length > 0
+                                ? combined.map(img => img.startsWith('http') ? img : `https://api.doorstephub.com/${img}`)
+                                : ['https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800'];
+                        })(),
 
                         amenities: [
                             ...(Array.isArray(data.amenities) ? data.amenities : []),
@@ -237,25 +242,24 @@ export default function SpaServiceDetailPage() {
 
             {/* Banner Image Slider */}
             <motion.div
-                style={{ opacity: headerOpacity, height: '420px' }}
-                className="relative overflow-hidden"
+                style={{ opacity: headerOpacity }}
+                className="relative h-[420px] overflow-hidden bg-gray-900"
             >
-                <div style={{ height: '420px' }}>
-                    <Slider {...sliderSettings}>
-                        {serviceData.images.map((image, index) => (
-                            <div key={index} style={{ height: '420px', outline: 'none' }}>
-                                <div style={{ position: 'relative', height: '420px', overflow: 'hidden' }}>
-                                    <img
-                                        src={image}
-                                        alt={`${serviceData.name} - ${index + 1}`}
-                                        style={{ width: '100%', height: '420px', objectFit: 'cover', display: 'block' }}
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                                </div>
+                <Slider {...sliderSettings} className="h-full">
+                    {serviceData.images.map((img, idx) => (
+                        <div key={idx} className="relative h-[420px]">
+                            <div
+                                className="w-full h-full bg-cover bg-center"
+                                style={{
+                                    backgroundImage: `url(${img})`,
+                                    height: "420px",
+                                }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             </div>
-                        ))}
-                    </Slider>
-                </div>
+                        </div>
+                    ))}
+                </Slider>
             </motion.div>
 
             {/* Header Info */}

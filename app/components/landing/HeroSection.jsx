@@ -398,7 +398,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
                 />
               </div>
 
-              <h5 className={`text-xs mt-2 font-medium text-center line-clamp-2 transition-colors duration-300 ${isActive ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>
+              <h5 className={`text-[15px] mt-2 font-medium text-center line-clamp-2 transition-colors duration-300 ${isActive ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>
                 {service.name}
               </h5>
             </motion.div>

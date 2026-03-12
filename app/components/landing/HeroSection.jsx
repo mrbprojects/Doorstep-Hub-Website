@@ -353,9 +353,9 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
+      className="mt-6 sm:mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full"
     >
-      <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+      <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
         {services.map((service, index) => {
           const isActive = index === activeIndex;
           return (
@@ -363,7 +363,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
               key={service._id}
               variants={cardVariants}
               onClick={() => handleServiceClick(service)}
-              className="group cursor-pointer transition-all duration-500 w-16 sm:w-20 md:w-24 flex-shrink-0"
+              className="group cursor-pointer transition-all duration-500 w-[72px] min-[400px]:w-20 sm:w-24 flex-shrink-0"
             >
               <div
                 className={`
@@ -488,7 +488,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, [services, isPaused]); // Re-run if services load/change or pause state changes
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-28 sm:pt-20">
+    <section className="relative min-h-[85dvh] flex items-center justify-center overflow-x-hidden pt-16 pb-4 sm:pt-20 sm:pb-20">
       {/* Standardized Architectural World Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -527,7 +527,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center space-x-2 px-4 py-2 bg-[#037166]/10 border border-[#037166]/30 rounded-full mb-8 max-w-full"
+            className="inline-flex items-center space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#037166]/10 border border-[#037166]/30 rounded-full mb-4 sm:mb-8 max-w-full"
           >
             <Sparkles className="w-4 h-4 text-[#037166] shrink-0" />
             <h6 className="text-[10px] sm:text-xs md:text-sm bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent font-medium line-clamp-1 sm:line-clamp-none">
@@ -536,7 +536,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
           </motion.div>
 
           {/* Main Heading */}
-          <h1 className="text-4xl sm:text-6xl lg:text-6xl font-bold mb-6 italic">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 italic leading-[1.1]">
             {/* SVG Text for Stroke Animation */}
 
             <span className="block bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Everything You Need.</span>
@@ -549,7 +549,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
-              className="block mt-2 bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent min-h-[1.2em]"
+              className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent min-h-[1.2em]"
             >
               {services.length > 0 ? services[activeIndex]?.name : "One Hub."}
             </motion.span>
@@ -560,14 +560,13 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
           >
             Your Premium Gateway to Appliance Services, Spa & Saloon, PG & Hostels, Religious Services, and More.
             A Smarter Way to Access Trusted Services.
           </motion.p>
 
           {/* Tour Trigger Button */}
-
 
           {/* Service Cards */}
           <motion.div

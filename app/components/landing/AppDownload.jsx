@@ -72,8 +72,8 @@ export function AppDownload() {
             </a>
 
             {/* Heading */}
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent whitespace-nowrap">
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
                 Everything in Your Pocket
               </span>
             </h2>
@@ -106,41 +106,25 @@ export function AppDownload() {
             </div>
 
             {/* Download Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-3 px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-2xl text-white font-semibold shadow-xl shadow-[#037166]/40 hover:shadow-2xl hover:shadow-[#037166]/50 transition-all w-full"
-                >
-                  <Apple className="w-6 h-6" />
-                  <div className="text-left">
-                    <div className="text-xs text-white/90">Download on the</div>
-                    <h5 className="text-base ">App Store</h5>
-                  </div>
-                </motion.button>
-              </a>
-
+            <div className="flex flex-wrap items-center gap-4 mb-8">
               <a
                 href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="flex items-center justify-center w-36 xs:w-44 md:w-48 h-12 xs:h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
+                title="Get it on Google Play"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-3 px-8 py-4 bg-[#1a1a1a]/80 backdrop-blur-sm border-2 border-[#037166]/30 rounded-2xl text-white font-semibold hover:bg-[#037166]/10 transition-all w-full"
-                >
-                  <Smartphone className="w-6 h-6" />
-                  <div className="text-left">
-                    <div className="text-xs text-white/90">Get it on</div>
-                    <h5 className="text-white font-bold text-transparent">Google Play</h5>
-                  </div>
-                </motion.button>
+                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
+              </a>
+
+              <a
+                href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-36 xs:w-44 md:w-48 h-12 xs:h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
+                title="Download on the App Store"
+              >
+                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
               </a>
             </div>
 

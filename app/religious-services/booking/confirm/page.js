@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2 } from 'lucide-react';
+
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -23,9 +24,14 @@ export default function ReligiousConfirmPage() {
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
+    const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+    const [mounted, setMounted] = useState(false);
+
+    // Prevent hydration mismatch from new Date() during SSR
+    useEffect(() => { setMounted(true); }, []);
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
@@ -134,8 +140,9 @@ export default function ReligiousConfirmPage() {
         return allTimeSlots;
     };
 
-    const availableDates = getAvailableDates();
-    const availableTimesForSelectedDate = getAvailableTimes(bookedDate);
+    // Only compute on client to avoid hydration mismatch
+    const availableDates = mounted ? getAvailableDates() : [];
+    const availableTimesForSelectedDate = mounted ? getAvailableTimes(bookedDate) : [];
 
     useEffect(() => {
         setBookedTime('');
@@ -176,6 +183,8 @@ export default function ReligiousConfirmPage() {
                 bookedDate,
                 bookedTime,
                 paymentMethod,
+                paymentOption,
+                ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
@@ -391,7 +400,7 @@ export default function ReligiousConfirmPage() {
                         </motion.div>
 
 
-                        {/* Payment Method */}
+                        {/* Payment Method — Online Only */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -400,26 +409,64 @@ export default function ReligiousConfirmPage() {
                         >
                             <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-4 flex items-center gap-2">
                                 <CreditCard className="w-5 h-5 text-[var(--saffron)]" />
-                                Select Payment Method
+                                Payment Method
                             </h3>
-                            <div className="grid md:grid-cols-2 gap-3">
-                                {[
-                                    { id: 'WALLET', label: 'Wallet Pay', icon: Wallet },
-                                    { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
-                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
-                                ].map((method) => (
-                                    <button
-                                        key={method.id}
-                                        onClick={() => setPaymentMethod(method.id)}
-                                        className={`p-5 rounded-xl flex flex-col items-center gap-2 transition-all ${paymentMethod === method.id
-                                            ? 'bg-[var(--saffron)] text-white shadow-lg'
-                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
-                                            }`}
-                                    >
-                                        <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-white' : 'text-[var(--saffron)]'}`} />
-                                        <span className="text-sm font-medium">{method.label}</span>
-                                    </button>
-                                ))}
+                            <p className="text-xs text-gray-400 mb-4">Secure online payment only</p>
+                            <div className="p-5 rounded-xl flex items-center gap-4 bg-[var(--saffron)] text-white shadow-lg">
+                                <CreditCard className="w-6 h-6 text-white" />
+                                <div className="flex-1">
+                                    <span className="text-sm font-semibold">Online Payment</span>
+                                    <p className="text-xs text-white/70 mt-0.5">Pay securely via UPI / Card / Net Banking</p>
+                                </div>
+                                <CheckCircle className="w-5 h-5" />
+                            </div>
+                        </motion.div>
+
+                        {/* Payment Choice: Advance vs Full */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.35 }}
+                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+                        >
+                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-1 flex items-center gap-2">
+                                <Wallet className="w-5 h-5 text-[var(--saffron)]" />
+                                Payment Choice
+                            </h3>
+                            <p className="text-xs text-gray-400 mb-4">Choose how much to pay now</p>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => setPaymentOption('ADVANCE')}
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
+                                        paymentOption === 'ADVANCE'
+                                            ? 'border-[var(--saffron)] bg-[var(--saffron)]/5'
+                                            : 'border-gray-100 hover:border-[var(--saffron)]/30 bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className={`font-bold text-sm ${paymentOption === 'ADVANCE' ? 'text-[var(--saffron)]' : 'text-gray-900'}`}>Pay Advance</h4>
+                                        {paymentOption === 'ADVANCE' && <CheckCircle className="w-4 h-4 text-[var(--saffron)]" />}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mb-2">Pay advance to confirm your slot.</p>
+                                    <p className="text-xl font-black text-gray-900">₹{cartData?.advPayment ?? 0}</p>
+                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Slot Confirmed</div>
+                                </button>
+                                <button
+                                    onClick={() => setPaymentOption('FULL')}
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
+                                        paymentOption === 'FULL'
+                                            ? 'border-[var(--saffron)] bg-[var(--saffron)]/5'
+                                            : 'border-gray-100 hover:border-[var(--saffron)]/30 bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className={`font-bold text-sm ${paymentOption === 'FULL' ? 'text-[var(--saffron)]' : 'text-gray-900'}`}>Full Payment</h4>
+                                        {paymentOption === 'FULL' && <CheckCircle className="w-4 h-4 text-[var(--saffron)]" />}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mb-2">Pay total amount including all fees.</p>
+                                    <p className="text-xl font-black text-gray-900">₹{cartData?.finalAmount ?? 0}</p>
+                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Hassle Free</div>
+                                </button>
                             </div>
                         </motion.div>
 
@@ -459,42 +506,84 @@ export default function ReligiousConfirmPage() {
                             <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-6">Booking Summary</h3>
 
                             {/* Cart Items */}
-                            <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
+                            <div className="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">
                                 {cartItems.map((item) => (
-                                    <div key={item.itemId || item._id} className="flex justify-between text-sm">
-                                        <div className="flex-1">
-                                            <p className="text-[var(--deep-charcoal)] font-bold">{item.itemName}</p>
-                                            <p className="text-gray-400 text-[10px]">Qty: {item.quantity || 1}</p>
+                                    <div key={item.itemId || item._id} className="flex justify-between items-start text-sm">
+                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--saffron)] flex-shrink-0 mt-1.5" />
+                                            <p className="text-gray-800 font-medium line-clamp-1">{item.itemName}</p>
                                         </div>
-                                        <span className="text-[var(--deep-charcoal)] font-medium">₹{item.subtotal?.toFixed(2)}</span>
+                                        <span className="text-gray-700 font-semibold ml-2">₹{item.subtotal?.toFixed(0)}</span>
                                     </div>
                                 ))}
                             </div>
 
                             <div className="h-px bg-gray-100 mb-4" />
 
-                            {/* Pricing */}
-                            <div className="space-y-2 mb-4">
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Subtotal</span>
-                                    <span>₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
+                            {/* Fee breakdown */}
+                            <div className="space-y-2.5">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Subtotal</span>
+                                    <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0)}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Platform Fee</span>
-                                    <span>₹{(cartData?.consultationFee || 0).toFixed(2)}</span>
+
+                                {(cartData?.consultationFee ?? 0) > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-gray-500">Platform Fee</span>
+                                            <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
+                                        </div>
+                                        <span className="text-gray-900 font-semibold">₹{cartData?.consultationFee}</span>
+                                    </div>
+                                )}
+
+                                {(cartData?.gstAmount ?? 0) > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">GST (18%)</span>
+                                        <span className="text-gray-900 font-semibold">₹{cartData?.gstAmount}</span>
+                                    </div>
+                                )}
+
+                                {/* Divider + Total */}
+                                <div className="border-t border-gray-200 pt-2.5">
+                                    <div className="flex justify-between font-bold text-sm">
+                                        <span className="text-gray-800">Total Amount</span>
+                                        <span className="text-gray-900">₹{(cartData?.finalAmount || 0)}</span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
                                 </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>GST</span>
-                                    <span>₹{(cartData?.gstAmount || 0).toFixed(2)}</span>
+
+                                {/* Non-refundable note */}
+                                <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                    </svg>
+                                    <span>Platform fee is non-refundable.</span>
                                 </div>
                             </div>
 
-                            <div className="h-px bg-gray-100 mb-4" />
-
-                            <div className="flex justify-between text-xl font-bold text-[var(--saffron)] mb-6">
-                                <span>Total</span>
-                                <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                            {/* Final Calculation Cards */}
+                            <div className="mt-6 p-4 rounded-2xl bg-[var(--saffron)]/5 border border-[var(--saffron)]/20 mb-4">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-gray-600 font-medium text-sm">Payable Now</span>
+                                    <span className="text-2xl font-black text-[var(--saffron)]">
+                                        ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0) : (cartData?.finalAmount ?? 0)}
+                                    </span>
+                                </div>
+                                <p className="text-[10px] text-[var(--saffron)] uppercase font-bold">
+                                    {paymentOption === 'ADVANCE' ? 'Advance Payment' : 'Full Payment'}
+                                </p>
                             </div>
+
+                            {paymentOption === 'ADVANCE' && (
+                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500 text-sm">Remaining to Pay</span>
+                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0))}</span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at location after service</p>
+                                </div>
+                            )}
 
                             {/* Selected Date/Time Preview */}
                             {bookedDate && bookedTime && (
@@ -529,6 +618,18 @@ export default function ReligiousConfirmPage() {
                                     `Pay ₹${(cartData?.finalAmount || 0).toFixed(2)}`
                                 )}
                             </motion.button>
+
+                            <div className="mt-4 space-y-1.5 text-center">
+                                <p className="text-[10px] text-gray-400">
+                                    By booking, you agree to our Terms &amp; Cancellation Policy.
+                                </p>
+                                <div className="flex items-start justify-center gap-1 text-[10px] text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                    </svg>
+                                    <span>As per RBI guidelines, payment gateway charges may apply depending on the payment mode.</span>
+                                </div>
+                            </div>
                         </motion.div>
                     </div>
                 </div>

@@ -17,11 +17,15 @@ export default function SpaConfirmPage() {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('ONLINE'); // Default to Online for prepayment
-    const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
+    const [paymentMethod, setPaymentMethod] = useState('ONLINE');
+    const [paymentOption, setPaymentOption] = useState('ADVANCE');
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+    const [paymentStatus, setPaymentStatus] = useState(null);
+    const [mounted, setMounted] = useState(false);
+
+    // Mark client-side mount to avoid hydration mismatch with new Date()
+    useEffect(() => { setMounted(true); }, []);
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
@@ -43,7 +47,7 @@ export default function SpaConfirmPage() {
         }
     }, [clearCart, router]);
 
-    const PLATFORM_FEE = 125;
+
 
     useEffect(() => {
         const savedAddress = sessionStorage.getItem('selected_address');
@@ -120,8 +124,9 @@ export default function SpaConfirmPage() {
         return allTimeSlots;
     };
 
-    const availableDates = getAvailableDates();
-    const availableTimesForSelectedDate = getAvailableTimes(bookedDate);
+    // Only compute dates/times on the client to avoid hydration mismatch
+    const availableDates = mounted ? getAvailableDates() : [];
+    const availableTimesForSelectedDate = mounted ? getAvailableTimes(bookedDate) : [];
 
     useEffect(() => {
         setBookedTime('');
@@ -147,12 +152,11 @@ export default function SpaConfirmPage() {
         if (isMock) {
             toast.success('Mock Booking Confirmed!');
             const paid = paymentOption === 'ADVANCE'
-                ? ((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)
-                : ((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0);
+                ? (cartData?.advPayment || 0)
+                : (cartData?.finalAmount || 0);
             const remaining = paymentOption === 'ADVANCE'
-                ? ((cartData?.totalServiceCost || 0) * 0.75).toFixed(0)
-                : '0';
-
+                ? ((cartData?.finalAmount || 0) - (cartData?.advPayment || 0))
+                : 0;
             router.push(`/spa-salon/thank-you?date=${bookedDate}&time=${bookedTime}&paid=${paid}&remaining=${remaining}`);
             return;
         }
@@ -173,7 +177,8 @@ export default function SpaConfirmPage() {
                 bookedDate,
                 bookedTime,
                 paymentMethod,
-                paymentOption, // 'ADVANCE' or 'FULL'
+                paymentOption,
+                ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
@@ -199,14 +204,14 @@ export default function SpaConfirmPage() {
 
             if (data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
+                    // Use backend-calculated amounts
                     const paid = paymentOption === 'ADVANCE'
-                        ? ((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)
-                        : ((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0);
+                        ? (cartData?.advPayment || 0)
+                        : (cartData?.finalAmount || 0);
                     const remaining = paymentOption === 'ADVANCE'
-                        ? ((cartData?.totalServiceCost || 0) * 0.75).toFixed(0)
-                        : '0';
+                        ? ((cartData?.finalAmount || 0) - (cartData?.advPayment || 0))
+                        : 0;
 
-                    // Save pending booking details to sessionStorage before redirect
                     sessionStorage.setItem('pending_booking', JSON.stringify({
                         bookedDate,
                         bookedTime,
@@ -220,12 +225,13 @@ export default function SpaConfirmPage() {
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = easebuzzUrl;
                 } else {
+                    // Use backend-calculated amounts
                     const paid = paymentOption === 'ADVANCE'
-                        ? ((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)
-                        : ((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0);
+                        ? (cartData?.advPayment || 0)
+                        : (cartData?.finalAmount || 0);
                     const remaining = paymentOption === 'ADVANCE'
-                        ? ((cartData?.totalServiceCost || 0) * 0.75).toFixed(0)
-                        : '0';
+                        ? ((cartData?.finalAmount || 0) - (cartData?.advPayment || 0))
+                        : 0;
 
                     toast.success('Booking created successfully!');
                     clearCart();
@@ -249,7 +255,7 @@ export default function SpaConfirmPage() {
     if (cartLoading && cartItems.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Loader2 className="w-10 h-10 text-[#C06C84] animate-spin" />
+                <Loader2 className="w-10 h-10 text-[#6D1357] animate-spin" />
             </div>
         );
     }
@@ -297,9 +303,9 @@ export default function SpaConfirmPage() {
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'
                                             }`}>
                                             {isCompleted ? (
-                                                <CheckCircle className="w-5 h-5 text-[#C06C84]" />
+                                                <CheckCircle className="w-5 h-5 text-[#6D1357]" />
                                             ) : (
-                                                <span className={`text-sm font-bold ${isCurrent ? 'text-[#C06C84]' : 'text-white/60'}`}>{index + 1}</span>
+                                                <span className={`text-sm font-bold ${isCurrent ? 'text-[#6D1357]' : 'text-white/60'}`}>{index + 1}</span>
                                             )}
                                         </div>
                                         <span className={`text-xs sm:text-sm font-medium transition-all ${isCurrent ? 'text-white font-bold' : 'text-white/70'
@@ -327,7 +333,7 @@ export default function SpaConfirmPage() {
                             className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
                         >
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-[#C06C84]" />
+                                <Calendar className="w-5 h-5 text-[#6D1357]" />
                                 Select Date
                             </h3>
                             {availableDates.length === 0 ? (
@@ -339,8 +345,8 @@ export default function SpaConfirmPage() {
                                             key={date.value}
                                             onClick={() => setBookedDate(date.value)}
                                             className={`p-4 rounded-2xl flex flex-col items-center gap-0.5 transition-all border-2 ${bookedDate === date.value
-                                                ? 'bg-[#C06C84] border-[#C06C84] text-white shadow-lg'
-                                                : 'bg-white border-gray-100 text-gray-700 hover:border-[#C06C84]/30'
+                                                ? 'bg-[#6D1357] border-[#6D1357] text-white shadow-lg'
+                                                : 'bg-white border-gray-100 text-gray-700 hover:border-[#6D1357]/30'
                                                 }`}
                                         >
                                             <span className={`text-[10px] uppercase font-bold tracking-widest ${bookedDate === date.value ? 'text-white/80' : 'text-gray-400'}`}>
@@ -361,7 +367,7 @@ export default function SpaConfirmPage() {
                             className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
                         >
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-[#C06C84]" />
+                                <Clock className="w-5 h-5 text-[#6D1357]" />
                                 Select Time Slot
                             </h3>
                             {availableTimesForSelectedDate.length === 0 ? (
@@ -378,7 +384,7 @@ export default function SpaConfirmPage() {
                                             key={time.value}
                                             onClick={() => setBookedTime(time.value)}
                                             className={`p-4 rounded-xl font-medium transition-all ${bookedTime === time.value
-                                                ? 'bg-[#C06C84] text-white shadow-lg shadow-[#C06C84]/30'
+                                                ? 'bg-[#6D1357] text-white shadow-lg shadow-[#6D1357]/30'
                                                 : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                                                 }`}
                                         >
@@ -394,82 +400,72 @@ export default function SpaConfirmPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="p-6 rounded-2xl bg-white border-2 border-[#C06C84]/20 shadow-sm"
+                            className="p-6 rounded-2xl bg-white border-2 border-[#6D1357]/20 shadow-sm"
                         >
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-[#C06C84]" />
+                                <CreditCard className="w-5 h-5 text-[#6D1357]" />
                                 Payment Choice
                             </h3>
                             <div className="grid md:grid-cols-2 gap-4">
                                 <button
                                     onClick={() => setPaymentOption('ADVANCE')}
                                     className={`p-6 rounded-2xl border-2 transition-all text-left relative overflow-hidden group ${paymentOption === 'ADVANCE'
-                                        ? 'border-[#C06C84] bg-[#C06C84]/5'
-                                        : 'border-gray-100 hover:border-[#C06C84]/30 bg-gray-50'
+                                        ? 'border-[#6D1357] bg-[#6D1357]/5'
+                                        : 'border-gray-100 hover:border-[#6D1357]/30 bg-gray-50'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <h4 className={`font-bold ${paymentOption === 'ADVANCE' ? 'text-[#C06C84]' : 'text-gray-900'}`}>
+                                        <h4 className={`font-bold ${paymentOption === 'ADVANCE' ? 'text-[#6D1357]' : 'text-gray-900'}`}>
                                             Pay Advance
                                         </h4>
-                                        {paymentOption === 'ADVANCE' && <CheckCircle className="w-5 h-5 text-[#C06C84]" />}
+                                        {paymentOption === 'ADVANCE' && <CheckCircle className="w-5 h-5 text-[#6D1357]" />}
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-2">Pay platform fee + 25% Pay in Advance to confirm your slot.</p>
-                                    <p className="text-2xl font-bold text-gray-900">₹{((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)}</p>
+                                    <p className="text-sm text-gray-600 mb-2">Pay consultation fee + advance amount to confirm your slot.</p>
+                                    <p className="text-2xl font-bold text-gray-900">₹{cartData?.advPayment ?? 0}</p>
                                     <div className="mt-2 text-[10px] text-gray-400 uppercase font-bold tracking-wider">Slot Confirmed</div>
                                 </button>
 
                                 <button
                                     onClick={() => setPaymentOption('FULL')}
                                     className={`p-6 rounded-2xl border-2 transition-all text-left relative overflow-hidden group ${paymentOption === 'FULL'
-                                        ? 'border-[#C06C84] bg-[#C06C84]/5'
-                                        : 'border-gray-100 hover:border-[#C06C84]/30 bg-gray-50'
+                                        ? 'border-[#6D1357] bg-[#6D1357]/5'
+                                        : 'border-gray-100 hover:border-[#6D1357]/30 bg-gray-50'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <h4 className={`font-bold ${paymentOption === 'FULL' ? 'text-[#C06C84]' : 'text-gray-900'}`}>
+                                        <h4 className={`font-bold ${paymentOption === 'FULL' ? 'text-[#6D1357]' : 'text-gray-900'}`}>
                                             Full Payment
                                         </h4>
-                                        {paymentOption === 'FULL' && <CheckCircle className="w-5 h-5 text-[#C06C84]" />}
+                                        {paymentOption === 'FULL' && <CheckCircle className="w-5 h-5 text-[#6D1357]" />}
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-2">Pay total amount including platform fee upfront.</p>
+                                    <p className="text-sm text-gray-600 mb-2">Pay total amount including all fees upfront.</p>
                                     <p className="text-2xl font-bold text-gray-900">
-                                        ₹{((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0)}
+                                        ₹{cartData?.finalAmount ?? 0}
                                     </p>
                                     <div className="mt-2 text-[10px] text-gray-400 uppercase font-bold tracking-wider">Hassle Free</div>
                                 </button>
                             </div>
                         </motion.div>
 
-                        {/* Payment Method */}
+                        {/* Payment Method — Online Only */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                             className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
                         >
-                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <Wallet className="w-5 h-5 text-[#C06C84]" />
-                                Select Payment Method
+                            <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-[#6D1357]" />
+                                Payment Method
                             </h3>
-                            <div className="grid md:grid-cols-1 gap-3">
-                                {[
-                                    { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
-                                    // { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
-                                ].map((method) => (
-                                    <button
-                                        key={method.id}
-                                        onClick={() => setPaymentMethod(method.id)}
-                                        className={`p-5 rounded-xl flex items-center gap-3 transition-all ${paymentMethod === method.id
-                                            ? 'bg-[#C06C84] text-white shadow-lg'
-                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
-                                            }`}
-                                    >
-                                        <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-white' : 'text-[#C06C84]'}`} />
-                                        <span className="text-sm font-medium">{method.label}</span>
-                                        {paymentMethod === method.id && <CheckCircle className="w-5 h-5 ml-auto" />}
-                                    </button>
-                                ))}
+                            <p className="text-xs text-gray-400 mb-4">Secure online payment only</p>
+                            <div className="p-5 rounded-xl flex items-center gap-4 bg-gradient-to-r from-[#6D1357] to-[#8E1B73] text-white shadow-lg">
+                                <CreditCard className="w-6 h-6 text-white" />
+                                <div className="flex-1">
+                                    <span className="text-sm font-semibold">Online Payment</span>
+                                    <p className="text-xs text-white/70 mt-0.5">Pay securely via UPI / Card / Net Banking</p>
+                                </div>
+                                <CheckCircle className="w-5 h-5" />
                             </div>
                         </motion.div>
 
@@ -481,7 +477,7 @@ export default function SpaConfirmPage() {
                             className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
                         >
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-[#C06C84]" />
+                                <MapPin className="w-5 h-5 text-[#6D1357]" />
                                 Booking Address
                             </h3>
                             {selectedAddress ? (
@@ -512,7 +508,7 @@ export default function SpaConfirmPage() {
                             <div className="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
                                 <div className="flex flex-col gap-3 mb-4 pb-4 border-b border-gray-200">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-xl bg-[#C06C84]/10 flex items-center justify-center text-[#C06C84]">
+                                        <div className="w-12 h-12 rounded-xl bg-[#6D1357]/10 flex items-center justify-center text-[#6D1357]">
                                             <Scissors className="w-6 h-6" />
                                         </div>
                                         <div>
@@ -535,33 +531,63 @@ export default function SpaConfirmPage() {
   ))}
 </div>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2.5 pt-1">
+                                    {/* Subtotal */}
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500 text-sm">Service Cost</span>
-                                        <span className="text-gray-900 font-bold">₹{cartData?.totalServiceCost || 0}</span>
+                                        <span className="text-gray-500">Subtotal</span>
+                                        <span className="text-gray-900 font-semibold">₹{cartData?.totalServiceCost ?? 0}</span>
                                     </div>
-                                    <div className="flex justify-between text-sm">
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-gray-500 text-sm">Platform Fee</span>
-                                            <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Booking & Platform Service Fee">?</div>
+
+                                    {/* Consultation / Platform Fee */}
+                                    {(cartData?.consultationFee ?? 0) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-gray-500">Platform Fee</span>
+                                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
+                                            </div>
+                                            <span className="text-gray-900 font-semibold">₹{cartData?.consultationFee}</span>
                                         </div>
-                                        <span className="text-gray-900 font-bold">₹{PLATFORM_FEE}</span>
+                                    )}
+
+                                    {/* GST */}
+                                    {(cartData?.gstAmount ?? 0) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">GST (18%)</span>
+                                            <span className="text-gray-900 font-semibold">₹{cartData?.gstAmount}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Divider */}
+                                    <div className="border-t border-gray-200 pt-2.5">
+                                        <div className="flex justify-between text-sm font-bold">
+                                            <span className="text-gray-700">Total Amount</span>
+                                            <span className="text-gray-900">₹{cartData?.finalAmount ?? 0}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes & fees</p>
+                                    </div>
+
+                                    {/* Non-refundable note */}
+                                    <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        </svg>
+                                        <span>Platform fee is non-refundable.</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Final Calculation */}
-                            <div className="p-4 rounded-2xl bg-[#C06C84]/5 border border-[#C06C84]/20 mb-6">
+                            <div className="p-4 rounded-2xl bg-[#6D1357]/5 border border-[#6D1357]/20 mb-6">
                                 <div className="flex justify-between mb-1">
                                     <span className="text-gray-600 font-medium">Payable Now</span>
-                                    <span className="text-2xl font-black text-[#C06C84]">
+                                    <span className="text-2xl font-black text-[#6D1357]">
                                         ₹{paymentOption === 'ADVANCE'
-                                            ? ((cartData?.totalServiceCost || 0) * 0.25 + PLATFORM_FEE).toFixed(0)
-                                            : ((cartData?.totalServiceCost || 0) + PLATFORM_FEE).toFixed(0)}
+                                            ? (cartData?.advPayment ?? 0)
+                                            : (cartData?.finalAmount ?? 0)}
                                     </span>
                                 </div>
-                                <p className="text-[10px] text-[#C06C84] uppercase font-bold">
-                                    {paymentOption === 'ADVANCE' ? 'Advance + Platform Fee' : 'Total Service Paid'}
+                                <p className="text-[10px] text-[#6D1357] uppercase font-bold">
+                                    {paymentOption === 'ADVANCE' ? 'Advance Payment' : 'Full Amount (incl. all fees)'}
                                 </p>
                             </div>
 
@@ -569,7 +595,7 @@ export default function SpaConfirmPage() {
                                 <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500 text-sm">Remaining to Pay</span>
-                                        <span className="text-gray-900 font-bold">₹{((cartData?.totalServiceCost || 0) * 0.75).toFixed(0)}</span>
+                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0))}</span>
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at store after service</p>
                                 </div>
@@ -583,7 +609,7 @@ export default function SpaConfirmPage() {
                                 disabled={loading || !bookedDate || !bookedTime}
                                 className={`w-full px-6 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg ${loading || !bookedDate || !bookedTime
                                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-                                    : 'bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white hover:shadow-[#C06C84]/40'
+                                    : 'bg-gradient-to-r from-[#6D1357] to-[#6C5CE7] text-white hover:shadow-[#6D1357]/40'
                                     }`}
                             >
                                 {loading ? (
@@ -596,9 +622,18 @@ export default function SpaConfirmPage() {
                                 )}
                             </motion.button>
 
-                            <p className="mt-4 text-[10px] text-center text-gray-400">
-                                By booking, you agree to our Terms & Cancellation Policy.
-                            </p>
+                                <div className="mt-4 space-y-1.5 text-center">
+                                    <p className="text-[10px] text-gray-400">
+                                        By booking, you agree to our Terms &amp; Cancellation Policy.
+                                    </p>
+                                    <div className="flex items-start justify-center gap-1 text-[10px] text-gray-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        </svg>
+                                        <span>As per RBI guidelines, payment gateway charges may apply depending on the payment mode.</span>
+                                    </div>
+                                </div>
+
                         </motion.div>
                     </div>
                 </div>

@@ -12,6 +12,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/spasalon/AddonsModal';
+import { useServiceCart } from '@/context/ServiceCartContext';
 
 const amenityIcons = {
     Wifi: Sparkles,
@@ -39,6 +40,7 @@ export default function SpaServiceDetailPage() {
     const [loading, setLoading] = useState(true);
     const [selectedPackages, setSelectedPackages] = useState([]);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
+    const { cartItems, clearCart } = useServiceCart();
 
     const sliderSettings = {
         dots: true,
@@ -107,11 +109,21 @@ export default function SpaServiceDetailPage() {
                         basePrice: store.BasePrice || 500,
                         logo: store.logo ? (store.logo.startsWith('http') ? store.logo : `https://api.doorstephub.com/${store.logo}`) : '',
                         images: (() => {
-                            const mainImg = store.image || store.logo;
-                            const portfolio = data.serviceImages || [];
-                            const combined = mainImg ? [mainImg, ...portfolio.filter(i => i !== mainImg)] : portfolio;
-                            return combined.length > 0
-                                ? combined.map(img => img.startsWith('http') ? img : `https://api.doorstephub.com/${img}`)
+                            // Strictly use the "image" key from the backend as the primary banner
+                            const baseUrl = 'https://api.doorstephub.com/';
+                            const toUrl = (p) => p ? (p.startsWith('http') ? p : `${baseUrl}${p}`) : null;
+
+                            const bannerImg = toUrl(store.image);      // primary from "image" key
+                            const logoImg   = toUrl(store.logo);       // fallback
+                            const extras    = (data.serviceImages || []).map(toUrl).filter(Boolean);
+
+                            const primary = bannerImg || logoImg;
+                            const deduped = primary
+                                ? [primary, ...extras.filter(u => u !== primary)]
+                                : extras;
+
+                            return deduped.length > 0
+                                ? deduped
                                 : ['https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800'];
                         })(),
 
@@ -167,12 +179,23 @@ export default function SpaServiceDetailPage() {
 
     const totalPrice = selectedPackages.reduce((sum, pkg) => sum + (parseFloat(pkg.price) || 0), 0);
 
-    const handleContinueToBook = () => {
+    const handleContinueToBook = async () => {
         if (selectedPackages.length === 0) {
-            alert("Please select at least one service.");
+            alert('Please select at least one service.');
             setActiveTab('portfolio');
             return;
         }
+
+        // ── Provider conflict check ──
+        const existingProviderId = cartItems.length > 0 ? cartItems[0].providerId : null;
+        if (existingProviderId && existingProviderId !== id) {
+            const confirmed = window.confirm(
+                `Your cart already has services from a different professional.\n\nDo you want to clear your existing cart and book with this professional instead?`
+            );
+            if (!confirmed) return;
+            await clearCart(true); // clear old provider's cart silently
+        }
+
         setShowAddonsModal(true);
     };
 
@@ -290,9 +313,9 @@ export default function SpaServiceDetailPage() {
                         </div>
 
                         <div className="flex flex-wrap gap-4 w-full md:w-auto">
-                            <div className="bg-[#C06C84]/10 rounded-2xl p-3 md:p-4 border border-[#C06C84]/20 min-w-[100px] md:min-w-[120px] flex flex-col items-center">
+                            <div className="bg-[#6D1357]/10 rounded-2xl p-3 md:p-4 border border-[#6D1357]/20 min-w-[100px] md:min-w-[120px] flex flex-col items-center">
                                 <div className="flex items-center justify-center mb-0.5">
-                                    <Star className="w-4 h-4 md:w-5 md:h-5 fill-[#C06C84] text-[#C06C84] mr-1" />
+                                    <Star className="w-4 h-4 md:w-5 md:h-5 fill-[#6D1357] text-[#6D1357] mr-1" />
                                     <span className="text-xl md:text-2xl font-bold text-gray-900">{serviceData.rating}</span>
                                 </div>
                                 <div className="text-[10px] md:text-xs text-gray-500 text-center uppercase font-semibold">Rating</div>
@@ -318,7 +341,7 @@ export default function SpaServiceDetailPage() {
                                 <TabsTrigger
                                     key={tab.toLowerCase()}
                                     value={tab === 'Services' ? 'portfolio' : tab.toLowerCase()}
-                                    className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#C06C84] data-[state=active]:to-[#6C5CE7] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap"
+                                    className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#6D1357] data-[state=active]:to-[#6D1357] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap"
                                 >
                                     {tab}
                                 </TabsTrigger>
@@ -442,7 +465,7 @@ export default function SpaServiceDetailPage() {
                     </div>
                     <button
                         onClick={handleContinueToBook}
-                        className="px-8 md:px-12 py-3.5 md:py-4 bg-[#1A0515] text-white rounded-2xl font-bold text-base md:text-lg hover:shadow-xl hover:shadow-[#1A0515]/40 transition-all transform hover:scale-105"
+                        className="px-8 md:px-12 py-3.5 md:py-4 bg-[#6D1357] text-white rounded-2xl font-bold text-base md:text-lg hover:shadow-xl hover:shadow-[#1A0515]/40 transition-all transform hover:scale-105"
                     >
                         Book Now
                     </button>

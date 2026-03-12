@@ -182,7 +182,7 @@ function SpaCategoryContent() {
                                                 <Sparkles className="w-4 h-4" />
                                                 <span>Top Rated</span>
                                             </div>
-                                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#C06C84] group-hover:text-white transition-colors">
+                                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#6D1357] group-hover:text-white transition-colors">
                                                 <ChevronRight className="w-5 h-5" />
                                             </div>
                                         </div>

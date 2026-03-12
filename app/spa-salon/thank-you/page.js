@@ -36,7 +36,7 @@ function SpaThankYouContent() {
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Background Decorative Elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#C06C84]/10 rounded-full blur-[100px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#6D1357]/10 rounded-full blur-[100px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#6C5CE7]/10 rounded-full blur-[100px]" />
             </div>
 
@@ -44,21 +44,21 @@ function SpaThankYouContent() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, type: "spring" }}
-                className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-[#C06C84]/20"
+                className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-[#6D1357]/20"
             >
                 {/* Header Section */}
-                <div className="bg-gradient-to-br from-[#C06C84] to-[#6C5CE7] p-10 text-center relative overflow-hidden">
+                <div className="bg-gradient-to-br from-[#6D1357] to-[#6C5CE7] p-10 text-center relative overflow-hidden">
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                         className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg relative"
                     >
-                        <CheckCircle className="w-12 h-12 text-[#C06C84]" />
+                        <CheckCircle className="w-12 h-12 text-[#6D1357]" />
                         <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 border-2 border-dashed border-[#C06C84]/30 rounded-full"
+                            className="absolute inset-0 border-2 border-dashed border-[#6D1357]/30 rounded-full"
                         />
                     </motion.div>
 
@@ -95,8 +95,8 @@ function SpaThankYouContent() {
                             transition={{ delay: 0.5 }}
                             className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100"
                         >
-                            <div className="w-12 h-12 rounded-xl bg-[#C06C84]/10 flex items-center justify-center flex-shrink-0">
-                                <Calendar className="w-6 h-6 text-[#C06C84]" />
+                            <div className="w-12 h-12 rounded-xl bg-[#6D1357]/10 flex items-center justify-center flex-shrink-0">
+                                <Calendar className="w-6 h-6 text-[#6D1357]" />
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500 font-medium">Date & Time</p>
@@ -114,8 +114,8 @@ function SpaThankYouContent() {
                             transition={{ delay: 0.6 }}
                             className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100"
                         >
-                            <div className="w-12 h-12 rounded-xl bg-[#C06C84]/10 flex items-center justify-center flex-shrink-0">
-                                <MapPin className="w-6 h-6 text-[#C06C84]" />
+                            <div className="w-12 h-12 rounded-xl bg-[#6D1357]/10 flex items-center justify-center flex-shrink-0">
+                                <MapPin className="w-6 h-6 text-[#6D1357]" />
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500 font-medium">Service Location</p>
@@ -130,11 +130,11 @@ function SpaThankYouContent() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.65 }}
-                            className="p-5 rounded-3xl bg-white border-2 border-[#C06C84]/10 shadow-sm"
+                            className="p-5 rounded-3xl bg-white border-2 border-[#6D1357]/10 shadow-sm"
                         >
                             <div className="flex justify-between items-center mb-3">
                                 <span className="text-gray-500 text-sm">Paid Today</span>
-                                <span className="text-xl font-bold text-[#C06C84]">₹{bookingDetails.paid}</span>
+                                <span className="text-xl font-bold text-[#6D1357]">₹{bookingDetails.paid}</span>
                             </div>
                             {bookingDetails.remaining !== '0' && (
                                 <div className="flex justify-between items-center pt-3 border-t border-gray-100">
@@ -151,7 +151,7 @@ function SpaThankYouContent() {
                             transition={{ delay: 0.7 }}
                             className="text-center py-4 px-6 bg-pink-50 rounded-xl"
                         >
-                            <p className="text-[#C06C84] italic flex items-center justify-center gap-2">
+                            <p className="text-[#6D1357] italic flex items-center justify-center gap-2">
                                 <Sparkles className="w-4 h-4" />
                                 "Beauty begins the moment you decide to be yourself."
                                 <Sparkles className="w-4 h-4" />
@@ -163,7 +163,7 @@ function SpaThankYouContent() {
                     <div className="mt-8 flex flex-col gap-3">
                         <Button
                             onClick={() => router.push('/spa-salon')}
-                            className="w-full py-6 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] hover:opacity-90 text-white text-lg rounded-xl shadow-lg transition-all font-semibold"
+                            className="w-full py-6 bg-gradient-to-r from-[#6D1357] to-[#6C5CE7] hover:opacity-90 text-white text-lg rounded-xl shadow-lg transition-all font-semibold"
                         >
                             Book Another Service
                         </Button>
@@ -183,7 +183,7 @@ function SpaThankYouContent() {
 
 export default function SpaThankYouPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-[#C06C84]">Loading Confirmation...</div>}>
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-[#6D1357]">Loading Confirmation...</div>}>
             <SpaThankYouContent />
         </Suspense>
     );

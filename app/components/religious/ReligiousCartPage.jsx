@@ -193,33 +193,29 @@ export function ReligiousCartPage({
 
                                 <h4 className="text-xl font-bold text-white mb-8 border-b border-white/5 pb-4">Order Summary</h4>
 
-                                <div className="space-y-6 mb-12">
+                                <div className="space-y-4 mb-10">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between items-center text-white/50 text-xs font-black uppercase tracking-widest">
+                                        <div className="flex justify-between items-center text-white/50 text-[10px] font-black uppercase tracking-widest">
                                             <span>Sacred Rituals Cost</span>
-                                            <span className="text-white text-lg">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
+                                            <span className="text-white text-lg font-bold">₹{(cartData?.totalServiceCost || 0).toFixed(0)}</span>
                                         </div>
                                         <div className="h-px bg-white/5" />
                                     </div>
 
-                                    <div className="space-y-4 pt-2">
-                                        <div className="flex justify-between items-center text-white/50 text-sm">
+                                    <div className="space-y-3.5 pt-1">
+                                        {/* Platform Fee */}
+                                        <div className="flex justify-between items-center text-white/40 text-sm">
                                             <div className="flex items-center gap-2">
-                                                <span>Platform Sewa Fee</span>
-                                                <Info className="w-3.5 h-3.5 text-[#ff9933]/50" />
+                                                <span>Platform Fee</span>
+                                                <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px] text-white/40 cursor-help" title="Non-refundable booking fee">?</div>
                                             </div>
-                                            <span className="text-white/80 font-bold">₹{(cartData?.platformFee || 0).toFixed(2)}</span>
+                                            <span className="text-white/70 font-semibold">₹{(cartData?.consultationFee || 0).toFixed(0)}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-white/50 text-sm">
-                                            <span>Consultation Fee</span>
-                                            <span className="text-white/80 font-bold">₹{(cartData?.consultationFee || 0).toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center text-white/50 text-sm">
-                                            <div className="flex items-center gap-1.5">
-                                                <span>GST</span>
-                                                <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10 text-white/40">18%</span>
-                                            </div>
-                                            <span className="text-white/80 font-bold">₹{(cartData?.gstAmount || 0).toFixed(2)}</span>
+
+                                        {/* GST */}
+                                        <div className="flex justify-between items-center text-white/40 text-sm">
+                                            <span>GST (18%)</span>
+                                            <span className="text-white/70 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
                                         </div>
                                     </div>
 
@@ -228,13 +224,10 @@ export function ReligiousCartPage({
                                     <div className="flex flex-col gap-4">
                                         <div className="flex justify-between items-end">
                                             <div className="flex flex-col">
-                                                <span className="text-white/30 text-xs uppercase font-black tracking-widest">Payable Online Now</span>
-                                                <span className="text-4xl font-black text-white tracking-tighter shadow-lg">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                                                <span className="text-white/30 text-[10px] uppercase font-black tracking-[0.2em] mb-1">Payable Now</span>
+                                                <span className="text-4xl font-black text-white tracking-tighter">₹{(cartData?.finalAmount || 0).toFixed(0)}</span>
                                             </div>
-                                            <div className="flex flex-col items-end gap-1">
-                                                <ShieldCheck className="w-6 h-6 text-green-500 opacity-80" />
-                                                <span className="text-[9px] text-green-500/80 font-bold uppercase tracking-tighter">Secure Booking</span>
-                                            </div>
+                                            <ShieldCheck className="w-8 h-8 text-[#ff9933] opacity-50" />
                                         </div>
 
                                         <motion.button

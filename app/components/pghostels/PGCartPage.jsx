@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, ShoppingCart, Loader2, Home, MapPin, Building2, ShieldCheck, Info, Sparkles } from 'lucide-react';
+import { ArrowLeft, Trash2, ShoppingCart, Loader2, Home, MapPin, Building2, ShieldCheck, Info, Sparkles, Store } from 'lucide-react';
 import { useServiceCart } from '@/context/ServiceCartContext';
 
 export function PGCartPage({
@@ -196,33 +196,29 @@ export function PGCartPage({
 
                                 <h4 className="text-xl font-bold text-white mb-8 border-b border-white/5 pb-4">Order Summary</h4>
 
-                                <div className="space-y-6 mb-12">
+                                <div className="space-y-4 mb-10">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between items-center text-white/50 text-xs font-black uppercase tracking-widest">
-                                            <span>Stay Package Cost</span>
+                                        <div className="flex justify-between items-center text-white/50 text-[10px] font-black uppercase tracking-widest">
+                                            <span>Monthly Rent</span>
                                             <span className="text-white text-lg">₹{(cartData?.totalServiceCost || 0).toFixed(0)}</span>
                                         </div>
                                         <div className="h-px bg-white/5" />
                                     </div>
 
-                                    <div className="space-y-4 pt-2">
-                                        <div className="flex justify-between items-center text-white/50 text-sm">
+                                    <div className="space-y-3.5 pt-1">
+                                        {/* Platform Fee */}
+                                        <div className="flex justify-between items-center text-white/40 text-sm">
                                             <div className="flex items-center gap-2">
-                                                <span>Admin Charges</span>
-                                                <Info className="w-3.5 h-3.5 text-[#037166]/50" />
+                                                <span>Platform Fee</span>
+                                                <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px] text-white/40 cursor-help" title="Non-refundable booking fee">?</div>
                                             </div>
-                                            <span className="text-white/80 font-bold">₹{(cartData?.platformFee || 0).toFixed(0)}</span>
+                                            <span className="text-white/70 font-semibold">₹{(cartData?.consultationFee || 0).toFixed(0)}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-white/50 text-sm">
-                                            <span>Verification Fee</span>
-                                            <span className="text-white/80 font-bold">₹{(cartData?.consultationFee || 0).toFixed(0)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center text-white/50 text-sm">
-                                            <div className="flex items-center gap-1.5">
-                                                <span>GST</span>
-                                                <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10 text-white/40">18%</span>
-                                            </div>
-                                            <span className="text-white/80 font-bold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
+
+                                        {/* GST */}
+                                        <div className="flex justify-between items-center text-white/40 text-sm">
+                                            <span>GST (18%)</span>
+                                            <span className="text-white/70 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
                                         </div>
                                     </div>
 
@@ -231,13 +227,10 @@ export function PGCartPage({
                                     <div className="flex flex-col gap-4">
                                         <div className="flex justify-between items-end">
                                             <div className="flex flex-col">
-                                                <span className="text-white/30 text-xs uppercase font-black tracking-widest">Payable Online Now</span>
-                                                <span className="text-4xl font-black text-white tracking-tighter shadow-lg">₹{(cartData?.finalAmount || 0).toFixed(0)}</span>
+                                                <span className="text-white/30 text-[10px] uppercase font-black tracking-[0.2em] mb-1">Payable Now</span>
+                                                <span className="text-4xl font-black text-white tracking-tighter">₹{(cartData?.finalAmount || 0).toFixed(0)}</span>
                                             </div>
-                                            <div className="flex flex-col items-end gap-1">
-                                                <ShieldCheck className="w-6 h-6 text-green-500 opacity-80" />
-                                                <span className="text-[9px] text-green-500/80 font-bold uppercase tracking-tighter">Verified Stay</span>
-                                            </div>
+                                            <ShieldCheck className="w-8 h-8 text-[#037166] opacity-50" />
                                         </div>
 
                                         <motion.button
@@ -252,9 +245,12 @@ export function PGCartPage({
                                     </div>
                                 </div>
 
-                                <div className="mt-12 p-8 rounded-[2.5rem] bg-white/5 border border-white/5 flex flex-col gap-4 text-center">
-                                    <p className="text-white/30 text-[9px] leading-relaxed font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2">
-                                        Verified property by <span className="text-white">DoorstepHub Safety</span> <ShieldCheck className="w-4 h-4 text-[#037166]" />
+                                <div className="mt-8 p-6 rounded-3xl bg-white/5 border border-white/5 flex flex-col gap-3">
+                                    <p className="text-white/40 text-[9px] leading-relaxed font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                                        Monthly rent is <span className="text-white">Pay at Hostel</span> <Store className="w-3 h-3 text-[#037166]" />
+                                    </p>
+                                    <p className="text-white/20 text-[8px] leading-relaxed font-medium uppercase tracking-widest text-center">
+                                         verified by DoorstepHub Safety
                                     </p>
                                 </div>
                             </motion.div>

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Sparkles } from 'lucide-react';
+import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -27,9 +27,15 @@ function SpaAddressContent() {
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
+
+    // GPS / Map state
+    const [gpsLoading, setGpsLoading] = useState(false);
+    const [mapCoords, setMapCoords] = useState({ lat: 17.4126, lng: 78.2676 }); // Default: Hyderabad
+    const [mapKey, setMapKey] = useState(0); // force iframe refresh
+
     const [newAddress, setNewAddress] = useState({
         name: '', phone: '', type: 'Home', area: '', flat: '',
-        postalCode: '', addressLineOne: '', addressLineTwo: '',
+        plotNumber: '', postalCode: '', addressLineOne: '', addressLineTwo: '',
         stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
     });
 
@@ -71,9 +77,73 @@ function SpaAddressContent() {
         }
     }, [isAuthenticated, fetchAddresses]);
 
+    // ── Auto-detect location ──────────────────────────────────────────
+    const handleDetectLocation = () => {
+        if (!navigator.geolocation) {
+            toast.error('Geolocation is not supported by your browser');
+            return;
+        }
+        setGpsLoading(true);
+        toast.info('Detecting your location…');
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                setMapCoords({ lat: latitude, lng: longitude });
+                setMapKey(k => k + 1); // refresh map iframe
+
+                try {
+                    // Reverse geocode via Nominatim (free, no API key)
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`,
+                        { headers: { 'Accept-Language': 'en' } }
+                    );
+                    const geo = await res.json();
+                    const addr = geo.address || {};
+
+                    const localArea =
+                        addr.suburb || addr.neighbourhood || addr.quarter ||
+                        addr.village || addr.town || addr.county || '';
+                    const city =
+                        addr.city || addr.town || addr.village || addr.county || 'Hyderabad';
+                    const state =
+                        addr.state || 'Telangana';
+                    const pincode = addr.postcode || '';
+                    const road = addr.road || addr.pedestrian || addr.footway || '';
+
+                    setNewAddress(prev => ({
+                        ...prev,
+                        area: localArea || prev.area,
+                        cityName: city,
+                        stateName: state,
+                        postalCode: pincode,
+                        addressLineOne: road || prev.addressLineOne,
+                    }));
+
+                    toast.success('Location detected! Please verify and fill in your flat/house number.');
+                } catch (err) {
+                    console.error(err);
+                    toast.error('Could not fetch address details. Please fill manually.');
+                } finally {
+                    setGpsLoading(false);
+                }
+            },
+            (err) => {
+                setGpsLoading(false);
+                if (err.code === err.PERMISSION_DENIED) {
+                    toast.error('Location permission denied. Please allow access in your browser.');
+                } else {
+                    toast.error('Failed to detect location. Please fill manually.');
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
+    // ── Save / Update Address ─────────────────────────────────────────
     const handleAddOrUpdateAddress = async () => {
         if (!newAddress.name || !newAddress.phone || !newAddress.area || !newAddress.flat || !newAddress.postalCode) {
-            toast.error('Please fill in required fields');
+            toast.error('Please fill in required fields (Name, Phone, Flat, Area, Pincode)');
             return;
         }
 
@@ -87,8 +157,8 @@ function SpaAddressContent() {
 
             const payload = {
                 ...newAddress,
-                latitude: "17.450123",
-                longitude: "78.390456",
+                latitude: String(mapCoords.lat),
+                longitude: String(mapCoords.lng),
                 defaultAddress: addresses.length === 0 ? true : newAddress.defaultAddress
             };
 
@@ -108,7 +178,7 @@ function SpaAddressContent() {
                 setEditingAddress(null);
                 setNewAddress({
                     name: '', phone: '', type: 'Home', area: '', flat: '',
-                    postalCode: '', addressLineOne: '', addressLineTwo: '',
+                    plotNumber: '', postalCode: '', addressLineOne: '', addressLineTwo: '',
                     stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
                 });
                 fetchAddresses();
@@ -141,7 +211,7 @@ function SpaAddressContent() {
 
     const handleContinue = async () => {
         if (!selectedAddress) {
-            toast.error("Please select an address");
+            toast.error('Please select an address');
             return;
         }
 
@@ -150,7 +220,6 @@ function SpaAddressContent() {
             const packageIdList = packageId ? packageId.split(',') : [];
             const firstPackageId = packageIdList[0];
 
-            // Mock Skip
             if (providerId?.startsWith('mock_') || (firstPackageId && firstPackageId.startsWith('mock_'))) {
                 sessionStorage.setItem('spa_booking_data', JSON.stringify({
                     providerId, packageId: packageIdList, addons: addons ? addons.split(',') : [], address: selectedAddress
@@ -160,21 +229,10 @@ function SpaAddressContent() {
                 return;
             }
 
-            // 1. Clear Cart
             await clearCart(true);
 
-            // 2. Add All Packages
             for (const pId of packageIdList) {
-                const packageSuccess = await addToCart(
-                    providerId,
-                    pId,
-                    'professional_service',
-                    1,
-                    null,
-                    'professional',
-                    true // suppressToast
-                );
-
+                const packageSuccess = await addToCart(providerId, pId, 'professional_service', 1, null, 'professional', true);
                 if (!packageSuccess) {
                     toast.error(`Failed to add service ${pId} to booking`);
                     setLoading(false);
@@ -182,35 +240,23 @@ function SpaAddressContent() {
                 }
             }
 
-            // 3. Add Addons
             if (addons) {
                 const addonList = addons.split(',');
                 for (const addonId of addonList) {
-                    await addToCart(
-                        providerId,
-                        addonId,
-                        'professional_addon',
-                        1,
-                        firstPackageId, // Link addons to the first package
-                        'professional',
-                        true // suppressToast
-                    );
+                    await addToCart(providerId, addonId, 'professional_addon', 1, firstPackageId, 'professional', true);
                 }
             }
 
-            // Save booking context
             sessionStorage.setItem('spa_booking_data', JSON.stringify({
-                providerId,
-                packageId: packageIdList,
+                providerId, packageId: packageIdList,
                 addons: addons ? addons.split(',') : [],
                 address: selectedAddress
             }));
             sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
-
             router.push('/spa-salon/booking/confirm');
         } catch (error) {
-            console.error("Error adding to cart:", error);
-            toast.error("Failed to proceed. Please try again.");
+            console.error('Error adding to cart:', error);
+            toast.error('Failed to proceed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -220,9 +266,15 @@ function SpaAddressContent() {
         setEditingAddress(addr);
         setNewAddress({
             name: addr.name, phone: addr.phone, type: addr.type, area: addr.area, flat: addr.flat,
+            plotNumber: addr.plotNumber || '',
             postalCode: addr.postalCode, addressLineOne: addr.addressLineOne, addressLineTwo: addr.addressLineTwo,
             stateName: addr.stateName || 'Telangana', cityName: addr.cityName || 'Hyderabad', defaultAddress: addr.defaultAddress
         });
+        // Set map to stored coords if available
+        if (addr.latitude && addr.longitude) {
+            setMapCoords({ lat: parseFloat(addr.latitude), lng: parseFloat(addr.longitude) });
+            setMapKey(k => k + 1);
+        }
         setShowAddForm(true);
     };
 
@@ -232,6 +284,9 @@ function SpaAddressContent() {
         if (lower.includes('work') || lower.includes('office')) return Briefcase;
         return MapPin;
     };
+
+    // Map iframe URL
+    const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.01},${mapCoords.lat - 0.01},${mapCoords.lng + 0.01},${mapCoords.lat + 0.01}&layer=mapnik&marker=${mapCoords.lat},${mapCoords.lng}`;
 
     return (
         <div className="min-h-screen pt-20 pb-32 bg-gray-50">
@@ -262,7 +317,7 @@ function SpaAddressContent() {
 
             <div className="max-w-[1000px] mx-auto px-6 lg:px-8 py-8">
                 {loading && addresses.length === 0 ? (
-                    <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-[#C06C84]" /></div>
+                    <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-[#6D1357]" /></div>
                 ) : (
                     <div className="grid gap-6">
                         {addresses.length === 0 && !loading && (
@@ -282,21 +337,21 @@ function SpaAddressContent() {
                                     transition={{ delay: index * 0.1 }}
                                     onClick={() => setSelectedAddress(address)}
                                     className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 ${isSelected
-                                        ? 'bg-white border-2 border-[#C06C84] shadow-lg shadow-[#C06C84]/10'
-                                        : 'bg-white border border-gray-200 hover:border-[#C06C84]/30 hover:shadow-md'
+                                        ? 'bg-white border-2 border-[#6D1357] shadow-lg shadow-[#6D1357]/10'
+                                        : 'bg-white border border-gray-200 hover:border-[#6D1357]/30 hover:shadow-md'
                                         }`}
                                 >
                                     <div className="flex gap-6">
-                                        <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-[#C06C84]/10' : 'bg-gray-100'}`}>
-                                            <Icon className={`w-8 h-8 ${isSelected ? 'text-[#C06C84]' : 'text-gray-400'}`} />
+                                        <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-[#6D1357]/10' : 'bg-gray-100'}`}>
+                                            <Icon className={`w-8 h-8 ${isSelected ? 'text-[#6D1357]' : 'text-gray-400'}`} />
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="text-xl font-bold text-gray-900 capitalize mb-1">{address.type || 'Address'}</h3>
-                                            <p className="font-medium text-gray-800 mb-1">{address.name}</p>
-                                            <p className="text-gray-600 text-sm">{address.flat}, {address.area}, {address.cityName}</p>
+                                            <h3 className="text-xl font-bold text-black capitalize mb-1">{address.type || 'Address'}</h3>
+                                            <p className="font-medium text-black mb-1">{address.name}</p>
+                                            <p className="text-black/70 text-sm">{address.flat}, {address.area}, {address.cityName}</p>
                                         </div>
                                         <div className="flex flex-col gap-2">
-                                            {isSelected && <div className="w-8 h-8 rounded-full bg-[#C06C84] flex items-center justify-center"><Check className="w-5 h-5 text-white" /></div>}
+                                            {isSelected && <div className="w-8 h-8 rounded-full bg-[#6D1357] flex items-center justify-center"><Check className="w-5 h-5 text-white" /></div>}
                                             <button onClick={(e) => { e.stopPropagation(); openEditModal(address); }} className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100"><Edit2 className="w-4 h-4 text-gray-500" /></button>
                                             <button onClick={(e) => { e.stopPropagation(); handleDeleteAddress(address._id); }} className="p-2 rounded-lg bg-gray-50 hover:bg-red-50"><Trash2 className="w-4 h-4 text-gray-500 hover:text-red-500" /></button>
                                         </div>
@@ -320,13 +375,13 @@ function SpaAddressContent() {
                             });
                             setShowAddForm(true);
                         }}
-                        className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-500 hover:border-[#C06C84] hover:text-[#C06C84] transition-colors"
+                        className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-black hover:border-[#6D1357] hover:text-[#6D1357] transition-colors"
                     >
                         <Plus className="w-5 h-5 mr-2" /> Add New Address
                     </motion.button>
                 )}
 
-                {/* Inline Add/Edit Form */}
+                {/* ── Add / Edit Form ── */}
                 <AnimatePresence>
                     {showAddForm && (
                         <motion.div
@@ -335,46 +390,111 @@ function SpaAddressContent() {
                             exit={{ opacity: 0, height: 0 }}
                             className="mt-6 overflow-hidden"
                         >
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-bold text-gray-900">{editingAddress ? 'Edit Address' : 'Add New Details'}</h3>
-                                    <Button variant="ghost" size="icon" onClick={() => setShowAddForm(false)}><X className="h-5 w-5" /></Button>
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+
+                                {/* ── Map ── */}
+                                <div className="relative w-full h-56 bg-gray-100">
+                                    <iframe
+                                        key={mapKey}
+                                        src={mapSrc}
+                                        className="w-full h-full border-0"
+                                        title="Location Map"
+                                        loading="lazy"
+                                        allowFullScreen
+                                    />
+                                    {/* GPS Detect button overlaying the map */}
+                                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
+                                        <button
+                                            onClick={handleDetectLocation}
+                                            disabled={gpsLoading}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-[#6D1357] text-white rounded-full shadow-lg text-sm font-semibold hover:bg-[#5A0E47] transition-all disabled:opacity-70"
+                                        >
+                                            {gpsLoading
+                                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Detecting…</>
+                                                : <><Navigation className="w-4 h-4" /> Use My Current Location</>
+                                            }
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="space-y-4">
-                                    <div className="flex gap-3">
-                                        {['Home', 'Office', 'Other'].map(type => (
-                                            <button
-                                                key={type}
-                                                onClick={() => setNewAddress({ ...newAddress, type })}
-                                                className={`flex-1 py-2 rounded-lg font-medium border ${newAddress.type === type ? 'bg-[#C06C84] text-white border-[#C06C84]' : 'border-gray-200 hover:bg-gray-50'}`}
-                                            >
-                                                {type}
-                                            </button>
-                                        ))}
+
+                                {/* ── Form Fields ── */}
+                                <div className="p-6">
+                                    <div className="flex justify-between items-center mb-5">
+                                        <h3 className="text-xl font-bold text-black">{editingAddress ? 'Edit Address' : 'Add New Details'}</h3>
+                                        <Button variant="ghost" size="icon" onClick={() => setShowAddForm(false)}><X className="h-5 w-5" /></Button>
                                     </div>
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <Input placeholder="Full Name" value={newAddress.name} onChange={e => setNewAddress({ ...newAddress, name: e.target.value })} />
-                                        <Input placeholder="Phone Number" value={newAddress.phone} onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} />
-                                    </div>
-                                    <Input placeholder="Flat / House No" value={newAddress.flat} onChange={e => setNewAddress({ ...newAddress, flat: e.target.value })} />
-                                    <Input placeholder="Area / Colony" value={newAddress.area} onChange={e => setNewAddress({ ...newAddress, area: e.target.value })} />
-                                    <div className="grid md:grid-cols-3 gap-4">
-                                        <Input placeholder="City" value={newAddress.cityName} onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} />
-                                        <Input placeholder="State" value={newAddress.stateName} onChange={e => setNewAddress({ ...newAddress, stateName: e.target.value })} />
-                                        <Input placeholder="Pincode" value={newAddress.postalCode} onChange={e => setNewAddress({ ...newAddress, postalCode: e.target.value })} />
-                                    </div>
-                                    <div className="flex gap-3 pt-2">
-                                        <Button variant="outline" className="flex-1" onClick={() => setShowAddForm(false)}>Cancel</Button>
-                                        <Button className="flex-1 bg-[#C06C84] hover:bg-[#A0556C] text-white" onClick={handleAddOrUpdateAddress}>
-                                            {loading ? 'Saving...' : 'Save Address'}
-                                        </Button>
+
+                                    <div className="space-y-4">
+                                        {/* Address Type */}
+                                        <div className="flex gap-3">
+                                            {['Home', 'Office', 'Other'].map(type => (
+                                                <button
+                                                    key={type}
+                                                    onClick={() => setNewAddress({ ...newAddress, type })}
+                                                    className={`flex-1 py-2 rounded-lg font-medium border ${newAddress.type === type ? 'bg-[#6D1357] text-white border-[#6D1357]' : 'text-black border-gray-200 hover:bg-gray-50'}`}
+                                                >
+                                                    {type}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Name & Phone */}
+                                        <div className="grid md:grid-cols-2 gap-4">
+                                            <Input className="text-black" placeholder="Full Name *" value={newAddress.name} onChange={e => setNewAddress({ ...newAddress, name: e.target.value })} />
+                                            <Input className="text-black" placeholder="Phone Number *" value={newAddress.phone} onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} />
+                                        </div>
+
+                                        {/* Flat & Plot Number */}
+                                        <div className="grid md:grid-cols-2 gap-4">
+                                            <Input className="text-black" placeholder="Flat / House No *" value={newAddress.flat} onChange={e => setNewAddress({ ...newAddress, flat: e.target.value })} />
+                                            <Input className="text-black" placeholder="Plot Number" value={newAddress.plotNumber} onChange={e => setNewAddress({ ...newAddress, plotNumber: e.target.value })} />
+                                        </div>
+
+                                        {/* Area/Colony — auto-filled from GPS */}
+                                        <div className="relative">
+                                            <Input
+                                                className="text-black pr-10"
+                                                placeholder="Area / Locality *"
+                                                value={newAddress.area}
+                                                onChange={e => setNewAddress({ ...newAddress, area: e.target.value })}
+                                            />
+                                            {newAddress.area && (
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">Auto</span>
+                                            )}
+                                        </div>
+
+                                        {/* City, State, Pincode — auto-filled from GPS */}
+                                        <div className="grid md:grid-cols-3 gap-4">
+                                            <div className="relative">
+                                                <Input className="text-black" placeholder="City" value={newAddress.cityName} onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} />
+                                            </div>
+                                            <div className="relative">
+                                                <Input className="text-black" placeholder="State" value={newAddress.stateName} onChange={e => setNewAddress({ ...newAddress, stateName: e.target.value })} />
+                                            </div>
+                                            <div className="relative">
+                                                <Input className="text-black" placeholder="Pincode *" value={newAddress.postalCode} onChange={e => setNewAddress({ ...newAddress, postalCode: e.target.value })} />
+                                            </div>
+                                        </div>
+
+                                        {/* GPS hint */}
+                                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                                            <Navigation className="w-3 h-3" />
+                                            Tap &ldquo;Use My Current Location&rdquo; on the map to auto-fill Area, City, State & Pincode.
+                                        </p>
+
+                                        {/* Buttons */}
+                                        <div className="flex gap-3 pt-2">
+                                            <Button variant="outline" className="flex-1 text-black" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                                            <Button className="flex-1 bg-[#6D1357] hover:bg-[#5A0E47] text-white" onClick={handleAddOrUpdateAddress}>
+                                                {loading ? 'Saving...' : 'Save Address'}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
-
             </div>
 
             <AuthModal
@@ -390,7 +510,7 @@ function SpaAddressContent() {
                     <Button
                         onClick={handleContinue}
                         disabled={!selectedAddress || showAddForm || loading}
-                        className="w-full h-14 text-lg bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] hover:opacity-90 text-white rounded-xl shadow-lg"
+                        className="w-full h-14 text-lg bg-[#6D1357] hover:opacity-90 text-white rounded-xl shadow-lg"
                     >
                         {loading ? 'Processing...' : 'Proceed to Payment'}
                     </Button>

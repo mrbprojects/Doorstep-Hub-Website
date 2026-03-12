@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, ShoppingCart, Loader2, Tag, Scissors, Sparkles, Info, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Trash2, ShoppingCart, Loader2, Tag, Scissors, Sparkles, Info, ShieldCheck, AlertTriangle, Store } from 'lucide-react';
 import { useServiceCart } from '@/context/ServiceCartContext';
 
 export function SpaCartPage({
@@ -10,6 +10,10 @@ export function SpaCartPage({
     onProceedToAddress,
 }) {
     const { cartItems, cartData, loading, removeFromCart, clearCart } = useServiceCart();
+
+    // Detect mixed providers
+    const uniqueProviders = [...new Set(cartItems.map(i => i.providerId).filter(Boolean))];
+    const hasMixedProviders = uniqueProviders.length > 1;
 
     const handleRemove = async (serviceId) => {
         await removeFromCart(serviceId);
@@ -110,6 +114,30 @@ export function SpaCartPage({
                     <div className="grid lg:grid-cols-3 gap-10">
                         {/* Cart Items */}
                         <div className="lg:col-span-2 space-y-6">
+
+                            {/* ── Mixed Provider Warning ── */}
+                            {hasMixedProviders && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5 flex items-start gap-4"
+                                >
+                                    <AlertTriangle className="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" />
+                                    <div className="flex-1">
+                                        <p className="text-amber-300 font-bold text-sm mb-1">Services from multiple providers</p>
+                                        <p className="text-amber-200/60 text-xs leading-relaxed">
+                                            Your cart has services from <span className="font-bold text-amber-300">{uniqueProviders.length} different professionals</span>. Only one provider can be booked at a time. Please clear your cart before adding services from a different provider.
+                                        </p>
+                                        <button
+                                            onClick={handleClear}
+                                            className="mt-3 px-4 py-1.5 rounded-lg bg-amber-500 text-black text-xs font-bold hover:bg-amber-400 transition-colors"
+                                        >
+                                            Clear Cart &amp; Start Fresh
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+
                             <AnimatePresence mode="popLayout">
                                 {cartItems.map((item, index) => (
                                     <motion.div
@@ -138,6 +166,16 @@ export function SpaCartPage({
                                                         <h4 className="text-2xl font-bold text-white group-hover:text-[#C06C84] transition-colors mb-1">
                                                             {item.itemName}
                                                         </h4>
+                                                        {/* Provider identity badge */}
+                                                        {item.providerId && (
+                                                            <p className="text-white/40 text-xs flex items-center gap-1.5 mb-1">
+                                                                <Store className="w-3 h-3 text-[#6D1357]" />
+                                                                <span className="text-white/50">Provider ID:</span>
+                                                                <span className="text-[#C06C84] font-mono text-[10px] bg-white/5 px-1.5 py-0.5 rounded">
+                                                                    {item.providerId}
+                                                                </span>
+                                                            </p>
+                                                        )}
                                                         {item.itemType === 'addon' && item.parentServiceName && (
                                                             <p className="text-white/40 text-sm flex items-center gap-1.5">
                                                                 <Tag className="w-3.5 h-3.5" />
@@ -196,33 +234,31 @@ export function SpaCartPage({
 
                                 <h4 className="text-xl font-bold text-white mb-8 border-b border-white/5 pb-4">Order Summary</h4>
 
-                                <div className="space-y-6 mb-8">
+                                <div className="space-y-4 mb-8">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between items-center text-white/50 text-xs font-bold uppercase tracking-widest">
-                                            <span>Treatments Cost</span>
-                                            <span className="text-white text-lg font-bold">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
+                                        <div className="flex justify-between items-center text-white/50 text-[10px] font-black uppercase tracking-widest">
+                                            <span>Services Subtotal</span>
+                                            <span className="text-white text-lg font-bold">₹{(cartData?.totalServiceCost || 0).toFixed(0)}</span>
                                         </div>
                                         <div className="h-px bg-white/5" />
                                     </div>
 
-                                    <div className="space-y-4 pt-2">
+                                    <div className="space-y-3.5 pt-1">
+                                        {/* Platform Fee */}
                                         <div className="flex justify-between items-center text-white/40 text-sm">
                                             <div className="flex items-center gap-2">
                                                 <span>Platform Fee</span>
-                                                <Info className="w-3.5 h-3.5 text-[#6C5CE7]" />
+                                                <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px] text-white/40 cursor-help" title="Non-refundable booking fee">?</div>
                                             </div>
-                                            <span className="text-white/70 font-semibold">₹{(cartData?.platformFee || 0).toFixed(2)}</span>
+                                            <span className="text-white/70 font-semibold">₹{(cartData?.consultationFee || 0).toFixed(0)}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-white/40 text-sm">
-                                            <span>Consultation Fee</span>
-                                            <span className="text-white/70 font-semibold">₹{(cartData?.consultationFee || 0).toFixed(2)}</span>
-                                        </div>
+
+                                        {/* GST */}
                                         <div className="flex justify-between items-center text-white/40 text-sm">
                                             <div className="flex items-center gap-1.5">
-                                                <span>GST</span>
-                                                <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10 text-white/40">18%</span>
+                                                <span>GST (18%)</span>
                                             </div>
-                                            <span className="text-white/70 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(2)}</span>
+                                            <span className="text-white/70 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
                                         </div>
                                     </div>
 
@@ -231,20 +267,25 @@ export function SpaCartPage({
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
                                             <div className="flex flex-col">
-                                                <span className="text-white/30 text-xs uppercase font-black tracking-widest">Payable Online Now</span>
-                                                <span className="text-4xl font-black text-white tracking-tighter">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                                                <span className="text-white/30 text-[10px] uppercase font-black tracking-[0.2em] mb-1">Payable Now</span>
+                                                <span className="text-4xl font-black text-white tracking-tighter">₹{(cartData?.finalAmount || 0).toFixed(0)}</span>
                                             </div>
-                                            <ShieldCheck className="w-8 h-8 text-green-500 opacity-50" />
+                                            <ShieldCheck className="w-8 h-8 text-[#C06C84] opacity-50" />
                                         </div>
 
                                         <motion.button
                                             whileHover={{ scale: 1.02, y: -2 }}
                                             whileTap={{ scale: 0.98 }}
                                             onClick={onProceedToAddress}
-                                            className="w-full px-8 py-5 rounded-2xl bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white font-black text-xl shadow-xl shadow-[#C06C84]/20 hover:shadow-[#C06C84]/40 transition-all flex items-center justify-center gap-3"
+                                            disabled={hasMixedProviders}
+                                            className={`w-full px-8 py-5 rounded-2xl font-black text-xl shadow-xl transition-all flex items-center justify-center gap-3 ${
+                                                hasMixedProviders
+                                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white shadow-[#C06C84]/20 hover:shadow-[#C06C84]/40'
+                                            }`}
                                         >
-                                            Book My Glow-up
-                                            <ArrowLeft className="w-6 h-6 rotate-180" />
+                                            {hasMixedProviders ? 'Resolve conflicts above' : 'Book My Glow-up'}
+                                            {!hasMixedProviders && <ArrowLeft className="w-6 h-6 rotate-180" />}
                                         </motion.button>
                                     </div>
                                 </div>

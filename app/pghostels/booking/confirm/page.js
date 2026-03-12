@@ -7,6 +7,7 @@ import {
     ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet,
     Truck, CheckCircle, Loader2, Building2, Info
 } from 'lucide-react';
+
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -36,9 +37,14 @@ function PGConfirmContent() {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [bookedDate, setBookedDate] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
+    const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+    const [paymentStatus, setPaymentStatus] = useState(null);
+    const [mounted, setMounted] = useState(false);
+
+    // Prevent hydration mismatch from new Date() during SSR
+    useEffect(() => { setMounted(true); }, []);
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
@@ -136,7 +142,8 @@ function PGConfirmContent() {
         return dates;
     };
 
-    const availableDates = getAvailableDates();
+    // Only compute on client to avoid hydration mismatch
+    const availableDates = mounted ? getAvailableDates() : [];
 
 
     const handleCheckout = async () => {
@@ -155,7 +162,9 @@ function PGConfirmContent() {
                 serviceAddressId: selectedAddress._id,
                 bookedDate,
                 bookedTime: '10:00',
-                paymentMethod, // BUG-R2-02 FIX: Use state variable instead of hardcoded 'ONLINE'
+                paymentMethod,
+                paymentOption,
+                ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
                 sourceOfLead: 'website',
                 providerType: 'professional',
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
@@ -391,7 +400,7 @@ function PGConfirmContent() {
                             )}
                         </motion.div>
 
-                        {/* Payment Method */}
+                        {/* Payment Method — Online Only */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -402,25 +411,62 @@ function PGConfirmContent() {
                                 <CreditCard className="w-5 h-5 text-[#037166]" />
                                 Payment Method
                             </h3>
-                            <p className="text-xs text-gray-400 mb-4">Select your preferred payment method</p>
-                            <div className="grid md:grid-cols-2 gap-3">
-                                {[
-                                    { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
-                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
-                                ].map((method) => (
-                                    <button
-                                        key={method.id}
-                                        onClick={() => setPaymentMethod(method.id)}
-                                        className={`p-5 rounded-xl flex flex-col items-center gap-2 transition-all ${paymentMethod === method.id
-                                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg'
-                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
-                                            }`}
-                                    >
-                                        <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-white' : 'text-[#037166]'}`} />
-                                        <span className="text-sm font-semibold">{method.label}</span>
-                                        {paymentMethod === method.id && <CheckCircle className="w-4 h-4 mt-1" />}
-                                    </button>
-                                ))}
+                            <p className="text-xs text-gray-400 mb-4">Secure online payment only</p>
+                            <div className="p-5 rounded-xl flex items-center gap-4 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg">
+                                <CreditCard className="w-6 h-6 text-white" />
+                                <div className="flex-1">
+                                    <span className="text-sm font-semibold">Online Payment</span>
+                                    <p className="text-xs text-white/70 mt-0.5">Pay securely via UPI / Card / Net Banking</p>
+                                </div>
+                                <CheckCircle className="w-5 h-5" />
+                            </div>
+                        </motion.div>
+
+                        {/* Payment Choice: Advance vs Full */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.25 }}
+                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+                        >
+                            <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+                                <Wallet className="w-5 h-5 text-[#037166]" />
+                                Payment Choice
+                            </h3>
+                            <p className="text-xs text-gray-400 mb-4">Choose how much to pay now</p>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => setPaymentOption('ADVANCE')}
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
+                                        paymentOption === 'ADVANCE'
+                                            ? 'border-[#037166] bg-[#037166]/5'
+                                            : 'border-gray-100 hover:border-[#037166]/30 bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className={`font-bold text-sm ${paymentOption === 'ADVANCE' ? 'text-[#037166]' : 'text-gray-900'}`}>Pay Advance</h4>
+                                        {paymentOption === 'ADVANCE' && <CheckCircle className="w-4 h-4 text-[#037166]" />}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mb-2">Pay advance to confirm your slot.</p>
+                                    <p className="text-xl font-black text-gray-900">₹{cartData?.advPayment ?? 0}</p>
+                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Slot Confirmed</div>
+                                </button>
+                                <button
+                                    onClick={() => setPaymentOption('FULL')}
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
+                                        paymentOption === 'FULL'
+                                            ? 'border-[#037166] bg-[#037166]/5'
+                                            : 'border-gray-100 hover:border-[#037166]/30 bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className={`font-bold text-sm ${paymentOption === 'FULL' ? 'text-[#037166]' : 'text-gray-900'}`}>Full Payment</h4>
+                                        {paymentOption === 'FULL' && <CheckCircle className="w-4 h-4 text-[#037166]" />}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mb-2">Pay total amount including all fees.</p>
+                                    <p className="text-xl font-black text-gray-900">₹{cartData?.finalAmount ?? 0}</p>
+                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Hassle Free</div>
+                                </button>
                             </div>
                         </motion.div>
 
@@ -485,49 +531,74 @@ function PGConfirmContent() {
                                         })}
                                     </div>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2.5 pt-1">
+                                    {/* Monthly Rent */}
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Hostel Monthly Rent</span>
-                                        <span className="text-gray-900 font-bold">₹{safeNum(cartData?.totalServiceCost)}</span>
+                                        <span className="text-gray-500">Monthly Rent</span>
+                                        <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.totalServiceCost)}</span>
                                     </div>
-                                    {(safeNum(cartData?.platformFee) > 0) && (
-                                        <>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-500">Platform Fee</span>
-                                                <span className="text-gray-900 font-bold">₹{safeNum(cartData.platformFee)}</span>
-                                            </div>
-                                            {/* Info note */}
-                                            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#037166]/8 border border-[#037166]/20">
-                                                <Info className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
-                                                <p className="text-xs text-[#037166] leading-snug">
-                                                    This is the <strong>only amount you pay now</strong> to confirm your booking. Monthly rent is paid directly at the hostel.
-                                                </p>
-                                            </div>
-                                        </>
-                                    )}
-                                    {(safeNum(cartData?.gstAmount) > 0) && (
+
+                                    {/* Platform Fee */}
+                                    {safeNum(cartData?.consultationFee) > 0 && (
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">GST</span>
-                                            <span className="text-gray-900 font-bold">₹{safeNum(cartData.gstAmount)}</span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-gray-500">Platform Fee</span>
+                                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
+                                            </div>
+                                            <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.consultationFee)}</span>
                                         </div>
                                     )}
+
+                                    {/* GST */}
+                                    {safeNum(cartData?.gstAmount) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">GST (18%)</span>
+                                            <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.gstAmount)}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Divider + Total */}
+                                    <div className="border-t border-gray-200 pt-2.5">
+                                        <div className="flex justify-between text-sm font-bold">
+                                            <span className="text-gray-700">Total Booking Fee</span>
+                                            <span className="text-gray-900">₹{safeNum(cartData?.finalAmount || cartData?.totalServiceCost)}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
+                                    </div>
+
+                                    {/* Non-refundable note */}
+                                    <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        </svg>
+                                        <span>Platform fee is non-refundable.</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Total */}
-                            <div className="p-4 rounded-2xl bg-[#037166]/5 border border-[#037166]/20 mb-6">
-                                <div className="flex justify-between mb-2">
-                                    <span className="text-gray-600 font-medium">Total Payable Now</span>
+                            {/* Final Calculation Cards */}
+                            <div className="p-4 rounded-2xl bg-[#037166]/5 border border-[#037166]/20 mb-4">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-gray-600 font-medium">Payable Now</span>
                                     <span className="text-2xl font-black text-[#037166]">
-                                        ₹{safeNum(cartData?.finalAmount || cartData?.totalServiceCost).toFixed(0)}
+                                        ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0) : safeNum(cartData?.finalAmount || cartData?.totalServiceCost)}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-1.5 mt-1 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                                    <Info className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                                    <p className="text-[11px] text-amber-700 font-medium">
-                                        Monthly rent of ₹{safeNum(cartData?.totalServiceCost)} is <strong>Pay at Hostel</strong> — not charged now
-                                    </p>
+                                <p className="text-[10px] text-[#037166] uppercase font-bold">
+                                    {paymentOption === 'ADVANCE' ? 'Advance Booking Fee' : 'Full Booking Fee'}
+                                </p>
+                            </div>
+
+                            <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500 text-sm">Remaining Amount</span>
+                                    <span className="text-gray-900 font-bold">
+                                        ₹{safeNum(cartData?.totalServiceCost) + (paymentOption === 'ADVANCE' ? (safeNum(cartData?.finalAmount || cartData?.totalServiceCost) - safeNum(cartData?.advPayment)) : 0)}
+                                    </span>
                                 </div>
+                                <p className="text-[10px] text-gray-400 mt-1 uppercase leading-tight">
+                                    Monthly rent of ₹{safeNum(cartData?.totalServiceCost)} + dues to be paid directly at hostel
+                                </p>
                             </div>
 
                             {/* Confirm Button */}
@@ -551,9 +622,17 @@ function PGConfirmContent() {
                                 )}
                             </motion.button>
 
-                            <p className="mt-4 text-[10px] text-center text-gray-400">
-                                By booking, you agree to our Terms & Cancellation Policy.
-                            </p>
+                            <div className="mt-4 space-y-1.5 text-center">
+                                    <p className="text-[10px] text-gray-400">
+                                        By booking, you agree to our Terms &amp; Cancellation Policy.
+                                    </p>
+                                    <div className="flex items-start justify-center gap-1 text-[10px] text-gray-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        </svg>
+                                        <span>As per RBI guidelines, payment gateway charges may apply depending on the payment mode.</span>
+                                    </div>
+                                </div>
                         </motion.div>
                     </div>
                 </div>

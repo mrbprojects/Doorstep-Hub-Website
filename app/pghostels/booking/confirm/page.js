@@ -63,7 +63,10 @@ function PGConfirmContent() {
             router.push(`/pghostels/booking/success?date=${pendingBooking.bookedDate || ''}&time=10:00&bookingId=${pendingBooking.bookingId || ''}`);
         } else if (status === 'failure') {
             setPaymentStatus('failure');
-            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+            toast.error('Payment failed. Redirecting to cart for retry...');
+            setTimeout(() => {
+                router.push('/pghostels/cart');
+            }, 2000);
         }
     }, [clearCart, router]);
 
@@ -168,7 +171,7 @@ function PGConfirmContent() {
                 sourceOfLead: 'website',
                 providerType: 'professional',
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=failure`
+                furl: `${window.location.protocol}//${window.location.host}/pghostels/booking/failure`
             };
 
             const endpoint = paymentMethod === 'ONLINE'

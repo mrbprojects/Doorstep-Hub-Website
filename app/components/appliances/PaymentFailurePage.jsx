@@ -40,6 +40,12 @@ export function PaymentFailurePage() {
         }
 
         setHasBookingData(!!(savedAddress || bookingDetails || orderId || serviceId));
+
+        // Auto-redirect after 5 seconds
+        const timer = setTimeout(() => {
+            handleRetry();
+        }, 5000);
+        return () => clearTimeout(timer);
     }, [searchParams]);
 
     const handleRetry = () => {
@@ -85,9 +91,15 @@ export function PaymentFailurePage() {
                     </h1>
                     <p className="text-xl text-white/80 mb-6">Oops! We couldn't process your transaction</p>
 
-                    <div className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 text-sm leading-relaxed max-w-md mx-auto">
-                        <ShieldAlert className="w-5 h-5 text-red-500 flex-shrink-0" />
-                        <p> Don't worry, <strong>no funds were deducted</strong> from your account. If any amount was debited, it will be refunded automatically within 5-7 business days.</p>
+                    <div className="inline-flex flex-col items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 text-sm leading-relaxed max-w-md mx-auto">
+                        <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-red-500 flex-shrink-0" />
+                            <p> Don't worry, <strong>no funds were deducted</strong> from your account.</p>
+                        </div>
+                        <p className="text-red-400 font-medium mt-2 flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            Redirecting to cart for retry in 5 seconds...
+                        </p>
                     </div>
                 </motion.div>
 

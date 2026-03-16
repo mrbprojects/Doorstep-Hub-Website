@@ -58,8 +58,11 @@ function CheckoutContent() {
             router.push(`/appliances/thank-you?${params.toString()}`);
 
         } else if (status === 'failure') {
-            setShowFailureModal(true);
-            // Cart remains intact for retry
+            setPaymentStatus('failure');
+            toast.error('Payment failed. Redirecting to cart for retry...');
+            setTimeout(() => {
+                router.push('/appliances/cart');
+            }, 2000);
         }
     }, [searchParams, router, clearCart]);
 

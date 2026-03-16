@@ -43,9 +43,12 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             toast.success('Payment successful! Booking confirmed.');
         } else if (status === 'failure') {
             setPaymentStatus('failure');
-            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+            toast.error('Payment failed. Redirecting to cart for retry...');
+            setTimeout(() => {
+                router.push('/appliances/cart');
+            }, 2000);
         }
-    }, []);
+    }, [router, clearCart]);
 
     // Fetch Wallet Balance
     useEffect(() => {
@@ -217,7 +220,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     paymentMethod: methodToSend, // Send 'ONLINE'
                     sourceOfLead: 'website',
                     surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                    furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=failure`
+                    furl: `${window.location.protocol}//${window.location.host}/appliances/payment-failed`
                 })
             });
 

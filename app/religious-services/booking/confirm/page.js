@@ -49,7 +49,10 @@ export default function ReligiousConfirmPage() {
             router.push(`/religious-services/thank-you?orderId=${pendingBooking.orderId || ''}&date=${pendingBooking.bookedDate || ''}&time=${pendingBooking.bookedTime || ''}`);
         } else if (status === 'failure') {
             setPaymentStatus('failure');
-            toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
+            toast.error('Payment failed. Redirecting to cart for retry...');
+            setTimeout(() => {
+                router.push('/religious-services/cart');
+            }, 2000);
         }
     }, [clearCart, router]);
     const [technicianPreference, setTechnicianPreference] = useState('any');
@@ -188,7 +191,7 @@ export default function ReligiousConfirmPage() {
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=failure`
+                furl: `${window.location.protocol}//${window.location.host}/religious-services/booking/failure`
             };
 
             if (paymentMethod === 'ONLINE') {

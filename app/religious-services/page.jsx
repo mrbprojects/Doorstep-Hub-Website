@@ -689,7 +689,7 @@ export default function ReligiousServicesPage() {
                         </p>
                         <div className="flex items-center justify-between mt-auto">
                           <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 uppercase font-medium">Starting from</span>
+                            <span className="text-[10px] text-gray-400 italic font-medium">Starting from</span>
                             <span className="text-xl font-bold text-[var(--saffron)] leading-none">₹{(service.startingAt || service.BasePrice || service.minFare || 1000).toLocaleString()}</span>
                           </div>
                           <Button size="sm" className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white h-8 px-4 text-xs font-semibold rounded-lg shadow-sm">
@@ -829,7 +829,7 @@ export default function ReligiousServicesPage() {
 
                           <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
                             <div className="flex flex-col">
-                              <span className="text-[10px] text-gray-400 uppercase font-medium">Starts from</span>
+                              <span className="text-[10px] text-gray-400 italic font-medium">Starts from</span>
                               <span className="text-xl font-bold text-[var(--saffron)]">
                                 ₹{ritual.startingAt || ritual.serviceBookingCost || 1000}
                               </span>

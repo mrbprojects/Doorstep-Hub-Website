@@ -313,36 +313,37 @@ export function Footer({ theme = {} }) {
               serviceName;
 
           return (
-            <div key={sIdx} className="mb-16">
+            <div key={sIdx} className="mb-16 relative group">
+              {/* Coming Soon Tooltip */}
+              <div className="absolute -top-10 left-0 px-3 py-1 bg-[#037166] text-white text-[10px] font-bold rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 pointer-events-none shadow-lg shadow-[#037166]/20">
+                Coming Soon
+              </div>
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="space-y-6"
+                className="space-y-6 opacity-60 grayscale-[0.5] hover:grayscale-0 transition-all duration-500"
               >
-                <h3 className={`text-xl font-bold mb-6 bg-gradient-to-r ${t.headingGradient} bg-clip-text text-transparent w-fit`}>
-                  <Link href={getProfessionalServiceHomeLink(serviceName)} className="hover:opacity-80 transition-opacity">
-                    {displayTitle}
-                  </Link>
+                <h3 className={`text-xl font-bold mb-6 bg-gradient-to-r ${t.headingGradient} bg-clip-text text-transparent w-fit cursor-default`}>
+                  {displayTitle}
                 </h3>
                 <div className={`text-sm leading-8 ${t.textMuted}`}>
                   {section.categories.map((catGroup, groupIdx) => (
                     <span key={catGroup.category._id} className="inline mr-1">
-                      <Link
-                        href={getProfessionalCategoryLink(serviceName, catGroup.category)}
-                        className={`${t.groupNameColor} font-bold whitespace-nowrap mr-2 hover:opacity-80 transition-opacity`}
+                      <span
+                        className={`${t.groupNameColor} font-bold whitespace-nowrap mr-2 cursor-default`}
                       >
                         {catGroup.category.name}:
-                      </Link>
+                      </span>
 
                       {catGroup.subcategories.map((sub, idx) => (
                         <span key={sub._id} className="inline">
-                          <Link
-                            href={getProfessionalLink(serviceName, sub, catGroup.category)}
-                            className={`${t.textLink} ${t.textLinkHover} transition-colors`}
+                          <span
+                            className={`${t.textLink} transition-colors cursor-default`}
                           >
                             {sub.name}
-                          </Link>
+                          </span>
                           {idx < catGroup.subcategories.length - 1 && (
                             <span className={`mx-2 ${t.dividerColor}`}>|</span>
                           )}

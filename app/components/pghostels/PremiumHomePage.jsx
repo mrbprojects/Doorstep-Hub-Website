@@ -21,33 +21,7 @@ const testimonials = [
     { name: 'Sneha Patel', role: 'Designer', review: 'The co-living space is amazing. Made so many new friends here.', avatar: '👩‍🎨', rating: 5 },
 ];
 
-// Helper to get the best image for the category
-const getCategoryImage = (categoryName, apiImage) => {
-    if (!categoryName) return 'https://images.unsplash.com/photo-1520277739336-7bf67edfa768?q=80&w=2070&auto=format&fit=crop';
 
-    const name = categoryName.toLowerCase();
-    const images = {
-        'boys': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
-        'girls': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop',
-        'womens': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop',
-        'women': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop',
-        'mens': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
-        'men': 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
-        'co-living': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop',
-        'dorm': 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop',
-        'food': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1980&auto=format&fit=crop',
-    };
-
-    for (const [key, url] of Object.entries(images)) {
-        if (name.includes(key)) return url;
-    }
-
-    if (apiImage) {
-        return apiImage.startsWith('http') ? apiImage : `https://api.doorstephub.com/${apiImage}`;
-    }
-
-    return 'https://images.unsplash.com/photo-1520277739336-7bf67edfa768?q=80&w=2070&auto=format&fit=crop';
-};
 
 export function PremiumHomePage() {
     const router = useRouter();
@@ -112,32 +86,13 @@ export function PremiumHomePage() {
         fetchFeaturedHostels();
     }, []);
 
-    // Fetch Categories
+    // Fetch Categories from public GET endpoint
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                // Get service ID from localStorage
-                const selectedService = localStorage.getItem('selectedService');
-                let serviceId = SERVICE_ID; // Default fallback
-
-                if (selectedService) {
-                    try {
-                        const serviceData = JSON.parse(selectedService);
-                        serviceId = serviceData.id || SERVICE_ID;
-                    } catch (e) {
-                        console.log('Using default service ID');
-                    }
-                }
-
-                const response = await fetch(`${API_BASE_URL}/professional-services-flow/public/categories`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        serviceId: serviceId
-                    })
-                });
+                const response = await fetch(
+                    'https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories'
+                );
                 const data = await response.json();
                 if (data.success && data.category) {
                     setApiCategories(data.category);
@@ -376,7 +331,9 @@ export function PremiumHomePage() {
                                     <div
                                         className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110"
                                         style={{
-                                            backgroundImage: `url("${apiCategories.length > 0 ? getCategoryImage(apiCategories[heroSlideIndex]?.name, apiCategories[heroSlideIndex]?.image) : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?auto=format&fit=crop&q=80&w=1080'}")`
+                                            backgroundImage: apiCategories[heroSlideIndex]?.image
+                                                ? `url("https://api.doorstephub.com/${apiCategories[heroSlideIndex].image}")`
+                                                : 'none'
                                         }}
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -493,7 +450,15 @@ export function PremiumHomePage() {
         ))
       ) : (
         apiCategories.map((cat, i) => {
-          const bgImage = getCategoryImage(cat.name, cat.image);
+          const bgImage = cat.image
+            ? `https://api.doorstephub.com/${cat.image}`
+            : cat.categoryIcon
+            ? `https://api.doorstephub.com/${cat.categoryIcon}`
+            : '';
+
+          const iconImg = cat.categoryIcon
+            ? `https://api.doorstephub.com/${cat.categoryIcon}`
+            : null;
 
           return (
             <motion.div
@@ -506,15 +471,14 @@ export function PremiumHomePage() {
               onClick={() => handleCategoryClick(cat._id, cat.name)}
               className="group cursor-pointer relative h-96 min-w-[260px] md:min-w-0 rounded-[2.5rem] overflow-hidden shadow-xl snap-start"
             >
-
-              {/* Image */}
+              {/* Background Image */}
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                 style={{
                   backgroundImage: `url("${bgImage}")`,
-                  backgroundPosition: "center",
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
                 }}
               />
 
@@ -523,9 +487,18 @@ export function PremiumHomePage() {
 
               {/* Content */}
               <div className="absolute inset-0 p-8 flex flex-col justify-end">
-
-                <div className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#037166] group-hover:border-[#037166] group-hover:scale-110 transition-all duration-300 shadow-lg">
-                  <Users className="w-8 h-8 text-white" />
+                {/* Category Icon */}
+                <div className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#037166] group-hover:border-[#037166] group-hover:scale-110 transition-all duration-300 shadow-lg overflow-hidden">
+                  {iconImg ? (
+                    <img
+                      src={iconImg}
+                      alt={cat.name}
+                      className="w-full h-full object-cover rounded-2xl"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <Users className="w-8 h-8 text-white" />
+                  )}
                 </div>
 
                 <h4 className="text-xl font-bold text-white mb-3 tracking-tight">
@@ -533,12 +506,10 @@ export function PremiumHomePage() {
                 </h4>
 
                 <div className="h-1 w-12 bg-[#037166] rounded-full group-hover:w-24 transition-all duration-300" />
-
               </div>
 
               {/* Hover Border Glow */}
               <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#037166]/50 rounded-[2.5rem] transition-colors duration-300" />
-
             </motion.div>
           );
         })

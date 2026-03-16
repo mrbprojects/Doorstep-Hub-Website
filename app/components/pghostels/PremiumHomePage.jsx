@@ -86,12 +86,21 @@ export function PremiumHomePage() {
         fetchFeaturedHostels();
     }, []);
 
-    // Fetch Categories from public GET endpoint
+    // Fetch Categories with serviceId in payload
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const response = await fetch(
-                    'https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories'
+                    'https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            serviceId: SERVICE_ID
+                        })
+                    }
                 );
                 const data = await response.json();
                 if (data.success && data.category) {

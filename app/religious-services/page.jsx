@@ -534,8 +534,7 @@ export default function ReligiousServicesPage() {
         <section className="py-20 bg-gradient-to-b from-[var(--soft-cream)] to-[var(--off-white)]">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12 cursor-pointer group" onClick={() => {
-              const el = document.getElementById('sacred-categories');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
+              router.push('/religious-services/all-services');
             }}>
               <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4 group-hover:text-[var(--saffron)] transition-colors">
                 Astrology & Religious Consultation
@@ -672,9 +671,9 @@ export default function ReligiousServicesPage() {
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex flex-col gap-1">
                             <Badge className="bg-[var(--sacred-teal)]/10 text-[var(--sacred-teal)] text-[9px] uppercase font-bold tracking-wider w-fit">Verified Service</Badge>
-                            <span className="text-[9px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter">
+                            {/* <span className="text-[9px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter">
                               <CheckCircle className="h-2.5 w-2.5" /> Cash on Delivery
-                            </span>
+                            </span> */}
                           </div>
                           <div className="flex items-center text-sm font-semibold text-[var(--deep-charcoal)]">
                             <Star className="h-3 w-3 fill-[var(--warm-gold)] text-[var(--warm-gold)] mr-1" />
@@ -823,9 +822,9 @@ export default function ReligiousServicesPage() {
                             {ritual.serviceName || `${ritual.firstName} ${ritual.lastName}`}
                           </h3>
 
-                          <div className="text-[10px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter mb-4">
+                          {/* <div className="text-[10px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter mb-4">
                             <CheckCircle className="h-3 w-3" /> Cash on Delivery Available
-                          </div>
+                          </div> */}
 
                           <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
                             <div className="flex flex-col">

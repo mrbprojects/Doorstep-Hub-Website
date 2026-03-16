@@ -24,8 +24,14 @@ function SubCategoryServicesContent() {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Filters state
-    const [priceRange, setPriceRange] = useState([500, 50000]);
+    // Helper for robust URL construction
+    const getFullUrl = (path, defaultUrl) => {
+        if (!path) return defaultUrl;
+        if (path.startsWith('http')) return path;
+        return `https://api.doorstephub.com/${path.replace(/^\//, '')}`;
+    };
+
+    const [priceRange, setPriceRange] = useState([0, 100000]);
     const [minRating, setMinRating] = useState(0);
 
     const [expandedCategory, setExpandedCategory] = useState(categoryId);
@@ -37,7 +43,6 @@ function SubCategoryServicesContent() {
     useEffect(() => {
         if (categoryId) {
             setExpandedCategory(categoryId);
-            // Also find the initial category name if possible
             const currentCat = categories.find(c => c._id === categoryId);
             if (currentCat) {
                 setActiveCategoryName(currentCat.name);
@@ -63,7 +68,6 @@ function SubCategoryServicesContent() {
                 const data = await response.json();
                 if (data.success && data.category) {
                     setCategories(data.category);
-                    // If no expanded category, set the current one
                     if (!expandedCategory && categoryId) {
                         setExpandedCategory(categoryId);
                     }
@@ -98,20 +102,20 @@ function SubCategoryServicesContent() {
             try {
                 const lat = location?.lat || 17.3850;
                 const lng = location?.lng || 78.4867;
-                
-                // Get religious services serviceId
                 const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
+
+                const requestBody = {
+                    lattitude: lat,
+                    longitude: lng,
+                    serviceId: RELIGIOUS_SERVICE_ID,
+                    subcategoryId: params.id, // Correct casing
+                    categoryId: categoryId     // Send both for better backend matching
+                };
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        lattitude: lat,
-                        longitude: lng,
-                        subCategoryId: params.id,
-                        categoryId: categoryId,
-                        serviceId: RELIGIOUS_SERVICE_ID
-                    })
+                    body: JSON.stringify(requestBody)
                 });
                 const data = await response.json();
 
@@ -129,8 +133,9 @@ function SubCategoryServicesContent() {
 
     const filteredServices = useMemo(() => {
         return services.filter(service => {
-            const price = service.startingAt || service.BasePrice || service.minFare || 1100;
-            const rating = service.avgRating || 4.8;
+            const rawPrice = service.startingAt || service.BasePrice || service.minFare || 1100;
+            const price = Number(rawPrice);
+            const rating = Number(service.avgRating || 4.8);
             
             const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
             const matchesRating = rating >= minRating;

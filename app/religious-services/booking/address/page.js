@@ -320,8 +320,8 @@ function ReligiousAddressContent() {
                             Select Ritual Location
                         </motion.h1>
 
-                        <div className="flex-1 max-w-2xl">
-                            <div className="flex items-center gap-2">
+                        <div className="flex-1 max-w-2xl ">
+                            <div className="flex items-center gap-2 justify-between">
                                 {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => (
                                     <React.Fragment key={step}>
                                         <div className="flex items-center gap-2 shrink-0">

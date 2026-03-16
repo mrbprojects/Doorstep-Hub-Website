@@ -242,7 +242,7 @@ function PGConfirmContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen pt-[300px] md:pt-[280px] pb-32 bg-gray-50"
+            className="min-h-screen pt-[180px] md:pt-[160px] pb-32 bg-gray-50"
         >
             {/* Header */}
             <section className="fixed top-20 left-0 right-0 z-40 bg-gradient-to-r from-[#037166] via-teal-600 to-[#04a99d] border-b border-white/10 shadow-lg">
@@ -267,44 +267,45 @@ function PGConfirmContent() {
                         Back to Address
                     </motion.button>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
-                    >
-                        <Building2 className="w-8 h-8" />
-                        Confirm Your Space In PG
-                    </motion.h1>
-                </div>
+                    <div className="flex flex-col md:flex-row md:items-center justify-start gap-12">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3 shrink-0"
+                        >
+                            <Building2 className="w-8 h-8" />
+                            Confirm Your Space In PG
+                        </motion.h1>
 
-                {/* Progress Indicator */}
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
-                    <div className="flex items-center gap-2">
-                        {['Select PG', 'Address', 'Confirm & Pay'].map((step, index) => {
-                            const isCompleted = index < 2;
-                            const isCurrent = index === 2;
-                            return (
-                                <React.Fragment key={step}>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'
-                                            }`}>
-                                            {isCompleted ? (
-                                                <CheckCircle className="w-5 h-5 text-[#037166]" />
-                                            ) : (
-                                                <span className={`text-sm font-bold ${isCurrent ? 'text-[#037166]' : 'text-white/60'}`}>{index + 1}</span>
+                        <div className="flex-1 max-w-2xl">
+                            <div className="flex items-center gap-2">
+                                {['Select PG', 'Address', 'Confirm & Pay'].map((step, index) => {
+                                    const isCompleted = index < 2;
+                                    const isCurrent = index === 2;
+                                    return (
+                                        <React.Fragment key={step}>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'
+                                                    }`}>
+                                                    {isCompleted ? (
+                                                        <CheckCircle className="w-5 h-5 text-[#037166]" />
+                                                    ) : (
+                                                        <span className={`text-sm font-bold ${isCurrent ? 'text-[#037166]' : 'text-white/60'}`}>{index + 1}</span>
+                                                    )}
+                                                </div>
+                                                <span className={`text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all hidden sm:inline ${isCurrent ? 'text-white' : 'text-white/70'
+                                                    }`}>{step}</span>
+                                            </div>
+                                            {index < 2 && (
+                                                <div className={`h-0.5 flex-1 mx-2 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'
+                                                    }`} />
                                             )}
-                                        </div>
-                                        <span className={`text-xs sm:text-sm font-medium transition-all ${isCurrent ? 'text-white font-bold' : 'text-white/70'
-                                            }`}>{step}</span>
-                                    </div>
-                                    {index < 2 && (
-                                        <div className={`h-0.5 flex-1 mx-2 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'
-                                            }`} />
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

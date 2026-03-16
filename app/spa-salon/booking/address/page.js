@@ -303,15 +303,43 @@ function SpaAddressContent() {
                         Back to options
                     </motion.button>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
-                    >
-                        <MapPin className="w-8 h-8" />
-                        Where should we come?
-                    </motion.h1>
+                    <div className="flex flex-col md:flex-row md:items-center justify-start gap-12">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3 shrink-0"
+                        >
+                            <MapPin className="w-8 h-8" />
+                            Where should we come?
+                        </motion.h1>
+
+                        <div className="flex-1 max-w-2xl">
+                            <div className="flex items-center gap-2">
+                                {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => {
+                                    const isCompleted = index < 1;
+                                    const isCurrent = index === 1;
+                                    return (
+                                        <React.Fragment key={step}>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'}`}>
+                                                    {isCompleted ? (
+                                                        <CheckCircle className="w-5 h-5 text-[#6D1357]" />
+                                                    ) : (
+                                                        <span className={`text-sm font-bold ${isCurrent ? 'text-[#6D1357]' : 'text-white/60'}`}>{index + 1}</span>
+                                                    )}
+                                                </div>
+                                                <span className={`text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all hidden sm:inline ${isCurrent ? 'text-white font-bold' : 'text-white/70'}`}>{step}</span>
+                                            </div>
+                                            {index < 2 && (
+                                                <div className={`h-0.5 flex-1 mx-2 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'}`} />
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -319,7 +347,7 @@ function SpaAddressContent() {
                 {loading && addresses.length === 0 ? (
                     <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-[#6D1357]" /></div>
                 ) : (
-                    <div className="grid gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {addresses.length === 0 && !loading && (
                             <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-xl">
                                 <p className="text-gray-500">No addresses found. Add one below.</p>
@@ -374,6 +402,8 @@ function SpaAddressContent() {
                                 stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
                             });
                             setShowAddForm(true);
+                            // Auto-trigger detection
+                            setTimeout(() => handleDetectLocation(), 100);
                         }}
                         className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-black hover:border-[#6D1357] hover:text-[#6D1357] transition-colors"
                     >
@@ -427,11 +457,11 @@ function SpaAddressContent() {
                                     <div className="space-y-4">
                                         {/* Address Type */}
                                         <div className="flex gap-3">
-                                            {['Home', 'Office', 'Other'].map(type => (
+                                            {['Home', 'Office', 'Friends & Relative'].map(type => (
                                                 <button
                                                     key={type}
                                                     onClick={() => setNewAddress({ ...newAddress, type })}
-                                                    className={`flex-1 py-2 rounded-lg font-medium border ${newAddress.type === type ? 'bg-[#6D1357] text-white border-[#6D1357]' : 'text-black border-gray-200 hover:bg-gray-50'}`}
+                                                    className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-bold border transition-all ${newAddress.type === type ? 'bg-[#6D1357] text-white border-[#6D1357] shadow-md' : 'text-black border-gray-200 hover:bg-gray-50'}`}
                                                 >
                                                     {type}
                                                 </button>
@@ -441,19 +471,27 @@ function SpaAddressContent() {
                                         {/* Name & Phone */}
                                         <div className="grid md:grid-cols-2 gap-4">
                                             <Input className="text-black" placeholder="Full Name *" value={newAddress.name} onChange={e => setNewAddress({ ...newAddress, name: e.target.value })} />
-                                            <Input className="text-black" placeholder="Phone Number *" value={newAddress.phone} onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} />
+                                            <Input className="text-black" placeholder="Mobile Number *" value={newAddress.phone} onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} />
                                         </div>
 
                                         {/* Flat & Plot Number */}
                                         <div className="grid md:grid-cols-2 gap-4">
-                                            <Input className="text-black" placeholder="Flat / House No *" value={newAddress.flat} onChange={e => setNewAddress({ ...newAddress, flat: e.target.value })} />
+                                            <div className="relative">
+                                                <Input className="text-black pr-20" placeholder="Flat / House No *" value={newAddress.flat} onChange={e => setNewAddress({ ...newAddress, flat: e.target.value })} />
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); handleDetectLocation(); }}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-[#6D1357]/10 text-[#6D1357] text-[10px] font-bold rounded-md border border-[#6D1357]/20 hover:bg-[#6D1357]/20 transition-all uppercase"
+                                                >
+                                                    {gpsLoading ? '...' : 'Detect'}
+                                                </button>
+                                            </div>
                                             <Input className="text-black" placeholder="Plot Number" value={newAddress.plotNumber} onChange={e => setNewAddress({ ...newAddress, plotNumber: e.target.value })} />
                                         </div>
 
                                         {/* Area/Colony — auto-filled from GPS */}
                                         <div className="relative">
                                             <Input
-                                                className="text-black pr-10"
+                                                className="text-black pr-12"
                                                 placeholder="Area / Locality *"
                                                 value={newAddress.area}
                                                 onChange={e => setNewAddress({ ...newAddress, area: e.target.value })}

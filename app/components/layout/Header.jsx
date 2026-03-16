@@ -308,7 +308,17 @@ export function Header({ theme = {}, navItems = [] }) {
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push(`/${serviceSlugs.appliances}/cart`)}
+                onClick={() => {
+                  if (pathname.includes('/religious-services') || pathname.includes(serviceSlugs.religious)) {
+                    router.push(`/${serviceSlugs.religious}/cart`);
+                  } else if (pathname.includes('/spa-salon') || pathname.includes(serviceSlugs.spa)) {
+                    router.push(`/${serviceSlugs.spa}/cart`);
+                  } else if (pathname.includes('/pghostels') || pathname.includes(serviceSlugs.pg)) {
+                    router.push(`/${serviceSlugs.pg}/cart`);
+                  } else {
+                    router.push(`/${serviceSlugs.appliances}/cart`);
+                  }
+                }}
                 className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all relative shadow-md hover:shadow-lg`}
               >
                 <ShoppingCart className={`w-5 h-5 ${currentTheme.textHover ? currentTheme.textHover : 'text-[#037166]'}`} />

@@ -84,19 +84,27 @@ export default function ReligiousServiceDetailPage() {
                     const store = data.storeData[0];
 
                     // Map API Data to UI Model (Religious Context)
+                    const getFullUrl = (path, defaultUrl) => {
+                        if (!path) return defaultUrl;
+                        if (path.startsWith('http')) return path;
+                        return `https://api.doorstephub.com/${path}`;
+                    };
+
                     const mappedData = {
                         id: id,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
                         location: store.address || 'Location available on request',
-                        image: store.image || 'https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80',
+                        // Main profile image
+                        mainImage: getFullUrl(store.image, 'https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80'),
                         address: store.address || 'Address provided upon booking',
                         rating: parseFloat(store.avgRating || 4.8).toFixed(1),
                         orders: store.totalOrders || 120,
                         basePrice: store.startingAt || 1100,
                         monthlyPrice: store.startingAt || 1100,
-                        logo: store.logo ? `https://api.doorstephub.com/${store.logo}` : 'https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80',
+                        // Logo with religious fallback
+                        logo: getFullUrl(store.logo, 'https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80'),
                         images: data.serviceImages && data.serviceImages.length > 0
-                            ? data.serviceImages.map(img => `https://api.doorstephub.com${img}`)
+                            ? data.serviceImages.map(img => `https://api.doorstephub.com/${img.replace(/^\//, '')}`)
                             : [
                                 'https://images.unsplash.com/photo-1582344795368-b3d9016c68cb?auto=format&fit=crop&q=80',
                                 'https://images.unsplash.com/photo-1609139003551-ee404a3b090b?auto=format&fit=crop&q=80'
@@ -215,20 +223,19 @@ export default function ReligiousServiceDetailPage() {
                 <ArrowLeft className="w-5 h-5 text-[var(--deep-charcoal)]" />
             </motion.button>
 
-            {/* Slider */}
-        <motion.div
-  style={{ opacity: headerOpacity }}
-  className="relative h-[500px] overflow-hidden"
->
-  <div
-    className="absolute inset-0 bg-cover bg-center"
-    style={{
-      backgroundImage: `url(https://api.doorstephub.com/${serviceData?.image || serviceData?.logo})`
-    }}
-  />
-
-  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-</motion.div>
+            {/* Slider / Hero Section */}
+            <motion.div
+                style={{ opacity: headerOpacity }}
+                className="relative h-[500px] overflow-hidden"
+            >
+                <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{
+                        backgroundImage: `url(${serviceData.mainImage || serviceData.logo})`
+                    }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            </motion.div>
 
             {/* Header Info */}
             <div className="max-w-7xl mx-auto px-4 -mt-32 relative z-10">
@@ -319,22 +326,22 @@ export default function ReligiousServiceDetailPage() {
                             Please select a sacred offering to proceed:
                         </div>
                         {serviceData.packages.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {serviceData.packages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => setSelectedPackage(pkg)}
-                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative ${selectedPackage?._id === pkg._id
+                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-col sm:flex-row h-full ${selectedPackage?._id === pkg._id
                                             ? 'border-2 border-[var(--saffron)] ring-2 ring-[var(--saffron)]/10'
                                             : 'border-gray-100'
                                             }`}
                                     >
                                         {selectedPackage?._id === pkg._id && (
-                                            <div className="absolute top-3 right-3 z-10 bg-[var(--saffron)] text-white p-1 rounded-full shadow-lg">
-                                                <Check className="w-4 h-4" />
+                                            <div className="absolute top-2 right-2 z-10 bg-[var(--saffron)] text-white p-1 rounded-full shadow-lg">
+                                                <Check className="w-3 h-3" />
                                             </div>
                                         )}
-                                        <div className="h-48 bg-gray-100 relative">
+                                        <div className="w-full sm:w-48 h-48 sm:h-auto bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
                                                 <img src={`https://api.doorstephub.com/${pkg.image}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
@@ -343,27 +350,41 @@ export default function ReligiousServiceDetailPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <h3 className="font-bold text-[var(--deep-charcoal)] line-clamp-1">{pkg.name}</h3>
-                                                {pkg.banner_images && pkg.banner_images.length > 0 && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setViewingRateCard(pkg);
-                                                            setRateCardImageIndex(0);
-                                                        }}
-                                                        className="text-xs font-semibold text-[var(--saffron)] hover:underline flex items-center gap-1"
-                                                    >
-                                                        See more
-                                                        <ChevronRight className="w-3 h-3" />
-                                                    </button>
-                                                )}
+                                        <div className="p-6 flex-1 flex flex-col justify-between">
+                                            <div>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h3 className="text-xl font-bold text-[var(--deep-charcoal)]">{pkg.name}</h3>
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-[var(--saffron)] font-bold text-xl">₹{pkg.price}</span>
+                                                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">{pkg.priceUnit}</span>
+                                                    </div>
+                                                </div>
+                                                <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2 md:line-clamp-none">
+                                                    {pkg.description}
+                                                </p>
                                             </div>
-                                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{pkg.description}</p>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[var(--saffron)] font-bold text-lg">₹{pkg.price}</span>
-                                                <span className="text-xs text-gray-500">{pkg.priceUnit}</span>
+
+                                            <div className="flex items-center justify-between mt-auto">
+                                                <div className="flex items-center gap-4">
+                                                    {pkg.banner_images && pkg.banner_images.length > 0 && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setViewingRateCard(pkg);
+                                                                setRateCardImageIndex(0);
+                                                            }}
+                                                            className="text-xs font-bold text-[var(--saffron)] bg-[var(--saffron)]/10 px-3 py-1.5 rounded-lg border border-[var(--saffron)]/20 hover:bg-[var(--saffron)]/20 transition-all flex items-center gap-1"
+                                                        >
+                                                            View Details
+                                                            <ChevronRight className="w-3 h-3" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {selectedPackage?._id === pkg._id && (
+                                                    <span className="text-[var(--saffron)] text-xs font-bold flex items-center gap-1">
+                                                        <CheckCircle className="w-3 h-3" /> Selected
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

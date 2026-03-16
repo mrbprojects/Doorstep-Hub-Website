@@ -158,7 +158,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         const newQuantity = (item.quantity || 1) + delta;
 
         if (newQuantity < 1) {
-            await removeFromCart(item.itemId, item.itemType);
+            await removeFromCart(item.itemId);
             return;
         }
 

@@ -35,7 +35,7 @@ export function CartPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-20 pb-32"
+      className="min-h-screen pt-20 pb-32 bg-slate-50/50"
     >
       {/* Header */}
       <section className="sticky top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
@@ -83,13 +83,13 @@ export function CartPage({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20"
+            className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm"
           >
-            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 flex items-center justify-center">
-              <ShoppingCart className="w-16 h-16 text-white/40" />
+            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
+              <ShoppingCart className="w-16 h-16 text-slate-300" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-4">Your cart is empty</h2>
-            <p className="text-white/60 mb-8">Add some services to get started!</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">Your cart is empty</h2>
+            <p className="text-slate-500 mb-8">Add some services to get started!</p>
             <button
               onClick={onBack}
               className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
@@ -110,7 +110,7 @@ export function CartPage({
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ delay: index * 0.05 }}
                     layout
-                    className="group relative rounded-2xl p-6 bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/30 transition-all duration-300"
+                    className="group relative rounded-2xl p-6 bg-white border border-slate-200 hover:border-[#037166]/30 hover:shadow-md transition-all duration-300"
                   >
                     <div className="flex gap-6">
                       {/* Image */}
@@ -126,11 +126,11 @@ export function CartPage({
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <h4 className="text-xl font-bold text-white mb-1">
+                            <h4 className="text-xl font-bold text-slate-900 mb-1">
                               {item.itemName}
                             </h4>
                             {item.itemType === 'addon' && item.parentServiceName && (
-                              <p className="text-white/50 text-sm flex items-center gap-1">
+                              <p className="text-slate-400 text-sm flex items-center gap-1">
                                 <Tag className="w-3 h-3" />
                                 Addon for: {item.parentServiceName}
                               </p>
@@ -138,31 +138,31 @@ export function CartPage({
                           </div>
                           <button
                             onClick={() => handleRemove(item.itemId)}
-                            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
+                            className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
 
                         {item.description && (
-                          <p className="text-white/60 text-sm mb-3 line-clamp-2">{item.description}</p>
+                          <p className="text-slate-500 text-sm mb-3 line-clamp-2">{item.description}</p>
                         )}
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <h6 className="px-3 py-1 rounded-full bg-[#037166]/20 border border-[#037166]/30 text-[#04a99d] text-xs font-semibold">
+                            <h6 className="px-3 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20 text-[#037166] text-xs font-semibold">
                               {item.itemType === 'service' || item.itemType === 'professional_service' ? 'Service' : 'Add-on'}
                             </h6>
-                            <span className="text-white/60 text-sm">
+                            <span className="text-slate-400 text-sm">
                               Qty: {item.quantity}
                             </span>
                           </div>
 
                           <div className="text-right">
-                            <div className="text-2xl font-bold text-white">
+                            <div className="text-2xl font-bold text-slate-900">
                               ₹{item.subtotal.toFixed(2)}
                             </div>
-                            <div className="text-sm text-white/60">
+                            <div className="text-sm text-slate-400">
                               ₹{item.price} {item.priceUnit}
                             </div>
                           </div>
@@ -180,31 +180,31 @@ export function CartPage({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="sticky top-48 p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                className="sticky top-48 p-6 rounded-2xl bg-white border border-slate-200 shadow-sm"
               >
-                <h4 className="text-xl font-bold text-white mb-6">Order Summary</h4>
+                <h4 className="text-xl font-bold text-slate-900 mb-6">Order Summary</h4>
 
                 <div className="space-y-4 mb-6">
-                  <div className="flex justify-between text-white/80">
+                  <div className="flex justify-between text-slate-600">
                     <span>Service Cost</span>
-                    <span>₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
+                    <span className="font-semibold text-slate-900">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-white/80">
+                  <div className="flex justify-between text-slate-600">
                     <span>Platform Fee</span>
-                    <span>₹{(cartData?.platformFee || 0).toFixed(2)}</span>
+                    <span className="font-semibold text-slate-900">₹{(cartData?.platformFee || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-white/80">
+                  <div className="flex justify-between text-slate-600">
                     <span>Consultation Fee</span>
-                    <span>₹{(cartData?.consultationFee || 0).toFixed(2)}</span>
+                    <span className="font-semibold text-slate-900">₹{(cartData?.consultationFee || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-white/80">
+                  <div className="flex justify-between text-slate-600">
                     <span>GST</span>
-                    <span>₹{(cartData?.gstAmount || 0).toFixed(2)}</span>
+                    <span className="font-semibold text-slate-900">₹{(cartData?.gstAmount || 0).toFixed(2)}</span>
                   </div>
-                  <div className="h-px bg-white/10" />
-                  <div className="flex justify-between text-xl font-bold text-white">
+                  <div className="h-px bg-slate-100" />
+                  <div className="flex justify-between text-xl font-bold text-slate-900">
                     <span>Total</span>
-                    <span>₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                    <span className="text-[#037166]">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -217,9 +217,9 @@ export function CartPage({
                   Proceed to Address
                 </motion.button>
 
-                <div className="mt-6 p-4 rounded-lg bg-[#037166]/10 border border-[#037166]/20">
-                  <p className="text-white/80 text-sm text-center">
-                    <span className="font-medium text-[#04a99d]"></span> This is the online booking fee
+                <div className="mt-6 p-4 rounded-lg bg-teal-50 border border-teal-100">
+                  <p className="text-teal-700 text-sm text-center">
+                    This is the online booking fee
                   </p>
                 </div>
               </motion.div>

@@ -99,26 +99,27 @@ export const ServiceCartProvider = ({ children }) => {
         }
     };
 
-    const removeFromCart = async (itemId, itemType = 'service') => {
+    const removeFromCart = async (productId) => {
         if (!isAuthenticated) return;
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/service-cart/remove', {
+            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/cart/remove', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    itemId,
-                    itemType
+                    productId
                 })
             });
             const data = await response.json();
             if (data.success) {
                 await fetchCart();
+            } else {
+                toast.error(data.message || 'Failed to remove from cart');
             }
         } catch (error) {
-            console.error('Error removing from service cart:', error);
+            console.error('Error removing from cart:', error);
             toast.error('Failed to remove from cart');
         }
     };

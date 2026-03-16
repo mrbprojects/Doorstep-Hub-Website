@@ -23,7 +23,7 @@ export function PGCartPage({
 
     if (loading && cartItems.length === 0) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+            <div className="min-h-screen flex items-center justify-center bg-white">
                 <Loader2 className="w-12 h-12 text-[#037166] animate-spin" />
             </div>
         );
@@ -34,11 +34,11 @@ export function PGCartPage({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen pt-20 pb-32 bg-[#0a0a0a]"
+            className="min-h-screen pt-20 pb-32 bg-slate-50/50"
         >
-            {/* Header - Refined Premium Header */}
-            <section className=" top-20 z-40 bg-gradient-to-r from-[#0f1614] via-[#025a51] to-[#037166] border-b border-white/5 shadow-2xl overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-[80px]" />
+            {/* Header */}
+            <section className=" top-20 z-40 bg-gradient-to-r from-slate-50 via-slate-100 to-slate-200 border-b border-slate-200 shadow-sm overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-slate-100 rounded-full -mr-32 -mt-32 blur-[80px]" />
 
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-8 relative z-10">
                     <div className="flex items-center justify-between">
@@ -46,16 +46,16 @@ export function PGCartPage({
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={onBack}
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all text-sm font-bold shadow-sm"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200 text-slate-700 hover:bg-white transition-all text-sm font-bold shadow-sm"
                         >
-                            <ArrowLeft className="w-4 h-4" />
+                            <ArrowLeft className="w-4 h-4 text-slate-600" />
                             Explore More Listings
                         </motion.button>
 
                         {cartItems.length > 0 && (
                             <button
                                 onClick={handleClear}
-                                className="text-white/40 hover:text-red-400 text-sm flex items-center gap-2 transition-colors font-black uppercase tracking-widest text-[10px]"
+                                className="text-slate-400 hover:text-red-500 text-sm flex items-center gap-2 transition-colors font-black uppercase tracking-widest text-[10px]"
                             >
                                 <Trash2 className="w-4 h-4" />
                                 Deselect Stay
@@ -67,9 +67,9 @@ export function PGCartPage({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="mt-6 text-4xl md:text-5xl font-black text-white flex items-center gap-6"
+                        className="mt-6 text-4xl md:text-5xl font-black text-slate-900 flex items-center gap-6"
                     >
-                        <div className="p-4 bg-white rounded-3xl shadow-xl shadow-[#025a51]/30">
+                        <div className="p-4 bg-white rounded-3xl shadow-xl shadow-slate-200/30">
                             <Home className="w-10 h-10 text-[#037166]" />
                         </div>
                         <span>Stay Portfolio</span>
@@ -85,14 +85,14 @@ export function PGCartPage({
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center py-40 bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] rounded-[2.5rem] shadow-2xl border border-white/5 relative overflow-hidden"
+                        className="text-center py-40 bg-white rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden"
                     >
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-96 bg-gradient-to-b from-[#037166]/5 via-transparent to-transparent -mt-32" />
-                        <div className="w-48 h-48 mx-auto mb-10 rounded-[2.5rem] bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center relative shadow-inner">
-                            <Building2 className="w-16 h-16 text-white/10" />
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-96 bg-gradient-to-b from-slate-50 via-transparent to-transparent -mt-32" />
+                        <div className="w-48 h-48 mx-auto mb-10 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative">
+                            <Building2 className="w-16 h-16 text-slate-200" />
                         </div>
-                        <h2 className="text-4xl font-black text-white mb-5 tracking-tight">Looking for a place to stay?</h2>
-                        <p className="text-white/40 text-xl mb-12 max-w-lg mx-auto leading-relaxed font-medium">Your stay selection is empty. Browse through our verified premium PG and hostel listings.</p>
+                        <h2 className="text-4xl font-black text-slate-900 mb-5 tracking-tight">Looking for a place to stay?</h2>
+                        <p className="text-slate-500 text-xl mb-12 max-w-lg mx-auto leading-relaxed font-medium">Your stay selection is empty. Browse through our verified premium PG and hostel listings.</p>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}

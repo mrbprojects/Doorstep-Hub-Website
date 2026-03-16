@@ -345,7 +345,7 @@ export function AddressPage({
       </section>
 
       <div className="max-w-[1000px] mx-auto px-6 lg:px-8 py-8">
-        <div className="grid gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Saved Addresses */}
           <AnimatePresence mode="popLayout">
             {loading && addresses.length === 0 ? (
@@ -643,6 +643,8 @@ export function AddressPage({
                   addressLineOne: contextLocation?.address || ''
                 });
                 setShowAddForm(true);
+                // Auto-trigger detection
+                setTimeout(() => handleAutoDetect(), 100);
               }}
               className="flex items-center justify-center gap-3 p-6 rounded-2xl border-2 border-dashed border-white/20 hover:border-[#037166]/50 bg-white/5 hover:bg-white/10 transition-all group"
             >
@@ -682,13 +684,13 @@ export function AddressPage({
 
                   <div className="space-y-4">
                     <div className="flex gap-3">
-                      {['Home', 'Office', 'Other'].map((type) => (
+                      {['Home', 'Office', 'Friends & Relative'].map((type) => (
                         <button
                           key={type}
                           onClick={() => setNewAddress({ ...newAddress, type })}
-                          className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${newAddress.type === type
-                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                            : 'bg-white/5 text-white/70 hover:bg-white/10'
+                          className={`flex-1 px-2 py-3 rounded-lg text-xs font-bold transition-all ${newAddress.type === type
+                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-md'
+                            : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                             }`}
                         >
                           {type}
@@ -708,7 +710,7 @@ export function AddressPage({
                       </div>
                       <div className="flex flex-col gap-1">
                         <input
-                          placeholder="Phone Number"
+                          placeholder="Mobile Number"
                           value={newAddress.phone}
                           onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"

@@ -269,38 +269,39 @@ export default function ReligiousConfirmPage() {
                         Back to Address
                     </motion.button>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
-                    >
-                        <Sparkles className="w-8 h-8" />
-                        Confirm Your Ritual
-                    </motion.h1>
-                </div>
+                    <div className="flex flex-col md:flex-row md:items-center justify-start gap-12">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3 shrink-0"
+                        >
+                            <Sparkles className="w-8 h-8" />
+                            Confirm Your Ritual
+                        </motion.h1>
 
-                {/* Progress Indicator */}
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
-                    <div className="flex items-center gap-2">
-                        {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => (
-                            <React.Fragment key={step}>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                                        <CheckCircle className="w-5 h-5 text-[var(--saffron)]" />
-                                    </div>
-                                    <span className="text-white/90 text-sm font-medium hidden sm:inline">{step}</span>
-                                </div>
-                                {index < 2 && <div className="h-0.5 flex-1 bg-white/30" />}
-                            </React.Fragment>
-                        ))}
+                        <div className="flex-1 max-w-2xl">
+                            <div className="flex items-center gap-2">
+                                {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => (
+                                    <React.Fragment key={step}>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                                                <CheckCircle className="w-5 h-5 text-[var(--saffron)]" />
+                                            </div>
+                                            <span className="text-white/90 text-[10px] md:text-sm font-bold uppercase tracking-wider hidden sm:inline">{step}</span>
+                                        </div>
+                                        {index < 2 && <div className="h-0.5 flex-1 bg-white/30" />}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </section>
 
             <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-8">
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Date Selection */}
                         <motion.div

@@ -48,6 +48,59 @@ function PGAddressContent() {
         stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
     });
 
+    // GPS / Map state
+    const [gpsLoading, setGpsLoading] = useState(false);
+    const [mapCoords, setMapCoords] = useState({ lat: 17.4126, lng: 78.2676 }); // Default: Hyderabad
+    const [mapKey, setMapKey] = useState(0); // force iframe refresh
+
+    const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.005}%2C${mapCoords.lat - 0.003}%2C${mapCoords.lng + 0.005}%2C${mapCoords.lat + 0.003}&layer=mapnik&marker=${mapCoords.lat}%2C${mapCoords.lng}`;
+
+    const handleDetectLocation = () => {
+        if (!navigator.geolocation) {
+            toast.error('Geolocation is not supported by your browser');
+            return;
+        }
+        setGpsLoading(true);
+        toast.info('Detecting your location…');
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                setMapCoords({ lat: latitude, lng: longitude });
+                setMapKey(k => k + 1);
+
+                try {
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`,
+                        { headers: { 'Accept-Language': 'en' } }
+                    );
+                    const data = await res.json();
+                    if (data && data.address) {
+                        const addr = data.address;
+                        setNewAddress(prev => ({
+                            ...prev,
+                            area: addr.suburb || addr.neighbourhood || addr.residential || addr.road || '',
+                            cityName: addr.city || addr.town || addr.village || 'Hyderabad',
+                            stateName: addr.state || 'Telangana',
+                            postalCode: addr.postcode || '',
+                            addressLineOne: data.display_name
+                        }));
+                        toast.success('Location detected!');
+                    }
+                } catch (e) {
+                    console.error('Reverse Geocode Error:', e);
+                } finally {
+                    setGpsLoading(false);
+                }
+            },
+            (error) => {
+                setGpsLoading(false);
+                toast.error('Failed to get location. Please enter manually.');
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    };
+
     const fetchAddresses = useCallback(async () => {
         if (!token) return;
         setLoading(true);
@@ -194,41 +247,42 @@ function PGAddressContent() {
                         Back
                     </motion.button>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
-                    >
-                        <MapPin className="w-8 h-8" />
-                        Select Booking Address
-                    </motion.h1>
-                </div>
+                    <div className="flex flex-col md:flex-row md:items-center justify-start gap-12">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3 shrink-0"
+                        >
+                            <MapPin className="w-8 h-8" />
+                            Select Booking Address
+                        </motion.h1>
 
-                {/* Progress Indicator */}
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
-                    <div className="flex items-center gap-2">
-                        {['Select PG', 'Address', 'Confirm & Pay'].map((step, index) => {
-                            const isCompleted = index < 1;
-                            const isCurrent = index === 1;
-                            return (
-                                <React.Fragment key={step}>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'}`}>
-                                            {isCompleted ? (
-                                                <Check className="w-5 h-5 text-[#037166]" />
-                                            ) : (
-                                                <span className={`text-sm font-bold ${isCurrent ? 'text-[#037166]' : 'text-white/60'}`}>{index + 1}</span>
+                        <div className="flex-1 max-w-2xl">
+                            <div className="flex items-center gap-2">
+                                {['Select PG', 'Address', 'Confirm & Pay'].map((step, index) => {
+                                    const isCompleted = index < 1;
+                                    const isCurrent = index === 1;
+                                    return (
+                                        <React.Fragment key={step}>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'}`}>
+                                                    {isCompleted ? (
+                                                        <Check className="w-5 h-5 text-[#037166]" />
+                                                    ) : (
+                                                        <span className={`text-sm font-bold ${isCurrent ? 'text-[#037166]' : 'text-white/60'}`}>{index + 1}</span>
+                                                    )}
+                                                </div>
+                                                <span className={`text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all hidden sm:inline ${isCurrent ? 'text-white font-bold' : 'text-white/70'}`}>{step}</span>
+                                            </div>
+                                            {index < 2 && (
+                                                <div className={`h-0.5 flex-1 mx-2 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'}`} />
                                             )}
-                                        </div>
-                                        <span className={`text-xs sm:text-sm font-medium transition-all ${isCurrent ? 'text-white font-bold' : 'text-white/70'}`}>{step}</span>
-                                    </div>
-                                    {index < 2 && (
-                                        <div className={`h-0.5 flex-1 mx-2 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'}`} />
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -239,7 +293,7 @@ function PGAddressContent() {
                         <Loader2 className="w-10 h-10 animate-spin text-[#037166]" />
                     </div>
                 ) : (
-                    <div className="grid gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {addresses.length === 0 && !loading && (
                             <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-xl">
                                 <p className="text-gray-500">No addresses found. Add one below.</p>
@@ -308,6 +362,8 @@ function PGAddressContent() {
                                 stateName, cityName, defaultAddress: false
                             });
                             setShowAddForm(true);
+                            // Auto-trigger detection
+                            setTimeout(() => handleDetectLocation(), 100);
                         }}
                         className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-500 hover:border-[#037166] hover:text-[#037166] transition-colors"
                     >
@@ -330,30 +386,67 @@ function PGAddressContent() {
                                     <Button variant="ghost" size="icon" onClick={() => setShowAddForm(false)}><X className="h-5 w-5" /></Button>
                                 </div>
                                 <div className="space-y-4">
+                                    <div className="relative w-full h-48 bg-gray-100 mb-6 rounded-xl overflow-hidden border border-gray-200">
+                                        <iframe
+                                            key={mapKey}
+                                            src={mapSrc}
+                                            className="w-full h-full border-0"
+                                            title="Location Map"
+                                            loading="lazy"
+                                        />
+                                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-full px-4">
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={handleDetectLocation}
+                                                disabled={gpsLoading}
+                                                className="w-full shadow-lg border border-gray-200 flex items-center justify-center gap-2"
+                                            >
+                                                {gpsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+                                                {gpsLoading ? 'Detecting...' : 'Use My Current Location'}
+                                            </Button>
+                                        </div>
+                                    </div>
+
                                     <div className="flex gap-3">
-                                        {['Home', 'Office', 'Other'].map(type => (
+                                        {['Home', 'Office', 'Friends & Relative'].map(type => (
                                             <button
                                                 key={type}
                                                 onClick={() => setNewAddress({ ...newAddress, type })}
-                                                className={`flex-1 py-2 rounded-lg font-medium border ${newAddress.type === type ? 'bg-[#037166] text-white border-[#037166]' : 'border-gray-200 hover:bg-gray-50'}`}
+                                                className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-bold border transition-all ${newAddress.type === type ? 'bg-[#037166] text-white border-[#037166] shadow-md' : 'text-[#037166] border-gray-200 hover:bg-gray-50'}`}
                                             >
                                                 {type}
                                             </button>
                                         ))}
                                     </div>
                                     <div className="grid md:grid-cols-2 gap-4">
-                                        <Input placeholder="Full Name" value={newAddress.name} onChange={e => setNewAddress({ ...newAddress, name: e.target.value })} />
-                                        <Input placeholder="Phone Number" value={newAddress.phone} onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} />
+                                        <Input className="text-black" placeholder="Full Name" value={newAddress.name} onChange={e => setNewAddress({ ...newAddress, name: e.target.value })} />
+                                        <Input className="text-black" placeholder="Mobile Number" value={newAddress.phone} onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })} />
                                     </div>
-                                    <Input placeholder="Flat / House No" value={newAddress.flat} onChange={e => setNewAddress({ ...newAddress, flat: e.target.value })} />
-                                    <Input placeholder="Area / Colony" value={newAddress.area} onChange={e => setNewAddress({ ...newAddress, area: e.target.value })} />
+                                    <div className="relative">
+                                        <Input className="text-black pr-24" placeholder="Flat / House No" value={newAddress.flat} onChange={e => setNewAddress({ ...newAddress, flat: e.target.value })} />
+                                        <button
+                                            onClick={(e) => { e.preventDefault(); handleDetectLocation(); }}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-[#037166]/10 text-[#037166] text-[10px] font-bold rounded-md border border-[#037166]/20 hover:bg-[#037166]/20 transition-all uppercase"
+                                        >
+                                            {gpsLoading ? '...' : 'Detect'}
+                                        </button>
+                                    </div>
+
+                                    <div className="relative">
+                                        <Input className="text-black pr-12" placeholder="Area / Colony" value={newAddress.area} onChange={e => setNewAddress({ ...newAddress, area: e.target.value })} />
+                                        {newAddress.area && (
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">Auto</span>
+                                        )}
+                                    </div>
+
                                     <div className="grid md:grid-cols-3 gap-4">
-                                        <Input placeholder="City" value={newAddress.cityName} onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} />
-                                        <Input placeholder="State" value={newAddress.stateName} onChange={e => setNewAddress({ ...newAddress, stateName: e.target.value })} />
-                                        <Input placeholder="Pincode" value={newAddress.postalCode} onChange={e => setNewAddress({ ...newAddress, postalCode: e.target.value })} />
+                                        <Input className="text-black" placeholder="City" value={newAddress.cityName} onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} />
+                                        <Input className="text-black" placeholder="State" value={newAddress.stateName} onChange={e => setNewAddress({ ...newAddress, stateName: e.target.value })} />
+                                        <Input className="text-black" placeholder="Pincode" value={newAddress.postalCode} onChange={e => setNewAddress({ ...newAddress, postalCode: e.target.value })} />
                                     </div>
                                     <div className="flex gap-3 pt-2">
-                                        <Button variant="outline" className="flex-1" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                                        <Button variant="outline" className="flex-1 text-black" onClick={() => setShowAddForm(false)}>Cancel</Button>
                                         <Button className="flex-1 bg-[#037166] hover:bg-[#025a51] text-white" onClick={handleAddOrUpdateAddress}>
                                             {loading ? 'Saving...' : 'Save Address'}
                                         </Button>

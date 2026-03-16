@@ -83,7 +83,7 @@ export function HomePage() {
             try {
                 const API_BASE_URL = 'https://api.doorstephub.com/v1/dhubApi/app';
                 const selectedService = localStorage.getItem('selectedService');
-                let serviceId = null;
+                // let serviceId = "69524f4a57bb211ca094e5e6";
 
                 if (selectedService) {
                     try {
@@ -93,6 +93,7 @@ export function HomePage() {
                         console.log('Error parsing selectedService from localStorage');
                     }
                 }
+                 let serviceId = "69524f4a57bb211ca094e5e6";
 
                 const response = await fetch(`${API_BASE_URL}/professional-services-flow/public/categories`, {
                     method: 'POST',

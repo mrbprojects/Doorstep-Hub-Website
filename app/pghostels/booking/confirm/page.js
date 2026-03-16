@@ -310,7 +310,7 @@ function PGConfirmContent() {
                 </div>
             </section>
 
-            <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-8">
+            <div className="max-w-[1200px] mx-auto mt-10 px-6 lg:px-8 py-8">
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">

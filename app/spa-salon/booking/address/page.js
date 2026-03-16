@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Home,CheckCircle, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -314,14 +314,14 @@ function SpaAddressContent() {
                             Where should we come?
                         </motion.h1>
 
-                        <div className="flex-1 max-w-2xl">
-                            <div className="flex items-center gap-2">
+                        <div className="flex-1 max-w-5xl">
+                            <div className="flex items-center gap-8">
                                 {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => {
                                     const isCompleted = index < 1;
                                     const isCurrent = index === 1;
                                     return (
                                         <React.Fragment key={step}>
-                                            <div className="flex items-center gap-2 shrink-0">
+                                            <div className="flex items-center gap-3 shrink-0">
                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'}`}>
                                                     {isCompleted ? (
                                                         <CheckCircle className="w-5 h-5 text-[#6D1357]" />
@@ -332,7 +332,7 @@ function SpaAddressContent() {
                                                 <span className={`text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all hidden sm:inline ${isCurrent ? 'text-white font-bold' : 'text-white/70'}`}>{step}</span>
                                             </div>
                                             {index < 2 && (
-                                                <div className={`h-0.5 flex-1 mx-2 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'}`} />
+                                                <div className={`h-0.5 flex-1 mx-12 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'}`} />
                                             )}
                                         </React.Fragment>
                                     );

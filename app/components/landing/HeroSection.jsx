@@ -315,6 +315,9 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
 
   // ✅ FIXED: Pass full service object, not just serviceName
   const handleServiceClick = (service) => {
+    const isAppliance = (service.name || '').toUpperCase().includes('APPLIANCE');
+    if (!isAppliance) return;
+
     // Store service details in localStorage
     localStorage.setItem('selectedService', JSON.stringify({
       id: service._id,
@@ -358,12 +361,13 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
       <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
         {services.map((service, index) => {
           const isActive = index === activeIndex;
+          const isAppliance = (service.name || '').toUpperCase().includes('APPLIANCE');
           return (
             <motion.div
               key={service._id}
               variants={cardVariants}
               onClick={() => handleServiceClick(service)}
-              className="group cursor-pointer transition-all duration-500 w-[72px] min-[400px]:w-20 sm:w-24 flex-shrink-0"
+              className={`group relative transition-all duration-500 w-[72px] min-[400px]:w-20 sm:w-24 flex-shrink-0 ${isAppliance ? 'cursor-pointer' : 'cursor-default'}`}
             >
               <div
                 className={`
@@ -384,6 +388,12 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
+                {!isAppliance && (
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2 text-center">
+                    <span className="text-[10px] font-bold text-[#ff6b35] uppercase tracking-tighter leading-none">Coming Soon</span>
+                  </div>
+                )}
+
                 {/* Service Name Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-3">
                   {/* Empty overlay preserved */}
@@ -393,7 +403,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isActive ? 1 : 0 }}
-                  whileHover={{ opacity: 1 }}
+                  whileHover={{ opacity: isAppliance ? 1 : 0 }}
                   className="absolute inset-0 bg-gradient-to-t from-[#037166]/30 to-transparent"
                 />
               </div>

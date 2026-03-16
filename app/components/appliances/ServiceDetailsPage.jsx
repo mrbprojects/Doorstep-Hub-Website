@@ -49,6 +49,27 @@ export function ServiceDetailsPage({
   });
   const accentColor = serviceAccents[category] || '#5a8b9d';
 
+  // Hide the native browser scrollbar for the entire page while this detail view is mounted
+  useEffect(() => {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'detail-page-no-scrollbar';
+    styleEl.textContent = `
+      html, body {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+      }
+    `;
+    document.head.appendChild(styleEl);
+    return () => {
+      document.getElementById('detail-page-no-scrollbar')?.remove();
+    };
+  }, []);
+
   useEffect(() => {
     const fetchServiceDetails = async () => {
       if (!serviceId && !serviceSlug) return;
@@ -303,11 +324,10 @@ export function ServiceDetailsPage({
       exit={{ opacity: 0 }}
       className="min-h-screen pt-20 pb-24 lg:pb-0 overflow-x-hidden"
     >
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(3,113,102,0.5); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(3,113,102,0.8); }
+      {/* Hide all scrollbars inside this detail view */}
+      <style>{`
+        .detail-left-panel::-webkit-scrollbar { display: none !important; width: 0 !important; }
+        .detail-left-panel { scrollbar-width: none !important; -ms-overflow-style: none !important; }
       `}</style>
 
       {/* ── MOBILE: Sticky bottom Book-Now bar (hidden on lg+) ─────────────── */}
@@ -380,7 +400,14 @@ export function ServiceDetailsPage({
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
 
             {/* LEFT col: Gallery + Tabs (order-2 on mobile, order-none on desktop) */}
-            <div className="order-2 lg:order-none space-y-6 lg:space-y-8">
+         <div
+              className="detail-left-panel order-2 lg:order-none space-y-6 lg:space-y-8 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto lg:pr-2"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
 
               {/* Image Gallery */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="w-full">

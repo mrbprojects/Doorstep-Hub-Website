@@ -168,7 +168,7 @@ export function LatestSpaServices() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="group relative w-[calc(100%/1.5)] md:w-[calc(100%/3.5)] lg:w-[calc(100%/6.5)] h-auto flex-shrink-0 snap-start"
+                className="group relative w-[calc(100%/1.5)] md:w-[calc(100%/3.5)] lg:w-[calc(100%/6.5)] h-auto flex-shrink-0 snap-start cursor-not-allowed"
               >
                 {/* Card with Breathing Effect */}
                 <motion.div
@@ -199,15 +199,9 @@ export function LatestSpaServices() {
                       </div>
                     </div>
 
-                    {/* View Details Button Badge - Bottom Center */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Link href={`/spa-salon/detail/${store._id}`}>
-                        <div
-                          className="px-6 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all hover:bg-[#025951]"
-                        >
-                          <h6 className="text-[12px] font-ubuntu  tracking-wider">Book Appointment</h6>
-                        </div>
-                      </Link>
+                    {/* Coming Soon Overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
+                      <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
                     </div>
 
                     {/* Floating Heart Icon */}

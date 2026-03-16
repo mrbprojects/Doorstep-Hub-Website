@@ -1,18 +1,21 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { motion } from 'motion/react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams, useParams, usePathname } from 'next/navigation';
 import {
     MapPin, Star, Search, Sliders, Heart, TrendingUp, X, Wifi, Utensils,
-    Shirt, Zap, Shield, ChevronRight, Award, Sparkles, ArrowLeft
+    Shirt, Zap, Shield, ChevronRight, Award, Sparkles, ArrowLeft, Filter,
+    CheckCircle, MessageSquare
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
 import { Input } from '@/components/pghostels/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
 import { Slider } from '@/components/pghostels/ui/slider';
 import { Checkbox } from '@/components/pghostels/ui/checkbox';
+import { Button } from '@/components/pghostels/ui/button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Badge } from '@/components/ui/badge';
 
 const mockListings = [
     {
@@ -142,6 +145,10 @@ function PGListingsContent() {
     const [minRating, setMinRating] = useState(0);
 
     const [activeTab, setActiveTab] = useState('all');
+    const [categories, setCategories] = useState([]);
+    const [allSubCategories, setAllSubCategories] = useState([]);
+    const [expandedCategory, setExpandedCategory] = useState(searchParams.get('categoryId') || null);
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // BUG-12 FIX: Restore last active tab from localStorage inside useEffect to avoid Hydration Error
     useEffect(() => {
@@ -160,39 +167,56 @@ function PGListingsContent() {
 
     const mapApiResponseToListing = (item) => {
         if (!item) return null;
-        // Helper to safely extract a string from a value that might be an object
+        
+        // Robust string extractor for IDs and names
         const str = (val, fallback = '') => {
             if (!val) return fallback;
-            if (typeof val === 'string') return val || fallback;
-            if (typeof val === 'object') return val.title || val.name || val.label || fallback;
+            if (typeof val === 'string') return val.trim() || fallback;
+            // Handle MongoDB ObjectIDs or nested label objects
+            if (typeof val === 'object') {
+                return val.$oid || val._id || val.id || val.title || val.name || val.label || fallback;
+            }
             return String(val) || fallback;
         };
+
         const num = (val, fallback = 0) => {
+            if (val === 0) return 0;
             if (!val) return fallback;
             if (typeof val === 'number') return val;
             if (typeof val === 'object') return val.amount || val.value || fallback;
-            return parseFloat(val) || fallback;
+            const parsed = parseFloat(val);
+            return isNaN(parsed) ? fallback : parsed;
         };
-        // Sanitize amenities: each item may be {_id, title, image} — extract the string
+
+        // Unique ID priority: _id > id > random fallback to prevent React key collisions
+        const uniqueId = str(item?._id) || str(item?.id) || `temp-${Math.random()}`;
+
+        // Image priority: image > logo > fallback
+        let displayImage = mockListings[0]?.image;
+        if (item?.image) displayImage = `https://api.doorstephub.com/${item.image}`;
+        else if (item?.logo) displayImage = `https://api.doorstephub.com/${item.logo}`;
+
+        // Sanitize amenities
         const rawAmenities = item?.amenities;
         const amenities = Array.isArray(rawAmenities)
-            ? rawAmenities.map(a => str(a, '')).filter(Boolean)
+            ? rawAmenities.map(a => typeof a === 'object' ? str(a) : a).filter(Boolean)
             : ['WiFi', 'Food', 'Laundry'];
+
         return {
-            id: str(item?._id, 'unknown'),
-            name: str(item?.business_name || item?.hostelName) ||
+            id: uniqueId,
+            name: str(item?.business_name) || str(item?.hostelName) ||
                 `${str(item?.firstName)} ${str(item?.lastName)}`.trim() || 'Professional Service',
-            location: str(item?.address || item?.cityName, 'Unknown Location'),
+            location: str(item?.address) || str(item?.location) || str(item?.cityName, 'Unknown Location'),
             rating: num(item?.rating) || 4.5,
             orders: num(item?.totalOrders),
-            basePrice: num(item?.startingAt || item?.minFare),
-            monthlyPrice: num(item?.startingAt || item?.minFare) || 6500,
-            image: item?.logo ? `https://api.doorstephub.com/${item.logo}` : mockListings[0]?.image,
-            distance: parseFloat(str(item?.distance, '2.5').replace(' km', '')) || 2.5,
-            matchScore: num(item?.matchScore) || 90,
+            basePrice: num(item?.startingAt) || num(item?.minFare) || num(item?.serviceBookingCost),
+            monthlyPrice: num(item?.startingAt) || num(item?.minFare) || 6500,
+            image: displayImage,
+            distance: typeof item?.distance === 'string' ? parseFloat(item.distance.replace(/[^\d.]/g, '')) : (num(item?.distance) || 2.5),
+            matchScore: num(item?.matchScore) || num(item?.score) || 90,
             badges: Array.isArray(item?.badges)
-                ? item.badges.map(b => str(b, '')).filter(Boolean)
-                : ['Verified'],
+                ? item.badges.map(b => str(b)).filter(Boolean)
+                : (item?.badges ? [str(item.badges)] : ['Verified']),
             amenities: amenities.length > 0 ? amenities : ['WiFi', 'Food', 'Laundry'],
             availableBeds: 5,
             description: str(item?.bio, '')
@@ -206,54 +230,64 @@ function PGListingsContent() {
         if (query !== null && query !== searchQuery) {
             setSearchQuery(query);
         }
+
+        const catId = searchParams.get('categoryId');
+        if (catId && catId !== expandedCategory) {
+            setExpandedCategory(catId);
+        }
+
+        // Sync price range and rating from URL if present
+        const minP = searchParams.get('minPrice');
+        const maxP = searchParams.get('maxPrice');
+        if (minP && maxP) {
+            const range = [parseInt(minP), parseInt(maxP)];
+            if (range[0] !== priceRange[0] || range[1] !== priceRange[1]) {
+                setPriceRange(range);
+            }
+        }
+
+        const rating = searchParams.get('minRating');
+        if (rating) {
+            const r = parseFloat(rating);
+            if (r !== minRating) setMinRating(r);
+        }
     }, [searchParams]);
+
+    // Sync active tab with route param
+    useEffect(() => {
+        if (params.type && (params.type === 'all' || params.type === 'nearby' || params.type === 'recommended')) {
+            setActiveTab(params.type === 'all' ? 'all' : params.type);
+        }
+    }, [params.type]);
 
     useEffect(() => {
         const fetchListings = async () => {
             setLoading(true);
             try {
-                // Get location from URL params or localStorage
+                // Get location from URL params
                 let lat = searchParams.get('lat') || "17.4483"; // Default Hyderabad
                 let lng = searchParams.get('lng') || "78.3915";
 
-                // If not in URL, try localStorage
-                if (!searchParams.get('lat') && typeof window !== 'undefined') {
-                    try {
-                        const storedLocation = localStorage.getItem('user_location_data');
-                        if (storedLocation) {
-                            const parsedLocation = JSON.parse(storedLocation);
-                            if (parsedLocation?.lat && parsedLocation?.lng) {
-                                lat = parsedLocation.lat.toString();
-                                lng = parsedLocation.lng.toString();
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error parsing stored location", e);
-                    }
-                }
+                // Clean up lng/lat if they contain extra text
+                if (lng && lng.includes(' ')) lng = lng.split(' ')[0];
+                if (lat && lat.includes(' ')) lat = lat.split(' ')[0];
 
-                // Construct API payload matching your Curl request
+                // Construct API payload - use values prioritize searchParams
                 const payload = {
                     lattitude: lat,
                     longitude: lng,
-                    searchQuery: searchQuery || undefined,
                     serviceId: SERVICE_ID,
-                    minPrice: priceRange?.[0] || 0,
-                    maxPrice: priceRange?.[1] || 100000,
-                    minRating: minRating || 0,
-                    ...Object.fromEntries(searchParams.entries())
+                    minPrice: searchParams.get('minPrice') || priceRange[0],
+                    maxPrice: searchParams.get('maxPrice') || priceRange[1],
+                    minRating: searchParams.get('minRating') || minRating,
+                    searchQuery: searchParams.get('query') || searchQuery || undefined,
+                    // Directly include all relevant filter params from URL
+                    roomType: searchParams.get('roomType') || undefined,
+                    food: searchParams.get('food') || undefined,
+                    moveIn: searchParams.get('moveIn') || undefined,
+                    categoryId: searchParams.get('categoryId') || undefined,
+                    subcategoryId: searchParams.get('subcategoryId') || undefined
                 };
-
-                // Prioritize subcategoryId if present, otherwise categoryId
-                const dynamicCategoryId = searchParams.get('categoryId');
-                const dynamicSubcategoryId = searchParams.get('subcategoryId');
-
-                if (dynamicSubcategoryId) {
-                    payload.subcategoryId = dynamicSubcategoryId;
-                } else if (dynamicCategoryId) {
-                    payload.categoryId = dynamicCategoryId;
-                }
-
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
                     method: 'POST',
@@ -269,23 +303,62 @@ function PGListingsContent() {
                     setUsingFallback(false);
                     setFetchError(false);
                 } else {
-                    // No results — show EmptyState instead of fake mock data
                     setFilteredListings([]);
                     setUsingFallback(false);
                 }
             } catch (error) {
                 console.error('Error fetching listings:', error);
-                // On error — show EmptyState with error message, NOT fake Bangalore data
                 setFilteredListings([]);
                 setFetchError(true);
-                setUsingFallback(false);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchListings();
-    }, [searchQuery, priceRange, minRating]); // Re-run when filters change
+        const timer = setTimeout(() => {
+            fetchListings();
+        }, 100); // Small debounce
+        return () => clearTimeout(timer);
+    }, [searchParams.toString(), priceRange, minRating]); // Reliable change detection
+
+    // Fetch Categories
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setCategoriesLoading(true);
+            try {
+                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serviceId: SERVICE_ID })
+                });
+                const data = await response.json();
+                if (data.success && data.category) {
+                    setCategories(data.category);
+                }
+            } catch (e) { console.error("Error fetching categories:", e); }
+            finally { setCategoriesLoading(false); }
+        };
+        fetchCategories();
+    }, []);
+
+    // Fetch Subcategories for active category
+    useEffect(() => {
+        const fetchSubCategories = async () => {
+            if (!expandedCategory) return;
+            try {
+                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categoryId: expandedCategory })
+                });
+                const data = await response.json();
+                if (data.success && data.data) {
+                    setAllSubCategories(data.data);
+                }
+            } catch (e) { console.error("Error fetching subcategories:", e); }
+        };
+        fetchSubCategories();
+    }, [expandedCategory]);
 
     const toggleSave = (id) => {
         setSavedItems(prev =>
@@ -316,42 +389,225 @@ function PGListingsContent() {
     const sortedListings = [...filteredListings].sort((a, b) => b.matchScore - a.matchScore);
     const recommendedListings = sortedListings.slice(0, 3);
 
-    const FilterPanel = () => (
-        <div className="space-y-6 shadow-sm text-black">
-            <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Price Range</h3>
-                <Slider
-                    defaultValue={[5000, 20000]}
-                    min={3000}
-                    max={25000}
-                    step={500}
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    className="mb-2 text-black"
-                />
-                <div className="flex justify-between text-sm text-gray-600">
+    const updateFilter = (key, value) => {
+        const currentParams = new URLSearchParams(searchParams.toString());
+        if (value) {
+            currentParams.set(key, value);
+        } else {
+            currentParams.delete(key);
+        }
+        router.push(`${pathname}?${currentParams.toString()}`);
+    };
+
+    const FilterPanel = ({ showTitle = true }) => (
+        <div className="space-y-6 text-black">
+            {showTitle && (
+                <h4 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                    <Filter className="w-5 h-5 text-[#037166]" />
+                    Filters
+                </h4>
+            )}
+
+            {/* Categories Section (Accordion Style) */}
+            <div className="mb-8 border-b border-gray-100 pb-6">
+                <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Hostel Categories</h6>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {categories.map((cat) => (
+                        <div key={cat._id} className="overflow-hidden">
+                            <button
+                                onClick={() => {
+                                    if (expandedCategory === cat._id) setExpandedCategory(null);
+                                    else setExpandedCategory(cat._id);
+                                }}
+                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
+                                    expandedCategory === cat._id || cat._id === searchParams.get('categoryId')
+                                    ? 'bg-[#037166]/10 text-[#037166] font-bold border border-[#037166]/20 shadow-sm' 
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-[#037166] border border-transparent'
+                                }`}
+                            >
+                                <span className="truncate">{cat.name}</span>
+                                {expandedCategory === cat._id ? (
+                                    <ChevronRight className="w-4 h-4 rotate-90 transition-transform text-[#037166]" />
+                                ) : (
+                                    <ChevronRight className="w-4 h-4 opacity-30" />
+                                )}
+                            </button>
+
+                            <AnimatePresence>
+                                {expandedCategory === cat._id && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="pl-5 pr-1 py-2 space-y-1.5 mt-1 border-l-2 border-[#037166]/20 ml-4">
+                                            {allSubCategories.map(sub => (
+                                                <button
+                                                    key={sub._id}
+                                                    onClick={() => {
+                                                        const currentParams = new URLSearchParams(searchParams.toString());
+                                                        currentParams.set('categoryId', cat._id);
+                                                        currentParams.set('subcategoryId', sub._id);
+                                                        currentParams.set('categoryName', cat.name);
+                                                        router.push(`${pathname}?${currentParams.toString()}`);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
+                                                        searchParams.get('subcategoryId') === sub._id
+                                                        ? 'bg-[#037166] text-white shadow-md shadow-[#037166]/20'
+                                                        : 'text-gray-500 hover:text-[#037166] hover:bg-[#037166]/5'
+                                                    }`}
+                                                >
+                                                    {sub.name}
+                                                </button>
+                                            ))}
+                                            {allSubCategories.length === 0 && <span className="text-[10px] text-gray-400 italic pl-2">No options found</span>}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+                    {categoriesLoading && (
+                        <div className="text-center py-4">
+                            <div className="w-5 h-5 border-2 border-[#037166]/20 border-t-[#037166] rounded-full animate-spin mx-auto" />
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Price Range */}
+            <div className="mb-8 border-b border-gray-100 pb-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h6 className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Monthly Budget</h6>
+                    <span className="text-[11px] font-bold text-[#037166] bg-[#037166]/10 px-2.5 py-1 rounded-full border border-[#037166]/10">₹{priceRange[1].toLocaleString()}</span>
+                </div>
+                <div className="px-1">
+                    <Slider
+                        defaultValue={[5000, 20000]}
+                        min={2000}
+                        max={40000}
+                        step={500}
+                        value={priceRange}
+                        onValueChange={(val) => {
+                            setPriceRange(val);
+                            // Debounce URL update or update on commit if needed
+                        }}
+                        className="mb-4"
+                    />
+                </div>
+                <div className="flex justify-between text-[10px] font-bold text-gray-400">
                     <span>₹{priceRange[0].toLocaleString()}</span>
                     <span>₹{priceRange[1].toLocaleString()}</span>
                 </div>
             </div>
 
-            <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Minimum Rating</h3>
-                <div className="space-y-2">
+            {/* Rating Grid */}
+            <div className="mb-8 border-b border-gray-100 pb-6">
+                <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Minimum Rating</h6>
+                <div className="grid grid-cols-2 gap-2">
                     {[4.5, 4.0, 3.5, 3.0].map((rating) => (
-                        <label key={rating} className="flex items-center space-x-2 cursor-pointer">
-                            <Checkbox
-                                checked={minRating === rating}
-                                onCheckedChange={(checked) => setMinRating(checked ? rating : 0)}
-                            />
-                            <div className="flex items-center">
-                                <Star className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B] mr-1" />
-                                <span className="text-sm text-gray-700">{rating}+ stars</span>
-                            </div>
-                        </label>
+                        <button
+                            key={rating}
+                            onClick={() => setMinRating(rating === minRating ? 0 : rating)}
+                            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl transition-all border-2 ${
+                                minRating === rating
+                                ? 'bg-[#037166] border-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                                : 'bg-white border-gray-100 text-gray-500 hover:border-[#037166]/20 hover:text-[#037166]'
+                            }`}
+                        >
+                            <Star className={`w-3.5 h-3.5 ${minRating === rating ? 'fill-white text-white' : 'fill-[#F59E0B] text-[#F59E0B]'}`} />
+                            <span className="text-xs font-black">{rating}+</span>
+                        </button>
                     ))}
                 </div>
             </div>
+
+            {/* Room Type */}
+            <div className="mb-8 border-b border-gray-100 pb-6">
+                <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Room Type</h6>
+                <div className="grid gap-2">
+                    {[
+                        { value: 'single', label: 'Single Occupancy' },
+                        { value: '2-sharing', label: '2 Sharing' },
+                        { value: '3-sharing', label: '3 Sharing' },
+                        { value: '4-sharing', label: '4+ Sharing' }
+                    ].map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => updateFilter('roomType', opt.value === searchParams.get('roomType') ? '' : opt.value)}
+                            className={`text-left px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${
+                                searchParams.get('roomType') === opt.value
+                                ? 'bg-[#037166] border-[#037166] text-white shadow-sm'
+                                : 'bg-white border-gray-50 text-gray-600 hover:border-[#037166]/20'
+                            }`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Food Faculty */}
+            <div className="mb-8 border-b border-gray-100 pb-6">
+                <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Food Facility</h6>
+                <div className="flex flex-wrap gap-2">
+                    {[
+                        { value: 'with-food', label: 'Food Included' },
+                        { value: 'without-food', label: 'No Food' }
+                    ].map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => updateFilter('food', opt.value === searchParams.get('food') ? '' : opt.value)}
+                            className={`px-4 py-2 rounded-full text-[10px] font-bold border-2 transition-all ${
+                                searchParams.get('food') === opt.value
+                                ? 'bg-[#037166] text-white border-[#037166] shadow-sm'
+                                : 'bg-gray-50 border-transparent text-gray-600 hover:border-gray-200'
+                            }`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Move-in Filter */}
+            <div className="mb-6">
+                <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Availability</h6>
+                <div className="grid grid-cols-2 gap-2">
+                    {[
+                        { value: 'today', label: 'Available Today' },
+                        { value: 'this-week', label: 'This Week' },
+                        { value: 'next-week', label: 'Next Week' },
+                        { value: 'flexible', label: 'Flexible' }
+                    ].map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => updateFilter('moveIn', opt.value === searchParams.get('moveIn') ? '' : opt.value)}
+                            className={`px-2 py-2.5 rounded-xl text-[10px] font-bold text-center border-2 transition-all ${
+                                searchParams.get('moveIn') === opt.value
+                                ? 'bg-[#037166]/10 text-[#037166] border-[#037166]/30'
+                                : 'bg-white border-gray-50 text-gray-500 hover:border-gray-100'
+                            }`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Reset Button */}
+            <button 
+                className="w-full mt-4 bg-white border border-gray-200 text-gray-400 hover:text-[#037166] hover:border-[#037166]/30 h-11 text-[11px] font-black rounded-xl gap-2 transition-all flex items-center justify-center shadow-sm"
+                onClick={() => {
+                    setPriceRange([5000, 20000]);
+                    setMinRating(0);
+                    router.push(pathname);
+                }}
+            >
+                <X className="w-3.5 h-3.5" />
+                Reset All Filters
+            </button>
         </div>
     );
 
@@ -606,12 +862,15 @@ function PGListingsContent() {
                                     <span className="hidden md:inline font-medium">Filters</span>
                                 </button>
                             </SheetTrigger>
-                            <SheetContent>
-                                <SheetHeader>
-                                    <SheetTitle>Filter Options</SheetTitle>
+                            <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto custom-scrollbar">
+                                <SheetHeader className="pb-6 border-b border-gray-100">
+                                    <SheetTitle className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                                        <Filter className="w-5 h-5 text-[#037166]" />
+                                        Filters
+                                    </SheetTitle>
                                 </SheetHeader>
                                 <div className="mt-6">
-                                    <FilterPanel />
+                                    <FilterPanel showTitle={false} />
                                 </div>
                             </SheetContent>
                         </Sheet>
@@ -714,11 +973,7 @@ function PGListingsContent() {
                     <div className="flex gap-8">
                         {/* Desktop Filter Panel */}
                         <div className="hidden lg:block w-80 flex-shrink-0">
-                            <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 sticky top-24">
-                                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                    <Sliders className="w-5 h-5 mr-2 text-[#037166]" />
-                                    Filters
-                                </h2>
+                            <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28 overflow-hidden">
                                 <FilterPanel />
                             </div>
                         </div>

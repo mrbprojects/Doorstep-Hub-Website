@@ -285,20 +285,20 @@ export default function SpaConfirmPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3 shrink-0"
+                            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-4 shrink-0"
                         >
                             <Scissors className="w-8 h-8" />
                             Confirm Slot
                         </motion.h1>
 
-                        <div className="flex-1 max-w-2xl">
-                            <div className="flex items-center gap-2">
+                        <div className="flex-1 max-w-5xl">
+                            <div className="flex items-center gap-8">
                                 {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => {
                                     const isCompleted = index < 2;
                                     const isCurrent = index === 2;
                                     return (
                                         <React.Fragment key={step}>
-                                            <div className="flex items-center gap-2 shrink-0">
+                                            <div className="flex items-center gap-3 shrink-0">
                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-white shadow-md' : isCurrent ? 'bg-white ring-4 ring-white/30 scale-110 shadow-lg' : 'bg-white/30'
                                                     }`}>
                                                     {isCompleted ? (
@@ -311,7 +311,7 @@ export default function SpaConfirmPage() {
                                                     }`}>{step}</span>
                                             </div>
                                             {index < 2 && (
-                                                <div className={`h-0.5 flex-1 mx-2 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'
+                                                <div className={`h-0.5 flex-1 mx-12 transition-all ${isCompleted ? 'bg-white/80' : 'bg-white/20'
                                                     }`} />
                                             )}
                                         </React.Fragment>

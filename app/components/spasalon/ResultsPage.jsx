@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { Search, SlidersHorizontal, Star, MapPin, Clock, Heart, ChevronLeft } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Search, SlidersHorizontal, Star, MapPin, Clock, Heart, ChevronLeft, Filter, ChevronRight, X, CheckCircle, Sliders } from 'lucide-react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useLocationContext } from '@/context/LocationContext';
-import { useEffect } from 'react';
+import { Input } from '@/components/pghostels/ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
+import { Slider } from '@/components/pghostels/ui/slider';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/pghostels/ui/button';
 
 
 
@@ -20,15 +24,23 @@ const filters = [
 export function ResultsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { location, detectLocation } = useLocationContext();
+
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '');
     const [selectedFilter, setSelectedFilter] = useState('All Services');
-    const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(true);
 
-    // Location Context
-    const { location, detectLocation } = useLocationContext();
+    // New state for filters
+    const [priceRange, setPriceRange] = useState([200, 5000]);
+    const [minRating, setMinRating] = useState(0);
+    const [categories, setCategories] = useState([]);
+    const [allSubCategories, setAllSubCategories] = useState([]);
+    const [expandedCategory, setExpandedCategory] = useState(searchParams.get('categoryId') || null);
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     useEffect(() => {
         // No auto-detection, let the user trigger or wait for context
@@ -72,8 +84,10 @@ export function ResultsPage() {
                     searchQuery: searchQuery || "",
                     sortBy: currentSortBy,
                     latitude: lat,
-                    lattitude: lat,
-                    longitude: lng
+                    longitude: lng,
+                    minPrice: priceRange[0],
+                    maxPrice: priceRange[1],
+                    minRating: minRating || undefined
                 };
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
@@ -132,7 +146,227 @@ export function ResultsPage() {
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [searchParams, location, activeTab, selectedFilter, searchQuery]);
+    }, [searchParams, location, activeTab, selectedFilter, searchQuery, priceRange, minRating]);
+
+    // Fetch Categories and Subcategories
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setCategoriesLoading(true);
+            try {
+                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serviceId: '69524f4a57bb211ca094e5e6' })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    setCategories(data.category || []);
+                }
+            } catch (err) {
+                console.error("Error fetching categories:", err);
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    const updateFilter = (key, value) => {
+        const currentParams = new URLSearchParams(searchParams.toString());
+        if (value) {
+            currentParams.set(key, value);
+        } else {
+            currentParams.delete(key);
+        }
+        router.push(`${pathname}?${currentParams.toString()}`);
+    };
+
+    const sortedServices = useMemo(() => {
+        let result = [...services];
+        
+        // Apply Rating Filter if set manually via state
+        if (minRating > 0) {
+            result = result.filter(s => s.rating >= minRating);
+        }
+
+        return result;
+    }, [services, minRating]);
+
+    const FilterPanel = ({ showTitle = true }) => {
+        return (
+            <div className="space-y-6 text-black">
+                {showTitle && (
+                    <h4 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                        <Filter className="w-5 h-5 text-[#C06C84]" />
+                        Filters
+                    </h4>
+                )}
+
+                {/* Categories Section */}
+                <div className="mb-8 border-b border-gray-100 pb-6">
+                    <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Spa Categories</h6>
+                    <div className="space-y-1">
+                        {categoriesLoading ? (
+                            <div className="space-y-2">
+                                {[1, 2, 3].map(i => <div key={i} className="h-10 bg-gray-50 rounded-xl animate-pulse" />)}
+                            </div>
+                        ) : categories.map((cat) => (
+                            <div key={cat._id} className="mb-1">
+                                <button
+                                    onClick={() => {
+                                        if (expandedCategory === cat._id) {
+                                            setExpandedCategory(null);
+                                        } else {
+                                            setExpandedCategory(cat._id);
+                                            // Fetch subcategories
+                                            fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ categoryId: cat._id })
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    setAllSubCategories(prev => {
+                                                        const otherSubs = prev.filter(s => s.categoryId !== cat._id);
+                                                        return [...otherSubs, ...data.data.map(s => ({ ...s, categoryId: cat._id }))];
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    }}
+                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
+                                        searchParams.get('categoryId') === cat._id 
+                                        ? 'bg-[#C06C84]/10 text-[#C06C84] font-bold' 
+                                        : 'hover:bg-gray-50 text-gray-600'
+                                    }`}
+                                >
+                                    <span className="text-sm">{cat.name}</span>
+                                    <ChevronRight className={`w-4 h-4 transition-transform ${expandedCategory === cat._id ? 'rotate-90' : ''}`} />
+                                </button>
+                                
+                                <AnimatePresence>
+                                    {expandedCategory === cat._id && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden pl-4 pr-1 mt-1 space-y-1"
+                                        >
+                                            {allSubCategories
+                                                .filter(s => s.categoryId === cat._id)
+                                                .map(sub => (
+                                                    <button
+                                                        key={sub._id}
+                                                        onClick={() => {
+                                                            updateFilter('categoryId', cat._id);
+                                                            updateFilter('subcategoryId', sub._id);
+                                                            updateFilter('categoryName', cat.name);
+                                                            updateFilter('name', sub.name);
+                                                        }}
+                                                        className={`w-full text-left p-2.5 rounded-lg text-xs transition-all ${
+                                                            searchParams.get('subcategoryId') === sub._id
+                                                            ? 'text-[#C06C84] font-bold bg-[#C06C84]/5'
+                                                            : 'text-gray-500 hover:text-[#C06C84] hover:bg-gray-50'
+                                                        }`}
+                                                    >
+                                                        {sub.name}
+                                                    </button>
+                                                ))
+                                            }
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Price Range */}
+                <div className="mb-8 border-b border-gray-100 pb-6">
+                    <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Price Range</h6>
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                        {[
+                            { value: 'under-500', label: 'Under ₹500', range: [0, 500] },
+                            { value: '500-1500', label: '₹500 - 1500', range: [500, 1500] },
+                            { value: '1500-3000', label: '₹1500 - 3000', range: [1500, 3000] },
+                            { value: '3000+', label: '₹3000+', range: [3000, 10000] }
+                        ].map((opt) => (
+                            <button
+                                key={opt.value}
+                                onClick={() => {
+                                    const isSelected = searchParams.get('budget') === opt.value;
+                                    if (isSelected) {
+                                        updateFilter('budget', '');
+                                    } else {
+                                        updateFilter('budget', opt.value);
+                                        setPriceRange(opt.range);
+                                    }
+                                }}
+                                className={`px-2 py-2 rounded-lg text-[10px] font-bold text-center border transition-all ${
+                                    searchParams.get('budget') === opt.value
+                                    ? 'bg-[#C06C84] text-white border-[#C06C84]'
+                                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="px-1">
+                        <Slider
+                            defaultValue={[200, 5000]}
+                            min={100}
+                            max={10000}
+                            step={100}
+                            value={priceRange}
+                            onValueChange={setPriceRange}
+                            className="mb-4"
+                        />
+                    </div>
+                    <div className="flex justify-between text-[10px] font-bold text-gray-400">
+                        <span>₹{priceRange[0].toLocaleString()}</span>
+                        <span>₹{priceRange[1].toLocaleString()}</span>
+                    </div>
+                </div>
+
+                {/* Minimum Rating */}
+                <div className="mb-8 border-b border-gray-100 pb-6">
+                    <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Minimum Rating</h6>
+                    <div className="grid grid-cols-5 gap-2">
+                        {[1, 2, 3, 4, 5].map((rating) => (
+                            <button
+                                key={rating}
+                                onClick={() => setMinRating(rating === minRating ? 0 : rating)}
+                                className={`h-10 rounded-xl flex items-center justify-center border transition-all ${
+                                    minRating === rating
+                                    ? 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/20'
+                                    : 'bg-white border-gray-100 text-gray-400 hover:border-amber-200'
+                                }`}
+                            >
+                                <span className="font-black text-sm">{rating}</span>
+                                <Star className={`w-3 h-3 ml-1 ${minRating === rating ? 'fill-white' : 'fill-gray-300'} text-transparent`} />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Reset Button */}
+                <button 
+                    className="w-full mt-4 border border-gray-200 text-gray-400 hover:text-[#C06C84] hover:border-[#C06C84]/30 h-10 text-[10px] font-black rounded-xl gap-2 transition-all flex items-center justify-center"
+                    onClick={() => {
+                        setPriceRange([200, 5000]);
+                        setMinRating(0);
+                        router.push(pathname);
+                    }}
+                >
+                    <X className="w-3.5 h-3.5" />
+                    Reset All Filters
+                </button>
+            </div>
+        );
+    };
 
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         const R = 6371;
@@ -154,153 +388,189 @@ export function ResultsPage() {
     });
 
     return (
-        <div className="min-h-screen bg-[#F6F7FB] pt-20">
-            {/* Header */}
-            <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-xl border-b border-[#E8ECF2] shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    {/* Back Button */}
+        <div className="min-h-screen bg-[#F6F7FB]">
+            {/* Header / Hero Section */}
+            <div className="bg-[#1A0515] pt-24 pb-16 relative overflow-hidden">
+                {/* Background Decorations */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-[#C06C84]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#6C5CE7]/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <motion.button
                         whileHover={{ x: -5 }}
                         onClick={() => router.push('/spa-salon')}
-                        className="flex items-center gap-2 text-[#64748B] hover:text-[#0F172A] mb-6 transition-colors"
+                        className="flex items-center gap-2 text-white/60 hover:text-white mb-8 transition-colors text-sm font-medium"
                     >
-                        <ChevronLeft className="w-5 h-5" />
-                        Back to Home
+                        <ChevronLeft className="w-4 h-4" />
+                        Back to Spa & Salon
                     </motion.button>
 
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[#0F172A] mb-2">
-                                Spa Services <span className="text-[#C06C84]">Matched for You</span>
-                            </h1>
-                            <p className="text-[#64748B]">
-                                {filteredServices.length} services available
-                            </p>
-                        </div>
-
-                        {/* Search Bar */}
-                        <div className="relative flex-1 max-w-md">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748B]" />
-                            <input
-                                type="text"
-                                placeholder="Search services..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 bg-white border border-[#E8ECF2] rounded-xl text-[#0F172A] placeholder:text-[#64748B] focus:outline-none focus:border-[#C06C84] transition-colors shadow-sm"
-                            />
-                        </div>
-
-                        {/* Filter Button */}
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border border-[#E8ECF2] rounded-xl text-[#0F172A] hover:border-[#C06C84] transition-colors shadow-sm"
-                        >
-                            <SlidersHorizontal className="w-5 h-5" />
-                            Filters
-                        </motion.button>
-                    </div>
-
-                    {/* Filter Chips */}
-                    {showFilters && (
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-wrap gap-3 mt-6"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
                         >
-                            {filters.map((filter) => (
-                                <motion.button
-                                    key={filter}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => setSelectedFilter(filter)}
-                                    className={`px-4 py-2 rounded-lg border transition-all ${selectedFilter === filter
-                                        ? 'bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] border-transparent text-white'
-                                        : 'bg-[#F6F7FB] border-[#E8ECF2] text-[#64748B] hover:border-[#C06C84]'
-                                        }`}
-                                >
-                                    {filter}
-                                </motion.button>
-                            ))}
+                            <h1 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-tight">
+                                Spas Matched <span className="text-[#C06C84]">for You</span>
+                            </h1>
+                            <p className="text-white/60 text-lg font-medium">
+                                {searchQuery ? `Searching for "${searchQuery}"` : 'Handpicked premium services in your area'}
+                            </p>
                         </motion.div>
-                    )}
 
-                    {/* Tabs */}
-                    <div className="flex gap-4 mt-6">
-                        <TabButton
-                            active={activeTab === 'all'}
-                            onClick={() => setActiveTab('all')}
-                        >
-                            All Services
-                        </TabButton>
-
+                        <div className="flex items-center gap-3">
+                            <div className="h-12 bg-white/10 backdrop-blur-md rounded-2xl px-4 flex items-center border border-white/10">
+                                <span className="text-white/80 text-sm font-bold">{sortedServices.length} Results</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Services Grid */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {!location && !loading ? (
-                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-[#E8ECF2] shadow-xl">
-                        <div className="p-6 rounded-full bg-[#F6F7FB] mb-6">
-                            <MapPin className="h-12 w-12 text-[#C06C84] animate-bounce" />
-                        </div>
-                        <h2 className="text-3xl font-bold text-[#0F172A] mb-3">Where are you?</h2>
-                        <p className="text-[#64748B] text-center max-w-md mb-8 px-6 leading-relaxed">
-                            Discover the best spas and salons in your neighborhood. Please set your location to continue.
-                        </p>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => detectLocation()}
-                            className="px-10 py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-2xl font-bold shadow-lg shadow-[#C06C84]/30 hover:shadow-[#C06C84]/50 transition-all"
-                        >
-                            Find Near Me
-                        </motion.button>
+            {/* Search & Mobile Filter Bar */}
+            <div className="max-w-7xl mx-auto px-4 -mt-8 relative z-20">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white rounded-2xl shadow-xl p-4 border border-gray-100 flex items-center gap-4"
+                >
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <Input
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchQuery(val);
+                                const currentParams = new URLSearchParams(searchParams.toString());
+                                if (val) currentParams.set('query', val);
+                                else currentParams.delete('query');
+                                router.replace(`${pathname}?${currentParams.toString()}`);
+                            }}
+                            placeholder="Find treatments, salons, or experts..."
+                            className="pl-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400"
+                        />
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {loading ? (
-                            [1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] shadow-md animate-pulse">
-                                    {/* Image shimmer */}
-                                    <div className="h-56 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
-                                    {/* Content shimmer */}
-                                    <div className="p-6">
-                                        <div className="h-5 bg-gray-200 rounded-lg w-3/4 mb-2" />
-                                        <div className="h-4 bg-gray-100 rounded-lg w-1/2 mb-5" />
-                                        <div className="flex gap-3 mb-4">
-                                            <div className="h-4 bg-gray-200 rounded-lg w-20" />
-                                            <div className="h-4 bg-gray-100 rounded-lg w-16" />
-                                        </div>
-                                        <div className="h-4 bg-gray-100 rounded-lg w-28 mb-6" />
-                                        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                                            <div className="h-7 bg-gray-200 rounded-lg w-20" />
-                                            <div className="h-9 bg-gray-200 rounded-xl w-28" />
-                                        </div>
+                    
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <button className="flex items-center space-x-2 px-6 h-12 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors shrink-0 lg:hidden">
+                                <Sliders className="w-5 h-5" />
+                                <span className="font-bold text-sm">Filters</span>
+                            </button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto custom-scrollbar">
+                            <SheetHeader className="pb-6 border-b border-gray-100">
+                                <SheetTitle className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                                    <Filter className="w-5 h-5 text-[#C06C84]" />
+                                    Filters
+                                </SheetTitle>
+                            </SheetHeader>
+                            <div className="mt-6">
+                                <FilterPanel showTitle={false} />
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                </motion.div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="flex gap-8">
+                    {/* Desktop Sidebar */}
+                    <div className="hidden lg:block w-80 flex-shrink-0">
+                        <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28">
+                            <FilterPanel />
+                        </div>
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="flex-1 min-w-0">
+                        {!location && !loading ? (
+                            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-[#E8ECF2] shadow-xl">
+                                <div className="p-6 rounded-full bg-[#F6F7FB] mb-6">
+                                    <MapPin className="h-12 w-12 text-[#C06C84] animate-bounce" />
+                                </div>
+                                <h2 className="text-3xl font-bold text-[#0F172A] mb-3">Where are you?</h2>
+                                <p className="text-[#64748B] text-center max-w-md mb-8 px-6 leading-relaxed">
+                                    Discover the best spas and salons in your neighborhood. Please set your location to continue.
+                                </p>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => detectLocation()}
+                                    className="px-10 py-4 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white rounded-2xl font-bold shadow-lg shadow-[#C06C84]/30 hover:shadow-[#C06C84]/50 transition-all font-bold"
+                                >
+                                    Find Near Me
+                                </motion.button>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Tab Row */}
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex bg-white p-1.5 rounded-2xl border border-gray-200 shadow-sm">
+                                        <button 
+                                            onClick={() => setActiveTab('all')}
+                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#1A0515] text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                                        >
+                                            All Services
+                                        </button>
+                                        <button 
+                                            onClick={() => setActiveTab('nearby')}
+                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'nearby' ? 'bg-[#1A0515] text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                                        >
+                                            Nearby
+                                        </button>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest hidden sm:block">Sort By:</span>
+                                        <select 
+                                            value={selectedFilter}
+                                            onChange={(e) => setSelectedFilter(e.target.value)}
+                                            className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-widest text-gray-700 outline-none focus:border-[#C06C84] transition-all cursor-pointer shadow-sm"
+                                        >
+                                            {filters.map(f => (
+                                                <option key={f} value={f}>{f}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
-                            ))
-                        ) : filteredServices.map((service, index) => (
-                            <ServiceCard
-                                key={service.id}
-                                service={service}
-                                index={index}
-                                router={router}
-                            />
-                        ))}
-                    </div>
-                )}
 
-                {!loading && filteredServices.length === 0 && (
-                    <div className="text-center py-20">
-                        <div className="text-6xl mb-4">🔍</div>
-                        <h3 className="text-2xl font-bold text-[#0F172A] mb-2">No services found</h3>
-                        <p className="text-[#64748B]">Try adjusting your search or filters</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {loading ? (
+                                        [1, 2, 4, 5].map((i) => (
+                                            <div key={i} className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] shadow-md animate-pulse h-[400px]" />
+                                        ))
+                                    ) : sortedServices.length > 0 ? (
+                                        sortedServices.map((service, index) => (
+                                            <ServiceCard
+                                                key={service.id}
+                                                service={service}
+                                                index={index}
+                                                router={router}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full">
+                                            <EmptyState 
+                                                icon="search"
+                                                title="No services found"
+                                                description="We couldn't find any services matching your current filters. Try resetting or adjusting your criteria."
+                                                actionLabel="Reset All Filters"
+                                                onAction={() => {
+                                                    setPriceRange([200, 5000]);
+                                                    setMinRating(0);
+                                                    router.push(pathname);
+                                                }}
+                                                className="bg-white rounded-[32px] border border-gray-100 shadow-sm"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
@@ -338,9 +608,9 @@ function ServiceCard({ service, index, router }) {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -10 }}
+            whileHover={{ y: -8 }}
             onClick={() => router.push(`/spa-salon/detail/${service.id}`)}
-            className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-md hover:shadow-xl transition-all"
+            className="bg-white rounded-[32px] overflow-hidden border border-gray-100 cursor-pointer group shadow-sm hover:shadow-2xl transition-all duration-500"
         >
             {/* Image */}
             <div className="relative h-56 overflow-hidden">
@@ -369,56 +639,50 @@ function ServiceCard({ service, index, router }) {
                 </motion.button> */}
 
                 {/* Availability Badge */}
-                <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium ${service.availability === 'Available Today'
-                    ? 'bg-[#22C55E] text-white'
-                    : 'bg-[#6C5CE7] text-white'
+                <div className={`absolute top-5 left-5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-lg backdrop-blur-md ${
+                    service.availability === 'Available Today'
+                    ? 'bg-green-500/90 text-white shadow-green-500/20'
+                    : 'bg-[#C06C84]/90 text-white shadow-[#C06C84]/20'
                     }`}>
                     {service.availability}
                 </div>
             </div>
 
             {/* Content */}
-            <div className="p-6">
-                <h3 className="text-xl font-semibold text-[#0F172A] mb-1">{service.name}</h3>
-                <p className="text-[#64748B] text-sm mb-4">{service.provider}</p>
-
-                {/* Stats */}
-                <div className="flex items-center gap-4 mb-4">
-                    <div className="flex items-center gap-1 text-[#C06C84]">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span className="text-[#0F172A] font-medium">{service.rating}</span>
-                        <span className="text-[#64748B] text-sm">({service.reviews})</span>
+            <div className="p-7">
+                <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-black text-gray-900 group-hover:text-[#C06C84] transition-colors">{service.name}</h3>
+                    <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        <span className="text-xs font-black text-amber-700">{service.rating}</span>
                     </div>
-                    {/* <div className="flex items-center gap-1 text-[#64748B]">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm">{service.duration}</span>
-                    </div> */}
                 </div>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">{service.provider}</p>
 
                 {/* Distance */}
                 {service.isNearby && (
-                    <div className="flex items-center gap-1 text-[#64748B] mb-4">
-                        <MapPin className="w-4 h-4 text-[#C06C84]" />
-                        <span className="text-sm">{service.distance} away</span>
+                    <div className="flex items-center gap-1.5 text-gray-400 mb-6 bg-gray-50 w-fit px-3 py-1.5 rounded-full">
+                        <MapPin className="w-3.5 h-3.5 text-[#C06C84]" />
+                        <span className="text-[10px] font-black uppercase tracking-wider">{service.distance} away</span>
                     </div>
                 )}
 
                 {/* Price & CTA */}
-                <div className="flex items-center justify-between pt-4 border-t border-[#E8ECF2]">
+                <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                     <div>
-                        <p className="text-[10px] text-[#6D1357] font-bold uppercase tracking-wider mb-0.5">Starting at</p>
-                        <p className="text-2xl font-bold text-[#0F172A]">₹{service.price}</p>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Starting at</p>
+                        <p className="text-2xl font-black text-gray-900">₹{service.price.toLocaleString()}</p>
                     </div>
                     <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/spa-salon/detail/${service.id}`);
                         }}
-                        className="px-6 py-2 bg-[#6d1357] text-white rounded-lg font-medium hover:shadow-lg hover:shadow-[#1A0515]/50 transition-all font-bold"
+                        className="px-6 py-3 bg-[#1A0515] text-white rounded-xl text-sm font-black hover:bg-[#C06C84] transition-all shadow-lg shadow-[#1A0515]/10"
                     >
-                        View Details
+                        Book Now
                     </motion.button>
                 </div>
             </div>

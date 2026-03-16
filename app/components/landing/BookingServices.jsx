@@ -139,12 +139,11 @@ export function BookingServices() {
     const subCategoryParam = encodeURIComponent(service.title);
 
     // Determine base slug dynamically
-    let baseSlug = 'appliances';
-    const upperCategory = service.category.toUpperCase();
-    const upperTitle = service.title.toUpperCase();
+    let baseSlug = serviceSlugs.appliances;
+    const upperCategory = (service.category || '').toUpperCase();
+    const upperTitle = (service.title || '').toUpperCase();
 
-    if (upperCategory.includes('APPLIANCE') || upperTitle.includes('APPLIANCE')) baseSlug = serviceSlugs.appliances;
-    else if (upperCategory.includes('RELIGIOUS') || upperTitle.includes('RELIGIOUS')) baseSlug = serviceSlugs.religious;
+    if (upperCategory.includes('RELIGIOUS') || upperTitle.includes('RELIGIOUS')) baseSlug = serviceSlugs.religious;
     else if (upperCategory.includes('PG') || upperTitle.includes('PG')) baseSlug = serviceSlugs.pg;
     else if (upperCategory.includes('SPA') || upperTitle.includes('SPA')) baseSlug = serviceSlugs.spa;
 
@@ -214,55 +213,57 @@ export function BookingServices() {
               </div>
             ))
           ) : (
-            services.map((service, index) => (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                className="group relative flex-shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[15.8%] snap-start flex flex-col"
-              >
-                <div className="relative flex-1 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#037166]/20 transition-all duration-300 flex flex-col">
-                  {/* Status Badge - Top Center */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-[#037166]/90 backdrop-blur-md rounded-b-lg rounded-t-none text-[15px]  text-white shadow-lg border border-t-0 border-[#037166]/20 whitespace-nowrap">
+            services.map((service, index) => {
+              return (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  className="group relative flex-shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[15.8%] snap-start flex flex-col cursor-pointer"
+                  onClick={() => handleServiceClick(service)}
+                >
+                  <div className="relative flex-1 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#037166]/20 transition-all duration-300 flex flex-col">
+                    {/* Status Badge - Top Center */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-[#037166]/90 backdrop-blur-md rounded-b-lg rounded-t-none text-[15px]  text-white shadow-lg border border-t-0 border-[#037166]/20 whitespace-nowrap">
 
-                    <h6 className="text-[10px] font-ubuntu tracking-wide">{service.status}</h6>
-                  </div>
+                      <h6 className="text-[10px] font-ubuntu tracking-wide">{service.status}</h6>
+                    </div>
 
-                  {/* Image - Fixed height */}
-                  <div className="relative h-40 overflow-hidden flex-shrink-0">
-                    <ImageWithFallback
-                      src={service.image}
-                      alt={service.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      style={{ width: '100%', height: '100%' }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+                    {/* Image - Fixed height */}
+                    <div className="relative h-40 overflow-hidden flex-shrink-0">
+                      <ImageWithFallback
+                        src={service.image}
+                        alt={service.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
 
-                    {/* Rating Badge - Bottom Left Flush */}
-                    <div className="absolute bottom-0 left-0 z-20">
-                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
-                        <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                        <span className="text-sm font-bold text-white">{service.rating}</span>
+                      {/* Rating Badge - Bottom Left Flush */}
+                      <div className="absolute bottom-0 left-0 z-20">
+                        <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
+                          <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
+                          <span className="text-sm font-bold text-white">{service.rating}</span>
+                        </div>
+                      </div>
+
+                      {/* Book Now Button Badge - Bottom Center */}
+                      <div
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 px-6 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:opacity-100 hover:bg-[#025951]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleServiceClick(service);
+                        }}
+                      >
+                        <h6 className="text-[12px] font-ubuntu tracking-wider text-white bg-clip-text text-transparent">Book Now</h6>
                       </div>
                     </div>
 
-                    {/* Book Now Button Badge - Bottom Center */}
-                    <div
-                      className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 px-6 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:opacity-100 hover:bg-[#025951]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleServiceClick(service);
-                      }}
-                    >
-                      <h6 className="text-[12px] font-ubuntu tracking-wider text-white bg-clip-text text-transparent">Book Now</h6>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-4 flex flex-col">
+                    {/* Content */}
+                    <div className="p-4 flex flex-col">
                     <div className="space-y-1">
 
                       {/* Category + Rating */}
@@ -290,7 +291,8 @@ export function BookingServices() {
                   <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
                 </div>
               </motion.div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

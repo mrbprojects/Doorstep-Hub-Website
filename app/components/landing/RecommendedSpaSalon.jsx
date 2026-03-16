@@ -307,10 +307,10 @@ export function RecommendedSpaSalon() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.7 }}
-              className={`flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group relative ${place.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
+              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group relative cursor-not-allowed"
             >
               {/* Premium Card - Original sizing preserved */}
-              <div className={`relative h-full bg-gradient-to-br from-[#1a1a1a] via-[#1a1510] to-[#0f0f0f] border-2 border-[#037166]/30 rounded-3xl overflow-hidden ${place.isDummy ? 'pointer-events-none' : ''}`}>
+              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a] via-[#1a1510] to-[#0f0f0f] border-2 border-[#037166]/30 rounded-3xl overflow-hidden pointer-events-none">
                 {/* Top Badge */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-2 px-8 py-1 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] backdrop-blur-md rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 shadow-lg whitespace-nowrap">
                   <Award className="w-3 h-3 text-white" />
@@ -337,20 +337,16 @@ export function RecommendedSpaSalon() {
                     </div>
                   </div> */}
 
-                  {/* Shimmer Effect */}
-                  <motion.div
-                    initial={{ x: '-100%' }}
-                    whileHover={place.isDummy ? {} : { x: '100%' }}
-                    transition={{ duration: 1 }}
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
-                  />
+                  {/* Coming Soon Overlay */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
+                    <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
+                  </div>
                 </div>
 
                 {/* Content - Original spacing preserved */}
                 <div className="p-8 -mt-20 relative z-10">
                   {/* Main Info Card */}
                   <motion.div
-                    whileHover={place.isDummy ? {} : { y: -5 }}
                     className="p-6 bg-[#1a1a1a]/90 backdrop-blur-xl border border-[#037166]/30 rounded-2xl mb-6 shadow-xl h-[340px] flex flex-col justify-between"
                   >
                     <div className="mb-4">
@@ -377,13 +373,10 @@ export function RecommendedSpaSalon() {
                         </div>
                       </div>
 
-                      {/* Right: View Details Button - Inline */}
-                      <div
-                        onClick={() => !place.isDummy && (window.location.href = `/spa-salon?storeId=${place.id}`)}
-                        className={`cursor-pointer ${place.isDummy ? 'pointer-events-none opacity-50' : ''}`}
-                      >
-                        <div className="px-3 py-1.5 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full font-semibold text-[10px] shadow-lg shadow-[#037166]/30 whitespace-nowrap hover:scale-105 transition-transform">
-                          <span className="text-white">
+                      {/* Right: View Details Button - Disabled */}
+                      <div className="opacity-50 pointer-events-none">
+                        <div className="px-3 py-1.5 bg-gray-700 rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap">
+                          <span className="text-gray-300">
                             View Details
                           </span>
                         </div>
@@ -415,9 +408,6 @@ export function RecommendedSpaSalon() {
                 </div>
 
                 {/* Premium Glow Effect */}
-                {!place.isDummy && (
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/20 via-[#d4af37]/20 to-[#037166]/20 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 -z-10" />
-                )}
               </div>
             </motion.div>
           ))}

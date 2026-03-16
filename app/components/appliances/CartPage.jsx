@@ -41,25 +41,27 @@ export function CartPage({
       className="min-h-screen pt-20 pb-32 bg-slate-50/50"
     >
       {/* Header */}
-      <section className="sticky top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
+      <section className="sticky top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-[80px]" />
+
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6 relative z-10">
           <div className="flex items-center justify-between">
             <motion.button
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onBack}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all text-[10px] font-black uppercase tracking-widest"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               Continue Shopping
             </motion.button>
 
             {cartItems.length > 0 && (
               <button
                 onClick={handleClear}
-                className="text-white/60 hover:text-red-400 text-sm flex items-center gap-2 transition-colors"
+                className="text-white/40 hover:text-white text-[10px] flex items-center gap-2 transition-colors font-black uppercase tracking-widest"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
                 Clear Cart
               </button>
             )}
@@ -69,12 +71,14 @@ export function CartPage({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mt-4 text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
+            className="mt-6 text-3xl md:text-4xl font-black text-white flex items-center gap-4"
           >
-            <ShoppingCart className="w-8 h-8" />
-            Your Service Cart
+            <div className="p-3 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-md">
+              <ShoppingCart className="w-8 h-8 md:w-9 md:h-9" />
+            </div>
+            Service Hub
             {cartItems.length > 0 && (
-              <span className="text-lg text-white/80">({cartItems.length} item{cartItems.length > 1 ? 's' : ''})</span>
+              <span className="text-lg md:text-xl text-white/50 font-medium tracking-tighter">/ {cartItems.length} ITEM{cartItems.length > 1 ? 's' : ''}</span>
             )}
           </motion.h1>
         </div>
@@ -113,60 +117,63 @@ export function CartPage({
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ delay: index * 0.05 }}
                     layout
-                    className="group relative rounded-2xl p-6 bg-white border border-slate-200 hover:border-[#037166]/30 hover:shadow-md transition-all duration-300"
+                    className="group relative rounded-3xl p-5 bg-white border border-[#037166]/10 hover:border-[#037166]/40 hover:shadow-xl hover:shadow-[#037166]/5 transition-all duration-500"
                   >
-                    <div className="flex gap-6">
-                      {/* Image */}
-                      <div className="w-24 h-24 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
+                    <div className="flex gap-6 items-start">
+                      {/* Image - Compact */}
+                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-50 flex-shrink-0 border border-slate-100">
                         <img
                           src={item.itemImage ? `https://api.doorstephub.com/${item.itemImage}` : `https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg`}
                           alt={item.itemName}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                       </div>
 
                       {/* Service Info */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="min-w-0 pr-4">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="px-2 py-0.5 rounded-md bg-[#037166]/5 text-[#037166] text-[8px] font-black uppercase tracking-widest border border-[#037166]/10">
+                                {item.itemType === 'service' ? 'Service' : 'Add-on'}
+                              </span>
+                            </div>
+                            <h4 className="text-lg md:text-xl font-black text-slate-900 group-hover:text-[#037166] transition-colors leading-tight truncate">
                               {item.itemName}
                             </h4>
-                            {item.itemType === 'addon' && item.parentServiceName && (
-                              <p className="text-slate-400 text-sm flex items-center gap-1">
-                                <Tag className="w-3 h-3" />
-                                Addon for: {item.parentServiceName}
-                              </p>
-                            )}
                           </div>
                           <button
                             onClick={() => handleRemove(item.itemId)}
-                            className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors"
+                            className="p-2 rounded-xl bg-red-50 hover:bg-red-500 text-red-500 hover:text-white transition-all shadow-sm flex-shrink-0"
                           >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
 
                         {item.description && (
-                          <p className="text-slate-500 text-sm mb-3 line-clamp-2">{item.description}</p>
+                          <p className="text-slate-400 text-xs mb-4 line-clamp-1 italic leading-relaxed">
+                            {item.description}
+                          </p>
                         )}
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <h6 className="px-3 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20 text-[#037166] text-xs font-semibold">
-                              {item.itemType === 'service' ? 'Service' : 'Add-on'}
-                            </h6>
-                            <span className="text-slate-400 text-sm">
-                              Qty: {item.quantity}
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                          <div className="flex items-center gap-4">
+                            <span className="text-slate-300 font-black text-[9px] uppercase tracking-widest">
+                              Quantity: <span className="text-slate-900">{item.quantity}</span>
                             </span>
+                            {item.itemType === 'addon' && item.parentServiceName && (
+                              <div className="hidden sm:flex items-center gap-1 text-[9px] text-[#037166] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#037166]/5">
+                                For: {item.parentServiceName.slice(0, 15)}...
+                              </div>
+                            )}
                           </div>
 
                           <div className="text-right">
-                            <div className="text-2xl font-bold text-slate-900">
+                            <div className="text-2xl font-black text-slate-900 group-hover:text-[#037166] transition-colors tracking-tighter">
                               ₹{item.subtotal.toFixed(2)}
                             </div>
-                            <div className="text-sm text-slate-400">
-                              ₹{item.price} {item.priceUnit}
+                            <div className="text-[8px] text-slate-400 font-black tracking-widest uppercase">
+                              Base Price
                             </div>
                           </div>
                         </div>

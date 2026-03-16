@@ -289,13 +289,15 @@ export function PremiumPGHostels() {
 
           {/* Explore All Button */}
           <motion.button
-            onClick={() => router.push('/pghostels')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/30 hover:shadow-xl hover:shadow-[#037166]/40 transition-all"
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-700/50 text-gray-400 rounded-xl font-semibold shadow-lg cursor-not-allowed group/header-btn relative overflow-hidden"
           >
             <span>Explore All PG & Hostels</span>
             <ArrowRight className="w-5 h-5" />
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/header-btn:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-[10px] font-bold text-[#ff6b35] uppercase tracking-tighter">Coming Soon</span>
+            </div>
           </motion.button>
         </motion.div>
 
@@ -319,13 +321,12 @@ export function PremiumPGHostels() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.6 }}
-                className={`flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group ${hostel.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
+                className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-default"
               >
                 {/* Card with Parallax Effect */}
                 <motion.div
-                  whileHover={hostel.isDummy ? {} : {}}
                   transition={{ type: 'spring', stiffness: 300 }}
-                  className={`relative h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl ${hostel.isDummy ? 'pointer-events-none' : ''}`}
+                  className="relative h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl"
                   style={{ transformStyle: 'preserve-3d' }}
                 >
                   {/* Type Badge */}
@@ -339,7 +340,6 @@ export function PremiumPGHostels() {
                   {/* Image with Depth */}
                   <div className="relative h-48 overflow-hidden">
                     <motion.div
-                      whileHover={hostel.isDummy ? {} : {}}
                       transition={{ duration: 0.6 }}
                     >
                       <ImageWithFallback
@@ -348,6 +348,11 @@ export function PremiumPGHostels() {
                         className="w-full h-full object-cover"
                       />
                     </motion.div>
+
+                    {/* Coming Soon Overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
+                      <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
+                    </div>
 
                     {/* Architectural Grid Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
@@ -376,8 +381,8 @@ export function PremiumPGHostels() {
                       </div> */}
                     </div>
 
-                    {/* Price */}
-                    <div className="mb-2 p-2 border border-[#037166]/20 rounded-xl flex items-center justify-between gap-2">
+                    {/* Price - Disabled interaction */}
+                    <div className="mb-2 p-2 border border-[#037166]/20 rounded-xl flex items-center justify-between gap-2 opacity-80">
 
                       {/* Left: Price */}
                       <div>
@@ -391,22 +396,16 @@ export function PremiumPGHostels() {
 
 
 
-                      {/* Right: Book Now */}
-                      <div className={`${hostel.isDummy ? 'opacity-100 pointer-events-none' : ''}`}>
-                        <Link
-                          href={hostel.isDummy ? '#' : `/pghostels/hostel-detail/${hostel.id}`}
+                      {/* Right: Book Now - Disabled */}
+                      <div className="opacity-50">
+                        <motion.button
+                          disabled
+                          className="px-2 py-1.5 bg-gray-700 rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap cursor-not-allowed"
                         >
-                          <motion.button
-                            whileHover={{ scale: 1.04 }}
-                            whileTap={{ scale: 0.97 }}
-                            disabled={hostel.isDummy}
-                            className="px-2 py-1.5 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full font-semibold text-[10px] shadow-lg shadow-[#037166]/30 whitespace-nowrap"
-                          >
-                            <span className="text-white">
-                              Book Now
-                            </span>
-                          </motion.button>
-                        </Link>
+                          <span className="text-gray-300">
+                            Book Now
+                          </span>
+                        </motion.button>
                       </div>
 
                     </div>

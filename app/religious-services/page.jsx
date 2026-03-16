@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import {
   Sparkles, Flame, Home as HomeIcon, User,
   Calendar, Shield, Award, Heart,
-  MapPin, Star, Clock, CheckCircle, ArrowRight, Zap
+  MapPin, Star, Clock, CheckCircle, ArrowRight, Zap,
+  Mountain, Waves, Wind
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useLocationContext } from '@/context/LocationContext';
@@ -193,88 +194,68 @@ export default function ReligiousServicesPage() {
     <div className="min-h-screen bg-[var(--off-white)]">
 
       {/* 1. HERO SECTION - Calm & Divine with Animated Elements */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[110vh] flex items-center overflow-hidden">
         {/* Vertical Gradient Background: White â†’ Saffron â†’ Deep Maroon */}
         <div className="absolute inset-0 bg-gradient-to-b from-white via-[#FFF8E7] to-[#8B4513]/30" />
 
         {/* Floating Religious Motifs - Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Om Symbol - Top Left */}
+          {/* Left Side Elements (Earth & Fire) */}
           <motion.div
-            initial={{ opacity: 0, y: 100 }}
+            initial={{ opacity: 0, x: -100 }}
             animate={{
-              opacity: [0.08, 0.12, 0.08],
-              y: [100, 0, 100],
+              opacity: [0.15, 0.22, 0.15],
+              y: [0, 30, 0],
               rotate: [0, 5, 0]
             }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute top-20 left-[10%] text-9xl text-[var(--saffron)]"
-            style={{ fontFamily: 'serif' }}
+            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[25%] left-[10%] text-[var(--saffron)] flex flex-col items-center drop-shadow-[0_0_15px_rgba(255,153,51,0.2)]"
           >
-            ॐ
+            <Mountain className="h-32 w-32 opacity-70" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] mt-2 opacity-50">Pritvi</span>
           </motion.div>
 
-          {/* Swastika - Top Right */}
           <motion.div
-            initial={{ opacity: 0, y: 150 }}
+            initial={{ opacity: 0, x: -100 }}
             animate={{
-              opacity: [0.06, 0.1, 0.06],
-              y: [150, 50, 150],
-              rotate: [0, -8, 0]
+              opacity: [0.18, 0.28, 0.18],
+              y: [0, -30, 0],
+              scale: [1, 1.05, 1]
             }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2
-            }}
-            className="absolute top-32 right-[15%] text-9xl text-[var(--temple-red)]"
-            style={{ fontFamily: 'serif' }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute bottom-[25%] left-[15%] text-[var(--temple-red)] flex flex-col items-center drop-shadow-[0_0_20px_rgba(139,26,26,0.3)]"
           >
-            卐
+            <Flame className="h-36 w-36 opacity-80" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] mt-2 opacity-50">Agni</span>
           </motion.div>
 
-          {/* Flame - Bottom Left */}
+          {/* Right Side Elements (Water & Air) */}
           <motion.div
-            initial={{ opacity: 0, y: -100 }}
+            initial={{ opacity: 0, x: 100 }}
             animate={{
-              opacity: [0.07, 0.11, 0.07],
-              y: [-100, 0, -100],
-              rotate: [0, 10, 0]
+              opacity: [0.15, 0.22, 0.15],
+              y: [0, -40, 0],
+              rotate: [0, -5, 0]
             }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 4
-            }}
-            className="absolute bottom-40 left-[20%]"
+            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-[25%] right-[10%] text-[var(--sacred-teal)] flex flex-col items-center drop-shadow-[0_0_15px_rgba(3,113,102,0.2)]"
           >
-            <Flame className="h-28 w-28 text-[var(--saffron)]" />
+            <Waves className="h-32 w-32 opacity-70" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] mt-2 opacity-50">Jal</span>
           </motion.div>
 
-          {/* Swastika - Middle Right */}
           <motion.div
-            initial={{ opacity: 0, y: 80 }}
+            initial={{ opacity: 0, x: 100 }}
             animate={{
-              opacity: [0.05, 0.09, 0.05],
-              y: [80, 20, 80],
-              rotate: [0, -12, 0]
+              opacity: [0.12, 0.2, 0.12],
+              y: [0, 40, 0],
+              x: [100, 120, 100]
             }}
-            transition={{
-              duration: 22,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 6
-            }}
-            className="absolute top-1/2 right-[8%] text-8xl text-[var(--sacred-teal)]"
-            style={{ fontFamily: 'serif' }}
+            transition={{ duration: 28, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+            className="absolute bottom-[25%] right-[15%] text-sky-400 flex flex-col items-center drop-shadow-[0_0_15px_rgba(56,189,248,0.2)]"
           >
-            卐
+            <Wind className="h-28 w-28 opacity-70" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] mt-2 opacity-50">Vayu</span>
           </motion.div>
 
           {/* Floating Particles - Gold/Saffron Dots */}
@@ -356,28 +337,46 @@ export default function ReligiousServicesPage() {
               <h6 className="text-sm font-medium text-[var(--temple-red)]">Trusted by 50,000+ Devotees</h6>
             </motion.div>
 
-            {/* Main Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.5 }}
-              className="text-5xl md:text-7xl font-bold mb-6 text-[var(--deep-charcoal)] leading-tight"
+            {/* Centered Sacred Om Symbol */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="mb-8 text-7xl text-[var(--warm-gold)] drop-shadow-[0_0_20px_rgba(255,191,0,0.5)] flex justify-center"
+              style={{ fontFamily: 'serif' }}
             >
-              Book Trusted Religious &{' '}
-              <span className="bg-gradient-to-r from-[var(--saffron)] via-[var(--temple-red)] to-[var(--vermilion)] bg-clip-text text-transparent">
-                Spiritual Services
-              </span>
-            </motion.h1>
+            </motion.div>
 
-            {/* Subheadline */}
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.7 }}
-              className="text-xl md:text-2xl text-[var(--muted-foreground)] mb-10 leading-relaxed max-w-3xl mx-auto"
-            >
-              Astrology consultations, poojas, homams, and sacred ceremonies  all in one place.
-            </motion.p>
+            {/* Main Headline with Background Om */}
+          {/* Main Headline with Background Om */}
+<div className="relative mb-12">
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ 
+      opacity: [0.12, 0.2, 0.12], // Increased from 0.04-0.08 to 0.12-0.2
+      scale: [1, 1.05, 1],
+    }}
+    transition={{ 
+      duration: 6, 
+      repeat: Infinity, 
+      ease: "easeInOut" 
+    }}
+    className="absolute inset-0 flex items-center justify-center pointer-events-none select-none -z-10 text-[15rem] md:text-[25rem] text-[var(--saffron)] font-serif leading-none"
+  >
+    ॐ
+  </motion.div>
+  <motion.h1
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.9, delay: 0.5 }}
+    className="text-5xl md:text-7xl font-bold text-[var(--deep-charcoal)] leading-tight relative z-10"
+  >
+    Book Trusted Religious &{' '}
+    <span className="bg-gradient-to-r from-[var(--saffron)] via-[var(--temple-red)] to-[var(--vermilion)] bg-clip-text text-transparent">
+      Spiritual Services
+    </span>
+  </motion.h1>
+</div>
 
             {/* CTA Buttons */}
             <motion.div
@@ -547,59 +546,68 @@ export default function ReligiousServicesPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredLoading ? (
-                <div className="col-span-4 flex items-center justify-center py-20">
-                  <div className="w-10 h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin" />
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  {featuredLoading ? (
+    <div className="col-span-4 flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin" />
+    </div>
+  ) : featuredServices.slice(0, 4).map((service, index) => (
+    <motion.div
+      key={index}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      viewport={{ once: true }}
+      className="w-full"
+    >
+      <Card
+        className="h-full bg-white hover:shadow-lg transition-shadow cursor-pointer group"
+        onClick={() => router.push(`/religious-services/service/${service._id}`)}
+      >
+        <CardContent className="p-6 h-full flex flex-col">
+          {/* Name and Image Side by Side */}
+          <div className="flex items-center gap-3 mb-4">
+            {/* Image Circle */}
+            <div className="h-14 w-14 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--saffron)]/10 to-[var(--temple-red)]/10 group-hover:scale-110 transition-transform shadow-sm flex-shrink-0">
+              {service.image ? (
+                <img
+                  src={`https://api.doorstephub.com/${service.image}`}
+                  alt={service.serviceName}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg class="h-8 w-8 text-[var(--saffron)]" ...></svg></div>';
+                  }}
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-[var(--saffron)]" />
                 </div>
-              ) : featuredServices.slice(0, 4).map((service, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="w-full"
-                >
-                  <Card
-                    className="h-full bg-white hover:shadow-lg transition-shadow cursor-pointer group"
-                    onClick={() => router.push(`/religious-services/service/${service._id}`)}
-                  >
-                    <CardContent className="p-6 h-full flex flex-col">
-                      <div className="mb-4 h-14 w-14 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--saffron)]/10 to-[var(--temple-red)]/10 group-hover:scale-110 transition-transform shadow-sm">
-                        {service.image ? (
-                          <img
-                            src={`https://api.doorstephub.com/${service.image}`}
-                            alt={service.serviceName}
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <Sparkles className="h-full w-full p-3 text-[var(--saffron)]" />
-                        )}
-                      </div>
-                      <h3 className="text-lg font-semibold text-[var(--deep-charcoal)] mb-2 group-hover:text-[var(--saffron)] transition-colors line-clamp-1">
-                        {service.serviceName || `${service.firstName} ${service.lastName}`}
-                      </h3>
-                      <p className="text-sm text-[var(--muted-foreground)] mb-4 line-clamp-3 title" title={service.bio || ''}>
-                        {service.bio?.replace(/<[^>]+>/g, '') || 'Expert religious services.'}
-                      </p>
-
-                      <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-2">
-                        <span className="text-[11px] uppercase  font-bold text-[var(--saffron)] tracking-wider">
-                          Starting at ₹{service.startingAt || service.serviceBookingCost || 500}
-                        </span>
-                        {/* <span className="text-[10px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter">
-                          <CheckCircle className="h-3 w-3" /> Cash on Service Delivery
-                        </span> */}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+              )}
             </div>
+            
+            {/* Name */}
+            <h3 className="text-lg font-semibold text-[var(--deep-charcoal)] group-hover:text-[var(--saffron)] transition-colors line-clamp-2 flex-1">
+              {service.serviceName || `${service.firstName} ${service.lastName}`}
+            </h3>
+          </div>
+
+          {/* Description */}
+          <p className="text-sm text-[var(--muted-foreground)] mb-4 line-clamp-3" title={service.bio || ''}>
+            {service.bio?.replace(/<[^>]+>/g, '') || 'Expert religious services.'}
+          </p>
+
+          {/* Footer */}
+          <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-2">
+            <span className="text-[11px] font-bold text-[var(--saffron)] tracking-wider">
+              <span className="text-[11px] italic font-bold text-[var(--saffron)] tracking-wider">Starting at</span> ₹{service.startingAt || service.serviceBookingCost}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  ))}
+</div>
           </div>
         </section>
       </SectionReveal>

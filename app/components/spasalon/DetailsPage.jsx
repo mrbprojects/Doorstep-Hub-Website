@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, Heart, ChevronRight, Check } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/spasalon/ui/tabs';
@@ -201,7 +201,6 @@ export function DetailsPage() {
                             </TabsList>
                         </div>
 
-                        {/* Details Tab */}
                         <TabsContent value="details">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -213,12 +212,11 @@ export function DetailsPage() {
                             </motion.div>
                         </TabsContent>
 
-                        {/* Services / Portfolio Tab */}
                         <TabsContent value="services">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="grid gap-4"
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
                             >
                                 {service.packages.map((pkg) => {
                                     const isSelected = selectedPackages.some(p => p._id === pkg._id);

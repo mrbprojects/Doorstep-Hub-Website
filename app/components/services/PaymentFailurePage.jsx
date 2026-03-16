@@ -43,21 +43,7 @@ export function PaymentFailurePage() {
     }, [searchParams]);
 
     const handleRetry = () => {
-        // Check for saved booking data
-        const savedAddress = sessionStorage.getItem('selected_address');
-        const bookingDetails = sessionStorage.getItem('booking_package_details');
-        const serviceId = searchParams.get('serviceId');
-
-        if (savedAddress || searchParams.get('address')) {
-            // If we have address, redirect back to confirmation page
-            router.push('/services/booking');
-        } else if (bookingDetails || serviceId) {
-            // If we have booking details or serviceId, redirect to address selection
-            router.push('/services/address');
-        } else {
-            // Fallback to home if no data
-            router.push('/services');
-        }
+        router.push('/services/cart');
     };
 
     const handleGoHome = () => {

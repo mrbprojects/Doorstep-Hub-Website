@@ -212,7 +212,7 @@ export function CartPage({
 
                     <div className="flex justify-between items-start text-white/70 text-sm">
                       <div className="flex flex-col">
-                        <span>Online Consultation Fee</span>
+                        <span>Platform Fee</span>
                         <div className="flex items-center gap-1 text-[#04a99d] text-[10px] font-normal">
                           <Info className="w-3 h-3" />
                           <span>Payable Online</span>

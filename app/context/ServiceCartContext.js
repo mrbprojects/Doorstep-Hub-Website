@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from './AuthContext';
 import { useAuthModal } from './AuthModalContext';
 import { toast } from 'sonner';
@@ -16,6 +17,8 @@ export const ServiceCartProvider = ({ children }) => {
     const [cartData, setCartData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [cartError, setCartError] = useState(false);
+    const pathname = usePathname();
+    const [currentServiceFlow, setCurrentServiceFlow] = useState(null);
 
     const fetchCart = useCallback(async () => {
         if (!isAuthenticated) return;
@@ -47,6 +50,7 @@ export const ServiceCartProvider = ({ children }) => {
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
+
 
     const addToCart = async (providerId, itemId, itemType = 'service', quantity = 1, parentServiceId = null, providerType = 'regular', suppressToast = false) => {
         if (!isAuthenticated) {
@@ -119,7 +123,7 @@ export const ServiceCartProvider = ({ children }) => {
         }
     };
 
-    const clearCart = async (suppressToast = false) => {
+    const clearCart = useCallback(async (suppressToast = false) => {
         if (!isAuthenticated) return;
         try {
             const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/service-cart/clear', {
@@ -138,7 +142,25 @@ export const ServiceCartProvider = ({ children }) => {
             console.error('Error clearing service cart:', error);
             if (!suppressToast) toast.error('Failed to clear cart');
         }
-    };
+    }, [token, isAuthenticated]);
+
+    // Handle service category changes to clear the cart
+    useEffect(() => {
+        const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
+        const segments = pathname.split('/').filter(Boolean);
+        const match = serviceCategories.find(cat => segments.includes(cat));
+
+        if (match) {
+            if (currentServiceFlow && currentServiceFlow !== match) {
+                // If we've shifted from one service category to another, clear the cart
+                console.log(`🛒 Service Flow Change: ${currentServiceFlow} -> ${match}. Clearing cart...`);
+                if (cartItems.length > 0) {
+                    clearCart(true); // true to suppress "Failed to clear cart" toast if unauthorized
+                }
+            }
+            setCurrentServiceFlow(match);
+        }
+    }, [pathname, currentServiceFlow, cartItems.length, clearCart]);
 
     return (
         <ServiceCartContext.Provider value={{

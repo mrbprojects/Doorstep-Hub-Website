@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { motion } from 'motion/react';
-import { ArrowLeft, Star, MapPin, Sparkles, Filter, CheckCircle, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ArrowLeft, Star, MapPin, Sparkles, Filter, CheckCircle, Clock, Sliders, X, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLocationContext } from '@/context/LocationContext';
+import { Slider } from '@/components/pghostels/ui/slider';
+import { Checkbox } from '@/components/pghostels/ui/checkbox';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
 
 function SubCategoryServicesContent() {
     const router = useRouter();
@@ -21,11 +24,73 @@ function SubCategoryServicesContent() {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Filters state
+    const [priceRange, setPriceRange] = useState([500, 50000]);
+    const [minRating, setMinRating] = useState(0);
+
+    const [expandedCategory, setExpandedCategory] = useState(categoryId);
+    const [activeCategoryName, setActiveCategoryName] = useState(categoryName);
+    const [categories, setCategories] = useState([]);
+    const [allSubCategories, setAllSubCategories] = useState([]);
+
+    // Sync expanded category with URL params
+    useEffect(() => {
+        if (categoryId) {
+            setExpandedCategory(categoryId);
+            // Also find the initial category name if possible
+            const currentCat = categories.find(c => c._id === categoryId);
+            if (currentCat) {
+                setActiveCategoryName(currentCat.name);
+            }
+        }
+    }, [categoryId, categories]);
+
     useEffect(() => {
         if (!location) {
             detectWithIP().catch(err => console.log("Auto detect failed", err));
         }
     }, [location]);
+
+    // Fetch Categories
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serviceId: '695250aa57bb211ca094e5fd' })
+                });
+                const data = await response.json();
+                if (data.success && data.category) {
+                    setCategories(data.category);
+                    // If no expanded category, set the current one
+                    if (!expandedCategory && categoryId) {
+                        setExpandedCategory(categoryId);
+                    }
+                }
+            } catch (e) { console.log(e); }
+        };
+        fetchCategories();
+    }, []);
+
+    // Fetch Subcategories for active category
+    useEffect(() => {
+        const fetchSubCategories = async () => {
+            if (!expandedCategory) return;
+            try {
+                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categoryId: expandedCategory })
+                });
+                const data = await response.json();
+                if (data.success && data.data) {
+                    setAllSubCategories(data.data);
+                }
+            } catch (e) { console.log(e); }
+        };
+        fetchSubCategories();
+    }, [expandedCategory]);
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -33,15 +98,19 @@ function SubCategoryServicesContent() {
             try {
                 const lat = location?.lat || 17.3850;
                 const lng = location?.lng || 78.4867;
+                
+                // Get religious services serviceId
+                const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
 
-                // Providing `subcategoryId` to the API
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         lattitude: lat,
                         longitude: lng,
-                        subcategoryId: params.id,
+                        subCategoryId: params.id,
+                        categoryId: categoryId,
+                        serviceId: RELIGIOUS_SERVICE_ID
                     })
                 });
                 const data = await response.json();
@@ -56,13 +125,154 @@ function SubCategoryServicesContent() {
             }
         };
         fetchServices();
-    }, [location, params.id]);
+    }, [location, params.id, categoryId]);
+
+    const filteredServices = useMemo(() => {
+        return services.filter(service => {
+            const price = service.startingAt || service.BasePrice || service.minFare || 1100;
+            const rating = service.avgRating || 4.8;
+            
+            const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
+            const matchesRating = rating >= minRating;
+            
+            return matchesPrice && matchesRating;
+        });
+    }, [services, priceRange, minRating]);
+
+    const FilterPanel = ({ className = "" }) => (
+        <div className={`space-y-6 ${className}`}>
+            <h4 className="text-xl font-black text-[var(--deep-charcoal)] mb-6 flex items-center gap-2">
+                <Filter className="w-5 h-5 text-[var(--saffron)]" />
+                Filters
+            </h4>
+
+            {/* Categories Filter (Accordion Style) - Spiritual Light Theme */}
+            <div className="mb-8 border-b border-orange-100 pb-6">
+                <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Ritual Categories</h6>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {categories.map((cat) => (
+                        <div key={cat._id} className="overflow-hidden">
+                            <button
+                                onClick={() => {
+                                    if (expandedCategory === cat._id) setExpandedCategory(null);
+                                    else {
+                                        setExpandedCategory(cat._id);
+                                        setActiveCategoryName(cat.name);
+                                    }
+                                }}
+                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
+                                    expandedCategory === cat._id || cat._id === categoryId
+                                    ? 'bg-[var(--saffron)]/10 text-[var(--saffron)] font-bold border border-[var(--saffron)]/20 shadow-sm' 
+                                    : 'text-gray-600 hover:bg-orange-50/50 hover:text-[var(--saffron)] border border-transparent'
+                                }`}
+                            >
+                                <span className="truncate">{cat.name}</span>
+                                {expandedCategory === cat._id ? (
+                                    <ChevronRight className="w-4 h-4 rotate-90 transition-transform text-[var(--saffron)]" />
+                                ) : (
+                                    <ChevronRight className="w-4 h-4 opacity-30" />
+                                )}
+                            </button>
+
+                            {/* Accordion Subcategories */}
+                            <AnimatePresence>
+                                {expandedCategory === cat._id && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="pl-5 pr-1 py-2 space-y-1.5 mt-1 border-l-2 border-orange-100 ml-4">
+                                            {allSubCategories.map(sub => (
+                                                <button
+                                                    key={sub._id}
+                                                    onClick={() => {
+                                                        router.push(`/religious-services/subcategory/${sub._id}?category=${encodeURIComponent(activeCategoryName || categoryName)}&name=${encodeURIComponent(sub.name)}&categoryId=${expandedCategory}`);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
+                                                        params.id === sub._id
+                                                        ? 'bg-[var(--saffron)] text-white shadow-md shadow-[var(--saffron)]/20'
+                                                        : 'text-gray-500 hover:text-[var(--saffron)] hover:bg-orange-50'
+                                                    }`}
+                                                >
+                                                    {sub.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Price Filter */}
+            <div className="mb-8 border-b border-orange-100 pb-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h6 className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Offering Range</h6>
+                    <span className="text-[11px] font-bold text-[var(--saffron)] bg-[var(--saffron)]/10 px-2.5 py-1 rounded-full border border-[var(--saffron)]/10">₹{priceRange[1].toLocaleString()}</span>
+                </div>
+                <div className="px-1">
+                    <Slider
+                        defaultValue={[500, 50000]}
+                        min={0}
+                        max={100000}
+                        step={500}
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        className="mb-4"
+                    />
+                </div>
+                <div className="flex justify-between text-[10px] font-bold text-gray-400">
+                    <span>₹{priceRange[0].toLocaleString()}</span>
+                    <span>₹{priceRange[1].toLocaleString()}</span>
+                </div>
+            </div>
+
+            {/* Rating Filter */}
+            <div className="mb-6">
+                <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Devotee Rating</h6>
+                <div className="grid grid-cols-2 gap-2">
+                    {[4.5, 4.0, 3.5, 3.0].map((rating) => (
+                        <button
+                            key={rating}
+                            onClick={() => setMinRating(rating === minRating ? 0 : rating)}
+                            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl transition-all border-2 ${
+                                minRating === rating
+                                ? 'bg-[var(--saffron)] border-[var(--saffron)] text-white shadow-lg shadow-[var(--saffron)]/30'
+                                : 'bg-white border-gray-100 text-gray-500 hover:border-orange-200 hover:text-[var(--saffron)]'
+                            }`}
+                        >
+                            <Star className={`w-3.5 h-3.5 ${minRating === rating ? 'fill-white text-white' : 'fill-[var(--saffron)] text-[var(--saffron)]'}`} />
+                            <span className="text-xs font-black">{rating}+</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Reset Button */}
+            <Button 
+                variant="outline" 
+                className="w-full mt-4 bg-white border-gray-100 text-gray-400 hover:text-[var(--saffron)] hover:border-[var(--saffron)]/20 h-11 text-[11px] font-black rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                onClick={() => {
+                    setPriceRange([500, 50000]);
+                    setMinRating(0);
+                    setExpandedCategory(categoryId);
+                }}
+            >
+                <X className="w-3.5 h-3.5" />
+                Reset All Filters
+            </Button>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-[var(--off-white)] pt-24 pb-10">
+        <div className="min-h-screen bg-[var(--off-white)] pt-24 pb-16">
             <div className="container mx-auto px-4">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-10">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -73,94 +283,201 @@ function SubCategoryServicesContent() {
                                 router.push('/religious-services');
                             }
                         }}
-                        className="mb-4 text-gray-500 hover:text-[var(--saffron)] pl-0"
+                        className="mb-6 text-gray-500 hover:text-[var(--saffron)] transition-all hover:translate-x-[-4px]"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Categories
                     </Button>
 
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                        <div>
-                            <div className="text-sm text-[var(--saffron)] font-medium mb-1 uppercase tracking-wider">{categoryName}</div>
-                            <h1 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)]">{subCategoryName}</h1>
-                            <p className="text-gray-500 mt-2">Verified priests and services for {subCategoryName}</p>
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div className="max-w-2xl">
+                            <div className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--saffron)]/10 text-[var(--saffron)] text-xs font-bold uppercase tracking-widest mb-3">
+                                <Sparkles className="w-3 h-3 mr-2" />
+                                {categoryName}
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-black text-[var(--deep-charcoal)] mb-3 tracking-tight">{subCategoryName}</h1>
+                            <p className="text-gray-500 text-lg">Verified priests and sacred services curated for your {subCategoryName.toLowerCase()} ceremonies.</p>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="border-[var(--saffron)]/20 text-[var(--deep-charcoal)] bg-white">
-                                {services.length} Services
+                        <div className="flex items-center gap-3">
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" className="lg:hidden bg-white border-gray-200 hover:border-[var(--saffron)]/30 gap-2 h-10 px-4 rounded-xl text-sm font-bold">
+                                        <Sliders className="w-4 h-4" />
+                                        Filters
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="w-[310px] bg-[var(--off-white)] border-r border-orange-100 p-0 overflow-y-auto custom-scrollbar">
+                                    <SheetHeader className="p-6 border-b border-orange-50 bg-white">
+                                        <SheetTitle className="text-2xl font-black text-[var(--deep-charcoal)] flex items-center gap-2">
+                                            <Filter className="w-5 h-5 text-[var(--saffron)]" />
+                                            Filters
+                                        </SheetTitle>
+                                    </SheetHeader>
+                                    <div className="p-4 bg-[var(--off-white)]">
+                                        <FilterPanel />
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+                            <Badge className="bg-white text-[var(--deep-charcoal)] border-gray-200 px-4 py-2 text-sm font-bold shadow-sm rounded-xl">
+                                {filteredServices.length} Results
                             </Badge>
                         </div>
                     </div>
                 </div>
 
-                {/* Services Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {loading ? (
-                        <div className="col-span-full flex flex-col items-center justify-center py-20 text-[var(--saffron)]">
-                            <Sparkles className="w-10 h-10 animate-spin mb-4" />
-                            <p>Finding Divine Services...</p>
+                <div className="flex flex-col lg:flex-row gap-8">
+                    <div className="hidden lg:block w-80 shrink-0">
+                        <div className="sticky top-28">
+                            <FilterPanel className="p-7 rounded-[32px] bg-white border border-orange-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden" />
                         </div>
-                    ) : services.length > 0 ? (
-                        services.map((service, i) => (
-                            <motion.div
-                                key={service._id || i}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                            >
-                                <Card
-                                    className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer border border-gray-100 hover:border-[var(--saffron)]/30 h-full"
-                                    onClick={() => router.push(`/religious-services/service/${service._id}?subcategoryId=${params.id}&subCategoryName=${encodeURIComponent(subCategoryName)}&categoryName=${encodeURIComponent(categoryName)}`)}
+                    </div>
+
+                    {/* Services List View */}
+                    <div className="flex-1">
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center py-32 text-[var(--saffron)] bg-white rounded-3xl border border-gray-100 shadow-sm">
+                                <motion.div
+                                    animate={{ 
+                                        rotate: [0, 360],
+                                        scale: [1, 1.2, 1]
+                                    }}
+                                    transition={{ 
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                    className="mb-4"
                                 >
-                                    <div className="relative h-52 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                                        <img
-                                            src={service.image ? `https://api.doorstephub.com/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
-                                            alt={service.business_name}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                                    <Sparkles className="w-16 h-16 opacity-20" />
+                                </motion.div>
+                                <p className="text-xl font-bold tracking-tight">Finding Divine Services...</p>
+                                <p className="text-gray-400 mt-2">Preparing the sacred space for you</p>
+                            </div>
+                        ) : filteredServices.length > 0 ? (
+                            <div className="space-y-6">
+                                <AnimatePresence mode="popLayout">
+                                    {filteredServices.map((service, i) => (
+                                        <motion.div
+                                            key={service._id || i}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ delay: i * 0.05 }}
+                                            layout
+                                        >
+                                            <Card
+                                                className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer border-transparent hover:border-[var(--saffron)]/20 bg-white shadow-sm relative"
+                                                onClick={() => router.push(`/religious-services/service/${service._id}?subcategoryId=${params.id}&subCategoryName=${encodeURIComponent(subCategoryName)}&categoryName=${encodeURIComponent(categoryName)}&categoryId=${categoryId}`)}
+                                            >
+                                                <div className="flex flex-col md:flex-row h-full">
+                                                    {/* Image Section */}
+                                                    <div className="relative w-full md:w-52 h-40 md:h-auto overflow-hidden shrink-0">
+                                                        <img
+                                                            src={service.image ? `https://api.doorstephub.com/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
+                                                            alt={service.business_name}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                        />
+                                                        <div className="absolute inset-0 bg-black/5 md:hidden" />
+                                                        
+                                                        {/* Floating Rating on Image */}
+                                                        <div className="absolute top-2 left-2">
+                                                            <div className="flex items-center gap-1 bg-white/90 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-gray-900 shadow-sm">
+                                                                <Star className="h-2.5 w-2.5 fill-[var(--saffron)] text-[var(--saffron)]" />
+                                                                {service.avgRating || 4.8}
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end text-white">
-                                            <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-lg text-sm">
-                                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                                {service.avgRating || 4.8}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <CardContent className="p-6">
-                                        <div className="mb-4">
-                                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-1 group-hover:text-[var(--saffron)] transition-colors">
-                                                {service.business_name || `${service.firstName} ${service.lastName}`}
-                                            </h3>
-                                            <div className="flex items-center text-sm text-gray-500 gap-2 mb-2">
-                                                <MapPin className="h-3 w-3" />
-                                                {service.address ? service.address.substring(0, 30) + '...' : 'Available at Doorstep'}
-                                            </div>
-                                            <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px]">
-                                                {service.description || service.bio || 'Expert Vedic Priests and religious service providers ensuring divine experiences.'}
-                                            </p>
-                                        </div>
+                                                    {/* Content Section */}
+                                                    <CardContent className="flex-1 p-4 md:p-5 flex flex-col justify-between">
+                                                        <div className="flex flex-col h-full">
+                                                            <div className="flex items-start justify-between gap-4 mb-2">
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                        <Badge variant="secondary" className="bg-[var(--saffron)]/10 text-[var(--saffron)] border-none font-bold uppercase tracking-wider text-[8px] h-4">
+                                                                            Verified Expert
+                                                                        </Badge>
+                                                                        {service.totalOrders > 50 && (
+                                                                            <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-none font-bold text-[8px] h-4">
+                                                                                Top Rated
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
+                                                                    <h3 className="text-lg md:text-xl font-black text-[var(--deep-charcoal)] mb-0.5 group-hover:text-[var(--saffron)] transition-colors tracking-tight truncate">
+                                                                        {service.business_name || `${service.firstName} ${service.lastName}`}
+                                                                    </h3>
+                                                                    <div className="flex items-start text-[10px] font-medium text-gray-400 gap-1 mt-1 transition-colors group-hover:text-gray-500">
+                                                                        <MapPin className="h-3 w-3 text-[var(--saffron)] shrink-0" />
+                                                                        <span className="line-clamp-1">{service.address ? service.address : 'Available at Your Doorstep'}</span>
+                                                                    </div>
+                                                                </div>
 
-                                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs text-gray-400">Starts from</span>
-                                                <span className="text-xl font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
-                                            </div>
-                                            <Button className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white shadow-lg hover:shadow-[var(--saffron)]/30">
-                                                Book Now
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                            <div className="mb-4 text-4xl">🙏</div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">No Services Found</h3>
-                            <p className="text-gray-500">We couldn't find any services for this sub-category nearby.</p>
-                        </div>
-                    )}
+                                                                <div className="hidden md:flex flex-col items-end">
+                                                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">From</span>
+                                                                    <div className="text-xl font-black text-[var(--saffron)] tracking-tighter leading-none">
+                                                                        ₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <p className="text-gray-500 text-xs leading-relaxed mb-3 line-clamp-1">
+                                                                {service.description || service.bio || 'Experience divine blessings with our expert Vedic priests.'}
+                                                            </p>
+
+                                                            <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
+                                                                        <CheckCircle className="w-3 h-3 text-emerald-500" />
+                                                                        On-time Visit
+                                                                    </div>
+                                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
+                                                                        <Clock className="w-3 h-3 text-orange-400" />
+                                                                        Fast Response
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-3">
+                                                                     {/* Mobile Price */}
+                                                                    <div className="md:hidden text-right">
+                                                                        <span className="text-[14px] font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
+                                                                    </div>
+                                                                    <Button className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white px-4 h-8 rounded text-[11px] font-bold shadow-sm transition-all group/btn">
+                                                                        Book Now
+                                                                        <ChevronRight className="w-3.5 h-3.5 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </CardContent>
+                                                </div>
+                                            </Card>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        ) : (
+                            <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-200">
+                                <motion.div
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="mb-6 inline-flex p-6 rounded-full bg-gray-50"
+                                >
+                                    <Sparkles className="w-16 h-16 text-gray-200" />
+                                </motion.div>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2">Divine Silence</h3>
+                                <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto">We couldn't find any services matching your specific filters. Try expanding your search criteria.</p>
+                                <Button 
+                                    onClick={() => {
+                                        setPriceRange([500, 50000]);
+                                        setMinRating(0);
+                                    }}
+                                    className="bg-white border-2 border-gray-200 text-gray-900 hover:border-[var(--saffron)] hover:text-[var(--saffron)] hover:bg-white"
+                                >
+                                    Clear All Filters
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

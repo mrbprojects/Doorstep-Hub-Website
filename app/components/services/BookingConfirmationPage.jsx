@@ -576,7 +576,7 @@ export function BookingConfirmationPage({
                 {bookingCost > 0 && (
                   <div className="flex justify-between items-start text-white/80">
                     <div className="flex flex-col">
-                      <span>Online Consultation Fee</span>
+                      <span>Platform Fee</span>
                       <div className="flex items-center gap-1 text-[#04a99d] text-xs font-normal">
                         <Info className="w-3 h-3" />
                         <span>pay online</span>
@@ -600,7 +600,7 @@ export function BookingConfirmationPage({
                     </div>
                     <div className="flex items-start gap-2 text-[10px] text-white/50 bg-white/5 p-2 rounded">
                       <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-[#04a99d]" />
-                      <p>Note: This is the online consultation fee only. The Doorstep Inspection Fee will be collected at Doorstep.</p>
+                      <p>Note: This is the Platform fee only. The Doorstep Inspection Fee will be collected at Doorstep.</p>
                     </div>
                   </div>
                 )}

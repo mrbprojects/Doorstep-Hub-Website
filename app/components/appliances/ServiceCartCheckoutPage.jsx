@@ -566,7 +566,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     {(
                                         <div className="flex justify-between items-center text-white/70 text-sm">
                                             <div className="flex flex-col">
-                                                <span>Online Consultation Fee</span>
+                                                <span>Platform Fee</span>
                                                 <span className="text-[10px] text-[#04a99d]">Non-refundable booking fee</span>
                                             </div>
                                             <span>₹{consultationFee.toFixed(2)}</span>

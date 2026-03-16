@@ -36,6 +36,7 @@ export default function ReligiousServiceDetailPage() {
     const subcategoryId = searchParams.get('subcategoryId');
     const subCategoryName = searchParams.get('subCategoryName');
     const categoryName = searchParams.get('categoryName');
+    const categoryId = searchParams.get('categoryId');
     const [activeTab, setActiveTab] = useState('portfolio');
     const { scrollY } = useScroll();
     const headerOpacity = useTransform(scrollY, [0, 300], [1, 0.8]);
@@ -87,6 +88,7 @@ export default function ReligiousServiceDetailPage() {
                         id: id,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
                         location: store.address || 'Location available on request',
+                        image: store.image || 'https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80',
                         address: store.address || 'Address provided upon booking',
                         rating: parseFloat(store.avgRating || 4.8).toFixed(1),
                         orders: store.totalOrders || 120,
@@ -203,7 +205,7 @@ export default function ReligiousServiceDetailPage() {
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => {
                     if (subcategoryId) {
-                        router.push(`/religious-services/subcategory/${subcategoryId}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCategoryName)}`);
+                        router.push(`/religious-services/subcategory/${subcategoryId}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCategoryName)}&categoryId=${categoryId}`);
                     } else {
                         router.back();
                     }
@@ -214,22 +216,19 @@ export default function ReligiousServiceDetailPage() {
             </motion.button>
 
             {/* Slider */}
-            <motion.div
-                style={{ opacity: headerOpacity }}
-                className="relative h-[500px] overflow-hidden"
-            >
-                <Slider {...sliderSettings}>
-                    {serviceData.images.map((image, index) => (
-                        <div key={index} className="relative h-[500px]">
-                            <div
-                                className="absolute inset-0 bg-cover bg-center"
-                                style={{ backgroundImage: `url(${image})` }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                        </div>
-                    ))}
-                </Slider>
-            </motion.div>
+        <motion.div
+  style={{ opacity: headerOpacity }}
+  className="relative h-[500px] overflow-hidden"
+>
+  <div
+    className="absolute inset-0 bg-cover bg-center"
+    style={{
+      backgroundImage: `url(https://api.doorstephub.com/${serviceData?.image || serviceData?.logo})`
+    }}
+  />
+
+  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+</motion.div>
 
             {/* Header Info */}
             <div className="max-w-7xl mx-auto px-4 -mt-32 relative z-10">

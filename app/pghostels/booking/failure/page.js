@@ -8,7 +8,7 @@ export default function FailurePage() {
     const router = useRouter();
 
     const handleRetry = () => {
-        router.push('/pghostels/booking/confirm');
+        router.push('/pghostels/cart');
     };
 
     const handleBackToHome = () => {

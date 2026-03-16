@@ -527,6 +527,13 @@ export default function ReligiousConfirmPage() {
                                     <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
                                 </div>
 
+                                   {(cartData?.gstAmount ?? 0) > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">GST (18%)</span>
+                                        <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
+                                    </div>
+                                )}
+
                                 {(cartData?.consultationFee ?? 0) > 0 && (
                                     <div className="flex justify-between text-sm">
                                         <div className="flex items-center gap-1">
@@ -537,12 +544,7 @@ export default function ReligiousConfirmPage() {
                                     </div>
                                 )}
 
-                                {(cartData?.gstAmount ?? 0) > 0 && (
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">GST (18%)</span>
-                                        <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
-                                    </div>
-                                )}
+                             
 
                                 {/* Divider + Total */}
                                 <div className="border-t border-gray-200 pt-2.5">
@@ -615,7 +617,9 @@ export default function ReligiousConfirmPage() {
                                         Processing...
                                     </div>
                                 ) : (
-                                    `Pay ₹${(cartData?.finalAmount || 0).toFixed(2)}`
+                                    paymentMethod === 'ONLINE' 
+                                        ? `${paymentOption === 'ADVANCE' ? 'Pay Advance' : 'Pay Full'} ₹${paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : (cartData?.finalAmount ?? 0).toFixed(2)}`
+                                        : 'Confirm Booking'
                                 )}
                             </motion.button>
 

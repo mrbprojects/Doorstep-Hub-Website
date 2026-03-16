@@ -21,7 +21,7 @@ const STEPS = [
     {
         id: 'payment',
         title: 'Payment',
-        subtitle: 'Online consultation fee — inspection at doorstep',
+        subtitle: 'Platform fee — inspection at doorstep',
         icon: IndianRupee,
     },
     {

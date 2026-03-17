@@ -31,10 +31,9 @@ async function getDynamicSlugs() {
     }
 
     const serviceIds = [
+        // Only the appliance service ID is supported by this endpoint.
+        // Spa, PG, and religious IDs return 404 — their slugs come from DEFAULT_SLUGS.
         { id: '683daaa8f261c1548bdf7442', internalPrefix: '/appliances' },
-        { id: '695250aa57bb211ca094e5fd', internalPrefix: '/religious-services' },
-        { id: '69524f4a57bb211ca094e5e6', internalPrefix: '/spa-salon' },
-        { id: '69524fb157bb211ca094e5ee', internalPrefix: '/pghostels' },
     ];
 
     try {

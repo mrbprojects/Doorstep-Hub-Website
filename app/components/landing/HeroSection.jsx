@@ -431,48 +431,19 @@ function HeroContent({ services = [], loading = false, error = null }) {
     pg: 'pg-hostels-near-me'
   });
 
-  // Fetch Service Slugs
+  // Fetch Service Slugs (only appliance ID is supported by this endpoint)
   useEffect(() => {
     const fetchSlugs = async () => {
-      const servicesToFetch = [
-        { id: '683daaa8f261c1548bdf7442', key: 'appliances' },
-        { id: '695250aa57bb211ca094e5fd', key: 'religious' },
-        { id: '69524f4a57bb211ca094e5e6', key: 'spa' },
-        { id: '69524fb157bb211ca094e5ee', key: 'pg' }
-      ];
-
       try {
-        const results = await Promise.allSettled(
-          servicesToFetch.map(async (s) => {
-            try {
-              const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${s.id}`);
-              const data = await res.json();
-              if (data.success && data.data?.home) {
-                // Ensure we don't accidentally map everything to 'appliance-repair-services'
-                // if the API is buggy or returning generic data.
-                if (s.key === 'appliances' || (data.data.home !== 'appliance-repair-services' && data.data.home !== 'appliances')) {
-                  return { [s.key]: data.data.home };
-                }
-              }
-            } catch (e) {
-              console.warn(`Failed to fetch slug for ${s.key}:`, e);
-            }
-            return null;
-          })
+        const res = await fetch(
+          `https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
         );
-
-        const fetchedSlugs = {};
-        results.forEach(result => {
-          if (result.status === 'fulfilled' && result.value) {
-            Object.assign(fetchedSlugs, result.value);
-          }
-        });
-
-        if (Object.keys(fetchedSlugs).length > 0) {
-          setServiceSlugs(prev => ({ ...prev, ...fetchedSlugs }));
+        const data = await res.json();
+        if (data.success && data.data?.home) {
+          setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
         }
-      } catch (error) {
-        console.error("Critical error fetching service slugs:", error);
+      } catch (e) {
+        console.warn('Failed to fetch appliance slug, using default:', e);
       }
     };
     fetchSlugs();

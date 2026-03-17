@@ -34,39 +34,14 @@ export function BookingServices() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch Slugs
-        const servicesToFetchSlugs = [
-          { id: '683daaa8f261c1548bdf7442', key: 'appliances' },
-          { id: '695250aa57bb211ca094e5fd', key: 'religious' },
-          { id: '69524f4a57bb211ca094e5e6', key: 'spa' },
-          { id: '69524fb157bb211ca094e5ee', key: 'pg' }
-        ];
-
-        const slugResults = await Promise.allSettled(
-          servicesToFetchSlugs.map(async (s) => {
-            try {
-              const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${s.id}`);
-              const data = await res.json();
-              if (data.success && data.data?.home) {
-                if (s.key === 'appliances' || (data.data.home !== 'appliance-repair-services' && data.data.home !== 'appliances')) {
-                  return { [s.key]: data.data.home };
-                }
-              }
-            } catch (e) { }
-            return null;
-          })
-        );
-
-        const fetchedSlugs = {};
-        slugResults.forEach(result => {
-          if (result.status === 'fulfilled' && result.value) {
-            Object.assign(fetchedSlugs, result.value);
+        // 1. Fetch Slugs (only appliance ID is supported by this endpoint)
+        try {
+          const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
+          const data = await res.json();
+          if (data.success && data.data?.home) {
+            setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
           }
-        });
-
-        if (Object.keys(fetchedSlugs).length > 0) {
-          setServiceSlugs(prev => ({ ...prev, ...fetchedSlugs }));
-        }
+        } catch (e) { /* use default slug */ }
 
         // 2. Fetch Latest Booking Services
         const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_bookings_services');

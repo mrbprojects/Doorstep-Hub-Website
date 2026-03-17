@@ -10,38 +10,13 @@ import { useRouter } from 'next/navigation';
 
 const staticQuestions = [
     {
-        id: 'occasion',
-        title: 'What is the occasion?',
-        icon: Star,
+        id: 'budget',
+        title: 'Budget Range?',
+        icon: Sun,
         options: [
-            { value: 'new-home', label: 'New Home / Office', desc: 'Griha Pravesh & inauguration' },
-            { value: 'birthday', label: 'Birthday / Anniversary', desc: 'Janamdin pooja & blessings' },
-            { value: 'festival-day', label: 'Festival Day', desc: 'Specific festival or auspicious date' },
-            { value: 'health', label: 'Health & Wellbeing', desc: 'Maha Mrityunjaya & healing rituals' },
-            { value: 'general', label: 'General Blessing', desc: 'Satyanarayan or daily prayer' },
-        ],
-    },
-    {
-        id: 'attendees',
-        title: 'How many people will attend?',
-        icon: Users,
-        options: [
-            { value: 'personal', label: 'Just Me / Family', desc: 'Intimate ceremony (1–10 people)' },
-            { value: 'small-group', label: 'Small Gathering', desc: '10–25 people' },
-            { value: 'community', label: 'Community Event', desc: '25–100 people' },
-            { value: 'large', label: 'Large Event', desc: '100+ people' },
-        ],
-    },
-    {
-        id: 'timing',
-        title: 'When do you need the service?',
-        icon: Calendar,
-        options: [
-            { value: 'today', label: 'Today', desc: 'Same day booking' },
-            { value: 'this-week', label: 'This Week', desc: 'Within 7 days' },
-            { value: 'next-week', label: 'Next Week', desc: '8–14 days' },
-            { value: 'specific-date', label: 'Specific Muhurtham', desc: 'An auspicious date I have in mind' },
-            { value: 'flexible', label: 'Flexible', desc: 'Pandit can suggest the date' },
+            { value: '499-1500', label: '₹499–₹1,500', desc: 'Essential ceremonies' },
+            { value: '1500-5000', label: '₹1,500–₹5,000', desc: 'Detailed rituals' },
+            { value: '5000+', label: '₹5,000+', desc: 'Grand community events' },
         ],
     },
 ];
@@ -62,7 +37,6 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
             setAnswers({});
             setSubcategories([]);
         } else {
-            // Fetch categories when modal opens
             fetchCategories();
         }
     }, [isOpen]);
@@ -114,9 +88,9 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
             icon: Flame,
             options: categories.map(cat => ({
                 value: cat._id,
-                label: cat.categoryName,
+                label: cat.categoryName || cat.name,
                 desc: 'Select to explore related services',
-                categoryName: cat.categoryName // storing this to pass through
+                categoryName: cat.categoryName || cat.name
             }))
         },
         {
@@ -126,58 +100,79 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
             options: subcategories.map(sub => ({
                 value: sub._id,
                 label: sub.name,
-                desc: sub.description || 'Proceed with this specific service',
-                subcategoryName: sub.name
+                desc: sub.startingAt || sub.price || sub.minFare ? `Starting at ₹${sub.startingAt || sub.price || sub.minFare}` : sub.description || 'Proceed with this specific service',
+                subcategoryName: sub.name,
+                price: sub.startingAt || sub.price || sub.minFare || null
             }))
         },
         ...staticQuestions
     ];
 
     const currentQuestion = questions[currentStep];
-    const progress = ((currentStep + 1) / questions.length) * 100;
+    const progress = questions.length > 0 ? ((currentStep + 1) / questions.length) * 100 : 0;
     const isAnswered = answers[currentQuestion?.id];
+
+    // Unified finish function to avoid stale state issues
+    const handleFinish = (finalAnswers) => {
+        // Use 'all' if no specific subcategory was chosen
+        const subId = finalAnswers.subcategory || 'all';
+        
+        const params = new URLSearchParams();
+        // Standardize ALL params to always be present in URL, matching user structure expectations
+        params.set('category', finalAnswers.categoryName || '');
+        params.set('categoryId', finalAnswers.category || '');
+        params.set('name', finalAnswers.subcategoryName || '');
+        params.set('budget', finalAnswers.budget || '');
+        
+        // Ensure subCategoryId is also in query for certain backend/filter logic
+        if (subId !== 'all') params.set('subcategoryId', subId);
+
+        const targetUrl = `/religious-services/subcategory/${subId}?${params.toString()}`;
+        
+        console.log("🕉️ Sacred redirect path formed:", targetUrl);
+        
+        // Use window.location.href for a foolproof redirect if router.push has issues in this context
+        setTimeout(() => {
+            console.log("🚀 Executing final redirect to:", targetUrl);
+            window.location.href = targetUrl;
+            onClose();
+        }, 500);
+    };
 
     const handleSelect = (option) => {
         const updatedAnswers = { ...answers, [currentQuestion.id]: option.value };
 
-        // If we are selecting a category, clear subcategory since it will change, and save categoryName
         if (currentQuestion.id === 'category') {
             updatedAnswers.subcategory = undefined;
             updatedAnswers.categoryName = option.categoryName;
+            setAnswers(updatedAnswers);
+            fetchSubcategories(option.value).then(() => {
+                setCurrentStep(1);
+            });
+            return;
         }
 
-        // If selecting subcategory, save the subcategoryName
         if (currentQuestion.id === 'subcategory') {
             updatedAnswers.subcategoryName = option.subcategoryName;
+            setAnswers(updatedAnswers);
+            setCurrentStep(2);
+            return;
+        }
+
+        if (currentQuestion.id === 'budget') {
+            setAnswers(updatedAnswers);
+            handleFinish(updatedAnswers);
+            return;
         }
 
         setAnswers(updatedAnswers);
     };
 
-    const handleNext = async () => {
+    const handleNext = () => {
         if (currentStep < questions.length - 1) {
-            if (currentQuestion.id === 'category') {
-                // Now we fetch subcategories for the selected category before showing step 2
-                await fetchSubcategories(answers.category);
-                // If API returned an empty list, skip to the static questions or show empty state? Let's just proceed.
-            }
             setCurrentStep(currentStep + 1);
         } else {
-            // FINISH - Navigate to subcategory page
-            const queryParams = new URLSearchParams({
-                category: answers.categoryName || '',
-                categoryId: answers.category || '',
-                name: answers.subcategoryName || '',
-                occasion: answers.occasion || '',
-                attendees: answers.attendees || '',
-                timing: answers.timing || ''
-            });
-
-            // The URL structure uses the selected subcategoryId as the path parameter
-            const subcategoryId = answers.subcategory || 'all';
-
-            router.push(`/religious-services/subcategory/${subcategoryId}?${queryParams.toString()}`);
-            onClose();
+            handleFinish(answers);
         }
     };
 
@@ -197,7 +192,6 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                     onClick={onClose}
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] flex items-center justify-center p-4"
                 >
-                    {/* Modal Card */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -206,7 +200,6 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                         onClick={(e) => e.stopPropagation()}
                         className="w-full max-w-[600px] max-h-[90vh] bg-white rounded-3xl shadow-2xl border border-orange-100 overflow-hidden flex flex-col"
                     >
-                        {/* Header */}
                         <div
                             className="relative text-white p-6"
                             style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #FF9933 50%, #E85D2F 100%)' }}
@@ -218,22 +211,20 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                                 <X className="w-5 h-5" />
                             </button>
 
-                            {/* Decorative Om */}
-                            <div className="absolute top-2 right-14 text-5xl text-white/10 font-serif select-none">ॐ</div>
+                            <div className="absolute top-2 right-14 text-5xl text-white/10 font-serif select-none pointer-events-none">ॐ</div>
 
                             <div className="mb-4">
                                 <div className="flex items-center gap-2 mb-2">
                                     <Sparkles className="w-5 h-5 text-yellow-200" />
-                                    <span className="text-white/90 text-sm font-medium">Find the right Pandit for you</span>
+                                    <span className="text-white/90 text-sm font-medium uppercase tracking-wider">Divine Consultation</span>
                                 </div>
-                                <h2 className="text-2xl font-bold">Book a Religious Service</h2>
+                                <h2 className="text-2xl font-black">Spiritual Quest</h2>
                                 <p className="text-white/80 text-sm mt-1">
-                                    {questions.length} quick questions to match your sacred needs
+                                    {questions.length} sacred steps to find your ideal Pandit.
                                 </p>
                             </div>
 
-                            {/* Progress */}
-                            <div className="relative h-2 bg-white/20 rounded-full overflow-hidden">
+                            <div className="relative h-1.5 bg-white/20 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${progress}%` }}
@@ -241,14 +232,13 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                                     className="absolute inset-y-0 left-0 bg-white rounded-full"
                                 />
                             </div>
-                            <div className="flex justify-between mt-2 text-xs text-white/80">
+                            <div className="flex justify-between mt-2 text-[10px] font-bold text-white/70 uppercase tracking-tighter">
                                 <span>Step {currentStep + 1} of {questions.length}</span>
                                 <span>{Math.round(progress)}% complete</span>
                             </div>
                         </div>
 
-                        {/* Question Content */}
-                        <div className="flex-1 overflow-y-auto p-6">
+                        <div className="flex-1 overflow-y-auto p-6 bg-orange-50/10">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={currentStep}
@@ -257,27 +247,29 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                                     exit={{ opacity: 0, x: -20 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    {/* Question Title */}
-                                    <div className="flex items-center gap-3 mb-6">
+                                    <div className="flex items-center gap-4 mb-8">
                                         <div
-                                            className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                                            className="w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center flex-shrink-0"
                                             style={{ background: 'linear-gradient(135deg, #FF6B35, #E85D2F)' }}
                                         >
-                                            {QuestionIcon && <QuestionIcon className="w-6 h-6 text-white" />}
+                                            {QuestionIcon && <QuestionIcon className="w-7 h-7 text-white" />}
                                         </div>
-                                        <h3 className="text-xl font-bold text-gray-900">{currentQuestion?.title}</h3>
+                                        <div>
+                                            <h3 className="text-2xl font-black text-gray-900 leading-tight">{currentQuestion?.title}</h3>
+                                            <p className="text-sm text-gray-500 mt-1">Select the best option for your ceremony</p>
+                                        </div>
                                     </div>
 
-                                    {/* Options */}
-                                    <div className="grid gap-3">
+                                    <div className="grid gap-4">
                                         {loadingData && (currentQuestion?.id === 'category' || currentQuestion?.id === 'subcategory') ? (
-                                            <div className="flex flex-col items-center justify-center p-8">
-                                                <div className="w-8 h-8 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin mb-4" />
-                                                <p className="text-gray-500 font-medium">Fetching options...</p>
+                                            <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border-2 border-dashed border-orange-100">
+                                                <div className="w-12 h-12 rounded-full border-4 border-orange-100 border-t-orange-500 animate-spin mb-6" />
+                                                <p className="text-orange-900 font-bold text-lg animate-pulse">Invoking Divine Options...</p>
                                             </div>
                                         ) : currentQuestion?.options.length === 0 ? (
-                                            <div className="p-8 text-center text-gray-500 border border-dashed border-gray-300 rounded-2xl bg-gray-50">
-                                                No options available for this selection.
+                                            <div className="p-12 text-center text-gray-500 border border-dashed border-orange-200 rounded-3xl bg-white shadow-inner">
+                                                <Sparkles className="w-12 h-12 text-orange-200 mx-auto mb-4 opacity-50" />
+                                                <p className="font-medium">Peace be with you. No services found for this path yet.</p>
                                             </div>
                                         ) : currentQuestion?.options.map((option) => {
                                             const isSelected = answers[currentQuestion.id] === option.value;
@@ -285,26 +277,50 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                                                 <motion.button
                                                     key={option.value}
                                                     onClick={() => handleSelect(option)}
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    className={`relative p-4 rounded-2xl border-2 transition-all text-left ${isSelected
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50/30'
+                                                    whileHover={{ scale: 1.01, x: 4 }}
+                                                    whileTap={{ scale: 0.99 }}
+                                                    className={`relative p-5 rounded-2xl border-2 transition-all text-left shadow-sm ${isSelected
+                                                        ? 'border-orange-500 bg-[#FFF3E0] ring-4 ring-[#FF6B35]/10'
+                                                        : 'border-white bg-white hover:border-orange-200 hover:shadow-md'
                                                         }`}
                                                 >
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <div>
-                                                            <div className="font-semibold text-gray-900 mb-0.5">{option.label}</div>
-                                                            <div className="text-sm text-gray-500">{option.desc}</div>
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <div 
+                                                                    className="font-bold text-lg"
+                                                                    style={{ color: isSelected ? '#BF360C' : '#111827' }}
+                                                                >
+                                                                    {option.label}
+                                                                </div>
+                                                                {option.price && (
+                                                                    <div 
+                                                                        className="font-black text-sm px-3 py-1 rounded-full border"
+                                                                        style={{ 
+                                                                            color: isSelected ? '#E65100' : '#ea580c',
+                                                                            backgroundColor: isSelected ? '#FFF3E0' : '#fff7ed',
+                                                                            borderColor: isSelected ? '#fed7aa' : '#ffedd5'
+                                                                        }}
+                                                                    >
+                                                                        ₹{option.price}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div 
+                                                                className="text-sm font-medium"
+                                                                style={{ color: isSelected ? '#D84315' : '#6b7280' }}
+                                                            >
+                                                                {option.desc}
+                                                            </div>
                                                         </div>
                                                         {isSelected && (
                                                             <motion.div
-                                                                initial={{ scale: 0 }}
-                                                                animate={{ scale: 1 }}
-                                                                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                                                                initial={{ scale: 0, rotate: -45 }}
+                                                                animate={{ scale: 1, rotate: 0 }}
+                                                                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg"
                                                                 style={{ background: 'linear-gradient(135deg, #FF6B35, #E85D2F)' }}
                                                             >
-                                                                <Check className="w-4 h-4 text-white" />
+                                                                <Check className="w-5 h-5 text-white" />
                                                             </motion.div>
                                                         )}
                                                     </div>
@@ -316,13 +332,12 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                             </AnimatePresence>
                         </div>
 
-                        {/* Footer */}
-                        <div className="border-t border-gray-100 p-5 bg-orange-50/30">
+                        <div className="border-t border-gray-100 p-6 bg-white">
                             <div className="flex items-center justify-between gap-4">
                                 <button
                                     onClick={handleBack}
                                     disabled={currentStep === 0}
-                                    className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-gray-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="px-8 py-4 bg-gray-50 border-2 border-gray-100 text-gray-500 rounded-2xl font-bold hover:bg-gray-100 hover:text-gray-700 transition-all disabled:opacity-0 disabled:pointer-events-none flex items-center gap-2"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                     Back
@@ -331,11 +346,19 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
                                 <button
                                     onClick={handleNext}
                                     disabled={!isAnswered}
-                                    className="flex-1 px-6 py-3 text-white rounded-xl font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
-                                    style={isAnswered ? { background: 'linear-gradient(135deg, #FF6B35, #E85D2F)', boxShadow: '0 4px 20px rgba(255, 107, 53, 0.35)' } : { background: '#ccc' }}
+                                    className="flex-1 px-8 py-4 text-white rounded-2xl font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-2xl overflow-hidden relative group"
+                                    style={isAnswered ? { background: 'linear-gradient(135deg, #FF6B35, #E85D2F)', boxShadow: '0 8px 30px rgba(255, 107, 53, 0.4)' } : { background: '#e5e7eb' }}
                                 >
-                                    <span>{currentStep === questions.length - 1 ? '🙏 Show Pandits' : 'Next'}</span>
-                                    <ChevronRight className="w-5 h-5" />
+                                    {isAnswered && (
+                                        <motion.div
+                                            className="absolute inset-0 bg-white/20"
+                                            initial={{ x: '-100%' }}
+                                            whileHover={{ x: '100%' }}
+                                            transition={{ duration: 0.5 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">{currentStep === questions.length - 1 ? '🙏 Reveal Pandits' : 'Continue Path'}</span>
+                                    <ChevronRight className={`w-5 h-5 relative z-10 transition-transform ${isAnswered ? 'group-hover:translate-x-1' : ''}`} />
                                 </button>
                             </div>
                         </div>

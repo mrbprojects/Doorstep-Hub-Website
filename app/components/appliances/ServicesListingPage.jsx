@@ -33,6 +33,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   // Metadata State (derived from props or API)
   const [pageTitle, setPageTitle] = useState(subCategory || '');
   const [categoryName, setCategoryName] = useState(category || '');
+  const [isWrongUrl, setIsWrongUrl] = useState(false);
+  const [redirectTimer, setRedirectTimer] = useState(4); // Countdown for redirection
 
   useEffect(() => {
     if (subCategory) setPageTitle(subCategory);
@@ -86,10 +88,17 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               if (matchedSubCat) {
                 resolvedSubcategoryId = matchedSubCat._id;
                 setPageTitle(matchedSubCat.name);
+                setIsWrongUrl(false);
+              } else {
+                // If we have both slugs but can't match them, it's a wrong URL
+                setIsWrongUrl(true);
               }
+            } else {
+              setIsWrongUrl(true);
             }
           } catch (err) {
             console.error('Error resolving subcategory from slug:', err);
+            setIsWrongUrl(true);
           }
         }
 
@@ -172,9 +181,20 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   }, [subCategoryId, childCategoryId, slug, category, location?.lat, location?.lng, minRating]);
 
   useEffect(() => {
-    // Deliberately disabled automatic redirects.
-    // Users will now see the localized Empty State message instead of being forcefully redirected.
-  }, [loading, services, centers, slug, category, router]);
+    if (isWrongUrl) {
+      const interval = setInterval(() => {
+        setRedirectTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            router.push('/book-appointment');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isWrongUrl, router]);
 
   // Fetch Categories for Sidebar
   useEffect(() => {
@@ -289,6 +309,32 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     return rating >= minRating;
   });
 
+  if (isWrongUrl) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0E] flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full text-center"
+        >
+          <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <X className="w-10 h-10 text-red-500" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4">Invalid URL or Service</h2>
+          <p className="text-white/60 mb-8 leading-relaxed text-sm md:text-base">
+            The service or category you are looking for doesn't exist in our system. 
+            Redirecting you to our Booking page in <span className="text-[#04a99d] font-black">{redirectTimer}s</span>...
+          </p>
+          <button 
+            onClick={() => router.push('/book-appointment')}
+            className="w-full px-8 py-4 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-black rounded-2xl hover:shadow-2xl hover:shadow-[#037166]/40 transition-all active:scale-95"
+          >
+            Go to Book Appointment Now
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

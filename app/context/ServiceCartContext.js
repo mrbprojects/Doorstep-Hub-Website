@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { usePathname } from 'next/navigation';
 import { useAuth } from './AuthContext';
 import { useAuthModal } from './AuthModalContext';
+import { useLocationContext } from './LocationContext';
 import { toast } from 'sonner';
 
 const ServiceCartContext = createContext();
@@ -17,8 +18,10 @@ export const ServiceCartProvider = ({ children }) => {
     const [cartData, setCartData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [cartError, setCartError] = useState(false);
+    const { location } = useLocationContext();
     const pathname = usePathname();
     const [currentServiceFlow, setCurrentServiceFlow] = useState(null);
+    const [lastLocation, setLastLocation] = useState(null);
 
     const fetchCart = useCallback(async () => {
         if (!isAuthenticated) return;
@@ -145,23 +148,33 @@ export const ServiceCartProvider = ({ children }) => {
         }
     }, [token, isAuthenticated]);
 
-    // Handle service category changes to clear the cart
+    // Handle service category OR location changes to clear the cart
     useEffect(() => {
         const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
         const segments = pathname.split('/').filter(Boolean);
         const match = serviceCategories.find(cat => segments.includes(cat));
 
-        if (match) {
-            if (currentServiceFlow && currentServiceFlow !== match) {
-                // If we've shifted from one service category to another, clear the cart
-                console.log(`🛒 Service Flow Change: ${currentServiceFlow} -> ${match}. Clearing cart...`);
-                if (cartItems.length > 0) {
-                    clearCart(true); // true to suppress "Failed to clear cart" toast if unauthorized
-                }
+        // 1. Check for Service Flow Change
+        const isFlowChanged = match && currentServiceFlow && currentServiceFlow !== match;
+        
+        // 2. Check for Location Change
+        const hasLocationChanged = (location && lastLocation) && (
+            location.lat !== lastLocation.lat || 
+            location.lng !== lastLocation.lng
+        );
+
+        if (isFlowChanged || hasLocationChanged) {
+            console.log(`🛒 Context Change Detected! Flow: ${currentServiceFlow}->${match}, Location: Changed? ${hasLocationChanged}. Clearing cart...`);
+            if (cartItems.length > 0) {
+                clearCart(true); 
             }
-            setCurrentServiceFlow(match);
         }
-    }, [pathname, currentServiceFlow, cartItems.length, clearCart]);
+
+        // Update tracking states
+        if (match) setCurrentServiceFlow(match);
+        if (location) setLastLocation({ lat: location.lat, lng: location.lng });
+        
+    }, [pathname, location, currentServiceFlow, lastLocation, cartItems.length, clearCart]);
 
     return (
         <ServiceCartContext.Provider value={{

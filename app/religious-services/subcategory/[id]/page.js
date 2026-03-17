@@ -17,12 +17,18 @@ function SubCategoryServicesContent() {
     const params = useParams();
     const searchParams = useSearchParams();
     const categoryName = searchParams.get('category') || 'Services';
-    const subCategoryName = searchParams.get('name') || 'Available Services';
+    const subCategoryName = searchParams.get('name') || searchParams.get('subCategoryName') || 'Available Services';
     const categoryId = searchParams.get('categoryId') || null;
+    const subIdFromUrl = searchParams.get('subCategoryId') || searchParams.get('subcategoryId') || params.id;
 
     const { location, detectWithIP } = useLocationContext();
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Helper for robust URL construction
     const getFullUrl = (path, defaultUrl) => {
@@ -33,6 +39,26 @@ function SubCategoryServicesContent() {
 
     const [priceRange, setPriceRange] = useState([0, 100000]);
     const [minRating, setMinRating] = useState(0);
+
+    // Sync filters from URL
+    useEffect(() => {
+        const budget = searchParams.get('budget');
+        const rating = searchParams.get('minRating');
+
+        if (budget) {
+            if (budget === '5000+') {
+                setPriceRange([5000, 50000]);
+            } else if (budget.includes('-')) {
+                const [min, max] = budget.split('-').map(Number);
+                if (!isNaN(min) && !isNaN(max)) {
+                    setPriceRange([min, max]);
+                }
+            }
+        }
+        if (rating) {
+            setMinRating(parseFloat(rating));
+        }
+    }, [searchParams]);
 
     const [expandedCategory, setExpandedCategory] = useState(categoryId);
     const [activeCategoryName, setActiveCategoryName] = useState(categoryName);
@@ -108,8 +134,8 @@ function SubCategoryServicesContent() {
                     lattitude: lat,
                     longitude: lng,
                     serviceId: RELIGIOUS_SERVICE_ID,
-                    subcategoryId: params.id, // Correct casing
-                    categoryId: categoryId     // Send both for better backend matching
+                    subcategoryId: (subIdFromUrl && subIdFromUrl !== 'all') ? subIdFromUrl : undefined,
+                    categoryId: categoryId || undefined
                 };
 
                 const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
@@ -129,7 +155,7 @@ function SubCategoryServicesContent() {
             }
         };
         fetchServices();
-    }, [location, params.id, categoryId]);
+    }, [location, subIdFromUrl, categoryId, searchParams]);
 
     const filteredServices = useMemo(() => {
         return services.filter(service => {
@@ -193,10 +219,10 @@ function SubCategoryServicesContent() {
                                                 <button
                                                     key={sub._id}
                                                     onClick={() => {
-                                                        router.push(`/religious-services/subcategory/${sub._id}?category=${encodeURIComponent(activeCategoryName || categoryName)}&name=${encodeURIComponent(sub.name)}&categoryId=${expandedCategory}`);
+                                                        router.push(`/religious-services/subcategory/${sub._id}?category=${encodeURIComponent(activeCategoryName || categoryName)}&name=${encodeURIComponent(sub.name)}&categoryId=${expandedCategory}&subCategoryId=${sub._id}`);
                                                     }}
                                                     className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
-                                                        params.id === sub._id
+                                                        subIdFromUrl === sub._id
                                                         ? 'bg-[var(--saffron)] text-white shadow-md shadow-[var(--saffron)]/20'
                                                         : 'text-gray-500 hover:text-[var(--saffron)] hover:bg-orange-50'
                                                     }`}
@@ -217,11 +243,13 @@ function SubCategoryServicesContent() {
             <div className="mb-8 border-b border-orange-100 pb-6">
                 <div className="flex items-center justify-between mb-6">
                     <h6 className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Offering Range</h6>
-                    <span className="text-[11px] font-bold text-[var(--saffron)] bg-[var(--saffron)]/10 px-2.5 py-1 rounded-full border border-[var(--saffron)]/10">₹{priceRange[1].toLocaleString()}</span>
+                    <span className="text-[11px] font-bold text-[var(--saffron)] bg-[var(--saffron)]/10 px-2.5 py-1 rounded-full border border-[var(--saffron)]/10">
+                        ₹{mounted ? priceRange[1].toLocaleString() : priceRange[1]}
+                    </span>
                 </div>
                 <div className="px-1">
                     <Slider
-                        defaultValue={[500, 50000]}
+                        defaultValue={[0, 50000]}
                         min={0}
                         max={100000}
                         step={500}
@@ -469,16 +497,17 @@ function SubCategoryServicesContent() {
                                 >
                                     <Sparkles className="w-16 h-16 text-gray-200" />
                                 </motion.div>
-                                <h3 className="text-2xl font-black text-gray-900 mb-2">Divine Silence</h3>
-                                <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto">We couldn't find any services matching your specific filters. Try expanding your search criteria.</p>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2">No results found in your budget range</h3>
+                                <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto">Try widening your price range or exploring other divine categories to find the right priest for your ceremony.</p>
                                 <Button 
                                     onClick={() => {
-                                        setPriceRange([500, 50000]);
+                                        setPriceRange([0, 50000]);
                                         setMinRating(0);
+                                        router.push(pathname);
                                     }}
                                     className="bg-white border-2 border-gray-200 text-gray-900 hover:border-[var(--saffron)] hover:text-[var(--saffron)] hover:bg-white"
                                 >
-                                    Clear All Filters
+                                    Reset All Filters
                                 </Button>
                             </div>
                         )}

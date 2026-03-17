@@ -225,7 +225,7 @@ export default function ReligiousServicesPage() {
             transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute bottom-[25%] left-[15%] text-[var(--temple-red)] flex flex-col items-center drop-shadow-[0_0_20px_rgba(139,26,26,0.3)]"
           >
-            <Flame className="h-36 w-36 opacity-80" />
+            <Flame className="h-32 w-32 opacity-80" />
             <span className="text-[10px] font-bold uppercase tracking-[0.4em] mt-2 opacity-50">Agni</span>
           </motion.div>
 

@@ -35,12 +35,37 @@ export function ResultsPage() {
     const [showFilters, setShowFilters] = useState(true);
 
     // New state for filters
-    const [priceRange, setPriceRange] = useState([200, 5000]);
+    const [priceRange, setPriceRange] = useState([0, 50000]);
     const [minRating, setMinRating] = useState(0);
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
     const [expandedCategory, setExpandedCategory] = useState(searchParams.get('categoryId') || null);
     const [categoriesLoading, setCategoriesLoading] = useState(false);
+
+    // Sync state with URL params
+    useEffect(() => {
+        const query = searchParams.get('query') || searchParams.get('name') || '';
+        setSearchQuery(query);
+
+        const budget = searchParams.get('budget');
+        if (budget) {
+            const budgetOpt = [
+                { value: '499-999', range: [499, 999] },
+                { value: '999-1999', range: [999, 1999] },
+                { value: '1999+', range: [1999, 50000] }
+            ].find(opt => opt.value === budget);
+            
+            if (budgetOpt) {
+                setPriceRange(budgetOpt.range);
+            }
+        } else {
+            setPriceRange([0, 50000]);
+        }
+        
+        if (searchParams.get('categoryId')) {
+            setExpandedCategory(searchParams.get('categoryId'));
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         // No auto-detection, let the user trigger or wait for context
@@ -77,10 +102,10 @@ export function ResultsPage() {
                 const payload = {
                     serviceId: '69524f4a57bb211ca094e5e6',
                     categoryId: categoryId || undefined,
-                    subCategoryId: subcategoryId || undefined,
-                    searchQuery: searchQuery || "",
-                    sortBy: currentSortBy,
-                    latitude: lat,
+                    subcategoryId: subcategoryId || undefined, // Standardized to lowercase c
+                    searchQuery: searchQuery || undefined,
+                    sortBy: currentSortBy || undefined,
+                    lattitude: lat, // Standardized to double t
                     longitude: lng,
                     minPrice: priceRange[0],
                     maxPrice: priceRange[1],
@@ -292,43 +317,51 @@ export function ResultsPage() {
                     </div>
                 </div>
 
-                {/* Price Range */}
-                <div className="mb-8 border-b border-gray-100 pb-6">
-                    <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Price Range</h6>
-                    <div className="grid grid-cols-2 gap-2 mb-4">
+                {/* Quick Budget */}
+                <div className="mb-6">
+                    <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Quick Budget</h6>
+                    <div className="grid grid-cols-1 gap-2">
                         {[
-                            { value: 'under-500', label: 'Under ₹500', range: [0, 500] },
-                            { value: '500-1500', label: '₹500 - 1500', range: [500, 1500] },
-                            { value: '1500-3000', label: '₹1500 - 3000', range: [1500, 3000] },
-                            { value: '3000+', label: '₹3000+', range: [3000, 10000] }
+                            { value: '499-999', label: '₹499 - ₹999', range: [499, 999] },
+                            { value: '999-1999', label: '₹999 - ₹1,999', range: [999, 1999] },
+                            { value: '1999+', label: '₹1,999+', range: [1999, 50000] }
                         ].map((opt) => (
                             <button
                                 key={opt.value}
                                 onClick={() => {
                                     const isSelected = searchParams.get('budget') === opt.value;
-                                    updateFilters({
-                                        budget: isSelected ? '' : opt.value
-                                    });
+                                    updateFilters({ budget: isSelected ? '' : opt.value });
                                     if (!isSelected) setPriceRange(opt.range);
                                 }}
-                                className={`px-2 py-2 rounded-lg text-[10px] font-bold text-center border transition-all ${
+                                className={`text-left px-4 py-2.5 rounded-xl text-xs font-bold border transition-all ${
                                     searchParams.get('budget') === opt.value
-                                    ? 'bg-[#C06C84] text-white border-[#C06C84]'
-                                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-[#C06C84] border-[#C06C84] text-white shadow-md'
+                                    : 'bg-white border-gray-100 text-gray-600 hover:border-[#C06C84]/30'
                                 }`}
                             >
                                 {opt.label}
                             </button>
                         ))}
                     </div>
+                </div>
+
+                {/* Price Range Slider */}
+                <div className="mb-8 border-b border-gray-100 pb-6">
+                    <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Price Range Slider</h6>
                     <div className="px-1">
                         <Slider
-                            defaultValue={[200, 5000]}
-                            min={100}
-                            max={10000}
+                            defaultValue={[0, 50000]}
+                            min={0}
+                            max={50000}
                             step={100}
                             value={priceRange}
-                            onValueChange={setPriceRange}
+                            onValueChange={(val) => {
+                                setPriceRange(val);
+                                // Clear budget preset if user moves slider
+                                if (searchParams.get('budget')) {
+                                    updateFilters({ budget: '' });
+                                }
+                            }}
                             className="mb-4"
                         />
                     </div>
@@ -336,7 +369,7 @@ export function ResultsPage() {
                         <span>₹{priceRange[0].toLocaleString()}</span>
                         <span>₹{priceRange[1].toLocaleString()}</span>
                     </div>
-                </div>
+                </div>            
 
                 {/* Minimum Rating */}
                 <div className="mb-8 border-b border-gray-100 pb-6">
@@ -561,11 +594,11 @@ export function ResultsPage() {
                                         <div className="col-span-full">
                                             <EmptyState 
                                                 icon="search"
-                                                title="No services found"
-                                                description="We couldn't find any services matching your current filters. Try resetting or adjusting your criteria."
+                                                title="No services found in your budget range"
+                                                description="We couldn't find any services matching your criteria. Try widening your price range or exploring other categories."
                                                 actionLabel="Reset All Filters"
                                                 onAction={() => {
-                                                    setPriceRange([200, 5000]);
+                                                    setPriceRange([0, 50000]);
                                                     setMinRating(0);
                                                     router.push(pathname);
                                                 }}

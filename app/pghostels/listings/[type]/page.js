@@ -134,7 +134,7 @@ function PGListingsContent() {
         moveIn: searchParams.get('moveIn') || ''
     };
 
-    const [priceRange, setPriceRange] = useState([5000, 20000]);
+    const [priceRange, setPriceRange] = useState([0, 50000]);
     const [savedItems, setSavedItems] = useState([]);
     const [compareList, setCompareList] = useState([]);
     const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '');
@@ -239,10 +239,27 @@ function PGListingsContent() {
         // Sync price range and rating from URL if present
         const minP = searchParams.get('minPrice');
         const maxP = searchParams.get('maxPrice');
+
         if (minP && maxP) {
             const range = [parseInt(minP), parseInt(maxP)];
             if (range[0] !== priceRange[0] || range[1] !== priceRange[1]) {
                 setPriceRange(range);
+            }
+        } else if (!minP && !maxP && !searchParams.get('budget')) {
+            setPriceRange([0, 50000]);
+        }
+
+        // Parse 'budget' param from Questionnaire
+        const budget = searchParams.get('budget');
+        if (budget) {
+            const budgetMap = {
+                '3-6k': [3000, 6000],
+                '6-10k': [6000, 10000],
+                '10-15k': [10000, 15000],
+                '15k+': [15000, 50000]
+            };
+            if (budgetMap[budget]) {
+                setPriceRange(budgetMap[budget]);
             }
         }
 
@@ -360,6 +377,50 @@ function PGListingsContent() {
         fetchSubCategories();
     }, [expandedCategory]);
 
+    // Sync state back to URL for deep linking and consistent filtering
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const params = new URLSearchParams(searchParams.toString());
+            let changed = false;
+
+            // Sync Price Range if changed
+            if (priceRange[0] !== 0 || priceRange[1] !== 50000) {
+                if (params.get('minPrice') !== priceRange[0].toString()) {
+                    params.set('minPrice', priceRange[0].toString());
+                    changed = true;
+                }
+                if (params.get('maxPrice') !== priceRange[1].toString()) {
+                    params.set('maxPrice', priceRange[1].toString());
+                    changed = true;
+                }
+            } else if (params.has('minPrice') || params.has('maxPrice')) {
+                // If it's back to default but URL still has params, clear them
+                if (!params.get('budget')) { // Only clear if not a preset
+                    params.delete('minPrice');
+                    params.delete('maxPrice');
+                    changed = true;
+                }
+            }
+
+            // Sync Rating
+            if (minRating > 0) {
+                if (params.get('minRating') !== minRating.toString()) {
+                    params.set('minRating', minRating.toString());
+                    changed = true;
+                }
+            } else if (params.has('minRating')) {
+                params.delete('minRating');
+                changed = true;
+            }
+
+            if (changed) {
+                router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+            }
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(timer);
+    }, [priceRange, minRating]);
+
     const toggleSave = (id) => {
         setSavedItems(prev =>
             prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
@@ -393,6 +454,15 @@ function PGListingsContent() {
         const currentParams = new URLSearchParams(searchParams.toString());
         if (value) {
             currentParams.set(key, value);
+            // Clear query search when selecting a category or subcategory
+            if (key === 'categoryId' || key === 'subcategoryId') {
+                currentParams.delete('query');
+                setSearchQuery('');
+            }
+            // If selecting a category, clear subcategory
+            if (key === 'categoryId') {
+                currentParams.delete('subcategoryId');
+            }
         } else {
             currentParams.delete(key);
         }
@@ -416,8 +486,12 @@ function PGListingsContent() {
                         <div key={cat._id} className="overflow-hidden">
                             <button
                                 onClick={() => {
-                                    if (expandedCategory === cat._id) setExpandedCategory(null);
-                                    else setExpandedCategory(cat._id);
+                                    if (expandedCategory === cat._id) {
+                                        setExpandedCategory(null);
+                                    } else {
+                                        setExpandedCategory(cat._id);
+                                        updateFilter('categoryId', cat._id);
+                                    }
                                 }}
                                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
                                     expandedCategory === cat._id || cat._id === searchParams.get('categoryId')
@@ -478,10 +552,36 @@ function PGListingsContent() {
 
             {/* Price Range */}
             <div className="mb-8 border-b border-gray-100 pb-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                     <h6 className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Monthly Budget</h6>
                     <span className="text-[11px] font-bold text-[#037166] bg-[#037166]/10 px-2.5 py-1 rounded-full border border-[#037166]/10">₹{priceRange[1].toLocaleString()}</span>
                 </div>
+
+                <div className="grid grid-cols-2 gap-2 mb-6">
+                    {[
+                        { value: '3-6k', label: '₹3k - ₹6k', range: [3000, 6000] },
+                        { value: '6-10k', label: '₹6k - ₹10k', range: [6000, 10000] },
+                        { value: '10-15k', label: '₹10k - ₹15k', range: [10000, 15000] },
+                        { value: '15k+', label: '₹15k+', range: [15000, 40000] }
+                    ].map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => {
+                                const isSelected = searchParams.get('budget') === opt.value;
+                                updateFilter('budget', isSelected ? '' : opt.value);
+                                if (!isSelected) setPriceRange(opt.range);
+                            }}
+                            className={`px-2 py-2.5 rounded-xl text-[10px] font-bold text-center border-2 transition-all ${
+                                searchParams.get('budget') === opt.value
+                                ? 'bg-[#037166] text-white border-[#037166] shadow-md'
+                                : 'bg-white border-gray-50 text-gray-500 hover:border-[#037166]/20'
+                            }`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+
                 <div className="px-1">
                     <Slider
                         defaultValue={[5000, 20000]}
@@ -491,7 +591,10 @@ function PGListingsContent() {
                         value={priceRange}
                         onValueChange={(val) => {
                             setPriceRange(val);
-                            // Debounce URL update or update on commit if needed
+                            // Clear budget preset if user moves slider
+                            if (searchParams.get('budget')) {
+                                updateFilter('budget', '');
+                            }
                         }}
                         className="mb-4"
                     />
@@ -600,7 +703,7 @@ function PGListingsContent() {
             <button 
                 className="w-full mt-4 bg-white border border-gray-200 text-gray-400 hover:text-[#037166] hover:border-[#037166]/30 h-11 text-[11px] font-black rounded-xl gap-2 transition-all flex items-center justify-center shadow-sm"
                 onClick={() => {
-                    setPriceRange([5000, 20000]);
+                    setPriceRange([0, 50000]);
                     setMinRating(0);
                     router.push(pathname);
                 }}
@@ -1000,12 +1103,14 @@ function PGListingsContent() {
                                 ) : (
                                     <EmptyState
                                         icon="search"
-                                        title="No PGs found"
-                                        description="We couldn't find any PGs matching your criteria. Try adjusting your price range or filters."
+                                        title="No results found in your budget range"
+                                        description="We couldn't find any PGs matching your criteria. Try widening your price range or exploring other categories."
                                         actionLabel="Reset Filters"
                                         onAction={() => {
-                                            setPriceRange([5000, 20000]);
+                                            setPriceRange([0, 50000]);
+                                            setMinRating(0);
                                             setSearchQuery('');
+                                            router.push(pathname);
                                         }}
                                         className="bg-white rounded-3xl border border-gray-100 shadow-sm"
                                     />
@@ -1013,13 +1118,29 @@ function PGListingsContent() {
                             </TabsContent>
 
                             <TabsContent value="nearby" className="mt-0">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                                    {sortedListings
-                                        .sort((a, b) => a.distance - b.distance)
-                                        .map((listing) => (
-                                            <PGCard key={listing.id} listing={listing} isNearby />
-                                        ))}
-                                </div>
+                                {sortedListings.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                                        {sortedListings
+                                            .sort((a, b) => a.distance - b.distance)
+                                            .map((listing) => (
+                                                <PGCard key={listing.id} listing={listing} isNearby />
+                                            ))}
+                                    </div>
+                                ) : (
+                                    <EmptyState
+                                        icon="map-pin"
+                                        title="No nearby PGs found in your budget range"
+                                        description="Try adjusting your filters or increasing your search radius to find more options."
+                                        actionLabel="Reset Filters"
+                                        onAction={() => {
+                                            setPriceRange([0, 50000]);
+                                            setMinRating(0);
+                                            setSearchQuery('');
+                                            router.push(pathname);
+                                        }}
+                                        className="bg-white rounded-3xl border border-gray-100 shadow-sm"
+                                    />
+                                )}
                             </TabsContent>
                         </div>
                     </div>

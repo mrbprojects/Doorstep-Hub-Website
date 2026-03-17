@@ -7,28 +7,6 @@ import { useRouter } from 'next/navigation';
 
 const staticQuestions = [
     {
-        id: 'roomType',
-        title: 'What type of room do you prefer?',
-        icon: Bed,
-        options: [
-            { value: 'single', label: 'Single Room', desc: 'Your own private space' },
-            { value: '2-sharing', label: '2 Sharing', desc: 'Share with one person' },
-            { value: '3-sharing', label: '3 Sharing', desc: 'Share with two people' },
-            { value: '4-sharing', label: '4+ Sharing', desc: 'Dormitory style' },
-        ],
-    },
-    {
-        id: 'duration',
-        title: 'How long do you plan to stay?',
-        icon: Calendar,
-        options: [
-            { value: '1-month', label: '1 Month', desc: 'Short term stay' },
-            { value: '3-months', label: '3 Months', desc: 'Medium term' },
-            { value: '6-months', label: '6 Months', desc: 'Extended stay' },
-            { value: 'long-term', label: 'Long Term', desc: '1 year or more' },
-        ],
-    },
-    {
         id: 'budget',
         title: 'What is your budget range?',
         icon: DollarSign,
@@ -37,27 +15,6 @@ const staticQuestions = [
             { value: '6-10k', label: '₹6,000 - ₹10,000', desc: 'Mid range' },
             { value: '10-15k', label: '₹10,000 - ₹15,000', desc: 'Premium' },
             { value: '15k+', label: '₹15,000+', desc: 'Luxury' },
-        ],
-    },
-    {
-        id: 'food',
-        title: 'Do you need food included?',
-        icon: Utensils,
-        options: [
-            { value: 'with-food', label: 'With Food', desc: 'Meals included in rent' },
-            { value: 'without-food', label: 'Without Food', desc: 'Self-catering' },
-            { value: 'optional', label: 'Optional', desc: 'Flexible arrangement' },
-        ],
-    },
-    {
-        id: 'moveIn',
-        title: 'When do you want to move in?',
-        icon: Calendar,
-        options: [
-            { value: 'today', label: 'Today', desc: 'Immediate move-in' },
-            { value: 'this-week', label: 'This Week', desc: 'Within 7 days' },
-            { value: 'next-week', label: 'Next Week', desc: '8-14 days' },
-            { value: 'flexible', label: 'Flexible', desc: 'No rush' },
         ],
     },
 ];
@@ -123,8 +80,9 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                         options: data.data.map(sub => ({
                             value: sub._id,
                             label: sub.name,
-                            desc: sub.categoryName,
-                            image: sub.image
+                            desc: sub.startingAt || sub.price || sub.minFare ? `Starting at ₹${sub.startingAt || sub.price || sub.minFare}` : sub.categoryName,
+                            image: sub.image,
+                            price: sub.startingAt || sub.price || sub.minFare || null
                         }))
                     };
                 }
@@ -209,7 +167,8 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
             const queryParams = new URLSearchParams({
                 categoryId: finalCategoryId,
                 categoryName: finalCategoryName,
-                ...answers
+                subcategoryId: answers.subcategoryId || '',
+                budget: answers.budget || ''
             });
 
             if (lat) queryParams.append('lat', lat);
@@ -330,8 +289,15 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                                                         style={{ backgroundImage: `url('https://api.doorstephub.com/${option.image}')` }}
                                                                     />
                                                                 )}
-                                                                <div>
-                                                                    <div className="font-semibold text-gray-900 mb-1">{option.label}</div>
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center justify-between mb-1">
+                                                                        <div className="font-semibold text-gray-900">{option.label}</div>
+                                                                        {option.price && (
+                                                                            <div className="text-[#037166] font-bold text-sm bg-[#037166]/5 px-2 py-0.5 rounded-lg">
+                                                                                ₹{option.price}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                     <div className="text-sm text-gray-600">{option.desc}</div>
                                                                 </div>
                                                             </div>

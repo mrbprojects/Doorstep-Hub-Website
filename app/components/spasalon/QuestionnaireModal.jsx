@@ -7,38 +7,12 @@ import { useRouter } from 'next/navigation';
 
 const staticQuestions = [
     {
-        id: 'serviceType',
-        question: 'Where would you like the service?',
-        options: [
-            { value: 'home', label: 'Home Service', icon: '🏠' },
-            { value: 'center', label: 'Visit Nearby Center', icon: '🏢' },
-        ],
-    },
-    {
-        id: 'preferredTime',
-        question: 'Preferred Time?',
-        options: [
-            { value: 'morning', label: 'Morning', icon: '🌅' },
-            { value: 'afternoon', label: 'Afternoon', icon: '☀️' },
-            { value: 'evening', label: 'Evening', icon: '🌙' },
-        ],
-    },
-    {
         id: 'budget',
         question: 'Budget Range?',
         options: [
             { value: '499-999', label: '₹499–₹999', icon: '💰' },
             { value: '999-1999', label: '₹999–₹1999', icon: '💎' },
             { value: '1999+', label: '₹1999+', icon: '👑' },
-        ],
-    },
-    {
-        id: 'genderPreference',
-        question: 'Gender Preference for Staff?',
-        options: [
-            { value: 'female', label: 'Female Staff', icon: '👩' },
-            { value: 'male', label: 'Male Staff', icon: '👨' },
-            { value: 'any', label: 'Any', icon: '🤝' },
         ],
     },
 ];
@@ -104,7 +78,8 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                 value: sub._id,
                                 label: sub.name,
                                 icon: '✨',
-                                image: sub.image
+                                image: sub.image,
+                                price: sub.startingAt || sub.price || sub.minFare || null
                             }))
                         };
                         setQuestions([subcatQuestion, ...staticQuestions]);
@@ -297,7 +272,12 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                                                         {option.icon}
                                                                     </div>
                                                                 )}
-                                                                <span className="text-[#0F172A] font-semibold text-l">{option.label}</span>
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[#0F172A] font-semibold text-l">{option.label}</span>
+                                                                        {option.price && (
+                                                                            <span className="text-[#C06C84] font-bold text-sm mt-1">Starting at ₹{option.price}</span>
+                                                                        )}
+                                                                    </div>
                                                             </div>
                                                         </motion.button>
                                                     ))}

@@ -15,7 +15,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
     // Profile Edit State
     const [isEditing, setIsEditing] = useState(false);
-    const [profileData, setProfileData] = useState({ name: '', email: '' });
+    const [profileData, setProfileData] = useState({ name: '', email: '', phone: '' });
     const [previewImage, setPreviewImage] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [resendTimer, setResendTimer] = useState(0);
@@ -48,7 +48,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         if (user) {
             setProfileData({
                 name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                email: user.email || ''
+                email: user.email || '',
+                phone: user.phone || user.mobile || ''
             });
         }
     }, [user]);
@@ -137,15 +138,14 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         }
     };
 
-    // Auto-enable edit mode for first-time users (no name) and show toast
-    // Also seeds profile data once the user object arrives from context
     React.useEffect(() => {
         if (isAuthenticated && user && step === 'profile') {
-            const hasProfile = user.name || user.firstName || user.lastName;
+            const hasProfile = (user.name || user.firstName || user.lastName) && (user.phone || user.mobile);
             // Always re-seed profileData from the latest user object
             setProfileData({
                 name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                email: user.email || ''
+                email: user.email || '',
+                phone: user.phone || user.mobile || ''
             });
             if (!hasProfile) {
                 setIsEditing(true);
@@ -179,7 +179,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
     if (!isOpen) return null;
 
-    const isFirstTimeUser = isAuthenticated && user && !(user.name || user.firstName || user.lastName);
+    const isFirstTimeUser = isAuthenticated && user && !((user.name || user.firstName || user.lastName) && (user.phone || user.mobile));
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -416,7 +416,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                 </div>
                                 <div className="mt-4 text-center">
                                     <h3 className={`text-xl font-bold ${t.textMain}`}>{user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User'}</h3>
-                                    <p className={`${t.textMain} opacity-60 text-sm`}>{user?.phone || user?.mobile || 'No phone'}</p>
+                                    <p className={`${t.textMain} opacity-60 text-sm`}>{profileData.phone || user?.phone || user?.mobile || 'No phone'}</p>
                                 </div>
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
@@ -433,6 +433,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                                 const formData = new FormData();
                                                 formData.append('name', profileData.name);
                                                 formData.append('email', profileData.email);
+                                                formData.append('mobile', profileData.phone);
                                                 if (selectedFile) {
                                                     formData.append('image', selectedFile);
                                                 }
@@ -462,6 +463,17 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                             </div>
 
                             <div className="space-y-4">
+                                <div className="relative">
+                                    <Phone className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${t.textMain} opacity-40`} />
+                                    <input
+                                        type="tel"
+                                        placeholder="Phone Number"
+                                        value={profileData.phone}
+                                        disabled={!isEditing}
+                                        onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} placeholder:opacity-30 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
+                                    />
+                                </div>
                                 <div className="relative">
                                     <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${t.textMain} opacity-40`} />
                                     <input

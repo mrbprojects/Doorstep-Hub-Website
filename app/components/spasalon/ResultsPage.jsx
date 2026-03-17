@@ -76,11 +76,8 @@ export function ResultsPage() {
 
                 const payload = {
                     serviceId: '69524f4a57bb211ca094e5e6',
-                    categoryId: categoryId,
-                    subCategoryId: subcategoryId,
-                    subcategoryId: subcategoryId,
-                    // If we have a subcategory, don't send categoryId to avoid filtering conflicts
-                    ...(subcategoryId ? {} : { categoryId }),
+                    categoryId: categoryId || undefined,
+                    subCategoryId: subcategoryId || undefined,
                     searchQuery: searchQuery || "",
                     sortBy: currentSortBy,
                     latitude: lat,
@@ -172,13 +169,15 @@ export function ResultsPage() {
         fetchCategories();
     }, []);
 
-    const updateFilter = (key, value) => {
+    const updateFilters = (updates) => {
         const currentParams = new URLSearchParams(searchParams.toString());
-        if (value) {
-            currentParams.set(key, value);
-        } else {
-            currentParams.delete(key);
-        }
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                currentParams.set(key, value);
+            } else {
+                currentParams.delete(key);
+            }
+        });
         router.push(`${pathname}?${currentParams.toString()}`);
     };
 
@@ -215,6 +214,14 @@ export function ResultsPage() {
                             <div key={cat._id} className="mb-1">
                                 <button
                                     onClick={() => {
+                                        // Update filters immediately for category
+                                        updateFilters({
+                                            categoryId: cat._id,
+                                            subcategoryId: '',
+                                            categoryName: cat.name,
+                                            name: cat.name
+                                        });
+
                                         if (expandedCategory === cat._id) {
                                             setExpandedCategory(null);
                                         } else {
@@ -260,10 +267,12 @@ export function ResultsPage() {
                                                     <button
                                                         key={sub._id}
                                                         onClick={() => {
-                                                            updateFilter('categoryId', cat._id);
-                                                            updateFilter('subcategoryId', sub._id);
-                                                            updateFilter('categoryName', cat.name);
-                                                            updateFilter('name', sub.name);
+                                                            updateFilters({
+                                                                categoryId: cat._id,
+                                                                subcategoryId: sub._id,
+                                                                categoryName: cat.name,
+                                                                name: sub.name
+                                                            });
                                                         }}
                                                         className={`w-full text-left p-2.5 rounded-lg text-xs transition-all ${
                                                             searchParams.get('subcategoryId') === sub._id
@@ -297,12 +306,10 @@ export function ResultsPage() {
                                 key={opt.value}
                                 onClick={() => {
                                     const isSelected = searchParams.get('budget') === opt.value;
-                                    if (isSelected) {
-                                        updateFilter('budget', '');
-                                    } else {
-                                        updateFilter('budget', opt.value);
-                                        setPriceRange(opt.range);
-                                    }
+                                    updateFilters({
+                                        budget: isSelected ? '' : opt.value
+                                    });
+                                    if (!isSelected) setPriceRange(opt.range);
                                 }}
                                 className={`px-2 py-2 rounded-lg text-[10px] font-bold text-center border transition-all ${
                                     searchParams.get('budget') === opt.value
@@ -390,7 +397,7 @@ export function ResultsPage() {
     return (
         <div className="min-h-screen bg-[#F6F7FB]">
             {/* Header / Hero Section */}
-            <div className="bg-[#1A0515] pt-24 pb-16 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[#C27393] to-[#6D1357] pt-24 pb-20 relative overflow-hidden">
                 {/* Background Decorations */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#C06C84]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#6C5CE7]/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
@@ -410,11 +417,11 @@ export function ResultsPage() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                         >
-                            <h1 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-tight">
-                                Spas Matched <span className="text-[#C06C84]">for You</span>
+                            <h1 className="text-4xl md:text-6xl font-black text-white mb-3 tracking-tight drop-shadow-lg">
+                                Spas Matched <span className="text-white/80">for You</span>
                             </h1>
-                            <p className="text-white/60 text-lg font-medium">
-                                {searchQuery ? `Searching for "${searchQuery}"` : 'Handpicked premium services in your area'}
+                            <p className="text-white/90 text-lg font-medium">
+                                {searchQuery ? `Searching for "${searchQuery}"` : 'Premium treatments designed for your relaxation and beauty.'}
                             </p>
                         </motion.div>
 
@@ -510,13 +517,13 @@ export function ResultsPage() {
                                     <div className="flex bg-white p-1.5 rounded-2xl border border-gray-200 shadow-sm">
                                         <button 
                                             onClick={() => setActiveTab('all')}
-                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#1A0515] text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#6D1357] text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
                                         >
                                             All Services
                                         </button>
                                         <button 
                                             onClick={() => setActiveTab('nearby')}
-                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'nearby' ? 'bg-[#1A0515] text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'nearby' ? 'bg-[#6D1357] text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
                                         >
                                             Nearby
                                         </button>
@@ -680,7 +687,7 @@ function ServiceCard({ service, index, router }) {
                             e.stopPropagation();
                             router.push(`/spa-salon/detail/${service.id}`);
                         }}
-                        className="px-6 py-3 bg-[#1A0515] text-white rounded-xl text-sm font-black hover:bg-[#C06C84] transition-all shadow-lg shadow-[#1A0515]/10"
+                        className="px-6 py-3 bg-[#6D1357] text-white rounded-xl text-sm font-black hover:bg-[#C06C84] transition-all shadow-lg shadow-[#6D1357]/10"
                     >
                         Book Now
                     </motion.button>

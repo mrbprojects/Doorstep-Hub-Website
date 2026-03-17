@@ -8,10 +8,12 @@ import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
+import { useRouter } from 'next/navigation';
 
 export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
     const { cartData, cartItems, clearCart, addToCart, removeFromCart } = useServiceCart();
     const { token, isAuthenticated, loading: authLoading } = useAuth();
+    const router = useRouter();
 
     // Calculate final payable amount: Service Cost + 18% GST + Fixed Consultation Fee (125)
     const baseServiceCost = cartData?.totalServiceCost || 0;

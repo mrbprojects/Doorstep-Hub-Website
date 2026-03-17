@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { PaymentFailureModal } from '@/components/ui/PaymentFailureModal';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { toast } from 'sonner';
 
 function CheckoutContent() {
     const router = useRouter();
@@ -58,7 +59,6 @@ function CheckoutContent() {
             router.push(`/appliances/thank-you?${params.toString()}`);
 
         } else if (status === 'failure') {
-            setPaymentStatus('failure');
             toast.error('Payment failed. Redirecting to cart for retry...');
             setTimeout(() => {
                 router.push('/appliances/cart');

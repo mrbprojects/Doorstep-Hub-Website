@@ -23,6 +23,10 @@ export const ServiceCartProvider = ({ children }) => {
     const [currentServiceFlow, setCurrentServiceFlow] = useState(null);
     const [lastLocation, setLastLocation] = useState(null);
 
+    // Refs to hold latest values without triggering re-renders in the effect
+    const cartItemsRef = React.useRef(cartItems);
+    const clearCartRef = React.useRef(null);
+
     const fetchCart = useCallback(async () => {
         if (!isAuthenticated) return;
         setLoading(true);
@@ -148,7 +152,18 @@ export const ServiceCartProvider = ({ children }) => {
         }
     }, [token, isAuthenticated]);
 
+    // Keep refs up to date so the effect below can access latest values without listing them as deps
+    useEffect(() => {
+        cartItemsRef.current = cartItems;
+    }, [cartItems]);
+
+    useEffect(() => {
+        clearCartRef.current = clearCart;
+    }, [clearCart]);
+
     // Handle service category OR location changes to clear the cart
+    // NOTE: cartItems and clearCart are accessed via refs to avoid infinite loops.
+    // Only stable/primitive values are in the dependency array.
     useEffect(() => {
         const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
         const segments = pathname.split('/').filter(Boolean);
@@ -156,25 +171,26 @@ export const ServiceCartProvider = ({ children }) => {
 
         // 1. Check for Service Flow Change
         const isFlowChanged = match && currentServiceFlow && currentServiceFlow !== match;
-        
+
         // 2. Check for Location Change
         const hasLocationChanged = (location && lastLocation) && (
-            location.lat !== lastLocation.lat || 
+            location.lat !== lastLocation.lat ||
             location.lng !== lastLocation.lng
         );
 
         if (isFlowChanged || hasLocationChanged) {
             console.log(`🛒 Context Change Detected! Flow: ${currentServiceFlow}->${match}, Location: Changed? ${hasLocationChanged}. Clearing cart...`);
-            if (cartItems.length > 0) {
-                clearCart(true); 
+            // Use ref to read latest cartItems length — avoids adding cartItems to deps
+            if (cartItemsRef.current.length > 0 && clearCartRef.current) {
+                clearCartRef.current(true);
             }
         }
 
         // Update tracking states
         if (match) setCurrentServiceFlow(match);
         if (location) setLastLocation({ lat: location.lat, lng: location.lng });
-        
-    }, [pathname, location, currentServiceFlow, lastLocation, cartItems.length, clearCart]);
+
+    }, [pathname, location, currentServiceFlow, lastLocation]);
 
     return (
         <ServiceCartContext.Provider value={{

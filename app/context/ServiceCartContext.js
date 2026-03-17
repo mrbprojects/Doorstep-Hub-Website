@@ -21,11 +21,16 @@ export const ServiceCartProvider = ({ children }) => {
     const { location } = useLocationContext();
     const pathname = usePathname();
     const [currentServiceFlow, setCurrentServiceFlow] = useState(null);
-    const [lastLocation, setLastLocation] = useState(null);
 
     // Refs to hold latest values without triggering re-renders in the effect
     const cartItemsRef = React.useRef(cartItems);
     const clearCartRef = React.useRef(null);
+    // lastLocation as a ref (not state) so writing to it never triggers a re-render
+    const lastLocationRef = React.useRef(null);
+
+    // Extract primitives so the effect dep array gets stable values, not a new object
+    const locationLat = location?.lat;
+    const locationLng = location?.lng;
 
     const fetchCart = useCallback(async () => {
         if (!isAuthenticated) return;
@@ -162,8 +167,8 @@ export const ServiceCartProvider = ({ children }) => {
     }, [clearCart]);
 
     // Handle service category OR location changes to clear the cart
-    // NOTE: cartItems and clearCart are accessed via refs to avoid infinite loops.
-    // Only stable/primitive values are in the dependency array.
+    // NOTE: cartItems/clearCart via refs, lastLocation via ref — nothing here causes a loop.
+    // Deps are all primitives or stable state; no new objects created.
     useEffect(() => {
         const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
         const segments = pathname.split('/').filter(Boolean);
@@ -172,25 +177,27 @@ export const ServiceCartProvider = ({ children }) => {
         // 1. Check for Service Flow Change
         const isFlowChanged = match && currentServiceFlow && currentServiceFlow !== match;
 
-        // 2. Check for Location Change
-        const hasLocationChanged = (location && lastLocation) && (
-            location.lat !== lastLocation.lat ||
-            location.lng !== lastLocation.lng
+        // 2. Check for Location Change (compare against ref — no setState involved)
+        const hasLocationChanged = locationLat != null && lastLocationRef.current != null && (
+            locationLat !== lastLocationRef.current.lat ||
+            locationLng !== lastLocationRef.current.lng
         );
 
         if (isFlowChanged || hasLocationChanged) {
-            console.log(`🛒 Context Change Detected! Flow: ${currentServiceFlow}->${match}, Location: Changed? ${hasLocationChanged}. Clearing cart...`);
-            // Use ref to read latest cartItems length — avoids adding cartItems to deps
+            console.log(`🛒 Context Change Detected! Flow: ${currentServiceFlow}->${match}, Location changed: ${hasLocationChanged}. Clearing cart...`);
             if (cartItemsRef.current.length > 0 && clearCartRef.current) {
                 clearCartRef.current(true);
             }
         }
 
-        // Update tracking states
+        // Update tracking: write to ref (no state update = no re-render)
         if (match) setCurrentServiceFlow(match);
-        if (location) setLastLocation({ lat: location.lat, lng: location.lng });
+        if (locationLat != null) {
+            lastLocationRef.current = { lat: locationLat, lng: locationLng };
+        }
 
-    }, [pathname, location, currentServiceFlow, lastLocation]);
+    }, [pathname, locationLat, locationLng, currentServiceFlow]);
+    // ↑ lastLocation removed — it's now a ref, so no need in deps
 
     return (
         <ServiceCartContext.Provider value={{

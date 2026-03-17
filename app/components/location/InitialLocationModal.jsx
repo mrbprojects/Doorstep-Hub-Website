@@ -13,6 +13,21 @@ export function InitialLocationModal() {
     const [isSearching, setIsSearching] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
     const [view, setView] = useState('welcome'); // 'welcome', 'search'
+    const [showAllCities, setShowAllCities] = useState(false);
+
+    const ALL_CITIES = [
+        'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 'Delhi', 'Kolkata',
+        'Ahmedabad', 'Pune', 'Surat', 'Jaipur', 'Lucknow', 'Kanpur',
+        'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Patna',
+        'Vadodara', 'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad',
+        'Meerut', 'Rajkot', 'Varanasi', 'Srinagar', 'Aurangabad', 'Dhanbad',
+        'Amritsar', 'Navi Mumbai', 'Prayagraj', 'Ranchi', 'Howrah', 'Coimbatore',
+        'Jabalpur', 'Gwalior', 'Vijayawada', 'Jodhpur', 'Madurai', 'Raipur',
+        'Kota', 'Guwahati', 'Chandigarh', 'Solapur', 'Hubli-Dharwad', 'Mysore',
+        'Tiruchirappalli', 'Bareilly', 'Aligarh', 'Gurgaon', 'Noida'
+    ];
+
+    const displayedCities = showAllCities ? ALL_CITIES : ALL_CITIES.slice(0, 4);
 
     useEffect(() => {
         // If no location is set, show the modal
@@ -77,6 +92,23 @@ export function InitialLocationModal() {
             setIsOpen(false);
         } catch (error) {
             console.error('Manual selection failed:', error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSelectCity = async (cityName) => {
+        setIsSearching(true);
+        try {
+            const results = await searchLocation(cityName);
+            if (results && results.length > 0) {
+                // Find the best match - usually the one where main_text matches cityName
+                const bestMatch = results.find(r => r.main_text.toLowerCase() === cityName.toLowerCase()) || results[0];
+                await setManualLocation(bestMatch.place_id);
+                setIsOpen(false);
+            }
+        } catch (error) {
+            console.error('City selection failed:', error);
         } finally {
             setIsSearching(false);
         }
@@ -197,20 +229,38 @@ export function InitialLocationModal() {
                                         <div className="text-center py-12 text-gray-500">No results found</div>
                                     ) : (
                                         <div className="py-8">
-                                            <div className="grid grid-cols-2 gap-3">
-                                                {['Hyderabad', 'Bangalore', 'Mumbai', 'Chennai'].map(city => (
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Popular Cities</h4>
+                                                {!showAllCities && (
+                                                    <button
+                                                        onClick={() => setShowAllCities(true)}
+                                                        className="text-xs font-bold text-[#04a99d] hover:underline"
+                                                    >
+                                                        See More
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                                {displayedCities.map(city => (
                                                     <button
                                                         key={city}
-                                                        onClick={() => {
-                                                            setSearchQuery(city);
-                                                            searchLocation(city).then(setSearchResults);
-                                                        }}
-                                                        className="p-3 text-left bg-white/5 border border-white/5 rounded-xl text-gray-400 hover:text-white transition-all text-sm"
+                                                        onClick={() => handleSelectCity(city)}
+                                                        disabled={isSearching}
+                                                        className="p-3 text-left bg-white/5 border border-white/5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 hover:border-[#037166]/30 transition-all text-sm flex items-center gap-2 group disabled:opacity-50"
                                                     >
-                                                        {city}
+                                                        <MapPin className="w-3 h-3 text-gray-600 group-hover:text-[#04a99d]" />
+                                                        <span className="truncate">{city}</span>
                                                     </button>
                                                 ))}
                                             </div>
+                                            {showAllCities && (
+                                                <button
+                                                    onClick={() => setShowAllCities(false)}
+                                                    className="mt-6 w-full py-3 text-sm font-medium text-gray-500 hover:text-white transition-colors border-t border-white/5"
+                                                >
+                                                    Show Less
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>

@@ -48,7 +48,7 @@ export default function ContactUsPage() {
 
         setSendingOtp(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/website-leads/send-otps', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/website-leads/send-otps`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ whatsapp: phone })
@@ -81,7 +81,7 @@ export default function ContactUsPage() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
                 const data = await res.json();
                 if (data.success && data.policy) {
                     setSettings(data.policy);
@@ -141,7 +141,7 @@ export default function ContactUsPage() {
 
         setSendingOtp(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/website-leads/send-otps', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/website-leads/send-otps`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ whatsapp: formData.whatsapp })
@@ -186,7 +186,7 @@ export default function ContactUsPage() {
 
         setSubmitting(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/website-leads/verify-and-submit', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/website-leads/verify-and-submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -374,7 +374,7 @@ export default function ContactUsPage() {
                                         </motion.div>
                                     ) : (
                                         <form onSubmit={handleSubmit} className="space-y-4">
-                                            <h3 className="text-xl font-bold text-white mb-6">Send Us a Message</h3>
+                                            <h3 className="text-xl font-bold text-white mb-6">Raise A Ticket For Support</h3>
 
                                             <div className="grid sm:grid-cols-2 gap-4">
                                                 <div>
@@ -582,3 +582,4 @@ export default function ContactUsPage() {
         </div>
     );
 }
+

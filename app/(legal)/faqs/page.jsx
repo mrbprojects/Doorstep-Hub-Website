@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { HelpCircle, ChevronDown, MessageSquare } from 'lucide-react';
+import { HelpCircle, ChevronDown, MessageSquare, User, Briefcase } from 'lucide-react';
 
 export default function FAQPage() {
+    const [activeTab, setActiveTab] = useState('customer app');
     const [faqs, setFaqs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,8 +14,9 @@ export default function FAQPage() {
 
     useEffect(() => {
         const fetchFAQs = async () => {
+            setLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/faqs?applicationType=customer%20app');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/faqs?applicationType=${encodeURIComponent(activeTab)}`);
                 const data = await response.json();
                 if (data.success) {
                     setFaqs(data.data);
@@ -30,12 +32,12 @@ export default function FAQPage() {
         };
 
         fetchFAQs();
-    }, []);
+    }, [activeTab]);
 
     useEffect(() => {
         const fetchGlobalSettings = async () => {
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
                 const data = await response.json();
                 if (data.success && data.policy) {
                     setGlobalSettings(data.policy);
@@ -50,35 +52,6 @@ export default function FAQPage() {
     const toggleAccordion = (index) => {
         setActiveIndex(activeIndex === index ? null : index);
     };
-
-    if (loading) {
-        return (
-            <div className="max-w-4xl mx-auto px-6 py-20 text-center">
-                <div className="animate-pulse space-y-8">
-                    <div className="h-12 w-3/4 bg-gray-800 rounded mx-auto"></div>
-                    <div className="space-y-4">
-                        {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="h-16 w-full bg-gray-800 rounded-xl"></div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="max-w-4xl mx-auto px-6 py-20 text-center">
-                <h1 className="text-2xl font-bold text-red-500 mb-4">{error}</h1>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="px-6 py-2 bg-[#037166] rounded-lg text-white font-medium"
-                >
-                    Retry
-                </button>
-            </div>
-        );
-    }
 
     return (
         <div className="max-w-4xl mx-auto px-6 py-12 lg:py-20">
@@ -100,49 +73,95 @@ export default function FAQPage() {
                     </p>
                 </div>
 
-                {/* FAQ List */}
-                <div className="space-y-4">
-                    {faqs.map((faq, index) => (
-                        <motion.div
-                            key={faq._id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className={`border rounded-2xl overflow-hidden transition-all duration-300 ${activeIndex === index
-                                ? 'bg-white/5 border-[#037166]/50 shadow-lg shadow-[#037166]/5'
-                                : 'bg-transparent border-white/10 hover:border-white/20'
+                {/* FAQ Tabs */}
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    {[
+                        { id: 'customer app', label: 'Customer', icon: User },
+                        { id: 'service app', label: 'Service Provider', icon: Briefcase }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => {
+                                setActiveTab(tab.id);
+                                setActiveIndex(null); // Reset accordion on tab change
+                                setError(null); // Reset error on tab change
+                            }}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border ${activeTab === tab.id
+                                ? 'bg-[#037166] text-white border-[#037166] shadow-lg shadow-[#037166]/20'
+                                : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:border-white/10'
                                 }`}
                         >
-                            <button
-                                onClick={() => toggleAccordion(index)}
-                                className="w-full px-6 py-5 flex items-center justify-between text-left gap-4"
-                            >
-                                <span className="text-lg font-medium text-white/90">
-                                    {faq.question}
-                                </span>
-                                <ChevronDown
-                                    className={`w-5 h-5 text-[#037166] transition-transform duration-300 ${activeIndex === index ? 'rotate-180' : ''
-                                        }`}
-                                />
-                            </button>
-
-                            <AnimatePresence>
-                                {activeIndex === index && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <div className="px-6 pb-6 text-gray-400 leading-relaxed border-t border-white/5 pt-4">
-                                            {faq.answer}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </motion.div>
+                            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'}`} />
+                            {tab.label}
+                        </button>
                     ))}
                 </div>
+
+                {/* Content Section */}
+                {loading ? (
+                    <div className="space-y-4">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="h-16 w-full bg-white/5 rounded-2xl animate-pulse"></div>
+                        ))}
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-10">
+                        <h2 className="text-xl font-semibold text-red-500 mb-4">{error}</h2>
+                        <button
+                            onClick={() => setActiveTab(activeTab)} // Retrigger useEffect
+                            className="px-6 py-2 bg-[#037166] rounded-lg text-white font-medium hover:bg-[#04a99d] transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                ) : faqs.length === 0 ? (
+                    <div className="text-center py-10">
+                        <p className="text-gray-400 italic">No questions found for this category.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {faqs.map((faq, index) => (
+                            <motion.div
+                                key={faq._id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className={`border rounded-2xl overflow-hidden transition-all duration-300 ${activeIndex === index
+                                    ? 'bg-white/5 border-[#037166]/50 shadow-lg shadow-[#037166]/5'
+                                    : 'bg-transparent border-white/10 hover:border-white/20'
+                                    }`}
+                            >
+                                <button
+                                    onClick={() => toggleAccordion(index)}
+                                    className="w-full px-6 py-5 flex items-center justify-between text-left gap-4"
+                                >
+                                    <span className="text-lg font-medium text-white/90">
+                                        {faq.question}
+                                    </span>
+                                    <ChevronDown
+                                        className={`w-5 h-5 text-[#037166] transition-transform duration-300 ${activeIndex === index ? 'rotate-180' : ''
+                                            }`}
+                                    />
+                                </button>
+
+                                <AnimatePresence>
+                                    {activeIndex === index && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <div className="px-6 pb-6 text-gray-400 leading-relaxed border-t border-white/5 pt-4">
+                                                {faq.answer}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Support Section */}
                 <div className="mt-16 p-8 rounded-3xl bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border border-[#037166]/20 text-center relative overflow-hidden group">
@@ -160,15 +179,10 @@ export default function FAQPage() {
                         >
                             {globalSettings?.email2 || "Email Support"}
                         </a>
-                        {/* <a
-                            href="/contact"
-                            className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all border border-white/10"
-                        >
-                            Contact Us
-                        </a> */}
                     </div>
                 </div>
             </motion.div>
         </div>
     );
 }
+

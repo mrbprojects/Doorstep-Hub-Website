@@ -18,7 +18,7 @@ export function FeaturedPackagesPage() {
         const fetchFeaturedStores = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/featured_spa_stores');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_spa_stores`);
                 const data = await response.json();
 
                 if (data.success && data.stores) {
@@ -26,7 +26,7 @@ export function FeaturedPackagesPage() {
                         id: store._id,
                         name: store.storeName || 'Spa Center',
                         image: store.image
-                            ? (store.image.startsWith('http') ? store.image : `https://api.doorstephub.com/${store.image}`)
+                            ? (store.image.startsWith('http') ? store.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.image}`)
                             : 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80',
                         rating: store.totalRatings || 0,
                         price: store.startingAt || 499,
@@ -212,3 +212,4 @@ function StoreListingCard({ store, index, router }) {
         </motion.div>
     );
 }
+

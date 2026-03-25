@@ -27,7 +27,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
   useEffect(() => {
     const fetchGlobalSettings = async () => {
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
         const data = await response.json();
         if (data.success && data.policy) {
           setGlobalSettings(data.policy);
@@ -81,7 +81,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
             >
               <div className="relative w-48 h-14 overflow-hidden flex-shrink-0">
                 <Image
-                  src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                  src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
                   alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
                   fill
                   sizes="192px"
@@ -316,3 +316,4 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
     </>
   );
 }
+

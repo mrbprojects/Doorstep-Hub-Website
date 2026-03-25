@@ -15,7 +15,7 @@ export function JobApplicationForm({ job: initialJob, onClose }) {
     React.useEffect(() => {
         const fetchDetails = async () => {
             try {
-                const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/careers/job-details/${initialJob._id}`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/careers/job-details/${initialJob._id}`);
                 const data = await response.json();
                 if (data.success && data.data) {
                     setJob(data.data);
@@ -78,7 +78,7 @@ export function JobApplicationForm({ job: initialJob, onClose }) {
                 data.append(key, formData[key]);
             });
 
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/careers/apply', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/careers/apply`, {
                 method: 'POST',
                 body: data
             });
@@ -327,3 +327,4 @@ function FormInput({ label, type = "text", ...props }) {
         </div>
     );
 }
+

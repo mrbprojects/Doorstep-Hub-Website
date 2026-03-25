@@ -55,7 +55,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                     body.minRating = minRating;
                 }
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_childcategory', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/services_by_childcategory`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -180,7 +180,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                                             {/* Image */}
                                             <div className="relative w-full md:w-72 h-48 md:h-auto overflow-hidden">
                                                 <img
-                                                    src={center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
+                                                    src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                                     alt={center.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 />
@@ -301,3 +301,4 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
         </motion.div>
     );
 }
+

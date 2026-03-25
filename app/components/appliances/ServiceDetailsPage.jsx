@@ -400,7 +400,7 @@ export function ServiceDetailsPage({
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
 
             {/* LEFT col: Gallery + Tabs (order-2 on mobile, order-none on desktop) */}
-         <div
+            <div
               className="detail-left-panel order-2 lg:order-none space-y-6 lg:space-y-8 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto lg:pr-2"
               style={{
                 scrollbarWidth: 'none',

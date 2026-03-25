@@ -110,7 +110,7 @@ export function NearbyServiceCenters() {
 
       try {
         setLoading(true);
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/nearest_service_centers', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/nearest_service_centers`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -148,10 +148,10 @@ export function NearbyServiceCenters() {
               lat: location.lat + latOffset,
               lng: location.lng + lngOffset,
               image: service.image && !service.image.startsWith('u')
-                ? `https://api.doorstephub.com/${service.image}`
-                : service.image ? `https://api.doorstephub.com/${service.image}` : `https://images.unsplash.com/photo-${index + 1}?w=400`,
+                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`
+                : service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : `https://images.unsplash.com/photo-${index + 1}?w=400`,
               logo: service.logo
-                ? `https://api.doorstephub.com/${service.logo}`
+                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}`
                 : null,
             };
           });
@@ -489,3 +489,4 @@ export function NearbyServiceCenters() {
     </section >
   );
 }
+

@@ -30,7 +30,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-service-addons', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -142,7 +142,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
                                                     <div className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 ${isSelected ? 'ring-2 ring-[#037166] ring-offset-2' : 'bg-gray-100'}`}>
                                                         {addon.image ? (
                                                             <img
-                                                                src={`https://api.doorstephub.com/${addon.image}`}
+                                                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addon.image}`}
                                                                 alt={addon.childServiceName}
                                                                 className="w-full h-full object-cover"
                                                             />
@@ -210,3 +210,4 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
         </AnimatePresence>
     );
 }
+

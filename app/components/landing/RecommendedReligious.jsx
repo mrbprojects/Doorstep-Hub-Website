@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Compass, Star, Clock, Heart, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function RecommendedReligious() {
+  const router = useRouter();
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -17,6 +19,10 @@ export function RecommendedReligious() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  const handleServiceClick = (service) => {
+    router.push(`/religious-services/service/${service.id}`);
+  };
 
   const amenityIcons = {
     'Experienced Vedic Pandit': User,
@@ -44,7 +50,7 @@ export function RecommendedReligious() {
     const fetchFeaturedServices = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/featured_religious_services');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_religious_services`);
         const data = await response.json();
 
         if (data.success && data.services) {
@@ -69,7 +75,7 @@ export function RecommendedReligious() {
               providerName: `${service.firstName} ${service.lastName}`,
               description: service.bio,
               rating: 5.0,
-              image: service.image ? `https://api.doorstephub.com/${service.image}` : '/placeholder-religious.jpg',
+              image: service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : '/placeholder-religious.jpg',
               address: service.address || service.cityName,
               amenities: displayedAmenities
             };
@@ -255,7 +261,8 @@ export function RecommendedReligious() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.7 }}
-              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-not-allowed"
+              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-pointer"
+              onClick={() => handleServiceClick(journey)}
             >
               {/* Journey Card */}
               <div className="relative h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] border-2 border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl">
@@ -269,10 +276,7 @@ export function RecommendedReligious() {
 
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
 
-                  {/* Coming Soon Overlay */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
-                    <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
-                  </div>
+
 
                   {/* Rating Badge - Bottom Left Flush */}
                   <div className="absolute bottom-0 left-0 z-20">
@@ -355,3 +359,4 @@ export function RecommendedReligious() {
     </section>
   );
 }
+

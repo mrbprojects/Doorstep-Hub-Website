@@ -34,7 +34,7 @@ export function DynamicSEO() {
                 // Pattern detection for primary APIs
                 if (currentPath.includes('/details/')) {
                     const slug = currentPath.split('/details/').pop();
-                    const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${slug}`, {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/dhub_service_details/${slug}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({})
@@ -46,7 +46,7 @@ export function DynamicSEO() {
                     }
                 } else if (currentPath.includes('/store/')) {
                     const id = currentPath.split('/store/').pop().split('?')[0];
-                    const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service_center_services/${id}`);
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${id}`);
                     const result = await response.json();
                     if (result.success && result.serviceCenter?.seo) {
                         seoData = result.serviceCenter.seo;
@@ -56,7 +56,7 @@ export function DynamicSEO() {
 
                 // Fallback to Smart API if primary not found or not dynamic page (handles /nearby-service-centers etc.)
                 if (!seoData) {
-                    const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/web/seo/get-page-seo?path=${currentPath}`);
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/web/seo/get-page-seo?path=${currentPath}`);
                     const result = await response.json();
                     if (result.success && result.data) {
                         seoData = result.data.data || result.data;
@@ -100,3 +100,4 @@ export function DynamicSEO() {
 
     return null;
 }
+

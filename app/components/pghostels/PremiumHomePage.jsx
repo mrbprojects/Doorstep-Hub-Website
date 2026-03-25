@@ -12,7 +12,7 @@ import { QuestionnaireModal } from '@/components/pghostels/QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
 import { NearbyHostelsSection } from './NearbyHostelsSection';
 
-const API_BASE_URL = 'https://api.doorstephub.com/v1/dhubApi/app';
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
 const SERVICE_ID = '69524fb157bb211ca094e5ee'; // PG Hostels Service ID
 
 const testimonials = [
@@ -91,7 +91,7 @@ export function PremiumHomePage() {
         const fetchCategories = async () => {
             try {
                 const response = await fetch(
-                    'https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories',
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`,
                     {
                         method: 'POST',
                         headers: {
@@ -341,7 +341,7 @@ export function PremiumHomePage() {
                                         className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110"
                                         style={{
                                             backgroundImage: apiCategories[heroSlideIndex]?.image
-                                                ? `url("https://api.doorstephub.com/${apiCategories[heroSlideIndex].image}")`
+                                                ? `url(${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${apiCategories[heroSlideIndex].image})`
                                                 : 'none'
                                         }}
                                     />
@@ -460,13 +460,13 @@ export function PremiumHomePage() {
       ) : (
         apiCategories.map((cat, i) => {
           const bgImage = cat.image
-            ? `https://api.doorstephub.com/${cat.image}`
+            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`
             : cat.categoryIcon
-            ? `https://api.doorstephub.com/${cat.categoryIcon}`
+            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.categoryIcon}`
             : '';
 
           const iconImg = cat.categoryIcon
-            ? `https://api.doorstephub.com/${cat.categoryIcon}`
+            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.categoryIcon}`
             : null;
 
           return (
@@ -936,7 +936,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                     const hostelPrice = listing.startingAt || 250;
                                     const hostelImage = listing.image?.startsWith('http')
                                         ? listing.image
-                                        : `https://api.doorstephub.com/${listing.image}`;
+                                        : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${listing.image}`;
                                     const isClickable = !listing.isFallback;
 
                                     return (
@@ -1000,3 +1000,4 @@ function FeaturedHostelsSection({ listings, loading, router }) {
         </section>
     );
 }
+

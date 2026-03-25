@@ -9,7 +9,7 @@ export function JobFilter({ activeRole, onRoleChange }) {
     useEffect(() => {
         const fetchRoles = async () => {
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/careers/get-roles');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/careers/get-roles`);
                 const data = await response.json();
                 if (data.success) {
                     setRoles(data.data);
@@ -117,3 +117,4 @@ export function JobCard({ job, onClick }) {
         </motion.div>
     );
 }
+

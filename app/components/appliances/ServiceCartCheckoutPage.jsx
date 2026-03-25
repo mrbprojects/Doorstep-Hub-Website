@@ -58,7 +58,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             if (!token) return;
             setWalletLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/wallet/balance', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/wallet/balance`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -207,7 +207,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             // If I send 'online', backend might reject.
             // Let's send 'ONLINE' if it is 'online'.
 
-            const endpoint = 'https://api.doorstephub.com/v1/dhubApi/app/service-cart/initiate-payment';
+            const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -664,3 +664,4 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         </motion.div>
     );
 }
+

@@ -84,7 +84,7 @@ function SpaSubCategoryContent() {
         const fetchCategories = async () => {
             setCategoriesLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ serviceId: SERVICE_ID })
@@ -104,7 +104,7 @@ function SpaSubCategoryContent() {
         const fetchSubCategories = async () => {
             if (!expandedCategory) return;
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ categoryId: expandedCategory })
@@ -140,7 +140,7 @@ function SpaSubCategoryContent() {
                 // Add optional category filtering if present in URL
                 if (searchParams.get('categoryId')) payload.categoryId = searchParams.get('categoryId');
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -168,7 +168,7 @@ function SpaSubCategoryContent() {
                         setServices(data.professionalServices.map(s => {
                             const uniqueId = str(s?._id) || str(s?.id) || `srv-${Math.random()}`;
                             const img = s.image || s.logo || '';
-                            const displayImage = img ? (img.startsWith('http') ? img : `https://api.doorstephub.com/${img}`) : null;
+                            const displayImage = img ? (img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`) : null;
 
                             return {
                                 id: uniqueId,

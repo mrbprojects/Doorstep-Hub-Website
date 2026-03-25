@@ -89,7 +89,7 @@ function PGResultsContent() {
                     requestBody.categoryId = categoryId;
                 }
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
@@ -108,7 +108,7 @@ function PGResultsContent() {
                         orders: service.totalOrders || 0,
                         // startingAt is the real price; minFare is booking cost — use startingAt first
                         monthlyPrice: parseFloat(service.startingAt || service.minFare) || 5000,
-                        image: service.logo ? `https://api.doorstephub.com/${service.logo}` : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?auto=format&fit=crop&q=80',
+                        image: service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?auto=format&fit=crop&q=80',
                         distance: service.distance || 'N/A',
                         matchScore: service.matchScore || 90,
                         badges: Array.isArray(service.badges) && service.badges.length > 0
@@ -433,3 +433,4 @@ export default function PGResultsPage() {
         </Suspense>
     );
 }
+

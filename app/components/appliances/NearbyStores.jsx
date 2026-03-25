@@ -47,7 +47,7 @@ export function NearbyServiceCenters({ onViewAll }) {
 
       try {
         setLoading(true);
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/nearest_service_centers', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/nearest_service_centers`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -82,8 +82,8 @@ export function NearbyServiceCenters({ onViewAll }) {
               address: service?.address || service?.cityName || 'Hyderabad, Telangana',
               lat: location.lat + latOffset,
               lng: location.lng + lngOffset,
-              image: service?.image ? `https://api.doorstephub.com/${service.image}` : null,
-              logo: service?.logo ? `https://api.doorstephub.com/${service.logo}` : null,
+              image: service?.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : null,
+              logo: service?.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : null,
             };
           });
 
@@ -362,3 +362,4 @@ export function NearbyServiceCenters({ onViewAll }) {
     </section >
   );
 }
+

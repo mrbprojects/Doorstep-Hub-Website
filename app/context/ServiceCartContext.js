@@ -36,7 +36,7 @@ export const ServiceCartProvider = ({ children }) => {
         if (!isAuthenticated) return;
         setLoading(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/service-cart/get', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/get`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -86,7 +86,7 @@ export const ServiceCartProvider = ({ children }) => {
 
             console.log('🛒 Service Cart API Request:', body);
 
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/service-cart/add', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/add`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -114,7 +114,7 @@ export const ServiceCartProvider = ({ children }) => {
     const removeFromCart = async (productId) => {
         if (!isAuthenticated) return;
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/cart/remove', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cart/remove`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -139,7 +139,7 @@ export const ServiceCartProvider = ({ children }) => {
     const clearCart = useCallback(async (suppressToast = false) => {
         if (!isAuthenticated) return;
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/service-cart/clear', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/clear`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -214,3 +214,4 @@ export const ServiceCartProvider = ({ children }) => {
         </ServiceCartContext.Provider>
     );
 };
+

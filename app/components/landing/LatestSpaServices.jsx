@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Waves, Star, Clock, Heart, MapPin } from 'lucide-react';
@@ -8,6 +9,7 @@ import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
 
 export function LatestSpaServices() {
+  const router = useRouter();
   const [spaStores, setSpaStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -20,10 +22,14 @@ export function LatestSpaServices() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  const handleStoreClick = (store) => {
+    router.push(`/spa-salon/detail/${store._id}`);
+  };
+
   useEffect(() => {
     const fetchSpaServices = async () => {
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_spa_stores', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_spa_stores`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -159,7 +165,7 @@ export function LatestSpaServices() {
               </div>
             ))
           ) : spaStores.map((store, index) => {
-            const imageUrl = store.image ? (store.image.startsWith('http') ? store.image : `https://api.doorstephub.com/${store.image}`) : 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800';
+            const imageUrl = store.image ? (store.image.startsWith('http') ? store.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.image}`) : 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800';
 
             return (
               <motion.div
@@ -168,7 +174,8 @@ export function LatestSpaServices() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="group relative w-[calc(100%/1.5)] md:w-[calc(100%/3.5)] lg:w-[calc(100%/6.5)] h-auto flex-shrink-0 snap-start cursor-not-allowed"
+                className="group relative w-[calc(100%/1.5)] md:w-[calc(100%/3.5)] lg:w-[calc(100%/6.5)] h-auto flex-shrink-0 snap-start cursor-pointer"
+                onClick={() => handleStoreClick(store)}
               >
                 {/* Card with Breathing Effect */}
                 <motion.div
@@ -199,10 +206,7 @@ export function LatestSpaServices() {
                       </div>
                     </div>
 
-                    {/* Coming Soon Overlay */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
-                      <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
-                    </div>
+
 
                     {/* Floating Heart Icon */}
                     {/* <motion.div
@@ -274,3 +278,4 @@ export function LatestSpaServices() {
     </section>
   );
 }
+

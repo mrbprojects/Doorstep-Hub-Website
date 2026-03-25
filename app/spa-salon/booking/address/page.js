@@ -43,7 +43,7 @@ function SpaAddressContent() {
         if (!token) return;
         setLoading(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/useraddress/getuseraddress', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -150,8 +150,8 @@ function SpaAddressContent() {
         setLoading(true);
         try {
             const url = editingAddress
-                ? `https://api.doorstephub.com/v1/dhubApi/app/useraddress/edituseraddress/${editingAddress._id}`
-                : 'https://api.doorstephub.com/v1/dhubApi/app/useraddress/addaddress';
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/edituseraddress/${editingAddress._id}`
+                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/addaddress`;
 
             const method = editingAddress ? 'PUT' : 'POST';
 
@@ -196,7 +196,7 @@ function SpaAddressContent() {
         if (!confirm('Delete this address?')) return;
         setLoading(true);
         try {
-            const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/useraddress/deleteuseraddress/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/deleteuseraddress/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -565,3 +565,4 @@ export default function SpaBookingAddressPage() {
         </Suspense>
     );
 }
+

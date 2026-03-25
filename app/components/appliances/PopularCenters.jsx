@@ -20,7 +20,7 @@ export function PopularCenters({ onStoreClick }) {
 
       setLoading(true);
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/featured_service_centers', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/featured_service_centers`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -42,8 +42,8 @@ export function PopularCenters({ onStoreClick }) {
             id: center._id,
             slug: center.slug, // Map the slug
             // Use image if available, otherwise logo, otherwise fallback
-            image: center.image ? `https://api.doorstephub.com/${center.image}` :
-              (center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80'),
+            image: center.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.image}` :
+              (center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80'),
             name: center.name,
             location: center.cityName && center.stateName ? `${center.cityName}, ${center.stateName}` : (center.address || 'Unknown Location'),
             rating: typeof center.rating === 'string' ? parseFloat(center.rating) : (center.rating || 0),
@@ -259,3 +259,4 @@ export function PopularCenters({ onStoreClick }) {
     </section>
   );
 }
+

@@ -31,7 +31,7 @@ function ReligiousCategoryContent() {
             try {
                 // 1. Try Fetching Sub-Categories
                 // Using the Professional Services Flow Subcategory API (Same as PG Hostels)
-                const subCatResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                const subCatResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ categoryId: params.id })
@@ -72,7 +72,7 @@ function ReligiousCategoryContent() {
                     }
                 } catch (e) { /* use fallback */ }
 
-                const servicesResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+                const servicesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -174,7 +174,7 @@ function ReligiousCategoryContent() {
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                                         {subCat.image ? (
                                             <img
-                                                src={`https://api.doorstephub.com/${subCat.image}`}
+                                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
                                                 alt={subCat.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
@@ -237,7 +237,7 @@ function ReligiousCategoryContent() {
                             >
                                 <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                                     <img
-                                        src={service.logo ? `https://api.doorstephub.com/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
+                                        src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                         alt={service.business_name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />

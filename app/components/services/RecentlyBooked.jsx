@@ -15,7 +15,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
     const fetchRecentServices = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_bookings_services', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
           // Transform API data to match component structure
           const transformedServices = data.services.slice(0, 10).map(service => ({
             id: service._id,
-            image: service.mainImage ? `https://api.doorstephub.com/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400',
+            image: service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400',
             title: service.serviceName,
             description: `${service.categoryName} - ${service.subcategoryName}`,
             price: service.serviceBookingCost, // Default pricing (can be fetched from rate cards if needed)
@@ -284,3 +284,4 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
     </section>
   );
 }
+

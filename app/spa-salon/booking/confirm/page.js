@@ -189,9 +189,9 @@ export default function SpaConfirmPage() {
             };
 
             if (paymentMethod === 'ONLINE') {
-                endpoint = 'https://api.doorstephub.com/v1/dhubApi/app/service-cart/initiate-payment';
+                endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
             } else {
-                endpoint = 'https://api.doorstephub.com/v1/dhubApi/app/service-cart/checkout';
+                endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
             }
 
             const response = await fetch(endpoint, {
@@ -655,3 +655,4 @@ export default function SpaConfirmPage() {
         </motion.div>
     );
 }
+

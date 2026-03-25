@@ -381,7 +381,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     <div className={`w-24 h-24 rounded-full border-2 border-opacity-50 ${borderColor} overflow-hidden ${inputBg}`}>
                                         {previewImage || user?.image ? (
                                             <img
-                                                src={previewImage || (user.image?.startsWith('http') ? user.image : `https://api.doorstephub.com/${user.image}`)}
+                                                src={previewImage || (user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`)}
                                                 alt={user.name}
                                                 className="w-full h-full object-cover"
                                             />
@@ -546,3 +546,4 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         </div>
     );
 }
+

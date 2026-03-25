@@ -65,7 +65,7 @@ export function BookAppointmentPage() {
         const fetchCities = async () => {
             setCitiesLoading(true);
             try {
-                const res = await fetch('https://api.doorstephub.com/v1/dhubApi/web/website-management/cities', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/web/website-management/cities`, {
                     headers: { 'Content-Type': 'application/json' }
                 });
                 const data = await res.json();
@@ -86,7 +86,7 @@ export function BookAppointmentPage() {
             setCategoriesLoading(true);
             try {
                 const res = await fetch(
-                    `https://api.doorstephub.com/v1/dhubApi/web/website-management/categories-by-city?cityId=${formData.websiteCityId}`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/web/website-management/categories-by-city?cityId=${formData.websiteCityId}`,
                     { headers: { 'Content-Type': 'application/json' } }
                 );
                 const data = await res.json();
@@ -105,7 +105,7 @@ export function BookAppointmentPage() {
         const fetchTerms = async () => {
             setTermsLoading(true);
             try {
-                const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/privacy-policies?applicationType=customer%20app');
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/privacy-policies?applicationType=customer%20app`);
                 const data = await res.json();
                 if (data.success) setTermsContent(data.data);
             } catch (err) {
@@ -179,7 +179,7 @@ export function BookAppointmentPage() {
                 furl: `${window.location.origin}/book-appointment?status=failure`,
             };
 
-            const res = await fetch('https://api.doorstephub.com/v1/dhubApi/web/crm-booking/initiate-crm-payment', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/web/crm-booking/initiate-crm-payment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -638,3 +638,4 @@ export function BookAppointmentPage() {
         </div>
     );
 }
+

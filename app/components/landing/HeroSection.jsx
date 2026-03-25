@@ -8,7 +8,7 @@
 
 // /* ---------- IMAGE LOADER ---------- */
 // const imageLoader = ({ src }) => {
-//   return `https://api.doorstephub.com/${src}`;
+//   return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${src}`;
 // };
 
 // /* ---------- SERVICE NAME TO SLUG MAPPING ---------- */
@@ -231,7 +231,7 @@
 
 //         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
 //           ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${process.env.NEXT_PUBLIC_API_ALL_SERVICES_ENDPOINT}`
-//           : 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services';
+//           : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`;
 
 //         const response = await fetch(apiUrl, {
 //           method: 'GET',
@@ -289,7 +289,7 @@ import { useRouter } from 'next/navigation';
 
 /* ---------- IMAGE LOADER ---------- */
 const imageLoader = ({ src }) => {
-  return `https://api.doorstephub.com/${src}`;
+  return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${src}`;
 };
 
 /* ---------- COMPACT SERVICES SECTION ---------- */
@@ -315,9 +315,6 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
 
   // ✅ FIXED: Pass full service object, not just serviceName
   const handleServiceClick = (service) => {
-    const isAppliance = (service.name || '').toUpperCase().includes('APPLIANCE');
-    if (!isAppliance) return;
-
     // Store service details in localStorage
     localStorage.setItem('selectedService', JSON.stringify({
       id: service._id,
@@ -367,7 +364,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
               key={service._id}
               variants={cardVariants}
               onClick={() => handleServiceClick(service)}
-              className={`group relative transition-all duration-500 w-[72px] min-[400px]:w-20 sm:w-24 flex-shrink-0 ${isAppliance ? 'cursor-pointer' : 'cursor-default'}`}
+              className={`group relative transition-all duration-500 w-[72px] min-[400px]:w-20 sm:w-24 flex-shrink-0 cursor-pointer`}
             >
               <div
                 className={`
@@ -388,11 +385,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                {!isAppliance && (
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2 text-center">
-                    <span className="text-[10px] font-bold text-[#ff6b35] uppercase tracking-tighter leading-none">Coming Soon</span>
-                  </div>
-                )}
+
 
                 {/* Service Name Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-3">
@@ -403,7 +396,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isActive ? 1 : 0 }}
-                  whileHover={{ opacity: isAppliance ? 1 : 0 }}
+                  whileHover={{ opacity: 1 }}
                   className="absolute inset-0 bg-gradient-to-t from-[#037166]/30 to-transparent"
                 />
               </div>
@@ -436,7 +429,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
     const fetchSlugs = async () => {
       try {
         const res = await fetch(
-          `https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
         );
         const data = await res.json();
         if (data.success && data.data?.home) {
@@ -594,7 +587,7 @@ export function HeroSection() {
 
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
           ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${process.env.NEXT_PUBLIC_API_ALL_SERVICES_ENDPOINT}`
-          : 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services';
+          : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`;
 
         const response = await fetch(apiUrl, {
           method: 'GET',
@@ -637,3 +630,4 @@ export function HeroSection() {
 }
 
 export default HeroSection;
+

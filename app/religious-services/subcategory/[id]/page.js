@@ -34,7 +34,7 @@ function SubCategoryServicesContent() {
     const getFullUrl = (path, defaultUrl) => {
         if (!path) return defaultUrl;
         if (path.startsWith('http')) return path;
-        return `https://api.doorstephub.com/${path.replace(/^\//, '')}`;
+        return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${path.replace(/^\//, '')}`;
     };
 
     const [priceRange, setPriceRange] = useState([0, 100000]);
@@ -86,7 +86,7 @@ function SubCategoryServicesContent() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ serviceId: '695250aa57bb211ca094e5fd' })
@@ -108,7 +108,7 @@ function SubCategoryServicesContent() {
         const fetchSubCategories = async () => {
             if (!expandedCategory) return;
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ categoryId: expandedCategory })
@@ -138,7 +138,7 @@ function SubCategoryServicesContent() {
                     categoryId: categoryId || undefined
                 };
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
@@ -406,7 +406,7 @@ function SubCategoryServicesContent() {
                                                     {/* Image Section */}
                                                     <div className="relative w-full md:w-52 h-40 md:h-auto overflow-hidden shrink-0">
                                                         <img
-                                                            src={service.image ? `https://api.doorstephub.com/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
+                                                            src={service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                                             alt={service.business_name}
                                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                         />

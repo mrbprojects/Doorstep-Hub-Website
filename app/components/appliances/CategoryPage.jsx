@@ -80,7 +80,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
   useEffect(() => {
     const fetchAppLinks = async () => {
       try {
-        const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
         const data = await res.json();
         if (data.success && data.policy) {
           setAppLinks({
@@ -133,7 +133,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
 
       setLoading(true);
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -298,7 +298,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
         {categoryImage && (
           <div className="absolute inset-0 z-0">
             <img
-              src={`https://api.doorstephub.com/${categoryImage}`}
+              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${categoryImage}`}
               alt={categoryMetadata.categoryName}
               className="w-full h-full object-cover opacity-10"
             />
@@ -485,7 +485,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
                           {subCategory.image && (
                             <div className="absolute inset-0 z-0">
                               <img
-                                src={`https://api.doorstephub.com/${subCategory.image}`}
+                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
                                 alt={subCategory.name}
                                 className="w-fit h-fit object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
                               />
@@ -498,7 +498,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
                             {subCategory.image ? (
                               <div className="w-full h-full overflow-hidden">
                                 <img
-                                  src={`https://api.doorstephub.com/${subCategory.image}`}
+                                  src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
                                   alt={subCategory.name}
                                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
@@ -605,3 +605,4 @@ export function CategoryPage({ slug, initialData, onBack }) {
     </motion.div>
   );
 }
+

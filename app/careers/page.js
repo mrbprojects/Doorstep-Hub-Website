@@ -19,7 +19,7 @@ export default function CareersPage() {
         const fetchJobs = async () => {
             setLoading(true);
             try {
-                let url = 'https://api.doorstephub.com/v1/dhubApi/app/careers/open-jobs';
+                let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/careers/open-jobs`;
                 if (activeRole) {
                     url += `?roleId=${activeRole}`;
                 }
@@ -110,3 +110,4 @@ export default function CareersPage() {
         </div>
     );
 }
+

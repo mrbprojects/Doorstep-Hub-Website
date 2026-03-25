@@ -31,7 +31,7 @@ function AllReligiousServicesContent() {
                 const lat = location?.lat || 17.3850;
                 const lng = location?.lng || 78.4867;
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -148,7 +148,7 @@ function AllReligiousServicesContent() {
                                 >
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                                         <img
-                                            src={service.logo ? `https://api.doorstephub.com/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
+                                            src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                             alt={service.business_name}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         />
@@ -232,3 +232,4 @@ export default function AllReligiousServicesPage() {
         </Suspense>
     );
 }
+

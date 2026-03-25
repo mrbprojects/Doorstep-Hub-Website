@@ -282,11 +282,10 @@ export function SpaCartPage({
                                             whileTap={{ scale: 0.98 }}
                                             onClick={onProceedToAddress}
                                             disabled={hasMixedProviders}
-                                            className={`w-full px-8 py-5 rounded-2xl font-black text-xl shadow-xl transition-all flex items-center justify-center gap-3 ${
-                                                hasMixedProviders
+                                            className={`w-full px-8 py-5 rounded-2xl font-black text-xl shadow-xl transition-all flex items-center justify-center gap-3 ${hasMixedProviders
                                                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                                                     : 'bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white shadow-[#C06C84]/20 hover:shadow-[#C06C84]/40'
-                                            }`}
+                                                }`}
                                         >
                                             {hasMixedProviders ? 'Resolve conflicts above' : 'Book My Glow-up'}
                                             {!hasMixedProviders && <ArrowLeft className="w-6 h-6 rotate-180" />}

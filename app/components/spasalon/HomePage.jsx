@@ -81,7 +81,7 @@ export function HomePage() {
         const fetchCategories = async () => {
             // ... existing category fetch
             try {
-                const API_BASE_URL = 'https://api.doorstephub.com/v1/dhubApi/app';
+                const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
                 const selectedService = localStorage.getItem('selectedService');
                 // let serviceId = "69524f4a57bb211ca094e5e6";
 
@@ -108,7 +108,7 @@ export function HomePage() {
                     const mappedCategories = data.category.map(cat => ({
                         _id: cat._id,
                         name: cat.name,
-                        image: cat.image ? `https://api.doorstephub.com/${cat.image}` : 'https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&q=80',
+                        image: cat.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}` : 'https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&q=80',
                         icon: cat.icon || '✨',
                         description: cat.description
                     }));
@@ -156,7 +156,7 @@ export function HomePage() {
         const fetchFeaturedPackages = async () => {
             try {
                 setLoadingFeatured(true);
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/featured_spa_stores');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_spa_stores`);
                 const data = await response.json();
 
                 if (data.success && data.stores) {
@@ -165,7 +165,7 @@ export function HomePage() {
                         const imageUrl = logo && logo.startsWith('http')
                             ? logo
                             : logo
-                                ? `https://api.doorstephub.com/${logo.startsWith('/') ? logo.substring(1) : logo}`
+                                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${logo.startsWith('/') ? logo.substring(1) : logo}`
                                 : 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
 
                         return {
@@ -198,7 +198,7 @@ export function HomePage() {
                 const lat = location?.coords?.latitude || "17.4483";
                 const lng = location?.coords?.longitude || "78.3915";
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/nearby_spa_centers', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/nearby_spa_centers`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -214,7 +214,7 @@ export function HomePage() {
                         const imageUrl = logo && logo.startsWith('http')
                             ? logo
                             : logo
-                                ? `https://api.doorstephub.com/${logo.startsWith('/') ? logo.substring(1) : logo}`
+                                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${logo.startsWith('/') ? logo.substring(1) : logo}`
                                 : 'https://images.unsplash.com/photo-1544161515-436cead60470?auto=format&fit=crop&q=80&w=800';
 
                         return {
@@ -485,7 +485,7 @@ export function HomePage() {
                                         <div className="w-12 h-12 bg-gradient-to-r from-[#C06C84]/20 to-[#6C5CE7]/20 rounded-xl flex items-center justify-center text-2xl overflow-hidden">
                                             {sub.image ? (
                                                 <img
-                                                    src={sub.image.startsWith('http') ? sub.image : `https://api.doorstephub.com/${sub.image.startsWith('/') ? sub.image.substring(1) : sub.image}`}
+                                                    src={sub.image.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image.startsWith('/') ? sub.image.substring(1) : sub.image}`}
                                                     alt={sub.name}
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
@@ -1045,3 +1045,4 @@ function BlogCard({ title, image, readTime }) {
         </motion.div>
     );
 }
+

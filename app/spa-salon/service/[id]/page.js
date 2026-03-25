@@ -89,7 +89,7 @@ export default function SpaServiceDetailPage() {
                     return;
                 }
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/single-professional-provider', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -107,10 +107,10 @@ export default function SpaServiceDetailPage() {
                         location: store.address || 'Location available on request',
                         rating: parseFloat(store.avgRating || 4.8).toFixed(1),
                         basePrice: store.BasePrice || 500,
-                        logo: store.logo ? (store.logo.startsWith('http') ? store.logo : `https://api.doorstephub.com/${store.logo}`) : '',
+                        logo: store.logo ? (store.logo.startsWith('http') ? store.logo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.logo}`) : '',
                         images: (() => {
                             // Strictly use the "image" key from the backend as the primary banner
-                            const baseUrl = 'https://api.doorstephub.com/';
+                            const baseUrl = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/`;
                             const toUrl = (p) => p ? (p.startsWith('http') ? p : `${baseUrl}${p}`) : null;
 
                             const bannerImg = toUrl(store.image);      // primary from "image" key
@@ -368,7 +368,7 @@ export default function SpaServiceDetailPage() {
                                         )}
                                         <div className="h-48 bg-gray-100 relative">
                                             {pkg.image ? (
-                                                <img src={`https://api.doorstephub.com/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" />
+                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full text-gray-400 bg-gray-100">
                                                     <Scissors className="w-12 h-12 opacity-20" />

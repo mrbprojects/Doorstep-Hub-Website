@@ -59,7 +59,7 @@ export function Header({ theme = {}, navItems = [] }) {
       try {
         // 1. Fetch Slugs — only the appliance ID is supported by this endpoint
         try {
-          const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
           const data = await res.json();
           if (data.success && data.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
@@ -67,21 +67,21 @@ export function Header({ theme = {}, navItems = [] }) {
         } catch (e) { /* use default slug */ }
 
         // 3. Fetch Screen Settings
-        const screenSettingsResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-screen-settings');
+        const screenSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`);
         const screenSettingsData = await screenSettingsResponse.json();
         if (screenSettingsData.success && screenSettingsData.data?.homescreen) {
           setShowHomeScreen(true);
         }
 
         // 4. Fetch Global Settings
-        const globalSettingsResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+        const globalSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
         const globalSettingsData = await globalSettingsResponse.json();
         if (globalSettingsData.success && globalSettingsData.policy) {
           setGlobalSettings(globalSettingsData.policy);
         }
 
         // Fetch Navbar CMS Items
-        const navResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-navbar');
+        const navResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-navbar`);
         const navData = await navResponse.json();
 
         if (navData.success && navData.data) {
@@ -214,7 +214,7 @@ export function Header({ theme = {}, navItems = [] }) {
               >
                 <div className="relative w-24 sm:w-48 h-10 sm:h-16 overflow-hidden flex-shrink-0">
                   <Image
-                    src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                    src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
                     alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
                     fill
                     sizes="(max-width: 640px) 96px, 192px"
@@ -320,7 +320,7 @@ export function Header({ theme = {}, navItems = [] }) {
               >
                 {isAuthenticated && user?.image ? (
                   <img
-                    src={user.image?.startsWith('http') ? user.image : `https://api.doorstephub.com/${user.image}`}
+                    src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                     alt={user.name || 'User'}
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -418,3 +418,4 @@ export function Header({ theme = {}, navItems = [] }) {
     </>
   );
 }
+

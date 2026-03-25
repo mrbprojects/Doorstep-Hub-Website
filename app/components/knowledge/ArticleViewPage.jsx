@@ -20,7 +20,7 @@ export function ArticleViewPage({ slug }) {
                 setLoading(true);
                 // Fetch all articles to find the one matching the slug
                 // In a real scenario, there should be an endpoint to fetch by slug directly
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/knowledge-base');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/knowledge-base`);
                 const data = await response.json();
 
                 if (data.success && data.data) {
@@ -260,3 +260,4 @@ export function ArticleViewPage({ slug }) {
         </article>
     );
 }
+

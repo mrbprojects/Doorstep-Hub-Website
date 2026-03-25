@@ -64,7 +64,7 @@ export function SpaLandingPage() {
                 }
 
                 // Use Real API
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -186,7 +186,7 @@ export function SpaLandingPage() {
                                     <Card className="h-full border-none shadow-lg hover:shadow-xl transition-all overflow-hidden">
                                         <div className="h-48 relative overflow-hidden bg-gray-100">
                                             {cat.image && !cat.image.includes('mock') ? (
-                                                <img src={`https://api.doorstephub.com/${cat.image}`} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-[#FBEAF0]">
                                                     <Scissors className="w-12 h-12 text-[#C06C84]" />
@@ -213,3 +213,4 @@ export function SpaLandingPage() {
         </div>
     );
 }
+

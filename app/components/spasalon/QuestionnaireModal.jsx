@@ -32,7 +32,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
             setLoading(true);
 
             try {
-                const API_BASE_URL = 'https://api.doorstephub.com/v1/dhubApi/app';
+                const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
 
                 // Case 1: No category selected yet - Fetch all categories
                 if (!selectedCat.id) {
@@ -264,7 +264,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                                                     <div
                                                                         className="w-16 h-16 rounded-xl bg-cover bg-center shadow-inner flex-shrink-0"
                                                                         style={{
-                                                                            backgroundImage: `url('${option.image.startsWith('http') ? option.image : `https://api.doorstephub.com/${option.image}`}')`
+                                                                            backgroundImage: `url('${option.image.startsWith('http') ? option.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${option.image}`}')`
                                                                         }}
                                                                     />
                                                                 ) : (
@@ -330,3 +330,4 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
         </AnimatePresence>
     );
 }
+

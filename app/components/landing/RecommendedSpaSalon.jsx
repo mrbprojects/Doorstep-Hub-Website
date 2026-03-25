@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Sparkles, Award, TrendingUp, Crown, CloudFog, HandHeart, Coffee, Flame, Droplets, Scissors, Palette, Wind } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function RecommendedSpaSalon() {
+  const router = useRouter();
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -17,6 +19,11 @@ export function RecommendedSpaSalon() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+  
+  const handleStoreClick = (store) => {
+    if (store.isDummy) return;
+    router.push(`/spa-salon/detail/${store.id}`);
+  };
 
   const amenityIcons = {
     'Steam room or sauna': CloudFog,
@@ -41,7 +48,7 @@ export function RecommendedSpaSalon() {
     const fetchFeaturedSpaStores = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/featured_spa_stores');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_spa_stores`);
         const data = await response.json();
 
         if (data.success && data.stores && data.stores.length > 0) {
@@ -80,7 +87,7 @@ export function RecommendedSpaSalon() {
               rating: 4.8,
               reviews: '500+',
               price: store.startingAt ? `₹${store.startingAt}` : '$$',
-              image: store.image ? `https://api.doorstephub.com/${store.image}` : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBzcGElMjB0cmVhdG1lbnR8ZW58MXx8fHwxNzY3OTU0MDk4fDA&ixlib=rb-4.1.0&q=80&w=1080',
+              image: store.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.image}` : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBzcGElMjB0cmVhdG1lbnR8ZW58MXx8fHwxNzY3OTU0MDk4fDA&ixlib=rb-4.1.0&q=80&w=1080',
               badge: index === 0 ? 'Top Rated' : 'Trending',
               highlights: displayedAmenities,
               description: store.bio,
@@ -307,10 +314,11 @@ export function RecommendedSpaSalon() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.7 }}
-              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group relative cursor-not-allowed"
+              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group relative cursor-pointer"
+              onClick={() => handleStoreClick(place)}
             >
               {/* Premium Card - Original sizing preserved */}
-              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a] via-[#1a1510] to-[#0f0f0f] border-2 border-[#037166]/30 rounded-3xl overflow-hidden pointer-events-none">
+              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a] via-[#1a1510] to-[#0f0f0f] border-2 border-[#037166]/30 rounded-3xl overflow-hidden">
                 {/* Top Badge */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-2 px-8 py-1 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] backdrop-blur-md rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 shadow-lg whitespace-nowrap">
                   <Award className="w-3 h-3 text-white" />
@@ -337,10 +345,7 @@ export function RecommendedSpaSalon() {
                     </div>
                   </div> */}
 
-                  {/* Coming Soon Overlay */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
-                    <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
-                  </div>
+
                 </div>
 
                 {/* Content - Original spacing preserved */}
@@ -373,9 +378,8 @@ export function RecommendedSpaSalon() {
                         </div>
                       </div>
 
-                      {/* Right: View Details Button - Disabled */}
-                      <div className="opacity-50 pointer-events-none">
-                        <div className="px-3 py-1.5 bg-gray-700 rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap">
+                      <div>
+                        <div className="px-3 py-1.5 bg-[#297A70] rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap">
                           <span className="text-gray-300">
                             View Details
                           </span>
@@ -445,3 +449,4 @@ export function RecommendedSpaSalon() {
     </section>
   );
 }
+

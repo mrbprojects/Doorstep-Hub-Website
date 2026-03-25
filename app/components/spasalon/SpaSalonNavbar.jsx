@@ -126,7 +126,7 @@ export function SpaSalonNavbar() {
                         >
                             {isAuthenticated && user?.image ? (
                                 <img
-                                    src={user.image?.startsWith('http') ? user.image : `https://api.doorstephub.com/${user.image}`}
+                                    src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                                     alt={user.name}
                                     className="w-full h-full object-cover rounded-full"
                                 />
@@ -219,3 +219,4 @@ function DropdownItem({ onClick, children }) {
         </button>
     );
 }
+

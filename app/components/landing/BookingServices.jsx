@@ -36,7 +36,7 @@ export function BookingServices() {
       try {
         // 1. Fetch Slugs (only appliance ID is supported by this endpoint)
         try {
-          const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
           const data = await res.json();
           if (data.success && data.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
@@ -44,12 +44,12 @@ export function BookingServices() {
         } catch (e) { /* use default slug */ }
 
         // 2. Fetch Latest Booking Services
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_bookings_services');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`);
         const data = await response.json();
 
         if (data.success && data.services) {
           // Fetch all services for slug enrichment
-          const allRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
+          const allRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
           const allData = await allRes.json();
           const allServices = allData.success && Array.isArray(allData.data) ? allData.data : [];
 
@@ -63,7 +63,7 @@ export function BookingServices() {
               rating: 4.8,
               bookings: '2.3K',
               image: service.mainImage
-                ? `https://api.doorstephub.com/${service.mainImage}`
+                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}`
                 : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?w=400',
               status: service.status === 'active' ? 'Save 10% On Services' : 'Unavailable',
             };
@@ -274,3 +274,4 @@ export function BookingServices() {
     </section>
   );
 }
+

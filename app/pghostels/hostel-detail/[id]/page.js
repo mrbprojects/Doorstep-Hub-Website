@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Star, TrendingUp, DollarSign, Wifi, Utensils, Shirt, Zap,
-    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, ChevronRight, Home,ChevronLeft 
+    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, ChevronRight, Home, ChevronLeft
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
 import Slider from 'react-slick';
@@ -67,7 +67,7 @@ export default function NewHostelDetailPage() {
 
             setLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/single-professional-provider', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -91,12 +91,12 @@ export default function NewHostelDetailPage() {
                         basePrice: store.startingAt || 0,
                         bookingCost: store.startingAt || 0,
                         monthlyPrice: store.startingAt || 0, // Roughly estimating if not provided directly
-                        logo: store.logo ? `https://api.doorstephub.com/${store.logo}` : 'https://images.unsplash.com/photo-1730096081994-73f1fa5f189a?fit=max&fm=jpg&w=200',
-                        image: store.image ? `https://api.doorstephub.com/${store.image}` : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?fit=max&fm=jpg&w=1080',
+                        logo: store.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.logo}` : 'https://images.unsplash.com/photo-1730096081994-73f1fa5f189a?fit=max&fm=jpg&w=200',
+                        image: store.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.image}` : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?fit=max&fm=jpg&w=1080',
                         images: data.serviceImages && data.serviceImages.length > 0
                             ? data.serviceImages.map(img => img.startsWith('/')
                                 ? `https://api.doorstephub.com${img}`
-                                : `https://api.doorstephub.com/${img}`)
+                                : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`)
                             : ['https://images.unsplash.com/photo-1617430690223-3e165b390e25?fit=max&fm=jpg&w=1080'],
 
                         amenities: [
@@ -170,7 +170,7 @@ export default function NewHostelDetailPage() {
 
         setIsCheckingAddons(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-service-addons', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -271,19 +271,19 @@ export default function NewHostelDetailPage() {
             </motion.button>
 
             {/* Image Gallery Slider */}
-          <motion.div
-  style={{ opacity: headerOpacity }}
-  className="relative h-[500px] overflow-hidden"
->
-  <div
-    className="absolute inset-0 bg-fit bg-center"
-    style={{
-      backgroundImage: `url(${hostelData.image})`
-    }}
-  />
+            <motion.div
+                style={{ opacity: headerOpacity }}
+                className="relative h-[500px] overflow-hidden"
+            >
+                <div
+                    className="absolute inset-0 bg-fit bg-center"
+                    style={{
+                        backgroundImage: `url(${hostelData.image})`
+                    }}
+                />
 
-  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-</motion.div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            </motion.div>
 
             {/* Hostel Header Info - Floating Card */}
             <div className="max-w-7xl mx-auto px-4 -mt-32 relative z-10">
@@ -409,7 +409,7 @@ export default function NewHostelDetailPage() {
                                         )}
                                         <div className="w-24 sm:w-48 h-auto sm:h-full bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
-                                                <img src={`https://api.doorstephub.com/${pkg.image}`} alt={pkg.name} className="w-full h-full object-cover" />
+                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full text-gray-400 text-xs">No Image</div>
                                             )}
@@ -748,7 +748,7 @@ export default function NewHostelDetailPage() {
                                     key={rateCardImageIndex}
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    src={`https://api.doorstephub.com/${viewingRateCard.banner_images[rateCardImageIndex]}`}
+                                    src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${viewingRateCard.banner_images[rateCardImageIndex]}`}
                                     alt={viewingRateCard.name}
                                     className="max-w-full max-h-[70vh] object-contain shadow-lg rounded-xl"
                                 />
@@ -764,7 +764,7 @@ export default function NewHostelDetailPage() {
                                             className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[#037166] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                         >
                                             <img
-                                                src={`https://api.doorstephub.com/${img}`}
+                                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                                 className="w-full h-full object-cover"
                                                 alt=""
                                             />

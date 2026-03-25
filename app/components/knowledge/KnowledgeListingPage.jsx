@@ -19,7 +19,7 @@ export function KnowledgeListingPage() {
         const fetchArticles = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/knowledge-base');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/knowledge-base`);
                 const data = await response.json();
 
                 if (data.success && data.data) {
@@ -99,8 +99,8 @@ export function KnowledgeListingPage() {
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === cat
-                                        ? 'bg-[#037166] text-white'
-                                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                    ? 'bg-[#037166] text-white'
+                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                     }`}
                             >
                                 {cat}
@@ -192,3 +192,4 @@ export function KnowledgeListingPage() {
         </div>
     );
 }
+

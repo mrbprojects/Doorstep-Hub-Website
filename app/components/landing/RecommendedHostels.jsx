@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Heart, Users, Star, Check, Home, Wifi, Shield, Building2, Bed, Coffee, Flame, Scroll, Flower2, Utensils, Bell, Clock, BookOpen } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+import { useRouter } from 'next/navigation';
 
 export function RecommendedHostels() {
+  const router = useRouter();
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -19,12 +21,16 @@ export function RecommendedHostels() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  const handleHostelClick = (hostel) => {
+    router.push(`/pghostels/hostel-detail/${hostel.id}`);
+  };
+
   // Fetch latest PG hostels from API
   useEffect(() => {
     const fetchLatestHostels = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_pg_hostels');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_pg_hostels`);
         const data = await response.json();
 
         if (data.success && data.hostels) {
@@ -47,7 +53,7 @@ export function RecommendedHostels() {
               id: hostel._id,
               name: hostel.hostelName || `${hostel.firstName} ${hostel.lastName}`,
               tagline: hostel.bio || "Premium living space for your comfort and safety.",
-              image: hostel.image ? `https://api.doorstephub.com/${hostel.image}` : 'https://images.unsplash.com/photo-1743116591552-9ff5e8c1ad31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwYmVkcm9vbSUyMGhvc3RlbHxlbnwxfHx8fDE3NjgwMjY3NDh8MA&ixlib=rb-4.1.0&q=80&w=1080',
+              image: hostel.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image}` : 'https://images.unsplash.com/photo-1743116591552-9ff5e8c1ad31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwYmVkcm9vbSUyMGhvc3RlbHxlbnwxfHx8fDE3NjgwMjY3NDh8MA&ixlib=rb-4.1.0&q=80&w=1080',
               amenities: displayedAmenities.slice(0, 3),
               price: hostel.startingAt || hostel.serviceBookingCost || 0,
             };
@@ -311,7 +317,8 @@ export function RecommendedHostels() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.6 }}
-                className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group"
+                className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-pointer"
+                onClick={() => handleHostelClick(hostel)}
               >
                 {/* Trust-Focused Card */}
                 <div className="relative h-full flex flex-col bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] border-2 border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl">
@@ -359,15 +366,12 @@ export function RecommendedHostels() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
 
-                    {/* Coming Soon Overlay */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
-                      <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
-                    </div>
+
 
                     {/* Schedule Visit Button Badge - Bottom Center */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div
-                        className="px-6 py-1 bg-gray-700/80 backdrop-blur-md rounded-t-lg rounded-b-none text-gray-300 shadow-lg border border-b-0 border-gray-600/20 whitespace-nowrap cursor-not-allowed transition-all"
+                        className="px-6 py-1 bg-[#297A70] backdrop-blur-md rounded-t-lg rounded-b-none text-gray-300 shadow-lg border border-b-0 border-gray-600/20 whitespace-nowrap cursor-pointer transition-all"
                       >
                         <h6 className="text-[12px] font-ubuntu font-bold tracking-wider">Schedule Your Space</h6>
                       </div>
@@ -476,3 +480,4 @@ export function RecommendedHostels() {
     </section>
   );
 }
+

@@ -203,14 +203,14 @@ export function PGCartPage({
                                     </div>
 
                                     <div className="space-y-3.5 pt-1">
-                                     
+
 
                                         {/* GST */}
                                         <div className="flex justify-between items-center text-white/40 text-sm">
                                             <span>GST (18%)</span>
                                             <span className="text-white/70 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
                                         </div>
-                                           {/* Platform Fee */}
+                                        {/* Platform Fee */}
                                         <div className="flex justify-between items-center text-white/40 text-sm">
                                             <div className="flex items-center gap-2">
                                                 <span>Platform Fee</span>
@@ -248,7 +248,7 @@ export function PGCartPage({
                                         Monthly rent is <span className="text-white">Pay at Hostel</span> <Store className="w-3 h-3 text-[#037166]" />
                                     </p>
                                     <p className="text-white/20 text-[8px] leading-relaxed font-medium uppercase tracking-widest text-center">
-                                         verified by DoorstepHub Safety
+                                        verified by DoorstepHub Safety
                                     </p>
                                 </div>
                             </motion.div>

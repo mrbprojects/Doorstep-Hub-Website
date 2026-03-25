@@ -75,7 +75,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         // If navigating by slug (e.g. /ac-repair/cassette-ac), resolve subcategoryId first
         if (slug && !subCategoryId && !childCategoryId && category) {
           try {
-            const subCatRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+            const subCatRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ slug: category })
@@ -102,7 +102,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
           }
         }
 
-        let apiUrl = 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory';
+        let apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/services_by_subcategory`;
         let body = {
           lattitude: location.lat,
           longitude: location.lng,
@@ -111,7 +111,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         if (resolvedSubcategoryId) {
           body.subcategoryId = resolvedSubcategoryId;
         } else if (childCategoryId) {
-          apiUrl = 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_childcategory';
+          apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/services_by_childcategory`;
           body.childcategoryId = childCategoryId;
         } else if (slug) {
           body.slug = slug; // Fallback only
@@ -203,7 +203,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
       setLoadingCategories(true);
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -235,7 +235,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     fetchedCatsRef.current.add(catId);
     setLoadingSubcats(prev => ({ ...prev, [catId]: true }));
     try {
-      const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug: catSlug })
@@ -617,7 +617,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           {/* Image */}
                           <div className="relative h-48 overflow-hidden">
                             <img
-                              src={service.mainImage ? `https://api.doorstephub.com/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'} // Fallback image
+                              src={service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'} // Fallback image
                               alt={service.name}
                               className="w-full h-full object-cover transition-transform duration-700"
                             />
@@ -769,7 +769,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             {/* Image */}
                             <div className="relative w-full md:w-80 h-44 md:h-44 overflow-hidden shrink-0">
                               <img
-                                src={center.image ? `https://api.doorstephub.com/${center.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
+                                src={center.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                 alt={center.business_name}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               />

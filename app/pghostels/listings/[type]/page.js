@@ -193,8 +193,8 @@ function PGListingsContent() {
 
         // Image priority: image > logo > fallback
         let displayImage = mockListings[0]?.image;
-        if (item?.image) displayImage = `https://api.doorstephub.com/${item.image}`;
-        else if (item?.logo) displayImage = `https://api.doorstephub.com/${item.logo}`;
+        if (item?.image) displayImage = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}`;
+        else if (item?.logo) displayImage = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.logo}`;
 
         // Sanitize amenities
         const rawAmenities = item?.amenities;
@@ -306,7 +306,7 @@ function PGListingsContent() {
                     subcategoryId: searchParams.get('subcategoryId') || undefined
                 };
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -343,7 +343,7 @@ function PGListingsContent() {
         const fetchCategories = async () => {
             setCategoriesLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ serviceId: SERVICE_ID })
@@ -363,7 +363,7 @@ function PGListingsContent() {
         const fetchSubCategories = async () => {
             if (!expandedCategory) return;
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ categoryId: expandedCategory })

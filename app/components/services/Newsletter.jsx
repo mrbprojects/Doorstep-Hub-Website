@@ -20,7 +20,7 @@ export function Newsletter() {
     setIsError(false);
 
     try {
-      const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/newsletter/subscribe', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/newsletter/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -50,7 +50,7 @@ export function Newsletter() {
     setIsError(false);
 
     try {
-      const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/newsletter/verify-otp', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/newsletter/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -255,3 +255,4 @@ export function Newsletter() {
     </section>
   );
 }
+

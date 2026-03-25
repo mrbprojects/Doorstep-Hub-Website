@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -108,7 +108,7 @@ export default function ReligiousServicesPage() {
 
         const serviceId = RELIGIOUS_SERVICE_ID;
 
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ lattitude: lat, longitude: lng, serviceId })
@@ -135,7 +135,7 @@ export default function ReligiousServicesPage() {
       try {
         const serviceId = RELIGIOUS_SERVICE_ID;
 
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ serviceId })
@@ -157,7 +157,7 @@ export default function ReligiousServicesPage() {
   useEffect(() => {
     const fetchFeaturedServices = async () => {
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/featured_religious_services');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_religious_services`);
         const data = await response.json();
         if (data.success) {
           setFeaturedServices(data.services || []);
@@ -175,7 +175,7 @@ export default function ReligiousServicesPage() {
   useEffect(() => {
     const fetchLatestServices = async () => {
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_religious_services');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_religious_services`);
         const data = await response.json();
         if (data.success) {
           setLatestServices(data.services || []);
@@ -489,7 +489,7 @@ export default function ReligiousServicesPage() {
                       <div className="relative h-44 overflow-hidden bg-gradient-to-br from-orange-100 to-red-50">
                         {category.image ? (
                           <img
-                            src={`https://api.doorstephub.com/${category.image}`}
+                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${category.image}`}
                             alt={category.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -570,7 +570,7 @@ export default function ReligiousServicesPage() {
             <div className="h-14 w-14 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--saffron)]/10 to-[var(--temple-red)]/10 group-hover:scale-110 transition-transform shadow-sm flex-shrink-0">
               {service.image ? (
                 <img
-                  src={`https://api.doorstephub.com/${service.image}`}
+                  src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                   alt={service.serviceName}
                   className="h-full w-full object-cover"
                   onError={(e) => {
@@ -661,7 +661,7 @@ export default function ReligiousServicesPage() {
                     >
                       <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                         <img
-                          src={service.image ? `https://api.doorstephub.com/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
+                          src={service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                           alt={service.business_name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
@@ -807,7 +807,7 @@ export default function ReligiousServicesPage() {
                       <Card className="overflow-hidden group cursor-pointer border-2 border-transparent hover:border-[var(--saffron)]/30 transition-all flex flex-col h-full" onClick={() => router.push(`/religious-services/service/${ritual._id}`)}>
                         <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                           <img
-                            src={ritual.image ? `https://api.doorstephub.com/${ritual.image}` : 'https://images.unsplash.com/photo-1599030859770-940e6a970d4d?auto=format&fit=crop&w=600&q=80'}
+                            src={ritual.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${ritual.image}` : 'https://images.unsplash.com/photo-1599030859770-940e6a970d4d?auto=format&fit=crop&w=600&q=80'}
                             alt={ritual.serviceName}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -931,3 +931,4 @@ export default function ReligiousServicesPage() {
     </div>
   );
 }
+

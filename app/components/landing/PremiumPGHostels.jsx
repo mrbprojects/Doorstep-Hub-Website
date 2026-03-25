@@ -68,12 +68,17 @@ export function PremiumPGHostels() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  const handleHostelClick = (hostel) => {
+    if (hostel.isDummy) return;
+    router.push(`/pghostels/hostel-detail/${hostel.id}`);
+  };
+
   // Fetch featured PG hostels from API
   useEffect(() => {
     const fetchFeaturedPGHostels = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/featured_pg_hostels');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_pg_hostels`);
         const data = await response.json();
 
         if (data.success && data.hostels && data.hostels.length > 0) {
@@ -96,7 +101,7 @@ export function PremiumPGHostels() {
               location: hostel.cityName || 'Hyderabad Area',
               price: `₹${hostel.startingAt}/month`,
               occupancy: 'Single/Double',
-              image: hostel.image ? `https://api.doorstephub.com/${hostel.image}` : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3Njc5NTMwMzR8MA&ixlib=rb-4.1.0&q=80&w=1080',
+              image: hostel.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image}` : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3Njc5NTMwMzR8MA&ixlib=rb-4.1.0&q=80&w=1080',
               description: hostel.bio,
               amenities: displayedAmenities,
               isDummy: false
@@ -291,13 +296,10 @@ export function PremiumPGHostels() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-700/50 text-gray-400 rounded-xl font-semibold shadow-lg cursor-not-allowed group/header-btn relative overflow-hidden"
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-700/50 text-gray-400 rounded-xl font-semibold shadow-lg cursor-pointer group/header-btn relative overflow-hidden"
           >
             <span>Explore All PG & Hostels</span>
             <ArrowRight className="w-5 h-5" />
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/header-btn:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-[10px] font-bold text-[#ff6b35] uppercase tracking-tighter">Coming Soon</span>
-            </div>
           </motion.button>
         </motion.div>
 
@@ -321,7 +323,8 @@ export function PremiumPGHostels() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.6 }}
-                className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-default"
+                className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-pointer"
+                onClick={() => handleHostelClick(hostel)}
               >
                 {/* Card with Parallax Effect */}
                 <motion.div
@@ -349,10 +352,7 @@ export function PremiumPGHostels() {
                       />
                     </motion.div>
 
-                    {/* Coming Soon Overlay */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4 text-center z-30">
-                      <span className="text-sm font-bold text-[#ff6b35] uppercase tracking-wider">Coming Soon</span>
-                    </div>
+
 
                     {/* Architectural Grid Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
@@ -397,10 +397,9 @@ export function PremiumPGHostels() {
 
 
                       {/* Right: Book Now - Disabled */}
-                      <div className="opacity-50">
+                      <div>
                         <motion.button
-                          disabled
-                          className="px-2 py-1.5 bg-gray-700 rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap cursor-not-allowed"
+                          className="px-2 py-1.5 bg-[#297A70] rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap cursor-pointer"
                         >
                           <span className="text-gray-300">
                             Book Now
@@ -464,3 +463,4 @@ export function PremiumPGHostels() {
     </section>
   );
 }
+

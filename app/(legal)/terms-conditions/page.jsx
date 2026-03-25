@@ -12,7 +12,7 @@ export default function TermsConditions() {
     useEffect(() => {
         const fetchTermsConditions = async () => {
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/privacy-policies?applicationType=customer%20app');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/privacy-policies?applicationType=customer%20app`);
                 const data = await response.json();
                 if (data.success) {
                     setContent(data.data);
@@ -111,3 +111,4 @@ export default function TermsConditions() {
         </div>
     );
 }
+

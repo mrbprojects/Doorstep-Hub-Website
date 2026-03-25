@@ -35,7 +35,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                 : {};
 
             // Using the same endpoint as Hero.jsx
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -62,7 +62,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
             };
 
             // Fetch subcategories
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -194,7 +194,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                         >
                                             <div className="w-12 h-12 rounded-lg bg-[#222] overflow-hidden flex-shrink-0 border border-[#333] group-hover:border-[#037166]/30">
                                                 <img
-                                                    src={`https://api.doorstephub.com/${cat.image}`}
+                                                    src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`}
                                                     alt={cat.name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -218,7 +218,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                         >
                                             <div className="w-12 h-12 rounded-lg bg-[#222] overflow-hidden flex-shrink-0 border border-[#333] group-hover:border-[#037166]/30">
                                                 <img
-                                                    src={sub.image?.startsWith('http') ? sub.image : `https://api.doorstephub.com/${sub.image}`}
+                                                    src={sub.image?.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image}`}
                                                     alt={sub.name}
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
@@ -260,3 +260,4 @@ export function ServiceBookingModal({ isOpen, onClose }) {
         </AnimatePresence>
     );
 }
+

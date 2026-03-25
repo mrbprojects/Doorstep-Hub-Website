@@ -71,7 +71,7 @@ export default function ReligiousServiceDetailPage() {
 
             setLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/single-professional-provider', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -87,7 +87,7 @@ export default function ReligiousServiceDetailPage() {
                     const getFullUrl = (path, defaultUrl) => {
                         if (!path) return defaultUrl;
                         if (path.startsWith('http')) return path;
-                        return `https://api.doorstephub.com/${path}`;
+                        return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${path}`;
                     };
 
                     const mappedData = {
@@ -104,7 +104,7 @@ export default function ReligiousServiceDetailPage() {
                         // Logo with religious fallback
                         logo: getFullUrl(store.logo, 'https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80'),
                         images: data.serviceImages && data.serviceImages.length > 0
-                            ? data.serviceImages.map(img => `https://api.doorstephub.com/${img.replace(/^\//, '')}`)
+                            ? data.serviceImages.map(img => `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img.replace(/^\//, '')}`)
                             : [
                                 'https://images.unsplash.com/photo-1582344795368-b3d9016c68cb?auto=format&fit=crop&q=80',
                                 'https://images.unsplash.com/photo-1609139003551-ee404a3b090b?auto=format&fit=crop&q=80'
@@ -160,7 +160,7 @@ export default function ReligiousServiceDetailPage() {
 
         setIsCheckingAddons(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-service-addons', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -343,7 +343,7 @@ export default function ReligiousServiceDetailPage() {
                                         )}
                                         <div className="w-full sm:w-48 h-48 sm:h-auto bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
-                                                <img src={`https://api.doorstephub.com/${pkg.image}`} alt={pkg.name} className="w-full h-full object-cover" />
+                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full text-gray-400 bg-gray-100">
                                                     <Flower2 className="w-12 h-12 opacity-20" />
@@ -569,7 +569,7 @@ export default function ReligiousServiceDetailPage() {
                                     key={rateCardImageIndex}
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    src={`https://api.doorstephub.com/${viewingRateCard.banner_images[rateCardImageIndex]}`}
+                                    src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${viewingRateCard.banner_images[rateCardImageIndex]}`}
                                     alt={viewingRateCard.name}
                                     className="max-w-full max-h-[70vh] object-contain shadow-lg rounded-xl"
                                 />
@@ -585,7 +585,7 @@ export default function ReligiousServiceDetailPage() {
                                             className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[var(--saffron)] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                         >
                                             <img
-                                                src={`https://api.doorstephub.com/${img}`}
+                                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                                 className="w-full h-full object-cover"
                                                 alt=""
                                             />

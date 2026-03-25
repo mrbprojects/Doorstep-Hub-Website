@@ -59,7 +59,7 @@ export function ViewAllPage({
           };
 
           const response = await fetch(
-            'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys',
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`,
             {
               method: 'POST',
               headers: {
@@ -76,7 +76,7 @@ export function ViewAllPage({
             setCategories(result.data.map(item => ({
               ...item,
               title: item.name,
-              image: `https://api.doorstephub.com/${item.image}`
+              image: `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}`
             })));
           }
         } catch (error) {
@@ -97,7 +97,7 @@ export function ViewAllPage({
             return;
           }
 
-          const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/nearest_service_centers', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/nearest_service_centers`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export function ViewAllPage({
               name: item.name || `${item.firstName} ${item.lastName}`,
               address: item.address || item.cityName || 'Location not specified',
               rating: item.rating || 4.5,
-              image: item.image ? `https://api.doorstephub.com/${item.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400',
+              image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400',
               reviews: item.reviews || 'New'
             })));
           }
@@ -146,7 +146,7 @@ export function ViewAllPage({
       const fetchRecentServices = async () => {
         try {
           setIsLoading(true);
-          const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_bookings_services', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export function ViewAllPage({
           if (data.success && data.services) {
             setRecentServices(data.services.map(service => ({
               id: service._id,
-              image: service.mainImage ? `https://api.doorstephub.com/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400',
+              image: service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400',
               title: service.serviceName,
               description: `${service.categoryName} - ${service.subcategoryName}`,
               price: service.serviceBookingCost || 999,
@@ -582,3 +582,4 @@ export function ViewAllPage({
     </motion.div>
   );
 }
+

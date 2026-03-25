@@ -20,7 +20,7 @@ export function NearbyHostelsSection({ router }) {
 
             setLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/latest_pg_hostels');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_pg_hostels`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch hostels');
@@ -142,7 +142,7 @@ export function NearbyHostelsSection({ router }) {
                                         <div className="absolute inset-0">
                                             <div
                                                 className="absolute inset-0 bg-[length:100%_auto] bg-top bg-no-repeat transition-all duration-700 group-hover:scale-110 group-hover:-translate-y-2"
-                                                style={{ backgroundImage: `url("https://api.doorstephub.com/${hostel.image}")` }}
+                                                style={{ backgroundImage: `url(${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image})` }}
                                             />
                                             {/* Grey Finish Gradient - Enhanced for readability */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent opacity-95" />
@@ -204,3 +204,4 @@ export function NearbyHostelsSection({ router }) {
         </section>
     );
 }
+

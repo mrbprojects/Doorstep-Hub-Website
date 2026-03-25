@@ -68,7 +68,7 @@ export function ServiceDetailsPage({
       if (!serviceId) return;
       setLoading(true);
       try {
-        const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${serviceId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/dhub_service_details/${serviceId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export function ServiceDetailsPage({
           // Auto-enrich URL if category or subCategory is missing
           if (!category || !subCategory) {
             try {
-              const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
               const allServicesData = await res.json();
               if (allServicesData.success && Array.isArray(allServicesData.data)) {
                 let foundCat = '';
@@ -165,8 +165,8 @@ export function ServiceDetailsPage({
   // Prepare images list (banner + service images)
   // FIXED CODE:
   const images = [
-    storeData.bannerImage ? `https://api.doorstephub.com/${storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
-    ...serviceImages.map(img => `https://api.doorstephub.com/${img}`)
+    storeData.bannerImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
+    ...serviceImages.map(img => `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`)
   ].filter(Boolean); // Remove any null/undefined images
 
   const nextImage = () => {
@@ -409,7 +409,7 @@ export function ServiceDetailsPage({
                               className="aspect-square rounded-2xl overflow-hidden group cursor-pointer relative border border-white/10"
                             >
                               <img
-                                src={`https://api.doorstephub.com/${img}`}
+                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                 alt={`Portfolio ${idx + 1}`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                               />
@@ -733,7 +733,7 @@ export function ServiceDetailsPage({
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.05 }}
-                  src={`https://api.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
+                  src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${rateCardModal.images[rateCardModal.currentIndex]}`}
                   alt={rateCardModal.title}
                   className="w-full h-full object-contain shadow-2xl"
                 />
@@ -757,3 +757,4 @@ export function ServiceDetailsPage({
     </motion.div>
   );
 }
+

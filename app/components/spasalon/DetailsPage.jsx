@@ -24,7 +24,7 @@ export function DetailsPage() {
             if (!params?.id) return;
             setLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/single-professional-provider', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -39,7 +39,7 @@ export function DetailsPage() {
                         id: store._id || params.id,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
                         provider: store.business_name || 'Professional Service',
-                        image: store.logo ? `https://api.doorstephub.com/${store.logo}` : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
+                        image: store.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.logo}` : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
                         rating: parseFloat(store.avgRating || 4.5).toFixed(1),
                         reviewCount: store.totalOrders || 0,
                         price: store.BasePrice || store.minFare || 999,
@@ -233,7 +233,7 @@ export function DetailsPage() {
                                                 {/* Package Image */}
                                                 <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                                                     <img
-                                                        src={pkg.image ? `https://api.doorstephub.com/${pkg.image[0]}` : service.image}
+                                                        src={pkg.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}` : service.image}
                                                         alt={pkg.name}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -478,7 +478,7 @@ export function DetailsPage() {
                                 key={rateCardImageIndex}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                src={`https://api.doorstephub.com/${viewingRateCard.image[0]}`}
+                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${viewingRateCard.image[0]}`}
                                 alt={viewingRateCard.name}
                                 className="max-w-full max-h-[70vh] object-contain shadow-lg rounded-xl"
                             />
@@ -494,7 +494,7 @@ export function DetailsPage() {
                                         className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[#C06C84] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                     >
                                         <img
-                                            src={`https://api.doorstephub.com/${img}`}
+                                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                             className="w-full h-full object-cover"
                                             alt=""
                                         />
@@ -508,3 +508,4 @@ export function DetailsPage() {
         </div>
     );
 }
+

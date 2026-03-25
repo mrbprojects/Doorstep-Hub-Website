@@ -112,7 +112,7 @@ export function ResultsPage() {
                     minRating: minRating || undefined
                 };
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -133,7 +133,7 @@ export function ResultsPage() {
                         const imageUrl = logo && logo.startsWith('http')
                             ? logo
                             : logo
-                                ? `https://api.doorstephub.com/${logo}`
+                                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${logo}`
                                 : 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=800';
 
                         return {
@@ -175,7 +175,7 @@ export function ResultsPage() {
         const fetchCategories = async () => {
             setCategoriesLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ serviceId: '69524f4a57bb211ca094e5e6' })
@@ -252,7 +252,7 @@ export function ResultsPage() {
                                         } else {
                                             setExpandedCategory(cat._id);
                                             // Fetch subcategories
-                                            fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                                            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({ categoryId: cat._id })
@@ -729,3 +729,4 @@ function ServiceCard({ service, index, router }) {
         </motion.div>
     );
 }
+

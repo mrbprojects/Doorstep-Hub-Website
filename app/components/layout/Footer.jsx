@@ -88,7 +88,7 @@ export function Footer({ theme = {} }) {
     const fetchFooterData = async () => {
       try {
         // Step 1: Fetch Appliance Categories
-        const catResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
+        const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -101,7 +101,7 @@ export function Footer({ theme = {} }) {
         if (catData.success && Array.isArray(catData.data)) {
           const groups = await Promise.all(catData.data.map(async (category) => {
             try {
-              const subResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+              const subResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ slug: category.slug })
@@ -122,7 +122,7 @@ export function Footer({ theme = {} }) {
         }
 
         // Step 2: Fetch Professional Services Catalog
-        const profResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/products/professional-services-catalog', {
+        const profResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/professional-services-catalog`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -133,7 +133,7 @@ export function Footer({ theme = {} }) {
         }
 
         // Step 3: Fetch Global Settings
-        const globalResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings', {
+        const globalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -144,7 +144,7 @@ export function Footer({ theme = {} }) {
 
         // Step 4: Fetch Service Slugs (only appliance ID is supported by this endpoint)
         try {
-          const slugRes = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
+          const slugRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
           const slugData = await slugRes.json();
           if (slugData.success && slugData.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: slugData.data.home }));
@@ -152,7 +152,7 @@ export function Footer({ theme = {} }) {
         } catch (e) { /* use default slug */ }
 
         // Step 5: Fetch Screen Settings
-        const screenSettingsResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-screen-settings');
+        const screenSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`);
         const screenSettingsData = await screenSettingsResponse.json();
         const isHomeEnabled = screenSettingsData.success && screenSettingsData.data?.homescreen;
         setShowHomeScreen(isHomeEnabled);
@@ -361,7 +361,7 @@ export function Footer({ theme = {} }) {
                 {/* Logo - increased size */}
                 <div className="relative w-36 h-20 flex-shrink-0 overflow-hidden">
                   <Image
-                    src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                    src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
                     alt={globalSettings?.applicationName || "Doorstep Hub"}
                     fill
                     sizes="224px"
@@ -572,3 +572,4 @@ export function Footer({ theme = {} }) {
     </footer >
   );
 }
+

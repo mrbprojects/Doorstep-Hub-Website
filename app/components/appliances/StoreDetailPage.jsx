@@ -79,7 +79,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         } else {
           // Resolve slug to real MongoDB _id
           try {
-            const centersRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
+            const centersRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_service_center`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -106,7 +106,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         }
 
         const response = await fetch(
-          `https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service_center_services/${resolvedStoreId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${resolvedStoreId}`,
           {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
@@ -151,13 +151,13 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
           // Set portfolio images
           const portfolioUrls = data.portfolio?.images?.map((img) =>
-            `https://api.doorstephub.com/${img.startsWith('/') ? img.slice(1) : img}`
+            `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img.startsWith('/') ? img.slice(1) : img}`
           ) || [];
           setPortfolioImages(portfolioUrls);
 
           // Set banner image
           if (data.banner_image) {
-            setBannerImage(`https://api.doorstephub.com/${data.banner_image}`);
+            setBannerImage(`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${data.banner_image}`);
           }
 
           // Set about bio
@@ -224,7 +224,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     try {
       console.log('Fetching addons for service:', serviceId);
       const response = await fetch(
-        'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service-addons',
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service-addons`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -566,7 +566,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                         {service.image && (
                           <div className="relative w-full sm:w-32 h-32 sm:h-auto overflow-hidden">
                             <img
-                              src={`https://api.doorstephub.com/${service.image}`}
+                              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                               alt={service.name}
                               className="w-full h-full object-cover"
                             />
@@ -621,7 +621,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                       {service.bannerImages.map((img, idx) => (
                                         <div key={idx} className="w-6 h-6 rounded-md overflow-hidden flex-shrink-0 border border-white/10 ring-1 ring-white/5 shadow-sm">
                                           <img
-                                            src={`https://api.doorstephub.com/${img}`}
+                                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                             alt=""
                                             className="w-full h-full object-cover"
                                             onError={(e) => { e.target.style.display = 'none'; }}
@@ -1064,7 +1064,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 <div className="bg-white/5 border border-[#037166]/30 rounded-2xl p-4 flex items-center gap-4">
                   {addonsData.parentServiceImage && (
                     <img
-                      src={`https://api.doorstephub.com/${addonsData.parentServiceImage}`}
+                      src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addonsData.parentServiceImage}`}
                       alt={addonsData.parentServiceName}
                       className="w-16 h-16 rounded-xl object-cover"
                     />

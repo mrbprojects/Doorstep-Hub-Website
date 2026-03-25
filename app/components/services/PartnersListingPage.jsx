@@ -55,7 +55,7 @@ export function PartnersListingPage({ category, subCategory, childCategoryId }) 
                     body.minRating = minRating;
                 }
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_childcategory', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/services_by_childcategory`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -182,7 +182,7 @@ export function PartnersListingPage({ category, subCategory, childCategoryId }) 
                                         <div className="relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                                             <div className="relative h-48 overflow-hidden">
                                                 <img
-                                                    src={service.mainImage ? `https://api.doorstephub.com/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'}
+                                                    src={service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'}
                                                     alt={service.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 />
@@ -286,3 +286,4 @@ export function PartnersListingPage({ category, subCategory, childCategoryId }) 
         </motion.div>
     );
 }
+

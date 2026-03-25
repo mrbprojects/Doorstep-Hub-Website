@@ -19,7 +19,7 @@ export function ThankYouPage({ bookingDetails }) {
     React.useEffect(() => {
         const fetchGlobalSettings = async () => {
             try {
-                const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
                 const data = await res.json();
                 if (data.success && data.policy) {
                     if (data.policy.customerReferedAmount) setReferAndEarnAmount(data.policy.customerReferedAmount);
@@ -381,3 +381,4 @@ export function ThankYouPage({ bookingDetails }) {
         </div>
     );
 }
+

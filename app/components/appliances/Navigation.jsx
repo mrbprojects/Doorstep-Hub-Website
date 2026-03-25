@@ -27,7 +27,7 @@ export function Navigation() {
   useEffect(() => {
     const fetchGlobalSettings = async () => {
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
         const data = await response.json();
         if (data.success && data.policy) {
           setGlobalSettings(data.policy);
@@ -82,7 +82,7 @@ export function Navigation() {
             className="flex items-center gap-3 text-2xl font-bold cursor-pointer p-1 -m-1"
           >
             <Image
-              src={globalSettings?.applicaionLogo ? `https://api.doorstephub.com/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+              src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
               alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
               width={140}
               height={40}
@@ -282,3 +282,4 @@ export function Navigation() {
     </motion.nav>
   );
 }
+

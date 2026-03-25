@@ -65,7 +65,7 @@ export function KnowledgeSpace() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/knowledge-base');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/knowledge-base`);
         const data = await response.json();
 
         if (data.success && data.data && data.data.length > 0) {
@@ -283,3 +283,4 @@ export function KnowledgeSpace() {
     </section>
   );
 }
+

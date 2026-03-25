@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://api.doorstephub.com/v1/dhubApi';
+const API_BASE_URL = '${process.env.NEXT_PUBLIC_API_BASE_URL}';
 const BASE_URL = 'https://doorstephub.com';
 
 export default async function sitemap() {
@@ -12,7 +12,7 @@ export default async function sitemap() {
     { url: `${BASE_URL}/privacy-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/terms-conditions`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/refund-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
-    
+
     // 2. Main Service Landing Pages
     { url: `${BASE_URL}/appliances`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
@@ -20,7 +20,7 @@ export default async function sitemap() {
     { url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/book-appointment`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    
+
     // 3. Static Lists & Info
     { url: `${BASE_URL}/appliances/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/appliances/centers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
@@ -62,7 +62,7 @@ export default async function sitemap() {
               cache: 'no-store'
             });
             const subData = await subRes.json();
-            
+
             if (subData.success && Array.isArray(subData.data)) {
               for (const sub of subData.data) {
                 if (sub.slug && !sub.slug.match(/^[0-9a-fA-F]{24}$/)) {
@@ -116,3 +116,4 @@ export default async function sitemap() {
 
   return filteredEntries;
 }
+

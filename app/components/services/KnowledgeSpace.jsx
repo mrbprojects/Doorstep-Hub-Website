@@ -11,7 +11,7 @@ export function KnowledgeSpace() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/knowledge-base');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/knowledge-base`);
         const data = await response.json();
 
         if (data.success && data.data) {
@@ -25,7 +25,7 @@ export function KnowledgeSpace() {
             // Ensure full URL
             const fullImageUrl = imageUrl.startsWith('http')
               ? imageUrl
-              : `https://api.doorstephub.com/${imageUrl.replace(/^\//, '')}`;
+              : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${imageUrl.replace(/^\//, '')}`;
 
             return {
               id: article._id,
@@ -228,3 +228,4 @@ export function KnowledgeSpace() {
     </section>
   );
 }
+

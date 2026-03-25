@@ -25,7 +25,7 @@ export function Hero({ onViewServices, onBookService }) {
           longitude: location.lng.toString()
         };
         const response = await fetch(
-          'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`,
           {
             method: 'POST',
             headers: {
@@ -44,7 +44,7 @@ export function Hero({ onViewServices, onBookService }) {
         if (result.success && result.data && result.data.length > 0) {
           const mappedCategories = result.data.map((item) => ({
             title: item.name,
-            image: `https://api.doorstephub.com/${item.image}`,
+            image: `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}`,
             _id: item._id,
             status: item.status,
           }));
@@ -174,3 +174,4 @@ export function Hero({ onViewServices, onBookService }) {
     </section>
   );
 }
+

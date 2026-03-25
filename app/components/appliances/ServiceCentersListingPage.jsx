@@ -22,7 +22,7 @@ export function ServiceCentersListingPage() {
     useEffect(() => {
         const fetchSlugs = async () => {
             try {
-                const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442');
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
                 const data = await res.json();
                 if (data.success && data.data) {
                     setServiceSlugs(prev => ({ ...prev, ...data.data }));
@@ -43,7 +43,7 @@ export function ServiceCentersListingPage() {
                     return;
                 }
 
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_service_center`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export function ServiceCentersListingPage() {
                         name: item.business_name || `${item.firstName} ${item.lastName}`,
                         address: item.address || item.cityName || 'Location not specified',
                         rating: item.rating || 4.5,
-                        image: item.image ? `https://api.doorstephub.com/${item.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400',
+                        image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400',
                         reviews: item.reviews || 'New'
                     })));
                 }
@@ -357,3 +357,4 @@ export function ServiceCentersListingPage() {
         </motion.div>
     );
 }
+

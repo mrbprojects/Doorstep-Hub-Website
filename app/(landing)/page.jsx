@@ -19,7 +19,7 @@ export default async function Home() {
     let showHomeScreen = false;
 
     try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get-website-screen-settings', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`, {
             cache: 'no-store'
         });
         const data = await response.json();
@@ -50,3 +50,4 @@ export default async function Home() {
         </div>
     );
 }
+

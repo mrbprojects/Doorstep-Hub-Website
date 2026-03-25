@@ -175,8 +175,8 @@ function PGConfirmContent() {
             };
 
             const endpoint = paymentMethod === 'ONLINE'
-                ? 'https://api.doorstephub.com/v1/dhubApi/app/service-cart/initiate-payment'
-                : 'https://api.doorstephub.com/v1/dhubApi/app/service-cart/checkout';
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
+                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 
             const res = await fetch(endpoint, {
                 method: 'POST',
@@ -665,3 +665,4 @@ export default function PGConfirmPage() {
         </Suspense>
     );
 }
+

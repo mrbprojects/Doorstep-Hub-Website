@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }) => {
 
     const fetchProfile = async (authToken) => {
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/user/profile', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/user/profile`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }) => {
 
     const loginWithWhatsApp = async (mobile) => {
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/auth/sendWhatsAppOtp', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/auth/sendWhatsAppOtp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mobile, fcmtoken: '1234' })
@@ -192,7 +192,7 @@ export const AuthProvider = ({ children }) => {
             // Get device fingerprint for security
             const deviceId = await getDeviceFingerprint();
 
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/auth/verifywhatsappOTP', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/auth/verifywhatsappOTP`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -244,7 +244,7 @@ export const AuthProvider = ({ children }) => {
 
             console.log('🔥 Firebase Google Sign-In successful, calling backend API...');
 
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/auth/loginWithGoogle', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/auth/loginWithGoogle`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idToken, fcmtoken: '1234' })
@@ -276,7 +276,7 @@ export const AuthProvider = ({ children }) => {
 
             console.log(' Firebase Apple Sign-In successful, calling backend API...');
 
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/auth/loginWithApple', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/auth/loginWithApple`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idToken, fcmtoken: '1234' })
@@ -310,7 +310,7 @@ export const AuthProvider = ({ children }) => {
                 throw new Error('Token expired');
             }
 
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/user/profile', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/user/profile`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -379,3 +379,4 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
+

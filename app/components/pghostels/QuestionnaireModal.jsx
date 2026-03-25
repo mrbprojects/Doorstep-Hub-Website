@@ -64,7 +64,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
 
             setLoading(true);
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ categoryId: currentCatId })
@@ -286,7 +286,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                                                 {option.image && (
                                                                     <div
                                                                         className="w-12 h-12 rounded-lg bg-cover bg-center flex-shrink-0"
-                                                                        style={{ backgroundImage: `url('https://api.doorstephub.com/${option.image}')` }}
+                                                                        style={{ backgroundImage: `url(${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${option.image})` }}
                                                                     />
                                                                 )}
                                                                 <div className="flex-1">
@@ -348,3 +348,4 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
         </AnimatePresence>
     );
 }
+

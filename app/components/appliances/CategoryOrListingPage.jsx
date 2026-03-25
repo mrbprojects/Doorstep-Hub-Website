@@ -33,7 +33,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
                     return;
                 }
                 // 1. Try to fetch as a Category first
-                const catResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+                const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ slug: slug })
@@ -52,7 +52,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
                 }
 
                 // 2. Try to fetch as a deep Category or Subcategory
-                const allRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
+                const allRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
                 const allData = await allRes.json();
 
                 if (allData.success && Array.isArray(allData.data)) {
@@ -84,7 +84,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
                 }
 
                 // 3. Try to fetch as a Store (Service Center)
-                const storeResponse = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/service_center_services/${slug}`, {
+                const storeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${slug}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -140,3 +140,4 @@ export function CategoryOrListingPage({ slug, onBack }) {
         <div className="min-h-screen bg-[#0a0a0a]" />
     );
 }
+

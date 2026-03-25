@@ -45,7 +45,7 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
         setLoadingData(true);
         try {
             const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/categories', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ serviceId: RELIGIOUS_SERVICE_ID })
@@ -64,7 +64,7 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
     const fetchSubcategories = async (categoryId) => {
         setLoadingData(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/subcategories', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ categoryId })
@@ -368,3 +368,4 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
         </AnimatePresence>
     );
 }
+

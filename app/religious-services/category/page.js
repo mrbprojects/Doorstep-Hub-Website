@@ -82,7 +82,7 @@ function ReligiousCategoryContent() {
                 } catch (e) { /* use fallback */ }
 
                 const response = await fetch(
-                    'https://api.doorstephub.com/v1/dhubApi/app/professional-services-flow/public/professional-services',
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -253,7 +253,7 @@ function ReligiousCategoryContent() {
                                         <img
                                             src={
                                                 service.logo
-                                                    ? `https://api.doorstephub.com/${service.logo}`
+                                                    ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}`
                                                     : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'
                                             }
                                             alt={service.business_name || 'Pandit'}
@@ -365,3 +365,4 @@ export default function ReligiousCategoryPage() {
         </Suspense>
     );
 }
+

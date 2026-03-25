@@ -20,7 +20,7 @@ export const CartProvider = ({ children }) => {
         if (!isAuthenticated) return;
         setLoading(true);
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/cart/get', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cart/get`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -48,7 +48,7 @@ export const CartProvider = ({ children }) => {
             return false;
         }
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/cart/add', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cart/add`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -71,7 +71,7 @@ export const CartProvider = ({ children }) => {
     const removeFromCart = async (productId) => {
         if (!isAuthenticated) return;
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/cart/remove', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cart/remove`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -91,7 +91,7 @@ export const CartProvider = ({ children }) => {
     const clearCart = async () => {
         if (!isAuthenticated) return;
         try {
-            const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/cart/clear', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cart/clear`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -121,3 +121,4 @@ export const CartProvider = ({ children }) => {
         </CartContext.Provider>
     );
 };
+

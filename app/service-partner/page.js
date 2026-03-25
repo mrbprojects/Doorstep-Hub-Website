@@ -80,7 +80,7 @@ export default function ServicePartnerPage() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -211,7 +211,7 @@ export default function ServicePartnerPage() {
                                                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden">
                                                     {globalSettings?.workerLogo ? (
                                                         <img 
-                                                            src={`https://api.doorstephub.com/${globalSettings.workerLogo}`} 
+                                                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.workerLogo}`} 
                                                             alt="Partner Logo" 
                                                             className="w-full h-full object-contain p-2"
                                                         />
@@ -539,3 +539,4 @@ export default function ServicePartnerPage() {
         </div>
     );
 }
+

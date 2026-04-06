@@ -283,7 +283,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Download,Zap ,Shield ,Star  } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -292,9 +292,14 @@ const imageLoader = ({ src }) => {
   return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${src}`;
 };
 
+
+
 /* ---------- COMPACT SERVICES SECTION ---------- */
 function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
   const router = useRouter();
+
+
+  
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -355,7 +360,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
       animate="visible"
       className="mt-6 sm:mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full"
     >
-      <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
+      <div className="flex flex-wrap justify-center gap-2 min-[400px]:gap-3 sm:gap-6">
         {services.map((service, index) => {
           const isActive = index === activeIndex;
           const isAppliance = (service.name || '').toUpperCase().includes('APPLIANCE');
@@ -364,15 +369,15 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
               key={service._id}
               variants={cardVariants}
               onClick={() => handleServiceClick(service)}
-              className={`group relative transition-all duration-500 w-[72px] min-[400px]:w-20 sm:w-24 flex-shrink-0 cursor-pointer`}
+              className={`group relative transition-all duration-500 w-[17vw] max-w-[75px] sm:max-w-none sm:w-24 flex-shrink-0 cursor-pointer`}
             >
               <div
                 className={`
-                  relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border 
+                  relative aspect-square rounded-xl overflow-hidden bg-transparent border-2 
                   transition-all duration-500
                   ${isActive
-                    ? 'border-[#037166] scale-110 shadow-[0_0_20px_rgba(3,113,102,0.4)]'
-                    : 'border-white/10 hover:border-[#037166]/50 hover:scale-105'}
+                    ? 'border-[#007367] scale-110 shadow-[0_0_20px_rgba(3,113,102,0.2)]'
+                    : 'border-transparent hover:border-[#007367]/30 hover:scale-105'}
                 `}
               >
                 <Image
@@ -401,7 +406,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
                 />
               </div>
 
-              <h5 className={`text-[15px] mt-2 font-medium text-center line-clamp-2 transition-colors duration-300 ${isActive ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>
+              <h5 className={`text-[10px] min-[400px]:text-[11px] sm:text-[15px] leading-[1.2] mt-1 sm:mt-2 font-medium text-center line-clamp-2 transition-colors duration-300 ${isActive ? 'text-[#04a99d]' : 'text-[#007367] group-hover:text-[#04a99d]'}`}>
                 {service.name}
               </h5>
             </motion.div>
@@ -461,11 +466,26 @@ function HeroContent({ services = [], loading = false, error = null }) {
     return () => clearInterval(intervalId);
   }, [services, isPaused]); // Re-run if services load/change or pause state changes
 
+
+  const videoRef = React.useRef(null);
+  const appLinks = {
+    android: 'https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share',
+    ios: 'https://apps.apple.com/in/app/doorstep-hub/id6475340236'
+  };
+
+  React.useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.log("Video autoplay failed:", error);
+      });
+    }
+  }, []);
+
   return (
     <section className="relative min-h-[85dvh] flex items-center justify-center overflow-x-hidden pt-16 pb-4 sm:pt-20 sm:pb-20">
       {/* Standardized Architectural World Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#D9EAE8] via-[#e5f0ef] to-[#D9EAE8]" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
@@ -513,9 +533,9 @@ function HeroContent({ services = [], loading = false, error = null }) {
           <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 italic leading-[1.1]">
             {/* SVG Text for Stroke Animation */}
 
-            <span className="block bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Everything You Need.</span>
+            <span className="block text-gray-900 drop-shadow-sm">Everything You Need.</span>
 
-
+                           
 
             <motion.span
               key={activeIndex} // Triggers animation on change
@@ -534,7 +554,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-base sm:text-lg md:text-xl text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
           >
             Your Premium Gateway to Appliance Services, Spa & Saloon, PG & Hostels, Religious Services, and More.
             A Smarter Way to Access Trusted Services.
@@ -564,11 +584,26 @@ function HeroContent({ services = [], loading = false, error = null }) {
               <ServiceCardsSection services={services} loading={loading} activeIndex={activeIndex} serviceSlugs={serviceSlugs} />
             )}
           </motion.div>
+
+          {/* Download Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0 }}
+            className="flex flex-wrap justify-center gap-4 mt-8 mb-4 relative z-20"
+          >
+            <a href={appLinks.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10" title="Get it on Google Play">
+              <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+            </a>
+            <a href={appLinks.ios} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10" title="Download on the App Store">
+              <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+            </a>
+          </motion.div>
         </motion.div>
       </div>
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#D9EAE8] to-transparent" />
     </section >
   );
 }

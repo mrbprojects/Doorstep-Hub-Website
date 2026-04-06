@@ -46,6 +46,9 @@ export function Animated404() {
                     alt="Doorstep Hub Logo Animation"
                     className="w-full h-auto object-contain mix-blend-multiply"
                 />
+                <p className="mt-4 text-center text-lg font-semibold text-[#2F4F4C] whitespace-nowrap">
+                    I’d be happy to help with your booking.
+                </p>
             </motion.div>
         </div>
     );

@@ -482,10 +482,10 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, []);
 
   return (
-    <section className="relative min-h-[85dvh] flex items-center justify-center overflow-x-hidden pt-16 pb-4 sm:pt-20 sm:pb-20">
-      {/* Standardized Architectural World Background */}
+    <section className="relative min-h-[85dvh] flex items-center justify-center overflow-x-hidden pt-16 pb-0 sm:pt-20 sm:pb-0">
+      {/* Latest Booking Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#D9EAE8] via-[#e5f0ef] to-[#D9EAE8]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
@@ -497,7 +497,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/30 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
         />
         <motion.div
           animate={{
@@ -505,7 +505,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/20 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
         />
       </div>
 
@@ -533,7 +533,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
           <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 italic leading-[1.1]">
             {/* SVG Text for Stroke Animation */}
 
-            <span className="block text-gray-900 drop-shadow-sm">Everything You Need.</span>
+            <span className="block text-white-900 drop-shadow-sm">Everything You Need.</span>
 
                            
 
@@ -554,7 +554,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-base sm:text-lg md:text-xl text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-white-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
           >
             Your Premium Gateway to Appliance Services, Spa & Saloon, PG & Hostels, Religious Services, and More.
             A Smarter Way to Access Trusted Services.
@@ -603,7 +603,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
       </div>
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#D9EAE8] to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
     </section >
   );
 }

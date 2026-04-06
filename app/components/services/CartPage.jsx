@@ -73,7 +73,7 @@ export function CartPage({
             <div className="p-3 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-md">
               <ShoppingCart className="w-8 h-8 md:w-9 md:h-9" />
             </div>
-            Service Hub
+            Doorstep Hub
             {cartItems.length > 0 && (
               <span className="text-lg md:text-xl text-white/50 font-medium tracking-tighter">/ {cartItems.length} ITEM{cartItems.length > 1 ? 's' : ''}</span>
             )}

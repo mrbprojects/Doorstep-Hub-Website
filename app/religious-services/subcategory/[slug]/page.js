@@ -1,25 +1,51 @@
 'use client';
 
 import { useState, useEffect, Suspense, useMemo } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
+import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Star, MapPin, Sparkles, Filter, CheckCircle, Clock, Sliders, X, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLocationContext } from '@/context/LocationContext';
 import { Slider } from '@/components/pghostels/ui/slider';
-import { Checkbox } from '@/components/pghostels/ui/checkbox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
+import { isObjectId, resolveParam } from '@/utils/slugHelper';
+
+const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
+const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
 
 function SubCategoryServicesContent() {
     const router = useRouter();
     const params = useParams();
+    const slugOrId = params.slug || params.id;
     const searchParams = useSearchParams();
-    const categoryName = searchParams.get('category') || 'Services';
-    const subCategoryName = searchParams.get('name') || searchParams.get('subCategoryName') || 'Available Services';
-    const categoryId = searchParams.get('categoryId') || null;
-    const subIdFromUrl = searchParams.get('subCategoryId') || searchParams.get('subcategoryId') || params.id;
+    const pathname = usePathname();
+
+    // Context from URL or Storage
+    const [context, setContext] = useState({
+        categoryName: searchParams.get('category') || 'Services',
+        subCategoryName: searchParams.get('name') || searchParams.get('subCategoryName') || 'Available Services',
+        categoryId: (searchParams.get('categoryId') && searchParams.get('categoryId') !== 'null') ? searchParams.get('categoryId') : null
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = sessionStorage.getItem('religious_subcategory_context');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                setContext(prev => ({
+                    ...prev,
+                    categoryName: parsed.categoryName || prev.categoryName,
+                    subCategoryName: parsed.subCategoryName || prev.subCategoryName,
+                    categoryId: parsed.categoryId || prev.categoryId
+                }));
+            }
+        }
+    }, []);
+
+    const { categoryName, subCategoryName, categoryId } = context;
+    const categoryUniqueId = categoryId;
 
     const { location, detectWithIP } = useLocationContext();
     const [services, setServices] = useState([]);
@@ -29,13 +55,6 @@ function SubCategoryServicesContent() {
     useEffect(() => {
         setMounted(true);
     }, []);
-
-    // Helper for robust URL construction
-    const getFullUrl = (path, defaultUrl) => {
-        if (!path) return defaultUrl;
-        if (path.startsWith('http')) return path;
-        return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${path.replace(/^\//, '')}`;
-    };
 
     const [priceRange, setPriceRange] = useState([0, 100000]);
     const [minRating, setMinRating] = useState(0);
@@ -60,21 +79,20 @@ function SubCategoryServicesContent() {
         }
     }, [searchParams]);
 
-    const [expandedCategory, setExpandedCategory] = useState(categoryId);
+    const [expandedCategory, setExpandedCategory] = useState(categoryUniqueId);
     const [activeCategoryName, setActiveCategoryName] = useState(categoryName);
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
 
-    // Sync expanded category with URL params
     useEffect(() => {
-        if (categoryId) {
-            setExpandedCategory(categoryId);
-            const currentCat = categories.find(c => c._id === categoryId);
+        if (categoryUniqueId) {
+            setExpandedCategory(categoryUniqueId);
+            const currentCat = categories.find(c => (c.slug === categoryUniqueId || c._id === categoryUniqueId));
             if (currentCat) {
                 setActiveCategoryName(currentCat.name);
             }
         }
-    }, [categoryId, categories]);
+    }, [categoryUniqueId, categories]);
 
     useEffect(() => {
         if (!location) {
@@ -89,14 +107,11 @@ function SubCategoryServicesContent() {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ serviceId: '695250aa57bb211ca094e5fd' })
+                    body: JSON.stringify({ serviceId: RELIGIOUS_SERVICE_ID })
                 });
                 const data = await response.json();
                 if (data.success && data.category) {
                     setCategories(data.category);
-                    if (!expandedCategory && categoryId) {
-                        setExpandedCategory(categoryId);
-                    }
                 }
             } catch (e) { console.log(e); }
         };
@@ -106,12 +121,13 @@ function SubCategoryServicesContent() {
     // Fetch Subcategories for active category
     useEffect(() => {
         const fetchSubCategories = async () => {
-            if (!expandedCategory) return;
+            if (!expandedCategory || expandedCategory === 'null') return;
             try {
+                const apiPayload = resolveParam(expandedCategory, 'categoryId', 'categorySlug');
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId: expandedCategory })
+                    body: JSON.stringify(apiPayload)
                 });
                 const data = await response.json();
                 if (data.success && data.data) {
@@ -128,20 +144,29 @@ function SubCategoryServicesContent() {
             try {
                 const lat = location?.lat || 17.3850;
                 const lng = location?.lng || 78.4867;
-                const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
 
-                const requestBody = {
+                const subCategoryParam = resolveParam(slugOrId, 'subcategoryId', 'subcategorySlug');
+                const serviceParam = { serviceId: RELIGIOUS_SERVICE_ID };
+
+                const payload = {
+                    ...serviceParam,
+                    ...subCategoryParam,
                     lattitude: lat,
                     longitude: lng,
-                    serviceId: RELIGIOUS_SERVICE_ID,
-                    subcategoryId: (subIdFromUrl && subIdFromUrl !== 'all') ? subIdFromUrl : undefined,
-                    categoryId: categoryId || undefined
+                    minPrice: priceRange[0],
+                    maxPrice: priceRange[1],
+                    minRating: minRating || undefined,
                 };
+
+                if (categoryUniqueId) {
+                    const catParam = resolveParam(categoryUniqueId, 'categoryId', 'categorySlug');
+                    Object.assign(payload, catParam);
+                }
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(payload)
                 });
                 const data = await response.json();
 
@@ -155,7 +180,7 @@ function SubCategoryServicesContent() {
             }
         };
         fetchServices();
-    }, [location, subIdFromUrl, categoryId, searchParams]);
+    }, [location, slugOrId, categoryUniqueId, searchParams]);
 
     const filteredServices = useMemo(() => {
         return services.filter(service => {
@@ -177,37 +202,38 @@ function SubCategoryServicesContent() {
                 Filters
             </h4>
 
-            {/* Categories Filter (Accordion Style) - Spiritual Light Theme */}
+            {/* Categories Filter */}
             <div className="mb-8 border-b border-orange-100 pb-6">
                 <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Ritual Categories</h6>
                 <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                    {categories.map((cat) => (
+                    {categories.map((cat) => {
+                        const catTarget = cat.slug || cat._id;
+                        return (
                         <div key={cat._id} className="overflow-hidden">
                             <button
                                 onClick={() => {
-                                    if (expandedCategory === cat._id) setExpandedCategory(null);
+                                    if (expandedCategory === catTarget) setExpandedCategory(null);
                                     else {
-                                        setExpandedCategory(cat._id);
+                                        setExpandedCategory(catTarget);
                                         setActiveCategoryName(cat.name);
                                     }
                                 }}
                                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
-                                    expandedCategory === cat._id || cat._id === categoryId
+                                    expandedCategory === catTarget || catTarget === categoryUniqueId
                                     ? 'bg-[var(--saffron)]/10 text-[var(--saffron)] font-bold border border-[var(--saffron)]/20 shadow-sm' 
                                     : 'text-gray-600 hover:bg-orange-50/50 hover:text-[var(--saffron)] border border-transparent'
                                 }`}
                             >
                                 <span className="truncate">{cat.name}</span>
-                                {expandedCategory === cat._id ? (
+                                {expandedCategory === catTarget ? (
                                     <ChevronRight className="w-4 h-4 rotate-90 transition-transform text-[var(--saffron)]" />
                                 ) : (
                                     <ChevronRight className="w-4 h-4 opacity-30" />
                                 )}
                             </button>
 
-                            {/* Accordion Subcategories */}
                             <AnimatePresence>
-                                {expandedCategory === cat._id && (
+                                {expandedCategory === catTarget && (
                                     <motion.div
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: 'auto', opacity: 1 }}
@@ -215,27 +241,36 @@ function SubCategoryServicesContent() {
                                         className="overflow-hidden"
                                     >
                                         <div className="pl-5 pr-1 py-2 space-y-1.5 mt-1 border-l-2 border-orange-100 ml-4">
-                                            {allSubCategories.map(sub => (
+                                            {allSubCategories.map(sub => {
+                                                const subTarget = sub.slug || sub._id;
+                                                return (
                                                 <button
                                                     key={sub._id}
                                                     onClick={() => {
-                                                        router.push(`/religious-services/subcategory/${sub._id}?category=${encodeURIComponent(activeCategoryName || categoryName)}&name=${encodeURIComponent(sub.name)}&categoryId=${expandedCategory}&subCategoryId=${sub._id}`);
+                                                        if (typeof window !== 'undefined') {
+                                                            sessionStorage.setItem('religious_subcategory_context', JSON.stringify({
+                                                                categoryId: catTarget,
+                                                                categoryName: activeCategoryName || cat.name,
+                                                                subCategoryName: sub.name
+                                                            }));
+                                                        }
+                                                        router.push(`/religious-services/subcategory/${subTarget}`);
                                                     }}
                                                     className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
-                                                        subIdFromUrl === sub._id
+                                                        slugOrId === subTarget
                                                         ? 'bg-[var(--saffron)] text-white shadow-md shadow-[var(--saffron)]/20'
                                                         : 'text-gray-500 hover:text-[var(--saffron)] hover:bg-orange-50'
                                                     }`}
                                                 >
                                                     {sub.name}
                                                 </button>
-                                            ))}
+                                            )})}
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
-                    ))}
+                    )})}
                 </div>
             </div>
 
@@ -292,7 +327,7 @@ function SubCategoryServicesContent() {
                 onClick={() => {
                     setPriceRange([500, 50000]);
                     setMinRating(0);
-                    setExpandedCategory(categoryId);
+                    setExpandedCategory(categoryUniqueId);
                 }}
             >
                 <X className="w-3.5 h-3.5" />
@@ -310,8 +345,8 @@ function SubCategoryServicesContent() {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                            if (categoryId) {
-                                router.push(`/religious-services/category/${categoryId}?name=${encodeURIComponent(categoryName)}`);
+                            if (categoryUniqueId) {
+                                router.push(`/religious-services/${categoryUniqueId}`);
                             } else {
                                 router.push('/religious-services');
                             }
@@ -389,7 +424,9 @@ function SubCategoryServicesContent() {
                         ) : filteredServices.length > 0 ? (
                             <div className="space-y-6">
                                 <AnimatePresence mode="popLayout">
-                                    {filteredServices.map((service, i) => (
+                                    {filteredServices.map((service, i) => {
+                                        const target = service.slug || service._id;
+                                        return (
                                         <motion.div
                                             key={service._id || i}
                                             initial={{ opacity: 0, x: 20 }}
@@ -400,7 +437,17 @@ function SubCategoryServicesContent() {
                                         >
                                             <Card
                                                 className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer border-transparent hover:border-[var(--saffron)]/20 bg-white shadow-sm relative"
-                                                onClick={() => router.push(`/religious-services/service/${service._id}?subcategoryId=${params.id}&subCategoryName=${encodeURIComponent(subCategoryName)}&categoryName=${encodeURIComponent(categoryName)}&categoryId=${categoryId}`)}
+                                                onClick={() => {
+                                                    if (typeof window !== 'undefined') {
+                                                        sessionStorage.setItem('religious_service_context', JSON.stringify({
+                                                            subcategoryId: slugOrId,
+                                                            subCategoryName: subCategoryName,
+                                                            categoryName: categoryName,
+                                                            categoryId: categoryUniqueId
+                                                        }));
+                                                    }
+                                                    router.push(`/religious-services/${target}`);
+                                                }}
                                             >
                                                 <div className="flex flex-col md:flex-row h-full">
                                                     {/* Image Section */}
@@ -485,7 +532,7 @@ function SubCategoryServicesContent() {
                                                 </div>
                                             </Card>
                                         </motion.div>
-                                    ))}
+                                    )})}
                                 </AnimatePresence>
                             </div>
                         ) : (

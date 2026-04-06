@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronRight, ChevronLeft, MapPin, Clock, DollarSign, User, Calendar, Layers } from 'lucide-react';
+import { resolveParam } from '@/utils/slugHelper';
 import { useRouter } from 'next/navigation';
 
 const staticQuestions = [
@@ -66,7 +67,10 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                     const subcatResponse = await fetch(`${API_BASE_URL}/professional-services-flow/public/subcategories`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ categoryId: selectedCat.id })
+                        body: JSON.stringify({
+                            ...resolveParam(selectedCat.id, 'categoryId', 'categorySlug'),
+                            serviceSlug: 'salon-at-home-services'
+                        })
                     });
                     const subcatData = await subcatResponse.json();
 

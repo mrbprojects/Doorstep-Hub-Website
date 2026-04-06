@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Slider } from '@/components/pghostels/ui/slider';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/pghostels/ui/button';
+import { isObjectId, resolveParam } from '@/utils/slugHelper';
 
 
 
@@ -84,7 +85,9 @@ export function ResultsPage() {
                 const lng = location.lng.toString();
 
                 const subcategoryId = searchParams.get('subcategoryId') || searchParams.get('subCategoryId') || "";
+                const subcategorySlug = searchParams.get('subcategorySlug') || "";
                 const categoryId = searchParams.get('categoryId') || "";
+                const categorySlug = searchParams.get('categorySlug') || "";
 
                 const filterMap = {
                     'All Services': '',
@@ -100,9 +103,9 @@ export function ResultsPage() {
                 }
 
                 const payload = {
-                    serviceId: '69524f4a57bb211ca094e5e6',
-                    categoryId: categoryId || undefined,
-                    subcategoryId: subcategoryId || undefined, // Standardized to lowercase c
+                    serviceSlug: 'salon-at-home-services',
+                    ...(categorySlug ? { categorySlug } : categoryId ? { categoryId } : {}),
+                    ...(subcategorySlug ? { subcategorySlug } : subcategoryId ? { subcategoryId } : {}),
                     searchQuery: searchQuery || undefined,
                     sortBy: currentSortBy || undefined,
                     lattitude: lat, // Standardized to double t
@@ -240,46 +243,51 @@ export function ResultsPage() {
                                 <button
                                     onClick={() => {
                                         // Update filters immediately for category
+                                        const catTarget = cat.slug || cat._id;
                                         updateFilters({
-                                            categoryId: cat._id,
+                                            ...(cat.slug ? { categorySlug: cat.slug, categoryId: '' } : { categoryId: cat._id, categorySlug: '' }),
                                             subcategoryId: '',
+                                            subcategorySlug: '',
                                             categoryName: cat.name,
                                             name: cat.name
                                         });
 
-                                        if (expandedCategory === cat._id) {
+                                        if (expandedCategory === catTarget) {
                                             setExpandedCategory(null);
                                         } else {
-                                            setExpandedCategory(cat._id);
+                                            setExpandedCategory(catTarget);
                                             // Fetch subcategories
+                                            const subPayload = cat.slug 
+                                                ? { categorySlug: cat.slug, serviceSlug: 'salon-at-home-services' }
+                                                : { categoryId: cat._id };
                                             fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ categoryId: cat._id })
+                                                body: JSON.stringify(subPayload)
                                             })
                                             .then(res => res.json())
                                             .then(data => {
                                                 if (data.success) {
                                                     setAllSubCategories(prev => {
-                                                        const otherSubs = prev.filter(s => s.categoryId !== cat._id);
-                                                        return [...otherSubs, ...data.data.map(s => ({ ...s, categoryId: cat._id }))];
+                                                        const otherSubs = prev.filter(s => s.categoryId !== catTarget);
+                                                        return [...otherSubs, ...data.data.map(s => ({ ...s, categoryId: catTarget }))];
                                                     });
                                                 }
                                             });
                                         }
                                     }}
                                     className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
-                                        searchParams.get('categoryId') === cat._id 
+                                        (searchParams.get('categoryId') === cat._id || searchParams.get('categorySlug') === cat.slug)
                                         ? 'bg-[#C06C84]/10 text-[#C06C84] font-bold' 
                                         : 'hover:bg-gray-50 text-gray-600'
                                     }`}
                                 >
                                     <span className="text-sm">{cat.name}</span>
-                                    <ChevronRight className={`w-4 h-4 transition-transform ${expandedCategory === cat._id ? 'rotate-90' : ''}`} />
+                                    <ChevronRight className={`w-4 h-4 transition-transform ${expandedCategory === (cat.slug || cat._id) ? 'rotate-90' : ''}`} />
                                 </button>
                                 
                                 <AnimatePresence>
-                                    {expandedCategory === cat._id && (
+                                    {expandedCategory === (cat.slug || cat._id) && (
                                         <motion.div
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
@@ -287,20 +295,20 @@ export function ResultsPage() {
                                             className="overflow-hidden pl-4 pr-1 mt-1 space-y-1"
                                         >
                                             {allSubCategories
-                                                .filter(s => s.categoryId === cat._id)
+                                                .filter(s => s.categoryId === (cat.slug || cat._id))
                                                 .map(sub => (
                                                     <button
                                                         key={sub._id}
                                                         onClick={() => {
                                                             updateFilters({
-                                                                categoryId: cat._id,
-                                                                subcategoryId: sub._id,
+                                                                ...(cat.slug ? { categorySlug: cat.slug, categoryId: '' } : { categoryId: cat._id, categorySlug: '' }),
+                                                                ...(sub.slug ? { subcategorySlug: sub.slug, subcategoryId: '' } : { subcategoryId: sub._id, subcategorySlug: '' }),
                                                                 categoryName: cat.name,
                                                                 name: sub.name
                                                             });
                                                         }}
                                                         className={`w-full text-left p-2.5 rounded-lg text-xs transition-all ${
-                                                            searchParams.get('subcategoryId') === sub._id
+                                                            searchParams.get('subcategoryId') === sub._id || searchParams.get('subcategorySlug') === sub.slug
                                                             ? 'text-[#C06C84] font-bold bg-[#C06C84]/5'
                                                             : 'text-gray-500 hover:text-[#C06C84] hover:bg-gray-50'
                                                         }`}
@@ -649,7 +657,7 @@ function ServiceCard({ service, index, router }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: -8 }}
-            onClick={() => router.push(`/spa-salon/detail/${service.id}`)}
+            onClick={() => router.push(`/spa-salon/detail/${service.slug || service.id}`)}
             className="bg-white rounded-[32px] overflow-hidden border border-gray-100 cursor-pointer group shadow-sm hover:shadow-2xl transition-all duration-500"
         >
             {/* Image */}
@@ -718,7 +726,7 @@ function ServiceCard({ service, index, router }) {
                         whileTap={{ scale: 0.98 }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            router.push(`/spa-salon/detail/${service.id}`);
+                            router.push(`/spa-salon/detail/${service.slug || service.id}`);
                         }}
                         className="px-6 py-3 bg-[#6D1357] text-white rounded-xl text-sm font-black hover:bg-[#C06C84] transition-all shadow-lg shadow-[#6D1357]/10"
                     >

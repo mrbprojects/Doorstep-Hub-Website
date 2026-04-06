@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 import { useAuthModal } from './AuthModalContext';
 import { useLocationContext } from './LocationContext';
 import { toast } from 'sonner';
+import { isObjectId } from '@/utils/slugHelper';
 
 const ServiceCartContext = createContext();
 
@@ -71,8 +72,27 @@ export const ServiceCartProvider = ({ children }) => {
             return false;
         }
         try {
+            let providerKey = providerId;
+
+            // Ensure professional flows send provider ObjectId (backend rejects slugs here)
+            if (providerType === 'professional' && providerId && !isObjectId(providerId)) {
+                try {
+                    const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ providerSlug: providerId })
+                    });
+                    const data = await resp.json();
+                    const store = data?.storeData?.[0];
+                    const resolvedId = store?._id || store?.providerId;
+                    if (resolvedId) providerKey = resolvedId;
+                } catch (e) {
+                    console.warn('Could not resolve provider slug to id; using provided value', e);
+                }
+            }
+
             const body = {
-                providerId,
+                providerId: providerKey,
                 itemId,
                 itemType, // 'service', 'addon', 'professional_service', 'professional_addon'
                 providerType, // 'regular' or 'professional'

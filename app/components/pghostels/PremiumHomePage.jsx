@@ -589,7 +589,7 @@ function NearYouSection({ listings, router }) {
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
                             whileHover={{ y: -10, rotateY: 5 }}
-                            onClick={() => router.push(`/pghostels/hostel-detail/${listing.id}`)}
+                            onClick={() => router.push(`/${listing.slug || listing.id}`)}
                             className="group flex-shrink-0 w-80 snap-start cursor-pointer"
                         >
                             <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-100">
@@ -931,6 +931,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                             ) : (
                                 displayListings.map((listing, i) => {
                                     const hostelId = listing._id;
+                                    const hostelSlug = listing.slug || listing.hostelSlug || hostelId;
                                     const hostelName = listing.hostelName;
                                     const hostelArea = listing.address || listing.cityName;
                                     const hostelPrice = listing.startingAt || 250;
@@ -947,7 +948,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                             viewport={{ once: true }}
                                             transition={{ delay: i * 0.1 }}
                                             whileHover={isClickable ? { y: -5 } : {}}
-                                            onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${hostelId}`)}
+                                            onClick={() => isClickable && router.push(`/${hostelSlug}`)}
                                             className={`group relative rounded-[1.5rem] overflow-hidden h-[30rem] min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white ${isClickable ? 'cursor-pointer' : ''}`}
                                         >
                                             <div className="absolute inset-0">

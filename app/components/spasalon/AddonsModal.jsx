@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Plus, Check, Loader2, Sparkles, Scissors, Flower } from 'lucide-react';
+import { isObjectId } from '@/utils/slugHelper';
 
 export function AddonsModal({ isOpen, onClose, providerId, selectedPackageIds, onContinue }) {
     const [addons, setAddons] = useState([]);
@@ -34,7 +35,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageIds, o
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     serviceIds: selectedPackageIds,
-                    professionalProviderId: providerId
+                    ...(isObjectId(providerId) ? { professionalProviderId: providerId } : { providerSlug: providerId })
                 })
             });
             const data = await response.json();

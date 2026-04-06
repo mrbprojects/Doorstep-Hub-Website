@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { isObjectId } from '@/utils/slugHelper';
 import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +19,9 @@ function PGAddressContent() {
     const { addToCart, clearCart } = useServiceCart();
 
     const providerId = searchParams.get('providerId');
+    const providerSlug = searchParams.get('providerSlug');
+    const providerParam = providerSlug || providerId;
+    const [providerResolvedId, setProviderResolvedId] = useState(providerParam);
     const packageId = searchParams.get('packageId');
     const addons = searchParams.get('addons');
 
@@ -195,14 +199,39 @@ function PGAddressContent() {
         finally { setLoading(false); }
     };
 
+    // Resolve slug to ObjectId once (backend requires providerId)
+    useEffect(() => {
+        const resolveProvider = async () => {
+            if (!providerParam || isObjectId(providerParam)) {
+                setProviderResolvedId(providerParam);
+                return;
+            }
+            try {
+                const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ providerSlug: providerParam })
+                });
+                const data = await resp.json();
+                const store = data?.storeData?.[0];
+                const id = store?._id || store?.providerId;
+                setProviderResolvedId(id || providerParam);
+            } catch (e) {
+                console.warn('Could not resolve provider slug to id for PG booking address; using slug');
+                setProviderResolvedId(providerParam);
+            }
+        };
+        resolveProvider();
+    }, [providerParam]);
+
     const handleContinue = async () => {
         if (!selectedAddress) { toast.error('Please select an address'); return; }
         setLoading(true);
         try {
             sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
             // Pass providerId so confirm page can recover cart context if needed
-            const confirmUrl = providerId
-                ? `/pghostels/booking/confirm?providerId=${providerId}`
+            const confirmUrl = providerResolvedId
+                ? `/pghostels/booking/confirm?providerId=${providerResolvedId}`
                 : '/pghostels/booking/confirm';
             router.push(confirmUrl);
         } catch {
@@ -237,8 +266,8 @@ function PGAddressContent() {
                     <motion.button
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        onClick={() => providerId
-                            ? router.push(`/pghostels/hostel-detail/${providerId}`)
+                        onClick={() => providerParam
+                            ? router.push(`/${providerParam}`)
                             : router.back()
                         }
                         className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"

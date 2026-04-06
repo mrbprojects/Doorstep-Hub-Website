@@ -22,7 +22,9 @@ export function RecommendedHostels() {
   }, []);
 
   const handleHostelClick = (hostel) => {
-    router.push(`/pghostels/hostel-detail/${hostel.id}`);
+    const detailSegment = hostel.slug || hostel.hostelSlug || hostel.id;
+    if (!detailSegment) return;
+    router.push(`/${detailSegment}`);
   };
 
   // Fetch latest PG hostels from API
@@ -51,6 +53,7 @@ export function RecommendedHostels() {
 
             return {
               id: hostel._id,
+              slug: hostel.slug || hostel.hostelSlug,
               name: hostel.hostelName || `${hostel.firstName} ${hostel.lastName}`,
               tagline: hostel.bio || "Premium living space for your comfort and safety.",
               image: hostel.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image}` : 'https://images.unsplash.com/photo-1743116591552-9ff5e8c1ad31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwYmVkcm9vbSUyMGhvc3RlbHxlbnwxfHx8fDE3NjgwMjY3NDh8MA&ixlib=rb-4.1.0&q=80&w=1080',

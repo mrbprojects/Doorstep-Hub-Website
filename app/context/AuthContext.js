@@ -37,13 +37,15 @@ export const AuthProvider = ({ children }) => {
         return Date.now() >= (tokenExpiry - TOKEN_REFRESH_THRESHOLD);
     }, [tokenExpiry]);
 
-    // Save token with expiry timestamp
+    // Save token with expiry timestamp (store in both localStorage + sessionStorage for resilience)
     const saveToken = useCallback((authToken) => {
         const expiryTime = Date.now() + TOKEN_EXPIRY_TIME;
         setToken(authToken);
         setTokenExpiry(expiryTime);
         localStorage.setItem('auth_token', authToken);
         localStorage.setItem('token_expiry', expiryTime.toString());
+        sessionStorage.setItem('auth_token_backup', authToken);
+        sessionStorage.setItem('token_expiry_backup', expiryTime.toString());
     }, []);
 
     // Clear token and expiry
@@ -52,15 +54,29 @@ export const AuthProvider = ({ children }) => {
         setTokenExpiry(null);
         localStorage.removeItem('auth_token');
         localStorage.removeItem('token_expiry');
+        sessionStorage.removeItem('auth_token_backup');
+        sessionStorage.removeItem('token_expiry_backup');
     }, []);
 
     // Validate and restore token from localStorage
     useEffect(() => {
-        const savedToken = localStorage.getItem('auth_token');
-        const savedExpiry = localStorage.getItem('token_expiry');
+        const savedToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token_backup');
+        const savedExpiry = localStorage.getItem('token_expiry') || sessionStorage.getItem('token_expiry_backup');
 
-        if (savedToken && savedExpiry) {
-            const expiryTime = parseInt(savedExpiry);
+        if (savedToken) {
+            let expiryTime = savedExpiry ? parseInt(savedExpiry) : null;
+
+            // If expiry missing (e.g., after external redirect), restore a fresh expiry window
+            if (!expiryTime || Number.isNaN(expiryTime)) {
+                expiryTime = Date.now() + TOKEN_EXPIRY_TIME;
+                localStorage.setItem('token_expiry', expiryTime.toString());
+                sessionStorage.setItem('token_expiry_backup', expiryTime.toString());
+            }
+
+            // Restore token to localStorage if it only existed in sessionStorage
+            if (!localStorage.getItem('auth_token')) {
+                localStorage.setItem('auth_token', savedToken);
+            }
 
             // Check if token is expired
             if (Date.now() >= expiryTime) {

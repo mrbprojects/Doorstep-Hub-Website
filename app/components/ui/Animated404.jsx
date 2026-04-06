@@ -1,54 +1,31 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 export function Animated404() {
+    const router = useRouter();
+
     useEffect(() => {
-        const previousBodyBg = document.body.style.backgroundColor;
-        const previousHtmlBg = document.documentElement.style.backgroundColor;
-        const previousBodyBgImportant = document.body.style.getPropertyValue('background-color');
-        const previousHtmlBgImportant = document.documentElement.style.getPropertyValue('background-color');
-        const previousBodyPriority = document.body.style.getPropertyPriority('background-color');
-        const previousHtmlPriority = document.documentElement.style.getPropertyPriority('background-color');
-        document.body.style.setProperty('background-color', '#D9EAE8', 'important');
-        document.documentElement.style.setProperty('background-color', '#D9EAE8', 'important');
         const timer = setTimeout(() => {
-            window.location.href = 'https://doorstephub.com/appliance-repair-services';
-        }, 3000);
-        return () => {
-            clearTimeout(timer);
-            if (previousBodyBgImportant) {
-                document.body.style.setProperty('background-color', previousBodyBgImportant, previousBodyPriority || '');
-            } else {
-                document.body.style.backgroundColor = previousBodyBg;
-            }
-            if (previousHtmlBgImportant) {
-                document.documentElement.style.setProperty('background-color', previousHtmlBgImportant, previousHtmlPriority || '');
-            } else {
-                document.documentElement.style.backgroundColor = previousHtmlBg;
-            }
-        };
-    }, []);
+            router.replace('/appliance-repair-services');
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, [router]);
 
     return (
-        <div
-            className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4"
-            style={{ backgroundColor: '#D9EAE8' }}
-        >
+        <div className="min-h-screen bg-[#D9EAE8] flex items-center justify-center p-4">
             <motion.div
-                initial={{ opacity: 0, scale: 1.1 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-3xl flex flex-col items-center justify-center gap-3"
+                className="flex flex-col items-center justify-center"
             >
                 <img
                     src="/doorstepanimation.gif"
                     alt="Doorstep Hub Logo Animation"
-                    className="w-auto max-w-full max-h-[60vh] object-contain"
+                    className="w-64 md:w-80 h-auto object-contain mb-8 mix-blend-multiply"
                 />
-                <p className="text-center text-lg font-semibold text-[#2F4F4C] whitespace-nowrap">
-                    I’d be happy to help with your booking.
-                </p>
             </motion.div>
         </div>
     );

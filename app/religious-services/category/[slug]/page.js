@@ -3,16 +3,34 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowLeft, ChevronRight, Sparkles, Flower2, Star, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Sparkles, Flower2, Star, CheckCircle, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLocationContext } from '@/context/LocationContext';
+import { isObjectId, resolveParam } from '@/utils/slugHelper';
+
+const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
+const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
 
 function ReligiousCategoryContent() {
     const router = useRouter();
     const params = useParams();
+    const slugOrId = params.slug || params.id;
     const searchParams = useSearchParams();
-    const categoryName = searchParams.get('name') || 'Category';
+
+    const [categoryNameFromStorage, setCategoryNameFromStorage] = useState('');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const data = sessionStorage.getItem('religious_category');
+            if (data) {
+                const parsed = JSON.parse(data);
+                setCategoryNameFromStorage(parsed.name);
+            }
+        }
+    }, []);
+
+    const categoryName = searchParams.get('name') || categoryNameFromStorage || (slugOrId ? slugOrId.replace(/-/g, ' ') : 'Category');
 
     const { location, detectLocation } = useLocationContext();
     const [subCategories, setSubCategories] = useState([]);
@@ -20,21 +38,28 @@ function ReligiousCategoryContent() {
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('loading'); // 'loading', 'subcategories', 'services', 'empty'
 
-    useEffect(() => {
-        // No auto-detect here
-    }, [location]);
-
     // Fetch DATA
     useEffect(() => {
         const fetchData = async () => {
+            if (!slugOrId) return;
             setLoading(true);
             try {
+                // Determine latitude and longitude
+                const lat = (location?.lat ?? 17.4065).toString();
+                const lng = (location?.lng ?? 78.4772).toString();
+
                 // 1. Try Fetching Sub-Categories
-                // Using the Professional Services Flow Subcategory API (Same as PG Hostels)
+                const apiPayload = {
+                    ...resolveParam(slugOrId, 'categoryId', 'categorySlug'),
+                    serviceId: RELIGIOUS_SERVICE_ID,
+                    serviceSlug: RELIGIOUS_SERVICE_SLUG,
+                    lattitude: lat,
+                    longitude: lng,
+                };
                 const subCatResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId: params.id })
+                    body: JSON.stringify(apiPayload)
                 });
 
                 let subCats = [];
@@ -53,16 +78,7 @@ function ReligiousCategoryContent() {
                 }
 
                 // 2. If No Sub-Categories, Fetch Direct Services (Fallback to old behavior)
-                if (!location) {
-                    setViewMode('location_required');
-                    setLoading(false);
-                    return;
-                }
-                const lat = location.lat;
-                const lng = location.lng;
-
                 // Get religious services serviceId from localStorage, fallback to hardcoded ID
-                const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
                 let serviceId = RELIGIOUS_SERVICE_ID;
                 try {
                     const savedService = localStorage.getItem('selectedService');
@@ -72,15 +88,18 @@ function ReligiousCategoryContent() {
                     }
                 } catch (e) { /* use fallback */ }
 
+                const servicesPayload = {
+                    ...apiPayload,
+                    lattitude: lat,
+                    longitude: lng,
+                    serviceId,
+                    serviceSlug: RELIGIOUS_SERVICE_SLUG
+                };
+
                 const servicesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        lattitude: lat,
-                        longitude: lng,
-                        categoryId: params.id,
-                        serviceId
-                    })
+                    body: JSON.stringify(servicesPayload)
                 });
 
                 const servicesData = await servicesResponse.json();
@@ -100,10 +119,18 @@ function ReligiousCategoryContent() {
         };
 
         fetchData();
-    }, [location, params.id]);
+    }, [location, slugOrId]);
 
     const handleSubCategoryClick = (subCat) => {
-        router.push(`/religious-services/subcategory/${subCat._id}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCat.name)}&categoryId=${params.id}`);
+        const target = subCat.slug || subCat._id;
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('religious_subcategory_context', JSON.stringify({
+                categoryId: slugOrId,
+                categoryName: categoryName,
+                subCategoryName: subCat.name
+            }));
+        }
+        router.push(`/religious-services/subcategory/${target}`);
     };
 
     if (loading) {
@@ -131,7 +158,7 @@ function ReligiousCategoryContent() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-white/10 backdrop-blur-md inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white mb-6 cursor-pointer hover:bg-white/20 transition-colors"
-                            onClick={() => router.back()}
+                            onClick={() => router.push('/religious-services')}
                         >
                             <ArrowLeft className="w-4 h-4" />
                             <span className="text-sm font-medium">Back to Categories</span>
@@ -229,64 +256,35 @@ function ReligiousCategoryContent() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {services.map((service, i) => (
-                            <Card
-                                key={service._id || i}
-                                className="overflow-hidden hover:shadow-xl transition-shadow group cursor-pointer border-none shadow-md"
-                                onClick={() => router.push(`/religious-services/service/${service._id}`)}
-                            >
-                                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                                    <img
-                                        src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
-                                        alt={service.business_name}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                </div>
-                                <CardContent className="p-6">
-                                    <h3 className="text-lg font-semibold text-[var(--deep-charcoal)] mb-2 group-hover:text-[var(--saffron)] transition-colors">
-                                        {service.business_name || `${service.firstName} ${service.lastName}`}
-                                    </h3>
-                                    <div className="flex items-center justify-between mt-4">
-                                        <span className="text-2xl font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
-                                        <Button size="sm" className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white">
-                                            Book Now
-                                        </Button>
+                        {services.map((service, i) => {
+                            const target = service.slug || service._id;
+                            return (
+                                <Card
+                                    key={service._id || i}
+                                    className="overflow-hidden hover:shadow-xl transition-shadow group cursor-pointer border-none shadow-md"
+                                    onClick={() => router.push(`/religious-services/${target}`)}
+                                >
+                                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
+                                        <img
+                                            src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
+                                            alt={service.business_name}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // LOCATION REQUIRED
-    if (viewMode === 'location_required') {
-        return (
-            <div className="min-h-screen bg-[var(--off-white)] pt-24 pb-10 flex flex-col items-center justify-center container mx-auto px-4">
-                <div className="bg-white p-12 rounded-[3rem] shadow-2xl border border-gray-100 flex flex-col items-center text-center max-w-2xl w-full">
-                    <div className="p-6 rounded-full bg-[var(--off-white)] mb-8">
-                        <MapPin className="h-16 w-16 text-[var(--saffron)] animate-bounce" />
-                    </div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4">Set Your Sacred Spcae</h1>
-                    <p className="text-lg text-gray-500 mb-10 leading-relaxed">
-                        To find divine services and priests specifically available in your locality, please share your current location.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 w-full">
-                        <Button
-                            onClick={() => detectLocation()}
-                            className="flex-1 bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white h-14 rounded-2xl text-lg font-bold shadow-xl shadow-[var(--saffron)]/20"
-                        >
-                            Find Near Me
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => router.back()}
-                            className="flex-1 h-14 rounded-2xl text-lg font-bold"
-                        >
-                            Go Back
-                        </Button>
+                                    <CardContent className="p-6">
+                                        <h3 className="text-lg font-semibold text-[var(--deep-charcoal)] mb-2 group-hover:text-[var(--saffron)] transition-colors">
+                                            {service.business_name || `${service.firstName} ${service.lastName}`}
+                                        </h3>
+                                        <div className="flex items-center justify-between mt-4">
+                                            <span className="text-2xl font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
+                                            <Button size="sm" className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white">
+                                                Book Now
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -307,7 +305,11 @@ function ReligiousCategoryContent() {
 export default function ReligiousCategoryPage() {
     return (
         <Suspense fallback={<div className="min-h-screen bg-[var(--off-white)] flex items-center justify-center">Loading...</div>}>
-            <ReligiousCategoryContent />
+            <SubCategoryServicesContent />
         </Suspense>
     );
+}
+
+function SubCategoryServicesContent() {
+    return <ReligiousCategoryContent />;
 }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { isObjectId } from '@/utils/slugHelper';
 import { ArrowLeft, Home,CheckCircle, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -17,7 +18,8 @@ function SpaAddressContent() {
     const { token, isAuthenticated } = useAuth();
     const { addToCart, clearCart } = useServiceCart();
 
-    const providerId = searchParams.get('providerId');
+    const providerIdParam = searchParams.get('providerId');
+    const [providerId, setProviderId] = useState(providerIdParam);
     const packageId = searchParams.get('packageId');
     const addons = searchParams.get('addons');
 
@@ -217,12 +219,34 @@ function SpaAddressContent() {
 
         setLoading(true);
         try {
+            let providerIdFinal = providerId;
+
+            // Ensure we send ObjectId to cart API
+            if (providerIdFinal && !isObjectId(providerIdFinal)) {
+                try {
+                    const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ providerSlug: providerIdFinal })
+                    });
+                    const data = await resp.json();
+                    const store = data?.storeData?.[0];
+                    const resolvedId = store?._id || store?.providerId;
+                    if (resolvedId) {
+                        providerIdFinal = resolvedId;
+                        setProviderId(resolvedId);
+                    }
+                } catch (e) {
+                    console.warn('Could not resolve provider slug during checkout, proceeding with slug');
+                }
+            }
+
             const packageIdList = packageId ? packageId.split(',') : [];
             const firstPackageId = packageIdList[0];
 
-            if (providerId?.startsWith('mock_') || (firstPackageId && firstPackageId.startsWith('mock_'))) {
+            if (providerIdFinal?.startsWith('mock_') || (firstPackageId && firstPackageId.startsWith('mock_'))) {
                 sessionStorage.setItem('spa_booking_data', JSON.stringify({
-                    providerId, packageId: packageIdList, addons: addons ? addons.split(',') : [], address: selectedAddress
+                    providerId: providerIdFinal, packageId: packageIdList, addons: addons ? addons.split(',') : [], address: selectedAddress
                 }));
                 sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
                 router.push('/spa-salon/booking/confirm');
@@ -232,7 +256,7 @@ function SpaAddressContent() {
             await clearCart(true);
 
             for (const pId of packageIdList) {
-                const packageSuccess = await addToCart(providerId, pId, 'professional_service', 1, null, 'professional', true);
+                const packageSuccess = await addToCart(providerIdFinal, pId, 'professional_service', 1, null, 'professional', true);
                 if (!packageSuccess) {
                     toast.error(`Failed to add service ${pId} to booking`);
                     setLoading(false);
@@ -243,12 +267,12 @@ function SpaAddressContent() {
             if (addons) {
                 const addonList = addons.split(',');
                 for (const addonId of addonList) {
-                    await addToCart(providerId, addonId, 'professional_addon', 1, firstPackageId, 'professional', true);
+                    await addToCart(providerIdFinal, addonId, 'professional_addon', 1, firstPackageId, 'professional', true);
                 }
             }
 
             sessionStorage.setItem('spa_booking_data', JSON.stringify({
-                providerId, packageId: packageIdList,
+                providerId: providerIdFinal, packageId: packageIdList,
                 addons: addons ? addons.split(',') : [],
                 address: selectedAddress
             }));
@@ -277,6 +301,27 @@ function SpaAddressContent() {
         }
         setShowAddForm(true);
     };
+
+    // If providerId is a slug, resolve it to an _id once
+    useEffect(() => {
+        const resolveProvider = async () => {
+            if (!providerIdParam || isObjectId(providerIdParam)) return;
+            try {
+                const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ providerSlug: providerIdParam })
+                });
+                const data = await resp.json();
+                const store = data?.storeData?.[0];
+                const id = store?._id || store?.providerId;
+                if (id) setProviderId(id);
+            } catch (e) {
+                console.warn('Could not resolve provider slug to id, using slug', e);
+            }
+        };
+        resolveProvider();
+    }, [providerIdParam]);
 
     const getIcon = (type) => {
         const lower = type?.toLowerCase() || '';

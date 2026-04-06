@@ -13,6 +13,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/spasalon/AddonsModal';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { isObjectId } from '@/utils/slugHelper';
 
 const amenityIcons = {
     Wifi: Sparkles,
@@ -27,7 +28,8 @@ const amenityIcons = {
 export default function SpaServiceDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const id = params.id;
+    // Supporting both id and slug from the parameter
+    const slugOrId = params.slug || params.id;
     const searchParams = useSearchParams();
     const subcategoryId = searchParams.get('subcategoryId');
     const subCategoryName = searchParams.get('subCategoryName');
@@ -54,20 +56,20 @@ export default function SpaServiceDetailPage() {
 
     useEffect(() => {
         if (!loading && !serviceData) {
-            router.replace('/appliance-repair-services');
+            router.replace('/spa-salon');
         }
     }, [loading, serviceData, router]);
 
     useEffect(() => {
         const fetchServiceData = async () => {
-            if (!id) return;
+            if (!slugOrId) return;
 
             setLoading(true);
             try {
                 // Mock Support
-                if (id.startsWith('mock_')) {
+                if (slugOrId.startsWith('mock_')) {
                     const mockData = {
-                        id: id,
+                        id: slugOrId,
                         name: 'Luxe Spa Experience',
                         location: 'Home Service',
                         rating: 4.9,
@@ -89,12 +91,14 @@ export default function SpaServiceDetailPage() {
                     return;
                 }
 
+                // Determine if slugOrId is an ID or a Slug
+                const isId = isObjectId(slugOrId);
+                const apiPayload = isId ? { providerId: slugOrId } : { providerSlug: slugOrId };
+
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        providerId: id
-                    })
+                    body: JSON.stringify(apiPayload)
                 });
                 const data = await response.json();
 
@@ -102,19 +106,19 @@ export default function SpaServiceDetailPage() {
                     const store = data.storeData[0];
 
                     const mappedData = {
-                        id: id,
+                        id: store._id || store.id || store.providerId || slugOrId,
+                        slug: store.slug,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
                         location: store.address || 'Location available on request',
                         rating: parseFloat(store.avgRating || 4.8).toFixed(1),
                         basePrice: store.BasePrice || 500,
                         logo: store.logo ? (store.logo.startsWith('http') ? store.logo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.logo}`) : '',
                         images: (() => {
-                            // Strictly use the "image" key from the backend as the primary banner
                             const baseUrl = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/`;
                             const toUrl = (p) => p ? (p.startsWith('http') ? p : `${baseUrl}${p}`) : null;
 
-                            const bannerImg = toUrl(store.image);      // primary from "image" key
-                            const logoImg   = toUrl(store.logo);       // fallback
+                            const bannerImg = toUrl(store.image);
+                            const logoImg   = toUrl(store.logo);
                             const extras    = (data.serviceImages || []).map(toUrl).filter(Boolean);
 
                             const primary = bannerImg || logoImg;
@@ -155,6 +159,16 @@ export default function SpaServiceDetailPage() {
                     if (mappedData.packages.length > 0) {
                         setSelectedPackages([mappedData.packages[0]]);
                     }
+
+                    // Increment store views using slug
+                    try {
+                        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/increment-store-views`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ professionalStoreSlug: store.slug || slugOrId })
+                        });
+                    } catch (e) { console.error("Error incrementing views:", e); }
+
                 }
             } catch (error) {
                 console.error("Error fetching service data:", error);
@@ -164,7 +178,7 @@ export default function SpaServiceDetailPage() {
         };
 
         fetchServiceData();
-    }, [id]);
+    }, [slugOrId]);
 
     const togglePackage = (pkg) => {
         setSelectedPackages(prev => {
@@ -186,14 +200,13 @@ export default function SpaServiceDetailPage() {
             return;
         }
 
-        // ── Provider conflict check ──
         const existingProviderId = cartItems.length > 0 ? cartItems[0].providerId : null;
-        if (existingProviderId && existingProviderId !== id) {
+        if (existingProviderId && existingProviderId !== (serviceData.id || slugOrId)) {
             const confirmed = window.confirm(
                 `Your cart already has services from a different professional.\n\nDo you want to clear your existing cart and book with this professional instead?`
             );
             if (!confirmed) return;
-            await clearCart(true); // clear old provider's cart silently
+            await clearCart(true); 
         }
 
         setShowAddonsModal(true);
@@ -203,15 +216,14 @@ export default function SpaServiceDetailPage() {
         setShowAddonsModal(false);
         const addonIds = selectedAddons.map(a => a._id).join(',');
         const packageIds = selectedPackages.map(p => p._id).join(',');
-        router.push(`/spa-salon/booking/address?providerId=${id}&packageId=${packageIds}&addons=${addonIds}`);
+        const providerTarget = serviceData.id || slugOrId;
+        router.push(`/spa-salon/booking/address?providerId=${providerTarget}&packageId=${packageIds}&addons=${addonIds}`);
     };
 
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 pb-32">
-                {/* Banner shimmer */}
                 <div className="h-[420px] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
-                {/* Header card shimmer */}
                 <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-10">
                     <div className="bg-white/95 rounded-3xl shadow-2xl border border-gray-200 p-8 animate-pulse">
                         <div className="flex items-start gap-4 mb-6">
@@ -247,13 +259,12 @@ export default function SpaServiceDetailPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-32">
-            {/* Back Button — sits just below the fixed site header */}
             <motion.button
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => {
                     if (subcategoryId) {
-                        router.push(`/spa-salon/subcategory/${subcategoryId}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCategoryName)}`);
+                        router.push(`/spa-salon/subcategory/${subcategoryId}`);
                     } else {
                         router.back();
                     }
@@ -263,7 +274,6 @@ export default function SpaServiceDetailPage() {
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
             </motion.button>
 
-            {/* Banner Image Slider */}
             <motion.div
                 style={{ opacity: headerOpacity }}
                 className="relative h-[420px] overflow-hidden bg-gray-900"
@@ -285,7 +295,6 @@ export default function SpaServiceDetailPage() {
                 </Slider>
             </motion.div>
 
-            {/* Header Info */}
             <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
@@ -320,19 +329,11 @@ export default function SpaServiceDetailPage() {
                                 </div>
                                 <div className="text-[10px] md:text-xs text-gray-500 text-center uppercase font-semibold">Rating</div>
                             </div>
-                            {/* <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100 min-w-[120px]">
-                                <div className="flex items-center justify-center mb-1">
-                                    <DollarSign className="w-5 h-5 text-purple-600 mr-1" />
-                                    <span className="text-2xl font-bold text-gray-900">₹{serviceData.basePrice}</span>
-                                </div>
-                                <div className="text-xs text-gray-500 text-center">Starts From</div>
-                            </div> */}
                         </div>
                     </div>
                 </motion.div>
             </div >
 
-            {/* Tabs */}
             <div className="max-w-7xl mx-auto px-4 mt-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     <div className="sticky top-[72px] z-40 bg-gray-50/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-1.5 md:p-2 overflow-hidden">
@@ -445,7 +446,6 @@ export default function SpaServiceDetailPage() {
                 </Tabs>
             </div >
 
-            {/* Bottom CTA */}
             <motion.div
                 initial={{ y: 100 }}
                 animate={{ y: 0 }}
@@ -475,7 +475,7 @@ export default function SpaServiceDetailPage() {
             <AddonsModal
                 isOpen={showAddonsModal}
                 onClose={() => setShowAddonsModal(false)}
-                providerId={id}
+                providerId={serviceData.id || slugOrId}
                 selectedPackageIds={selectedPackages.map(p => p._id)}
                 onContinue={handleAddonsContinue}
             />

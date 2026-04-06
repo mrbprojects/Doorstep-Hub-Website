@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, Heart, ChevronRight, Check } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/spasalon/ui/tabs';
 import { AddonsModal } from '@/components/spasalon/AddonsModal';
+import { isObjectId } from '@/utils/slugHelper';
 
 
 export function DetailsPage() {
@@ -21,22 +22,25 @@ export function DetailsPage() {
 
     useEffect(() => {
         const fetchServiceDetails = async () => {
-            if (!params?.id) return;
+            const slugOrId = params?.id || params?.slug;
+            if (!slugOrId) return;
             setLoading(true);
             try {
+                const isId = isObjectId(slugOrId);
+                const apiPayload = isId ? { providerId: slugOrId } : { providerSlug: slugOrId };
+
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        providerId: params.id
-                    })
+                    body: JSON.stringify(apiPayload)
                 });
                 const data = await response.json();
 
                 if (data.success && data.storeData && data.storeData.length > 0) {
                     const store = data.storeData[0];
                     const mappedService = {
-                        id: store._id || params.id,
+                        id: store._id || store.providerId || params.id,
+                        slug: store.slug,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
                         provider: store.business_name || 'Professional Service',
                         image: store.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.logo}` : 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37f?auto=format&fit=crop&q=80&w=800',
@@ -74,11 +78,11 @@ export function DetailsPage() {
             }
         };
         fetchServiceDetails();
-    }, [params?.id]);
+    }, [params?.id, params?.slug]);
 
     useEffect(() => {
         if (!loading && !service) {
-            router.replace('/appliance-repair-services');
+            router.replace('/spa-salon');
         }
     }, [loading, service, router]);
 
@@ -400,13 +404,14 @@ export function DetailsPage() {
             <AddonsModal
                 isOpen={showAddonsModal}
                 onClose={() => setShowAddonsModal(false)}
-                providerId={params.id}
+                providerId={service.slug || params.id}
                 selectedPackageIds={selectedPackages.map(p => p._id)}
                 onContinue={(selectedAddons) => {
                     setShowAddonsModal(false);
+                    const providerTarget = service.slug || params.id;
                     const packageIds = selectedPackages.map(p => p._id).join(',');
                     const addonIds = selectedAddons.map(a => a._id).join(',');
-                    router.push(`/spa-salon/booking/address?providerId=${params.id}&packageId=${packageIds}&addons=${addonIds}`);
+                    router.push(`/spa-salon/booking/address?providerId=${providerTarget}&packageId=${packageIds}&addons=${addonIds}`);
                 }}
             />
 

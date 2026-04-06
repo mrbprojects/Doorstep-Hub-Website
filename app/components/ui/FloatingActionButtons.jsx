@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
@@ -10,7 +10,10 @@ const KNOWN_SECTIONS = ['/appliances', '/services', '/book-appointment', '/appli
     '/religious-services', '/spa-salon', '/pg-hostels', '/account', '/cart', '/address'];
 
 export function FloatingActionButtons() {
+    const [mounted, setMounted] = useState(false);
     const pathname = usePathname();
+    useEffect(() => { setMounted(true); }, []);
+    if (!mounted || !pathname) return null;
     const isBookingPage = pathname === '/book-appointment';
 
     // Services to hide icons for: SPA, PG Hostels, Religious Services, and General Services (Professional Services)

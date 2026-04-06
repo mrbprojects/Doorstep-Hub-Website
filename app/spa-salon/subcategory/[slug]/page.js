@@ -11,15 +11,17 @@ import { Slider } from '@/components/pghostels/ui/slider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/pghostels/ui/input';
+import { isObjectId, resolveParam } from '@/utils/slugHelper';
 
 function SpaSubCategoryContent() {
     const router = useRouter();
     const params = useParams();
+    const slugOrId = params.slug || params.id;
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const categoryName = searchParams.get('category') || 'Services';
     const subCategoryName = searchParams.get('name') || 'Service List';
-    const categoryId = searchParams.get('categoryId') || null;
+    const categoryUniqueId = searchParams.get('categoryId') || null;
 
     const { location, detectLocation } = useLocationContext();
     const [services, setServices] = useState([]);
@@ -61,7 +63,7 @@ function SpaSubCategoryContent() {
         if (rating) setMinRating(parseFloat(rating));
     }, [searchParams]);
 
-    // Update URL when filters change (with small debounce for slider)
+    // Update URL when filters change
     useEffect(() => {
         const timer = setTimeout(() => {
             const currentParams = new URLSearchParams(searchParams.toString());
@@ -104,10 +106,11 @@ function SpaSubCategoryContent() {
         const fetchSubCategories = async () => {
             if (!expandedCategory) return;
             try {
+                const apiPayload = resolveParam(expandedCategory, 'categoryId', 'categorySlug');
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId: expandedCategory })
+                    body: JSON.stringify(apiPayload)
                 });
                 const data = await response.json();
                 if (data.success && data.data) {
@@ -125,9 +128,12 @@ function SpaSubCategoryContent() {
                 const lat = location?.lat?.toString() || "17.4483";
                 const lng = location?.lng?.toString() || "78.3915";
 
+                const subCategoryParam = resolveParam(slugOrId, 'subcategoryId', 'subcategorySlug');
+                const serviceParam = { serviceSlug: SERVICE_SLUG };
+
                 const payload = {
-                    serviceId: SERVICE_ID,
-                    subCategoryId: params.id,
+                    ...serviceParam,
+                    ...subCategoryParam,
                     latitude: lat,
                     longitude: lng,
                     minPrice: priceRange[0],
@@ -137,8 +143,10 @@ function SpaSubCategoryContent() {
                     sortBy: sortBy === 'Highest Rated' ? 'rating' : sortBy === 'Price: Low to High' ? 'price_low' : sortBy === 'Price: High to Low' ? 'price_high' : ''
                 };
 
-                // Add optional category filtering if present in URL
-                if (searchParams.get('categoryId')) payload.categoryId = searchParams.get('categoryId');
+                if (searchParams.get('categoryId')) {
+                    const catParam = resolveParam(searchParams.get('categoryId'), 'categoryId', 'categorySlug');
+                    Object.assign(payload, catParam);
+                }
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
@@ -172,6 +180,7 @@ function SpaSubCategoryContent() {
 
                             return {
                                 id: uniqueId,
+                                slug: s.slug || uniqueId,
                                 name: str(s.business_name) || str(s.serviceName) || `${str(s.firstName)} ${str(s.lastName)}`.trim() || 'Professional Expert',
                                 provider: str(s.business_name) || 'Certified Partner',
                                 price: num(s.startingAt) || num(s.minFare) || num(s.price) || 499,
@@ -194,7 +203,7 @@ function SpaSubCategoryContent() {
             fetchServices();
         }, 500);
         return () => clearTimeout(timer);
-    }, [params.id, location, priceRange, minRating, searchQuery, sortBy]);
+    }, [slugOrId, location, priceRange, minRating, searchQuery, sortBy]);
 
     const sortedServices = useMemo(() => {
         let result = [...services];
@@ -214,70 +223,76 @@ function SpaSubCategoryContent() {
                     </h4>
                 )}
 
-                {/* Categories Section (Accordion Style) */}
+                {/* Categories Section */}
                 <div className="mb-8 border-b border-gray-100 pb-6">
                     <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Service Categories</h6>
                     <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                        {categories.map((cat) => (
-                            <div key={cat._id} className="overflow-hidden">
-                                <button
-                                    onClick={() => {
-                                        if (expandedCategory === cat._id) setExpandedCategory(null);
-                                        else setExpandedCategory(cat._id);
-                                    }}
-                                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
-                                        expandedCategory === cat._id || cat._id === searchParams.get('categoryId')
-                                        ? 'bg-[#C06C84]/10 text-[#C06C84] font-bold border border-[#C06C84]/20 shadow-sm' 
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-[#C06C84] border border-transparent'
-                                    }`}
-                                >
-                                    <span className="truncate">{cat.name}</span>
-                                    {expandedCategory === cat._id ? (
-                                        <ChevronRight className="w-4 h-4 rotate-90 transition-transform text-[#C06C84]" />
-                                    ) : (
-                                        <ChevronRight className="w-4 h-4 opacity-30" />
-                                    )}
-                                </button>
+                        {categories.map((cat) => {
+                            const catTarget = cat.slug || cat._id;
+                            return (
+                                <div key={cat._id} className="overflow-hidden">
+                                    <button
+                                        onClick={() => {
+                                            if (expandedCategory === catTarget) setExpandedCategory(null);
+                                            else setExpandedCategory(catTarget);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
+                                            expandedCategory === catTarget || catTarget === searchParams.get('categoryId')
+                                            ? 'bg-[#C06C84]/10 text-[#C06C84] font-bold border border-[#C06C84]/20 shadow-sm' 
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-[#C06C84] border border-transparent'
+                                        }`}
+                                    >
+                                        <span className="truncate">{cat.name}</span>
+                                        {expandedCategory === catTarget ? (
+                                            <ChevronRight className="w-4 h-4 rotate-90 transition-transform text-[#C06C84]" />
+                                        ) : (
+                                            <ChevronRight className="w-4 h-4 opacity-30" />
+                                        )}
+                                    </button>
 
-                                <AnimatePresence>
-                                    {expandedCategory === cat._id && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="pl-5 pr-1 py-2 space-y-1.5 mt-1 border-l-2 border-[#C06C84]/20 ml-4">
-                                                {allSubCategories.map(sub => (
-                                                    <button
-                                                        key={sub._id}
-                                                        onClick={() => {
-                                                            const currentParams = new URLSearchParams(searchParams.toString());
-                                                            currentParams.set('categoryId', cat._id);
-                                                            currentParams.set('category', cat.name);
-                                                            currentParams.set('name', sub.name);
-                                                            router.push(`/spa-salon/subcategory/${sub._id}?${currentParams.toString()}`);
-                                                        }}
-                                                        className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
-                                                            params.id === sub._id
-                                                            ? 'bg-[#C06C84] text-white shadow-md shadow-[#C06C84]/20'
-                                                            : 'text-gray-500 hover:text-[#C06C84] hover:bg-[#C06C84]/5'
-                                                        }`}
-                                                    >
-                                                        {sub.name}
-                                                    </button>
-                                                ))}
-                                                {allSubCategories.length === 0 && (
-                                                    <div className="text-center py-2">
-                                                        <div className="w-4 h-4 border-2 border-[#C06C84]/20 border-t-[#C06C84] rounded-full animate-spin mx-auto" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        ))}
+                                    <AnimatePresence>
+                                        {expandedCategory === catTarget && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="pl-5 pr-1 py-2 space-y-1.5 mt-1 border-l-2 border-[#C06C84]/20 ml-4">
+                                                    {allSubCategories.map(sub => {
+                                                        const subTarget = sub.slug || sub._id;
+                                                        return (
+                                                            <button
+                                                                key={sub._id}
+                                                                onClick={() => {
+                                                                    const currentParams = new URLSearchParams(searchParams.toString());
+                                                                    currentParams.set('categoryId', catTarget);
+                                                                    currentParams.set('category', cat.name);
+                                                                    currentParams.set('name', sub.name);
+                                                                    router.push(`/spa-salon/subcategory/${subTarget}?${currentParams.toString()}`);
+                                                                }}
+                                                                className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
+                                                                    slugOrId === subTarget
+                                                                    ? 'bg-[#C06C84] text-white shadow-md shadow-[#C06C84]/20'
+                                                                    : 'text-gray-500 hover:text-[#C06C84] hover:bg-[#C06C84]/5'
+                                                                }`}
+                                                            >
+                                                                {sub.name}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                    {allSubCategories.length === 0 && (
+                                                        <div className="text-center py-2">
+                                                            <div className="w-4 h-4 border-2 border-[#C06C84]/20 border-t-[#C06C84] rounded-full animate-spin mx-auto" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            );
+                        })}
                         {categoriesLoading && (
                             <div className="text-center py-4">
                                 <div className="w-5 h-5 border-2 border-[#C06C84]/20 border-t-[#C06C84] rounded-full animate-spin mx-auto" />
@@ -345,7 +360,6 @@ function SpaSubCategoryContent() {
 
     return (
         <div className="min-h-screen bg-[#F6F7FB]">
-            {/* Header / Hero */}
             <div className="bg-[#1A0515] pt-24 pb-12 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#C06C84]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -369,7 +383,6 @@ function SpaSubCategoryContent() {
                 </div>
             </div>
 
-            {/* Search & Mobile Filter Bar */}
             <div className="max-w-7xl mx-auto px-4 -mt-8 relative z-20">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -415,17 +428,14 @@ function SpaSubCategoryContent() {
                 </motion.div>
             </div>
 
-            {/* Main Content Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 <div className="flex gap-10">
-                    {/* Desktop Sidebar */}
                     <div className="hidden lg:block w-80 flex-shrink-0">
                         <div className="bg-white rounded-[20px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28">
                             <FilterPanel />
                         </div>
                     </div>
 
-                    {/* Content Area */}
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row items-center justify-between mb-10 gap-4">
                             <div className="flex bg-white p-1.5 rounded-[20px] border border-gray-200 shadow-sm w-full sm:w-auto">
@@ -472,7 +482,7 @@ function SpaSubCategoryContent() {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         whileHover={{ y: -8 }}
-                                        onClick={() => router.push(`/spa-salon/detail/${service.id}`)}
+                                        onClick={() => router.push(`/spa-salon/service/${service.slug || service.id}`)}
                                         className="bg-white rounded-[20px] overflow-hidden border border-gray-100 cursor-pointer group shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col"
                                     >
                                         <div className="relative h-48 overflow-hidden">
@@ -487,9 +497,6 @@ function SpaSubCategoryContent() {
                                                     <Heart className="w-12 h-12 text-[#C06C84]/10" />
                                                 </div>
                                             )}
-                                            <div className="absolute top-6 left-6 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#C06C84]/90 text-white backdrop-blur shadow-lg">
-                                                Certified Professional
-                                            </div>
                                         </div>
 
                                         <div className="p-6 flex-1 flex flex-col">

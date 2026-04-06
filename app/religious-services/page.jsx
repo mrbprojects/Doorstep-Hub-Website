@@ -88,6 +88,7 @@ export default function ReligiousServicesPage() {
     try {
       localStorage.setItem('selectedService', JSON.stringify({
         id: RELIGIOUS_SERVICE_ID,
+        slug: RELIGIOUS_SERVICE_SLUG,
         name: 'Religious Services'
       }));
     } catch (e) {
@@ -133,12 +134,10 @@ export default function ReligiousServicesPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const serviceId = RELIGIOUS_SERVICE_ID;
-
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ serviceId })
+          body: JSON.stringify({ serviceId: RELIGIOUS_SERVICE_ID })
         });
         const data = await response.json();
         if (data.success && data.category) {
@@ -481,7 +480,13 @@ export default function ReligiousServicesPage() {
                     transition={{ delay: index * 0.1 }}
                     viewport={{ once: true }}
                     whileHover={{ y: -8, scale: 1.02 }}
-                    onClick={() => router.push(`/religious-services/category/${category._id}?name=${encodeURIComponent(category.name)}`)}
+                    onClick={() => {
+                      const target = category.slug || category._id;
+                      if (typeof window !== 'undefined') {
+                        sessionStorage.setItem('religious_category', JSON.stringify({ name: category.name }));
+                      }
+                      router.push(`/religious-services/${target}`);
+                    }}
                     className="group cursor-pointer"
                   >
                     <Card className="h-full border-2 border-transparent hover:border-[var(--saffron)]/30 hover:shadow-xl transition-all duration-300 overflow-hidden">
@@ -561,7 +566,10 @@ export default function ReligiousServicesPage() {
     >
       <Card
         className="h-full bg-white hover:shadow-lg transition-shadow cursor-pointer group"
-        onClick={() => router.push(`/religious-services/service/${service._id}`)}
+        onClick={() => {
+                        const target = service.slug || service._id;
+                        router.push(`/religious-services/${target}`);
+                      }}
       >
         <CardContent className="p-6 h-full flex flex-col">
           {/* Name and Image Side by Side */}
@@ -657,7 +665,10 @@ export default function ReligiousServicesPage() {
                   >
                     <Card
                       className="overflow-hidden hover:shadow-xl transition-shadow group cursor-pointer h-full border border-gray-100 hover:border-[var(--saffron)]/30"
-                      onClick={() => router.push(`/religious-services/service/${service._id}`)}
+                      onClick={() => {
+                        const target = service.slug || service._id;
+                        router.push(`/religious-services/${target}`);
+                      }}
                     >
                       <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                         <img
@@ -804,7 +815,7 @@ export default function ReligiousServicesPage() {
                       whileHover={{ scale: 1.03 }}
                       className="px-3"
                     >
-                      <Card className="overflow-hidden group cursor-pointer border-2 border-transparent hover:border-[var(--saffron)]/30 transition-all flex flex-col h-full" onClick={() => router.push(`/religious-services/service/${ritual._id}`)}>
+                      <Card className="overflow-hidden group cursor-pointer border-2 border-transparent hover:border-[var(--saffron)]/30 transition-all flex flex-col h-full" onClick={() => router.push(`/religious-services/${ritual.slug || ritual._id}`)}>
                         <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                           <img
                             src={ritual.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${ritual.image}` : 'https://images.unsplash.com/photo-1599030859770-940e6a970d4d?auto=format&fit=crop&w=600&q=80'}

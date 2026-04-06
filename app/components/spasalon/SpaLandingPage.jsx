@@ -12,6 +12,7 @@ import {
     MapPin, Star, CheckCircle, ArrowRight
 } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
+import { resolveParam } from '@/utils/slugHelper';
 
 // Section wrapper
 function SectionReveal({ children, delay = 0 }) {
@@ -180,7 +181,7 @@ export function SpaLandingPage() {
                                 <motion.div
                                     key={cat._id || index}
                                     whileHover={{ y: -10 }}
-                                    onClick={() => router.push(`/spa-salon/category/${cat._id}?name=${encodeURIComponent(cat.name)}`)}
+                                    onClick={() => router.push(`/spa-salon/category/${cat.slug || cat._id}`)}
                                     className="group cursor-pointer"
                                 >
                                     <Card className="h-full border-none shadow-lg hover:shadow-xl transition-all overflow-hidden">

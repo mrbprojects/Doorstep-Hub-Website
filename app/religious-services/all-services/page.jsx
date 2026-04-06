@@ -21,6 +21,7 @@ function AllReligiousServicesContent() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
+    const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
     const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
 
     useEffect(() => {
@@ -144,7 +145,10 @@ function AllReligiousServicesContent() {
                             >
                                 <Card
                                     className="overflow-hidden hover:shadow-2xl transition-all duration-500 group cursor-pointer h-full border-none shadow-sm ring-1 ring-gray-100 hover:ring-[var(--saffron)]/30"
-                                    onClick={() => router.push(`/religious-services/service/${service._id}`)}
+                                    onClick={() => {
+                                        const target = service.slug || service._id;
+                                        router.push(`/religious-services/${target}`);
+                                    }}
                                 >
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                                         <img

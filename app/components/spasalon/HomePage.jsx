@@ -82,24 +82,13 @@ export function HomePage() {
             // ... existing category fetch
             try {
                 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
-                const selectedService = localStorage.getItem('selectedService');
-                // let serviceId = "69524f4a57bb211ca094e5e6";
-
-                if (selectedService) {
-                    try {
-                        const serviceData = JSON.parse(selectedService);
-                        serviceId = serviceData.id;
-                    } catch (e) {
-                        console.log('Error parsing selectedService from localStorage');
-                    }
-                }
-                 let serviceId = "69524f4a57bb211ca094e5e6";
+                const SERVICE_ID = '69524f4a57bb211ca094e5e6';
 
                 const response = await fetch(`${API_BASE_URL}/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        serviceId: serviceId || '69524f4a57bb211ca094e5e6'
+                        serviceId: SERVICE_ID
                     })
                 });
 
@@ -107,6 +96,7 @@ export function HomePage() {
                 if (data.success && data.category && data.category.length > 0) {
                     const mappedCategories = data.category.map(cat => ({
                         _id: cat._id,
+                        slug: cat.slug,
                         name: cat.name,
                         image: cat.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}` : 'https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&q=80',
                         icon: cat.icon || '✨',
@@ -120,7 +110,7 @@ export function HomePage() {
                             fetch(`${API_BASE_URL}/professional-services-flow/public/subcategories`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ categoryId: cat._id })
+                                body: JSON.stringify(cat.slug ? { categorySlug: cat.slug, serviceSlug: SERVICE_SLUG } : { categoryId: cat._id })
                             }).then(res => res.json())
                         );
 
@@ -128,8 +118,8 @@ export function HomePage() {
                         let allSubs = [];
                         subcatResults.forEach((res, index) => {
                             if (res.success && res.data) {
-                                const catId = data.category[index]._id;
-                                const subsWithCat = res.data.map(s => ({ ...s, parentCategoryId: catId }));
+                                const cat = data.category[index];
+                                const subsWithCat = res.data.map(s => ({ ...s, parentCategoryId: cat._id, parentCategorySlug: cat.slug }));
                                 allSubs = [...allSubs, ...subsWithCat];
                             }
                         });
@@ -318,7 +308,8 @@ export function HomePage() {
     }, [loadingFeatured, featuredPackages]); // Added loadingFeatured to dependency array
 
     const handleCategoryClick = (category) => {
-        router.push(`/spa-salon/category/${category._id || category.id}?name=${encodeURIComponent(category.name)}`);
+        const target = category.slug || category._id || category.id;
+        router.push(`/spa-salon/category/${category.slug || target}`);
     };
 
     return (
@@ -473,8 +464,10 @@ export function HomePage() {
                                         delay: index * 0.2,
                                     }}
                                     onClick={() => {
-                                        if (sub._id) {
-                                            router.push(`/spa-salon/results?subcategoryId=${sub._id}&categoryId=${sub.parentCategoryId || categories[0]?._id}`);
+                                        if (sub.slug || sub._id) {
+                                            const subParam = sub.slug ? `subcategorySlug=${sub.slug}` : `subcategoryId=${sub._id}`;
+                                            const catParam = sub.parentCategorySlug ? `categorySlug=${sub.parentCategorySlug}` : `categoryId=${sub.parentCategoryId || categories[0]?._id}`;
+                                            router.push(`/spa-salon/results?${subParam}&${catParam}`);
                                         } else {
                                             setModalOpen(true);
                                         }
@@ -852,7 +845,7 @@ function PackageCard({ package: pkg, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -10 }}
-            onClick={() => router.push(`/spa-salon/detail/${pkg.id}`)}
+            onClick={() => router.push(`/spa-salon/detail/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-52 overflow-hidden">
@@ -908,7 +901,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/spa-salon/detail/${pkg.id}`)}
+            onClick={() => router.push(`/spa-salon/detail/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-xl overflow-hidden border border-[#E8ECF2] cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
         >
             <div className="relative h-40">
@@ -947,7 +940,7 @@ function NearbyCenterCard({ center, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/spa-salon/detail/${center.id}`)}
+            onClick={() => router.push(`/spa-salon/detail/${center.slug || center.id}`)}
             className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] cursor-pointer group hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-48 overflow-hidden">

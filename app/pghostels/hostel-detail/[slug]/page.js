@@ -14,6 +14,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/pghostels/AddonsModal';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { toast } from 'sonner';
+import { isObjectId } from '@/utils/slugHelper';
 
 const amenityIcons = {
     Wifi: Wifi,
@@ -28,12 +29,12 @@ const amenityIcons = {
     "High-Speed WiFi": Wifi,
 };
 
-export default function NewHostelDetailPage() {
+export default function NewHostelDetailPage({ slugOverride = null }) {
     const params = useParams();
     const router = useRouter();
-    const id = params.id;
+    const slugOrId = slugOverride || params.slug || params.id;
     const searchParams = useSearchParams();
-    const fromListing = searchParams.get('fromListing') || 'all';
+    const fromListing = searchParams.get('fromListing') || null;
     const [activeTab, setActiveTab] = useState('roomTypes');
     const [viewingRateCard, setViewingRateCard] = useState(null);
     const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
@@ -63,16 +64,17 @@ export default function NewHostelDetailPage() {
 
     useEffect(() => {
         const fetchHostelData = async () => {
-            if (!id) return;
+            if (!slugOrId) return;
 
             setLoading(true);
             try {
+                const isId = isObjectId(slugOrId);
+                const apiPayload = isId ? { providerId: slugOrId } : { providerSlug: slugOrId };
+
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        providerId: id
-                    })
+                    body: JSON.stringify(apiPayload)
                 });
                 const data = await response.json();
 
@@ -81,7 +83,8 @@ export default function NewHostelDetailPage() {
 
                     // Map API Data to UI Model
                     const mappedData = {
-                        id: id,
+                        id: store._id || store.providerId || slugOrId,
+                        slug: store.slug || store.providerId || slugOrId,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
 
                         location: store.address || 'Location not available',
@@ -125,10 +128,18 @@ export default function NewHostelDetailPage() {
                     };
 
                     setHostelData(mappedData);
+
+                    // If user landed with an ObjectId but we have a slug, normalize the URL to the slug
+                    if (isId && mappedData.slug && mappedData.slug !== slugOrId) {
+                        router.replace(`/${mappedData.slug}`);
+                    }
                     // Select first package by default if available
                     if (mappedData.packages.length > 0) {
                         setSelectedPackage(mappedData.packages[0]);
                     }
+                    setFetchError(false);
+                } else {
+                    setFetchError(true);
                 }
             } catch (error) {
                 console.error("Error fetching hostel data:", error);
@@ -139,7 +150,7 @@ export default function NewHostelDetailPage() {
         };
 
         fetchHostelData();
-    }, [id]);
+    }, [slugOrId]);
 
     // Immediate redirection logic
     useEffect(() => {
@@ -175,7 +186,7 @@ export default function NewHostelDetailPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     serviceIds: [selectedPackage._id],
-                    professionalProviderId: id
+                    professionalProviderId: hostelData.id
                 })
             });
             const data = await response.json();
@@ -212,7 +223,7 @@ export default function NewHostelDetailPage() {
 
             // 2. Add Main Package
             const packageSuccess = await addToCart(
-                id,
+                hostelData.id,
                 selectedPackage._id,
                 'professional_service',
                 1,
@@ -229,7 +240,7 @@ export default function NewHostelDetailPage() {
             // 3. Add Add-ons
             for (const addon of selectedAddons) {
                 await addToCart(
-                    id,
+                    hostelData.id,
                     addon._id,
                     'professional_addon',
                     1,
@@ -241,14 +252,14 @@ export default function NewHostelDetailPage() {
 
             // Save booking context for restoration if needed
             sessionStorage.setItem('pg_booking_data', JSON.stringify({
-                providerId: id,
+                providerId: hostelData.id,
                 packageId: selectedPackage._id,
                 addons: selectedAddons.map(a => a._id)
             }));
 
             // Navigate to address page (params are still useful for context, but items are already in cart)
             const addonIds = selectedAddons.map(a => a._id).join(',');
-            router.push(`/pghostels/booking/address?providerId=${id}&packageId=${selectedPackage._id}&addons=${addonIds}`);
+            router.push(`/pghostels/booking/address?providerId=${hostelData.id}&packageId=${selectedPackage._id}&addons=${addonIds}`);
         } catch (error) {
             console.error('Error during booking initiation:', error);
             toast.error('Failed to initiate booking. Please try again.');
@@ -264,7 +275,7 @@ export default function NewHostelDetailPage() {
             <motion.button
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                onClick={() => router.push(`/pghostels/listings/${fromListing}`)}
+                onClick={() => fromListing ? router.push(`/pghostels/listings/${fromListing}`) : router.back()}
                 className="fixed top-24 left-4 z-50 w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
             >
                 <ArrowLeft className="w-5 h-5 text-gray-900" />
@@ -673,7 +684,7 @@ export default function NewHostelDetailPage() {
             <AddonsModal
                 isOpen={showAddonsModal}
                 onClose={() => setShowAddonsModal(false)}
-                providerId={id}
+                providerId={hostelData.id}
                 selectedPackageId={selectedPackage?._id}
                 onContinue={handleAddonsContinue}
                 prefetchedAddons={addonsData}
@@ -776,118 +787,6 @@ export default function NewHostelDetailPage() {
                     </div>
                 )}
             </AnimatePresence>
-
-            {/* Gallery Fullscreen Modal */}
-            <AnimatePresence>
-                {viewingGalleryIndex !== null && (
-                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 sm:p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setViewingGalleryIndex(null)}
-                            className="absolute inset-0 bg-black/95 backdrop-blur-xl"
-                        />
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            className="relative w-full h-full sm:max-h-[90vh] max-w-6xl flex flex-col"
-                        >
-                            {/* Header */}
-                            <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-20 bg-gradient-to-b from-black/60 to-transparent">
-                                <div className="text-white">
-                                    <h3 className="text-lg font-bold">Hostel Gallery</h3>
-                                    <p className="text-sm opacity-70">Image {viewingGalleryIndex + 1} of {hostelData.images.length}</p>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <button
-                                        onClick={() => setGalleryAutoPlay(!galleryAutoPlay)}
-                                        className={`p-2 rounded-full transition-colors ${galleryAutoPlay ? 'bg-[#037166] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                                        title={galleryAutoPlay ? "Pause Slideshow" : "Play Slideshow"}
-                                    >
-                                        {galleryAutoPlay ? <Clock className="w-5 h-5 animate-pulse" /> : <TrendingUp className="w-5 h-5" />}
-                                    </button>
-                                    <button
-                                        onClick={() => setViewingGalleryIndex(null)}
-                                        className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-                                    >
-                                        <X className="w-6 h-6" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Main Slider */}
-                            <div className="flex-1 flex items-center justify-center relative">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setViewingGalleryIndex(prev => (prev - 1 + hostelData.images.length) % hostelData.images.length);
-                                    }}
-                                    className="absolute left-4 z-10 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-                                >
-                                    <ChevronLeft className="w-8 h-8" />
-                                </button>
-
-                                <motion.div
-                                    key={viewingGalleryIndex}
-                                    initial={{ opacity: 0, x: 100 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -100 }}
-                                    className="w-full h-full flex items-center justify-center p-4 sm:p-12"
-                                >
-                                    <img
-                                        src={hostelData.images[viewingGalleryIndex]}
-                                        className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
-                                        alt=""
-                                    />
-                                </motion.div>
-
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setViewingGalleryIndex(prev => (prev + 1) % hostelData.images.length);
-                                    }}
-                                    className="absolute right-4 z-10 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-                                >
-                                    <ChevronRight className="w-8 h-8" />
-                                </button>
-                            </div>
-
-                            {/* Thumbnails */}
-                            <div className="p-6 bg-black/20 backdrop-blur-sm overflow-x-auto flex gap-3 justify-center hide-scrollbar">
-                                {hostelData.images.map((img, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setViewingGalleryIndex(idx)}
-                                        className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 transition-all ${viewingGalleryIndex === idx ? 'ring-2 ring-[#037166] scale-110 shadow-lg' : 'opacity-40 hover:opacity-100'}`}
-                                    >
-                                        <img src={img} className="w-full h-full object-cover" alt="" />
-                                    </button>
-                                ))}
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* AutoPlay Script Effect */}
-            <AutoPlayHelper
-                active={galleryAutoPlay && viewingGalleryIndex !== null}
-                onNext={() => setViewingGalleryIndex(prev => (prev + 1) % hostelData.images.length)}
-                interval={4000}
-            />
-        </div >
+        </div>
     );
-}
-
-// Internal component to handle interval cleanup easily
-function AutoPlayHelper({ active, onNext, interval }) {
-    useEffect(() => {
-        if (!active) return;
-        const timer = setInterval(onNext, interval);
-        return () => clearInterval(timer);
-    }, [active, onNext, interval]);
-    return null;
 }

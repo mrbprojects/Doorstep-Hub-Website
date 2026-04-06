@@ -22,7 +22,9 @@ export function LatestReligiousServices() {
   }, []);
 
   const handleServiceClick = (service) => {
-    router.push(`/religious-services/service/${service.id}`);
+    const detailSegment = service.slug || service.serviceSlug || service.id;
+    if (!detailSegment) return;
+    router.push(`/religious-services/service/${detailSegment}`);
   };
 
   const amenityIcons = {
@@ -72,6 +74,7 @@ export function LatestReligiousServices() {
 
             return {
               id: service._id,
+              slug: service.slug || service.serviceSlug,
               name: service.serviceName || `${service.firstName} ${service.lastName}`,
               location: service.cityName || service.address || 'Hyderabad',
               amenities: displayedAmenities,

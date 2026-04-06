@@ -72,6 +72,7 @@ function ReligiousCategoryContent() {
 
                 // Get religious services serviceId from localStorage, fallback to hardcoded ID
                 const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
+                const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
                 let serviceId = RELIGIOUS_SERVICE_ID;
                 try {
                     const savedService = localStorage.getItem('selectedService');
@@ -244,9 +245,12 @@ function ReligiousCategoryContent() {
                             >
                                 <Card
                                     className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer border border-gray-100 hover:border-[var(--saffron,#FF9933)]/30 h-full"
-                                    onClick={() => router.push(
-                                        `/religious-services/service/${service._id}?serviceType=${serviceType}&occasion=${occasion}&attendees=${attendees}&timing=${timing}`
-                                    )}
+                                   onClick={() => {
+                                       const target = service.slug || service._id;
+                                       router.push(
+                                            `/religious-services/${target}?serviceType=${serviceType}&occasion=${occasion}&attendees=${attendees}&timing=${timing}`
+                                        );
+                                    }}
                                 >
                                     {/* Image */}
                                     <div className="relative h-52 overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50">

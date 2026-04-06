@@ -6,13 +6,14 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Star, TrendingUp, DollarSign, Wifi, Utensils, Shirt, Zap,
     Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X,
-    Calendar, Flower2, Loader2, CheckCircle, ChevronRight
+    Calendar, Flower2, Loader2, CheckCircle, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs'; // Reuse UI components if available, otherwise generic
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/religious/AddonsModal';
+import { isObjectId } from '@/utils/slugHelper';
 
 const amenityIcons = {
     Wifi: Wifi,
@@ -28,15 +29,38 @@ const amenityIcons = {
     "Dakshina": DollarSign,
 };
 
-export default function ReligiousServiceDetailPage() {
+export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     const params = useParams();
     const router = useRouter();
-    const id = params.id;
+    const slugOrId = slugOverride || params.slug || params.id;
     const searchParams = useSearchParams();
-    const subcategoryId = searchParams.get('subcategoryId');
-    const subCategoryName = searchParams.get('subCategoryName');
-    const categoryName = searchParams.get('categoryName');
-    const categoryId = searchParams.get('categoryId');
+
+    // Context handling
+    const [context, setContext] = useState({
+        subcategoryId: searchParams.get('subcategoryId'),
+        subCategoryName: searchParams.get('subCategoryName'),
+        categoryName: searchParams.get('categoryName'),
+        categoryId: searchParams.get('categoryId')
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = sessionStorage.getItem('religious_service_context');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                setContext(prev => ({
+                    ...prev,
+                    subcategoryId: parsed.subcategoryId || prev.subcategoryId,
+                    subCategoryName: parsed.subCategoryName || prev.subCategoryName,
+                    categoryName: parsed.categoryName || prev.categoryName,
+                    categoryId: parsed.categoryId || prev.categoryId
+                }));
+            }
+        }
+    }, []);
+
+    const { subcategoryId, subCategoryName, categoryName, categoryId } = context;
+
     const [activeTab, setActiveTab] = useState('portfolio');
     const { scrollY } = useScroll();
     const headerOpacity = useTransform(scrollY, [0, 300], [1, 0.8]);
@@ -67,16 +91,17 @@ export default function ReligiousServiceDetailPage() {
 
     useEffect(() => {
         const fetchServiceData = async () => {
-            if (!id) return;
+            if (!slugOrId) return;
 
             setLoading(true);
             try {
+                const isId = isObjectId(slugOrId);
+                const apiPayload = isId ? { providerId: slugOrId } : { providerSlug: slugOrId };
+
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        providerId: id
-                    })
+                    body: JSON.stringify(apiPayload)
                 });
                 const data = await response.json();
 
@@ -91,7 +116,8 @@ export default function ReligiousServiceDetailPage() {
                     };
 
                     const mappedData = {
-                        id: id,
+                        id: store._id || slugOrId,
+                        slug: store.slug || slugOrId,
                         name: store.business_name || `${store.firstName} ${store.lastName}`,
                         location: store.address || 'Location available on request',
                         // Main profile image
@@ -136,9 +162,17 @@ export default function ReligiousServiceDetailPage() {
                     };
 
                     setServiceData(mappedData);
+
+                    // If user entered an ObjectId but a slug exists, normalize URL to slug
+                    if (isId && mappedData.slug && mappedData.slug !== slugOrId) {
+                        router.replace(`/religious-services/${mappedData.slug}`);
+                    }
                     if (mappedData.packages.length > 0) {
                         setSelectedPackage(mappedData.packages[0]);
                     }
+                } else {
+                    // If no provider found, redirect to category page for this slug
+                    router.replace(`/religious-services/${slugOrId}`);
                 }
             } catch (error) {
                 console.error("Error fetching service data:", error);
@@ -148,7 +182,7 @@ export default function ReligiousServiceDetailPage() {
         };
 
         fetchServiceData();
-    }, [id]);
+    }, [slugOrId]);
 
     const handleContinueToBook = async () => {
         if (!selectedPackage) {
@@ -160,12 +194,13 @@ export default function ReligiousServiceDetailPage() {
 
         setIsCheckingAddons(true);
         try {
+            const currentId = serviceData.id;
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     serviceIds: [selectedPackage._id],
-                    professionalProviderId: id
+                    professionalProviderId: currentId
                 })
             });
             const data = await response.json();
@@ -190,7 +225,7 @@ export default function ReligiousServiceDetailPage() {
     const handleAddonsContinue = (selectedAddons) => {
         setShowAddonsModal(false);
         const addonIds = selectedAddons.map(a => a._id).join(',');
-        router.push(`/religious-services/booking/address?providerId=${id}&packageId=${selectedPackage._id}&addons=${addonIds}`);
+        router.push(`/religious-services/booking/address?providerId=${serviceData.id}&packageId=${selectedPackage._id}&addons=${addonIds}`);
     };
 
     if (loading) {
@@ -212,8 +247,9 @@ export default function ReligiousServiceDetailPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => {
-                    if (subcategoryId) {
-                        router.push(`/religious-services/subcategory/${subcategoryId}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCategoryName)}&categoryId=${categoryId}`);
+                    const targetSubcat = subcategoryId || context.subcategoryId;
+                    if (targetSubcat) {
+                        router.push(`/religious-services/subcategory/${targetSubcat}`);
                     } else {
                         router.back();
                     }
@@ -495,7 +531,7 @@ export default function ReligiousServiceDetailPage() {
             <AddonsModal
                 isOpen={showAddonsModal}
                 onClose={() => setShowAddonsModal(false)}
-                providerId={id}
+                providerId={serviceData.id}
                 selectedPackageId={selectedPackage?._id}
                 onContinue={handleAddonsContinue}
             />

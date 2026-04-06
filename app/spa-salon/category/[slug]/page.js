@@ -6,10 +6,12 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ChevronRight, Sparkles, Flower, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocationContext } from '@/context/LocationContext';
+import { isObjectId, resolveParam } from '@/utils/slugHelper';
 
 function SpaCategoryContent() {
     const router = useRouter();
     const params = useParams();
+    const slugOrId = params.slug || params.id;
     const searchParams = useSearchParams();
     const categoryName = searchParams.get('name') || 'Category';
 
@@ -26,24 +28,26 @@ function SpaCategoryContent() {
     // Fetch Sub-Categories
     useEffect(() => {
         const fetchData = async () => {
+            if (!slugOrId) return;
             setLoading(true);
             try {
-                // Mock ID fix (if categoryId is mock)
-                if (params.id.startsWith('mock_')) {
-                    // Return Mock Subcats
+                // Mock ID fix
+                if (slugOrId.startsWith('mock_')) {
                     setSubCategories([
-                        { _id: 'mock_sub_1', name: 'Premium Cut', description: 'Includes wash and styling', image: '' },
-                        { _id: 'mock_sub_2', name: 'Coloring', description: 'Global and highlights', image: '' },
-                        { _id: 'mock_sub_3', name: 'Spa Treatment', description: 'Deep conditioning', image: '' },
+                        { _id: 'mock_sub_1', name: 'Premium Cut', description: 'Includes wash and styling', image: '', slug: 'premium-cut' },
+                        { _id: 'mock_sub_2', name: 'Coloring', description: 'Global and highlights', image: '', slug: 'coloring' },
+                        { _id: 'mock_sub_3', name: 'Spa Treatment', description: 'Deep conditioning', image: '', slug: 'spa-treatment' },
                     ]);
                     setLoading(false);
                     return;
                 }
 
+                const apiPayload = resolveParam(slugOrId, 'categoryId', 'categorySlug');
+
                 const subCatResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId: params.id })
+                    body: JSON.stringify(apiPayload)
                 });
 
                 if (subCatResponse.ok) {
@@ -60,16 +64,16 @@ function SpaCategoryContent() {
         };
 
         fetchData();
-    }, [location, params.id]);
+    }, [location, slugOrId]);
 
     const handleSubCategoryClick = (subCat) => {
-        router.push(`/spa-salon/subcategory/${subCat._id}?category=${encodeURIComponent(categoryName)}&name=${encodeURIComponent(subCat.name)}&categoryId=${params.id}`);
+        const target = subCat.slug || subCat._id;
+        router.push(`/spa-salon/subcategory/${target}`);
     };
 
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 pt-24">
-                {/* Gradient hero shimmer */}
                 <div className="relative pt-32 pb-20 bg-gradient-to-br from-[#C06C84] to-[#6C5CE7]">
                     <div className="container mx-auto px-4 flex flex-col items-center gap-4">
                         <div className="h-10 bg-white/20 rounded-full w-40 animate-pulse" />
@@ -97,7 +101,6 @@ function SpaCategoryContent() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Hero Header */}
             <div className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-br from-[#C06C84] to-[#6C5CE7]">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                 <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none">
@@ -138,7 +141,6 @@ function SpaCategoryContent() {
                 </div>
             </div>
 
-            {/* Subcategories Grid */}
             <div className="container mx-auto px-4 -mt-16 pb-24 relative z-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {subCategories.length > 0 ? (

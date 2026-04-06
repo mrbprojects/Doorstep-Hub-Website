@@ -21,7 +21,9 @@ export function RecommendedReligious() {
   }, []);
 
   const handleServiceClick = (service) => {
-    router.push(`/religious-services/service/${service.id}`);
+    const detailSegment = service.slug || service.serviceSlug || service.id;
+    if (!detailSegment) return;
+    router.push(`/religious-services/service/${detailSegment}`);
   };
 
   const amenityIcons = {
@@ -71,6 +73,7 @@ export function RecommendedReligious() {
 
             return {
               id: service._id,
+              slug: service.slug || service.serviceSlug,
               title: service.serviceName,
               providerName: `${service.firstName} ${service.lastName}`,
               description: service.bio,

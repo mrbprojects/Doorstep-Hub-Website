@@ -61,16 +61,10 @@ export function BookingConfirmationPage({
   }, []);
 
   const cartItems = (directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || []);
-  const subtotal = (directBookingItems && directBookingItems.length > 0)
-    ? directBookingItems.reduce((acc, item) => acc + (item.price || 0), 0)
-    : (contextCartTotal || 0);
 
-  const bookingCost = (directBookingItems && directBookingItems.length > 0)
-    ? directBookingItems.reduce((acc, item) => acc + (item.bookingCost || 0), 0)
-    : 0;
-  const inspectionCost = (directBookingItems && directBookingItems.length > 0)
-    ? directBookingItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0)
-    : 0;
+  // Use the platform fees once per booking (not summed per item)
+  const bookingCost = cartItems.length > 0 ? (cartItems[0].bookingCost || 0) : 0;
+  const inspectionCost = cartItems.length > 0 ? (cartItems[0].inspectionCost || 0) : 0;
 
   const total = bookingCost;
   const tax = 0;
@@ -420,7 +414,6 @@ export function BookingConfirmationPage({
               )}
             </motion.div>
 
-            {/* Rest of the sections remain the same */}
             {/* Technician Preference */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -499,7 +492,7 @@ export function BookingConfirmationPage({
             </motion.div>
           </div>
 
-          {/* Summary Sidebar - SAME AS BEFORE */}
+          {/* Summary Sidebar */}
           <div className="lg:col-span-1">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -509,81 +502,71 @@ export function BookingConfirmationPage({
             >
               <h4 className="text-xl font-bold text-white mb-4">Booking Summary</h4>
 
-              {/* Services */}
-              <div className="space-y-3 mb-4">
+              {/* Selected Services Info - No Prices Shown */}
+              <div className="space-y-4 mb-6">
                 {cartItems.map((item, idx) => (
-                  <div key={item.id || item._id || idx} className="flex justify-between text-sm">
-                    <div className="flex-1">
-                      <h6 className="text-white/90 font-bold">{item.serviceName || 'Service'}</h6>
-                      <p className="text-[#04a99d] text-xs font-semibold uppercase tracking-wider mb-1">
-                        {item.packageName || item.title || 'Standard Package'}
-                      </p>
-                      <p className="text-white/40 text-[10px]">
-                        Qty: {item.quantity || 1}
-                      </p>
+                  <div key={item.id || item._id || idx} className="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <h6 className="text-white font-bold leading-tight mb-1">{item.serviceName || 'Professional Service'}</h6>
+                    <div className="flex flex-col gap-1">
+                        <p className="text-[#04a99d] text-[10px] font-bold uppercase tracking-widest bg-[#037166]/10 px-2 py-0.5 rounded w-fit">
+                            {item.packageName || item.title || 'Standard Package'}
+                        </p>
+                        <p className="text-white/40 text-[10px] flex items-center gap-1 mt-1">
+                            <Info className="w-3 h-3" />
+                            Rates checked: approx. start from ₹{item.price}
+                        </p>
                     </div>
-                    {/* Item cost is effectively 0 for immediate payment */}
-                    {/* <span className="text-white/90 font-medium">
-                      ₹0
-                    </span> */}
                   </div>
                 ))}
               </div>
 
-              <div className="h-px bg-white/10 mb-4" />
+              <div className="h-px bg-white/10 my-4" />
 
-              {/* Price Breakdown */}
-              <div className="space-y-2 mb-2">
-                {bookingCost > 0 && (
-                  <div className="flex justify-between items-start text-white/80">
-                    <div className="flex flex-col">
-                      <span>Platform Fee</span>
-                      <div className="flex items-center gap-1 text-[#04a99d] text-xs font-normal">
-                        <Info className="w-3 h-3" />
-                        <span>pay online</span>
-                      </div>
-                    </div>
-                    <span>₹{bookingCost}</span>
+              {/* Fees Breakdown */}
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between items-start text-white/80 text-sm">
+                  <div className="flex flex-col">
+                    <span>Platform Fee</span>
+                    <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
+                        <CreditCard className="w-3 h-3" /> pay online now 
+                    </span>
                   </div>
-                )}
-                {/* Hidden inspection cost for summary since subtotal is zero logic applies */}
-                {inspectionCost > 0 && (
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between items-start text-white/80">
-                      <div className="flex flex-col">
-                        <span>Doorstep Inspection Fee</span>
-                        <div className="flex items-center gap-1 text-[#04a99d] text-xs font-normal">
-                          <Info className="w-3 h-3" />
-                          <span>pay at Doorstep</span>
-                        </div>
-                      </div>
-                      <span>₹{inspectionCost}</span>
-                    </div>
-                    <div className="flex items-start gap-2 text-[10px] text-white/50 bg-white/5 p-2 rounded">
-                      <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-[#04a99d]" />
-                      <p>Note: This is the Platform fee only. The Doorstep Inspection Fee will be collected at Doorstep.</p>
-                    </div>
+                  <span className="font-bold text-white">₹{bookingCost}</span>
+                </div>
+                
+                <div className="flex justify-between items-start text-white/80 text-sm">
+                  <div className="flex flex-col">
+                    <span>Inspection Fee</span>
+                    <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> pay at doorstep 
+                    </span>
                   </div>
-                )}
+                  <span className="font-bold text-white">₹{inspectionCost}</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#037166]/5 border border-[#037166]/10 text-[10px] text-white/50 leading-relaxed">
+                    <p>Only the <span className="text-[#04a99d] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.</p>
+                </div>
               </div>
 
-              <div className="h-px bg-white/10 mb-4" />
+              <div className="h-px bg-white/10 my-4" />
 
-              <div className="flex justify-between text-xl font-bold text-white mb-6">
-                <span>Payable</span>
-                <span>₹{total}</span>
+              {/* Total Payable (Only Platform Fee) */}
+              <div className="flex justify-between items-center text-xl font-bold text-white mb-6">
+                <span>Payable Now</span>
+                <span className="text-[#04a99d]">₹{total}</span>
               </div>
 
-
-
-              {/* Selected Date/Time Preview */}
+              {/* Appointment Preview */}
               {selectedDate && selectedTime && (
-                <div className="p-4 rounded-lg bg-[#037166]/10 border border-[#037166]/20 mb-6">
-                  <p className="text-white/80 text-sm mb-2">Scheduled for:</p>
-                  <p className="text-white font-medium">
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6">
+                  <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <Clock className="w-3 h-3" /> Scheduled
+                  </div>
+                  <p className="text-white font-bold text-sm">
                     {availableDates.find(d => d.value === selectedDate)?.label}
                   </p>
-                  <p className="text-white font-medium">
+                  <p className="text-[#04a99d] text-xs font-medium">
                     {availableTimesForSelectedDate.find(t => t.value === selectedTime)?.label}
                   </p>
                 </div>
@@ -591,18 +574,18 @@ export function BookingConfirmationPage({
 
               {/* Confirm Button */}
               <motion.button
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleConfirm}
                 disabled={isConfirming || !selectedDate || !selectedTime}
-                className={`w-full px-6 py-4 rounded-xl font-medium text-lg transition-all ${isConfirming || !selectedDate || !selectedTime
-                  ? 'bg-white/20 text-white/60 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:shadow-lg hover:shadow-[#037166]/40'
+                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all ${isConfirming || !selectedDate || !selectedTime
+                  ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-xl shadow-[#037166]/30'
                   }`}
               >
                 {isConfirming ? (
                   <div className="flex items-center justify-center gap-2">
-                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Confirming...
                   </div>
                 ) : (
@@ -610,8 +593,8 @@ export function BookingConfirmationPage({
                 )}
               </motion.button>
 
-              <p className="text-white/60 text-xs text-center mt-4">
-                You'll receive a confirmation email and SMS
+              <p className="text-white/40 text-[10px] text-center mt-4">
+                Confirmation details will be sent via SMS/Email
               </p>
             </motion.div>
           </div>

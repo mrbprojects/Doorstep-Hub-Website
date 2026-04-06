@@ -70,7 +70,9 @@ export function PremiumPGHostels() {
 
   const handleHostelClick = (hostel) => {
     if (hostel.isDummy) return;
-    router.push(`/pghostels/hostel-detail/${hostel.id}`);
+    const detailSegment = hostel.slug || hostel.hostelSlug || hostel.id;
+    if (!detailSegment) return;
+    router.push(`/${detailSegment}`);
   };
 
   // Fetch featured PG hostels from API
@@ -96,6 +98,7 @@ export function PremiumPGHostels() {
 
             return {
               id: hostel._id,
+              slug: hostel.slug || hostel.hostelSlug,
               name: hostel.hostelName || `${hostel.firstName} ${hostel.lastName}`,
               type: 'Premium PG',
               location: hostel.cityName || 'Hyderabad Area',

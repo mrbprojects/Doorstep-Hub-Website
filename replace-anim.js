@@ -40,8 +40,8 @@ fs.writeFileSync(path.join(__dirname, 'app/components/ui/Animated404.jsx'), anim
 
 const filesToUpdate = [
     'app/spa-salon/service/[id]/page.js',
-    'app/religious-services/service/[id]/page.js',
-    'app/pghostels/hostel-detail/[id]/page.js',
+    'app/religious-services/service/[slug]/page.js',
+    'app/pghostels/hostel-detail/[slug]/page.js',
     'app/components/appliances/CategoryPage.jsx',
     'app/components/appliances/StoreDetailPage.jsx',
     'app/components/appliances/ServiceDetailsPage.jsx',

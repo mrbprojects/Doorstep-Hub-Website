@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/pghostels/ui/checkbox';
 import { Button } from '@/components/pghostels/ui/button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/badge';
+import { resolveParam } from '@/utils/slugHelper';
 
 const mockListings = [
     {
@@ -147,7 +148,7 @@ function PGListingsContent() {
     const [activeTab, setActiveTab] = useState('all');
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
-    const [expandedCategory, setExpandedCategory] = useState(searchParams.get('categoryId') || null);
+    const [expandedCategory, setExpandedCategory] = useState(searchParams.get('categorySlug') || searchParams.get('categoryId') || null);
     const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // BUG-12 FIX: Restore last active tab from localStorage inside useEffect to avoid Hydration Error
@@ -231,7 +232,7 @@ function PGListingsContent() {
             setSearchQuery(query);
         }
 
-        const catId = searchParams.get('categoryId');
+        const catId = searchParams.get('categorySlug') || searchParams.get('categoryId');
         if (catId && catId !== expandedCategory) {
             setExpandedCategory(catId);
         }
@@ -298,12 +299,11 @@ function PGListingsContent() {
                     maxPrice: searchParams.get('maxPrice') || priceRange[1],
                     minRating: searchParams.get('minRating') || minRating,
                     searchQuery: searchParams.get('query') || searchQuery || undefined,
-                    // Directly include all relevant filter params from URL
                     roomType: searchParams.get('roomType') || undefined,
                     food: searchParams.get('food') || undefined,
                     moveIn: searchParams.get('moveIn') || undefined,
-                    categoryId: searchParams.get('categoryId') || undefined,
-                    subcategoryId: searchParams.get('subcategoryId') || undefined
+                    ...resolveParam(searchParams.get('subcategorySlug') || searchParams.get('subcategoryId'), 'subcategoryId', 'subcategorySlug'),
+                    ...resolveParam(searchParams.get('categorySlug') || searchParams.get('categoryId'), 'categoryId', 'categorySlug')
                 };
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
@@ -366,7 +366,7 @@ function PGListingsContent() {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId: expandedCategory })
+                    body: JSON.stringify(resolveParam(expandedCategory, 'categoryId', 'categorySlug'))
                 });
                 const data = await response.json();
                 if (data.success && data.data) {
@@ -455,13 +455,14 @@ function PGListingsContent() {
         if (value) {
             currentParams.set(key, value);
             // Clear query search when selecting a category or subcategory
-            if (key === 'categoryId' || key === 'subcategoryId') {
+            if (key === 'categoryId' || key === 'subcategoryId' || key === 'categorySlug' || key === 'subcategorySlug') {
                 currentParams.delete('query');
                 setSearchQuery('');
             }
             // If selecting a category, clear subcategory
-            if (key === 'categoryId') {
+            if (key === 'categoryId' || key === 'categorySlug') {
                 currentParams.delete('subcategoryId');
+                currentParams.delete('subcategorySlug');
             }
         } else {
             currentParams.delete(key);
@@ -486,15 +487,17 @@ function PGListingsContent() {
                         <div key={cat._id} className="overflow-hidden">
                             <button
                                 onClick={() => {
-                                    if (expandedCategory === cat._id) {
+                                    const catKey = cat.slug || cat._id;
+                                    if (expandedCategory === catKey) {
                                         setExpandedCategory(null);
                                     } else {
-                                        setExpandedCategory(cat._id);
+                                        setExpandedCategory(catKey);
                                         updateFilter('categoryId', cat._id);
+                                        if (cat.slug) updateFilter('categorySlug', cat.slug);
                                     }
                                 }}
                                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
-                                    expandedCategory === cat._id || cat._id === searchParams.get('categoryId')
+                                    expandedCategory === (cat.slug || cat._id) || (cat.slug || cat._id) === (searchParams.get('categorySlug') || searchParams.get('categoryId'))
                                     ? 'bg-[#037166]/10 text-[#037166] font-bold border border-[#037166]/20 shadow-sm' 
                                     : 'text-gray-600 hover:bg-gray-50 hover:text-[#037166] border border-transparent'
                                 }`}
@@ -522,12 +525,14 @@ function PGListingsContent() {
                                                     onClick={() => {
                                                         const currentParams = new URLSearchParams(searchParams.toString());
                                                         currentParams.set('categoryId', cat._id);
+                                                        currentParams.set('categorySlug', cat.slug || '');
                                                         currentParams.set('subcategoryId', sub._id);
+                                                        currentParams.set('subcategorySlug', sub.slug || '');
                                                         currentParams.set('categoryName', cat.name);
                                                         router.push(`${pathname}?${currentParams.toString()}`);
                                                     }}
                                                     className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
-                                                        searchParams.get('subcategoryId') === sub._id
+                                                        (searchParams.get('subcategorySlug') || searchParams.get('subcategoryId')) === (sub.slug || sub._id)
                                                         ? 'bg-[#037166] text-white shadow-md shadow-[#037166]/20'
                                                         : 'text-gray-500 hover:text-[#037166] hover:bg-[#037166]/5'
                                                     }`}
@@ -812,7 +817,7 @@ function PGListingsContent() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-3 sm:p-6" onClick={() => isClickable && router.push(`/pghostels/hostel-detail/${listing.id}?fromListing=${params.type}`)}>
+                    <div className="p-3 sm:p-6" onClick={() => isClickable && router.push(`/${listing.slug || listing.id}`)}>
                         {/* PG Name & Location */}
                         <div className="mb-2 sm:mb-4">
                             <h3 className="text-base sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/pghostels/ui/input';
 import { useLocationContext } from '@/context/LocationContext';
+import { resolveParam } from '@/utils/slugHelper';
 
 const amenityIcons = {
     WiFi: Wifi,
@@ -27,6 +28,8 @@ function PGResultsContent() {
     const categoryName = searchParams.get('categoryName');
     const categoryId = searchParams.get('categoryId');       // Primary: sent by questionnaire
     const subcategoryId = searchParams.get('subcategoryId'); // Optional: sent if user picked a subcategory
+    const categorySlug = searchParams.get('categorySlug');
+    const subcategorySlug = searchParams.get('subcategorySlug');
     const roomType = searchParams.get('roomType');
     const budget = searchParams.get('budget');
     const duration = searchParams.get('duration');
@@ -34,7 +37,7 @@ function PGResultsContent() {
     const moveIn = searchParams.get('moveIn');
 
     // The API lookup id: prefer subcategoryId, fall back to categoryId
-    const lookupId = subcategoryId || categoryId;
+    const lookupId = subcategorySlug || subcategoryId || categorySlug || categoryId;
 
     // State
     const [listings, setListings] = useState([]);
@@ -80,14 +83,10 @@ function PGResultsContent() {
                     budget,
                     duration,
                     food,
-                    moveIn
+                    moveIn,
+                    ...resolveParam(subcategorySlug || subcategoryId, 'subcategoryId', 'subcategorySlug'),
+                    ...resolveParam(categorySlug || categoryId, 'categoryId', 'categorySlug')
                 };
-
-                if (subcategoryId) {
-                    requestBody.subcategoryId = subcategoryId;
-                } else {
-                    requestBody.categoryId = categoryId;
-                }
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`, {
                     method: 'POST',
@@ -101,6 +100,7 @@ function PGResultsContent() {
                     // map API data to our UI model
                     const mappedListings = data.professionalServices.map(service => ({
                         id: service._id,
+                        slug: service.slug,
                         name: service.business_name || `${service.firstName || ''} ${service.lastName || ''}`.trim(),
                         location: service.address,
                         address: service.address,
@@ -223,7 +223,7 @@ function PGResultsContent() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-6" onClick={() => router.push(`/pghostels/hostel-detail/${listing.id}`)}>
+                    <div className="p-6" onClick={() => router.push(`/pghostels/hostel-detail/${listing.slug || listing.id}`)}>
                         {/* PG Name & Location */}
                         <div className="mb-4">
                             <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#037166] transition-colors line-clamp-1">

@@ -39,14 +39,14 @@ export function Animated404() {
             <motion.div
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-3xl flex flex-col items-center justify-center"
+                className="w-full max-w-3xl flex flex-col items-center justify-center gap-3"
             >
                 <img
                     src="/doorstepanimation.gif"
                     alt="Doorstep Hub Logo Animation"
-                    className="w-full h-auto object-contain mix-blend-multiply"
+                    className="w-auto max-w-full max-h-[60vh] object-contain"
                 />
-                <p className="mt-4 text-center text-lg font-semibold text-[#2F4F4C] whitespace-nowrap">
+                <p className="text-center text-lg font-semibold text-[#2F4F4C] whitespace-nowrap">
                     I’d be happy to help with your booking.
                 </p>
             </motion.div>

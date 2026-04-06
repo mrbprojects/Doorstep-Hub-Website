@@ -54,7 +54,7 @@ export default function SpaServiceDetailPage() {
 
     useEffect(() => {
         if (!loading && !serviceData) {
-            router.replace('/book-appointment');
+            router.replace('/appliance-repair-services');
         }
     }, [loading, serviceData, router]);
 

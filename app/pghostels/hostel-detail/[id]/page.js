@@ -144,7 +144,7 @@ export default function NewHostelDetailPage() {
     // Immediate redirection logic
     useEffect(() => {
         if (!loading && (fetchError || !hostelData)) {
-            router.replace('/book-appointment');
+            router.replace('/appliance-repair-services');
         }
     }, [loading, fetchError, hostelData, router]);
 

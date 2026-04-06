@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { Animated404 } from '@/components/ui/Animated404';
 
 export default function NotFound() {
-  redirect('/book-appointment');
+  return <Animated404 />;
 }

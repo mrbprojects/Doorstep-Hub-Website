@@ -184,7 +184,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   // Immediate redirection logic
   useEffect(() => {
     if (!loading && !centerData) {
-      router.replace('/book-appointment');
+      router.replace('/appliance-repair-services');
     }
   }, [loading, centerData, router]);
 

@@ -33,7 +33,7 @@ export function ArticleViewPage({ slug }) {
                             category: foundArticle.subcategoryId?.name || foundArticle.categoryId?.name || 'General',
                             readTime: `${foundArticle.readTime} min read`,
                             image: foundArticle.coverImage?.url ? encodeURI(`https://api.doorstephub.com${foundArticle.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
-                            content: foundArticle.description || foundArticle.content || 'No content available.',
+                            content: foundArticle.summary || foundArticle.content || 'No content available.',
                             author: foundArticle.author || 'Doorstep Hub', // Assuming author field exists or default
                             date: new Date(foundArticle.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
                             tags: foundArticle.tags || []
@@ -65,7 +65,7 @@ export function ArticleViewPage({ slug }) {
 
     useEffect(() => {
         if (!loading && !article) {
-            router.replace('/book-appointment');
+            router.replace('/appliance-repair-services');
         }
     }, [loading, article, router]);
 

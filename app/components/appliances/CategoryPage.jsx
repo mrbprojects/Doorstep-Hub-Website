@@ -188,7 +188,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
 
   useEffect(() => {
     if (!loading && subCategories.length === 0) {
-      router.replace('/book-appointment');
+      router.replace('/appliance-repair-services');
     }
   }, [loading, subCategories, router]);
 

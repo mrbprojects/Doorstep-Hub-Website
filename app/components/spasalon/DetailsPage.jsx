@@ -78,7 +78,7 @@ export function DetailsPage() {
 
     useEffect(() => {
         if (!loading && !service) {
-            router.replace('/book-appointment');
+            router.replace('/appliance-repair-services');
         }
     }, [loading, service, router]);
 

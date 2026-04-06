@@ -17,8 +17,8 @@ const footerLinks = {
     { name: 'Careers', href: '/careers' },
     { name: 'Become a Service Partner', href: '/service-partner' },
     { name: 'Book Appointment', href: '/book-appointment' },
-    { name: 'Download Android App', href: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner' },
-    { name: 'Download iOS App', href: 'https://apps.apple.com/in/app/doorstep-hub/id6448539336' },
+    { name: 'Download Android App', href: '' },
+    { name: 'Download iOS App', href: '' },
   ],
   Moreinfo: [
     { name: 'FAQs', href: '/faqs' },
@@ -30,11 +30,11 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Facebook, href: 'https://www.facebook.com/DoorstepHub/', label: 'Facebook' },
-  { icon: Twitter, href: 'https://twitter.com/doorstephub', label: 'Twitter' },
-  { icon: Instagram, href: 'https://www.instagram.com/doorstephub_india/', label: 'Instagram' },
+  { icon: Facebook, href: '', label: 'Facebook' },
+  { icon: Twitter, href: '', label: 'Twitter' },
+  { icon: Instagram, href: '', label: 'Instagram' },
   { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { icon: Youtube, href: 'https://www.youtube.com/channel/UCTn8lV-nEbdWdwXolLAsMZA', label: 'YouTube' },
+  { icon: Youtube, href: '', label: 'YouTube' },
 ];
 
 // Hardcoded additionalServices removed as it's now dynamic
@@ -167,17 +167,15 @@ export function Footer({ theme = {} }) {
     fetchFooterData();
   }, [location?.lat, location?.lng]);
 
-  const dynamicQuickLinks = [
-    ...footerLinks.Quicklinks.map(link => {
-      if (link.name === 'Download Android App' && globalSettings?.customerAndroidAppLink) {
-        return { ...link, href: globalSettings.customerAndroidAppLink };
-      }
-      if (link.name === 'Download Ios App' && globalSettings?.customerIosAppLink) {
-        return { ...link, href: globalSettings.customerIosAppLink };
-      }
-      return link;
-    })
-  ];
+ const dynamicQuickLinks = footerLinks.Quicklinks.map(link => {
+  if (link.name === 'Download Android App' && globalSettings?.customerAndroidAppLink) {
+    return { ...link, href: globalSettings.customerAndroidAppLink };
+  }
+  if (link.name === 'Download iOS App' && globalSettings?.customerIosAppLink) {
+    return { ...link, href: globalSettings.customerIosAppLink };
+  }
+  return link;
+});
 
   const dynamicSocialLinks = socialLinks.map(social => {
     const socialLabel = (social.label || '').toLowerCase();
@@ -517,6 +515,8 @@ export function Footer({ theme = {} }) {
             className="flex items-center gap-3"
           >
             {dynamicSocialLinks.map((social, index) => (
+
+              social.href && ( 
               <div key={social.label} className="relative group">
                 <AnimatePresence>
                   {hoveredSocial === social.label && (
@@ -551,6 +551,7 @@ export function Footer({ theme = {} }) {
                   <social.icon className="w-5 h-5" />
                 </motion.a>
               </div>
+              )
             ))}
           </motion.div>
         </div>

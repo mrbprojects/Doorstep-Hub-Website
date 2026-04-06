@@ -7,6 +7,7 @@ import { ServiceDetailsPage } from '@/components/appliances/ServiceDetailsPage';
 import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { Animated404 } from '@/components/ui/Animated404';
 
 export function CategoryOrListingPage({ slug, onBack }) {
     const router = useRouter();
@@ -16,12 +17,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
     const [categoryData, setCategoryData] = useState(null);
     const [serviceId, setServiceId] = useState(queryServiceId);
 
-    // Immediate redirection for 404/not found state
-    useEffect(() => {
-        if (viewType === '404') {
-            router.replace('/book-appointment');
-        }
-    }, [viewType, router]);
+    // Removed immediate redirect effect, returning Animated404 instead
 
     useEffect(() => {
         const checkSlugType = async () => {
@@ -130,6 +126,10 @@ export function CategoryOrListingPage({ slug, onBack }) {
 
     if (viewType === 'listing') {
         return <ServicesListingPage slug={slug} onBack={onBack} />;
+    }
+
+    if (viewType === '404') {
+        return <Animated404 />;
     }
 
     if (viewType === 'store') {

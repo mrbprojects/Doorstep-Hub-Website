@@ -217,7 +217,7 @@ export function ServiceDetailsPage({
   // Immediate redirection logic
   useEffect(() => {
     if (!loading && !serviceDetails?.storeData) {
-      router.replace('/book-appointment');
+      router.replace('/appliance-repair-services');
     }
   }, [loading, serviceDetails, router]);
 

@@ -15,6 +15,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
     const [centers, setCenters] = useState([]);
     const [loading, setLoading] = useState(true);
     const { location } = useLocationContext();
+    const [globalSettings, setGlobalSettings] = useState(null);
 
     const handleRatingChange = (rating) => {
         const newRating = rating === minRating ? 0 : rating;
@@ -77,6 +78,22 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
         fetchCenters();
     }, [childCategoryId, location?.lat, location?.lng, minRating]);
 
+    // Fetch Global Settings for App Links
+    useEffect(() => {
+        const fetchGlobalSettings = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const data = await response.json();
+                if (data.success && data.policy) {
+                    setGlobalSettings(data.policy);
+                }
+            } catch (error) {
+                console.error('Error fetching global settings:', error);
+            }
+        };
+        fetchGlobalSettings();
+    }, []);
+
     const filteredCenters = centers.filter(center => (center.rating || 0) >= minRating);
 
     return (
@@ -98,16 +115,46 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                         Back
                     </motion.button>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">
-                            {subCategory}
-                        </h1>
-                        <p className="text-white/80">{category} • Authorized Service Centers</p>
-                    </motion.div>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="flex-1"
+                        >
+                            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">
+                                {subCategory}
+                            </h1>
+                            <p className="text-white/80">{category} • Authorized Service Centers</p>
+                        </motion.div>
+
+                        {/* App Links beside heading */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex items-center gap-3"
+                        >
+                            <a
+                                href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center w-32 h-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden"
+                                title="Get it on Google Play"
+                            >
+                                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                            </a>
+                            <a
+                                href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center w-32 h-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden"
+                                title="Download on the App Store"
+                            >
+                                <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                            </a>
+                        </motion.div>
+                    </div>
                 </div>
             </div>
 

@@ -137,6 +137,7 @@ export function NearbyServiceCenters() {
 
             return {
               id: service._id,
+              slug: service.slug,
               name: service.business_name || service.name || `${service.firstName} ${service.lastName}`,
               distance: `${distance.toFixed(1)} km`,
               rating: parseFloat(service.rating) || 4.5,

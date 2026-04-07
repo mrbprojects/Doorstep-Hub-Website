@@ -84,10 +84,12 @@ export function ServiceDetailsPage({
         if (data.success) {
           setServiceDetails(data);
           
-          // Pre-select the first package if none selected
+          // Removed auto-selection of the first package for manual selection
+          /*
           if (data.provider_rate_cards?.length > 0) {
             setSelectedCards([data.provider_rate_cards[0]]);
           }
+          */
 
           // Auto-enrich URL if category or subCategory is missing
           if (!category || !subCategory) {
@@ -203,11 +205,21 @@ export function ServiceDetailsPage({
 
   const toggleRateCard = (card) => {
     setSelectedCards(prev => {
-        const exists = prev.find(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
-        if (exists) {
-            return prev.filter(c => !(c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price)));
+        // Use a more specific key for comparison
+        const getCardKey = (c) => {
+            if (c._id) return `id-${c._id}`;
+            if (c.id) return `id-${c.id}`;
+            // If no ID, use title and price as a combined key
+            return `val-${c.title}-${c.price}`;
+        };
+
+        const targetKey = getCardKey(card);
+        const isAlreadySelected = prev.some(c => getCardKey(c) === targetKey);
+
+        if (isAlreadySelected) {
+            return prev.filter(c => getCardKey(c) !== targetKey);
         }
-        return [...prev, card]; // allow unlimited multi-select or handle as per need
+        return [...prev, card]; // Multi-selection enabled
     });
   };
 
@@ -383,85 +395,98 @@ export function ServiceDetailsPage({
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <div className="mb-6">
+                      <div className="mb-6" id="rate-cards-section">
                         <h3 className="text-xl font-bold text-white mb-1">About Service</h3>
                         <p className="text-white/40 text-xs italic">
                           Approximate service rates ({selectedCards.length} selected)
                         </p>
                       </div>
-                      <div className="grid gap-4 max-h-[min(42vh,420px)] overflow-y-auto pr-2 pb-4 custom-scrollbar">
-                        {provider_rate_cards.length > 0 ? provider_rate_cards.map((card, index) => {
-                          const isSelected = selectedCards.some(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
-                          const cardImage = getRateCardImage(card);
-                          return (
-                          <div
-                            role="button"
-                            tabIndex={0}
-                            key={card._id || card.id || index}
-                            onClick={() => toggleRateCard(card)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter' || event.key === ' ') {
-                                event.preventDefault();
-                                toggleRateCard(card);
-                              }
-                            }}
-                            aria-pressed={isSelected}
-                            className={`w-full p-5 rounded-2xl border text-left transition-all group ${
-                              isSelected
-                                ? 'bg-[#037166]/15 border-[#04a99d]/70 shadow-lg shadow-[#037166]/20'
-                                : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
-                            }`}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div
-                                className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
-                                  isSelected ? 'bg-[#037166] text-white' : 'bg-white/10 text-white/40'
-                                }`}
-                              >
-                                {isSelected && <Check className="w-6 h-6" />}
-                              </div>
+                      <div className="grid gap-4 max-h-[550px] overflow-y-auto pr-3 pb-8 custom-scrollbar">
+                         {provider_rate_cards.length > 0 ? provider_rate_cards.map((card, index) => {
+                          const isSelected = selectedCards.some(c => {
+                            const getCardKey = (item) => {
+                              if (item._id) return `id-${item._id}`;
+                              if (item.id) return `id-${item.id}`;
+                              return `val-${item.title}-${item.price}`;
+                            };
+                            return getCardKey(c) === getCardKey(card);
+                          });
+                           const cardImage = getRateCardImage(card);
+                           return (
+                             <div
+                               role="button"
+                               tabIndex={0}
+                               key={card._id || card.id || index}
+                               onClick={() => toggleRateCard(card)}
+                               onKeyDown={(event) => {
+                                 if (event.key === 'Enter' || event.key === ' ') {
+                                   event.preventDefault();
+                                   toggleRateCard(card);
+                                 }
+                               }}
+                               aria-pressed={isSelected}
+                               className={`w-full p-5 rounded-2xl border text-left transition-all group ${
+                                 isSelected
+                                   ? 'bg-[#037166]/15 border-[#04a99d]/70 shadow-lg shadow-[#037166]/20'
+                                   : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
+                               }`}
+                             >
+                               <div className="flex items-center gap-4">
+                                 <div
+                                   className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
+                                     isSelected ? 'bg-[#037166] text-white' : 'bg-white/10 text-white/40'
+                                   }`}
+                                 >
+                                   {isSelected && <Check className="w-6 h-6" />}
+                                 </div>
 
-                              {cardImage && (
-                                <img
-                                  src={cardImage}
-                                  alt={card.title || 'Service rate card'}
-                                  className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0"
-                                />
-                              )}
+                                 {cardImage && (
+                                   <img
+                                     src={cardImage}
+                                     alt={card.title || 'Service rate card'}
+                                     className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0"
+                                   />
+                                 )}
 
-                              <div className="flex-1 pr-4">
-                                <h6 className={`font-bold transition-colors leading-snug mb-1 ${
-                                  isSelected ? 'text-[#6ed0c8]' : 'text-white group-hover:text-[#04a99d]'
-                                }`}>{card.title}</h6>
-                                {card.reason && (
-                                  <p className="text-white/40 text-xs leading-relaxed">{card.reason}</p>
-                                )}
+                                 <div className="flex-1 pr-4">
+                                   <h6 className={`font-bold transition-colors leading-snug mb-1 ${
+                                     isSelected ? 'text-[#6ed0c8]' : 'text-white group-hover:text-[#04a99d]'
+                                   }`}>{card.title}</h6>
+                                   {card.reason && (
+                                     <p className="text-white/40 text-xs leading-relaxed">{card.reason}</p>
+                                   )}
+                                 </div>
 
-                                {/* See More Button if images exist */}
-                                {(card.serviceCardImages?.length > 0 || card.images?.length > 0) && (
-                                  <button
-                                    type="button"
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      setRateCardModal({
-                                      isOpen: true,
-                                      images: card.serviceCardImages || card.images,
-                                      currentIndex: 0,
-                                      title: card.title
-                                    });
-                                    }}
-                                    className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#04a99d] hover:text-[#037166] transition-colors"
-                                  >
-                                    See More
-                                    <ArrowRight className="w-3 h-3" />
-                                  </button>
-                                )}
-                              </div>
-                              <span className="text-[#04a99d] font-bold text-lg whitespace-nowrap flex-shrink-0">₹{card.price}</span>
-                            </div>
-                          </div>
-                          );
-                        }) : <div className="text-center py-12 text-white/40 border border-white/10 border-dashed rounded-2xl">No service rates available.</div>}
+                                 <div className="flex flex-col items-end justify-between min-h-[80px] flex-shrink-0">
+                                   <div className="text-right">
+                                     <p className="text-white/40 text-[10px] mb-0.5 italic">Starts from</p>
+                                     <span className="text-[#04a99d] font-black text-xl whitespace-nowrap">₹{card.price}+</span>
+                                   </div>
+
+                                   {/* See More Button if images exist */}
+                                   {(card.serviceCardImages?.length > 0 || card.images?.length > 0) && (
+                                     <button
+                                       type="button"
+                                       onClick={(event) => {
+                                         event.stopPropagation();
+                                         setRateCardModal({
+                                           isOpen: true,
+                                           images: card.serviceCardImages || card.images,
+                                           currentIndex: 0,
+                                           title: card.title
+                                         });
+                                       }}
+                                       className="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-white/10 text-[10px] font-bold uppercase tracking-wider text-[#04a99d] hover:bg-[#037166] hover:text-white transition-all bg-white/5 backdrop-blur-sm shadow-sm"
+                                     >
+                                       Images
+                                       <ArrowRight className="w-3 h-3" />
+                                     </button>
+                                   )}
+                                 </div>
+                               </div>
+                             </div>
+                           );
+                         }) : <div className="text-center py-12 text-white/40 border border-white/10 border-dashed rounded-2xl">No service rates available.</div>}
                       </div>
                     </motion.div>
                   )}
@@ -630,6 +655,26 @@ export function ServiceDetailsPage({
                 ))}
               </div>
 
+              {/* Selected Summary */}
+              {selectedCards.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white/60 text-sm font-medium">Selected Services</span>
+                    <span className="text-[#04a99d] font-bold">{selectedCards.length} Items</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white text-lg font-bold">Total Estimate</span>
+                    <span className="text-[#04a99d] text-2xl font-black">
+                      ₹{selectedCards.reduce((sum, card) => sum + (Number(card.price) || 0), 0)}
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Booking Button in Hero */}
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -644,6 +689,8 @@ export function ServiceDetailsPage({
 
                   if (selectedCards.length === 0) {
                     toast.error("Please select at least one service card to proceed");
+                    setActiveTab('About Service');
+                    document.getElementById('rate-cards-section')?.scrollIntoView({ behavior: 'smooth' });
                     return;
                   }
 
@@ -671,9 +718,13 @@ export function ServiceDetailsPage({
                   localStorage.setItem('booking_package_details', JSON.stringify(itemsToBook));
                   router.push('/appliances/address');
                 }}
-                className="w-full mt-6 px-10 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"
+                className={`w-full mt-6 px-10 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 group ${
+                  selectedCards.length > 0
+                    ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:shadow-2xl hover:shadow-[#037166]/40'
+                    : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10'
+                }`}
               >
-                Book This Service Now
+                {selectedCards.length > 0 ? 'Book Selected Services' : 'Select a Service to Book'}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </motion.div>

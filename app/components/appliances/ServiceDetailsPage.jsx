@@ -319,11 +319,19 @@ export function ServiceDetailsPage({
 
   const toggleRateCard = (card) => {
     setSelectedCards(prev => {
-        const exists = prev.find(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
-        if (exists) {
-            return prev.filter(c => !(c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price)));
+        const getCardKey = (c) => {
+            if (c._id) return `id-${c._id}`;
+            if (c.id) return `id-${c.id}`;
+            return `val-${c.title}-${c.price}`;
+        };
+
+        const targetKey = getCardKey(card);
+        const isAlreadySelected = prev.some(c => getCardKey(c) === targetKey);
+
+        if (isAlreadySelected) {
+            return prev.filter(c => getCardKey(c) !== targetKey);
         }
-        return [...prev, card]; // allow unlimited multi-select or handle as per need
+        return [...prev, card]; // Multi-selection enabled
     });
   };
 
@@ -526,32 +534,40 @@ export function ServiceDetailsPage({
                           <h3 className="text-lg font-bold text-white mb-0.5">About Service</h3>
                           <p className="text-white/40 text-xs italic">Approximate service rates (Select a service to proceed)</p>
                         </div>
-                        <div className="grid gap-3 pb-4">
+                        <div className="grid gap-2 pb-4">
                           {provider_rate_cards.map((card, index) => {
-                            const isSelected = selectedCards.some(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
+                            const isSelected = selectedCards.some(c => {
+                                const getCardKey = (item) => {
+                                    if (item._id) return `id-${item._id}`;
+                                    if (item.id) return `id-${item.id}`;
+                                    return `val-${item.title}-${item.price}`;
+                                };
+                                return getCardKey(c) === getCardKey(card);
+                            });
+
                             return (
                                 <div 
                                     key={card.id || card._id || index} 
                                     onClick={() => toggleRateCard(card)}
-                                    className={`p-2.5 sm:p-3 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${
+                                    className={`p-2 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${
                                         isSelected 
                                         ? 'bg-[#037166]/15 border-[#037166] shadow-[0_0_20px_rgba(3,113,102,0.15)] ring-1 ring-[#037166]/50' 
                                         : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
                                     }`}
                                 >
-                                    <div className="flex gap-3 sm:gap-4 items-center">
+                                    <div className="flex gap-2.5 sm:gap-3 items-center">
                                         {/* Selection Indicator (Left-aligned Checkbox style) */}
-                                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                                             isSelected 
                                             ? 'bg-[#037166] border-[#037166] shadow-[0_0_10px_rgba(3,113,102,0.5)]' 
                                             : 'border-white/20 group-hover:border-[#037166]/60'
                                         }`}>
-                                            <Check className={`w-4 h-4 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={4} />
+                                            <Check className={`w-3.5 h-3.5 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={4} />
                                         </div>
 
                                         {/* Rate Card Thumbnail */}
                                         {card.image && (
-                                            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
+                                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
                                                 <img
                                                     src={`https://api.doorstephub.com/${card.image}`}
                                                     alt={card.title}
@@ -564,14 +580,14 @@ export function ServiceDetailsPage({
                                         <div className="flex-1 flex flex-col justify-between min-w-0">
                                             <div className="flex items-start justify-between gap-2">
                                             <div className="min-w-0 flex-1">
-                                                <h6 className={`text-sm font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>{card.title}</h6>
+                                                <h6 className={`text-xs sm:text-sm font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>{card.title}</h6>
                                                 {card.reason && (
                                                 <p className="text-white/40 text-[10px] leading-relaxed line-clamp-1">{card.reason}</p>
                                                 )}
                                             </div>
 
-                                            <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                                                <span className="text-[#04a99d] font-bold text-base sm:text-lg whitespace-nowrap"><span className='italic font-normal text-[10px] text-white/80'>Starts from </span>₹{card.price}</span>
+                                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                                <span className="text-[#04a99d] font-bold text-sm sm:text-base whitespace-nowrap"><span className='italic font-normal text-[9px] text-white/80'>Starts from </span>₹{card.price}</span>
 
                                                 {/* See More Button - Below Price */}
                                                 {card.banner_images?.length > 0 && (
@@ -585,7 +601,7 @@ export function ServiceDetailsPage({
                                                             title: card.title
                                                         });
                                                     }}
-                                                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[9px] sm:text-[10px] font-bold border border-[#037166]/20"
+                                                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[9px] font-bold border border-[#037166]/20"
                                                 >
                                                     <span className="hidden xs:inline">View </span>Images
                                                     <ArrowRight className="w-3 h-3" />

@@ -40,6 +40,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const [bannerImage, setBannerImage] = useState('');
   const [aboutBio, setAboutBio] = useState('');
   const [locationData, setLocationData] = useState(null);
+  const [globalSettings, setGlobalSettings] = useState(null);
 
   // Addons popup state
   const [showAddonsPopup, setShowAddonsPopup] = useState(false);
@@ -180,6 +181,22 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
       fetchCenterDetails();
     }
   }, [storeId, location?.lat, location?.lng]);
+
+  // Fetch Global Settings for App Links
+  useEffect(() => {
+    const fetchGlobalSettings = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+        const data = await response.json();
+        if (data.success && data.policy) {
+          setGlobalSettings(data.policy);
+        }
+      } catch (error) {
+        console.error('Error fetching global settings:', error);
+      }
+    };
+    fetchGlobalSettings();
+  }, []);
 
   // Immediate redirection logic
   useEffect(() => {
@@ -454,9 +471,33 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           {/* Store Info Overlay */}
           <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
             <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-3.5 sm:p-5 md:p-6">
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1.5 md:mb-3 leading-tight">
-                {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
-              </h1>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-1.5 md:mb-3">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight">
+                  {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
+                </h1>
+
+                {/* App Links beside heading */}
+                <div className="flex items-center gap-3">
+                  <a
+                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-28 md:w-32 h-8 md:h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
+                    title="Get it on Google Play"
+                  >
+                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                  </a>
+                  <a
+                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-28 md:w-32 h-8 md:h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
+                    title="Download on the App Store"
+                  >
+                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                  </a>
+                </div>
+              </div>
 
               <div className="flex flex-col gap-2 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-6 mb-3 md:mb-4">
                 <div className="flex items-start gap-1.5 md:gap-2">

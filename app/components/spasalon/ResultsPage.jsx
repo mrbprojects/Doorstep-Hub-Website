@@ -63,8 +63,9 @@ export function ResultsPage() {
             setPriceRange([0, 50000]);
         }
         
-        if (searchParams.get('categoryId')) {
-            setExpandedCategory(searchParams.get('categoryId'));
+        const catFromUrl = searchParams.get('categoryId') || searchParams.get('categorySlug');
+        if (catFromUrl) {
+            setExpandedCategory(catFromUrl);
         }
     }, [searchParams]);
 
@@ -657,7 +658,7 @@ function ServiceCard({ service, index, router }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: -8 }}
-            onClick={() => router.push(`/spa-salon/detail/${service.slug || service.id}`)}
+            onClick={() => router.push(`/${service.slug || service.id}`)}
             className="bg-white rounded-[32px] overflow-hidden border border-gray-100 cursor-pointer group shadow-sm hover:shadow-2xl transition-all duration-500"
         >
             {/* Image */}
@@ -726,7 +727,7 @@ function ServiceCard({ service, index, router }) {
                         whileTap={{ scale: 0.98 }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            router.push(`/spa-salon/detail/${service.slug || service.id}`);
+                            router.push(`/spa-salon/${service.slug || service.id}`);
                         }}
                         className="px-6 py-3 bg-[#6D1357] text-white rounded-xl text-sm font-black hover:bg-[#C06C84] transition-all shadow-lg shadow-[#6D1357]/10"
                     >

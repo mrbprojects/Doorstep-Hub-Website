@@ -159,7 +159,7 @@ function StoreListingCard({ store, index, router }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
             whileHover={{ y: -10 }}
-            onClick={() => router.push(`/spa-salon/service/${store.id}`)}
+            onClick={() => router.push(`/${store.slug || store.id}`)}
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-[480px] flex flex-col"
         >
             <div className="relative h-56 overflow-hidden">

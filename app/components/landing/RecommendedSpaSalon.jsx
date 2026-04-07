@@ -22,7 +22,8 @@ export function RecommendedSpaSalon() {
   
   const handleStoreClick = (store) => {
     if (store.isDummy) return;
-    router.push(`/spa-salon/detail/${store.id}`);
+    // User requested domain + slug (root level)
+    router.push(`/${store.slug || store.id}`);
   };
 
   const amenityIcons = {

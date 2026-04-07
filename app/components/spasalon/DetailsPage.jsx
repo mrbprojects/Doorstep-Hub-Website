@@ -67,9 +67,12 @@ export function DetailsPage() {
                     };
                     setService(mappedService);
 
+                    // Removed auto-selection of the first package for manual selection
+                    /*
                     if (data.provider_rate_cards && data.provider_rate_cards.length > 0) {
                         setSelectedPackages([data.provider_rate_cards[0]]);
                     }
+                    */
                 }
             } catch (error) {
                 console.error("Error fetching service details:", error);
@@ -88,12 +91,18 @@ export function DetailsPage() {
 
     const togglePackage = (pkg) => {
         setSelectedPackages(prev => {
-            const isSelected = prev.some(p => p._id === pkg._id);
-            if (isSelected) {
-                return prev.filter(p => p._id !== pkg._id);
-            } else {
-                return [...prev, pkg];
+            const getPkgKey = (item) => {
+                if (item._id) return `id-${item._id}`;
+                if (item.id) return `id-${item.id}`;
+                return `val-${item.name}`;
+            };
+            const targetKey = getPkgKey(pkg);
+            const isAlreadySelected = prev.some(p => getPkgKey(p) === targetKey);
+
+            if (isAlreadySelected) {
+                return prev.filter(p => getPkgKey(p) !== targetKey);
             }
+            return [...prev, pkg]; // Multi-selection enabled
         });
     };
 
@@ -220,10 +229,18 @@ export function DetailsPage() {
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
+                                id="services-list"
                                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
                             >
                                 {service.packages.map((pkg) => {
-                                    const isSelected = selectedPackages.some(p => p._id === pkg._id);
+                                    const isSelected = selectedPackages.some(p => {
+                                        const getPkgKey = (item) => {
+                                            if (item._id) return `id-${item._id}`;
+                                            if (item.id) return `id-${item.id}`;
+                                            return `val-${item.name}`;
+                                        };
+                                        return getPkgKey(p) === getPkgKey(pkg);
+                                    });
                                     return (
                                         <div
                                             key={pkg._id}
@@ -274,9 +291,25 @@ export function DetailsPage() {
                                                         </div>
                                                     </div>
                                                     <p className="text-sm text-gray-500 line-clamp-2 mt-1 mb-2">{pkg.description}</p>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-lg text-gray-900">₹{pkg.price}</span>
-                                                        <span className="text-xs text-gray-400 capitalize">{pkg.priceUnit}</span>
+                                                    <div className="flex items-center justify-between mt-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-lg text-gray-900">₹{pkg.price}</span>
+                                                            <span className="text-xs text-gray-400 capitalize">{pkg.priceUnit}</span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                togglePackage(pkg);
+                                                            }}
+                                                            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                                                                isSelected
+                                                                    ? 'bg-red-50 text-red-500 border border-red-200 hover:bg-red-500 hover:text-white'
+                                                                    : 'bg-[#6d1357] text-white border border-[#6d1357] hover:bg-[#8d1d72]'
+                                                            }`}
+                                                        >
+                                                            {isSelected ? 'Remove' : 'Add'}
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -382,19 +415,20 @@ export function DetailsPage() {
                     <button
                         onClick={() => {
                             if (selectedPackages.length === 0) {
-                                if (service.packages && service.packages.length > 0) {
-                                    setSelectedPackages([service.packages[0]]);
-                                    setShowAddonsModal(true);
-                                } else {
-                                    console.warn("No packages found");
-                                }
+                                // show error instead of auto-selecting
+                                import('sonner').then(({ toast }) => {
+                                    toast.error("Please select at least one package to book");
+                                });
+                                // scroll to services
+                                document.getElementById('services-list')?.scrollIntoView({ behavior: 'smooth' });
                                 return;
                             }
                             setShowAddonsModal(true);
                         }}
-                        className={`${selectedPackages.length > 0 ? 'px-8 md:px-24' : 'w-full md:w-auto md:px-24'} py-4 bg-[#6d1357] text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#6d1357]/40 transition-all transform hover:scale-105 flex items-center justify-center gap-2`}
+                        className={`${selectedPackages.length > 0 ? 'px-8 md:px-24' : 'w-full md:w-auto md:px-24'} py-4 ${selectedPackages.length > 0 ? 'bg-[#6d1357]' : 'bg-gray-400'} text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#6d1357]/40 transition-all transform ${selectedPackages.length > 0 ? 'hover:scale-105' : ''} flex items-center justify-center gap-2`}
+                        disabled={selectedPackages.length === 0 && !service.packages?.length}
                     >
-                        Book Now
+                        {selectedPackages.length > 0 ? 'Book Now' : 'Select Service'}
                         <ChevronRight className="w-5 h-5" />
                     </button>
                 </div>

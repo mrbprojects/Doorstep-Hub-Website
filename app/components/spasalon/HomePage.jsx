@@ -68,6 +68,7 @@ export function HomePage() {
     const [loadingFeatured, setLoadingFeatured] = useState(true);
     const [nearbyCenters, setNearbyCenters] = useState([]);
     const [loadingNearby, setLoadingNearby] = useState(true);
+    const [globalSettings, setGlobalSettings] = useState(null);
     const nearbyScrollRef = useRef(null);
     const bookedScrollRef = useRef(null);
     const featuredScrollRef = useRef(null);
@@ -228,9 +229,22 @@ export function HomePage() {
             }
         };
 
+        const fetchGlobalSettings = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    setGlobalSettings(data.data);
+                }
+            } catch (error) {
+                console.error("Error fetching global settings:", error);
+            }
+        };
+
         fetchCategories();
         fetchFeaturedPackages();
         fetchNearbyCenters();
+        fetchGlobalSettings();
     }, []);
 
     useEffect(() => {
@@ -309,7 +323,7 @@ export function HomePage() {
 
     const handleCategoryClick = (category) => {
         const target = category.slug || category._id || category.id;
-        router.push(`/spa-salon/category/${category.slug || target}`);
+        router.push(`/${category.slug || target}`);
     };
 
     return (
@@ -406,11 +420,37 @@ export function HomePage() {
                                         setSelectedCategory(null);
                                         setModalOpen(true);
                                     }}
-                                    className="px-8 py-4 bg-[#6d1357] text-white rounded-xl font-medium hover:shadow-lg hover:shadow-[#1A0515]/50 transition-all flex items-center justify-center gap-2 font-bold"
+                                    className="px-8 py-4 bg-[#6d1357] text-white rounded-xl font-medium hover:shadow-lg hover:shadow-[#6d1357]/40 transition-all flex items-center justify-center gap-2 font-bold"
                                 >
                                     Explore Spa Services
                                     <ChevronRight className="w-5 h-5" />
                                 </motion.button>
+
+                                <div className="flex flex-wrap justify-center sm:justify-start gap-4">
+                                    <motion.a
+                                        href={globalSettings?.appStore || "#"}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                        title="Download on the App Store"
+                                    >
+                                        <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                                    </motion.a>
+
+                                    <motion.a
+                                        href={globalSettings?.playStore || "#"}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                        title="Get it on Google Play"
+                                    >
+                                        <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                                    </motion.a>
+                                </div>
 
                                 {/* <motion.button
                                     whileHover={{ scale: 1.05 }}
@@ -465,9 +505,13 @@ export function HomePage() {
                                     }}
                                     onClick={() => {
                                         if (sub.slug || sub._id) {
-                                            const subParam = sub.slug ? `subcategorySlug=${sub.slug}` : `subcategoryId=${sub._id}`;
-                                            const catParam = sub.parentCategorySlug ? `categorySlug=${sub.parentCategorySlug}` : `categoryId=${sub.parentCategoryId || categories[0]?._id}`;
-                                            router.push(`/spa-salon/results?${subParam}&${catParam}`);
+                                            const catSlug = sub.parentCategorySlug;
+                                            const subSlug = sub.slug || sub._id;
+                                            if (catSlug && subSlug) {
+                                                router.push(`/${catSlug}/${subSlug}`);
+                                            } else {
+                                                router.push(`/${subSlug}`);
+                                            }
                                         } else {
                                             setModalOpen(true);
                                         }
@@ -845,7 +889,7 @@ function PackageCard({ package: pkg, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -10 }}
-            onClick={() => router.push(`/spa-salon/detail/${pkg.slug || pkg.id}`)}
+            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-52 overflow-hidden">
@@ -901,7 +945,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/spa-salon/detail/${pkg.slug || pkg.id}`)}
+            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-xl overflow-hidden border border-[#E8ECF2] cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
         >
             <div className="relative h-40">
@@ -940,7 +984,7 @@ function NearbyCenterCard({ center, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/spa-salon/detail/${center.slug || center.id}`)}
+            onClick={() => router.push(`/${center.slug || center.id}`)}
             className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] cursor-pointer group hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-48 overflow-hidden">

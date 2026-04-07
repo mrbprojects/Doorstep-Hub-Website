@@ -8,12 +8,14 @@ import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Animated404 } from '@/components/ui/Animated404';
+import SpaCategoryPage from '@/components/spasalon/SpaCategoryPage';
+import SpaSubCategoryPage from '@/components/spasalon/SpaSubCategoryPage';
 
 export function CategoryOrListingPage({ slug, onBack }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const queryServiceId = searchParams.get('id');
-    const [viewType, setViewType] = useState('loading'); // 'loading', 'category', 'listing', 'detail', '404'
+    const [viewType, setViewType] = useState('loading'); // 'loading', 'category', 'listing', 'detail', '404', 'store', 'spa-category', 'spa-subcategory'
     const [categoryData, setCategoryData] = useState(null);
     const [serviceId, setServiceId] = useState(queryServiceId);
 
@@ -45,6 +47,41 @@ export function CategoryOrListingPage({ slug, onBack }) {
                     setCategoryData(catData);
                     setViewType('category');
                     return;
+                }
+
+                // 2. Try to fetch as a Spa Category
+                const spaCatRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serviceId: '69524f4a57bb211ca094e5e6' }) // Spa & Salon
+                });
+                const spaCatData = await spaCatRes.json();
+                if (spaCatData.success && Array.isArray(spaCatData.category)) {
+                    const matchedCat = spaCatData.category.find(c => c.slug === slug);
+                    if (matchedCat) {
+                        setCategoryData(matchedCat);
+                        setViewType('spa-category');
+                        return;
+                    }
+
+                    // Check Spa Subcategories - Need to fetch subcategories for each category to accurately find it
+                    // Optimization: We could have a search API, but for now we search across categories
+                    for (const cat of spaCatData.category) {
+                        const subRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ categorySlug: cat.slug })
+                        });
+                        const subData = await subRes.json();
+                        if (subData.success && Array.isArray(subData.data)) {
+                            const matchedSub = subData.data.find(s => s.slug === slug || s._id === slug || s.id === slug);
+                            if (matchedSub) {
+                                setCategoryData({ ...matchedSub, categoryName: cat.name, categoryId: cat._id });
+                                setViewType('spa-subcategory');
+                                return;
+                            }
+                        }
+                    }
                 }
 
                 // 2. Try to fetch as a deep Category or Subcategory
@@ -134,6 +171,14 @@ export function CategoryOrListingPage({ slug, onBack }) {
 
     if (viewType === 'store') {
         return <StoreDetailPage storeId={slug} onBack={onBack} />;
+    }
+
+    if (viewType === 'spa-category') {
+        return <SpaCategoryPage slugOverride={slug} initialData={categoryData} />;
+    }
+
+    if (viewType === 'spa-subcategory') {
+        return <SpaSubCategoryPage slugOverride={slug} initialData={categoryData} />;
     }
 
     return (

@@ -40,6 +40,7 @@ export function PremiumHomePage() {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+    const [globalSettings, setGlobalSettings] = useState(null);
 
     useEffect(() => {
         if (apiCategories.length > 0) {
@@ -103,8 +104,9 @@ export function PremiumHomePage() {
                     }
                 );
                 const data = await response.json();
-                if (data.success && data.category) {
-                    setApiCategories(data.category);
+                const categories = data.category || data.categories || data.data || [];
+                if (data.success && categories.length > 0) {
+                    setApiCategories(categories);
                 }
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -112,15 +114,33 @@ export function PremiumHomePage() {
                 setLoading(false);
             }
         };
+        const fetchGlobalSettings = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    setGlobalSettings(data.data);
+                }
+            } catch (error) {
+                console.error("Error fetching global settings:", error);
+            }
+        };
+
         fetchCategories();
+        fetchGlobalSettings();
     }, []);
 
     const parallaxY = useTransform(scrollY, [0, 500], [0, 150]);
     const parallaxYSpring = useSpring(parallaxY, { stiffness: 100, damping: 30 });
 
-    const handleCategoryClick = (categoryId, categoryName) => {
-        setSelectedCategory({ id: categoryId, name: categoryName });
-        setIsModalOpen(true);
+    const handleCategoryClick = (categoryId, categoryName, categorySlug) => {
+        // setSelectedCategory({ id: categoryId, name: categoryName });
+        // setIsModalOpen(true);
+        if (categorySlug) {
+            router.push(`/${categorySlug}`);
+        } else {
+            console.warn('Category slug is missing');
+        }
     };
 
     const scrollToCategories = () => {
@@ -193,96 +213,88 @@ export function PremiumHomePage() {
                             >
                                 Verified PGs, co-living spaces, and hostels near your college or office.
                             </motion.p>
+
                             <section className="relative md:-mt-20 mt-0 z-20">
-                                <div className="max-w-2xl mr-10 px-1">
+                                <div className="max-w-4xl px-1">
+                                    <div className="flex flex-col md:flex-row items-center gap-4">
+                                                {/* Search Bar */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    viewport={{ once: true }}
+                                                    className="flex-1 bg-white/40 md:bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-gray-200 p-2 w-full"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex-1 relative">
+                                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            <Input
+                                                                value={searchQuery}
+                                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                                onKeyDown={handleKeyDown}
+                                                                placeholder="Search by area, college, landmark..."
+                                                                className="pl-10 h-11 bg-white/30 md:bg-white/50 border-transparent focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
+                                                            />
+                                                        </div>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={handleSearch}
+                                                            className="px-6 py-2 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/20 text-sm hidden sm:block"
+                                                        >
+                                                            Search
+                                                        </motion.button>
+                                                    </div>
+                                                </motion.div>
+
+                                                {/* Explore PGs Button - Beside Search Bar */}
+                                                <motion.button
+                                                    initial={{ opacity: 0, x: 20 }}
+                                                    whileInView={{ opacity: 1, x: 0 }}
+                                                    viewport={{ once: true }}
+                                                    whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(3, 113, 102, 0.3)" }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    onClick={() => router.push('/pghostels/listings/all')}
+                                                    className="px-8 py-3 bg-[#037166] text-white rounded-2xl font-bold shadow-xl shadow-[#037166]/30 flex items-center gap-2 whitespace-nowrap h-[60px]"
+                                                >
+                                                    <span>Explore PGs</span>
+                                                    <ChevronRight className="w-5 h-5" />
+                                                </motion.button>
+                                    </div>
+
+                                    {/* App Buttons below search bar */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        className="bg-white/40 md:bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-gray-200 p-3 max-w-4xl mx-auto"
+                                        animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+                                        transition={{ delay: 0.5 }}
+                                        className="flex flex-wrap gap-4 mt-6"
                                     >
-                                        <div className="flex flex-wrap items-center gap-3">
-                                            {/* Search Input */}
-                                            <div className="flex-1 min-w-[250px] relative">
-                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                <Input
-                                                    value={searchQuery}
-                                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                                    onKeyDown={handleKeyDown}
-                                                    placeholder="Search by area, college, landmark..."
-                                                    className="pl-10 h-12 bg-white/30 md:bg-white/50 border-gray-200 focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
-                                                />
-                                            </div>
+                                        <motion.a
+                                            href={globalSettings?.appStore || "#"}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                            title="Download on the App Store"
+                                        >
+                                            <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                                        </motion.a>
 
-                                            {/* Filter Chips */}
-                                            {/* <div className="flex flex-wrap gap-1.5 hidden md:flex">
-                                {['Boys', 'Girls', 'Co-living', 'Dorm', 'With Food'].map((chip, i) => (
-                                    <motion.button
-                                        key={chip}
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        whileInView={{ opacity: 1, scale: 1 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: i * 0.05 }}
-                                        whileHover={{ scale: 0.95 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        className="px-3 py-1.5 bg-gray-100 hover:bg-[#037166] hover:text-white text-gray-700 rounded-lg text-xs font-medium transition-all"
-                                    >
-                                        {chip}
-                                    </motion.button>
-                                ))}
-                            </div> */}
-
-                                            {/* Search Button */}
-                                            <motion.button
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={handleSearch}
-                                                className="px-6 py-2.5 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/20 text-sm"
-                                            >
-                                                Search
-                                            </motion.button>
-                                        </div>
+                                        <motion.a
+                                            href={globalSettings?.playStore || "#"}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                            title="Get it on Google Play"
+                                        >
+                                            <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                                        </motion.a>
                                     </motion.div>
                                 </div>
                             </section>
                         </div>
-
-                        {/* CTAs */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
-                            transition={{ delay: 0.5 }}
-                            className="flex flex-wrap gap-4"
-                        >
-                            <motion.button
-                                whileHover={{ scale: 1.05, boxShadow: "0 20px 60px rgba(3, 113, 102, 0.4)" }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => router.push('/pghostels/listings/all')}
-                                className="px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-2xl font-semibold shadow-2xl shadow-[#037166]/50 flex items-center space-x-2"
-                            >
-                                <span>Explore PGs</span>
-                                <ChevronRight className="w-5 h-5" />
-                            </motion.button>
-
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={async () => {
-                                    try {
-                                        await detectWithGPS();
-                                    } catch (err) {
-                                        console.log('Location detection failed');
-                                    } finally {
-                                        setSelectedCategory({ id: '', name: '' });
-                                        setIsModalOpen(true);
-                                    }
-                                }}
-                                className="px-8 py-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 text-gray-900 rounded-2xl font-semibold hover:border-[#037166] transition-all flex items-center space-x-2"
-                            >
-                                <MapPin className="w-5 h-5 text-[#037166]" />
-                                <span>Near Me</span>
-                            </motion.button>
-                        </motion.div>
 
                         {/* Trust Badges */}
                         <motion.div
@@ -340,8 +352,8 @@ export function PremiumHomePage() {
                                     <div
                                         className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110"
                                         style={{
-                                            backgroundImage: apiCategories[heroSlideIndex]?.image
-                                                ? `url(${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${apiCategories[heroSlideIndex].image})`
+                                            backgroundImage: (apiCategories[heroSlideIndex]?.category_image || apiCategories[heroSlideIndex]?.image)
+                                                ? `url(https://api.doorstephub.com/${apiCategories[heroSlideIndex]?.category_image || apiCategories[heroSlideIndex]?.image})`
                                                 : 'none'
                                         }}
                                     />
@@ -460,13 +472,13 @@ export function PremiumHomePage() {
       ) : (
         apiCategories.map((cat, i) => {
           const bgImage = cat.image
-            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`
+            ? `https://api.doorstephub.com/${cat.image}`
             : cat.categoryIcon
-            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.categoryIcon}`
+            ? `https://api.doorstephub.com/${cat.categoryIcon}`
             : '';
 
           const iconImg = cat.categoryIcon
-            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.categoryIcon}`
+            ? `https://api.doorstephub.com/${cat.categoryIcon}`
             : null;
 
           return (
@@ -477,7 +489,7 @@ export function PremiumHomePage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -12, scale: 1.03 }}
-              onClick={() => handleCategoryClick(cat._id, cat.name)}
+              onClick={() => handleCategoryClick(cat._id, cat.name, cat.slug)}
               className="group cursor-pointer relative h-96 min-w-[260px] md:min-w-0 rounded-[2.5rem] overflow-hidden shadow-xl snap-start"
             >
               {/* Background Image */}

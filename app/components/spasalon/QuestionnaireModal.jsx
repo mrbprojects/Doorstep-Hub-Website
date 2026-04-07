@@ -7,15 +7,7 @@ import { resolveParam } from '@/utils/slugHelper';
 import { useRouter } from 'next/navigation';
 
 const staticQuestions = [
-    {
-        id: 'budget',
-        question: 'Budget Range?',
-        options: [
-            { value: '499-999', label: '₹499–₹999', icon: '💰' },
-            { value: '999-1999', label: '₹999–₹1999', icon: '💎' },
-            { value: '1999+', label: '₹1999+', icon: '👑' },
-        ],
-    },
+  
 ];
 
 export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCategoryName, categoryId: initialCategoryId }) {
@@ -50,6 +42,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                             question: 'Which service category are you looking for?',
                             options: catData.category.map(cat => ({
                                 value: cat._id,
+                                slug: cat.slug,
                                 label: cat.name,
                                 icon: '🎯',
                                 image: cat.image
@@ -80,6 +73,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                             question: `Select a ${selectedCat.name} Service`,
                             options: subcatData.data.map(sub => ({
                                 value: sub._id,
+                                slug: sub.slug,
                                 label: sub.name,
                                 icon: '✨',
                                 image: sub.image,
@@ -128,7 +122,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
 
         if (currentQuestion.id === 'categoryId') {
             const selectedOption = currentQuestion.options.find(opt => opt.value === value);
-            setSelectedCat({ id: value, name: selectedOption.label || 'Category' });
+            setSelectedCat({ id: value, name: selectedOption.label || 'Category', slug: selectedOption.slug });
             return; // useEffect will handle fetching subcategories
         }
 
@@ -145,14 +139,46 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
 
     const handleComplete = (allAnswers, catId) => {
         const queryParams = new URLSearchParams();
-        if (catId) queryParams.set('categoryId', catId);
+        let catSlug = '';
+        let subcatSlug = '';
+
+        // Extract slugs for paths
+        const catQuestion = questions.find(q => q.id === 'categoryId');
+        if (catQuestion) {
+            const selectedCatOpt = catQuestion.options.find(opt => opt.value === catId);
+            if (selectedCatOpt?.slug) catSlug = selectedCatOpt.slug;
+        } else if (selectedCat.slug) {
+            catSlug = selectedCat.slug;
+        }
+
+        const subcatQuestion = questions.find(q => q.id === 'subcategoryId');
+        if (subcatQuestion && allAnswers['subcategoryId']) {
+            const selectedSubOpt = subcatQuestion.options.find(opt => opt.value === allAnswers['subcategoryId']);
+            if (selectedSubOpt?.slug) subcatSlug = selectedSubOpt.slug;
+        }
 
         // Add all questionnaire answers to query params
         Object.entries(allAnswers).forEach(([key, value]) => {
+            if (key === 'categoryId' && catSlug) return;
+            if (key === 'subcategoryId' && subcatSlug) return;
             queryParams.set(key, value);
         });
 
-        router.push(`/spa-salon/results?${queryParams.toString()}`);
+        // Set ID as fallback if slug is missing
+        if (!catSlug && catId) queryParams.set('categoryId', catId);
+        if (!subcatSlug && allAnswers['subcategoryId']) queryParams.set('subcategoryId', allAnswers['subcategoryId']);
+
+        const queryString = queryParams.toString();
+        const baseQuery = queryString ? `?${queryString}` : '';
+
+        if (catSlug && subcatSlug) {
+            router.push(`/${catSlug}/${subcatSlug}${baseQuery}`);
+        } else if (catSlug) {
+            router.push(`/${catSlug}${baseQuery}`);
+        } else {
+            router.push(`/spa-salon/results?${queryString}`);
+        }
+        
         onClose();
     };
 

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, DollarSign, Filter, X, Zap, RotateCcw, ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
+import DOMPurify from 'dompurify';
 
 export function ServicesListingPage({ category, subCategory, subCategoryId, childCategoryId }) {
   const router = useRouter();
@@ -25,6 +26,19 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   const [categorySubcats, setCategorySubcats] = useState({}); // Cache for subcategories
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [loadingSubcats, setLoadingSubcats] = useState({});
+
+  const renderServiceDescription = (description) => {
+    if (!description) return null;
+
+    return (
+      <div
+        className="service-listing-rich-text text-white/60 text-[11px] mb-4 line-clamp-2"
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(description),
+        }}
+      />
+    );
+  };
 
   const handleRatingChange = (rating) => {
     const newRating = rating === minRating ? 0 : rating;
@@ -501,7 +515,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             <h4 className="text-[14px] font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-2">
                               {service.name}
                             </h4>
-                            <p className="text-white/60 text-[11px] mb-4 line-clamp-2">{service.description}</p>
+                            {renderServiceDescription(service.description)}
 
                             {/* Meta Info */}
                             <div className="flex flex-wrap items-center gap-4 mb-4 text-sm">

@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, usePathname } from 'next/navigation';
-import { ArrowLeft, Star, Clock, Shield, CheckCircle, Award, ThumbsUp, ChevronLeft, ChevronRight, ArrowRight, X } from 'lucide-react';
+import { ArrowLeft, Star, Clock, Shield, CheckCircle, Award, ThumbsUp, ChevronLeft, ChevronRight, ArrowRight, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -61,6 +62,7 @@ export function ServiceDetailsPage({
     currentIndex: 0,
     title: ''
   });
+  const [selectedCards, setSelectedCards] = useState([]);
   const accentColor = serviceAccents[category] || '#5a8b9d';
 
   useEffect(() => {
@@ -81,6 +83,11 @@ export function ServiceDetailsPage({
         const data = await response.json();
         if (data.success) {
           setServiceDetails(data);
+          
+          // Pre-select the first package if none selected
+          if (data.provider_rate_cards?.length > 0) {
+            setSelectedCards([data.provider_rate_cards[0]]);
+          }
 
           // Auto-enrich URL if category or subCategory is missing
           if (!category || !subCategory) {
@@ -169,12 +176,44 @@ export function ServiceDetailsPage({
     ...serviceImages.map(img => `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`)
   ].filter(Boolean); // Remove any null/undefined images
 
-  const nextImage = () => {
+  const renderDescription = (htmlContent) => {
+    if (!htmlContent) {
+      return <p className="text-white/80 text-lg leading-relaxed">No description available.</p>;
+    }
+
+    return (
+      <div
+        className={`rich-text-content ${isExpanded ? '' : 'rich-text-content--collapsed'}`}
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(htmlContent),
+        }}
+      />
+    );
+  };
+
+  const nextImage = (event) => {
+    event?.stopPropagation();
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
-  const prevImage = () => {
+  const prevImage = (event) => {
+    event?.stopPropagation();
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const toggleRateCard = (card) => {
+    setSelectedCards(prev => {
+        const exists = prev.find(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
+        if (exists) {
+            return prev.filter(c => !(c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price)));
+        }
+        return [...prev, card]; // allow unlimited multi-select or handle as per need
+    });
+  };
+
+  const getRateCardImage = (card) => {
+    const image = card.serviceCardImages?.[0] || card.images?.[0] || card.image;
+    return image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${image}` : null;
   };
 
   return (
@@ -317,7 +356,7 @@ export function ServiceDetailsPage({
               </motion.div>
 
               {/* Tabbed Content Section (Moved Here) */}
-              <div className="bg-[#1a1a1a]/40 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden p-6 md:p-8">
+              <div className="bg-[#1a1a1a]/40 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden p-6 md:p-8 mb-28">
                 {/* Tab Navigation */}
                 <div className="flex gap-2 mb-8 border-b border-white/10 pb-4 overflow-x-auto">
                   {['About Service', 'Working Images', 'Ratings'].map((tab) => (
@@ -346,17 +385,54 @@ export function ServiceDetailsPage({
                     >
                       <div className="mb-6">
                         <h3 className="text-xl font-bold text-white mb-1">About Service</h3>
-                        <p className="text-white/40 text-xs italic">Approximate service rates</p>
+                        <p className="text-white/40 text-xs italic">
+                          Approximate service rates ({selectedCards.length} selected)
+                        </p>
                       </div>
-                      <div className="grid gap-4">
-                        {provider_rate_cards.map((card, index) => (
+                      <div className="grid gap-4 max-h-[min(42vh,420px)] overflow-y-auto pr-2 pb-4 custom-scrollbar">
+                        {provider_rate_cards.length > 0 ? provider_rate_cards.map((card, index) => {
+                          const isSelected = selectedCards.some(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
+                          const cardImage = getRateCardImage(card);
+                          return (
                           <div
-                            key={card.id || index}
-                            className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#037166]/50 transition-all group"
+                            role="button"
+                            tabIndex={0}
+                            key={card._id || card.id || index}
+                            onClick={() => toggleRateCard(card)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                toggleRateCard(card);
+                              }
+                            }}
+                            aria-pressed={isSelected}
+                            className={`w-full p-5 rounded-2xl border text-left transition-all group ${
+                              isSelected
+                                ? 'bg-[#037166]/15 border-[#04a99d]/70 shadow-lg shadow-[#037166]/20'
+                                : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
+                            }`}
                           >
-                            <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-4">
+                              <div
+                                className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
+                                  isSelected ? 'bg-[#037166] text-white' : 'bg-white/10 text-white/40'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-6 h-6" />}
+                              </div>
+
+                              {cardImage && (
+                                <img
+                                  src={cardImage}
+                                  alt={card.title || 'Service rate card'}
+                                  className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0"
+                                />
+                              )}
+
                               <div className="flex-1 pr-4">
-                                <h6 className="text-white font-medium group-hover:text-[#04a99d] transition-colors leading-snug mb-1">{card.title}</h6>
+                                <h6 className={`font-bold transition-colors leading-snug mb-1 ${
+                                  isSelected ? 'text-[#6ed0c8]' : 'text-white group-hover:text-[#04a99d]'
+                                }`}>{card.title}</h6>
                                 {card.reason && (
                                   <p className="text-white/40 text-xs leading-relaxed">{card.reason}</p>
                                 )}
@@ -364,12 +440,16 @@ export function ServiceDetailsPage({
                                 {/* See More Button if images exist */}
                                 {(card.serviceCardImages?.length > 0 || card.images?.length > 0) && (
                                   <button
-                                    onClick={() => setRateCardModal({
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setRateCardModal({
                                       isOpen: true,
                                       images: card.serviceCardImages || card.images,
                                       currentIndex: 0,
                                       title: card.title
-                                    })}
+                                    });
+                                    }}
                                     className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#04a99d] hover:text-[#037166] transition-colors"
                                   >
                                     See More
@@ -380,7 +460,8 @@ export function ServiceDetailsPage({
                               <span className="text-[#04a99d] font-bold text-lg whitespace-nowrap flex-shrink-0">₹{card.price}</span>
                             </div>
                           </div>
-                        ))}
+                          );
+                        }) : <div className="text-center py-12 text-white/40 border border-white/10 border-dashed rounded-2xl">No service rates available.</div>}
                       </div>
                     </motion.div>
                   )}
@@ -515,13 +596,11 @@ export function ServiceDetailsPage({
               </div>
 
               <div className="mb-6">
-                <p className="text-white/80 text-lg leading-relaxed whitespace-pre-line inline">
-                  {isExpanded ? storeData.description : storeData.description?.slice(0, 250) + (storeData.description?.length > 250 ? '...' : '')}
-                </p>
+                {renderDescription(storeData.description)}
                 {storeData.description?.length > 250 && (
                   <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="text-[#04a99d] font-bold ml-2 hover:underline focus:outline-none inline-block"
+                    className="text-[#04a99d] font-bold mt-2 hover:underline focus:outline-none inline-block"
                   >
                     {isExpanded ? 'Read Less' : 'Read More'}
                   </button>
@@ -563,32 +642,33 @@ export function ServiceDetailsPage({
                     return;
                   }
 
+                  if (selectedCards.length === 0) {
+                    toast.error("Please select at least one service card to proceed");
+                    return;
+                  }
+
                   localStorage.setItem('last_service_id', finalServiceId);
-                  const firstPackage = provider_rate_cards[0];
+                  
+                  const itemsToBook = selectedCards.map(card => {
+                    const rawPrice = card.price || 0;
+                    const cleanPrice = typeof rawPrice === 'string'
+                      ? parseInt(rawPrice.replace(/[^0-9]/g, '')) || 0
+                      : rawPrice;
 
-                  // Clean the price string (remove + and non-numeric chars)
-                  const rawPrice = firstPackage?.price || 0;
-                  const cleanPrice = typeof rawPrice === 'string'
-                    ? parseInt(rawPrice.replace(/[^0-9]/g, '')) || 0
-                    : rawPrice;
-
-                  // Enrich the item with service details for the confirmation page
-                  const itemsToBook = [{
-                    ...(firstPackage || {}),
-                    id: firstPackage?.id || `direct-${finalServiceId}`,
-                    serviceId: finalServiceId,
-                    serviceName: storeData.name || 'Professional Service',
-                    packageName: firstPackage?.title || 'Standard Package',
-                    price: cleanPrice,
-                    bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
-                    inspectionCost: storeData.inspectionCost || 0,
-                    quantity: 1
-                  }];
+                    return {
+                      ...(card || {}),
+                      id: card.id || card._id || `pkg-${Math.random()}`,
+                      serviceId: finalServiceId,
+                      serviceName: storeData.name || 'Professional Service',
+                      packageName: card.title || 'Standard Package',
+                      price: cleanPrice,
+                      bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
+                      inspectionCost: storeData.inspectionCost || 0,
+                      quantity: 1
+                    };
+                  });
 
                   localStorage.setItem('booking_package_details', JSON.stringify(itemsToBook));
-
-                  // Navigate to address page
-                  // Use appliances as general prefix for bookings as per current architecture
                   router.push('/appliances/address');
                 }}
                 className="w-full mt-6 px-10 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"

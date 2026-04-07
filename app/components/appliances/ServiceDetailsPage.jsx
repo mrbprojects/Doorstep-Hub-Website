@@ -7,6 +7,7 @@ import { ArrowLeft, Star, Clock, Shield, CheckCircle, Award, ThumbsUp, ChevronLe
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useLocationContext } from '@/context/LocationContext';
+import DOMPurify from 'dompurify';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -301,14 +302,28 @@ export function ServiceDetailsPage({
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const renderDescription = (htmlContent) => {
+    if (!htmlContent) {
+      return <p className="text-white/80 text-sm leading-relaxed">No description available.</p>;
+    }
+
+    return (
+      <div
+        className={`rich-text-content rich-text-content--compact ${isExpanded ? '' : 'rich-text-content--collapsed-sm'}`}
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(htmlContent),
+        }}
+      />
+    );
+  };
+
   const toggleRateCard = (card) => {
     setSelectedCards(prev => {
-        const isExists = prev.find(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
-        if (isExists) {
-            return []; // Deselect if already selected
-        } else {
-            return [card]; // Select ONLY this one (Single Selection)
+        const exists = prev.find(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
+        if (exists) {
+            return prev.filter(c => !(c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price)));
         }
+        return [...prev, card]; // allow unlimited multi-select or handle as per need
     });
   };
 
@@ -439,7 +454,7 @@ export function ServiceDetailsPage({
                 <div className="relative rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm border border-white/10">
                   <div
                     className="relative w-full overflow-hidden"
-                    style={{ aspectRatio: '16/9' }}
+                    style={{ aspectRatio: '16/7' }}
                     onClick={() => { setSelectedImageIndex(currentImageIndex); setIsLightboxOpen(true); }}
                   >
                     <img
@@ -511,7 +526,7 @@ export function ServiceDetailsPage({
                           <h3 className="text-lg font-bold text-white mb-0.5">About Service</h3>
                           <p className="text-white/40 text-xs italic">Approximate service rates (Select a service to proceed)</p>
                         </div>
-                        <div className="grid gap-2.5">
+                        <div className="grid gap-3 pb-4">
                           {provider_rate_cards.map((card, index) => {
                             const isSelected = selectedCards.some(c => c._id === card._id || c.id === card.id || (c.title === card.title && c.price === card.price));
                             return (
@@ -677,11 +692,9 @@ export function ServiceDetailsPage({
 
               {/* Description */}
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line inline">
-                  {isExpanded ? storeData.description : storeData.description?.slice(0, 125) + (storeData.description?.length > 125 ? '...' : '')}
-                </p>
+                {renderDescription(storeData.description)}
                 {storeData.description?.length > 125 && (
-                  <button onClick={() => setIsExpanded(!isExpanded)} className="text-[#04a99d] font-bold ml-1.5 text-sm hover:underline focus:outline-none">
+                  <button onClick={() => setIsExpanded(!isExpanded)} className="text-[#04a99d] font-bold mt-2 text-sm hover:underline focus:outline-none">
                     {isExpanded ? 'Read Less' : 'Read More'}
                   </button>
                 )}

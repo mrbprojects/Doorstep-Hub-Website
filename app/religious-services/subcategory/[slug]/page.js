@@ -40,9 +40,19 @@ function SubCategoryServicesContent() {
                     subCategoryName: parsed.subCategoryName || prev.subCategoryName,
                     categoryId: parsed.categoryId || prev.categoryId
                 }));
+                if (parsed.budget && !searchParams.get('budget')) {
+                    if (parsed.budget === '5000+') {
+                        setPriceRange([5000, 50000]);
+                    } else if (parsed.budget.includes('-')) {
+                        const [min, max] = parsed.budget.split('-').map(Number);
+                        if (!isNaN(min) && !isNaN(max)) {
+                            setPriceRange([min, max]);
+                        }
+                    }
+                }
             }
         }
-    }, []);
+    }, [searchParams]);
 
     const { categoryName, subCategoryName, categoryId } = context;
     const categoryUniqueId = categoryId;

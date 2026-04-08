@@ -4,22 +4,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
     X, ChevronRight, ChevronLeft, Check,
-    Flame, Users, Calendar, Clock, Sparkles, Star, Home as HomeIcon, Sun
+    Flame, Users, Calendar, Clock, Sparkles, Star, Home as HomeIcon
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const staticQuestions = [
-    {
-        id: 'budget',
-        title: 'Budget Range?',
-        icon: Sun,
-        options: [
-            { value: '499-1500', label: '₹499–₹1,500', desc: 'Essential ceremonies' },
-            { value: '1500-5000', label: '₹1,500–₹5,000', desc: 'Detailed rituals' },
-            { value: '5000+', label: '₹5,000+', desc: 'Grand community events' },
-        ],
-    },
-];
+const staticQuestions = [];
 
 export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
     const router = useRouter();
@@ -88,6 +77,7 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
             icon: Flame,
             options: categories.map(cat => ({
                 value: cat._id,
+                slug: cat.slug,
                 label: cat.categoryName || cat.name,
                 desc: 'Select to explore related services',
                 categoryName: cat.categoryName || cat.name
@@ -99,6 +89,7 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
             icon: Sparkles,
             options: subcategories.map(sub => ({
                 value: sub._id,
+                slug: sub.slug,
                 label: sub.name,
                 desc: sub.startingAt || sub.price || sub.minFare ? `Starting at ₹${sub.startingAt || sub.price || sub.minFare}` : sub.description || 'Proceed with this specific service',
                 subcategoryName: sub.name,
@@ -115,19 +106,18 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
     // Unified finish function to avoid stale state issues
     const handleFinish = (finalAnswers) => {
         // Use 'all' if no specific subcategory was chosen
-        const subId = finalAnswers.subcategory || 'all';
-        
-        const params = new URLSearchParams();
-        // Standardize ALL params to always be present in URL, matching user structure expectations
-        params.set('category', finalAnswers.categoryName || '');
-        params.set('categoryId', finalAnswers.category || '');
-        params.set('name', finalAnswers.subcategoryName || '');
-        params.set('budget', finalAnswers.budget || '');
-        
-        // Ensure subCategoryId is also in query for certain backend/filter logic
-        if (subId !== 'all') params.set('subcategoryId', subId);
+        const subTarget = finalAnswers.subcategorySlug || finalAnswers.subcategory || finalAnswers.categorySlug || finalAnswers.category || 'all';
 
-        const targetUrl = `/religious-services/${subId}?${params.toString()}`;
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('religious_subcategory_context', JSON.stringify({
+                categoryId: finalAnswers.category || '',
+                categoryName: finalAnswers.categoryName || '',
+                subCategoryName: finalAnswers.subcategoryName || '',
+                budget: finalAnswers.budget || ''
+            }));
+        }
+
+        const targetUrl = `/religious-services/${subTarget}`;
         
         console.log("🕉️ Sacred redirect path formed:", targetUrl);
         
@@ -144,6 +134,8 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
 
         if (currentQuestion.id === 'category') {
             updatedAnswers.subcategory = undefined;
+            updatedAnswers.subcategorySlug = undefined;
+            updatedAnswers.categorySlug = option.slug;
             updatedAnswers.categoryName = option.categoryName;
             setAnswers(updatedAnswers);
             fetchSubcategories(option.value).then(() => {
@@ -153,9 +145,10 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
         }
 
         if (currentQuestion.id === 'subcategory') {
+            updatedAnswers.subcategorySlug = option.slug;
             updatedAnswers.subcategoryName = option.subcategoryName;
             setAnswers(updatedAnswers);
-            setCurrentStep(2);
+            handleFinish(updatedAnswers);
             return;
         }
 

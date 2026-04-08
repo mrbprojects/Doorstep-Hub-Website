@@ -20,6 +20,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [resendTimer, setResendTimer] = useState(0);
     const [referralCode, setReferralCode] = useState('');
+    const [profileSavedForBooking, setProfileSavedForBooking] = useState(false);
 
     // Auto-fill referral code from URL ?ref= param
     React.useEffect(() => {
@@ -31,6 +32,30 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     }, []);
     const fileInputRef = React.useRef(null);
     const profileToastShown = React.useRef(false);
+
+    const resetModalState = React.useCallback(() => {
+        setStep('login');
+        setMobile('');
+        setOtp('');
+        setLoading(false);
+        setIsEditing(false);
+        setSelectedFile(null);
+        setPreviewImage(null);
+        setResendTimer(0);
+        setProfileSavedForBooking(false);
+        profileToastShown.current = false;
+    }, []);
+
+    const handleClose = React.useCallback(() => {
+        resetModalState();
+        onClose?.();
+    }, [onClose, resetModalState]);
+
+    const handleLogout = React.useCallback(() => {
+        resetModalState();
+        logout();
+        onClose?.();
+    }, [logout, onClose, resetModalState]);
 
     // Timer logic for Resend OTP
     React.useEffect(() => {
@@ -147,7 +172,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 email: user.email || '',
                 phone: user.phone || user.mobile || ''
             });
-            if (!hasProfile) {
+            if (!hasProfile && !profileSavedForBooking) {
                 setIsEditing(true);
                 if (!profileToastShown.current) {
                     toast.info('Please complete your profile to continue');
@@ -160,7 +185,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 }
             }
         }
-    }, [user, isAuthenticated, step]);
+    }, [user, isAuthenticated, step, profileSavedForBooking]);
 
     const handleGoogleLogin = async () => {
         setLoading(true);
@@ -177,6 +202,38 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         }
     };
 
+    const handleProfileSave = async () => {
+        if (!profileData.name || !profileData.email) {
+            toast.error('Please fill in your name and email');
+            return false;
+        }
+
+        setLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('name', profileData.name);
+            formData.append('email', profileData.email);
+            formData.append('mobile', profileData.phone);
+            if (selectedFile) {
+                formData.append('image', selectedFile);
+            }
+            if (referralCode.trim()) {
+                formData.append('referalCode', referralCode.trim());
+            }
+
+            await updateProfile(formData);
+            setProfileSavedForBooking(true);
+            setIsEditing(false);
+            setSelectedFile(null);
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     const isFirstTimeUser = isAuthenticated && user && !((user.name || user.firstName || user.lastName) && (user.phone || user.mobile));
@@ -187,7 +244,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={onClose}
+                onClick={handleClose}
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
 
@@ -195,7 +252,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className={`relative w-full max-w-md ${t.bgMobile} glass-premium rounded-3xl border ${borderColor} shadow-2xl overflow-hidden`}
+                className={`relative w-full max-w-md ${t.bgMobile} glass-premium bg-[#D9EAE8]/10 rounded-3xl border ${borderColor} shadow-2xl overflow-hidden`}
             >
                 {/* Header */}
                 <div className={`p-6 border-b border-opacity-10 ${borderColor} flex items-center justify-between`}>
@@ -208,7 +265,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     ? 'Edit Profile'
                                     : 'Your Profile'}
                     </h2>
-                    <button onClick={onClose} className={`p-2 rounded-xl transition-colors hover:bg-white/10 ${t.textMain} opacity-70 hover:opacity-100`}>
+                    <button onClick={handleClose} className={`p-2 rounded-xl transition-colors hover:bg-white/10 ${t.textMain} opacity-70 hover:opacity-100`}>
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -423,38 +480,15 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     whileTap={{ scale: 0.9 }}
                                     onClick={async () => {
                                         if (isEditing) {
-                                            // Handle Save
-                                            if (!profileData.name || !profileData.email) {
-                                                toast.error('Please fill in your name and email');
-                                                return;
-                                            }
-                                            setLoading(true);
-                                            try {
-                                                const formData = new FormData();
-                                                formData.append('name', profileData.name);
-                                                formData.append('email', profileData.email);
-                                                formData.append('mobile', profileData.phone);
-                                                if (selectedFile) {
-                                                    formData.append('image', selectedFile);
-                                                }
-                                                if (referralCode.trim()) {
-                                                    formData.append('referalCode', referralCode.trim());
-                                                }
-
-                                                await updateProfile(formData);
-                                                setIsEditing(false);
-                                                setSelectedFile(null);
-                                            } catch (error) {
-                                                console.error(error);
-                                            } finally {
-                                                setLoading(false);
-                                            }
+                                            await handleProfileSave();
                                         } else {
                                             setIsEditing(true);
                                         }
                                     }}
                                     className={`absolute top-0 right-0 p-2.5 rounded-xl border transition-all ${isEditing
-                                        ? `bg-green-500/20 border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)] animate-pulse`
+                                        ? isFirstTimeUser
+                                            ? 'hidden'
+                                            : `bg-green-500/20 border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)] animate-pulse`
                                         : `bg-white/5 border-white/10 ${t.textHover} hover:bg-white/10`
                                         }`}
                                 >
@@ -508,20 +542,29 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                             onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                                             className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} placeholder:opacity-30 focus:border-opacity-100 transition-all outline-none font-mono tracking-widest`}
                                         />
-                                        {referralCode && (
-                                            <span className={`absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30`}>
-                                                Applied
-                                            </span>
-                                        )}
                                     </div>
                                 )}
                             </div>
+
+                            {isEditing && isFirstTimeUser && (
+                                <motion.button
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    onClick={async () => {
+                                        await handleProfileSave();
+                                    }}
+                                    disabled={loading}
+                                    className={`w-full py-4 border border-green-500/30 text-green-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-green-500/10 transition-all disabled:opacity-50`}
+                                >
+                                    {loading ? 'Saving...' : 'Save'}
+                                </motion.button>
+                            )}
 
                             {!isEditing && (
                                 <motion.button
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    onClick={onClose}
+                                    onClick={handleClose}
                                     className={`w-full py-4 border border-green-500/30 text-green-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-green-500/10 transition-all`}
                                 >
                                     Continue to Booking
@@ -530,10 +573,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                             )}
 
                             <button
-                                onClick={() => {
-                                    logout();
-                                    onClose();
-                                }}
+                                onClick={handleLogout}
                                 className={`w-full py-4 border border-red-500/30 text-red-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-red-500/10 transition-all`}
                             >
                                 <LogOut className="w-5 h-5" />

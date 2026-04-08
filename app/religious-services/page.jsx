@@ -211,7 +211,7 @@ export default function ReligiousServicesPage() {
     <div className="min-h-screen bg-[var(--off-white)]">
 
       {/* 1. HERO SECTION - Calm & Divine with Animated Elements */}
-      <section className="relative min-h-[110vh] flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Vertical Gradient Background: White â†’ Saffron â†’ Deep Maroon */}
         <div className="absolute inset-0 bg-gradient-to-b from-white via-[#FFF8E7] to-[#8B4513]/30" />
 
@@ -341,7 +341,7 @@ export default function ReligiousServicesPage() {
         </div>
 
         {/* Hero Content */}
-        <div className="container relative mx-auto px-4 py-20 mt-10 z-10">
+        <div className="container relative mx-auto px-4 pt-20 pb-14 mt-10 z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Trust Badge */}
             <motion.div
@@ -444,13 +444,13 @@ export default function ReligiousServicesPage() {
     rel={globalSettings?.playStore ? "noopener noreferrer" : undefined}
     whileHover={{ scale: 1.05, y: -2 }}
     whileTap={{ scale: 0.95 }}
-    className="flex items-center justify-center w-36 h-12 rounded-xl bg-gradient-to-r from-[#FF9933] via-[#FFD700] to-[#FF4500] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
+    className="flex items-center justify-center w-39 h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
     title="Get it on Google Play"
   >
     <img 
       src="/andriod1.png" 
       alt="Google Play" 
-      className="h-full w-full object-contain brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
+      className="h-full w-full object-cover brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
     />
   </motion.a>
 
@@ -461,13 +461,13 @@ export default function ReligiousServicesPage() {
     rel={globalSettings?.appStore ? "noopener noreferrer" : undefined}
     whileHover={{ scale: 1.05, y: -2 }}
     whileTap={{ scale: 0.95 }}
-    className="flex items-center justify-center w-36 h-12 rounded-xl bg-gradient-to-r from-[#FF9933] via-[#FFD700] to-[#FF4500] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
+    className="flex items-center justify-center w-39 h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
     title="Download on the App Store"
   >
     <img 
       src="/apple2.png" 
       alt="App Store" 
-      className="h-full w-full object-contain brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
+      className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" 
     />
   </motion.a>
 </div>

@@ -359,7 +359,7 @@ export const AuthProvider = ({ children }) => {
         if (sessionCheckInterval.current) {
             clearInterval(sessionCheckInterval.current);
         }
-        toast.message('Logged out successfully');
+        toast.success('Logged out successfully');
     }, [clearToken]);
 
     // Global API error handler for 401 responses

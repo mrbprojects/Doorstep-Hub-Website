@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -51,6 +51,10 @@ export default function ReligiousServicesPage() {
   const [latestServices, setLatestServices] = useState([]);
   const [latestLoading, setLatestLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [globalSettings, setGlobalSettings] = useState(null);
+
+  const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
+  const RELIGIOUS_SERVICE_SLUG = 'religious-services';
 
   const sliderSettings = {
     dots: true,
@@ -81,8 +85,6 @@ export default function ReligiousServicesPage() {
     // No auto-detect, let user trigger or context handle
   }, [location]);
 
-  const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
-
   // Set the correct serviceId in localStorage on mount to ensure consistency
   useEffect(() => {
     try {
@@ -94,6 +96,22 @@ export default function ReligiousServicesPage() {
     } catch (e) {
       console.error('Error setting selectedService in localStorage:', e);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchGlobalSettings = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+        const data = await response.json();
+        if (data.success && data.data) {
+          setGlobalSettings(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching global settings:", error);
+      }
+    };
+
+    fetchGlobalSettings();
   }, []);
 
   useEffect(() => {
@@ -382,7 +400,7 @@ export default function ReligiousServicesPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.9 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col items-center gap-5 justify-center"
             >
               {/* Primary CTA with Glow Pulse */}
               <motion.div
@@ -417,15 +435,52 @@ export default function ReligiousServicesPage() {
                 </Button>
               </motion.div>
 
+             {/* Alternative - Traditional Religious Theme */}
+<div className="relative flex flex-wrap justify-center gap-3">
+  {/* Google Play Button */}
+  <motion.a
+    href={globalSettings?.playStore || "#"}
+    target={globalSettings?.playStore ? "_blank" : undefined}
+    rel={globalSettings?.playStore ? "noopener noreferrer" : undefined}
+    whileHover={{ scale: 1.05, y: -2 }}
+    whileTap={{ scale: 0.95 }}
+    className="flex items-center justify-center w-36 h-12 rounded-xl bg-gradient-to-r from-[#FF9933] via-[#FFD700] to-[#FF4500] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
+    title="Get it on Google Play"
+  >
+    <img 
+      src="/andriod1.png" 
+      alt="Google Play" 
+      className="h-full w-full object-contain brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
+    />
+  </motion.a>
+
+  {/* App Store Button */}
+  <motion.a
+    href={globalSettings?.appStore || "#"}
+    target={globalSettings?.appStore ? "_blank" : undefined}
+    rel={globalSettings?.appStore ? "noopener noreferrer" : undefined}
+    whileHover={{ scale: 1.05, y: -2 }}
+    whileTap={{ scale: 0.95 }}
+    className="flex items-center justify-center w-36 h-12 rounded-xl bg-gradient-to-r from-[#FF9933] via-[#FFD700] to-[#FF4500] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
+    title="Download on the App Store"
+  >
+    <img 
+      src="/apple2.png" 
+      alt="App Store" 
+      className="h-full w-full object-contain brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
+    />
+  </motion.a>
+</div>
+
               {/* Secondary CTA */}
-              <Button
+              {/* <Button
                 size="lg"
                 variant="outline"
                 className="border-2 border-[var(--saffron)] text-[var(--saffron)] hover:bg-[var(--saffron)]/10 px-10 py-6 text-lg font-semibold bg-white/80 backdrop-blur-sm"
                 onClick={() => router.push('/religious-services/category')}
               >
                 Explore Services
-              </Button>
+              </Button> */}
             </motion.div>
 
             {/* Trust Indicators */}

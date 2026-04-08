@@ -249,7 +249,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                 onClick={() => {
                     const targetSubcat = subcategoryId || context.subcategoryId;
                     if (targetSubcat) {
-                        router.push(`/religious-services/subcategory/${targetSubcat}`);
+                        router.push(`/religious-services/${targetSubcat}`);
                     } else {
                         router.back();
                     }
@@ -636,3 +636,4 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
         </div>
     );
 }
+

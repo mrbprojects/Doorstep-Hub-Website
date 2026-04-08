@@ -97,10 +97,14 @@ export function ServiceBookingModal({ isOpen, onClose }) {
             image: subCategory.image
         }));
 
-        // Redirect to listing page
+        // Redirect to dedicated appliance listing page
         const subCategorySlug = subCategory.slug || subCategory._id;
         if (subCategorySlug) {
-            router.push(`/${subCategorySlug}`);
+            const qs = new URLSearchParams();
+            if (selectedCategory?.slug) qs.set('cat', selectedCategory.slug);
+            if (subCategory.name) qs.set('name', subCategory.name);
+            if (subCategory._id) qs.set('id', subCategory._id);
+            router.push(`/appliances/listing/${subCategorySlug}?${qs.toString()}`);
         } else {
             router.push('/appliance-repair-services');
         }

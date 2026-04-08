@@ -424,9 +424,9 @@ function HeroContent({ services = [], loading = false, error = null }) {
   const [isPaused, setIsPaused] = useState(false);
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
-    religious: 'pandit-ji-for-puja-services',
-    spa: 'salon-at-home-services',
-    pg: 'pg-hostels-near-me'
+    religious: 'religious-services',
+    spa: 'spa-salon',
+    pg: 'pghostels'
   });
 
   // Fetch Service Slugs (only appliance ID is supported by this endpoint)

@@ -130,7 +130,7 @@ function ReligiousCategoryContent() {
                 subCategoryName: subCat.name
             }));
         }
-        router.push(`/religious-services/subcategory/${target}`);
+        router.push(`/religious-services/${target}`);
     };
 
     if (loading) {
@@ -313,3 +313,4 @@ export default function ReligiousCategoryPage() {
 function SubCategoryServicesContent() {
     return <ReligiousCategoryContent />;
 }
+

@@ -6,7 +6,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ChevronRight, Sparkles, Flower } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocationContext } from '@/context/LocationContext';
-import { resolveParam } from '@/utils/slugHelper';
+import { isObjectId } from '@/utils/slugHelper';
 
 export default function SpaCategoryPage({ slugOverride = null, initialData = null }) {
     const router = useRouter();
@@ -76,13 +76,7 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
 
     const handleSubCategoryClick = (subCat) => {
         const subSlug = subCat.slug || subCat._id;
-        const catSlug = slugOrId && !isObjectId(slugOrId) ? slugOrId : null;
-        
-        if (catSlug && subSlug) {
-            router.push(`/${catSlug}/${subSlug}`);
-        } else {
-            router.push(`/${subSlug}`);
-        }
+        router.push(`/spa-salon/${subSlug}`);
     };
 
     if (loading) {
@@ -217,3 +211,4 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
         </div>
     );
 }
+

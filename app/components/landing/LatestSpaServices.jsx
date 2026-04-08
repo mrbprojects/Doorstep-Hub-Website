@@ -23,7 +23,7 @@ export function LatestSpaServices() {
   }, []);
 
   const handleStoreClick = (store) => {
-    router.push(`/spa-salon/${store._id}`);
+    router.push(`/spa-salon/${store.slug || store._id}`);
   };
 
   useEffect(() => {
@@ -278,4 +278,5 @@ export function LatestSpaServices() {
     </section>
   );
 }
+
 

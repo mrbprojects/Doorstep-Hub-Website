@@ -302,8 +302,14 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   };
 
   const handleSubCategorySelect = (subCat) => {
-    // Navigate to the selected subcategory
-    router.push(`/${subCat.slug || subCat._id}`);
+    // Navigate to the dedicated appliance listing page
+    const qs = new URLSearchParams();
+    // Find the parent category slug for this subcategory
+    const parentCat = allCategories.find(c => c._id === expandedCategory);
+    if (parentCat?.slug) qs.set('cat', parentCat.slug);
+    if (subCat.name) qs.set('name', subCat.name);
+    if (subCat._id) qs.set('id', subCat._id);
+    router.push(`/appliances/listing/${subCat.slug || subCat._id}?${qs.toString()}`);
     // Close mobile filter if open
     setFilterOpen(false);
   };

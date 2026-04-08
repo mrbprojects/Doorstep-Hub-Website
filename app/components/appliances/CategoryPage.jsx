@@ -98,7 +98,12 @@ export function CategoryPage({ slug, initialData, onBack }) {
 
   const handleSubCategoryClick = (subCategory) => {
     const subCategorySlug = subCategory.slug || subCategory._id;
-    router.push(`/${subCategorySlug}`);
+    const catSlug = categoryMetadata.slug || slug;
+    const params = new URLSearchParams();
+    if (catSlug) params.set('cat', catSlug);
+    if (subCategory.name) params.set('name', subCategory.name);
+    if (subCategory._id) params.set('id', subCategory._id);
+    router.push(`/appliances/listing/${subCategorySlug}?${params.toString()}`);
   };
 
   const handleBack = () => {

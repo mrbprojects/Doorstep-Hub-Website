@@ -25,9 +25,9 @@ export function BookingServices() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
-    religious: 'pandit-ji-for-puja-services',
-    spa: 'salon-at-home-services',
-    pg: 'pg-hostels-near-me'
+    religious: 'religious-services',
+    spa: 'spa-salon',
+    pg: 'pghostels'
   });
 
   // Fetch Service Slugs and Services
@@ -106,10 +106,6 @@ export function BookingServices() {
   }, [loading, services]);
 
   const handleServiceClick = (service) => {
-    if (service.slug) {
-      router.push(`/${service.slug}`);
-      return;
-    }
     const categoryParam = encodeURIComponent(service.category);
     const subCategoryParam = encodeURIComponent(service.title);
 
@@ -122,7 +118,20 @@ export function BookingServices() {
     else if (upperCategory.includes('PG') || upperTitle.includes('PG')) baseSlug = serviceSlugs.pg;
     else if (upperCategory.includes('SPA') || upperTitle.includes('SPA')) baseSlug = serviceSlugs.spa;
 
-    router.push(`/${baseSlug}/detail/${service.id}?category=${categoryParam}&subCategory=${subCategoryParam}`);
+    if (baseSlug === serviceSlugs.spa) {
+      router.push(`/spa-salon/${service.slug || service.id}`);
+      return;
+    }
+    if (baseSlug === serviceSlugs.religious) {
+      router.push(`/religious-services/${service.slug || service.id}`);
+      return;
+    }
+    if (baseSlug === serviceSlugs.pg) {
+      router.push(`/pghostels/${service.slug || service.id}`);
+      return;
+    }
+
+    router.push(`/${service.slug || `${baseSlug}/detail/${service.id}?category=${categoryParam}&subCategory=${subCategoryParam}`}`);
   };
 
   return (
@@ -274,4 +283,5 @@ export function BookingServices() {
     </section>
   );
 }
+
 

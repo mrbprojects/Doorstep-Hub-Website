@@ -323,7 +323,7 @@ export function HomePage() {
 
     const handleCategoryClick = (category) => {
         const target = category.slug || category._id || category.id;
-        router.push(`/${category.slug || target}`);
+        router.push(`/spa-salon/${target}`);
     };
 
     return (
@@ -505,13 +505,8 @@ export function HomePage() {
                                     }}
                                     onClick={() => {
                                         if (sub.slug || sub._id) {
-                                            const catSlug = sub.parentCategorySlug;
                                             const subSlug = sub.slug || sub._id;
-                                            if (catSlug && subSlug) {
-                                                router.push(`/${catSlug}/${subSlug}`);
-                                            } else {
-                                                router.push(`/${subSlug}`);
-                                            }
+                                            router.push(`/spa-salon/${subSlug}`);
                                         } else {
                                             setModalOpen(true);
                                         }
@@ -889,7 +884,7 @@ function PackageCard({ package: pkg, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -10 }}
-            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
+            onClick={() => router.push(`/spa-salon/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-52 overflow-hidden">
@@ -945,7 +940,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/${pkg.slug || pkg.id}`)}
+            onClick={() => router.push(`/spa-salon/${pkg.slug || pkg.id}`)}
             className="bg-white rounded-xl overflow-hidden border border-[#E8ECF2] cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
         >
             <div className="relative h-40">
@@ -984,7 +979,7 @@ function NearbyCenterCard({ center, index, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            onClick={() => router.push(`/${center.slug || center.id}`)}
+            onClick={() => router.push(`/spa-salon/${center.slug || center.id}`)}
             className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] cursor-pointer group hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-48 overflow-hidden">
@@ -1082,4 +1077,5 @@ function BlogCard({ title, image, readTime }) {
         </motion.div>
     );
 }
+
 

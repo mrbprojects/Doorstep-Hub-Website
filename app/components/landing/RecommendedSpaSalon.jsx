@@ -22,8 +22,7 @@ export function RecommendedSpaSalon() {
   
   const handleStoreClick = (store) => {
     if (store.isDummy) return;
-    // User requested domain + slug (root level)
-    router.push(`/${store.slug || store.id}`);
+    router.push(`/spa-salon/${store.slug || store.id}`);
   };
 
   const amenityIcons = {
@@ -450,4 +449,5 @@ export function RecommendedSpaSalon() {
     </section>
   );
 }
+
 

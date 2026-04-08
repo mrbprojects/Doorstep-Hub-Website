@@ -254,7 +254,7 @@ function SubCategoryServicesContent() {
                                                                 subCategoryName: sub.name
                                                             }));
                                                         }
-                                                        router.push(`/religious-services/subcategory/${subTarget}`);
+                                                        router.push(`/religious-services/${subTarget}`);
                                                     }}
                                                     className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
                                                         slugOrId === subTarget
@@ -572,3 +572,4 @@ export default function SubCategoryServicesPage() {
         </Suspense>
     );
 }
+

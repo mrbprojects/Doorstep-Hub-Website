@@ -24,7 +24,7 @@ export function RecommendedHostels() {
   const handleHostelClick = (hostel) => {
     const detailSegment = hostel.slug || hostel.hostelSlug || hostel.id;
     if (!detailSegment) return;
-    router.push(`/${detailSegment}`);
+    router.push(`/pghostels/${detailSegment}`);
   };
 
   // Fetch latest PG hostels from API
@@ -483,4 +483,5 @@ export function RecommendedHostels() {
     </section>
   );
 }
+
 

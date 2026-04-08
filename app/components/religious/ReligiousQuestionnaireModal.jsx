@@ -127,7 +127,7 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
         // Ensure subCategoryId is also in query for certain backend/filter logic
         if (subId !== 'all') params.set('subcategoryId', subId);
 
-        const targetUrl = `/religious-services/subcategory/${subId}?${params.toString()}`;
+        const targetUrl = `/religious-services/${subId}?${params.toString()}`;
         
         console.log("🕉️ Sacred redirect path formed:", targetUrl);
         
@@ -368,4 +368,5 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
         </AnimatePresence>
     );
 }
+
 

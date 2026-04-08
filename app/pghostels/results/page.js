@@ -223,7 +223,7 @@ function PGResultsContent() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-6" onClick={() => router.push(`/pghostels/hostel-detail/${listing.slug || listing.id}`)}>
+                    <div className="p-6" onClick={() => router.push(`/pghostels/${listing.slug || listing.id}`)}>
                         {/* PG Name & Location */}
                         <div className="mb-4">
                             <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#037166] transition-colors line-clamp-1">
@@ -433,4 +433,5 @@ export default function PGResultsPage() {
         </Suspense>
     );
 }
+
 

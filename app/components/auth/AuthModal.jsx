@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Phone, ShieldCheck, Mail, User, LogOut, Camera, Chrome, Pencil, Check, ChevronRight, Gift } from 'lucide-react';
+import { X, Phone, ShieldCheck, Mail, User, LogOut, Camera, Chrome, Pencil, ChevronRight, Gift } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
@@ -252,10 +252,12 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className={`relative w-full max-w-md ${t.bgMobile} glass-premium bg-[#D9EAE8]/10 rounded-3xl border ${borderColor} shadow-2xl overflow-hidden`}
+                className="relative w-full max-w-md overflow-hidden rounded-3xl border border-neutral-200/30 bg-white/25 shadow-2xl shadow-black/40 backdrop-blur-2xl transition-all duration-500"
             >
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/25 via-white/10 to-white/5" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-white/15 blur-2xl" />
                 {/* Header */}
-                <div className={`p-6 border-b border-opacity-10 ${borderColor} flex items-center justify-between`}>
+                <div className={`relative p-6 border-b border-opacity-10 ${borderColor} flex items-center justify-between`}>
                     <h2 className={`text-xl font-bold ${t.textMain}`}>
                         {!isAuthenticated
                             ? 'Sign In'
@@ -270,7 +272,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                     </button>
                 </div>
 
-                <div className="p-8">
+                <div className="relative p-8">
                     {!isAuthenticated ? (
                         step === 'login' ? (
                             <div className="space-y-6">
@@ -475,25 +477,16 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     <h3 className={`text-xl font-bold ${t.textMain}`}>{user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User'}</h3>
                                     <p className={`${t.textMain} opacity-60 text-sm`}>{profileData.phone || user?.phone || user?.mobile || 'No phone'}</p>
                                 </div>
-                                <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={async () => {
-                                        if (isEditing) {
-                                            await handleProfileSave();
-                                        } else {
-                                            setIsEditing(true);
-                                        }
-                                    }}
-                                    className={`absolute top-0 right-0 p-2.5 rounded-xl border transition-all ${isEditing
-                                        ? isFirstTimeUser
-                                            ? 'hidden'
-                                            : `bg-green-500/20 border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)] animate-pulse`
-                                        : `bg-white/5 border-white/10 ${t.textHover} hover:bg-white/10`
-                                        }`}
-                                >
-                                    {isEditing ? <Check className="w-5 h-5 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" /> : <Pencil className="w-5 h-5" />}
-                                </motion.button>
+                                {!isEditing && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setIsEditing(true)}
+                                        className={`absolute top-0 right-0 p-2.5 rounded-xl border transition-all bg-white/5 border-white/10 ${t.textHover} hover:bg-white/10`}
+                                    >
+                                        <Pencil className="w-5 h-5" />
+                                    </motion.button>
+                                )}
                             </div>
 
                             <div className="space-y-4">
@@ -546,7 +539,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                 )}
                             </div>
 
-                            {isEditing && isFirstTimeUser && (
+                            {isEditing && (
                                 <motion.button
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import CategorySlugPage from '../category/[slug]/page';
 import ReligiousServiceDetailPage from '../service/[slug]/page';
+import SubCategoryServicesPage from '../subcategory/[slug]/page';
 
 /**
  * Root slug router for Religious Services.
@@ -13,7 +14,7 @@ import ReligiousServiceDetailPage from '../service/[slug]/page';
 export default function ReligiousRootSlugPage() {
   const params = useParams();
   const slug = params.slug;
-  const [mode, setMode] = useState('loading'); // 'loading' | 'service' | 'category'
+  const [mode, setMode] = useState('loading'); // 'loading' | 'service' | 'category' | 'subcategory'
 
   useEffect(() => {
     let active = true;
@@ -39,6 +40,32 @@ export default function ReligiousRootSlugPage() {
             setMode('category');
             return;
           }
+
+          for (const category of catData.category) {
+            const subResp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                categorySlug: category.slug,
+                serviceSlug: 'rituals-and-religious-services'
+              })
+            });
+            const subData = await subResp.json();
+            if (!active) return;
+
+            if (subData?.success && Array.isArray(subData.data)) {
+              const isSubcategory = subData.data.some(
+                (sub) =>
+                  (sub.slug && sub.slug.toLowerCase() === slug.toLowerCase()) ||
+                  sub._id === slug
+              );
+
+              if (isSubcategory) {
+                setMode('subcategory');
+                return;
+              }
+            }
+          }
         }
 
         // 2) Fallback: check provider
@@ -63,6 +90,10 @@ export default function ReligiousRootSlugPage() {
 
   if (mode === 'service') {
     return <ReligiousServiceDetailPage slugOverride={slug} />;
+  }
+
+  if (mode === 'subcategory') {
+    return <SubCategoryServicesPage />;
   }
 
   return <CategorySlugPage params={{ slug }} />;

@@ -181,7 +181,7 @@ export function SpaLandingPage() {
                                 <motion.div
                                     key={cat._id || index}
                                     whileHover={{ y: -10 }}
-                                    onClick={() => router.push(`/spa-salon/category/${cat.slug || cat._id}`)}
+                                    onClick={() => router.push(`/spa-salon/${cat.slug || cat._id}`)}
                                     className="group cursor-pointer"
                                 >
                                     <Card className="h-full border-none shadow-lg hover:shadow-xl transition-all overflow-hidden">
@@ -214,4 +214,5 @@ export function SpaLandingPage() {
         </div>
     );
 }
+
 

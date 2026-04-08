@@ -3,12 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ChevronRight, MapPin, Loader2, AlertCircle, ShieldCheck, Star, Filter } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Loader2, AlertCircle, Sparkles, Home } from 'lucide-react';
 import { resolveParam } from '@/utils/slugHelper';
 
 const SERVICE_ID = '69524fb157bb211ca094e5ee'; // PG & Hostels service
-
-const bgTexture = "radial-gradient(circle at 10% 20%, rgba(255,255,255,0.08), transparent 35%), radial-gradient(circle at 80% 0%, rgba(255,255,255,0.05), transparent 25%)";
 
 function PGSubcategoryContent() {
     const { slug } = useParams();
@@ -23,13 +21,6 @@ function PGSubcategoryContent() {
     const [subcategories, setSubcategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
-    const pill = (label, value) => (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 text-sm text-gray-700 border border-white/60 shadow-sm">
-            <span className="font-semibold text-gray-900">{value}</span>
-            <span className="uppercase tracking-[0.15em] text-xs text-gray-500">{label}</span>
-        </div>
-    );
 
     useEffect(() => {
         const fetchSubcats = async () => {
@@ -63,121 +54,133 @@ function PGSubcategoryContent() {
     }, [categoryKey]);
 
     const goToListings = (subcat) => {
-        const params = new URLSearchParams();
-        params.set('categoryId', categoryId || categoryKey);
-        if (categorySlug) params.set('categorySlug', categorySlug);
-        params.set('categoryName', categoryName);
-        params.set('subcategoryId', subcat._id);
-        if (subcat.slug) params.set('subcategorySlug', subcat.slug);
-        params.set('subcategoryName', subcat.name);
-        router.push(`/pghostels/listings/all?${params.toString()}`);
+        router.push(`/pghostels/${subcat.slug || subcat._id}`);
+    };
+
+    const getImageUrl = (subcat) => {
+        const image = subcat.image || subcat.categoryIcon || subcat.icon;
+        if (!image) return null;
+        return image.startsWith('http') ? image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${image}`;
     };
 
     return (
-        <div className="min-h-screen bg-[#0b0f14] text-white">
-            <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0f3b36] via-[#0b6b60] to-[#0b0f14]" />
-                <div className="absolute inset-0" style={{ backgroundImage: bgTexture }} />
-
-                <div className="max-w-6xl mx-auto px-4 pt-24 pb-12 relative">
-                    <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-white/80">
-                        <span className="font-semibold tracking-[0.18em] uppercase">PG & Hostels</span>
-                        <span className="opacity-60">•</span>
-                        <span className="font-medium">Category</span>
-                    </div>
-
-                    <div className="flex flex-wrap items-start gap-6 justify-between">
-                        <div>
-                            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-sm">{categoryName}</h1>
-                            <p className="text-white/80 mt-3 max-w-2xl">Pick a subcategory to narrow down stays that actually fit your lifestyle. No questionnaires—just straight to matching rooms.</p>
-
-                            <div className="flex flex-wrap gap-3 mt-6">
-                                {pill('rooms', subcategories.length || '—')}
-                                {pill('service', 'PG & Hostel')}
-                                {pill('match', 'Smart Filters')}
-                            </div>
-                        </div>
-
-                        <div className="bg-white/10 border border-white/15 rounded-2xl px-5 py-4 shadow-lg backdrop-blur">
-                            <div className="flex items-center gap-3 text-sm text-white/80">
-                                <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                                <span>Verified listings only</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-white/80 mt-2">
-                                <Star className="w-4 h-4 text-amber-200" />
-                                <span>Community-rated stays</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-white/80 mt-2">
-                                <Filter className="w-4 h-4 text-sky-200" />
-                                <span>Filters continue on listings page</span>
-                            </div>
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-[#fffdf7] text-gray-950">
+            <section className="relative overflow-hidden bg-gradient-to-br from-[#0d3c36] via-[#147469] to-[#f0a64c] pt-32 pb-24">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#0d3c36] via-[#147469] to-[#f0a64c] opacity-10" />
+                <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none">
+                    <Home className="h-64 w-64 text-white" />
                 </div>
-            </div>
 
-            <div className="max-w-6xl mx-auto px-4 pb-16 -mt-10 relative z-10">
-                <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 md:p-8">
-                    <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-                        <div>
-                            <p className="text-xs uppercase tracking-[0.2em] text-[#0E8F83] font-bold">Subcategory List</p>
-                            <h2 className="text-2xl font-bold text-gray-900 mt-1">Choose your room style</h2>
+                <div className="relative z-10 mx-auto max-w-7xl px-4 text-center">
+                    <motion.button
+                        type="button"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        onClick={() => router.push('/pghostels')}
+                        className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-md transition-colors hover:bg-white/20"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Categories
+                    </motion.button>
+
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="mx-auto max-w-5xl text-4xl font-black tracking-tight text-white drop-shadow-lg md:text-6xl"
+                    >
+                        {categoryName}
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-white/90 md:text-xl"
+                    >
+                        Select a stay type to continue to verified PG and hostel listings near you.
+                    </motion.p>
+                </div>
+            </section>
+
+            <section className="relative z-20 mx-auto -mt-16 max-w-7xl px-4 pb-24">
+                {loading && (
+                    <div className="flex min-h-[240px] items-center justify-center rounded-[2rem] bg-white shadow-xl">
+                        <div className="flex items-center gap-3 text-[#147469]">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <span className="font-semibold">Loading room styles...</span>
                         </div>
-                        {loading && (
-                            <div className="flex items-center gap-2 text-gray-500 text-sm">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span>Loading…</span>
-                            </div>
-                        )}
-                        {!loading && subcategories.length > 0 && (
-                            <div className="text-sm text-gray-600">
-                                Showing <span className="font-semibold text-gray-900">{subcategories.length}</span> options
-                            </div>
-                        )}
                     </div>
+                )}
 
-                    {!loading && error && (
-                        <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-                            <AlertCircle className="w-5 h-5" />
-                            <span>{error}</span>
-                        </div>
-                    )}
+                {!loading && error && (
+                    <div className="flex items-center gap-3 rounded-[2rem] border border-red-100 bg-white px-6 py-5 text-red-600 shadow-xl">
+                        <AlertCircle className="h-5 w-5" />
+                        <span>{error}</span>
+                    </div>
+                )}
 
-                    {!loading && !error && subcategories.length === 0 && (
-                        <div className="text-gray-600 bg-gray-50 border border-gray-100 rounded-xl px-4 py-4">No subcategories found for this category.</div>
-                    )}
+                {!loading && !error && subcategories.length === 0 && (
+                    <div className="rounded-[2rem] border border-gray-100 bg-white px-6 py-8 text-center text-gray-600 shadow-xl">
+                        No subcategories found for this category.
+                    </div>
+                )}
 
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                        {subcategories.map((sub, i) => (
-                            <motion.button
-                                key={sub._id}
-                                whileHover={{ y: -6, boxShadow: '0 20px 45px -22px rgba(0,0,0,0.3)' }}
-                                transition={{ type: 'spring', stiffness: 220, damping: 18, delay: i * 0.02 }}
-                                onClick={() => goToListings(sub)}
-                                className="w-full text-left bg-gradient-to-br from-white to-[#f7fbfa] rounded-2xl border border-gray-100 p-5 flex flex-col gap-3 group"
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p className="text-[11px] uppercase tracking-[0.22em] text-[#0E8F83] font-bold">Subcategory</p>
-                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#0E8F83] transition-colors">
-                                            {sub.name}
-                                        </h3>
+                {!loading && !error && subcategories.length > 0 && (
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        {subcategories.map((sub, index) => {
+                            const imageUrl = getImageUrl(sub);
+                            return (
+                                <motion.div
+                                    key={sub._id}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.08 }}
+                                    onClick={() => goToListings(sub)}
+                                    className="group relative cursor-pointer"
+                                >
+                                    <div className="absolute inset-0 top-4 rounded-[2rem] bg-[#f0a64c] opacity-20 blur transition-opacity group-hover:opacity-40" />
+                                    <div className="relative h-full overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-4 shadow-xl transition-transform duration-300 group-hover:-translate-y-2">
+                                        <div className="relative mb-6 h-56 overflow-hidden rounded-[1.5rem] bg-[#eef3f2]">
+                                            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/65 to-transparent" />
+                                            {imageUrl ? (
+                                                <img
+                                                    src={imageUrl}
+                                                    alt={sub.name}
+                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center bg-[#eef3f2]">
+                                                    <Home className="h-20 w-20 text-[#147469]/30" />
+                                                </div>
+                                            )}
+                                            <div className="absolute bottom-4 left-4 right-4 z-20">
+                                                <h3 className="text-2xl font-black text-white transition-colors group-hover:text-[#f0c56b]">
+                                                    {sub.name}
+                                                </h3>
+                                            </div>
+                                        </div>
+
+                                        <div className="px-2 pb-2">
+                                            <p className="mb-6 line-clamp-2 text-sm leading-7 text-gray-600">
+                                                {sub.description || `Explore ${sub.name} stays with verified PG and hostel listings.`}
+                                            </p>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 text-sm font-bold text-[#147469]">
+                                                    <Sparkles className="h-4 w-4" />
+                                                    <span>Recommended</span>
+                                                </div>
+                                                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#fffdf7] text-[#147469] transition-colors group-hover:bg-[#147469] group-hover:text-white">
+                                                    <ChevronRight className="h-5 w-5" />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0E8F83]/10 text-[#0E8F83]">
-                                        <ChevronRight className="w-5 h-5" />
-                                    </span>
-                                </div>
-                                {sub.description && <p className="text-sm text-gray-600 line-clamp-2">{sub.description}</p>}
-                                {sub.address && (
-                                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                                        <MapPin className="w-4 h-4" /> {sub.address}
-                                    </p>
-                                )}
-                            </motion.button>
-                        ))}
+                                </motion.div>
+                            );
+                        })}
                     </div>
-                </div>
-            </div>
+                )}
+            </section>
         </div>
     );
 }

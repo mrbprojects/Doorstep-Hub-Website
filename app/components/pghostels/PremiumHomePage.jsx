@@ -15,6 +15,12 @@ import { NearbyHostelsSection } from './NearbyHostelsSection';
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
 const SERVICE_ID = '69524fb157bb211ca094e5ee'; // PG Hostels Service ID
 
+const getImageUrl = (image) => {
+    if (!image) return '';
+    if (image.startsWith('http')) return image;
+    return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${image}`;
+};
+
 const testimonials = [
     { name: 'Priya Sharma', role: 'Software Engineer', review: 'Found my perfect PG in just 2 days! The verification process gave me confidence.', avatar: '👩‍💼', rating: 5 },
     { name: 'Rahul Kumar', role: 'Student', review: 'Great amenities and transparent pricing. Highly recommended!', avatar: '👨‍🎓', rating: 5 },
@@ -137,7 +143,7 @@ export function PremiumHomePage() {
         // setSelectedCategory({ id: categoryId, name: categoryName });
         // setIsModalOpen(true);
         if (categorySlug) {
-            router.push(`/${categorySlug}`);
+            router.push(`/pghostels/${categorySlug}`);
         } else {
             console.warn('Category slug is missing');
         }
@@ -353,7 +359,7 @@ export function PremiumHomePage() {
                                         className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110"
                                         style={{
                                             backgroundImage: (apiCategories[heroSlideIndex]?.category_image || apiCategories[heroSlideIndex]?.image)
-                                                ? `url(https://api.doorstephub.com/${apiCategories[heroSlideIndex]?.category_image || apiCategories[heroSlideIndex]?.image})`
+                                                ? `url("${getImageUrl(apiCategories[heroSlideIndex]?.category_image || apiCategories[heroSlideIndex]?.image)}")`
                                                 : 'none'
                                         }}
                                     />
@@ -472,13 +478,13 @@ export function PremiumHomePage() {
       ) : (
         apiCategories.map((cat, i) => {
           const bgImage = cat.image
-            ? `https://api.doorstephub.com/${cat.image}`
+            ? getImageUrl(cat.image)
             : cat.categoryIcon
-            ? `https://api.doorstephub.com/${cat.categoryIcon}`
+            ? getImageUrl(cat.categoryIcon)
             : '';
 
           const iconImg = cat.categoryIcon
-            ? `https://api.doorstephub.com/${cat.categoryIcon}`
+            ? getImageUrl(cat.categoryIcon)
             : null;
 
           return (
@@ -601,7 +607,7 @@ function NearYouSection({ listings, router }) {
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
                             whileHover={{ y: -10, rotateY: 5 }}
-                            onClick={() => router.push(`/${listing.slug || listing.id}`)}
+                            onClick={() => router.push(`/pghostels/${listing.slug || listing.id}`)}
                             className="group flex-shrink-0 w-80 snap-start cursor-pointer"
                         >
                             <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-100">
@@ -960,7 +966,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                             viewport={{ once: true }}
                                             transition={{ delay: i * 0.1 }}
                                             whileHover={isClickable ? { y: -5 } : {}}
-                                            onClick={() => isClickable && router.push(`/${hostelSlug}`)}
+                                            onClick={() => isClickable && router.push(`/pghostels/${hostelSlug}`)}
                                             className={`group relative rounded-[1.5rem] overflow-hidden h-[30rem] min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white ${isClickable ? 'cursor-pointer' : ''}`}
                                         >
                                             <div className="absolute inset-0">
@@ -1013,4 +1019,5 @@ function FeaturedHostelsSection({ listings, loading, router }) {
         </section>
     );
 }
+
 

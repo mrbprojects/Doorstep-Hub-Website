@@ -172,9 +172,9 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
         const baseQuery = queryString ? `?${queryString}` : '';
 
         if (catSlug && subcatSlug) {
-            router.push(`/${catSlug}/${subcatSlug}${baseQuery}`);
+            router.push(`/spa-salon/${subcatSlug}${baseQuery}`);
         } else if (catSlug) {
-            router.push(`/${catSlug}${baseQuery}`);
+            router.push(`/spa-salon/${catSlug}${baseQuery}`);
         } else {
             router.push(`/spa-salon/results?${queryString}`);
         }
@@ -360,4 +360,5 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
         </AnimatePresence>
     );
 }
+
 

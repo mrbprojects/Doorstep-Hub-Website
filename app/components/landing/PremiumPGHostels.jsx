@@ -72,7 +72,7 @@ export function PremiumPGHostels() {
     if (hostel.isDummy) return;
     const detailSegment = hostel.slug || hostel.hostelSlug || hostel.id;
     if (!detailSegment) return;
-    router.push(`/${detailSegment}`);
+    router.push(`/pghostels/${detailSegment}`);
   };
 
   // Fetch featured PG hostels from API
@@ -466,4 +466,5 @@ export function PremiumPGHostels() {
     </section>
   );
 }
+
 

@@ -46,9 +46,9 @@ export function Header({ theme = {}, navItems = [] }) {
   const [apiNavItems, setApiNavItems] = useState([]);
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
-    religious: 'pandit-ji-for-puja-services',
-    spa: 'salon-at-home-services',
-    pg: 'pg-hostels-near-me'
+    religious: 'religious-services',
+    spa: 'spa-salon',
+    pg: 'pghostels'
   });
   const [showHomeScreen, setShowHomeScreen] = useState(false);
   const [globalSettings, setGlobalSettings] = useState(null);

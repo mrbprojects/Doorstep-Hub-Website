@@ -68,7 +68,7 @@ function SpaCategoryContent() {
 
     const handleSubCategoryClick = (subCat) => {
         const target = subCat.slug || subCat._id;
-        router.push(`/spa-salon/subcategory/${target}`);
+        router.push(`/spa-salon/${target}`);
     };
 
     if (loading) {
@@ -211,3 +211,4 @@ export default function SpaCategoryPage() {
         </Suspense>
     );
 }
+

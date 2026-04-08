@@ -275,7 +275,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                                                                 key={sub._id}
                                                                 onClick={() => {
                                                                     // domain + slug
-                                                                    router.push(`/${subTarget}`);
+                                                                    router.push(`/spa-salon/${subTarget}`);
                                                                 }}
                                                                 className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
                                                                     slugOrId === subTarget
@@ -488,7 +488,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         whileHover={{ y: -8 }}
-                                        onClick={() => router.push(`/${service.slug || service.id}`)}
+                                        onClick={() => router.push(`/spa-salon/${service.slug || service.id}`)}
                                         className="bg-white rounded-[20px] overflow-hidden border border-gray-100 cursor-pointer group shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col"
                                     >
                                         <div className="relative h-48 overflow-hidden">
@@ -559,3 +559,4 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
         </div>
     );
 }
+

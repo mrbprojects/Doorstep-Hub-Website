@@ -265,11 +265,7 @@ function SpaSubCategoryContent() {
                                                             <button
                                                                 key={sub._id}
                                                                 onClick={() => {
-                                                                    const currentParams = new URLSearchParams(searchParams.toString());
-                                                                    currentParams.set('categoryId', catTarget);
-                                                                    currentParams.set('category', cat.name);
-                                                                    currentParams.set('name', sub.name);
-                                                                    router.push(`/spa-salon/subcategory/${subTarget}?${currentParams.toString()}`);
+                                                                    router.push(`/spa-salon/${subTarget}`);
                                                                 }}
                                                                 className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
                                                                     slugOrId === subTarget
@@ -482,7 +478,7 @@ function SpaSubCategoryContent() {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         whileHover={{ y: -8 }}
-                                        onClick={() => router.push(`/spa-salon/service/${service.slug || service.id}`)}
+                                        onClick={() => router.push(`/spa-salon/${service.slug || service.id}`)}
                                         className="bg-white rounded-[20px] overflow-hidden border border-gray-100 cursor-pointer group shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col"
                                     >
                                         <div className="relative h-48 overflow-hidden">
@@ -561,3 +557,4 @@ export default function SpaSubCategoryPage() {
         </Suspense>
     );
 }
+

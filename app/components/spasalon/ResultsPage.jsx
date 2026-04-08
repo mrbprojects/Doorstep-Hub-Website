@@ -658,7 +658,7 @@ function ServiceCard({ service, index, router }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: -8 }}
-            onClick={() => router.push(`/${service.slug || service.id}`)}
+            onClick={() => router.push(`/spa-salon/${service.slug || service.id}`)}
             className="bg-white rounded-[32px] overflow-hidden border border-gray-100 cursor-pointer group shadow-sm hover:shadow-2xl transition-all duration-500"
         >
             {/* Image */}
@@ -738,4 +738,5 @@ function ServiceCard({ service, index, router }) {
         </motion.div>
     );
 }
+
 

@@ -24,7 +24,7 @@ export function LatestReligiousServices() {
   const handleServiceClick = (service) => {
     const detailSegment = service.slug || service.serviceSlug || service.id;
     if (!detailSegment) return;
-    router.push(`/religious-services/service/${detailSegment}`);
+    router.push(`/religious-services/${detailSegment}`);
   };
 
   const amenityIcons = {
@@ -384,4 +384,5 @@ export function LatestReligiousServices() {
     </section>
   );
 }
+
 

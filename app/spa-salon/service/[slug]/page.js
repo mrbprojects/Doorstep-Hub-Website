@@ -264,7 +264,7 @@ export default function SpaServiceDetailPage() {
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => {
                     if (subcategoryId) {
-                        router.push(`/spa-salon/subcategory/${subcategoryId}`);
+                        router.push(`/spa-salon/${subcategoryId}`);
                     } else {
                         router.back();
                     }
@@ -482,3 +482,4 @@ export default function SpaServiceDetailPage() {
         </div >
     );
 }
+

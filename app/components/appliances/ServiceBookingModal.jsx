@@ -98,10 +98,11 @@ export function ServiceBookingModal({ isOpen, onClose }) {
         }));
 
         // Redirect to listing page
-        if (selectedCategory?.slug) {
-            router.push(`/${selectedCategory.slug}/${subCategory.slug}`);
+        const subCategorySlug = subCategory.slug || subCategory._id;
+        if (subCategorySlug) {
+            router.push(`/${subCategorySlug}`);
         } else {
-            router.push(`/${subCategory.slug}`);
+            router.push('/appliance-repair-services');
         }
         onClose();
     };

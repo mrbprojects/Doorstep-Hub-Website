@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import NewHostelDetailPage from '@/pghostels/hostel-detail/[slug]/page';
 import SpaServiceDetailPage from '@/components/spasalon/SpaServiceDetailPage';
 import { CategoryOrListingPage } from '@/components/appliances/CategoryOrListingPage';
-import SpaSubCategoryPage from '@/components/spasalon/SpaSubCategoryPage';
 
 export default function RootCatchAllPage() {
     const params = useParams();
@@ -40,7 +39,7 @@ export default function RootCatchAllPage() {
                 } else {
                     setProviderType('none');
                 }
-            } catch (e) {
+            } catch {
                 if (active) setProviderType('none');
             }
         };
@@ -66,19 +65,13 @@ export default function RootCatchAllPage() {
         return <SpaServiceDetailPage slugOverride={lastSlug} />;
     }
 
-    // If it's a 2-level slug and not a provider, handle as Spa Subcategory
-    if (Array.isArray(slugParts) && slugParts.length === 2 && providerType === 'none') {
-        return (
-            <Suspense fallback={<div className="min-h-screen bg-transparent" />}>
-                <SpaSubCategoryPage slugOverride={lastSlug} />
-            </Suspense>
-        );
-    }
+    const parentSlug = Array.isArray(slugParts) && slugParts.length > 1 ? slugParts[slugParts.length - 2] : null;
 
-    // Default to CategoryOrListingPage for single slugs
+    // Default to the appliance category/listing resolver. It will fall through to
+    // the spa resolver when the slug is not an appliance category/subcategory.
     return (
         <Suspense fallback={<div className="min-h-screen bg-transparent" />}>
-            <CategoryOrListingPage slug={lastSlug} />
+            <CategoryOrListingPage slug={lastSlug} categorySlug={parentSlug} />
         </Suspense>
     );
 }

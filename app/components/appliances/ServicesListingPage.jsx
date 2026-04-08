@@ -301,9 +301,9 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     }
   };
 
-  const handleSubCategorySelect = (subCat, catSlug) => {
+  const handleSubCategorySelect = (subCat) => {
     // Navigate to the selected subcategory
-    router.push(`/${catSlug}/${subCat.slug}`);
+    router.push(`/${subCat.slug || subCat._id}`);
     // Close mobile filter if open
     setFilterOpen(false);
   };
@@ -767,7 +767,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -5 }}
                         className="group cursor-pointer"
-                        onClick={() => router.push(`/${center.slug || center._id}`)}
+                        onClick={() => router.push(`/appliances/store/${center._id}`)}
                       >
                         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                           <div className="flex flex-col md:flex-row">
@@ -817,7 +817,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                               </div>
 
                               <button
-                                onClick={() => router.push(`/${center.slug || center._id}`)}
+                                onClick={() => router.push(`/appliances/store/${center._id}`)}
                                 className="px-8 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center"
                               >
                                 Visit Service Center

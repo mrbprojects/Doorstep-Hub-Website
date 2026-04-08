@@ -86,8 +86,8 @@ export function ServiceCentersListingPage() {
         setSelectedRating(rating === selectedRating ? null : rating);
     };
 
-    const handleStoreClick = (slug) => {
-        router.push(`/${slug}`);
+    const handleStoreClick = (storeId) => {
+        router.push(`/appliances/store/${storeId}`);
     };
 
     const ShimmerGrid = () => {
@@ -244,7 +244,7 @@ export function ServiceCentersListingPage() {
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.05 }}
                                             whileHover={{ y: -8 }}
-                                            onClick={() => handleStoreClick(store.slug)}
+                                            onClick={() => handleStoreClick(store.id)}
                                             className="group cursor-pointer"
                                         >
                                             <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full flex flex-col">

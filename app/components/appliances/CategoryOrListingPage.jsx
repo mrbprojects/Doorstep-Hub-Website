@@ -6,13 +6,12 @@ import { ServicesListingPage } from '@/components/appliances/ServicesListingPage
 import { ServiceDetailsPage } from '@/components/appliances/ServiceDetailsPage';
 import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
 import { Loader2 } from 'lucide-react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Animated404 } from '@/components/ui/Animated404';
 import SpaCategoryPage from '@/components/spasalon/SpaCategoryPage';
 import SpaSubCategoryPage from '@/components/spasalon/SpaSubCategoryPage';
 
-export function CategoryOrListingPage({ slug, onBack }) {
-    const router = useRouter();
+export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
     const searchParams = useSearchParams();
     const queryServiceId = searchParams.get('id');
     const [viewType, setViewType] = useState('loading'); // 'loading', 'category', 'listing', 'detail', '404', 'store', 'spa-category', 'spa-subcategory'
@@ -30,7 +29,35 @@ export function CategoryOrListingPage({ slug, onBack }) {
                     setViewType('detail');
                     return;
                 }
-                // 1. Try to fetch as a Category first
+                // 1. If this is a two-part appliance URL, resolve the child
+                // slug through its parent category and show the listing page.
+                if (categorySlug) {
+                    const subCatResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ slug: categorySlug })
+                    });
+
+                    const subCatData = await subCatResponse.json();
+                    if (subCatData.success && Array.isArray(subCatData.data)) {
+                        const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
+                        const matchedSubCat = subCatData.data.find(sub =>
+                            sub.slug === slug || sub._id === slug || generateSlug(sub.name) === slug
+                        );
+
+                        if (matchedSubCat) {
+                            setCategoryData({
+                                categoryName: subCatData.categoryName || categorySlug,
+                                subCategoryName: matchedSubCat.name,
+                                subCategoryId: matchedSubCat._id
+                            });
+                            setViewType('listing');
+                            return;
+                        }
+                    }
+                }
+
+                // 2. Try to fetch as a Category first
                 const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -49,7 +76,74 @@ export function CategoryOrListingPage({ slug, onBack }) {
                     return;
                 }
 
-                // 2. Try to fetch as a Spa Category
+                // 3. Resolve root-level appliance service center slugs.
+                // Example: /anvika-computer-repair-services should show StoreDetailPage.
+                const centersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_service_center`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lattitude: '17.3850',
+                        longitude: '78.4867',
+                        page: 1,
+                        limit: 100
+                    })
+                });
+                const centersData = await centersResponse.json();
+                if (centersData.success && Array.isArray(centersData.nearByServiceCenters)) {
+                    const matchedCenter = centersData.nearByServiceCenters.find(center =>
+                        center.slug === slug || center._id === slug
+                    );
+                    if (matchedCenter) {
+                        setViewType('store');
+                        return;
+                    }
+                }
+
+                // 4. Try to resolve a root-level appliance subcategory slug.
+                // Example: /microwave-oven-repair should show the appliance listing page.
+                const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lattitude: '17.3850',
+                        longitude: '78.4867'
+                    })
+                });
+                const categoriesData = await categoriesResponse.json();
+
+                if (categoriesData.success && Array.isArray(categoriesData.data)) {
+                    const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
+
+                    for (const applianceCategory of categoriesData.data) {
+                        const subcategoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ slug: applianceCategory.slug })
+                        });
+                        const subcategoriesData = await subcategoriesResponse.json();
+
+                        if (subcategoriesData.success && Array.isArray(subcategoriesData.data)) {
+                            const matchedSubcategory = subcategoriesData.data.find(subcategory =>
+                                subcategory.slug === slug ||
+                                subcategory._id === slug ||
+                                generateSlug(subcategory.name) === slug
+                            );
+
+                            if (matchedSubcategory) {
+                                setCategoryData({
+                                    categoryName: applianceCategory.name,
+                                    categorySlug: applianceCategory.slug,
+                                    subCategoryName: matchedSubcategory.name,
+                                    subCategoryId: matchedSubcategory._id
+                                });
+                                setViewType('listing');
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // 5. Try to fetch as a Spa Category
                 const spaCatRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -84,7 +178,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
                     }
                 }
 
-                // 2. Try to fetch as a deep Category or Subcategory
+                // 6. Try to fetch as a deep Category or Subcategory
                 const allRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
                 const allData = await allRes.json();
 
@@ -116,7 +210,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
                     }
                 }
 
-                // 3. Try to fetch as a Store (Service Center)
+                // 7. Try to fetch as a Store (Service Center)
                 const storeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${slug}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
@@ -130,7 +224,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
                     }
                 }
 
-                // 4. Final Fallback: Assume it's a Service Detail slug
+                // 8. Final Fallback: Assume it's a Service Detail slug
                 // Let ServiceDetailsPage try to handle it.
                 setViewType('detail');
 
@@ -143,7 +237,7 @@ export function CategoryOrListingPage({ slug, onBack }) {
         if (slug) {
             checkSlugType();
         }
-    }, [slug, queryServiceId]);
+    }, [slug, categorySlug, queryServiceId]);
 
     if (viewType === 'loading') {
         return (
@@ -162,7 +256,15 @@ export function CategoryOrListingPage({ slug, onBack }) {
     }
 
     if (viewType === 'listing') {
-        return <ServicesListingPage slug={slug} onBack={onBack} />;
+        return (
+            <ServicesListingPage
+                slug={slug}
+                category={categoryData?.categorySlug || categorySlug}
+                subCategory={categoryData?.subCategoryName}
+                subCategoryId={categoryData?.subCategoryId}
+                onBack={onBack}
+            />
+        );
     }
 
     if (viewType === '404') {

@@ -148,7 +148,10 @@ export function NearbyServiceCenters({ onViewAll }) {
   const ServiceCard = ({ service, index, actualIndex }) => (
     <motion.div
       key={service.id}
-      onClick={() => setSelectedService(actualIndex)}
+      onClick={() => {
+        setSelectedService(actualIndex);
+        router.push(`/${service.slug || service.id}`);
+      }}
       whileHover={{ x: 10 }}
       className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm ${selectedService === actualIndex
         ? 'bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/10'

@@ -92,10 +92,8 @@ export function ApplianceHomePage() {
             />
             <DownloadApp />
             <NearbyStores onViewAll={() => router.push(`/${serviceSlugs.serviceCenter}`)} />
-            <PopularCenters onStoreClick={(store) => {
-                const categoryParam = encodeURIComponent('General');
-                const subCategoryParam = encodeURIComponent(store.speciality || 'Service');
-                router.push(`/${store.slug || store.id}`);
+            <PopularCenters onStoreClick={(storeId) => {
+                router.push(`/appliances/store/${storeId}`);
             }} />
             <KnowledgeSpace />
             <Newsletter />

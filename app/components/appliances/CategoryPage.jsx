@@ -97,8 +97,8 @@ export function CategoryPage({ slug, initialData, onBack }) {
   const theme = defaultTheme;
 
   const handleSubCategoryClick = (subCategory) => {
-    // User requested domain + subcategory name (root level)
-    router.push(`/${subCategory.slug || subCategory._id}`);
+    const subCategorySlug = subCategory.slug || subCategory._id;
+    router.push(`/${subCategorySlug}`);
   };
 
   const handleBack = () => {

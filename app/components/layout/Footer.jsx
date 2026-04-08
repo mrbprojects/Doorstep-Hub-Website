@@ -265,7 +265,7 @@ export function Footer({ theme = {} }) {
                       {group.subcategories.map((sub, idx) => (
                         <span key={sub._id} className="inline">
                           <Link
-                            href={`/services/listing/${sub._id}?category=${encodeURIComponent(group.name)}&name=${encodeURIComponent(sub.name)}`}
+                            href={`/${sub.slug || sub._id}`}
                             className={`${t.textLink} ${t.textLinkHover} transition-colors`}
                           >
                             {sub.name}

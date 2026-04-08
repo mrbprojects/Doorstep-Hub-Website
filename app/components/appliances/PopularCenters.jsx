@@ -231,7 +231,7 @@ export function PopularCenters({ onStoreClick }) {
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           whileTap={{ scale: 0.9 }}
                           className="px-4 py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-sm shadow-lg shadow-[#037166]/30 group-hover:shadow-[#037166]/50 transition-all flex items-center gap-2"
-                          onClick={() => onStoreClick?.(center)}
+                          onClick={() => onStoreClick?.(center.id)}
                         >
                           View Store
                           <ArrowRight className="w-4 h-4" />

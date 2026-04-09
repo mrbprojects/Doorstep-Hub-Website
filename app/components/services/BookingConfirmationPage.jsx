@@ -565,7 +565,7 @@ export function BookingConfirmationPage({
                   {paymentMethod === 'wallet' && <CheckCircle className="w-5 h-5 ml-auto" />}
                 </button>
               </div>
-            </motion.div>v>
+            </motion.div>
 
             {/* Service Address */}
             <motion.div

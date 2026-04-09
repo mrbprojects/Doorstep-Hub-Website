@@ -1,4 +1,4 @@
-const API_BASE_URL = '${process.env.NEXT_PUBLIC_API_BASE_URL}';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const BASE_URL = 'https://doorstephub.com';
 
 export default async function sitemap() {
@@ -33,7 +33,7 @@ export default async function sitemap() {
   ];
 
   try {
-    // 4. Dynamic Appliance/Service Categories (Filtering for slugs)
+    // 4. Dynamic Appliance/Service Categories
     const catRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -44,7 +44,6 @@ export default async function sitemap() {
 
     if (success && Array.isArray(categories)) {
       for (const cat of categories) {
-        // Only include if slug is present and not an ID
         if (cat.slug && !cat.slug.match(/^[0-9a-fA-F]{24}$/)) {
           sitemapEntries.push({
             url: `${BASE_URL}/${cat.slug}`,
@@ -53,7 +52,7 @@ export default async function sitemap() {
             priority: 0.7
           });
 
-          // 5. Dynamic Subcategories (Filtering for slugs)
+          // 5. Dynamic Subcategories
           try {
             const subRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
               method: 'POST',
@@ -73,7 +72,7 @@ export default async function sitemap() {
                     priority: 0.6
                   });
 
-                  // 6. Dynamic Services (Filtering for slugs)
+                  // 6. Dynamic Services
                   try {
                     const svcRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/services_by_subcategory`, {
                       method: 'POST',
@@ -101,7 +100,6 @@ export default async function sitemap() {
           } catch (e) { /* skip */ }
         }
       }
-    }
     }
   } catch (error) {
     console.error("Appliances sitemap generation failed:", error);
@@ -179,4 +177,3 @@ export default async function sitemap() {
 
   return filteredEntries;
 }
-

@@ -189,38 +189,34 @@ export function Footer({ theme = {} }) {
 
   // Used for SUBCATEGORY item links (shows services inside the subcategory)
   const getProfessionalLink = (serviceName, sub, category) => {
-    const encodedSubName = encodeURIComponent(sub.name);
-    const encodedCatName = category ? encodeURIComponent(category.name) : '';
-
+    const slug = sub.slug || sub._id;
     const lowerService = serviceName.toLowerCase();
 
     if (lowerService.includes('spa')) {
-      // Route to subcategory page (shows the services inside that subcategory)
-      return `/${serviceSlugs.spa}/subcategory/${sub._id}?name=${encodedSubName}&category=${encodedCatName}`;
+      return `/${serviceSlugs.spa}/${slug}`;
     }
     if (lowerService.includes('pg') || lowerService.includes('hostel')) {
-      return `/${serviceSlugs.pg}/listings/all`;
+      return `/${serviceSlugs.pg}/${slug}`;
     }
     if (lowerService.includes('religious')) {
-      return `/${serviceSlugs.religious}/subcategory/${sub._id}?name=${encodedSubName}&category=${encodedCatName}`;
+      return `/${serviceSlugs.religious}/${slug}`;
     }
     return '#';
   };
 
   // Used for CATEGORY heading links (shows subcategories to pick from)
   const getProfessionalCategoryLink = (serviceName, category) => {
-    const encodedCatName = category ? encodeURIComponent(category.name) : '';
-    const catId = category?._id || '';
+    const slug = category.slug || category._id;
     const lowerService = serviceName.toLowerCase();
 
     if (lowerService.includes('spa')) {
-      return `/${serviceSlugs.spa}/category/${catId}?name=${encodedCatName}`;
+      return `/${serviceSlugs.spa}/${slug}`;
     }
     if (lowerService.includes('pg') || lowerService.includes('hostel')) {
-      return `/${serviceSlugs.pg}/listings/all`;
+      return `/${serviceSlugs.pg}/${slug}`;
     }
     if (lowerService.includes('religious')) {
-      return `/${serviceSlugs.religious}`;
+      return `/${serviceSlugs.religious}/${slug}`;
     }
     return '#';
   };
@@ -298,36 +294,36 @@ export function Footer({ theme = {} }) {
 
           return (
             <div key={sIdx} className="mb-16 relative group">
-              {/* Coming Soon Tooltip */}
-              <div className="absolute -top-10 left-0 px-3 py-1 bg-[#037166] text-white text-[10px] font-bold rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 pointer-events-none shadow-lg shadow-[#037166]/20">
-                Coming Soon
-              </div>
-
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="space-y-6 opacity-60 grayscale-[0.5] hover:grayscale-0 transition-all duration-500"
+                className="space-y-6 transition-all duration-500"
               >
-                <h3 className={`text-xl font-bold mb-6 bg-gradient-to-r ${t.headingGradient} bg-clip-text text-transparent w-fit cursor-default`}>
+                <Link 
+                  href={getProfessionalServiceHomeLink(serviceName)}
+                  className={`text-xl font-bold mb-6 bg-gradient-to-r ${t.headingGradient} bg-clip-text text-transparent w-fit block ${t.textLinkHover}`}
+                >
                   {displayTitle}
-                </h3>
+                </Link>
                 <div className={`text-sm leading-8 ${t.textMuted}`}>
                   {section.categories.map((catGroup, groupIdx) => (
                     <span key={catGroup.category._id} className="inline mr-1">
-                      <span
-                        className={`${t.groupNameColor} font-bold whitespace-nowrap mr-2 cursor-default`}
+                      <Link
+                        href={getProfessionalCategoryLink(serviceName, catGroup.category)}
+                        className={`${t.groupNameColor} font-bold whitespace-nowrap mr-2 ${t.textLinkHover}`}
                       >
                         {catGroup.category.name}:
-                      </span>
+                      </Link>
 
                       {catGroup.subcategories.map((sub, idx) => (
                         <span key={sub._id} className="inline">
-                          <span
-                            className={`${t.textLink} transition-colors cursor-default`}
+                          <Link
+                            href={getProfessionalLink(serviceName, sub, catGroup.category)}
+                            className={`${t.textLink} ${t.textLinkHover} transition-colors`}
                           >
                             {sub.name}
-                          </span>
+                          </Link>
                           {idx < catGroup.subcategories.length - 1 && (
                             <span className={`mx-2 ${t.dividerColor}`}>|</span>
                           )}
@@ -570,7 +566,6 @@ export function Footer({ theme = {} }) {
 
       {/* Bottom Gradient Line */}
       <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${t.accentColor}80, transparent)` }} />
-    </footer >
+    </footer>
   );
 }
-

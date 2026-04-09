@@ -211,7 +211,7 @@ export default function ReligiousServicesPage() {
     <div className="min-h-screen bg-[var(--off-white)]">
 
       {/* 1. HERO SECTION - Calm & Divine with Animated Elements */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-[50vh] flex items-center overflow-hidden">
         {/* Vertical Gradient Background: White â†’ Saffron â†’ Deep Maroon */}
         <div className="absolute inset-0 bg-gradient-to-b from-white via-[#FFF8E7] to-[#8B4513]/30" />
 
@@ -341,14 +341,14 @@ export default function ReligiousServicesPage() {
         </div>
 
         {/* Hero Content */}
-        <div className="container relative mx-auto px-4 pt-20 pb-14 mt-10 z-10">
+        <div className="container relative mx-auto px-4 pt-16 pb-8 mt-10 z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Trust Badge */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="mb-6 inline-flex items-center space-x-2 rounded-full bg-white/80 backdrop-blur-sm px-5 py-2 border border-[var(--saffron)]/30 shadow-lg"
+              className="mb-4 inline-flex items-center space-x-2 rounded-full bg-white/80 backdrop-blur-sm px-5 py-2 border border-[var(--saffron)]/30 shadow-lg"
             >
               <Sparkles className="h-4 w-4 text-[var(--saffron)]" />
               <h6 className="text-sm font-medium text-[var(--temple-red)]">Trusted by 50,000+ Devotees</h6>
@@ -359,14 +359,14 @@ export default function ReligiousServicesPage() {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="mb-8 text-7xl text-[var(--warm-gold)] drop-shadow-[0_0_20px_rgba(255,191,0,0.5)] flex justify-center"
+              className="mb-4 text-6xl md:text-7xl text-[var(--warm-gold)] drop-shadow-[0_0_20px_rgba(255,191,0,0.5)] flex justify-center"
               style={{ fontFamily: 'serif' }}
             >
             </motion.div>
 
             {/* Main Headline with Background Om */}
           {/* Main Headline with Background Om */}
-<div className="relative mb-12">
+<div className="relative mb-6">
   <motion.div
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ 
@@ -386,7 +386,7 @@ export default function ReligiousServicesPage() {
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.9, delay: 0.5 }}
-    className="text-5xl md:text-7xl font-bold text-[var(--deep-charcoal)] leading-tight relative z-10"
+    className="text-4xl md:text-6xl font-bold text-[var(--deep-charcoal)] leading-tight relative z-10"
   >
     Book Trusted Religious &{' '}
     <span className="bg-gradient-to-r from-[var(--saffron)] via-[var(--temple-red)] to-[var(--vermilion)] bg-clip-text text-transparent">
@@ -400,7 +400,7 @@ export default function ReligiousServicesPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.9 }}
-              className="flex flex-col items-center gap-5 justify-center"
+              className="flex flex-col items-center gap-3 justify-center"
             >
               {/* Primary CTA with Glow Pulse */}
               <motion.div
@@ -421,7 +421,7 @@ export default function ReligiousServicesPage() {
                 <Button
                   onClick={() => setIsModalOpen(true)}
                   size="lg"
-                  className="relative bg-gradient-to-r from-[var(--saffron)] via-[var(--warm-gold)] to-[var(--temple-red)] text-white hover:opacity-90 shadow-2xl px-10 py-6 text-lg font-semibold overflow-hidden group"
+                  className="relative bg-gradient-to-r from-[var(--saffron)] via-[var(--warm-gold)] to-[var(--temple-red)] text-white hover:opacity-90 shadow-2xl px-8 py-4 text-base md:text-lg font-semibold overflow-hidden group"
                 >
                   {/* Shine Sweep Effect */}
                   <motion.div
@@ -444,7 +444,7 @@ export default function ReligiousServicesPage() {
     rel={globalSettings?.playStore ? "noopener noreferrer" : undefined}
     whileHover={{ scale: 1.05, y: -2 }}
     whileTap={{ scale: 0.95 }}
-    className="flex items-center justify-center w-39 h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
+    className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
     title="Get it on Google Play"
   >
     <img 
@@ -461,7 +461,7 @@ export default function ReligiousServicesPage() {
     rel={globalSettings?.appStore ? "noopener noreferrer" : undefined}
     whileHover={{ scale: 1.05, y: -2 }}
     whileTap={{ scale: 0.95 }}
-    className="flex items-center justify-center w-39 h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
+    className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
     title="Download on the App Store"
   >
     <img 
@@ -488,7 +488,7 @@ export default function ReligiousServicesPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 1.1 }}
-              className="mt-16 flex flex-wrap justify-center gap-8 text-sm text-[var(--muted-foreground)]"
+              className="mt-6 flex flex-wrap justify-center gap-8 text-sm text-[var(--muted-foreground)]"
             >
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-[var(--sacred-teal)]" />
@@ -509,10 +509,10 @@ export default function ReligiousServicesPage() {
 
       {/* 2. CORE SERVICE CATEGORIES */}
       <SectionReveal>
-        <section id="sacred-categories" className="py-20 bg-white">
+        <section id="sacred-categories" className="py-12 bg-white">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-3">
                 Sacred Service Categories
               </h2>
               <p className="text-lg text-[var(--muted-foreground)]">

@@ -175,26 +175,26 @@ export function PremiumHomePage() {
             </div>
 
             {/* Hero Section */}
-            <section ref={heroRef} className="relative min-h-screen flex items-center pt-20">
+            <section ref={heroRef} className="relative min-h-[70vh] flex items-center pt-20">
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-[#037166]/5 to-transparent" />
 
-                <div className="max-w-7xl mx-auto px-4 py-20 grid md:grid-cols-2 gap-12 items-center relative z-10">
+                <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10 grid md:grid-cols-2 gap-6 md:gap-8 items-center relative z-10">
                     {/* Left Content */}
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         animate={isHeroInView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.8, ease: [0.6, 0.05, 0.01, 0.9] }}
-                        className="space-y-8"
+                        className="space-y-4"
                     >
-                        <div className="space-y-6">
+                        <div className="space-y-3 sm:space-y-4">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ delay: 0.2 }}
                                 className="inline-block"
                             >
-                                <div className="px-4 py-2 bg-gradient-to-r from-[#037166]/20 to-transparent border border-[#037166]/30 rounded-full backdrop-blur-sm">
-                                    <h6 className="text-[#037166] text-sm font-semibold">✨ Find Your Perfect Stay</h6>
+                                <div className="px-3 py-1.5 sm:px-4 sm:py-1.5 bg-gradient-to-r from-[#037166]/20 to-transparent border border-[#037166]/30 rounded-full backdrop-blur-sm">
+                                    <h6 className="text-[#037166] text-xs sm:text-sm font-semibold">✨ Find Your Perfect Stay</h6>
                                 </div>
                             </motion.div>
 
@@ -202,7 +202,7 @@ export function PremiumHomePage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ delay: 0.3 }}
-                                className="text-5xl md:text-7xl font-bold leading-tight"
+                                className="text-[2.75rem] sm:text-4xl md:text-5xl font-bold leading-[0.98]"
                             >
                                 <span className="bg-gradient-to-r from-gray-900 to-[#037166] bg-clip-text text-transparent">
                                     Find your next stay
@@ -215,14 +215,14 @@ export function PremiumHomePage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ delay: 0.4 }}
-                                className="text-xl text-gray-600 leading-relaxed"
+                                className="text-base sm:text-lg text-gray-600 leading-relaxed"
                             >
                                 Verified PGs, co-living spaces, and hostels near your college or office.
                             </motion.p>
 
-                            <section className="relative md:-mt-20 mt-0 z-20">
+                            <section className="relative md:-mt-4 mt-0 z-20">
                                 <div className="max-w-4xl px-1">
-                                    <div className="flex flex-col md:flex-row items-center gap-4">
+                                    <div className="flex flex-col md:flex-row items-center gap-2.5">
                                                 {/* Search Bar */}
                                                 <motion.div
                                                     initial={{ opacity: 0, y: 20 }}
@@ -238,14 +238,14 @@ export function PremiumHomePage() {
                                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                                                 onKeyDown={handleKeyDown}
                                                                 placeholder="Search by area, college, landmark..."
-                                                                className="pl-10 h-11 bg-white/30 md:bg-white/50 border-transparent focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
+                                                                className="pl-10 h-9 sm:h-10 bg-white/30 md:bg-white/50 border-transparent focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
                                                             />
                                                         </div>
                                                         <motion.button
                                                             whileHover={{ scale: 1.05 }}
                                                             whileTap={{ scale: 0.95 }}
                                                             onClick={handleSearch}
-                                                            className="px-6 py-2 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/20 text-sm hidden sm:block"
+                                                            className="px-4 py-2 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/20 text-sm hidden sm:block"
                                                         >
                                                             Search
                                                         </motion.button>
@@ -260,10 +260,10 @@ export function PremiumHomePage() {
                                                     whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(3, 113, 102, 0.3)" }}
                                                     whileTap={{ scale: 0.95 }}
                                                     onClick={() => router.push('/pghostels/listings/all')}
-                                                    className="px-8 py-3 bg-[#037166] text-white rounded-2xl font-bold shadow-xl shadow-[#037166]/30 flex items-center gap-2 whitespace-nowrap h-[60px]"
+                                                    className="px-5 py-2 bg-[#037166] text-white rounded-2xl font-bold shadow-xl shadow-[#037166]/30 flex items-center gap-2 whitespace-nowrap h-[46px] text-sm"
                                                 >
                                                     <span>Explore PGs</span>
-                                                    <ChevronRight className="w-5 h-5" />
+                                                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                                 </motion.button>
                                     </div>
 
@@ -272,7 +272,7 @@ export function PremiumHomePage() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
                                         transition={{ delay: 0.5 }}
-                                        className="flex flex-wrap gap-4 mt-6"
+                                        className="flex flex-wrap justify-center sm:justify-start gap-2.5 mt-4"
                                     >
                                         <motion.a
                                             href={globalSettings?.appStore || "#"}
@@ -280,7 +280,7 @@ export function PremiumHomePage() {
                                             rel="noopener noreferrer"
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                            className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
                                             title="Download on the App Store"
                                         >
                                             <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
@@ -292,7 +292,7 @@ export function PremiumHomePage() {
                                             rel="noopener noreferrer"
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                            className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
                                             title="Get it on Google Play"
                                         >
                                             <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
@@ -307,7 +307,7 @@ export function PremiumHomePage() {
                             initial={{ opacity: 0 }}
                             animate={isHeroInView ? { opacity: 1 } : {}}
                             transition={{ delay: 0.6 }}
-                            className="flex flex-wrap gap-6 pt-4"
+                            className="flex flex-wrap gap-3 sm:gap-4 pt-1"
                         >
                             {[
                                 { icon: Shield, text: 'Verified Listings' },
@@ -315,10 +315,10 @@ export function PremiumHomePage() {
                                 { icon: TrendingUp, text: 'No Brokerage' },
                             ].map((badge, i) => (
                                 <div key={i} className="flex items-center space-x-2 text-gray-600">
-                                    <div className="w-10 h-10 bg-[#037166]/10 rounded-full flex items-center justify-center">
-                                        <badge.icon className="w-5 h-5 text-[#037166]" />
+                                    <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#037166]/10 rounded-full flex items-center justify-center">
+                                        <badge.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#037166]" />
                                     </div>
-                                    <h6 className="text-sm font-medium">{badge.text}</h6>
+                                    <h6 className="text-xs sm:text-sm font-medium">{badge.text}</h6>
                                 </div>
                             ))}
                         </motion.div>
@@ -329,14 +329,14 @@ export function PremiumHomePage() {
                         initial={{ opacity: 0, x: 50 }}
                         animate={isHeroInView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.8, ease: [0.6, 0.05, 0.01, 0.9] }}
-                        className="relative h-[550px] md:h-[650px] flex items-center justify-center p-6"
+                        className="relative h-[390px] md:h-[470px] flex items-center justify-center p-3 md:p-4"
                         style={{
                             transform: typeof window !== 'undefined' ? `perspective(1000px) rotateY(${(mousePosition.x - window.innerWidth / 2) / 60}deg) rotateX(${-(mousePosition.y - window.innerHeight / 2) / 60}deg)` : 'none'
                         }}
                     >
                         {/* Main Card Slider */}
                         <motion.div
-                            className="relative w-80 md:w-96 h-[450px] md:h-[550px] rounded-[2.5rem] overflow-hidden shadow-2xl z-10 bg-gray-900"
+                            className="relative w-56 md:w-72 h-[340px] md:h-[430px] rounded-[2.75rem] overflow-hidden shadow-2xl z-10 bg-gray-900"
                             animate={{
                                 y: [0, -15, 0],
                             }}
@@ -913,22 +913,22 @@ function FeaturedHostelsSection({ listings, loading, router }) {
     ];
 
     const hasData = listings && listings.length > 0;
-    const displayListings = hasData ? listings.slice(0, 4) : fallbackListings;
+    const displayListings = hasData ? listings.slice(0, 12) : fallbackListings;
 
     return (
-        <section className="py-24 bg-transparent">
+        <section className="py-12 bg-transparent">
             <div className="max-w-7xl mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="flex justify-between items-end mb-12"
+                    className="flex justify-between items-end mb-8"
                 >
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
+                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-2">
                             Featured Hostels
                         </h2>
-                        <p className="text-xl text-gray-600">Handpicked stays for you</p>
+                        <p className="text-lg text-gray-600">Handpicked stays for you</p>
                     </div>
                     <button
                         onClick={() => router.push('/pghostels/listings/all')}
@@ -940,11 +940,11 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                 </motion.div>
 
                 <div className="relative">
-                    <div className="overflow-x-auto px-4 md:px-0 scrollbar-hide pb-8">
-                        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 min-w-max md:min-w-full">
+                    <div className="overflow-x-auto px-1 md:px-0 scrollbar-hide pb-4 -mx-1 px-1">
+                        <div className="flex gap-3 md:gap-4 pb-2">
                             {loading ? (
                                 [...Array(4)].map((_, i) => (
-                                    <div key={i} className="bg-gray-200 rounded-[1.5rem] h-[30rem] min-w-[280px] md:min-w-0 flex-shrink-0 animate-pulse" />
+                                    <div key={i} className="bg-gray-200 rounded-[1.5rem] h-[25rem] min-w-[280px] md:min-w-0 flex-shrink-0 animate-pulse" />
                                 ))
                             ) : (
                                 displayListings.map((listing, i) => {
@@ -952,7 +952,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                     const hostelSlug = listing.slug || listing.hostelSlug || hostelId;
                                     const hostelName = listing.hostelName;
                                     const hostelArea = listing.address || listing.cityName;
-                                    const hostelPrice = listing.startingAt || 250;
+                                    const hostelPrice = listing.startingAt || (listing.defaultPrice ? parseInt(listing.defaultPrice) : 8500);
                                     const hostelImage = listing.image?.startsWith('http')
                                         ? listing.image
                                         : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${listing.image}`;
@@ -965,45 +965,47 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
                                             transition={{ delay: i * 0.1 }}
-                                            whileHover={isClickable ? { y: -5 } : {}}
+                                            whileHover={isClickable ? { y: -8 } : {}}
                                             onClick={() => isClickable && router.push(`/pghostels/${hostelSlug}`)}
-                                            className={`group relative rounded-[1.5rem] overflow-hidden h-[30rem] min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white ${isClickable ? 'cursor-pointer' : ''}`}
+                                            className={`group relative rounded-[1.5rem] overflow-hidden h-[25rem] w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-[calc((100%-80px)/6)] flex-shrink-0 snap-start bg-white shadow-md ${isClickable ? 'cursor-pointer' : ''}`}
                                         >
                                             <div className="absolute inset-0">
                                                 <div
-                                                    className="absolute inset-0 bg-[length:100%_auto] bg-top bg-no-repeat transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-2"
+                                                    className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-110"
                                                     style={{ backgroundImage: `url("${hostelImage}")` }}
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent opacity-90" />
                                             </div>
 
-                                            <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                                            <div className="absolute inset-0 p-5 flex flex-col justify-between">
                                                 <div className="flex justify-between items-start">
-                                                    <div className="px-4 py-2 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
-                                                        <span className="text-white text-sm font-semibold tracking-wide">Featured</span>
+                                                    <div className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
+                                                        <span className="text-white text-[10px] font-semibold tracking-wide uppercase">Featured</span>
                                                     </div>
                                                 </div>
 
                                                 <div>
-                                                    <div className="flex gap-3 mb-6">
+                                                    <div className="flex gap-1.5 mb-3">
                                                         {[Wifi, Utensils, Shirt].map((Icon, j) => (
-                                                            <div key={j} className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
-                                                                <Icon className="w-5 h-5" />
+                                                            <div key={j} className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
+                                                                 <Icon className="w-3.5 h-3.5" />
                                                             </div>
                                                         ))}
                                                     </div>
 
-                                                    <h3 className="text-base font-bold text-white mt-5 mb-1.5 leading-tight line-clamp-2 uppercase tracking-wide">{hostelName}</h3>
-                                                    <div className="grid grid-cols-[auto_1fr] items-start text-white/70 text-[13px] mb-4">
-                                                        <MapPin className="w-4 h-4 mr-2 mt-0.5" />
-                                                        <span className="line-clamp-2">{hostelArea}</span>
+                                                    <h3 className="text-base font-bold text-white mb-1 line-clamp-2 uppercase tracking-wide leading-tight">{hostelName}</h3>
+                                                    <div className="flex items-center text-white/70 text-[11px] mb-4">
+                                                        <MapPin className="w-3.5 h-3.5 mr-1" />
+                                                        <span className="truncate">{hostelArea}</span>
                                                     </div>
 
-                                                    <div className="flex items-center justify-between pt-2 border-t border-white/20">
-                                                        <p className="text-white/60 text-sm italic">Starts at</p>
-                                                        <div className="flex items-baseline gap-1">
-                                                            <span className="text-3xl font-bold text-white">₹{hostelPrice.toLocaleString()}</span>
-                                                            <span className="text-white/60 text-sm">/month</span>
+                                                    <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] text-white/60 uppercase">Starts at</span>
+                                                            <span className="text-xl font-bold text-white">₹{Number(hostelPrice || 0).toLocaleString()}/-</span>
+                                                        </div>
+                                                        <div className="w-10 h-10 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-lg">
+                                                            <ChevronRight className="w-5 h-5" />
                                                         </div>
                                                     </div>
                                                 </div>

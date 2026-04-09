@@ -11,17 +11,24 @@ export function TopCategories({ onViewAll }) {
   const { location } = useLocationContext();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const sectionRef = useRef(null);
   const scrollRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Continuous "Marquee" Auto-scroll effect
+  useEffect(() => {
+    const updateViewport = () => setIsMobile(window.innerWidth < 768);
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
+  // Continuous auto-scroll effect for mobile only
   useEffect(() => {
     const container = scrollRef.current;
-    if (!isLoading && categories.length > 0 && container) {
-      // Disable CSS smooth scrolling for manual control if needed, quite abrupt otherwise?
-      // Actually simply setting scrollLeft works well for marquee.
-
+    if (!isLoading && categories.length > 0 && container && isMobile) {
       let animationId;
       const scroll = () => {
         if (!isPaused && container) {
@@ -37,7 +44,7 @@ export function TopCategories({ onViewAll }) {
       animationId = requestAnimationFrame(scroll);
       return () => cancelAnimationFrame(animationId);
     }
-  }, [isLoading, categories, isPaused]);
+  }, [isLoading, categories, isPaused, isMobile]);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -103,12 +110,12 @@ export function TopCategories({ onViewAll }) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -12 }}
-      className="group cursor-pointer"
+      className="group cursor-pointer snap-start shrink-0 md:w-auto"
     >
-      <div className="relative w-72 lg:w-[210px] h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+      <div className="relative h-40 w-32 rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] backdrop-blur-sm sm:h-48 sm:w-40 md:h-52 md:w-full xl:h-56">
         {/* Skeleton Image */}
         <div className="absolute inset-0 animate-shimmer">
-          <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 rounded-3xl" />
+          <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
 
@@ -180,8 +187,12 @@ export function TopCategories({ onViewAll }) {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <div className="flex gap-6 min-w-max">
+          <div
+            ref={scrollRef}
+            className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div className="flex min-w-max gap-4 snap-x snap-mandatory md:grid md:min-w-0 md:grid-cols-4 md:gap-4 md:snap-none xl:grid-cols-8">
               {isLoading
                 ? Array.from({ length: 8 }).map((_, index) => (
                   <SkeletonCategoryCard key={`skeleton-${index}`} />
@@ -195,9 +206,9 @@ export function TopCategories({ onViewAll }) {
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ y: -12 }}
                     onClick={() => router.push(`/${category.slug}`)}
-                    className="group cursor-pointer"
+                    className="group cursor-pointer snap-start shrink-0 md:w-auto"
                   >
-                    <div className="relative w-56 sm:w-64 lg:w-[210px] h-48 sm:h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+                    <div className="relative h-40 w-32 rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] backdrop-blur-sm sm:h-48 sm:w-40 md:h-52 md:w-full xl:h-56">
                       {/* Image */}
                       <div className="absolute inset-0">
                         <img
@@ -217,14 +228,14 @@ export function TopCategories({ onViewAll }) {
                       />
 
                       {/* Glass Card Overlay */}
-                      <div className="absolute inset-0 flex flex-col justify-end p-6">
+                      <div className="absolute inset-0 flex flex-col justify-end p-4">
                         <div className="relative z-10">
-                          <h4 className="text-xl  bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-bold mb-2 group-hover:text-[#04a99d] transition-colors">
+                          <h4 className="text-sm sm:text-base bg-white bg-clip-text text-transparent font-bold mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-2">
                             {category.title}
                           </h4>
                           <motion.div
                             initial={{ width: 0 }}
-                            whileHover={{ width: '60px' }}
+                            whileHover={{ width: '40px' }}
                             className="h-1 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full"
                           />
                         </div>
@@ -234,7 +245,7 @@ export function TopCategories({ onViewAll }) {
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
-                        className="absolute inset-0 rounded-3xl border-2 border-[#037166]/50 pointer-events-none"
+                        className="absolute inset-0 rounded-2xl border-2 border-[#037166]/50 pointer-events-none"
                         style={{ boxShadow: '0 0 20px rgba(3, 113, 102, 0.3)' }}
                       />
 
@@ -242,9 +253,9 @@ export function TopCategories({ onViewAll }) {
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         whileHover={{ opacity: 1, x: 0 }}
-                        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center"
+                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center"
                       >
-                        <ChevronRight className="w-5 h-5 text-[#04a99d]" />
+                        <ChevronRight className="w-4 h-4 text-[#04a99d]" />
                       </motion.div>
                     </div>
                   </motion.div>
@@ -266,9 +277,6 @@ export function TopCategories({ onViewAll }) {
             </div>
           </div>
 
-          {/* Fade Edges */}
-          <div className="absolute left-0 top-0 bottom-4 w-20 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none" />
         </div>
       </motion.div>
 

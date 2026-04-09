@@ -30,6 +30,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [technicianPreference, setTechnicianPreference] = useState('any');
     const [walletBalance, setWalletBalance] = useState(0);
+    const [walletData, setWalletData] = useState(null);
     const [walletLoading, setWalletLoading] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
 
@@ -66,6 +67,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 const data = await response.json();
                 if (data.success && data.wallet) {
                     setWalletBalance(data.wallet.currentBalance || 0);
+                    setWalletData(data.wallet);
                 }
             } catch (error) {
                 console.error('Error fetching wallet balance:', error);
@@ -416,14 +418,64 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 <CreditCard className="w-5 h-5 text-[#04a99d]" />
                                 Select Payment Method
                             </h4>
+
+                            {/* Virtual Wallet Card */}
+                            {paymentMethod === 'wallet' && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+                                    animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="relative p-7 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] text-white shadow-2xl shadow-[#037166]/40 overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+                                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-24 -mb-24 blur-2xl" />
+                                        
+                                        <div className="relative flex justify-between items-start mb-10">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1.5">
+                                                    <div className="w-2 h-2 rounded-full bg-[#05bfb0] animate-pulse" />
+                                                    <p className="text-white/70 text-[10px] font-bold uppercase tracking-[0.2em]">DH Active Wallet</p>
+                                                </div>
+                                                <p className="text-white/60 text-[10px] font-medium uppercase tracking-widest mb-1">Available Balance</p>
+                                                <h3 className="text-4xl font-bold tracking-tight flex items-baseline gap-1">
+                                                    <span className="text-2xl opacity-60">₹</span>
+                                                    {walletBalance}
+                                                </h3>
+                                            </div>
+                                            <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
+                                                <Wallet className="w-6 h-6 text-white" />
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="relative flex justify-between items-end">
+                                            <div className="space-y-1">
+                                                <p className="text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
+                                                <p className="text-sm font-mono tracking-[0.3em] font-medium">
+                                                    {walletData?.walletId ? `**** ${walletData.walletId.split('-').pop()}` : '**** **** 7269'}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-[14px] font-black italic tracking-tighter text-white">DH<span className="text-white/50">PAY</span></span>
+                                                    <div className="flex gap-1 mt-1">
+                                                        <div className="w-4 h-2.5 rounded-sm bg-white/20" />
+                                                        <div className="w-4 h-2.5 rounded-sm bg-white/40" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
                             <div className="grid md:grid-cols-2 gap-3">
                                 {[
                                     {
                                         id: 'wallet',
                                         label: 'Wallet Pay',
                                         icon: Wallet,
-                                        disabled: true,
-                                        tooltip: 'Redeemable after service completion only',
+                                        disabled: false,
+                                        tooltip: 'Pay using your DH Wallet balance',
                                         showBalance: true
                                     },
                                     {

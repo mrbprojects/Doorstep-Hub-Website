@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
@@ -22,7 +22,10 @@ export function BookingConfirmationPage({
   const [selectedTime, setSelectedTime] = useState('');
   const [technicianPreference, setTechnicianPreference] = useState('any');
   const [isConfirming, setIsConfirming] = useState(false);
-  const [paymentMethod] = useState('online');
+  const [paymentMethod, setPaymentMethod] = useState('online');
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletData, setWalletData] = useState(null);
+  const [walletLoading, setWalletLoading] = useState(false);
   const [directBookingItems, setDirectBookingItems] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
 
@@ -43,7 +46,33 @@ export function BookingConfirmationPage({
       }
     }
 
-    // 2. Check if returning from Easebuzz payment gateway
+    // 2. Load wallet balance
+    const fetchWalletBalance = async () => {
+      if (!token || !isAuthenticated) return;
+      setWalletLoading(true);
+      try {
+        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/wallet/balance', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (data.success && data.wallet) {
+          setWalletBalance(data.wallet.currentBalance || 0);
+          setWalletData(data.wallet);
+        }
+      } catch (error) {
+        console.error('Error fetching wallet balance:', error);
+      } finally {
+        setWalletLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchWalletBalance();
+    }
+
+    // 3. Check if returning from Easebuzz payment gateway
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
     if (status === 'success') {
@@ -58,7 +87,7 @@ export function BookingConfirmationPage({
       setPaymentStatus('failure');
       toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
     }
-  }, []);
+  }, [token, isAuthenticated]);
 
   const cartItems = (directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || []);
 
@@ -245,6 +274,12 @@ export function BookingConfirmationPage({
             bookedTime: selectedTimeLabel
           });
         } else {
+          // Handle wallet specific error if present in response
+          if (paymentMethod === 'wallet' && data.required !== undefined) {
+             const available = data.available || 0;
+             const required = data.required;
+             throw new Error(`Insufficient wallet balance. Required: ₹${required}, Available Balance: ₹${available}`);
+          }
           throw new Error(data.message || 'Booking failed');
         }
       } else if (paymentMethod === 'online') {
@@ -445,7 +480,6 @@ export function BookingConfirmationPage({
               </div>
             </motion.div>
 
-            {/* Payment Method */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -456,14 +490,78 @@ export function BookingConfirmationPage({
                 <CreditCard className="w-5 h-5 text-[#04a99d]" />
                 Payment Method
               </h4>
-              <p className="text-xs text-white/40 mb-4">Only online payment is accepted</p>
-              <div className="p-5 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg flex items-center gap-4">
-                <CreditCard className="w-6 h-6" />
-                <div>
-                  <p className="font-semibold">Online Payment</p>
-                  <p className="text-xs text-white/70">Secure payment via payment gateway</p>
-                </div>
-                <CheckCircle className="w-5 h-5 ml-auto" />
+              <p className="text-xs text-white/40 mb-4">Select your preferred payment method</p>
+
+
+              
+              <div className="grid gap-3">
+                {/* Online Payment */}
+                <button
+                  onClick={() => setPaymentMethod('online')}
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
+                    paymentMethod === 'online'
+                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                      : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  <CreditCard className="w-6 h-6" />
+                  <div className="text-left flex-1">
+                    <p className="font-semibold">Online Payment</p>
+                    <p className={`text-xs ${paymentMethod === 'online' ? 'text-white/70' : 'text-white/40'}`}>
+                      Secure payment via UPI, Cards, or Net Banking
+                    </p>
+                  </div>
+                  {paymentMethod === 'online' && <CheckCircle className="w-5 h-5 ml-auto" />}
+                </button>
+
+                {/* Wallet Payment */}
+                <button
+                  onClick={() => setPaymentMethod('wallet')}
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
+                    paymentMethod === 'wallet'
+                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                      : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="w-6 h-6 flex items-center justify-center">
+                    <Wallet className={`w-6 h-6 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#04a99d]'}`} />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold">Doorstep Hub Wallet</p>
+                      {!walletLoading && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/20 text-[#04a99d]'
+                        }`}>
+                          Available Balance: ₹{walletBalance}
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs ${paymentMethod === 'wallet' ? 'text-white/70' : 'text-white/40'}`}>
+                      Pay using your Doorstep Hub wallet balance
+                    </p>
+                    {/* Referral Information Section */}
+                    <div className={`mt-4 p-3 rounded-xl flex gap-3 transition-all ${
+                      paymentMethod === 'wallet' 
+                        ? 'bg-white/10 border border-white/20' 
+                        : 'bg-[#037166]/5 border border-[#037166]/10'
+                    }`}>
+                      <div className={`p-1.5 rounded-lg h-fit ${
+                        paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/10'
+                      }`}>
+                        <Info className={`w-4 h-4 ${
+                          paymentMethod === 'wallet' ? 'text-white' : 'text-[#037166]'
+                        }`} />
+                      </div>
+                      <p className={`text-[11px] leading-relaxed ${
+                        paymentMethod === 'wallet' ? 'text-white/80' : 'text-[#037166]'
+                      }`}>
+                        Refer your friends and family members and earn cashback up to <span className="font-bold">₹99</span>. The amount will be credited to your Doorstep Hub Wallet after a successful booking.
+                      </p>
+                    </div>
+                  </div>
+                  {paymentMethod === 'wallet' && <CheckCircle className="w-5 h-5 ml-auto" />}
+                </button>
               </div>
             </motion.div>
 

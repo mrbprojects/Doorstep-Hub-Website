@@ -12,6 +12,7 @@ export function LatestReligiousServices() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -19,6 +20,15 @@ export function LatestReligiousServices() {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
   const handleServiceClick = (service) => {
@@ -83,7 +93,7 @@ export function LatestReligiousServices() {
               bio: service.bio
             };
           });
-          setServices(mappedServices.slice(0, 4));
+          setServices(mappedServices);
         }
       } catch (err) {
         console.error('Error fetching religious services:', err);
@@ -97,8 +107,9 @@ export function LatestReligiousServices() {
 
   // Auto-scroller logic
   const scrollRef = React.useRef(null);
+  const shouldDesktopScroll = isDesktop && services.length > 6;
   useEffect(() => {
-    if (loading || services.length === 0) return;
+    if (loading || services.length === 0 || !shouldDesktopScroll) return;
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -110,34 +121,34 @@ export function LatestReligiousServices() {
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [loading, services]);
+  }, [loading, services, shouldDesktopScroll]);
 
   // Skeleton Shimmer Component
   const SkeletonCard = () => (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative h-full bg-gradient-to-br from-[#1a1a1a]/70 to-[#1a0f1a]/70 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-2xl"
+      className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-2xl border border-[#037166]/20 bg-gradient-to-br from-[#1a1a1a]/70 to-[#1a0f1a]/70 backdrop-blur-xl shadow-2xl xl:w-auto"
     >
       {/* Skeleton Type Badge */}
-      <div className="absolute top-6 left-6 z-20 px-4 py-2 bg-gradient-to-r from-[#9b59b6]/40 via-[#037166]/40 to-[#9b59b6]/40 backdrop-blur-md rounded-full animate-shimmer">
+      <div className="absolute top-4 left-4 z-20 px-3 py-1.5 bg-gradient-to-r from-[#9b59b6]/40 via-[#037166]/40 to-[#9b59b6]/40 backdrop-blur-md rounded-full animate-shimmer">
         <div className="h-4 w-20 bg-gradient-to-r from-white/30 via-white/50 to-white/30 rounded-full" />
       </div>
 
       {/* Skeleton Bell Icon */}
-      <div className="absolute top-6 right-6 z-20 w-12 h-12 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full animate-shimmer" />
+      <div className="absolute top-4 right-4 z-20 h-10 w-10 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full animate-shimmer" />
 
       {/* Skeleton Image */}
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative h-40 overflow-hidden">
         <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
       </div>
 
       {/* Skeleton Content */}
-      <div className="p-6">
-        <div className="h-6 w-48 mb-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+      <div className="p-4">
+        <div className="h-5 w-40 mb-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
 
-        <div className="space-y-3 mb-6">
+        <div className="space-y-2 mb-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center space-x-3">
               <div className="w-4 h-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
@@ -146,7 +157,7 @@ export function LatestReligiousServices() {
           ))}
         </div>
 
-        <div className="h-12 bg-gradient-to-r from-[#037166]/40 via-[#9b59b6]/40 to-[#037166]/40 rounded-xl animate-shimmer" />
+        <div className="h-10 bg-gradient-to-r from-[#037166]/40 via-[#9b59b6]/40 to-[#037166]/40 rounded-xl animate-shimmer" />
       </div>
     </motion.div>
   );
@@ -173,11 +184,15 @@ export function LatestReligiousServices() {
             <div className="h-5 w-64 mx-auto bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
+          <div className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
+            <div className="flex min-w-max gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
           </div>
         </div>
 
@@ -197,7 +212,7 @@ export function LatestReligiousServices() {
   }
 
   return (
-    <section className="relative py-18 overflow-hidden">
+    <section className="relative py-15 overflow-hidden">
       {/* Architectural World Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -254,8 +269,9 @@ export function LatestReligiousServices() {
         {/* Services - Horizontal Scroller */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-8 pb-12 scrollbar-hide snap-x snap-mandatory px-4 sm:px-0"
+          className={`overflow-x-auto scrollbar-hide pb-12 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
         >
+          <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
           {services.map((service, index) => (
             <motion.div
               key={service.id || index}
@@ -263,11 +279,11 @@ export function LatestReligiousServices() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.15, duration: 0.6 }}
-              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-pointer"
+              className={`group w-[240px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
               onClick={() => handleServiceClick(service)}
             >
               {/* Spiritual Card */}
-              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a]/70 to-[#1a0f1a]/70 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a]/70 to-[#1a0f1a]/70 backdrop-blur-xl border border-[#037166]/20 rounded-2xl overflow-hidden shadow-2xl">
                 {/* Type Badge */}
                 {/* <div className="absolute top-6 left-6 z-20 px-4 py-2 bg-gradient-to-r from-[#9b59b6]/80 to-[#037166]/80 backdrop-blur-md rounded-full">
                   <h6 className="text-xs font-bold text-white">{service.type}</h6>
@@ -276,13 +292,13 @@ export function LatestReligiousServices() {
                 {/* Bell Icon */}
                 <motion.div
                   whileHover={{ rotate: [0, -15, 15, -15, 0] }}
-                  className="absolute top-6 right-6 z-20 w-12 h-12 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center"
+                  className="absolute top-4 right-4 z-20 h-10 w-10 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center"
                 >
-                  <Bell className="w-6 h-6 text-[#9b59b6]" />
+                  <Bell className="w-5 h-5 text-[#9b59b6]" />
                 </motion.div>
 
                 {/* Image */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-40 overflow-hidden">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.6 }}
@@ -319,7 +335,7 @@ export function LatestReligiousServices() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-4">
                   <h4 className="text-lg font-bold mb-3
       bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166]
       bg-clip-text text-transparent">
@@ -327,15 +343,15 @@ export function LatestReligiousServices() {
                   </h4>
 
                   {/* Details */}
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center space-x-3 text-sm">
-                      <MapPin className="w-4 h-4 text-[#037166]" />
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center space-x-2 text-xs">
+                      <MapPin className="w-3.5 h-3.5 text-[#037166]" />
                       <span className="text-gray-300 font-normal line-clamp-1">{service.location}</span>
                     </div>
                   </div>
 
                   {/* Amenities Grid */}
-                  <div className="grid grid-cols-2 gap-3 mb-2">
+                  <div className="grid grid-cols-2 gap-2 mb-2">
                     {service.amenities.slice(0, 4).map((amenity, idx) => {
                       const Icon = amenityIcons[amenity] || Flame;
                       return (
@@ -361,6 +377,7 @@ export function LatestReligiousServices() {
               </div>
             </motion.div>
           ))}
+          </div>
         </div>
 
         {/* Peaceful Message */}

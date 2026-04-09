@@ -168,7 +168,7 @@ export function ServiceDetailsPage({
               console.error("Error auto-enriching URL:", enrichError);
             }
           }
-          
+
           // Pre-select the first package if none selected (Optional, keeping as default)
           if (data.provider_rate_cards?.length > 0) {
             setSelectedCards([data.provider_rate_cards[0]]);
@@ -319,19 +319,19 @@ export function ServiceDetailsPage({
 
   const toggleRateCard = (card) => {
     setSelectedCards(prev => {
-        const getCardKey = (c) => {
-            if (c._id) return `id-${c._id}`;
-            if (c.id) return `id-${c.id}`;
-            return `val-${c.title}-${c.price}`;
-        };
+      const getCardKey = (c) => {
+        if (c._id) return `id-${c._id}`;
+        if (c.id) return `id-${c.id}`;
+        return `val-${c.title}-${c.price}`;
+      };
 
-        const targetKey = getCardKey(card);
-        const isAlreadySelected = prev.some(c => getCardKey(c) === targetKey);
+      const targetKey = getCardKey(card);
+      const isAlreadySelected = prev.some(c => getCardKey(c) === targetKey);
 
-        if (isAlreadySelected) {
-            return prev.filter(c => getCardKey(c) !== targetKey);
-        }
-        return [...prev, card]; // Multi-selection enabled
+      if (isAlreadySelected) {
+        return prev.filter(c => getCardKey(c) !== targetKey);
+      }
+      return [...prev, card]; // Multi-selection enabled
     });
   };
 
@@ -339,29 +339,29 @@ export function ServiceDetailsPage({
   const handleBookNow = () => {
     const finalServiceId = storeData.id || storeData._id || serviceId;
     if (!finalServiceId) { toast.error('Service information missing'); return; }
-    
+
     if (selectedCards.length === 0) {
-        toast.error('Please select at least one service');
-        return;
+      toast.error('Please select at least one service');
+      return;
     }
 
     localStorage.setItem('last_service_id', finalServiceId);
     if (serviceSlug) localStorage.setItem('last_service_slug', serviceSlug);
-    
+
     const packagesToSave = selectedCards.map(card => {
-        const rawPrice = card.price || 0;
-        const cleanPrice = typeof rawPrice === 'string' ? parseInt(rawPrice.replace(/[^0-9]/g, '')) || 0 : rawPrice;
-        return {
-            ...(card || {}),
-            id: card.id || card._id || `pkg-${Math.random()}`,
-            serviceId: finalServiceId,
-            serviceName: storeData.name || 'Professional Service',
-            packageName: card.title || 'Standard Package',
-            price: cleanPrice,
-            bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
-            inspectionCost: storeData.inspectionCost || 0,
-            quantity: 1
-        };
+      const rawPrice = card.price || 0;
+      const cleanPrice = typeof rawPrice === 'string' ? parseInt(rawPrice.replace(/[^0-9]/g, '')) || 0 : rawPrice;
+      return {
+        ...(card || {}),
+        id: card.id || card._id || `pkg-${Math.random()}`,
+        serviceId: finalServiceId,
+        serviceName: storeData.name || 'Professional Service',
+        packageName: card.title || 'Standard Package',
+        price: cleanPrice,
+        bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
+        inspectionCost: storeData.inspectionCost || 0,
+        quantity: 1
+      };
     });
 
     localStorage.setItem('booking_package_details', JSON.stringify(packagesToSave));
@@ -537,82 +537,81 @@ export function ServiceDetailsPage({
                         <div className="grid gap-2 pb-4">
                           {provider_rate_cards.map((card, index) => {
                             const isSelected = selectedCards.some(c => {
-                                const getCardKey = (item) => {
-                                    if (item._id) return `id-${item._id}`;
-                                    if (item.id) return `id-${item.id}`;
-                                    return `val-${item.title}-${item.price}`;
-                                };
-                                return getCardKey(c) === getCardKey(card);
+                              const getCardKey = (item) => {
+                                if (item._id) return `id-${item._id}`;
+                                if (item.id) return `id-${item.id}`;
+                                return `val-${item.title}-${item.price}`;
+                              };
+                              return getCardKey(c) === getCardKey(card);
                             });
 
                             return (
-                                <div 
-                                    key={card.id || card._id || index} 
-                                    onClick={() => toggleRateCard(card)}
-                                    className={`p-2 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${
-                                        isSelected 
-                                        ? 'bg-[#037166]/15 border-[#037166] shadow-[0_0_20px_rgba(3,113,102,0.15)] ring-1 ring-[#037166]/50' 
-                                        : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
-                                    }`}
-                                >
-                                    <div className="flex gap-2.5 sm:gap-3 items-center">
-                                        {/* Selection Indicator (Left-aligned Checkbox style) */}
-                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                                            isSelected 
-                                            ? 'bg-[#037166] border-[#037166] shadow-[0_0_10px_rgba(3,113,102,0.5)]' 
-                                            : 'border-white/20 group-hover:border-[#037166]/60'
-                                        }`}>
-                                            <Check className={`w-3.5 h-3.5 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={4} />
-                                        </div>
+                              <div
+                                key={card.id || card._id || index}
+                                onClick={() => toggleRateCard(card)}
+                                className={`p-2 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${isSelected
+                                    ? 'bg-[#037166]/15 border-[#037166] shadow-[0_0_20px_rgba(3,113,102,0.15)] ring-1 ring-[#037166]/50'
+                                    : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
+                                  }`}
+                              >
+                                <div className="flex gap-2.5 sm:gap-3 items-center">
+                                  {/* Selection Indicator (Left-aligned Checkbox style) */}
+                                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${isSelected
+                                      ? 'bg-[#037166] border-[#037166] shadow-[0_0_10px_rgba(3,113,102,0.5)]'
+                                      : 'border-white/20 group-hover:border-[#037166]/60'
+                                    }`}>
+                                    <Check className={`w-3.5 h-3.5 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={4} />
+                                  </div>
 
-                                        {/* Rate Card Thumbnail */}
-                                        {card.image && (
-                                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
-                                                <img
-                                                    src={`https://api.doorstephub.com/${card.image}`}
-                                                    alt={card.title}
-                                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                                    onError={(e) => { e.target.style.display = 'none'; }}
-                                                />
-                                            </div>
-                                        )}
-
-                                        <div className="flex-1 flex flex-col justify-between min-w-0">
-                                            <div className="flex items-start justify-between gap-2">
-                                            <div className="min-w-0 flex-1">
-                                                <h6 className={`text-xs sm:text-sm font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>{card.title}</h6>
-                                                {card.reason && (
-                                                <p className="text-white/40 text-[10px] leading-relaxed line-clamp-1">{card.reason}</p>
-                                                )}
-                                            </div>
-
-                                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                                <span className="text-[#04a99d] font-bold text-sm sm:text-base whitespace-nowrap"><span className='italic font-normal text-[9px] text-white/80'>Starts from </span>₹{card.price}</span>
-
-                                                {/* See More Button - Below Price */}
-                                                {card.banner_images?.length > 0 && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setRateCardModal({
-                                                            isOpen: true,
-                                                            images: card.banner_images,
-                                                            currentIndex: 0,
-                                                            title: card.title
-                                                        });
-                                                    }}
-                                                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[9px] font-bold border border-[#037166]/20"
-                                                >
-                                                    <span className="hidden xs:inline">View </span>Images
-                                                    <ArrowRight className="w-3 h-3" />
-                                                </button>
-                                                )}
-                                            </div>
-                                            </div>
-                                        </div>
+                                  {/* Rate Card Thumbnail */}
+                                  {card.image && (
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
+                                      <img
+                                        src={`https://api.doorstephub.com/${card.image}`}
+                                        alt={card.title}
+                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                        onError={(e) => { e.target.style.display = 'none'; }}
+                                      />
                                     </div>
+                                  )}
+
+                                  <div className="flex-1 flex flex-col justify-between min-w-0">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0 flex-1">
+                                        <h6 className={`text-xs sm:text-sm font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>{card.title}</h6>
+                                        {card.reason && (
+                                          <p className="text-white/40 text-[10px] leading-relaxed line-clamp-1">{card.reason}</p>
+                                        )}
+                                      </div>
+
+                                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                        <span className="text-[#04a99d] font-bold text-sm sm:text-base whitespace-nowrap"><span className='italic font-normal text-[9px] text-white/80'>Starts from </span>₹{card.price}</span>
+
+                                        {/* See More Button - Below Price */}
+                                        {card.banner_images?.length > 0 && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setRateCardModal({
+                                                isOpen: true,
+                                                images: card.banner_images,
+                                                currentIndex: 0,
+                                                title: card.title
+                                              });
+                                            }}
+                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[9px] font-bold border border-[#037166]/20"
+                                          >
+                                            <span className="hidden xs:inline">View </span>Images
+                                            <ArrowRight className="w-3 h-3" />
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
-                          )})}
+                              </div>
+                            )
+                          })}
                         </div>
                       </motion.div>
                     )}
@@ -879,68 +878,68 @@ export function ServiceDetailsPage({
       {/* Rate Card Images Modal */}
       <AnimatePresence>
         {rateCardModal.isOpen && (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 md:p-8"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 md:p-8"
+          >
+            <button
+              onClick={() => setRateCardModal(prev => ({ ...prev, isOpen: false }))}
+              className="absolute top-6 right-6 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[130]"
             >
-                <button
-                    onClick={() => setRateCardModal(prev => ({ ...prev, isOpen: false }))}
-                    className="absolute top-6 right-6 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[130]"
-                >
-                    <X className="w-6 h-6" />
-                </button>
+              <X className="w-6 h-6" />
+            </button>
 
-                <div className="relative max-w-4xl w-full h-full flex flex-col items-center justify-center gap-6">
-                    <div className="text-center">
-                        <h4 className="text-xl font-bold text-white mb-1">{rateCardModal.title}</h4>
-                        <p className="text-white/50 text-sm">Service Images</p>
-                    </div>
+            <div className="relative max-w-4xl w-full h-full flex flex-col items-center justify-center gap-6">
+              <div className="text-center">
+                <h4 className="text-xl font-bold text-white mb-1">{rateCardModal.title}</h4>
+                <p className="text-white/50 text-sm">Service Images</p>
+              </div>
 
-                    <div className="relative aspect-square md:aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black/20">
-                        <img 
-                            src={`https://api.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
-                            alt={rateCardModal.title}
-                            className="w-full h-full object-contain"
-                        />
-                        
-                        {rateCardModal.images.length > 1 && (
-                            <>
-                                <button
-                                    onClick={() => setRateCardModal(prev => ({ 
-                                        ...prev, 
-                                        currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length 
-                                    }))}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white"
-                                >
-                                    <ChevronLeft className="w-6 h-6" />
-                                </button>
-                                <button
-                                    onClick={() => setRateCardModal(prev => ({ 
-                                        ...prev, 
-                                        currentIndex: (prev.currentIndex + 1) % prev.images.length 
-                                    }))}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white"
-                                >
-                                    <ChevronRight className="w-6 h-6" />
-                                </button>
-                            </>
-                        )}
-                    </div>
+              <div className="relative aspect-square md:aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black/20">
+                <img
+                  src={`https://api.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
+                  alt={rateCardModal.title}
+                  className="w-full h-full object-contain"
+                />
 
-                    {rateCardModal.images.length > 1 && (
-                        <div className="flex gap-2">
-                            {rateCardModal.images.map((_, i) => (
-                                <div 
-                                    key={i} 
-                                    className={`w-2 h-2 rounded-full transition-all ${i === rateCardModal.currentIndex ? 'bg-[#04a99d] w-6' : 'bg-white/20'}`} 
-                                />
-                            ))}
-                        </div>
-                    )}
+                {rateCardModal.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setRateCardModal(prev => ({
+                        ...prev,
+                        currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+                      }))}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={() => setRateCardModal(prev => ({
+                        ...prev,
+                        currentIndex: (prev.currentIndex + 1) % prev.images.length
+                      }))}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {rateCardModal.images.length > 1 && (
+                <div className="flex gap-2">
+                  {rateCardModal.images.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-2 h-2 rounded-full transition-all ${i === rateCardModal.currentIndex ? 'bg-[#04a99d] w-6' : 'bg-white/20'}`}
+                    />
+                  ))}
                 </div>
-            </motion.div>
+              )}
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

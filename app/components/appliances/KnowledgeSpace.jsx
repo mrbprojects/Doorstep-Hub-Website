@@ -69,7 +69,7 @@ export function KnowledgeSpace() {
         const data = await response.json();
 
         if (data.success && data.data && data.data.length > 0) {
-          const mappedArticles = data.data.slice(0, 4).map(item => ({
+          const mappedArticles = data.data.slice(0, 6).map(item => ({
             id: item._id,
             title: item.title,
             category: item.subcategoryId?.name || item.categoryId?.name || item.serviceId?.name || 'General',
@@ -97,13 +97,13 @@ export function KnowledgeSpace() {
 
   // Skeleton Card
   const SkeletonCard = () => (
-    <div className="h-full rounded-3xl overflow-hidden bg-[#1a1a1a] border mb-3 border-white/5">
-      <div className="h-48 bg-white/5 animate-pulse" />
-      <div className="p-6 space-y-4">
-        <div className="h-6 w-3/4 bg-white/5 rounded animate-pulse" />
+    <div className="w-[240px] shrink-0 overflow-hidden rounded-2xl border border-white/5 bg-[#1a1a1a] md:w-full">
+      <div className="h-36 bg-white/5 animate-pulse" />
+      <div className="space-y-3 p-4">
+        <div className="h-5 w-3/4 rounded bg-white/5 animate-pulse" />
         <div className="flex justify-between">
-          <div className="h-4 w-20 bg-white/5 rounded animate-pulse" />
-          <div className="h-4 w-12 bg-white/5 rounded animate-pulse" />
+          <div className="h-4 w-20 rounded bg-white/5 animate-pulse" />
+          <div className="h-4 w-12 rounded bg-white/5 animate-pulse" />
         </div>
       </div>
     </div>
@@ -161,9 +161,10 @@ export function KnowledgeSpace() {
         </motion.div>
 
         {/* Articles Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-4 md:mx-0 md:px-0 md:overflow-visible">
+          <div className="flex min-w-max gap-4 md:min-w-0 md:grid md:grid-cols-2 md:gap-4 xl:grid-cols-6">
           {loading
-            ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             : articles.map((article, index) => (
               <motion.div
                 key={article.id || index}
@@ -171,17 +172,17 @@ export function KnowledgeSpace() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`group ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
+                className={`group w-[240px] shrink-0 md:w-auto ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
               >
                 <Link href={article.isDummy ? '#' : `/knowledge/${article.slug}`}>
                   {/* Studio Card */}
                   <motion.div
                     whileHover={article.isDummy ? {} : { y: -10 }}
-                    className={`relative h-full bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#037166]/20 transition-all duration-300 ${article.isDummy ? 'pointer-events-none' : ''}`}
+                    className={`relative h-full overflow-hidden rounded-2xl border border-[#037166]/20 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:shadow-[#037166]/20 ${article.isDummy ? 'pointer-events-none' : ''}`}
                   >
                     {/* Trending Badge */}
                     {article.trending && (
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 px-8 py-1 bg-gradient-to-r from-[#037166] via-white to-[#037166] backdrop-blur-md rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 shadow-lg whitespace-nowrap flex items-center space-x-2">
+                      <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-white to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
                         <TrendingUp className="w-3 h-3 text-[#037166]" />
                         <h6 className="text-xs font-bold text-[#037166]">Trending</h6>
                       </div>
@@ -189,7 +190,7 @@ export function KnowledgeSpace() {
 
 
                     {/* Image */}
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-36 overflow-hidden">
                       <ImageWithFallback
                         src={article.image}
                         alt={article.title}
@@ -198,7 +199,7 @@ export function KnowledgeSpace() {
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
 
                       {/* Category Badge */}
-                      <div className="absolute bottom-4 left-4 px-3 py-1 bg-[#037166]/80 backdrop-blur-md rounded-full">
+                      <div className="absolute bottom-3 left-3 rounded-full bg-[#037166]/80 px-2.5 py-1 backdrop-blur-md">
                         <h6 className="text-xs font-semibold text-white uppercase tracking-wider">
                           {article.category}
                         </h6>
@@ -206,17 +207,17 @@ export function KnowledgeSpace() {
                     </div>
 
                     {/* Content */}
-                    <div className="p-6">
-                      <h4 className="text-lg font-bold bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent mb-2 leading-snug line-clamp-1">
+                    <div className="p-4">
+                      <h4 className="mb-2 line-clamp-1 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-base font-bold leading-snug text-transparent">
                         {article.title}
                       </h4>
-                      <p className="text-white/60 text-sm mb-4 line-clamp-2">
+                      <p className="mb-3 line-clamp-2 text-xs text-white/60">
                         {article.summary}
                       </p>
 
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-sm text-gray-400">
-                          <Clock className="w-4 h-4 text-[#037166]" />
+                        <div className="flex items-center space-x-2 text-xs text-gray-400">
+                          <Clock className="h-3.5 w-3.5 text-[#037166]" />
                           <span>{article.readTime}</span>
                         </div>
 
@@ -232,6 +233,7 @@ export function KnowledgeSpace() {
                 </Link>
               </motion.div>
             ))}
+          </div>
         </div>
 
         <motion.div

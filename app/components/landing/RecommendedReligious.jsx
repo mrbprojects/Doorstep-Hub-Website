@@ -11,6 +11,7 @@ export function RecommendedReligious() {
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -18,6 +19,15 @@ export function RecommendedReligious() {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
   const handleServiceClick = (service) => {
@@ -83,7 +93,7 @@ export function RecommendedReligious() {
               amenities: displayedAmenities
             };
           });
-          setJourneys(mappedJourneys.slice(0, 4));
+          setJourneys(mappedJourneys);
         }
       } catch (err) {
         console.error('Error fetching featured religious services:', err);
@@ -99,8 +109,9 @@ export function RecommendedReligious() {
 
   // Auto-scroller for the horizontal container
   const scrollRef = React.useRef(null);
+  const shouldDesktopScroll = isDesktop && journeys.length > 6;
   useEffect(() => {
-    if (loading || journeys.length === 0) return;
+    if (loading || journeys.length === 0 || !shouldDesktopScroll) return;
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -112,35 +123,35 @@ export function RecommendedReligious() {
       }
     }, 3000); // Scroll every 3 seconds
     return () => clearInterval(interval);
-  }, [loading, journeys]);
+  }, [loading, journeys, shouldDesktopScroll]);
 
   // Skeleton Shimmer Component
   const SkeletonCard = () => (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] border-2 border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl"
+      className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-2xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] shadow-2xl xl:w-auto"
     >
       {/* Skeleton Image */}
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative h-40 overflow-hidden">
         <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
 
         {/* Skeleton Rating Badge */}
-        <div className="absolute top-6 right-6 px-4 py-2 bg-[#037166]/40 backdrop-blur-md rounded-full flex items-center space-x-2 animate-shimmer">
+        <div className="absolute top-4 right-4 flex items-center space-x-2 rounded-full bg-[#037166]/40 px-3 py-1.5 backdrop-blur-md animate-shimmer">
           <div className="w-4 h-4 bg-white/50 rounded-full" />
           <div className="h-4 w-10 bg-white/30 rounded" />
         </div>
       </div>
 
       {/* Skeleton Content */}
-      <div className="p-6">
+      <div className="p-4">
         {/* Title & Description */}
         <div className="mb-4">
-          <div className="h-8 w-4/5 mb-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
-          <div className="h-4 w-full mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-full mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-3/4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          <div className="mb-3 h-6 w-4/5 rounded-lg bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+          <div className="mb-2 h-4 w-full rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+          <div className="mb-2 h-4 w-full rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+          <div className="h-4 w-3/4 rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
         </div>
 
         {/* Participants & CTA */}
@@ -172,11 +183,15 @@ export function RecommendedReligious() {
             <div className="h-5 w-64 mx-auto bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
+          <div className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
+            <div className="flex min-w-max gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
           </div>
 
           <div className="max-w-3xl mx-auto p-8 bg-gradient-to-r from-[#1a1a1a]/60 via-[#1a1a1a]/80 to-[#1a1a1a]/60 backdrop-blur-xl border border-[#037166]/20 rounded-3xl text-center animate-shimmer h-32" />
@@ -255,8 +270,9 @@ export function RecommendedReligious() {
         {/* Journey Cards - Horizontal Scroller */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-8 pb-12 scrollbar-hide snap-x snap-mandatory"
+          className={`overflow-x-auto scrollbar-hide pb-12 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
         >
+          <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
           {journeys.map((journey, index) => (
             <motion.div
               key={journey.id || index}
@@ -264,13 +280,13 @@ export function RecommendedReligious() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.7 }}
-              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-pointer"
+              className={`group w-[240px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
               onClick={() => handleServiceClick(journey)}
             >
               {/* Journey Card */}
-              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] border-2 border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative h-full overflow-hidden rounded-2xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] shadow-2xl">
                 {/* Image */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-40 overflow-hidden">
                   <ImageWithFallback
                     src={journey.image}
                     alt={journey.title}
@@ -291,21 +307,21 @@ export function RecommendedReligious() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6 h-[200px] flex flex-col justify-between">
+                <div className="flex h-[160px] flex-col justify-between p-4">
                   {/* Title & Description */}
                   <div className="mb-4">
-                    <h4 className="text-lg font-bold bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-transparent line-clamp-1">
+                    <h4 className="line-clamp-1 bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-base font-bold text-transparent">
                       {journey.title}
                     </h4>
                     <h6 className="text-[#9b59b6] text-xs font-medium mb-2 uppercase tracking-wider">{journey.providerName}</h6>
                     {/* <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 mb-4">{journey.description}</p> */}
 
                     {/* Amenities Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-2">
+                    <div className="mb-2 grid grid-cols-2 gap-2">
                       {journey.amenities.slice(0, 4).map((amenity, idx) => {
                         const Icon = amenityIcons[amenity] || Flame;
                         return (
-                          <div key={idx} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg border border-[#037166]/10">
+                          <div key={idx} className="flex items-center space-x-2 rounded-lg border border-[#037166]/10 bg-[#1a1a1a]/50 p-2">
                             <Icon className="w-3 h-3 text-[#9b59b6]" />
                             <span className="text-[10px] text-gray-300 line-clamp-1">{amenity}</span>
                           </div>
@@ -335,6 +351,7 @@ export function RecommendedReligious() {
               </div>
             </motion.div>
           ))}
+          </div>
         </div>
 
         {/* Inspirational Quote */}
@@ -359,6 +376,15 @@ export function RecommendedReligious() {
           </motion.div>
         )} */}
       </div>
+      <style jsx>{`
+        .scrollbar-hide {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 }

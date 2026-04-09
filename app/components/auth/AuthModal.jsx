@@ -104,6 +104,13 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
             toast.error('Please enter a valid 10-digit mobile number');
             return;
         }
+
+        // Validate starting digit (must be 6, 7, 8, or 9)
+        if (!/^[6-9]/.test(mobile)) {
+            toast.error('Mobile number must start with 6, 7, 8, or 9');
+            return;
+        }
+
         setLoading(true);
         try {
             const data = await loginWithWhatsApp(mobile);
@@ -252,10 +259,10 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="relative w-full max-w-md overflow-hidden rounded-3xl border border-neutral-200/30 bg-white/25 shadow-2xl shadow-black/40 backdrop-blur-2xl transition-all duration-500"
+                className="relative w-full max-w-md overflow-hidden rounded-3xl border border-[#037166] bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 shadow-2xl shadow-[#037166]/10 backdrop-blur-2xl transition-all duration-500"
             >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/25 via-white/10 to-white/5" />
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-white/15 blur-2xl" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#037166]/12 via-white/5 to-[#025951]/10" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[#037166]/10 blur-2xl" />
                 {/* Header */}
                 <div className={`relative p-6 border-b border-opacity-10 ${borderColor} flex items-center justify-between`}>
                     <h2 className={`text-xl font-bold ${t.textMain}`}>
@@ -579,4 +586,3 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         </div>
     );
 }
-

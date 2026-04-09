@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Apple, Smartphone, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Apple, Smartphone, ThumbsUp, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export function DownloadApp() {
   return (
@@ -176,7 +176,7 @@ export function DownloadApp() {
                   transition={{ duration: 3.5, repeat: Infinity, delay: 1 }}
                   className="absolute -left-4 bottom-32 w-14 h-14 rounded-xl bg-gradient-to-br from-[#037166] to-[#065f46] shadow-xl flex items-center justify-center"
                 >
-                  <Smartphone className="w-7 h-7 text-white" />
+                  <ThumbsUp className="w-7 h-7 text-white" />
                 </motion.div>
               </div>
             </motion.div>

@@ -81,7 +81,7 @@ export function Newsletter() {
   };
 
   return (
-    <section className="py-20 mt-20 relative overflow-hidden">
+    <section className="py-20 mt-18 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0f1614] via-[#0a0a0a] to-[#0f1614]" />
 

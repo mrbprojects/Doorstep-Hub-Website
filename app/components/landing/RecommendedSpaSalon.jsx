@@ -11,6 +11,7 @@ export function RecommendedSpaSalon() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -18,6 +19,15 @@ export function RecommendedSpaSalon() {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
   
   const handleStoreClick = (store) => {
@@ -211,20 +221,27 @@ export function RecommendedSpaSalon() {
 
   // Auto-scroller logic
   const scrollRef = React.useRef(null);
+  const shouldDesktopScroll = isDesktop && featured.length > 6;
   useEffect(() => {
-    if (loading || featured.length === 0) return;
+    if (loading || featured.length === 0 || !shouldDesktopScroll) return;
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const cards = Array.from(scrollRef.current.querySelectorAll('[data-scroll-card="spa-salon"]'));
+
         if (scrollLeft + clientWidth >= scrollWidth - 5) {
           scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
-          scrollRef.current.scrollBy({ left: clientWidth, behavior: 'smooth' });
+          const nextCard = cards.find((card) => card.offsetLeft > scrollLeft + 5);
+          scrollRef.current.scrollTo({
+            left: nextCard ? nextCard.offsetLeft : 0,
+            behavior: 'smooth'
+          });
         }
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [loading, featured]);
+  }, [loading, featured, shouldDesktopScroll]);
 
   if (loading) {
     return (
@@ -235,12 +252,14 @@ export function RecommendedSpaSalon() {
               Recommended Spa & Salon
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse">
+          <div className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
+            <div className="flex min-w-max gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="w-[228px] shrink-0 animate-pulse xl:w-auto">
                 <div className="bg-gray-800 h-64 rounded-3xl" />
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
@@ -305,28 +324,30 @@ export function RecommendedSpaSalon() {
         {/* Featured Cards - Horizontal Scroller */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-4 pb-8 scrollbar-hide snap-x snap-mandatory px-4 sm:px-0"
+          className={`overflow-x-auto scrollbar-hide pb-8 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
         >
+          <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
           {featured.map((place, index) => (
             <motion.div
               key={place.id || index}
+              data-scroll-card="spa-salon"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.7 }}
-              className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group relative cursor-pointer"
+              className={`group relative w-[228px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
               onClick={() => handleStoreClick(place)}
             >
               {/* Premium Card - Original sizing preserved */}
-              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a] via-[#1a1510] to-[#0f0f0f] border-2 border-[#037166]/30 rounded-3xl overflow-hidden">
+              <div className="relative h-full overflow-hidden rounded-2xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] via-[#1a1510] to-[#0f0f0f]">
                 {/* Top Badge */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-2 px-8 py-1 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] backdrop-blur-md rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 shadow-lg whitespace-nowrap">
+                <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
                   <Award className="w-3 h-3 text-white" />
                   <h6 className="text-xs font-bold text-white uppercase tracking-wider">{place.badge}</h6>
                 </div>
 
                 {/* Image with Luxury Overlay - Original height preserved */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-44 overflow-hidden">
                   <ImageWithFallback
                     src={place.image}
                     alt={place.name}
@@ -349,16 +370,16 @@ export function RecommendedSpaSalon() {
                 </div>
 
                 {/* Content - Original spacing preserved */}
-                <div className="p-8 -mt-20 relative z-10">
+                <div className="relative z-10 -mt-10 p-4">
                   {/* Main Info Card */}
                   <motion.div
-                    className="p-6 bg-[#1a1a1a]/90 backdrop-blur-xl border border-[#037166]/30 rounded-2xl mb-6 shadow-xl h-[340px] flex flex-col justify-between"
+                    className="mb-4 flex h-[220px] flex-col rounded-2xl border border-[#037166]/30 bg-[#1a1a1a]/90 p-3 shadow-xl backdrop-blur-xl"
                   >
-                    <div className="mb-4">
-                      <h6 className="text-xs bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-transparent font-semibold mb-2 uppercase tracking-wider">
+                    <div className="mb-2 min-h-[48px]">
+                      <h6 className="mb-1 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-[10px] font-semibold uppercase tracking-[0.18em] text-transparent">
                         {place.category}
                       </h6>
-                      <h4 className="text-lg font-bold bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-transparent truncate w-full" title={place.name}>
+                      <h4 className="line-clamp-2 w-full bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-[15px] font-bold leading-tight text-transparent" title={place.name}>
                         {place.name}
                       </h4>
                     </div>
@@ -367,19 +388,19 @@ export function RecommendedSpaSalon() {
 
 
                     {/* Price & Action Card - Matches PG Styling */}
-                    <div className="mb-4 p-2 border border-[#037166]/20 rounded-xl flex items-center justify-between gap-2 bg-[#037166]/5">
+                    <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-[#037166]/20 bg-[#037166]/5 p-2">
                       {/* Left: Price */}
                       <div>
-                        <h6 className="text-[10px] text-gray-400 mb-0.5 font-ubuntu">
+                        <h6 className="mb-0.5 font-ubuntu text-[9px] text-gray-400">
                           Starting at
                         </h6>
-                        <div className="text-sm font-bold text-[#6D1357] font-ubuntu">
+                        <div className="font-ubuntu text-[11px] font-bold text-[#6D1357]">
                           {place.price}
                         </div>
                       </div>
 
                       <div>
-                        <div className="px-3 py-1.5 bg-[#297A70] rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap">
+                        <div className="whitespace-nowrap rounded-full bg-[#297A70] px-3 py-1.5 text-[9px] font-semibold shadow-lg">
                           <span className="text-gray-300">
                             View Details
                           </span>
@@ -389,13 +410,13 @@ export function RecommendedSpaSalon() {
 
                     {/* Highlights */}
                     {/* Highlights (Amenities) */}
-                    <div className="grid grid-cols-2 gap-3 mb-2 h-[88px] content-start">
+                    <div className="mt-auto grid grid-cols-2 gap-2">
                       {place.highlights.map((highlight, idx) => {
                         const Icon = amenityIcons[highlight] || Sparkles;
                         return (
-                          <div key={idx} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg border border-[#037166]/10">
-                            <Icon className="w-3 h-3 text-[#d4af37]" />
-                            <span className="text-[10px] text-gray-300 line-clamp-1">{highlight}</span>
+                          <div key={idx} className="flex h-[36px] items-center space-x-1.5 rounded-lg border border-[#037166]/10 bg-[#1a1a1a]/50 px-2 py-1.5">
+                            <Icon className="h-3 w-3 shrink-0 text-[#d4af37]" />
+                            <span className="line-clamp-1 text-[9px] text-gray-300">{highlight}</span>
                           </div>
                         );
                       })}
@@ -415,6 +436,7 @@ export function RecommendedSpaSalon() {
               </div>
             </motion.div>
           ))}
+          </div>
         </div>
 
         {/* Premium Stats - Original layout preserved */}
@@ -446,6 +468,15 @@ export function RecommendedSpaSalon() {
           ))}
         </motion.div> */}
       </div>
+      <style jsx>{`
+        .scrollbar-hide {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 }

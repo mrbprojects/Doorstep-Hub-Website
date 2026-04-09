@@ -24,6 +24,7 @@ export function BookingConfirmationPage({
   const [paymentMethod, setPaymentMethod] = useState('online');
   const [directBookingItems, setDirectBookingItems] = useState(null);
   const [walletBalance, setWalletBalance] = useState(0);
+  const [walletData, setWalletData] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
 
   // Race condition protection
@@ -45,6 +46,7 @@ export function BookingConfirmationPage({
         const data = await response.json();
         if (data.success && data.wallet) {
           setWalletBalance(data.wallet.currentBalance || 0);
+          setWalletData(data.wallet);
         }
       } catch (error) {
         console.error('Error fetching wallet balance:', error);
@@ -252,6 +254,12 @@ export function BookingConfirmationPage({
           cleanup();
           onConfirmBooking(data);
         } else {
+          // Handle wallet specific error if present in response
+          if (paymentMethod === 'wallet' && data.required !== undefined) {
+             const available = data.available || 0;
+             const required = data.required;
+             throw new Error(`Insufficient wallet balance. Required: ₹${required}, Available: ₹${available}`);
+          }
           throw new Error(data.message || 'Booking failed');
         }
       } else if (paymentMethod === 'online') {
@@ -445,73 +453,119 @@ export function BookingConfirmationPage({
               </div>
             </motion.div>
 
-            {/* Payment Method */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
             >
-              <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <h4 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-[#04a99d]" />
-                Select Payment Method
+                Payment Method
               </h4>
-              <div className="grid md:grid-cols-2 gap-3">
-                {[
-                  {
-                    id: 'wallet',
-                    label: 'Wallet Pay',
-                    icon: Wallet,
-                    disabled: true,
-                    tooltip: 'Redeemable after service completion only',
-                    showBalance: true
-                  },
-                  {
-                    id: 'online',
-                    label: 'Online Payment',
-                    icon: CreditCard,
-                    disabled: false
-                  },
-                ].map((method) => (
-                  <div key={method.id} className="relative group h-full">
-                    <button
-                      onClick={() => !method.disabled && setPaymentMethod(method.id)}
-                      disabled={method.disabled}
-                      className={`w-full h-full p-5 rounded-xl flex flex-col items-center justify-center gap-2 transition-all min-h-[140px] ${paymentMethod === method.id
-                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg'
-                        : method.disabled
-                          ? 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed'
-                          : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
-                        }`}
-                    >
-                      <div className={`w-6 h-6 flex items-center justify-center ${paymentMethod === method.id ? 'text-white' : method.disabled ? 'text-white/10' : 'text-[#04a99d]'}`}>
-                        {method.id === 'wallet' && !walletLoading && walletBalance > 0 ? (
-                          <span className="text-sm font-bold">₹{walletBalance}</span>
-                        ) : (
-                          <method.icon className="w-6 h-6" />
-                        )}
+              <p className="text-xs text-white/40 mb-4">Select your preferred payment method</p>
+
+              {/* Virtual Wallet Card */}
+              {paymentMethod === 'wallet' && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+                  animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
+                  className="overflow-hidden"
+                >
+                  <div className="relative p-7 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] text-white shadow-2xl shadow-[#037166]/40 overflow-hidden group">
+                    {/* Abstract background shapes */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-24 -mb-24 blur-2xl" />
+                    
+                    <div className="relative flex justify-between items-start mb-10">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="w-2 h-2 rounded-full bg-[#05bfb0] animate-pulse" />
+                          <p className="text-white/70 text-[10px] font-bold uppercase tracking-[0.2em]">DH Active Wallet</p>
+                        </div>
+                        <p className="text-white/60 text-[10px] font-medium uppercase tracking-widest mb-1">Available Balance</p>
+                        <h3 className="text-4xl font-bold tracking-tight flex items-baseline gap-1">
+                          <span className="text-2xl opacity-60">₹</span>
+                          {walletBalance}
+                        </h3>
                       </div>
-
-                      <h6 className="text-sm font-medium">{method.label}</h6>
-
-                      {method.id === 'wallet' && (
-                        <i className="text-[9px] text-white/40 block mt-0.5 leading-tight">
-                          Wallet Usable After Service Completion Only
-                        </i>
-                      )}
-                    </button>
-
-                    {/* Simple Tooltip on Top */}
-                    {method.disabled && method.tooltip && (
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 px-2 py-1 bg-black/90 text-white text-[12px] rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center">
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/90 rotate-45 border-r border-b border-white/10" />
-                        {method.tooltip}
+                      <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
+                        <Wallet className="w-6 h-6 text-white" />
                       </div>
-                    )}
+                    </div>
+                    
+                    <div className="relative flex justify-between items-end">
+                      <div className="space-y-1">
+                        <p className="text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
+                        <p className="text-sm font-mono tracking-[0.3em] font-medium">
+                          {walletData?.walletId ? `**** ${walletData.walletId.split('-').pop()}` : '**** **** 7269'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                         <div className="flex flex-col items-end">
+                            <span className="text-[14px] font-black italic tracking-tighter text-white">DH<span className="text-white/50">PAY</span></span>
+                            <div className="flex gap-1 mt-1">
+                              <div className="w-4 h-2.5 rounded-sm bg-white/20" />
+                              <div className="w-4 h-2.5 rounded-sm bg-white/40" />
+                            </div>
+                         </div>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                </motion.div>
+              )}
+              
+              <div className="grid gap-3">
+                {/* Online Payment */}
+                <button
+                  onClick={() => setPaymentMethod('online')}
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
+                    paymentMethod === 'online'
+                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                      : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  <CreditCard className="w-6 h-6" />
+                  <div className="text-left flex-1">
+                    <p className="font-semibold">Online Payment</p>
+                    <p className={`text-xs ${paymentMethod === 'online' ? 'text-white/70' : 'text-white/40'}`}>
+                      Secure payment via UPI, Cards, or Net Banking
+                    </p>
+                  </div>
+                  {paymentMethod === 'online' && <CheckCircle className="w-5 h-5 ml-auto" />}
+                </button>
+
+                {/* Wallet Payment */}
+                <button
+                  onClick={() => setPaymentMethod('wallet')}
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
+                    paymentMethod === 'wallet'
+                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                      : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="w-6 h-6 flex items-center justify-center">
+                    <Wallet className={`w-6 h-6 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#04a99d]'}`} />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold">DH Wallet</p>
+                      {!walletLoading && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/20 text-[#04a99d]'
+                        }`}>
+                          Available: ₹{walletBalance}
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs ${paymentMethod === 'wallet' ? 'text-white/70' : 'text-white/40'}`}>
+                      Pay using your Doorstep Hub wallet balance
+                    </p>
+                  </div>
+                  {paymentMethod === 'wallet' && <CheckCircle className="w-5 h-5 ml-auto" />}
+                </button>
               </div>
-            </motion.div>
+            </motion.div>v>
 
             {/* Service Address */}
             <motion.div

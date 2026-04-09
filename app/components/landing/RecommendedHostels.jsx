@@ -12,6 +12,7 @@ export function RecommendedHostels() {
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -19,6 +20,15 @@ export function RecommendedHostels() {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
   const handleHostelClick = (hostel) => {
@@ -61,7 +71,7 @@ export function RecommendedHostels() {
               price: hostel.startingAt || hostel.serviceBookingCost || 0,
             };
           });
-          setHostels(mappedHostels.slice(0, 4));
+          setHostels(mappedHostels);
         }
       } catch (err) {
         console.error('Error fetching latest hostels:', err);
@@ -75,8 +85,9 @@ export function RecommendedHostels() {
 
   // Auto-scroller logic
   const scrollRef = React.useRef(null);
+  const shouldDesktopScroll = isDesktop && hostels.length > 6;
   useEffect(() => {
-    if (loading || hostels.length === 0) return;
+    if (loading || hostels.length === 0 || !shouldDesktopScroll) return;
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -88,14 +99,14 @@ export function RecommendedHostels() {
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [loading, hostels]);
+  }, [loading, hostels, shouldDesktopScroll]);
 
   // Skeleton Shimmer Component
   const SkeletonCard = () => (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative h-full flex flex-col bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] border-2 border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl"
+      className="relative flex h-full w-[240px] shrink-0 flex-col overflow-hidden rounded-3xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] shadow-2xl xl:w-auto"
     >
       {/* Skeleton Trust Badge */}
       <div className="absolute top-6 right-6 z-20">
@@ -171,11 +182,15 @@ export function RecommendedHostels() {
             <div className="h-5 w-64 mx-auto bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
+          <div className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
+            <div className="flex min-w-max gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
           </div>
         </div>
 
@@ -303,12 +318,13 @@ export function RecommendedHostels() {
         {/* Hostels - Horizontal Scroller */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-8 pb-12 scrollbar-hide snap-x snap-mandatory px-4 sm:px-0"
+          className={`overflow-x-auto scrollbar-hide pb-12 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
         >
+          <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
           {loading ? (
             // Skeleton Loading State
-            [1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start">
+            [1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="w-[240px] shrink-0 snap-start xl:w-auto">
                 <SkeletonCard />
               </div>
             ))
@@ -320,7 +336,7 @@ export function RecommendedHostels() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.6 }}
-                className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-pointer"
+                className={`group w-[240px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
                 onClick={() => handleHostelClick(hostel)}
               >
                 {/* Trust-Focused Card */}
@@ -361,7 +377,7 @@ export function RecommendedHostels() {
                 </motion.div> */}
 
                   {/* Image */}
-                  <div className="relative h-40 overflow-hidden">
+                  <div className="relative h-36 overflow-hidden">
                     <ImageWithFallback
                       src={hostel.image}
                       alt={hostel.name}
@@ -394,9 +410,9 @@ export function RecommendedHostels() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-4 flex-1 flex flex-col">
+                  <div className="flex flex-1 flex-col p-4">
                     <div className="mb-2">
-                      <h4 className="text-xl font-bold bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent mb-1 line-clamp-1">
+                      <h4 className="mb-1 line-clamp-1 bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-base font-bold text-transparent">
                         {hostel.name}
                       </h4>
                       {/* <p className="text-gray-400 italic text-sm line-clamp-2">{hostel.tagline}</p> */}
@@ -415,7 +431,7 @@ export function RecommendedHostels() {
                   </div> */}
 
                     {/* Amenities */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="mb-4 grid grid-cols-2 gap-2">
                       {hostel.amenities.slice(0, 4).map((amenity, idx) => {
                         const Icon = amenityIcons[amenity] || Building2;
                         return (
@@ -425,10 +441,10 @@ export function RecommendedHostels() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 + idx * 0.05 }}
-                            className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg"
+                            className="flex items-center space-x-2 rounded-lg bg-[#1a1a1a]/50 p-2"
                           >
-                            <Icon className="w-4 h-4 text-[#037166]" />
-                            <span className="text-xs text-gray-300 line-clamp-1">{amenity}</span>
+                            <Icon className="h-3.5 w-3.5 text-[#037166]" />
+                            <span className="line-clamp-1 text-[11px] text-gray-300">{amenity}</span>
                           </motion.div>
                         );
                       })}
@@ -443,6 +459,7 @@ export function RecommendedHostels() {
               </motion.div>
             ))
           )}
+          </div>
         </div>
 
         {/* Trust Indicators */}
@@ -480,6 +497,15 @@ export function RecommendedHostels() {
           </div>
         )}
       </div>
+      <style jsx>{`
+        .scrollbar-hide {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 }

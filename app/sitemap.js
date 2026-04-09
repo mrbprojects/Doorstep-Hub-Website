@@ -102,9 +102,72 @@ export default async function sitemap() {
         }
       }
     }
+    }
   } catch (error) {
-    console.error("Dynamic sitemap generation failed:", error);
+    console.error("Appliances sitemap generation failed:", error);
   }
+
+  // 7. Dynamic PG Hostels
+  try {
+    const pgRes = await fetch(`${API_BASE_URL}/app/products/latest_pg_hostels`, { cache: 'no-store' });
+    const pgData = await pgRes.json();
+    if (pgData.success && Array.isArray(pgData.hostels)) {
+      pgData.hostels.forEach(hostel => {
+        const slug = hostel.slug || hostel._id;
+        if (slug && !slug.match(/^[0-9a-fA-F]{24}$/)) {
+          sitemapEntries.push({
+            url: `${BASE_URL}/pghostels/${slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.6
+          });
+        }
+      });
+    }
+  } catch (e) { /* skip */ }
+
+  // 8. Dynamic Spa & Salon Stores
+  try {
+    const spaRes = await fetch(`${API_BASE_URL}/app/products/all_spa_stores`, { cache: 'no-store' });
+    const spaData = await spaRes.json();
+    if (spaData.success && Array.isArray(spaData.stores)) {
+      spaData.stores.forEach(store => {
+        const slug = store.slug || store._id;
+        if (slug && !slug.match(/^[0-9a-fA-F]{24}$/)) {
+          sitemapEntries.push({
+            url: `${BASE_URL}/spa-salon/${slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.6
+          });
+        }
+      });
+    }
+  } catch (e) { /* skip */ }
+
+  // 9. Dynamic Religious Services
+  try {
+    const relRes = await fetch(`${API_BASE_URL}/app/professional-services-flow/public/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serviceId: '695250aa57bb211ca094e5fd' }), // Religious Service ID
+      cache: 'no-store'
+    });
+    const relData = await relRes.json();
+    if (relData.success && Array.isArray(relData.category)) {
+      relData.category.forEach(cat => {
+        const slug = cat.slug || cat._id;
+        if (slug && !slug.match(/^[0-9a-fA-F]{24}$/)) {
+          sitemapEntries.push({
+            url: `${BASE_URL}/religious-services/${slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.6
+          });
+        }
+      });
+    }
+  } catch (e) { /* skip */ }
 
   // Deduplicate entries by URL
   const uniqueUrls = new Set();

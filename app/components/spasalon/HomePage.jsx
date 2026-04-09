@@ -327,63 +327,89 @@ export function HomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-white pt-20">
+        <div className="min-h-screen bg-transparent pt-20">
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-white via-[#FBEAF0] to-[#F4F3FF]">
+            <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-white via-[#FBEAF0] to-[#F4F3FF]">
                 {/* ... (Hero Content) ... */}
                 <div className="absolute inset-0 overflow-hidden">
-                    {/* Sparkles */}
-                    {[...Array(15)].map((_, i) => (
-                        <motion.div
-                            key={`sparkle-${i}`}
-                            className="absolute"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                            }}
-                            animate={{
-                                scale: [1, 1.5, 1],
-                                opacity: [0.3, 0.8, 0.3],
-                                rotate: [0, 180, 360],
-                            }}
-                            transition={{
-                                duration: 3 + Math.random() * 2,
-                                repeat: Infinity,
-                                delay: Math.random() * 2,
-                            }}
-                        >
-                            <Sparkles className="w-4 h-4 text-[#C06C84]" />
-                        </motion.div>
-                    ))}
+                    {/* Floating Service Icons - Scattered across left, right, and bottom */}
+                    <div className="hidden lg:block">
+                        {(subcategories.length > 0 ? subcategories : [
+                            { name: 'Facial', icon: '✨', rating: 4.8 },
+                            { name: 'Hair Spa', icon: '💇', rating: 4.7 },
+                            { name: 'Massage', icon: '💆', rating: 4.6 },
+                            { name: 'Makeup', icon: '💄', rating: 4.5 },
+                            { name: 'Mani-Pedi', icon: '💅', rating: 4.4 }
+                        ]).map((sub, index) => {
+                            // Define scattered positions - adjusted right-side icons to be more towards the middle
+                            const positions = [
+                                { left: '2%', top: '35%' },      // Far Left
+                                { right: '12%', top: '22%' },    // Right (Middle-Right)
+                                { left: '5%', bottom: '5%' },    // Bottom Left
+                                { right: '15%', bottom: '18%' }, // Bottom Right (Middle-Right)
+                                { left: '50%', bottom: '2%', x: '-50%' } // Far Bottom Center
+                            ];
+                            const pos = positions[index % positions.length];
 
-                    {/* Floating Circles */}
-                    {[...Array(10)].map((_, i) => (
-                        <motion.div
-                            key={`circle-${i}`}
-                            className="absolute rounded-full"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                width: `${50 + Math.random() * 100}px`,
-                                height: `${50 + Math.random() * 100}px`,
-                                background: `radial-gradient(circle, ${i % 2 === 0 ? 'rgba(192, 108, 132, 0.1)' : 'rgba(108, 92, 231, 0.1)'}, transparent)`,
-                            }}
-                            animate={{
-                                y: [0, -30, 0],
-                                x: [0, 20, 0],
-                                scale: [1, 1.1, 1],
-                            }}
-                            transition={{
-                                duration: 5 + Math.random() * 3,
-                                repeat: Infinity,
-                                delay: Math.random() * 2,
-                            }}
-                        />
-                    ))}
+                            return (
+                                <motion.div
+                                    key={sub._id || sub.name}
+                                    className="absolute cursor-pointer z-0"
+                                    style={pos}
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ 
+                                        opacity: 1, 
+                                        scale: 1,
+                                        y: [0, -15, 0],
+                                        rotate: [0, 1.5, 0, -1.5, 0]
+                                    }}
+                                    transition={{
+                                        opacity: { duration: 0.8, delay: index * 0.1 },
+                                        scale: { duration: 0.8, delay: index * 0.1 },
+                                        y: { duration: 4 + index, repeat: Infinity, ease: "easeInOut" },
+                                        rotate: { duration: 5 + index, repeat: Infinity, ease: "easeInOut" }
+                                    }}
+                                    onClick={() => {
+                                        if (sub.slug || sub._id) {
+                                            const subSlug = sub.slug || sub._id;
+                                            router.push(`/spa-salon/${subSlug}`);
+                                        } else {
+                                            setModalOpen(true);
+                                        }
+                                    }}
+                                    whileHover={{ scale: 1.1, zIndex: 5 }}
+                                >
+                                    <div className="flex items-center gap-3 transition-colors">
+                                        <div className="text-3xl">
+                                            {sub.image ? (
+                                                <img
+                                                    src={sub.image.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image.startsWith('/') ? sub.image.substring(1) : sub.image}`}
+                                                    alt={sub.name}
+                                                    className="w-10 h-10 object-cover rounded-full shadow-inner"
+                                                    onError={(e) => {
+                                                        e.target.src = 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=200';
+                                                    }}
+                                                />
+                                            ) : (
+                                                <span>{sub.icon || ['✨', '💇', '💆', '💄', '💅'][index % 5]}</span>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="text-[#0F172A] text-xs font-bold leading-none mb-1">{sub.name}</p>
+                                            <div className="flex items-center gap-0.5 text-[#FBBF24]">
+                                                <Star className="w-2.5 h-2.5 fill-current" />
+                                                <span className="text-[#0F172A] text-[10px] font-bold">{sub.rating || (4.8 - (index * 0.1)).toFixed(1)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+                    <div className="grid lg:grid-cols-2 gap-3 lg:gap-5 items-center">
                         {/* Left Side */}
                         <motion.div
                             initial={{ opacity: 0, x: -50 }}
@@ -394,25 +420,24 @@ export function HomePage() {
                                 initial={{ opacity: 0, y: -20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8ECF2] mb-6 shadow-sm"
+                                className="inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8ECF2] mb-5 shadow-sm"
                             >
-                                <Sparkles className="w-4 h-4 text-[#C06C84]" />
-                                <h6 className="text-[#0F172A] text-sm">Premium Wellness Services</h6>
+                                <Sparkles className="w-4 h-4 text-[#C06C84] mb" />
+                                <h6 className="text-[#0F172A] text-xs sm:text-sm ">Premium Wellness Services</h6>
                             </motion.div>
 
-                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#0F172A] mb-6 leading-tight">
-                                Glow Up.
-                                <br />
-                                <span className="text-[#C06C84]">Chill Out.</span>
+                            <h1 className="text-[2.45rem] sm:text-[2.9rem] md:text-[3.2rem] lg:text-[3.0rem] font-bold text-[#0F172A] mb-5 leading-[0.88]">
+                                Glow Up .
+                                <span className="text-[#C06C84] mb-5">Chill Out.</span>
                                 <br />
                                 Book in Minutes.
                             </h1>
 
-                            <p className="text-xl text-[#64748B] mb-8">
+                            <p className="text-sm sm:text-[15px] text-[#64748B] mb-5">
                                 Premium salon & spa services at home or nearby centers.
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
@@ -420,20 +445,20 @@ export function HomePage() {
                                         setSelectedCategory(null);
                                         setModalOpen(true);
                                     }}
-                                    className="px-8 py-4 bg-[#6d1357] text-white rounded-xl font-medium hover:shadow-lg hover:shadow-[#6d1357]/40 transition-all flex items-center justify-center gap-2 font-bold"
+                                    className="px-5 py-2 mb-5 sm:px-6 sm:py-2.5 bg-[#6d1357] text-white rounded-xl text-sm sm:text-base font-medium hover:shadow-lg hover:shadow-[#6d1357]/40 transition-all flex items-center justify-center gap-2 font-bold"
                                 >
                                     Explore Spa Services
-                                    <ChevronRight className="w-5 h-5" />
+                                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </motion.button>
 
-                                <div className="flex flex-wrap justify-center sm:justify-start gap-4">
+                                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                                     <motion.a
                                         href={globalSettings?.appStore || "#"}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
-                                        className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                        className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
                                         title="Download on the App Store"
                                     >
                                         <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
@@ -445,7 +470,7 @@ export function HomePage() {
                                         rel="noopener noreferrer"
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
-                                        className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
+                                        className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
                                         title="Get it on Google Play"
                                     >
                                         <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
@@ -466,85 +491,21 @@ export function HomePage() {
                             </div>
 
                             {/* Stats */}
-                            <div className="grid grid-cols-3 gap-6 mt-12">
+                            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mt-3">
                                 <StatCard icon={<Users />} value="50K+" label="Happy Clients" />
                                 <StatCard icon={<Award />} value="500+" label="Expert Staff" />
                                 <StatCard icon={<Star />} value="4.9" label="Avg Rating" />
                             </div>
                         </motion.div>
 
-                        {/* Right Side - Floating Service Cards */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8 }}
-                            className="relative h-[600px] hidden lg:block"
-                        >
-                            {(subcategories.length > 0 ? subcategories : [
-                                { name: 'Facial', icon: '✨', rating: 4.8 },
-                                { name: 'Hair Spa', icon: '💇', rating: 4.7 },
-                                { name: 'Massage', icon: '💆', rating: 4.6 },
-                                { name: 'Makeup', icon: '💄', rating: 4.5 },
-                                { name: 'Mani-Pedi', icon: '💅', rating: 4.4 }
-                            ]).map((sub, index) => (
-                                <motion.div
-                                    key={sub._id || sub.name}
-                                    className="absolute bg-white border border-[#E8ECF2] rounded-2xl p-6 shadow-xl cursor-pointer"
-                                    style={{
-                                        left: `${(index % 2) * 50}%`,
-                                        top: `${index * 15}%`,
-                                    }}
-                                    animate={{
-                                        y: [0, -20, 0],
-                                        rotate: [0, 2, 0, -2, 0],
-                                    }}
-                                    transition={{
-                                        duration: 4 + index,
-                                        repeat: Infinity,
-                                        delay: index * 0.2,
-                                    }}
-                                    onClick={() => {
-                                        if (sub.slug || sub._id) {
-                                            const subSlug = sub.slug || sub._id;
-                                            router.push(`/spa-salon/${subSlug}`);
-                                        } else {
-                                            setModalOpen(true);
-                                        }
-                                    }}
-                                    whileHover={{ scale: 1.1, zIndex: 10 }}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-gradient-to-r from-[#C06C84]/20 to-[#6C5CE7]/20 rounded-xl flex items-center justify-center text-2xl overflow-hidden">
-                                            {sub.image ? (
-                                                <img
-                                                    src={sub.image.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image.startsWith('/') ? sub.image.substring(1) : sub.image}`}
-                                                    alt={sub.name}
-                                                    className="w-full h-full object-cover"
-                                                    onError={(e) => {
-                                                        e.target.src = 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=200';
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span>{sub.icon || ['✨', '💇', '💆', '💄', '💅'][index % 5]}</span>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="text-[#0F172A] font-semibold">{sub.name}</p>
-                                            <div className="flex items-center gap-1 text-[#FBBF24] text-sm">
-                                                <Star className="w-3 h-3 fill-current" />
-                                                <span className="text-[#0F172A]">{sub.rating || (4.8 - (index * 0.1)).toFixed(1)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </motion.div>
+                        {/* Empty right column to balance grid if needed, or we can make left side wider */}
+                        <div className="hidden lg:block h-full" />
                     </div>
                 </div>
             </section>
 
             {/* Explore Categories */}
-            <section id="categories" className="py-18 px-4 sm:px-6 lg:px-8 bg-[#F6F7FB]">
+            <section id="categories" className="py-18 mt-8 px-4 sm:px-6 lg:px-8 bg-transparent">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -624,7 +585,7 @@ export function HomePage() {
             </section>
 
             {/* Featured Packages */}
-            <section id="featured" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F6F7FB]">
+            <section id="featured" className="py-20 px-4 sm:px-6 lg:px-8 bg-transparent">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -667,7 +628,7 @@ export function HomePage() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="flex-shrink-0 w-80"
+                                    className="flex-shrink-0 w-72 lg:w-[calc((100%-7.5rem)/6)]"
                                 >
                                     <PackageCard package={pkg} index={index} router={router} />
                                 </motion.div>
@@ -682,7 +643,7 @@ export function HomePage() {
             </section>
 
             {/* Recently Booked */}
-            <section className="py-18 px-4 sm:px-6 lg:px-8 bg-[#F6F7FB]">
+            <section className="py-18 px-4 sm:px-6 lg:px-8 bg-transparent">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -711,7 +672,7 @@ export function HomePage() {
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1 }}
-                                        className="flex-shrink-0 w-72"
+                                        className="flex-shrink-0 w-64 lg:w-[calc((100%-7.5rem)/6)]"
                                     >
                                         <RecentlyBookedCard package={pkg} router={router} />
                                     </motion.div>
@@ -766,7 +727,7 @@ export function HomePage() {
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="flex-shrink-0 w-72"
+                                    className="flex-shrink-0 w-64 lg:w-[calc((100%-7.5rem)/6)]"
                                 >
                                     <NearbyCenterCard center={center} index={index} router={router} />
                                 </motion.div>
@@ -779,79 +740,6 @@ export function HomePage() {
                     </div>
                 </div>
             </section>
-
-            {/* Recommended For You */}
-            {/* <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F6F7FB]">
-                <div className="max-w-7xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-12"
-                    >
-                        <h2 className="text-4xl font-bold text-[#0F172A] mb-4">
-                            Recommended Based on Your <span className="text-[#C06C84]">Mood</span>
-                        </h2>
-                    </motion.div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <MoodCard
-                            mood="Relax Mode"
-                            service="Stress Relief Massage"
-                            image="https://images.unsplash.com/photo-1745327883508-b6cd32e5dde5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcGElMjBtYXNzYWdlJTIwcmVsYXhhdGlvbnxlbnwxfHx8fDE3Njg2NTI2ODh8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                            color="#C06C84"
-                            router={router}
-                        />
-                        <MoodCard
-                            mood="Glow Mode"
-                            service="Skin Brightening Facial"
-                            image="https://images.unsplash.com/photo-1684014286330-ddbeb4a40c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYWNpYWwlMjB0cmVhdG1lbnQlMjBza2luY2FydXxlbnwxfHx8fDE3Njg1NTQxNjZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                            color="#6C5CE7"
-                            router={router}
-                        />
-                        <MoodCard
-                            mood="Event Ready"
-                            service="Party Makeup"
-                            image="https://images.unsplash.com/photo-1625139108082-48bb424c2333?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHxicmlkYWwlMjBtYWtldXAlMjBhcnRpc3R8ZW58MXx8fHwxNzY4NTQyNjYzfDA&ixlib=rb-4.1.0&q=80&w=1080"
-                            color="#22C55E"
-                            router={router}
-                        />
-                    </div>
-                </div>
-            </section> */}
-
-            {/* Beauty & Wellness Tips */}
-            {/* <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-                <div className="max-w-7xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-12"
-                    >
-                        <h2 className="text-4xl font-bold text-[#0F172A] mb-4">Beauty & Wellness Tips</h2>
-                        <p className="text-xl text-[#64748B]">Expert advice for your beauty routine</p>
-                    </motion.div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <BlogCard
-                            title="5 Skincare Routine Tips"
-                            image="https://images.unsplash.com/photo-1684014286330-ddbeb4a40c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYWNpYWwlMjB0cmVhdG1lbnQlMjBza2luY2FydXxlbnwxfHx8fDE3Njg1NTQxNjZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                            readTime="5 min read"
-                        />
-                        <BlogCard
-                            title="Bridal Prep Timeline"
-                            image="https://images.unsplash.com/photo-1625139108082-48bb424c2333?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHxicmlkYWwlMjBtYWtldXAlMjBhcnRpc3R8ZW58MXx8fHwxNzY4NTQyNjYzfDA&ixlib=rb-4.1.0&q=80&w=1080"
-                            readTime="8 min read"
-                        />
-                        <BlogCard
-                            title="Hair Care Guide"
-                            image="https://images.unsplash.com/photo-1560066984-138dadb4c035?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHxoYWlyJTIwc2Fsb24lMjBzdHlsaW5nfGVufDF8fHx8MTc2ODY1MjY4N3ww&ixlib=rb-4.1.0&q=80&w=1080"
-                            readTime="6 min read"
-                        />
-                    </div>
-                </div>
-            </section> */}
 
             {/* Questionnaire Modal */}
             <QuestionnaireModal
@@ -885,7 +773,7 @@ function PackageCard({ package: pkg, index, router }) {
         <motion.div
             whileHover={{ y: -10 }}
             onClick={() => router.push(`/spa-salon/${pkg.slug || pkg.id}`)}
-            className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
+            className="bg-white/30 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-52 overflow-hidden">
                 <img
@@ -896,37 +784,31 @@ function PackageCard({ package: pkg, index, router }) {
                         e.target.src = 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
                     }}
                 />
+                {/* Rating Badge on Image */}
+                <div className="absolute bottom-0 left-0 bg-[#C06C84] text-white px-2.5 py-1 rounded-tr-xl flex items-center gap-1 text-xs font-bold shadow-lg">
+                    <Star className="w-3 h-3 fill-current" />
+                    {pkg.rating || 4.5}
+                </div>
             </div>
 
-            <div className="p-6 flex flex-col">
-                <div>
-                    <div className="flex items-center gap-2 text-[#64748B] text-sm mb-2">
-                        <MapPin className="w-3.5 h-3.5 text-[#C06C84]" />
-                        <span className="line-clamp-1">{pkg.location}</span>
+            <div className="p-6 flex flex-col flex-1">
+                <div className="flex-1">
+                    <div className="flex items-center gap-1.5 text-[#64748B] text-xs mb-1">
+                        <MapPin className="w-3.5 h-3.5 text-[#C06C84] flex-shrink-0" />
+                        <span className="truncate leading-none">{pkg.address}</span>
                     </div>
-                    <h4 className="text-xl font-bold text-[#0F172A] mb-2 line-clamp-2">{pkg.name}</h4>
-
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1 text-[#C06C84]">
-                            <Star className="w-4 h-4 fill-current" />
-                            <span className="text-[#0F172A]">{pkg.rating}</span>
-                        </div>
-                        {/* <div className="flex items-center gap-1 text-[#64748B]">
-                            <Clock className="w-4 h-4" />
-                            <span className="text-sm">{pkg.duration}</span>
-                        </div> */}
-                    </div>
+                    <h4 className="text-l font-bold text-[#0F172A] mb-1 line-clamp-2">{pkg.name}</h4>
                 </div>
 
-                <div className="flex items-center justify-between mt-4">
-                    <div>
-                        <p className="text-2xl font-bold text-[#0F172A]">₹{pkg.price}/-</p>
-                        <p className="text-[10px] text-[#64748B] uppercase tracking-wider">Starting Price</p>
+                <div className="mt-2 flex flex-col gap-2">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-[#64748B] uppercase tracking-wider font-semibold">Starting from</span>
+                        <p className="text-xl font-bold text-[#0F172A]">₹{pkg.price}/-</p>
                     </div>
                     <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-6 py-2.5 bg-[#6d1357] text-white rounded-xl font-semibold text-sm hover:bg-[#1E293B] transition-colors"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-2 bg-[#6d1357] text-white rounded-xl font-bold text-xs hover:bg-[#1E293B] transition-colors"
                     >
                         Book Now
                     </motion.button>
@@ -941,7 +823,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
         <motion.div
             whileHover={{ y: -5 }}
             onClick={() => router.push(`/spa-salon/${pkg.slug || pkg.id}`)}
-            className="bg-white rounded-xl overflow-hidden border border-[#E8ECF2] cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
+            className="bg-white/30 backdrop-blur-md rounded-xl overflow-hidden border border-white/20 cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
         >
             <div className="relative h-40">
                 <img
@@ -952,24 +834,34 @@ function RecentlyBookedCard({ package: pkg, router }) {
                         e.target.src = 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
                     }}
                 />
+                {/* Rating Badge on Image */}
+                <div className="absolute bottom-0 left-0 bg-[#C06C84] text-white px-2 py-0.5 rounded-tr-lg flex items-center gap-0.5 text-[10px] font-bold">
+                    <Star className="w-2.5 h-2.5 fill-current" />
+                    {pkg.rating || 4.5}
+                </div>
             </div>
 
-            <div className="p-4 flex flex-col">
-                <div>
-                    <h5 className="text-[#0F172A] font-bold mb-1 line-clamp-1">{pkg.name}</h5>
-                    <div className="flex items-center gap-1 text-[#C06C84] text-sm mb-2">
-                        <Star className="w-3 h-3 fill-current" />
-                        <span className="text-[#0F172A]">{pkg.rating}</span>
+            <div className="p-4 flex flex-col flex-1">
+                <div className="flex-1">
+                    <h5 className="text-[#0F172A] font-bold mb-0.5 line-clamp-1">{pkg.name}</h5>
+                    <div className="flex items-center gap-1.5 text-[#64748B] text-[10px] mb-1 min-w-0">
+                        <MapPin className="w-3 h-3 text-[#C06C84] flex-shrink-0" />
+                        <span className="truncate leading-none">{pkg.address}</span>
                     </div>
                 </div>
-              <div className="flex items-center justify-between mt-2">
-  <p className="flex items-center gap-2 text-[#C06C84] font-bold text-lg">
-    <span className="text-[#6D1357] text-[10px] italic">
-      Starting at
-    </span>
-    ₹{pkg.price}/-
-  </p>
-</div>
+                <div className="flex items-end justify-between mt-3 gap-2">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-[#64748B] uppercase tracking-wider font-semibold">Starts from</span>
+                        <p className="text-lg font-bold text-[#0F172A]">₹{pkg.price}/-</p>
+                    </div>
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="px-3 py-1.5 bg-[#6d1357] text-white rounded-lg font-bold text-[10px] whitespace-nowrap"
+                    >
+                        Book Now
+                    </motion.button>
+                </div>
             </div>
         </motion.div>
     );
@@ -980,7 +872,7 @@ function NearbyCenterCard({ center, index, router }) {
         <motion.div
             whileHover={{ y: -5 }}
             onClick={() => router.push(`/spa-salon/${center.slug || center.id}`)}
-            className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] cursor-pointer group hover:shadow-xl transition-all h-full"
+            className="bg-white/30 backdrop-blur-md rounded-3xl overflow-hidden border border-white/20 cursor-pointer group hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-48 overflow-hidden">
                 <img
@@ -993,30 +885,29 @@ function NearbyCenterCard({ center, index, router }) {
                 />
             </div>
 
-            <div className="p-6 flex flex-col">
-                <div>
-                    <h4 className="text-xl font-bold text-[#0F172A] mb-2 line-clamp-1">{center.name}</h4>
-                    <div className="flex items-center gap-2 text-[#64748B] text-sm mb-4">
-                        <MapPin className="w-5 h-5 text-[#C06C84]" />
-                        <span className="line-clamp-1">{center.location}</span>
+            <div className="p-6 flex flex-col flex-1">
+                <div className="flex-1">
+                    <h4 className="text-l font-bold text-[#0F172A] mb-1 line-clamp-1">{center.name}</h4>
+                    <div className="flex items-center gap-2 text-[#64748B] text-xs mb-2">
+                        <MapPin className="w-4 h-4 text-[#C06C84] flex-shrink-0" />
+                        <span className="truncate leading-none">{center.address}</span>
                     </div>
                 </div>
 
-                <div className="mt-4">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-1 text-[#C06C84]">
-                            <Star className="w-4 h-4 fill-current" />
-                            <span className="text-[#0F172A] font-semibold">{center.rating}</span>
+                <div className="mt-2">
+                    <div className="flex items-end justify-between mb-2">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-[#64748B] uppercase tracking-wider font-semibold">Starting from</span>
+                            <p className="text-xl font-bold text-[#0F172A]">₹{center.price}/-</p>
                         </div>
-                        <p className="text-[#C06C84] font-bold text-xl"><span className='text-black text-[10px] mr-2 italic'>Starts from</span>₹{center.price}/-</p>
                     </div>
 
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 bg-[#6d1357] text-white rounded-xl font-semibold text-sm transition-colors"
+                        className="w-full py-2 bg-[#6d1357] text-white rounded-xl font-bold text-xs transition-colors"
                     >
-                        Book Appointment
+                        Book Now
                     </motion.button>
                 </div>
             </div>
@@ -1058,7 +949,7 @@ function BlogCard({ title, image, readTime }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             whileHover={{ y: -5 }}
-            className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer shadow-md hover:shadow-lg transition-all"
+            className="bg-white/30 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 cursor-pointer shadow-md hover:shadow-lg transition-all"
         >
             <div className="relative h-48 overflow-hidden">
                 <img

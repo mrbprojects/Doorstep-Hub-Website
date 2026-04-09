@@ -58,10 +58,15 @@ export function LatestSpaServices() {
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const cards = Array.from(scrollRef.current.querySelectorAll('[data-scroll-card="latest-spa"]'));
         if (scrollLeft + clientWidth >= scrollWidth - 5) {
           scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
-          scrollRef.current.scrollBy({ left: clientWidth, behavior: 'smooth' });
+          const nextCard = cards.find((card) => card.offsetLeft > scrollLeft + 5);
+          scrollRef.current.scrollTo({
+            left: nextCard ? nextCard.offsetLeft : 0,
+            behavior: 'smooth'
+          });
         }
       }
     }, 3000);
@@ -134,8 +139,9 @@ export function LatestSpaServices() {
         {/* Spa Services Slider */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto pb-8 gap-6 snap-x scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0"
+          className="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide scroll-px-4 -mx-4 px-4 sm:scroll-px-6 sm:px-6 lg:px-8"
         >
+          <div className="w-4 shrink-0 sm:w-6 lg:w-8" aria-hidden="true" />
           {loading ? (
             // Skeleton Loading
             [1, 2, 3, 4, 5, 6].map((i) => (
@@ -170,6 +176,7 @@ export function LatestSpaServices() {
             return (
               <motion.div
                 key={store._id}
+                data-scroll-card="latest-spa"
                 initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -256,6 +263,7 @@ export function LatestSpaServices() {
               </motion.div>
             );
           })}
+          <div className="w-4 shrink-0 sm:w-6 lg:w-8" aria-hidden="true" />
         </div>
 
         {/* Breathing Instruction */}

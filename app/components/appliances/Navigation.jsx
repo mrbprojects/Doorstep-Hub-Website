@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
-import { Menu, X, ShoppingCart, User, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, AlertTriangle, AlertCircle, Wallet } from 'lucide-react';
 import { LocationBar } from '@/components/location/LocationBar';
 
 export function Navigation() {
@@ -23,6 +23,8 @@ export function Navigation() {
   const [activeLink, setActiveLink] = useState('Home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSettings, setGlobalSettings] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletLoading, setWalletLoading] = useState(false);
 
   useEffect(() => {
     const fetchGlobalSettings = async () => {
@@ -38,12 +40,34 @@ export function Navigation() {
     };
     fetchGlobalSettings();
 
+    const fetchWalletBalance = async () => {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) return;
+      setWalletLoading(true);
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/wallet/balance`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (data.success && data.wallet) {
+          setWalletBalance(data.wallet.currentBalance || 0);
+        }
+      } catch (err) {
+        console.error("Error fetching wallet balance:", err);
+      } finally {
+        setWalletLoading(false);
+      }
+    };
+    fetchWalletBalance();
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (pathname === '/') setActiveLink('Home');
@@ -137,6 +161,21 @@ export function Navigation() {
                 )}
               </div>
             </motion.button>
+            
+            {/* Wallet Balance Button */}
+            {user && (
+              <motion.button
+                onClick={() => handleNavigation('/wallet')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative px-4 py-2.5 text-sm font-medium text-white/90 hover:text-white rounded-full border border-white/10 hover:border-[#037166]/50 backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all duration-300"
+              >
+                <div className="flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-[#04a99d]" />
+                  <span className="font-bold">₹{walletBalance}</span>
+                </div>
+              </motion.button>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -210,6 +249,14 @@ export function Navigation() {
                 </span>
               )}
             </button>
+            {user && (
+              <button
+                onClick={() => handleNavigation('/wallet')}
+                className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <Wallet className="w-5 h-5 text-[#04a99d]" />
+              </button>
+            )}
             <button
               onClick={() => router.push('/profile')}
               className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"

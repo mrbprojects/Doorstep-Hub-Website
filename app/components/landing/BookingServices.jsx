@@ -135,10 +135,10 @@ export function BookingServices() {
   };
 
   return (
-    <section id="booking-services" className="relative py-22  overflow-hidden">
+    <section id="booking-services" className="relative pt-4 pb-12 overflow-hidden">
       {/* Architectural World Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-[#0a0a0a]" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
@@ -162,15 +162,15 @@ export function BookingServices() {
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto mt-10 px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-1 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
+          <div className="inline-flex items-center space-x-2 px-4 py-1 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-2">
             <Calendar className="w-4 h-4 text-[#037166]" />
             <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Futuristic Service Partners</h6>
           </div>

@@ -1,14 +1,51 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { TrendingUp, ArrowRight, Users } from 'lucide-react';
+import { TrendingUp, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function RecentlyBooked({ onServiceClick, onViewAll }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const scrollRef = useRef(null);
+  const shouldAutoScrollDesktop = !isMobile && services.length > 6;
+
+  useEffect(() => {
+    const updateViewport = () => setIsMobile(window.innerWidth < 1280);
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+
+    if (!container || !shouldAutoScrollDesktop) {
+      return;
+    }
+
+    let animationId;
+    const scroll = () => {
+      if (!isPaused && container) {
+        if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 1) {
+          container.scrollLeft = 0;
+        } else {
+          container.scrollLeft += 1;
+        }
+      }
+      animationId = requestAnimationFrame(scroll);
+    };
+
+    animationId = requestAnimationFrame(scroll);
+
+    return () => cancelAnimationFrame(animationId);
+  }, [shouldAutoScrollDesktop, isPaused, services.length]);
 
   // Fetch real recently booked services
   useEffect(() => {
@@ -29,7 +66,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
         const data = await response.json();
         if (data.success && data.services) {
           // Transform API data to match component structure
-          const transformedServices = data.services.slice(0, 10).map(service => ({
+          const transformedServices = data.services.slice(0, 20).map(service => ({
             id: service._id,
             image: service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400',
             title: service.serviceName,
@@ -58,23 +95,23 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
 
   // Shimmer Skeleton Card (Carousel Item)
   const ShimmerRecentCard = () => (
-    <div className="flex-shrink-0 w-80">
-      <div className="relative w-full h-[380px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+    <div className="w-full">
+      <div className="relative w-full h-[260px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
         {/* Shimmer Badge */}
         <div className="absolute top-4 left-4 z-20 h-8 w-36 rounded-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
 
         {/* Shimmer Image */}
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer">
+        <div className="relative h-36 overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer">
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         </div>
 
         {/* Shimmer Content */}
-        <div className="p-5">
+        <div className="p-4">
           {/* Title Shimmer */}
           <div className="h-6 w-3/4 mb-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
 
           {/* Description Shimmer */}
-          <div className="space-y-2 mb-6">
+          <div className="space-y-2 mb-4">
             <div className="h-4 w-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
             <div className="h-4 w-2/3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
           </div>
@@ -83,9 +120,9 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="h-3 w-10 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-              <div className="h-8 w-20 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+              <div className="h-7 w-16 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
             </div>
-            <div className="h-12 w-28 rounded-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+            <div className="h-10 w-24 rounded-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
           </div>
         </div>
       </div>
@@ -108,16 +145,13 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
           </div>
 
           <div className="relative">
-            <div className="overflow-x-auto scrollbar-hide pb-4">
-              <div className="flex gap-6 min-w-max">
-                {Array.from({ length: 4 }).map((_, index) => (
+            <div className="overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6">
+              <div className="flex min-w-max gap-4">
+                {Array.from({ length: 6 }).map((_, index) => (
                   <ShimmerRecentCard key={`shimmer-recent-${index}`} />
                 ))}
               </div>
             </div>
-            {/* Fade Edges */}
-            <div className="absolute left-0 top-0 bottom-4 w-20 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none z-10" />
-            <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none z-10" />
           </div>
         </div>
         <style jsx>{`
@@ -186,14 +220,20 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
             transition={{ delay: 0.1 }}
             className="text-gray-400 text-lg max-w-2xl"
           >
-            See what services your neighbors are booking right now ({services.length} services)
+            See what services your neighbors are booking right now
           </motion.p>
         </div>
 
-        {/* Horizontal Scrolling Carousel */}
-        <div className="relative">
-          <div className="overflow-x-auto scrollbar-hide pb-2">
-            <div className="flex gap-6 min-w-max">
+        <div
+          className="relative"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div
+            ref={scrollRef}
+            className={`overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6 ${!shouldAutoScrollDesktop ? 'xl:mx-0 xl:px-0 xl:overflow-visible' : ''}`}
+          >
+            <div className={`flex min-w-max gap-4 ${!shouldAutoScrollDesktop ? 'xl:min-w-0 xl:grid xl:grid-cols-6' : ''}`}>
               {services.map((service, index) => (
                 <motion.div
                   key={service.id || index}
@@ -201,16 +241,16 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="group cursor-pointer flex-shrink-0 w-80"
+                  whileHover={{ y: -6, scale: 1.01 }}
+                  className={`group cursor-pointer w-[260px] flex-shrink-0 ${!shouldAutoScrollDesktop ? 'xl:w-auto' : ''}`}
                   onClick={() => onServiceClick?.(service.id, service.categoryName, service.subcategoryName, service.slug)}
                 >
-                  <div className="relative w-full h-[320px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+                  <div className="relative w-full h-[260px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
                     {/* Booking Badge */}
 
 
                     {/* Image */}
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-36 overflow-hidden">
                       <img
                         src={service.image}
                         alt={service.title}
@@ -230,7 +270,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
 
                       {/* Book Now Button Badge - Bottom Center */}
                       <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 px-6 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:opacity-100 hover:bg-[#025951]"
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 px-4 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:opacity-100 hover:bg-[#025951]"
                         onClick={(e) => {
                           e.stopPropagation();
                           onServiceClick?.(service.id, service.categoryName, service.subcategoryName, service.slug);
@@ -241,8 +281,8 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                     </div>
 
                     {/* Content */}
-                    <div className="p-5">
-                      <h4 className="text-xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-2">
+                    <div className="p-4">
+                      <h4 className="text-base font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-2">
                         {service.title}
                       </h4>
                       <p className="text-white/60 text-sm mb-4 line-clamp-2">
@@ -261,12 +301,8 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                   </div>
                 </motion.div>
               ))}
-            </div>
           </div>
-
-          {/* Fade Edges */}
-          <div className="absolute left-0 top-0 bottom-4 w-20 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none z-10" />
-          <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none z-10" />
+        </div>
         </div>
 
         {/* View All CTA */}

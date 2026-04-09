@@ -482,7 +482,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, []);
 
   return (
-    <section className="relative min-h-[85dvh] flex items-center justify-center overflow-x-hidden pt-16 pb-0 sm:pt-20 sm:pb-0">
+    <section className="relative min-h-[60vh] flex flex-col items-center justify-center overflow-x-hidden pt-24 pb-8">
       {/* Latest Booking Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -530,10 +530,10 @@ function HeroContent({ services = [], loading = false, error = null }) {
           </motion.div>
 
           {/* Main Heading */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 italic leading-[1.1]">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 italic leading-[1.1]">
             {/* SVG Text for Stroke Animation */}
 
-            <span className="block text-white-900 drop-shadow-sm">Everything You Need.</span>
+            <span className="block text-white-900 text-[28px] sm:text-[40px] drop-shadow-sm">Everything You Need.</span>
 
                            
 
@@ -545,7 +545,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
               transition={{ duration: 0.5 }}
               className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent min-h-[1.2em]"
             >
-              {services.length > 0 ? services[activeIndex]?.name : "One Hub."}
+              {services.length > 0 ? services[activeIndex]?.name : "Doorstep Hub."}
             </motion.span>
           </h1>
 
@@ -554,7 +554,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-base sm:text-lg md:text-xl text-white-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base md:text-lg text-white-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
           >
             Your Premium Gateway to Appliance Services, Spa & Saloon, PG & Hostels, Religious Services, and More.
             A Smarter Way to Access Trusted Services.

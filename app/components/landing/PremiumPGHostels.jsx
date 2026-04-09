@@ -59,6 +59,7 @@ export function PremiumPGHostels() {
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -66,6 +67,15 @@ export function PremiumPGHostels() {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
   const handleHostelClick = (hostel) => {
@@ -101,7 +111,8 @@ export function PremiumPGHostels() {
               slug: hostel.slug || hostel.hostelSlug,
               name: hostel.hostelName || `${hostel.firstName} ${hostel.lastName}`,
               type: 'Premium PG',
-              location: hostel.cityName || 'Hyderabad Area',
+              // location: hostel.cityName || 'Hyderabad Area',
+              location: hostel.address || 'Hyderabad Area',
               price: `₹${hostel.startingAt}/month`,
               occupancy: 'Single/Double',
               image: hostel.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image}` : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3Njc5NTMwMzR8MA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -127,8 +138,9 @@ export function PremiumPGHostels() {
 
   // Auto-scroller logic
   const scrollRef = React.useRef(null);
+  const shouldDesktopScroll = isDesktop && hostels.length > 6;
   useEffect(() => {
-    if (loading || hostels.length === 0) return;
+    if (loading || hostels.length === 0 || !shouldDesktopScroll) return;
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -140,14 +152,14 @@ export function PremiumPGHostels() {
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [loading, hostels]);
+  }, [loading, hostels, shouldDesktopScroll]);
 
   // Skeleton Shimmer Component
   const SkeletonCard = () => (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl h-full"
+      className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-3xl border border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] shadow-2xl xl:w-auto"
     >
       {/* Skeleton Badge */}
       <div className="absolute top-6 left-6 z-20 px-4 py-2 bg-[#1a1a1a]/80 backdrop-blur-md border border-[#037166]/50 rounded-full shimmer">
@@ -308,17 +320,20 @@ export function PremiumPGHostels() {
 
         {/* PG Cards - Horizontal Scroller */}
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
+            <div className="flex min-w-max gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
+            </div>
           </div>
         ) : (
           <div
             ref={scrollRef}
-            className="flex overflow-x-auto gap-8 pb-8 scrollbar-hide snap-x snap-mandatory"
+            className={`overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
           >
+            <div className={`flex min-w-max gap-4 ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6'}`}>
             {hostels.map((hostel, index) => (
               <motion.div
                 key={hostel.id || index}
@@ -326,7 +341,7 @@ export function PremiumPGHostels() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.6 }}
-                className="flex-shrink-0 w-[85%] sm:w-[45%] lg:w-[24%] snap-start group cursor-pointer"
+                className={`group w-[240px] shrink-0 cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
                 onClick={() => handleHostelClick(hostel)}
               >
                 {/* Card with Parallax Effect */}
@@ -344,7 +359,7 @@ export function PremiumPGHostels() {
 
 
                   {/* Image with Depth */}
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-36 overflow-hidden">
                     <motion.div
                       transition={{ duration: 0.6 }}
                     >
@@ -364,7 +379,7 @@ export function PremiumPGHostels() {
 
                   {/* Content */}
                   <div className="p-4">
-                    <h4 className="text-xl font-bold bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent mb-2 h-14 line-clamp-2">
+                    <h4 className="mb-2 h-12 line-clamp-2 bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-base font-bold text-transparent">
                       {hostel.name}
                     </h4>
 
@@ -373,8 +388,8 @@ export function PremiumPGHostels() {
                       {hostel.description || "Experience premium living with the perfect blend of comfort, style, and community. Our state-of-the-art facilities ensure a hassle-free lifestyle."}
                     </p> */}
 
-                    <div className="space-y-1 mb-4">
-                      <div className="flex items-center justify-between text-sm">
+                    <div className="mb-3 space-y-1">
+                      <div className="flex items-center justify-between text-xs">
                         <span className="text-gray-400">Location</span>
                         <span className="text-white font-intro text-right flex-1 ml-4 line-clamp-1">{hostel.location}</span>
                       </div>
@@ -385,14 +400,14 @@ export function PremiumPGHostels() {
                     </div>
 
                     {/* Price - Disabled interaction */}
-                    <div className="mb-2 p-2 border border-[#037166]/20 rounded-xl flex items-center justify-between gap-2 opacity-80">
+                    <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-[#037166]/20 p-2 opacity-80">
 
                       {/* Left: Price */}
                       <div>
                         <h6 className="text-[10px] text-gray-400 mb-0.5 font-intro">
                           Starting from
                         </h6>
-                        <div className="text-sm font-bold text-[#037166] font-intro">
+                        <div className="text-xs font-bold text-[#037166] font-intro">
                           {hostel.price}
                         </div>
                       </div>
@@ -402,7 +417,7 @@ export function PremiumPGHostels() {
                       {/* Right: Book Now - Disabled */}
                       <div>
                         <motion.button
-                          className="px-2 py-1.5 bg-[#297A70] rounded-full font-semibold text-[10px] shadow-lg whitespace-nowrap cursor-pointer"
+                          className="cursor-pointer whitespace-nowrap rounded-full bg-[#297A70] px-2 py-1.5 text-[10px] font-semibold shadow-lg"
                         >
                           <span className="text-gray-300">
                             Book Now
@@ -414,7 +429,7 @@ export function PremiumPGHostels() {
 
 
                     {/* Amenities */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="mb-4 grid grid-cols-2 gap-2">
                       {hostel.amenities.slice(0, 4).map((amenity, idx) => {
                         const Icon = amenityIcons[amenity] || Building2;
                         return (
@@ -424,10 +439,10 @@ export function PremiumPGHostels() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 + idx * 0.05 }}
-                            className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg"
+                            className="flex items-center space-x-2 rounded-lg bg-[#1a1a1a]/50 p-2"
                           >
-                            <Icon className="w-4 h-4 text-[#037166]" />
-                            <span className="text-xs text-gray-300">{amenity}</span>
+                            <Icon className="h-3.5 w-3.5 text-[#037166]" />
+                            <span className="line-clamp-1 text-[11px] text-gray-300">{amenity}</span>
                           </motion.div>
                         );
                       })}
@@ -444,6 +459,7 @@ export function PremiumPGHostels() {
                 </motion.div>
               </motion.div>
             ))}
+            </div>
           </div>
         )}
       </div>
@@ -461,6 +477,13 @@ export function PremiumPGHostels() {
           background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
           background-size: 200% 100%;
           animation: shimmer 1.5s infinite;
+        }
+        .scrollbar-hide {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
     </section>

@@ -111,15 +111,15 @@ export function KnowledgeListingPage() {
             </div>
 
             {/* Articles Grid */}
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+            <div className="max-w-[1600px] mx-auto px-6 lg:px-8 py-16">
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="bg-[#1a1a1a] rounded-3xl overflow-hidden h-96 animate-pulse border border-white/5" />
+                            <div key={i} className="h-[320px] overflow-hidden rounded-2xl border border-white/5 bg-[#1a1a1a] animate-pulse" />
                         ))}
                     </div>
                 ) : filteredArticles.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                         {filteredArticles.map((article, index) => (
                             <motion.div
                                 key={article.id}
@@ -129,10 +129,10 @@ export function KnowledgeListingPage() {
                                 transition={{ delay: index * 0.05 }}
                             >
                                 <Link href={`/knowledge/${article.slug}`} className="group block h-full">
-                                    <div className="relative h-full bg-[#1a1a1a] border border-white/10 rounded-3xl overflow-hidden transition-all duration-300 hover:border-[#037166]/50 hover:shadow-2xl hover:shadow-[#037166]/20 flex flex-col">
+                                    <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a] transition-all duration-300 hover:border-[#037166]/50 hover:shadow-2xl hover:shadow-[#037166]/20">
 
                                         {/* Image */}
-                                        <div className="relative h-56 overflow-hidden">
+                                        <div className="relative h-40 overflow-hidden">
                                             <ImageWithFallback
                                                 src={article.image}
                                                 alt={article.title}
@@ -140,12 +140,12 @@ export function KnowledgeListingPage() {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-transparent to-transparent" />
 
-                                            <div className="absolute  top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-xs font-medium text-[#037166] border border-[#037166]/20">
+                                            <div className="absolute top-3 left-3 rounded-lg border border-[#037166]/20 bg-black/60 px-2.5 py-1 text-[11px] font-medium text-[#037166] backdrop-blur-md">
                                                 {article.category}
                                             </div>
 
                                             {article.isTrending && (
-                                                <div className="absolute top-4 right-4 px-3 py-1 bg-[#037166] backdrop-blur-md rounded-lg text-xs font-medium text-white flex items-center gap-1">
+                                                <div className="absolute top-3 right-3 flex items-center gap-1 rounded-lg bg-[#037166] px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md">
                                                     <TrendingUp className="w-3 h-3" />
                                                     Trending
                                                 </div>
@@ -153,15 +153,15 @@ export function KnowledgeListingPage() {
                                         </div>
 
                                         {/* Content */}
-                                        <div className="p-6 flex flex-col flex-1">
-                                            <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-[#037166] transition-colors">
+                                        <div className="flex flex-1 flex-col p-4">
+                                            <h3 className="mb-2 line-clamp-2 text-base font-bold text-white transition-colors group-hover:text-[#037166]">
                                                 {article.title}
                                             </h3>
-                                            <p className="text-gray-400 text-sm mb-4 line-clamp-3 flex-1">
+                                            <p className="mb-3 flex-1 line-clamp-3 text-xs text-gray-400">
                                                 {article.summary}
                                             </p>
 
-                                            <div className="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-white/5">
+                                            <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-3 text-[11px] text-gray-500">
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="w-3 h-3 text-[#037166]" />
                                                     {article.readTime}

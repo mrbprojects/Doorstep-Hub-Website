@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { NewsletterWidget } from '@/components/shared/NewsletterWidget';
+import { ProviderAuthOnboardingSection } from '@/components/provider-auth/ProviderAuthOnboardingSection';
 
 const PartnerBenefits = [
     {
@@ -321,6 +322,8 @@ export default function ServicePartnerPage() {
                         </div>
                     </div>
                 </section>
+
+                <ProviderAuthOnboardingSection />
 
                 {/* How It Works — Download App CTA */}
                <section id="app-download" className="relative min-h-screen flex items-center overflow-hidden py-16">

@@ -4,7 +4,7 @@ const BASE_URL = 'https://doorstephub.com';
 export default async function sitemap() {
   const sitemapEntries = [
     // 1. Static Core Pages
-    { url: `${BASE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
+    { url: `${BASE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
     { url: `${BASE_URL}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE_URL}/contact-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE_URL}/careers`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
@@ -21,19 +21,20 @@ export default async function sitemap() {
     { url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/book-appointment`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
 
-    // 3. Static Lists & Info
+    // 3. Vertical Specific Static Lists
+    { url: `${BASE_URL}/pghostels/listings/men`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/pghostels/listings/women`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/pghostels/listings/both`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/appliances/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/appliances/centers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${BASE_URL}/appliances/featured`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${BASE_URL}/appliances/recent`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
-    { url: `${BASE_URL}/appliances/verified`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${BASE_URL}/appliances/explore`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/religious-services/all-services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/spa-salon/packages`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
   ];
 
+  // 4. Dynamic Sections with Error Isolation
+  
+  // Section: Appliance Repairs & Services (Root-level dynamic slugs)
   try {
-    // 4. Dynamic Appliance/Service Categories
     const catRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,7 +53,7 @@ export default async function sitemap() {
             priority: 0.7
           });
 
-          // 5. Dynamic Subcategories
+          // Subcategories
           try {
             const subRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
               method: 'POST',
@@ -72,7 +73,7 @@ export default async function sitemap() {
                     priority: 0.6
                   });
 
-                  // 6. Dynamic Services
+                  // Services under subcategory
                   try {
                     const svcRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/services_by_subcategory`, {
                       method: 'POST',
@@ -93,19 +94,19 @@ export default async function sitemap() {
                         }
                       });
                     }
-                  } catch (e) { /* skip */ }
+                  } catch (e) {}
                 }
               }
             }
-          } catch (e) { /* skip */ }
+          } catch (e) {}
         }
       }
     }
   } catch (error) {
-    console.error("Appliances sitemap generation failed:", error);
+    console.error("Appliances sitemap failed:", error);
   }
 
-  // 7. Dynamic PG Hostels
+  // Section: PG Hostels
   try {
     const pgRes = await fetch(`${API_BASE_URL}/app/products/latest_pg_hostels`, { cache: 'no-store' });
     const pgData = await pgRes.json();
@@ -122,9 +123,9 @@ export default async function sitemap() {
         }
       });
     }
-  } catch (e) { /* skip */ }
+  } catch (e) {}
 
-  // 8. Dynamic Spa & Salon Stores
+  // Section: Spa & Salon
   try {
     const spaRes = await fetch(`${API_BASE_URL}/app/products/all_spa_stores`, { cache: 'no-store' });
     const spaData = await spaRes.json();
@@ -141,14 +142,14 @@ export default async function sitemap() {
         }
       });
     }
-  } catch (e) { /* skip */ }
+  } catch (e) {}
 
-  // 9. Dynamic Religious Services
+  // Section: Religious Services
   try {
     const relRes = await fetch(`${API_BASE_URL}/app/professional-services-flow/public/categories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ serviceId: '695250aa57bb211ca094e5fd' }), // Religious Service ID
+      body: JSON.stringify({ serviceId: '695250aa57bb211ca094e5fd' }),
       cache: 'no-store'
     });
     const relData = await relRes.json();
@@ -165,15 +166,14 @@ export default async function sitemap() {
         }
       });
     }
-  } catch (e) { /* skip */ }
+  } catch (e) {}
 
-  // Deduplicate entries by URL
+  // Finalize: Deduplicate and filter
   const uniqueUrls = new Set();
-  const filteredEntries = sitemapEntries.filter(entry => {
+  return sitemapEntries.filter(entry => {
     if (uniqueUrls.has(entry.url)) return false;
     uniqueUrls.add(entry.url);
     return true;
   });
-
-  return filteredEntries;
 }
+

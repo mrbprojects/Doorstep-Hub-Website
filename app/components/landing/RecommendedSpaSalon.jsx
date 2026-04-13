@@ -92,6 +92,7 @@ export function RecommendedSpaSalon() {
 
             return {
               id: store._id,
+              slug: store.slug,
               name: store.storeName || `${store.firstName} ${store.lastName}`,
               category: 'Premium Spa & Salon',
               rating: 4.8,
@@ -480,5 +481,3 @@ export function RecommendedSpaSalon() {
     </section>
   );
 }
-
-

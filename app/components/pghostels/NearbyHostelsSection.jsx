@@ -135,7 +135,7 @@ export function NearbyHostelsSection({ router }) {
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
                                     whileHover={{ y: -8, scale: 1.02 }}
-                                    onClick={() => router.push(`/pghostels/${hostel.slug || hostel._id}`)}
+                                    onClick={() => router.push(`/pghostels/hostel/${hostel.slug || hostel._id}`)}
                                     className="group relative flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-[calc((100%-80px)/6)] cursor-pointer py-2"
                                 >
                                     <div className="relative h-[25rem] rounded-[1.5rem] overflow-hidden bg-white shadow-md">

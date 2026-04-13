@@ -220,7 +220,8 @@ function PGListingsContent() {
                 : (item?.badges ? [str(item.badges)] : ['Verified']),
             amenities: amenities.length > 0 ? amenities : ['WiFi', 'Food', 'Laundry'],
             availableBeds: 5,
-            description: str(item?.bio, '')
+            description: str(item?.bio, ''),
+            slug: str(item?.slug) || uniqueId
         };
     };
 
@@ -817,7 +818,7 @@ function PGListingsContent() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-3 sm:p-6" onClick={() => isClickable && router.push(`/pghostels/${listing.slug || listing.id}`)}>
+                    <div className="p-3 sm:p-6" onClick={() => isClickable && router.push(`/pghostels/hostel/${listing.slug || listing.id}`)}>
                         {/* PG Name & Location */}
                         <div className="mb-2 sm:mb-4">
                             <h3 className="text-base sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">
@@ -1100,7 +1101,7 @@ function PGListingsContent() {
                                         ))}
                                     </div>
                                 ) : sortedListings.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                                         {sortedListings.map((listing) => (
                                             <PGCard key={listing.id} listing={listing} />
                                         ))}
@@ -1124,7 +1125,7 @@ function PGListingsContent() {
 
                             <TabsContent value="nearby" className="mt-0">
                                 {sortedListings.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                                         {sortedListings
                                             .sort((a, b) => a.distance - b.distance)
                                             .map((listing) => (

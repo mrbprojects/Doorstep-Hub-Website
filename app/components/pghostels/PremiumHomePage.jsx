@@ -966,7 +966,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                             viewport={{ once: true }}
                                             transition={{ delay: i * 0.1 }}
                                             whileHover={isClickable ? { y: -8 } : {}}
-                                            onClick={() => isClickable && router.push(`/pghostels/${hostelSlug}`)}
+                                            onClick={() => isClickable && router.push(`/pghostels/hostel/${hostelSlug}`)}
                                             className={`group relative rounded-[1.5rem] overflow-hidden h-[25rem] w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-[calc((100%-80px)/6)] flex-shrink-0 snap-start bg-white shadow-md ${isClickable ? 'cursor-pointer' : ''}`}
                                         >
                                             <div className="absolute inset-0">

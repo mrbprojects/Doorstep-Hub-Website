@@ -223,7 +223,7 @@ function PGResultsContent() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-6" onClick={() => router.push(`/pghostels/${listing.slug || listing.id}`)}>
+                    <div className="p-6" onClick={() => router.push(`/pghostels/hostel/${listing.slug || listing.id}`)}>
                         {/* PG Name & Location */}
                         <div className="mb-4">
                             <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#037166] transition-colors line-clamp-1">
@@ -414,7 +414,7 @@ function PGResultsContent() {
                         </div> */}
 
                         {/* Listings Grid */}
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {displayListings.map((listing) => (
                                 <PGCard key={listing.id} listing={listing} isNearby={showNearby} />
                             ))}

@@ -46,7 +46,7 @@ export default async function Home() {
             <LatestSpaServices />
             <RecommendedSpaSalon />
             <AppDownload />
-            <KnowledgeSection />
+            {/* <KnowledgeSection /> */}
         </div>
     );
 }

@@ -95,7 +95,7 @@ export function ApplianceHomePage() {
             <PopularCenters onStoreClick={(storeId) => {
                 router.push(`/appliances/store/${storeId}`);
             }} />
-            <KnowledgeSpace />
+            {/* <KnowledgeSpace /> */}
             <Newsletter />
         </>
     );

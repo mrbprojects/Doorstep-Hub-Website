@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Download, X } from 'lucide-react';
+import { CheckCircle, Download, X, UserCheck } from 'lucide-react';
 
-export function RegistrationSuccessPage({ onClose }) {
+export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
   const [appLinks, setAppLinks] = useState({
     android: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
     ios: 'https://apps.apple.com/in/app/doorstep-hub-partner/id6504071357'
@@ -52,7 +52,11 @@ export function RegistrationSuccessPage({ onClose }) {
         animate={{ scale: 1, opacity: 1 }}
         className="w-16 h-16 bg-[#04a99d]/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(4,169,157,0.3)]"
       >
-        <CheckCircle className="w-10 h-10 text-[#04a99d]" />
+        {isNewUser ? (
+          <CheckCircle className="w-10 h-10 text-[#04a99d]" />
+        ) : (
+          <UserCheck className="w-10 h-10 text-[#04a99d]" />
+        )}
       </motion.div>
 
       <motion.h2
@@ -60,7 +64,7 @@ export function RegistrationSuccessPage({ onClose }) {
         animate={{ y: 0, opacity: 1 }}
         className="text-2xl sm:text-3xl font-black mb-2 text-white tracking-tight leading-tight"
       >
-        Registration Successful!
+        {isNewUser ? 'Registration Successful!' : "You're Already With Us!"}
       </motion.h2>
 
       <motion.p
@@ -68,7 +72,11 @@ export function RegistrationSuccessPage({ onClose }) {
         animate={{ y: 0, opacity: 1 }}
         className="text-white/60 text-[13px] sm:text-sm mb-6 max-w-sm mx-auto leading-relaxed"
       >
-        Thank you for joining our professional network. Please download the Doorstep Hub Partner app to manage your service requests.
+        {isNewUser ? (
+          "Thank you for joining our professional network. Please download the Doorstep Hub Partner app to manage your service requests."
+        ) : (
+          "Welcome back! You are already a registered partner. Please download the Doorstep Hub Partner app to access your profile and bookings."
+        )}
       </motion.p>
 
       {/* MATCHED EXACTLY TO LANDING PAGE APP DOWNLOAD SECTION */}
@@ -77,20 +85,20 @@ export function RegistrationSuccessPage({ onClose }) {
           href={appLinks.android}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center w-[160px] sm:w-44 h-12 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0 border border-white/10"
+          className="flex items-center justify-center w-[135px] sm:w-[160px] h-11 sm:h-12 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
           title="Get it on Google Play"
         >
-          <img src="/andriod1.png" alt="Google Play" className="h-[80%] w-auto object-contain brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+          <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover scale-110 brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
         </a>
 
         <a
           href={appLinks.ios}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center w-[160px] sm:w-44 h-12 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0 border border-white/10"
+          className="flex items-center justify-center w-[135px] sm:w-[160px] h-11 sm:h-12 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
           title="Download on the App Store"
         >
-          <img src="/apple2.png" alt="App Store" className="h-[80%] w-auto object-contain brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+          <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover scale-110 brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
         </a>
       </div>
 

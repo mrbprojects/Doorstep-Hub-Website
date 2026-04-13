@@ -29,6 +29,7 @@ export function ProviderAuthOnboardingSection() {
   const [token, setToken] = useState('');
   const [userId, setUserId] = useState('');
   const [profile, setProfile] = useState(null);
+  const [isNewUser, setIsNewUser] = useState(true);
   const [loading, setLoading] = useState({ mobile: false, otp: false, register: false, profile: false });
   const [error, setError] = useState({ mobile: '', otp: '', register: '', profile: '' });
 
@@ -131,6 +132,7 @@ export function ProviderAuthOnboardingSection() {
       if (!authToken) throw new Error('No auth token received from verifyOTP.');
       toast.success(payload?.message || 'OTP verified');
       persist({ token: authToken, userId: verifiedUserId, phone, profile: null });
+      setIsNewUser(false);
       await loadProfile(authToken, phone, 'register', verifiedUserId);
     } catch (err) {
       setError((prev) => ({ ...prev, otp: err.message || 'OTP verification failed' }));
@@ -141,6 +143,7 @@ export function ProviderAuthOnboardingSection() {
 
   async function submitRegister(data) {
     setError((prev) => ({ ...prev, register: '' }));
+    setIsNewUser(true);
     setLoading((prev) => ({ ...prev, register: true }));
     try {
       const resolvedUserId = data.userId || userId;
@@ -347,7 +350,7 @@ export function ProviderAuthOnboardingSection() {
                   ) : null}
                   {step === 'success' || step === 'profile' ? (
                     <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                      <RegistrationSuccessPage onClose={resetForm} />
+                      <RegistrationSuccessPage onClose={resetForm} isNewUser={isNewUser} />
                     </motion.div>
                   ) : null}
                 </AnimatePresence>

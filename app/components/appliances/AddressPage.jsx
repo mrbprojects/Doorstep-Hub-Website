@@ -609,8 +609,12 @@ export function AddressPage({
                             )}
                           </div>
                           <p className="font-medium text-white mb-1">{address.name}</p>
-                          <p className="text-white/80 text-sm mb-1">{address.flat}, {address.area}</p>
-                          <p className="text-white/60 text-xs">{address.cityName}, {address.postalCode}</p>
+                          <p className="text-white/80 text-sm mb-1">
+                            {[address.flat, address.area].filter(Boolean).join(', ')}
+                          </p>
+                          <p className="text-white/60 text-xs">
+                            {[address.cityName, address.postalCode].filter(Boolean).join(', ')}
+                          </p>
                         </div>
 
                         <div className="flex flex-col gap-2">

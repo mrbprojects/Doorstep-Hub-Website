@@ -229,9 +229,9 @@ export function BookingConfirmationPage({
         throw new Error('Service identifier missing. Please return to service details and try again.');
       }
 
-      // Format date/time with timezone
       const dateTimeInfo = formatDateTimeWithTimezone(selectedDate, selectedTime);
 
+      /* PREVIOUS BOOKING DATA (BEFORE ONDEMAND SPEC UPDATE):
       const bookingData = {
         serviceId: serviceId,
         serviceAddressId: address._id || address.id,
@@ -239,9 +239,30 @@ export function BookingConfirmationPage({
         addMoreInfo: `Technician Preference: ${technicianPreference}. Payment: ${paymentMethod}. Packages: ${cartItems.map(i => i.packageName || i.serviceName).join(', ')}`,
         bookedDate: selectedDate,
         bookedTime: selectedTime,
-        bookedDateTime: dateTimeInfo.iso, // ISO 8601 format with timezone
+        bookedDateTime: dateTimeInfo.iso,
         timezone: dateTimeInfo.timezone,
-        totalAmount: priceValidation.value.toString() // Use validated price
+        totalAmount: priceValidation.value.toString()
+      };
+      */
+
+      const selectedServiceRates = cartItems.map(item => ({
+        id: item.id || item._id,
+        name: (item.packageName || item.title || item.name || item.serviceName || "Standard Service").trim(),
+        price: Number(item.price) || 0,
+        quantity: Number(item.quantity) || 1
+      })).filter(rate => rate.name);
+
+      const bookingData = {
+        serviceId: serviceId,
+        serviceAddressId: address._id || address.id,
+        sourceOfLead: 'website',
+        addMoreInfo: `Technician Preference: ${technicianPreference}. Payment: ${paymentMethod}.`,
+        bookedDate: selectedDate,
+        bookedTime: selectedTime,
+        bookedDateTime: dateTimeInfo.iso,
+        timezone: dateTimeInfo.timezone,
+        totalAmount: priceValidation.value.toString(),
+        selectedServiceRates: selectedServiceRates
       };
 
       // Save address to sessionStorage for Thank You page redirect/persistence
@@ -258,6 +279,10 @@ export function BookingConfirmationPage({
           },
           body: JSON.stringify({
             ...bookingData,
+            /* PREVIOUS BODY (WITHOUT EXPLICIT AMOUNT):
+            paymentMethod: paymentMethod === 'COD' ? 'COD' : 'wallet'
+            */
+            amount: priceValidation.value, // New explicit field per on-demand spec
             paymentMethod: paymentMethod === 'COD' ? 'COD' : 'wallet'
           })
         });
@@ -579,8 +604,12 @@ export function BookingConfirmationPage({
               {address ? (
                 <div className="p-4 rounded-lg bg-white/5">
                   <h6 className="text-white font-medium mb-1">{address.name}</h6>
-                  <p className="text-white/80">{address.flat}, {address.area}</p>
-                  <p className="text-white/60">{address.cityName || address.city}, {address.postalCode}</p>
+                  <p className="text-white/80">
+                    {[address.flat, address.area].filter(Boolean).join(', ')}
+                  </p>
+                  <p className="text-white/60">
+                    {[address.cityName || address.city, address.postalCode].filter(Boolean).join(', ')}
+                  </p>
                 </div>
               ) : (
                 <div className="p-4 rounded-lg bg-white/5">

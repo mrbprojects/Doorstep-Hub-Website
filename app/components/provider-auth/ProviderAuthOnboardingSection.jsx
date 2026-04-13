@@ -47,20 +47,19 @@ export function ProviderAuthOnboardingSection() {
     }
   }, []);
 
+  const resetForm = () => {
+    setStep('idle');
+    setPhone('');
+    setOtp('');
+    setToken('');
+    setUserId('');
+    setProfile(null);
+    localStorage.removeItem(SESSION_KEY);
+  };
+
   useEffect(() => {
     if (step !== 'success') return;
-
-    const timer = setTimeout(() => {
-      setStep('idle');
-      setPhone('');
-      setOtp('');
-      setToken('');
-      setUserId('');
-      setProfile(null);
-      localStorage.removeItem(SESSION_KEY);
-    }, 5000);
-
-    return () => clearTimeout(timer);
+    // Manual reset handled by individual pages
   }, [step]);
 
   function persist(next) {
@@ -307,7 +306,7 @@ export function ProviderAuthOnboardingSection() {
                   </div>
                 </div>
               )}
-              <div className={`lg:col-span-3 rounded-[3rem] border border-white/10 bg-[#0a0f0e]/90 backdrop-blur-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden group transition-all duration-500 ${step === 'success' || step === 'profile' ? 'max-w-xl mx-auto w-full p-4' : ''}`}>
+              <div className={`lg:col-span-3 rounded-[3rem] border border-white/10 bg-[#0a0f0e]/90 backdrop-blur-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden group transition-all duration-500 ${step === 'success' || step === 'profile' ? 'max-w-lg mx-auto w-full !p-8' : ''}`}>
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#04a99d]/10 rounded-full blur-[120px] -z-10" />
                 
                 <AnimatePresence mode="wait">
@@ -348,7 +347,7 @@ export function ProviderAuthOnboardingSection() {
                   ) : null}
                   {step === 'success' || step === 'profile' ? (
                     <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                      <RegistrationSuccessPage />
+                      <RegistrationSuccessPage onClose={resetForm} />
                     </motion.div>
                   ) : null}
                 </AnimatePresence>

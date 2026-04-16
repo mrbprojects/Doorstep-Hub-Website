@@ -36,8 +36,8 @@ async function getApplianceEntries() {
           if (subData?.success && Array.isArray(subData.data)) {
             subData.data.forEach(sub => {
               if (isValidSlug(sub.slug)) {
+                // Keep only the root-level slug as requested
                 catEntries.push({ url: `${BASE_URL}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-                catEntries.push({ url: `${BASE_URL}/${cat.slug}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
               }
             });
           }

@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com'; // Fallback if env is missing
 const BASE_URL = 'https://doorstephub.com';
 
 export default async function sitemap() {
@@ -22,24 +22,43 @@ export default async function sitemap() {
     { url: `${BASE_URL}/book-appointment`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
 
     // 3. Vertical Specific Static Lists
+    // Appliances
+    { url: `${BASE_URL}/appliances/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/appliances/centers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/appliances/explore`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/appliances/featured`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/appliances/listing`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/appliances/verified`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    
+    // Services
+    { url: `${BASE_URL}/services/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/services/centers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/services/explore`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/services/featured`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/services/listing`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/services/verified`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+
+    // PG Hostels
     { url: `${BASE_URL}/pghostels/listings/men`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/pghostels/listings/women`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/pghostels/listings/both`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${BASE_URL}/appliances/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${BASE_URL}/appliances/centers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    
+    // Religious Services
     { url: `${BASE_URL}/religious-services/all-services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    
+    // Spa & Salon
     { url: `${BASE_URL}/spa-salon/packages`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
   ];
 
   // 4. Dynamic Sections with Error Isolation
   
-  // Section: Appliance Repairs & Services (Root-level dynamic slugs)
+  // Section: Appliance Repairs & Services (Root-level dynamic slugs handled by catch-all)
   try {
     const catRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lattitude: 17.3850, longitude: 78.4867 }),
-      cache: 'no-store'
+      next: { revalidate: 3600 } // Cache for 1 hour
     });
     const { success, data: categories } = await catRes.json();
 
@@ -59,7 +78,7 @@ export default async function sitemap() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ slug: cat.slug }),
-              cache: 'no-store'
+              next: { revalidate: 3600 }
             });
             const subData = await subRes.json();
 
@@ -79,7 +98,7 @@ export default async function sitemap() {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ subcategoryId: sub._id, lattitude: 17.3850, longitude: 78.4867 }),
-                      cache: 'no-store'
+                      next: { revalidate: 3600 }
                     });
                     const svcData = await svcRes.json();
                     if (svcData.success && Array.isArray(svcData.dhubServices)) {
@@ -108,7 +127,7 @@ export default async function sitemap() {
 
   // Section: PG Hostels
   try {
-    const pgRes = await fetch(`${API_BASE_URL}/app/products/latest_pg_hostels`, { cache: 'no-store' });
+    const pgRes = await fetch(`${API_BASE_URL}/app/products/latest_pg_hostels`, { next: { revalidate: 3600 } });
     const pgData = await pgRes.json();
     if (pgData.success && Array.isArray(pgData.hostels)) {
       pgData.hostels.forEach(hostel => {
@@ -127,7 +146,7 @@ export default async function sitemap() {
 
   // Section: Spa & Salon
   try {
-    const spaRes = await fetch(`${API_BASE_URL}/app/products/all_spa_stores`, { cache: 'no-store' });
+    const spaRes = await fetch(`${API_BASE_URL}/app/products/all_spa_stores`, { next: { revalidate: 3600 } });
     const spaData = await spaRes.json();
     if (spaData.success && Array.isArray(spaData.stores)) {
       spaData.stores.forEach(store => {
@@ -150,7 +169,7 @@ export default async function sitemap() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ serviceId: '695250aa57bb211ca094e5fd' }),
-      cache: 'no-store'
+      next: { revalidate: 3600 }
     });
     const relData = await relRes.json();
     if (relData.success && Array.isArray(relData.category)) {

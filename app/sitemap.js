@@ -132,7 +132,7 @@ async function getCenterEntries() {
       return data.nearestServiceCenters
         .map(s => s.slug || s._id)
         .filter(isValidSlug)
-        .map(sl => ({ url: `${BASE_URL}/appliances/${sl}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 }));
+        .map(sl => ({ url: `${BASE_URL}/${sl}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 }));
     }
   } catch (e) {}
   return [];

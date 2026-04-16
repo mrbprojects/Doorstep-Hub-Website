@@ -34,12 +34,24 @@ async function getApplianceEntries() {
           catEntries.push({ url: `${BASE_URL}/${cat.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
           const subData = await fetchAPI('/app/applience-repairs-website/getsubcategorysbycategoryid', { slug: cat.slug });
           if (subData?.success && Array.isArray(subData.data)) {
-            subData.data.forEach(sub => {
+            const subResults = await Promise.all(subData.data.map(async (sub) => {
+              const subEntries = [];
               if (isValidSlug(sub.slug)) {
-                // Keep only the root-level slug as requested
-                catEntries.push({ url: `${BASE_URL}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+                subEntries.push({ url: `${BASE_URL}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+                
+                // Fetch individual services for this subcategory
+                const svcData = await fetchAPI('/app/applience-repairs-website/services_by_subcategory', { 
+                  subcategoryId: sub._id, lattitude: '17.3850', longitude: '78.4867' 
+                });
+                if (svcData?.success && Array.isArray(svcData.dhubServices)) {
+                  svcData.dhubServices.forEach(svc => {
+                    if (isValidSlug(svc.slug)) subEntries.push({ url: `${BASE_URL}/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 });
+                  });
+                }
               }
-            });
+              return subEntries;
+            }));
+            catEntries.push(...subResults.flat());
           }
         }
         return catEntries;
@@ -79,10 +91,23 @@ async function getSpaEntries() {
           catEntries.push({ url: `${BASE_URL}/spa-salon/${slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
           const subData = await fetchAPI('/app/professional-services-flow/public/subcategories', { categorySlug: slug });
           if (subData?.success && Array.isArray(subData.data)) {
-            subData.data.forEach(sub => {
+            const subResults = await Promise.all(subData.data.map(async (sub) => {
+              const subEntries = [];
               const ss = sub.slug || sub._id;
-              if (isValidSlug(ss)) catEntries.push({ url: `${BASE_URL}/spa-salon/${ss}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-            });
+              if (isValidSlug(ss)) {
+                subEntries.push({ url: `${BASE_URL}/spa-salon/${ss}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+                // Fetch deep services for this subcategory
+                const svcData = await fetchAPI('/app/professional-services-flow/public/services', { subcategorySlug: ss });
+                if (svcData?.success && Array.isArray(svcData.data)) {
+                  svcData.data.forEach(svc => {
+                    const svcs = svc.slug || svc._id;
+                    if (isValidSlug(svcs)) subEntries.push({ url: `${BASE_URL}/spa-salon/${svcs}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 });
+                  });
+                }
+              }
+              return subEntries;
+            }));
+            catEntries.push(...subResults.flat());
           }
         }
         return catEntries;
@@ -111,10 +136,23 @@ async function getReligiousEntries() {
           catEntries.push({ url: `${BASE_URL}/religious-services/${slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
           const subData = await fetchAPI('/app/professional-services-flow/public/subcategories', { categorySlug: slug });
           if (subData?.success && Array.isArray(subData.data)) {
-            subData.data.forEach(sub => {
+            const subResults = await Promise.all(subData.data.map(async (sub) => {
+              const subEntries = [];
               const ss = sub.slug || sub._id;
-              if (isValidSlug(ss)) catEntries.push({ url: `${BASE_URL}/religious-services/${ss}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-            });
+              if (isValidSlug(ss)) {
+                subEntries.push({ url: `${BASE_URL}/religious-services/${ss}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+                // Fetch deep services
+                const svcData = await fetchAPI('/app/professional-services-flow/public/services', { subcategorySlug: ss });
+                if (svcData?.success && Array.isArray(svcData.data)) {
+                  svcData.data.forEach(svc => {
+                    const svcs = svc.slug || svc._id;
+                    if (isValidSlug(svcs)) subEntries.push({ url: `${BASE_URL}/religious-services/${svcs}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 });
+                  });
+                }
+              }
+              return subEntries;
+            }));
+            catEntries.push(...subResults.flat());
           }
         }
         return catEntries;
@@ -126,14 +164,33 @@ async function getReligiousEntries() {
 }
 
 async function getCenterEntries() {
+  const cityCoords = [
+    { city: 'Hyderabad', lat: '17.3850', lng: '78.4867' },
+    { city: 'Bangalore', lat: '12.9716', lng: '77.5946' },
+    { city: 'Vizag', lat: '17.6868', lng: '83.2185' },
+    { city: 'Chennai', lat: '13.0827', lng: '80.2707' },
+    { city: 'Vijayawada', lat: '16.5062', lng: '80.6480' },
+    { city: 'Mumbai', lat: '19.0760', lng: '72.8777' },
+    { city: 'Pune', lat: '18.5204', lng: '73.8567' }
+  ];
+
   try {
-    const data = await fetchAPI('/app/applience-repairs-website/nearest_service_centers', { lattitude: '17.3850', longitude: '78.4867' });
-    if (data?.success && Array.isArray(data.nearestServiceCenters)) {
-      return data.nearestServiceCenters
-        .map(s => s.slug || s._id)
-        .filter(isValidSlug)
-        .map(sl => ({ url: `${BASE_URL}/${sl}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 }));
-    }
+    const centerResults = await Promise.all(cityCoords.map(async (coord) => {
+      try {
+        const data = await fetchAPI('/app/applience-repairs-website/nearest_service_centers', { 
+          lattitude: coord.lat, 
+          longitude: coord.lng 
+        });
+        if (data?.success && Array.isArray(data.nearestServiceCenters)) {
+          return data.nearestServiceCenters
+            .map(s => s.slug || s._id)
+            .filter(isValidSlug)
+            .map(sl => ({ url: `${BASE_URL}/${sl}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 }));
+        }
+      } catch (e) {}
+      return [];
+    }));
+    return centerResults.flat();
   } catch (e) {}
   return [];
 }

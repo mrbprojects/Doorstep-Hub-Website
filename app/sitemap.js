@@ -5,14 +5,27 @@ async function fetchAPI(endpoint, body = null, method = 'POST') {
   try {
     const config = {
       method,
-      headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: 3600 }
+      headers: { 
+        'Content-Type': 'application/json',
+        'User-Agent': 'DoorstepHub-SitemapGenerator/1.0'
+      },
     };
+    // Only add revalidate for GET requests, some environments fail POST with it
+    if (method === 'GET') {
+      config.next = { revalidate: 3600 };
+    }
     if (body) config.body = JSON.stringify(body);
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    if (!res.ok) return null;
+    
+    const url = `${API_BASE_URL}${endpoint}`;
+    const res = await fetch(url, config);
+    
+    if (!res.ok) {
+      console.error(`Sitemap fetch error: ${url} returned ${res.status}`);
+      return null;
+    }
     return await res.json();
   } catch (e) {
+    console.error(`Sitemap fetch exception for ${endpoint}:`, e.message);
     return null;
   }
 }
@@ -41,39 +54,35 @@ export default async function sitemap() {
   try {
     const catData = await fetchAPI('/app/applience-repairs-website/getallcategorys', { lattitude: '17.3850', longitude: '78.4867' });
     if (catData?.success && Array.isArray(catData.data)) {
-      const catResults = await Promise.all(catData.data.map(async (cat) => {
-        const entries = [];
-        if (isValidSlug(cat.slug)) {
-          entries.push({ url: `${BASE_URL}/${cat.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
-          
-          const subData = await fetchAPI('/app/applience-repairs-website/getsubcategorysbycategoryid', { slug: cat.slug });
-          if (subData?.success && Array.isArray(subData.data)) {
-            const subEntries = await Promise.all(subData.data.map(async (sub) => {
-              const subItems = [];
-              if (isValidSlug(sub.slug)) {
-                // Both root and nested for maximum compatibility
-                subItems.push({ url: `${BASE_URL}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-                subItems.push({ url: `${BASE_URL}/${cat.slug}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-                
-                // Services
-                const svcData = await fetchAPI('/app/applience-repairs-website/services_by_subcategory', { 
-                  subcategoryId: sub._id, lattitude: '17.3850', longitude: '78.4867' 
-                });
-                if (svcData?.success && Array.isArray(svcData.dhubServices)) {
-                  svcData.dhubServices.forEach(svc => {
-                    if (isValidSlug(svc.slug)) {
-                      subItems.push({ url: `${BASE_URL}/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 });
-                    }
+      const catPromises = catData.data.map(async (cat) => {
+        try {
+          const entries = [];
+          if (isValidSlug(cat.slug)) {
+            entries.push({ url: `${BASE_URL}/${cat.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
+            
+            const subData = await fetchAPI('/app/applience-repairs-website/getsubcategorysbycategoryid', { slug: cat.slug });
+            if (subData?.success && Array.isArray(subData.data)) {
+              for (const sub of subData.data) {
+                if (isValidSlug(sub.slug)) {
+                  entries.push({ url: `${BASE_URL}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+                  entries.push({ url: `${BASE_URL}/${cat.slug}/${sub.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+                  
+                  const svcData = await fetchAPI('/app/applience-repairs-website/services_by_subcategory', { 
+                    subcategoryId: sub._id, lattitude: '17.3850', longitude: '78.4867' 
                   });
+                  if (svcData?.success && Array.isArray(svcData.dhubServices)) {
+                    svcData.dhubServices.forEach(svc => {
+                      if (isValidSlug(svc.slug)) entries.push({ url: `${BASE_URL}/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 });
+                    });
+                  }
                 }
               }
-              return subItems;
-            }));
-            entries.push(...subEntries.flat());
+            }
           }
-        }
-        return entries;
-      }));
+          return entries;
+        } catch (e) { return []; }
+      });
+      const catResults = await Promise.all(catPromises);
       sitemapEntries.push(...catResults.flat());
     }
   } catch (e) {}
@@ -93,29 +102,25 @@ export default async function sitemap() {
   try {
     const spaCatData = await fetchAPI('/app/professional-services-flow/public/categories', { serviceId: '69524f4a57bb211ca094e5e6' });
     if (spaCatData?.success && Array.isArray(spaCatData.category)) {
-      const spaResults = await Promise.all(spaCatData.category.map(async (cat) => {
-        const entries = [];
-        const catSlug = cat.slug || cat._id;
-        if (isValidSlug(catSlug)) {
-          entries.push({ url: `${BASE_URL}/spa-salon/${catSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
-          const spaSubData = await fetchAPI('/app/professional-services-flow/public/subcategories', { categorySlug: catSlug });
-          if (spaSubData?.success && Array.isArray(spaSubData.data)) {
-            spaSubData.data.forEach(sub => {
-              const subSlug = sub.slug || sub._id;
-              if (isValidSlug(subSlug)) entries.push({ url: `${BASE_URL}/spa-salon/${subSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-            });
+      const spaPromises = spaCatData.category.map(async (cat) => {
+        try {
+          const entries = [];
+          const catSlug = cat.slug || cat._id;
+          if (isValidSlug(catSlug)) {
+            entries.push({ url: `${BASE_URL}/spa-salon/${catSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
+            const spaSubData = await fetchAPI('/app/professional-services-flow/public/subcategories', { categorySlug: catSlug });
+            if (spaSubData?.success && Array.isArray(spaSubData.data)) {
+              spaSubData.data.forEach(sub => {
+                const subSlug = sub.slug || sub._id;
+                if (isValidSlug(subSlug)) entries.push({ url: `${BASE_URL}/spa-salon/${subSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+              });
+            }
           }
-        }
-        return entries;
-      }));
-      sitemapEntries.push(...spaResults.flat());
-    }
-    const spaStoresData = await fetchAPI('/app/products/all_spa_stores', null, 'GET');
-    if (spaStoresData?.success && Array.isArray(spaStoresData.stores)) {
-      spaStoresData.stores.forEach(s => {
-        const sl = s.slug || s._id;
-        if (isValidSlug(sl)) sitemapEntries.push({ url: `${BASE_URL}/spa-salon/${sl}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+          return entries;
+        } catch (e) { return []; }
       });
+      const spaResults = await Promise.all(spaPromises);
+      sitemapEntries.push(...spaResults.flat());
     }
   } catch (e) {}
 
@@ -123,21 +128,24 @@ export default async function sitemap() {
   try {
     const relCatData = await fetchAPI('/app/professional-services-flow/public/categories', { serviceId: '695250aa57bb211ca094e5fd' });
     if (relCatData?.success && Array.isArray(relCatData.category)) {
-      const relResults = await Promise.all(relCatData.category.map(async (cat) => {
-        const entries = [];
-        const catSlug = cat.slug || cat._id;
-        if (isValidSlug(catSlug)) {
-          entries.push({ url: `${BASE_URL}/religious-services/${catSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
-          const relSubData = await fetchAPI('/app/professional-services-flow/public/subcategories', { categorySlug: catSlug });
-          if (relSubData?.success && Array.isArray(relSubData.data)) {
-            relSubData.data.forEach(sub => {
-              const subSlug = sub.slug || sub._id;
-              if (isValidSlug(subSlug)) entries.push({ url: `${BASE_URL}/religious-services/${subSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-            });
+      const relPromises = relCatData.category.map(async (cat) => {
+        try {
+          const entries = [];
+          const catSlug = cat.slug || cat._id;
+          if (isValidSlug(catSlug)) {
+            entries.push({ url: `${BASE_URL}/religious-services/${catSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
+            const relSubData = await fetchAPI('/app/professional-services-flow/public/subcategories', { categorySlug: catSlug });
+            if (relSubData?.success && Array.isArray(relSubData.data)) {
+              relSubData.data.forEach(sub => {
+                const subSlug = sub.slug || sub._id;
+                if (isValidSlug(subSlug)) entries.push({ url: `${BASE_URL}/religious-services/${subSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+              });
+            }
           }
-        }
-        return entries;
-      }));
+          return entries;
+        } catch (e) { return []; }
+      });
+      const relResults = await Promise.all(relPromises);
       sitemapEntries.push(...relResults.flat());
     }
   } catch (e) {}

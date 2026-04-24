@@ -121,7 +121,6 @@ export function ViewAllPage({
               image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400',
               reviews: item.reviews || 'New'
             })));
-          }
         } catch (error) {
           console.error('Error fetching stores:', error);
         } finally {

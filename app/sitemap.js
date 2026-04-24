@@ -165,29 +165,28 @@ async function getReligiousEntries() {
 
 async function getCenterEntries() {
   const cityCoords = [
-    { city: 'Hyderabad', lat: '17.3850', lng: '78.4867' },
-    { city: 'Bangalore', lat: '12.9716', lng: '77.5946' },
-    { city: 'Vizag', lat: '17.6868', lng: '83.2185' },
-    { city: 'Chennai', lat: '13.0827', lng: '80.2707' },
-    { city: 'Vijayawada', lat: '16.5062', lng: '80.6480' },
-    { city: 'Mumbai', lat: '19.0760', lng: '72.8777' },
-    { city: 'Pune', lat: '18.5204', lng: '73.8567' },
-    { city: 'Delhi', lat: '28.6139', lng: '77.2090' },
-    { city: 'Kolkata', lat: '22.5726', lng: '88.3639' },
-    { city: 'Ahmedabad', lat: '23.0225', lng: '72.5714' },
-    { city: 'Noida', lat: '28.5355', lng: '77.3910' },
-    { city: 'Gurgaon', lat: '28.4595', lng: '77.0266' }
+    { city: 'Hyderabad', lat: '17.3850', lng: '78.4867', limit: 200 },
+    { city: 'Bangalore', lat: '12.9716', lng: '77.5946', limit: 100 },
+    { city: 'Vizag', lat: '17.6868', lng: '83.2185', limit: 100 },
+    { city: 'Chennai', lat: '13.0827', lng: '80.2707', limit: 100 },
+    { city: 'Vijayawada', lat: '16.5062', lng: '80.6480', limit: 100 },
+    { city: 'Mumbai', lat: '19.0760', lng: '72.8777', limit: 100 },
+    { city: 'Pune', lat: '18.5204', lng: '73.8567', limit: 100 },
+    { city: 'Delhi', lat: '28.6139', lng: '77.2090', limit: 100 }
   ];
 
   try {
     const centerResults = await Promise.all(cityCoords.map(async (coord) => {
       try {
-        const data = await fetchAPI('/app/applience-repairs-website/nearest_service_centers', { 
+        // Using get_service_center which often returns more data than just nearest_service_centers
+        const data = await fetchAPI('/app/applience-repairs-website/get_service_center', { 
           lattitude: coord.lat, 
-          longitude: coord.lng 
+          longitude: coord.lng,
+          page: 1,
+          limit: coord.limit
         });
-        if (data?.success && Array.isArray(data.nearestServiceCenters)) {
-          return data.nearestServiceCenters
+        if (data?.success && Array.isArray(data.nearByServiceCenters)) {
+          return data.nearByServiceCenters
             .map(s => s.slug || s._id)
             .filter(isValidSlug)
             .map(sl => ({ url: `${BASE_URL}/service-list/${sl}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 }));
@@ -216,6 +215,8 @@ export default async function sitemap() {
     { url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/book-appointment`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/services/centers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE_URL}/appliances/centers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
   ];
 
   // Parallel fetch all dynamic sections

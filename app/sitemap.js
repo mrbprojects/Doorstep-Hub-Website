@@ -171,7 +171,12 @@ async function getCenterEntries() {
     { city: 'Chennai', lat: '13.0827', lng: '80.2707' },
     { city: 'Vijayawada', lat: '16.5062', lng: '80.6480' },
     { city: 'Mumbai', lat: '19.0760', lng: '72.8777' },
-    { city: 'Pune', lat: '18.5204', lng: '73.8567' }
+    { city: 'Pune', lat: '18.5204', lng: '73.8567' },
+    { city: 'Delhi', lat: '28.6139', lng: '77.2090' },
+    { city: 'Kolkata', lat: '22.5726', lng: '88.3639' },
+    { city: 'Ahmedabad', lat: '23.0225', lng: '72.5714' },
+    { city: 'Noida', lat: '28.5355', lng: '77.3910' },
+    { city: 'Gurgaon', lat: '28.4595', lng: '77.0266' }
   ];
 
   try {
@@ -185,7 +190,7 @@ async function getCenterEntries() {
           return data.nearestServiceCenters
             .map(s => s.slug || s._id)
             .filter(isValidSlug)
-            .map(sl => ({ url: `${BASE_URL}/${sl}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 }));
+            .map(sl => ({ url: `${BASE_URL}/service-list/${sl}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 }));
         }
       } catch (e) {}
       return [];

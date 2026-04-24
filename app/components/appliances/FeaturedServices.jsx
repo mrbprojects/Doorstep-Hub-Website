@@ -216,9 +216,10 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
                   </h4>
 
                   {/* Description */}
-                  <p className="text-white/60 text-sm mb-4 line-clamp-2">
-                    {service.description}
-                  </p>
+                  <div 
+                    className="text-white/60 text-sm mb-4 line-clamp-2"
+                    dangerouslySetInnerHTML={{ __html: service.description }}
+                  />
 
 
                 </div>

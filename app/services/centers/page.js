@@ -7,7 +7,7 @@ export default function ServiceCentersPage() {
     const router = useRouter();
 
     const handleStoreClick = (storeId) => {
-        router.push(`/store/${storeId}`); // Assuming store detail page exists or reusing map view logic
+        router.push(`/service-list/${storeId}`);
     };
 
     return (

@@ -105,7 +105,14 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
           setServices(servicesData.dhubServices || []);
 
           // Set centers from nearByServiceCenters array (same API response)
-          setCenters(servicesData.nearByServiceCenters || []);
+                    const enrichedCenters = (servicesData.nearByServiceCenters || []).map(center => {
+            if (center.slug) return center;
+            const generatedSlug = (center.business_name || center.firstName || center.name || 'service-center')
+              .toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+            return { ...center, slug: generatedSlug };
+          });
+          setCenters(enrichedCenters);
+
 
           console.log('Fetched services:', servicesData.dhubServices?.length || 0);
           console.log('Fetched nearby centers:', servicesData.nearByServiceCenters?.length || 0);

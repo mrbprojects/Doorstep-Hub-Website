@@ -253,7 +253,7 @@ export function NearbyServiceCenters() {
   const ServiceCard = ({ service, actualIndex }) => (
     <motion.div
       key={service.id}
-      onClick={() => router.push(`/${service.slug || service.id}`)}
+      onClick={() => router.push(`/service-list/${service.slug || service.id}`)}
       whileHover={{ y: -5 }}
       name="service-card"
       className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${selectedService === actualIndex

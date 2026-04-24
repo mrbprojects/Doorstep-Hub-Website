@@ -87,7 +87,8 @@ export function ServiceCentersListingPage() {
     };
 
     const handleStoreClick = (storeId) => {
-        router.push(`/appliances/store/${storeId}`);
+        const store = stores.find(s => s.id === storeId);
+        router.push(`/service-list/${store?.slug || storeId}`);
     };
 
     const ShimmerGrid = () => {

@@ -150,7 +150,7 @@ export function NearbyServiceCenters({ onViewAll }) {
       key={service.id}
       onClick={() => {
         setSelectedService(actualIndex);
-        router.push(`/${service.slug || service.id}`);
+        router.push(`/service-list/${service.slug || service.id}`);
       }}
       whileHover={{ x: 10 }}
       className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm ${selectedService === actualIndex
@@ -202,7 +202,7 @@ export function NearbyServiceCenters({ onViewAll }) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            router.push(`/${service.slug || service.id}`);
+            router.push(`/service-list/${service.slug || service.id}`);
           }}
           className="text-xs font-bold text-[#04a99d] hover:text-white flex items-center gap-1"
         >

@@ -114,7 +114,7 @@ export function ViewAllPage({
           if (result.success && result.nearestServiceCenters) {
             setStores(result.nearestServiceCenters.map(item => ({
               id: item._id,
-              slug: item.slug, // Map the slug
+              slug: item.slug,
               name: item.name || `${item.firstName} ${item.lastName}`,
               address: item.address || item.cityName || 'Location not specified',
               rating: item.rating || 4.5,
@@ -213,7 +213,6 @@ export function ViewAllPage({
           </button>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h1 className="text-4xl md:text-5xl font-bold">{getTitle()}</h1>
-            {/* Rating Filter moved to sidebar */}
           </div>
         </div>
       </section>
@@ -379,7 +378,7 @@ export function ViewAllPage({
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        whileHover={{ x: 10 }} // Slight horizontal shift on hover instead of lift
+                        whileHover={{ x: 10 }}
                         onClick={() => onServiceClick?.(service._id, service.categoryName, service.subcategoryName, service.slug)}
                         className="group cursor-pointer"
                       >
@@ -409,7 +408,10 @@ export function ViewAllPage({
                               <p className="text-white/50 text-xs mb-2 line-clamp-1 italic">
                                 {service.totalOrders || '2.5k+'} Services Booked
                               </p>
-                              <p className="text-white/40 text-[11px] line-clamp-1 leading-tight">{service.description}</p>
+                              <div 
+                                className="text-white/40 text-[11px] line-clamp-1 leading-tight"
+                                dangerouslySetInnerHTML={{ __html: service.description }}
+                              />
                             </div>
 
                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
@@ -434,7 +436,7 @@ export function ViewAllPage({
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                         whileHover={{ y: -8 }}
-                        onClick={() => onStoreClick?.(store.id)}
+                        onClick={() => onStoreClick?.(store.slug || store.id)}
                         className="group cursor-pointer"
                       >
                         <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full">
@@ -497,10 +499,9 @@ export function ViewAllPage({
                             </h4>
                             <p className="text-white/60 text-sm mb-4 line-clamp-2">{service.description}</p>
                             <div className="flex items-center justify-between mt-auto">
-                              {/* <p className="text-2xl font-bold text-white">₹{service.price}</p> */}
                               <button className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg transition-all text-sm flex items-center gap-2">
                                 Book Now
-                                <ArrowRight className="w-4 h-4" />
+                                <ArrowRight className="w-3 h-4" />
                               </button>
                             </div>
                           </div>
@@ -513,7 +514,6 @@ export function ViewAllPage({
           </div>
         )}
 
-        {/* Mobile Filter Panel */}
         <AnimatePresence>
           {filterOpen && (
             <>
@@ -582,4 +582,3 @@ export function ViewAllPage({
     </motion.div>
   );
 }
-

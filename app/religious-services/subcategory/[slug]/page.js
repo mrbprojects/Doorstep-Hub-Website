@@ -346,8 +346,27 @@ function SubCategoryServicesContent() {
         </div>
     );
 
+    const schemaData = filteredServices.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `${subCategoryName} Experts in ${location?.city || 'your area'}`,
+        "description": `Book verified priests and scholars for ${subCategoryName}.`,
+        "itemListElement": filteredServices.map((service, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": service.business_name || `${service.firstName} ${service.lastName}`,
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/religious-services/${service.slug || service._id}` : ""
+        }))
+    } : null;
+
     return (
         <div className="min-h-screen bg-[var(--off-white)] pt-24 pb-16">
+            {schemaData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+                />
+            )}
             <div className="container mx-auto px-4">
                 {/* Header */}
                 <div className="mb-10">

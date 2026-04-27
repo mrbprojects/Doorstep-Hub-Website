@@ -240,8 +240,41 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
         return <div className="min-h-screen bg-[var(--off-white)]" />;
     }
 
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": serviceData.name,
+        "description": serviceData.about,
+        "provider": {
+            "@type": "LocalBusiness",
+            "name": serviceData.name,
+            "image": serviceData.logo || serviceData.mainImage,
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": serviceData.location,
+                "addressCountry": "IN"
+            }
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": serviceData.rating,
+            "reviewCount": serviceData.orders || 10
+        },
+        "offers": serviceData.packages.map(pkg => ({
+            "@type": "Offer",
+            "name": pkg.name,
+            "price": pkg.price,
+            "priceCurrency": "INR",
+            "description": pkg.description
+        }))
+    };
+
     return (
         <div className="min-h-screen bg-[var(--off-white)] pb-32">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+            />
             {/* Back Button */}
             <motion.button
                 initial={{ opacity: 0, x: -20 }}

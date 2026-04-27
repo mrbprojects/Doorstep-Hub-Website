@@ -117,7 +117,7 @@ export function CategoryPage({ slug, initialData, onBack }) {
         if (initialData.image) setCategoryImage(initialData.image);
         setCategoryMetadata({
           categoryName: initialData.categoryName || '',
-          slug: initialData.slug || initialData.categorySlug || slug, // Use API slug if available, else prop
+          slug: initialData.slug || initialData.categorySlug || slug,
           totalCount: initialData.totalCount || initialData.data.length,
           detectedCity: initialData.detectedCity
         });
@@ -134,25 +134,15 @@ export function CategoryPage({ slug, initialData, onBack }) {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            slug: slug
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: slug })
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch subcategories');
-        }
+        if (!response.ok) throw new Error('Failed to fetch subcategories');
 
         const data = await response.json();
-
         if (data.success && Array.isArray(data.data)) {
           let filteredData = data.data;
-
-          // Extra safety: If the API returns a huge list (> 20), it might be returning all subcategories.
-          // In that case, we should filter client-side if we have the category name or slug.
           if (data.data.length > 20 && (data.categoryName || slug)) {
             const targetName = data.categoryName || slug.replace(/-/g, ' ');
             filteredData = data.data.filter(item =>
@@ -160,17 +150,11 @@ export function CategoryPage({ slug, initialData, onBack }) {
               (item.categorySlug && item.categorySlug === slug)
             );
           }
-
           setSubCategories(filteredData);
-
-          // Set category metadata from API response
-          if (data.image) {
-            setCategoryImage(data.image);
-          }
-
+          if (data.image) setCategoryImage(data.image);
           setCategoryMetadata({
             categoryName: data.categoryName || '',
-            slug: data.slug || data.categorySlug || slug, // Use API slug if available, else prop
+            slug: data.slug || data.categorySlug || slug,
             totalCount: data.totalCount || filteredData.length,
             detectedCity: data.detectedCity
           });
@@ -191,12 +175,26 @@ export function CategoryPage({ slug, initialData, onBack }) {
     }
   }, [loading, subCategories, router]);
 
-  // Auto-correct URL if slug doesn't match canonical slug (e.g. "AC Repair" vs "ac-repair")
+  // Auto-correct URL if slug doesn't match canonical slug
   useEffect(() => {
     if (categoryMetadata.slug && slug && categoryMetadata.slug !== slug) {
       router.replace(`/${categoryMetadata.slug}`);
     }
   }, [categoryMetadata.slug, slug, router]);
+
+  // Generate ItemList Schema for Category SEO
+  const schemaData = subCategories.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": categoryMetadata.categoryName || "Repair Services",
+    "description": `Professional ${categoryMetadata.categoryName} services available in ${categoryMetadata.detectedCity || 'your city'}.`,
+    "itemListElement": subCategories.map((sub, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": sub.name,
+      "url": typeof window !== 'undefined' ? `${window.location.origin}/${sub.slug || sub._id}` : ""
+    }))
+  } : null;
 
   return (
     <motion.div
@@ -206,6 +204,13 @@ export function CategoryPage({ slug, initialData, onBack }) {
       transition={{ duration: 0.4 }}
       className="relative min-h-screen pt-20 bg-gradient-to-b from-[#0a0a0a] via-[#0f1614] to-[#0a0a0a]"
     >
+      {schemaData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
+      )}
+      
       {/* App Download Modal */}
       <AnimatePresence>
         {showAppModal && (
@@ -291,9 +296,9 @@ export function CategoryPage({ slug, initialData, onBack }) {
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Compact Hero Section with Breadcrumb */}
       <section className="relative py-12 overflow-hidden border-b border-white/5">
-        {/* Category Image Background (if available from API) */}
         {categoryImage && (
           <div className="absolute inset-0 z-0">
             <img
@@ -305,111 +310,50 @@ export function CategoryPage({ slug, initialData, onBack }) {
           </div>
         )}
 
-        {/* Subtle Teal Gradient Background Overlay */}
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-[#037166] to-[#04a99d]"
-          style={{ opacity: theme.accentOpacity }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#037166] to-[#04a99d]" style={{ opacity: theme.accentOpacity }} />
 
-        {/* Animated glow orb - category specific intensity */}
         <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [theme.glowIntensity * 0.5, theme.glowIntensity, theme.glowIntensity * 0.5],
-          }}
+          animate={{ scale: [1, 1.3, 1], opacity: [theme.glowIntensity * 0.5, theme.glowIntensity, theme.glowIntensity * 0.5] }}
           transition={{ duration: 8, repeat: Infinity }}
           className="absolute top-0 right-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px]"
         />
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
-          {/* Back Button + Breadcrumb */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center gap-3 mb-6"
-          >
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 hover:bg-white/10 hover:border-[#037166]/50 transition-all"
-            >
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 mb-6">
+            <button onClick={handleBack} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 hover:bg-white/10 transition-all">
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
-
-            {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-white/50">
-              <button onClick={handleBack} className="hover:text-white/80 transition-colors">Home</button>
+              <button onClick={handleBack} className="hover:text-white/80">Home</button>
               <ChevronRight className="w-4 h-4" />
-              <span className="text-white/80">Services</span>
+              <span>Services</span>
               <ChevronRight className="w-4 h-4" />
               <span className="text-[#037166]">{categoryMetadata.categoryName}</span>
             </div>
           </motion.div>
 
-          {/* Category Header - Horizontal Layout */}
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            {/* Left: Title & Description */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                {categoryMetadata.categoryName}
-              </h1>
-              <p className="text-lg text-white/70 leading-relaxed mb-6">
-                {theme.description}
-              </p>
-
-              {/* Trust Badges - Horizontal */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{categoryMetadata.categoryName}</h1>
+              <p className="text-lg text-white/70 leading-relaxed mb-6">{theme.description}</p>
               <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
-                  <Shield className="w-4 h-4 text-[#037166]" />
-                  <h6 className="text-sm text-white/80">Verified Professionals</h6>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
-                  <Zap className="w-4 h-4 text-[#037166]" />
-                  <h6 className="text-sm text-white/80">Same-Day Available</h6>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
-                  <Award className="w-4 h-4 text-[#037166]" />
-                  <h6 className="text-sm text-white/80">30-90 Days Warranty</h6>
-                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"><Shield className="w-4 h-4 text-[#037166]" /><span className="text-sm text-white/80">Verified Professionals</span></div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"><Zap className="w-4 h-4 text-[#037166]" /><span className="text-sm text-white/80">Same-Day Available</span></div>
               </div>
-            </motion.div>
-
-            {/* Right: Stats Cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-3 gap-4"
-            >
-
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Subcategories Section - Redesigned Layout */}
+      {/* Subcategories Section */}
       <section className="py-16 relative">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-          {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-12"
-          >
-            <div className="flex items-center justify-between mb-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  Choose Your Service
-                </h2>
-                <p className="text-white/60">
-                  Select the specific service type you need
-                </p>
+                <h2 className="text-3xl font-bold text-white mb-2">Choose Your Service</h2>
+                <p className="text-white/60">Select the specific service type you need</p>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/50">
                 <TrendingUp className="w-4 h-4 text-[#037166]" />
@@ -420,188 +364,56 @@ export function CategoryPage({ slug, initialData, onBack }) {
 
           {loading ? (
             <div className="grid md:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <CategorySkeleton key={i} />
-              ))}
+              {[1, 2, 3].map((i) => <CategorySkeleton key={i} />)}
             </div>
-          ) : subCategories.length === 0 ?
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20 bg-white/5 rounded-3xl border border-white/10"
-            >
-              <div className="text-white/40 mb-4">
-                <Users className="w-12 h-12 mx-auto opacity-20" />
-              </div>
+          ) : subCategories.length === 0 ? (
+            <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
               <h3 className="text-xl font-bold text-white mb-2">No specific services found</h3>
-              <p className="text-white/50">We're expanding our services in this category. Check back soon!</p>
-            </motion.div>
-            :
-            <>
-              {/* Most Popular Subcategories - Up to featuredCount */}
-              {subCategories.length > 0 && (
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {subCategories.map((subCategory, index) => (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  className="mb-8"
+                  key={subCategory._id || index}
+                  whileHover={{ y: -8 }}
+                  onClick={() => handleSubCategoryClick(subCategory)}
+                  className="group cursor-pointer relative rounded-xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 overflow-hidden"
                 >
-                  <div className="flex items-center gap-2 mb-4">
-                    <Star className="w-5 h-5 fill-[#037166] text-[#037166]" />
-                    <h3 className="text-lg font-semibold text-white">Most Popular</h3>
+                  <div className="aspect-video relative overflow-hidden">
+                    <img src={subCategory.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800'} alt={subCategory.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute bottom-4 left-4">
+                      <h4 className="text-xl font-bold text-white group-hover:text-[#04a99d] transition-colors">{subCategory.name}</h4>
+                    </div>
                   </div>
-
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {subCategories.slice(0, Math.min(subCategories.length, featuredCount)).map((subCategory, index) => (
-                      <motion.div
-                        key={subCategory._id || `featured-${index}`}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-                        whileHover={{ y: -8 }}
-                        onHoverStart={() => setHoveredIndex(index)}
-                        onHoverEnd={() => setHoveredIndex(null)}
-                        onClick={() => handleSubCategoryClick(subCategory)}
-                        className="group cursor-pointer relative h-full"
-                      >
-                        <div className="relative h-full rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border-2 border-white/10 hover:border-[#037166]/50 backdrop-blur-sm transition-all duration-300 overflow-hidden flex items-stretch">
-                          {/* Popular Badge */}
-
-
-                          {/* Background glow on hover */}
-                          <AnimatePresence>
-                            {hoveredIndex === index && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10"
-                              />
-                            )}
-                          </AnimatePresence>
-
-                          {/* Image Background if available (low opacity) */}
-                          {subCategory.image && (
-                            <div className="absolute inset-0 z-0">
-                              <img
-                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
-                                alt={subCategory.name}
-                                className="w-fit h-fit object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent" />
-                            </div>
-                          )}
-
-                          {/* Icon/Image */}
-                          <div className="relative z-10 flex-shrink-0 w-28 md:w-40 bg-white/5">
-                            {subCategory.image ? (
-                              <div className="w-full h-full overflow-hidden">
-                                <img
-                                  src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
-                                  alt={subCategory.name}
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <svg
-                                  className="w-10 h-10 md:w-12 md:h-12 text-white"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Content */}
-                          <div className="relative z-10 flex-1 min-w-0 p-4 md:p-6 flex flex-col justify-center">
-                            <h4 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-[#04a99d] transition-colors truncate">
-                              {subCategory.name}
-                            </h4>
-                            <p className="text-white/60 text-sm mb-3 md:mb-4 leading-relaxed line-clamp-2">
-                              Professional service by verified and experienced technicians
-                            </p>
-
-                            {/* Price */}
-
-
-                            {/* CTA */}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-[#04a99d] font-semibold text-sm">
-                                View Services
-                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </div>
-
-                            </div>
-                          </div>
-
-                          {/* Hover glow border */}
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
-                            className="absolute inset-0 rounded-xl border-2 border-[#037166] pointer-events-none"
-                            style={{ boxShadow: '0 0 15px rgba(3, 113, 102, 0.5)' }}
-                          />
-                        </div>
-                      </motion.div>
-                    ))}
+                  <div className="p-4">
+                    <div className="flex items-center justify-between text-sm text-[#04a99d] font-semibold">
+                      <span>View Services</span>
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
                 </motion.div>
-              )}
+              ))}
+            </div>
+          )}
 
-              {/* All Other Subcategories - Compact Grid (Remaining) */}
-
-
-              {/* Bottom CTA Strip */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="mt-16 pt-8 border-t border-white/5"
-              >
-                <div className="bg-gradient-to-r from-[#037166]/10 to-[#04a99d]/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        Need Help Choosing?
-                      </h3>
-                      <p className="text-white/60">
-                        Our experts can recommend the best service for your needs
-                      </p>
-                    </div>
-                    <div className="flex gap-4">
-                      <button
-                        onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-2 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all whitespace-nowrap"
-                      >
-                        <TicketCheck className="w-4 h-4 text-[#04a99d]" />
-                        Raise A Ticket
-                      </button>
-
-                      <button
-                        onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all whitespace-nowrap"
-                      >
-                        <Smartphone className="w-4 h-4" />
-                        Track Order
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          }
+          {/* Bottom CTA */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-16 bg-gradient-to-r from-[#037166]/10 to-[#04a99d]/5 border border-white/10 rounded-2xl p-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-2">Need Help Choosing?</h3>
+                <p className="text-white/60">Our experts can recommend the best service for your needs</p>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => setShowAppModal(true)} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold">
+                  <Smartphone className="w-4 h-4" />
+                  Track Order
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </motion.div>
   );
 }
-

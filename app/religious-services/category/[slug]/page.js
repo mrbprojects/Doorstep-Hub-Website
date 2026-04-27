@@ -144,8 +144,25 @@ function ReligiousCategoryContent() {
 
     // RENDER SUB-CATEGORIES LIST
     if (viewMode === 'subcategories') {
+        const schemaData = {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": `${categoryName} Rituals & Services`,
+            "description": `Book verified priests for ${categoryName} in ${location?.city || 'your area'}.`,
+            "itemListElement": subCategories.map((sub, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "name": sub.name,
+                "url": typeof window !== 'undefined' ? `${window.location.origin}/religious-services/${sub.slug || sub._id}` : ""
+            }))
+        };
+
         return (
             <div className="min-h-screen bg-[var(--off-white)]">
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+                />
                 {/* Hero Header */}
                 <div className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-br from-[var(--divine-maroon)] via-[var(--temple-red)] to-[var(--saffron)]">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>

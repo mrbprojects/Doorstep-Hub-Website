@@ -153,8 +153,49 @@ export function PremiumHomePage() {
         categoriesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Service",
+                "name": `Verified PG & Hostel Accommodations in ${location?.city || 'India'}`,
+                "description": `Find your perfect stay with verified PGs, co-living spaces, and hostels in ${location?.city || 'your area'}. Transparent pricing and no brokerage.`,
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Doorstep Hub",
+                    "url": "https://doorstephub.com"
+                },
+                "areaServed": {
+                    "@type": "Country",
+                    "name": "India"
+                }
+            },
+            {
+                "@type": "ItemList",
+                "name": "Our Lifestyle Stays",
+                "itemListElement": apiCategories.length > 0 
+                    ? apiCategories.map((cat, index) => ({
+                        "@type": "ListItem",
+                        "position": index + 1,
+                        "name": cat.name,
+                        "url": typeof window !== 'undefined' ? `${window.location.origin}/pghostels/${cat.slug || cat._id}` : ""
+                    }))
+                    : [
+                        { "@type": "ListItem", "position": 1, "name": "Student Hostels" },
+                        { "@type": "ListItem", "position": 2, "name": "Working Professional PGs" },
+                        { "@type": "ListItem", "position": 3, "name": "Co-living Spaces" },
+                        { "@type": "ListItem", "position": 4, "name": "Luxury Accommodations" }
+                    ]
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen bg-[#E2E6E6] overflow-hidden">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+            />
             {/* Floating Particles Background */}
             <div className="fixed inset-0 pointer-events-none">
                 {[...Array(20)].map((_, i) => (

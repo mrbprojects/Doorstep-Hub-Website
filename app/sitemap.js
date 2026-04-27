@@ -63,16 +63,40 @@ async function getApplianceEntries() {
 }
 
 async function getHostelEntries() {
+  const entries = [];
   try {
-    const pgData = await fetchAPI('/app/products/latest_pg_hostels', null, 'GET');
-    if (pgData?.success && Array.isArray(pgData.hostels)) {
-      return pgData.hostels
-        .map(h => h.slug || h._id)
-        .filter(isValidSlug)
-        .map(s => ({ url: `${BASE_URL}/pghostels/${s}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 }));
+    const [catData, pgListData] = await Promise.all([
+      fetchAPI('/app/professional-services-flow/public/categories', { serviceId: '69524fb157bb211ca094e5ee' }),
+      fetchAPI('/app/products/latest_pg_hostels', null, 'GET')
+    ]);
+
+    if (catData?.success && Array.isArray(catData.category)) {
+      const results = await Promise.all(catData.category.map(async (cat) => {
+        const catEntries = [];
+        const slug = cat.slug || cat._id;
+        if (isValidSlug(slug)) {
+          catEntries.push({ url: `${BASE_URL}/pghostels/${slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
+          const subData = await fetchAPI('/app/professional-services-flow/public/subcategories', { categorySlug: slug, serviceId: '69524fb157bb211ca094e5ee' });
+          if (subData?.success && Array.isArray(subData.data)) {
+            subData.data.forEach(sub => {
+              const ss = sub.slug || sub._id;
+              if (isValidSlug(ss)) catEntries.push({ url: `${BASE_URL}/pghostels/${ss}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+            });
+          }
+        }
+        return catEntries;
+      }));
+      entries.push(...results.flat());
+    }
+
+    if (pgListData?.success && Array.isArray(pgListData.hostels)) {
+      pgListData.hostels.forEach(h => {
+        const sl = h.slug || h._id;
+        if (isValidSlug(sl)) entries.push({ url: `${BASE_URL}/pghostels/${sl}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+      });
     }
   } catch (e) {}
-  return [];
+  return entries;
 }
 
 async function getSpaEntries() {
@@ -96,7 +120,6 @@ async function getSpaEntries() {
               const ss = sub.slug || sub._id;
               if (isValidSlug(ss)) {
                 subEntries.push({ url: `${BASE_URL}/spa-salon/${ss}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-                // Fetch deep services for this subcategory
                 const svcData = await fetchAPI('/app/professional-services-flow/public/services', { subcategorySlug: ss });
                 if (svcData?.success && Array.isArray(svcData.data)) {
                   svcData.data.forEach(svc => {
@@ -141,7 +164,6 @@ async function getReligiousEntries() {
               const ss = sub.slug || sub._id;
               if (isValidSlug(ss)) {
                 subEntries.push({ url: `${BASE_URL}/religious-services/${ss}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
-                // Fetch deep services
                 const svcData = await fetchAPI('/app/professional-services-flow/public/services', { subcategorySlug: ss });
                 if (svcData?.success && Array.isArray(svcData.data)) {
                   svcData.data.forEach(svc => {
@@ -165,8 +187,8 @@ async function getReligiousEntries() {
 
 async function getCenterEntries() {
   const cityCoords = [
-    { city: 'Hyderabad', lat: '17.3850', lng: '78.4867', limit: 200 },
-    { city: 'Bangalore', lat: '12.9716', lng: '77.5946', limit: 100 },
+    { city: 'Hyderabad', lat: '17.3850', lng: '78.4867', limit: 300 },
+    { city: 'Bangalore', lat: '12.9716', lng: '77.5946', limit: 200 },
     { city: 'Vizag', lat: '17.6868', lng: '83.2185', limit: 100 },
     { city: 'Chennai', lat: '13.0827', lng: '80.2707', limit: 100 },
     { city: 'Vijayawada', lat: '16.5062', lng: '80.6480', limit: 100 },
@@ -178,7 +200,6 @@ async function getCenterEntries() {
   try {
     const centerResults = await Promise.all(cityCoords.map(async (coord) => {
       try {
-        // Using get_service_center which often returns more data than just nearest_service_centers
         const data = await fetchAPI('/app/applience-repairs-website/get_service_center', { 
           lattitude: coord.lat, 
           longitude: coord.lng,
@@ -219,7 +240,6 @@ export default async function sitemap() {
     { url: `${BASE_URL}/appliances/centers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
   ];
 
-  // Parallel fetch all dynamic sections
   const dynamicResults = await Promise.all([
     getApplianceEntries(),
     getHostelEntries(),
@@ -229,8 +249,8 @@ export default async function sitemap() {
   ]);
 
   const allEntries = [...staticEntries, ...dynamicResults.flat()];
-  
   const uniqueUrls = new Set();
+  
   return allEntries.filter(entry => {
     if (!entry.url || uniqueUrls.has(entry.url)) return false;
     uniqueUrls.add(entry.url);

@@ -63,8 +63,27 @@ function PGSubcategoryContent() {
         return image.startsWith('http') ? image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${image}`;
     };
 
+    const schemaData = subcategories.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `${categoryName} Options`,
+        "description": `Verified ${categoryName} and accommodations.`,
+        "itemListElement": subcategories.map((sub, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": sub.name,
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/pghostels/${sub.slug || sub._id}` : ""
+        }))
+    } : null;
+
     return (
         <div className="min-h-screen bg-[#fffdf7] text-gray-950">
+            {schemaData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+                />
+            )}
             <section className="relative overflow-hidden bg-gradient-to-br from-[#0d3c36] via-[#147469] to-[#f0a64c] pt-32 pb-24">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0d3c36] via-[#147469] to-[#f0a64c] opacity-10" />
                 <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none">

@@ -6,7 +6,7 @@ import { ServicesListingPage } from '@/components/appliances/ServicesListingPage
 import { ServiceDetailsPage } from '@/components/appliances/ServiceDetailsPage';
 import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
 import { Loader2 } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Animated404 } from '@/components/ui/Animated404';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -60,6 +60,7 @@ function AppliancePageShell({ children }) {
 }
 
 export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const queryServiceId = searchParams.get('id');
     const [viewType, setViewType] = useState('loading'); // 'loading', 'category', 'listing', 'detail', '404', 'store'
@@ -142,7 +143,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                         center.slug === slug || center._id === slug
                     );
                     if (matchedCenter) {
-                        setViewType('store');
+                        router.replace(`/service-list/${matchedCenter.slug || matchedCenter._id}`);
                         return;
                     }
                 }
@@ -232,7 +233,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 if (storeResponse.ok) {
                     const storeDataResult = await storeResponse.json();
                     if (storeDataResult.success) {
-                        setViewType('store');
+                        router.replace(`/service-list/${slug}`);
                         return;
                     }
                 }

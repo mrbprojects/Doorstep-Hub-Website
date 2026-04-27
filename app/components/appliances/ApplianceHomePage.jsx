@@ -27,7 +27,6 @@ export function ApplianceHomePage() {
         verifiedPartner: 'appliances/verified'
     });
 
-    // Fetch Slugs for this service
     useEffect(() => {
         const fetchSlugs = async () => {
             try {
@@ -50,7 +49,6 @@ export function ApplianceHomePage() {
         }
         const categoryParam = encodeURIComponent(categoryName || 'General');
         const subCategoryParam = encodeURIComponent(subcategoryName || 'Service');
-        // Fallback to ID-based if no slug
         router.push(`/${serviceSlugs.home}/detail/${serviceId}?category=${categoryParam}&subCategory=${subCategoryParam}`);
     };
 
@@ -66,8 +64,43 @@ export function ApplianceHomePage() {
         setShowExploreModal(false);
     };
 
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Service",
+                "name": "Professional Appliance Repair Services",
+                "description": "Expert repair and maintenance for all home appliances including AC, Refrigerator, TV, and more.",
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Doorstep Hub",
+                    "url": "https://doorstephub.com"
+                },
+                "areaServed": {
+                    "@type": "Country",
+                    "name": "India"
+                }
+            },
+            {
+                "@type": "ItemList",
+                "name": "Our Most Popular Appliance Services",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "AC Repair & Service" },
+                    { "@type": "ListItem", "position": 2, "name": "TV Repair & Service" },
+                    { "@type": "ListItem", "position": 3, "name": "Refrigerator Repair" },
+                    { "@type": "ListItem", "position": 4, "name": "Washing Machine Repair" },
+                    { "@type": "ListItem", "position": 5, "name": "Microwave Oven Repair" }
+                ]
+            }
+        ]
+    };
+
     return (
         <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+            />
             <Hero
                 onBookService={openModal}
                 onViewServices={openExploreModal}
@@ -95,9 +128,7 @@ export function ApplianceHomePage() {
             <PopularCenters onStoreClick={(storeId) => {
                 router.push(`/appliances/store/${storeId}`);
             }} />
-            {/* <KnowledgeSpace /> */}
             <Newsletter />
         </>
     );
 }
-

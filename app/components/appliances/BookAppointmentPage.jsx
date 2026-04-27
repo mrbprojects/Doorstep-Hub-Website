@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ClipboardList, Calendar, IndianRupee, CheckSquare, Info, Loader2, CheckCircle, X, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
 
 const STEPS = [
     {
@@ -610,7 +611,7 @@ export function BookAppointmentPage() {
                                 ) : termsContent ? (
                                     <div
                                         className="prose prose-sm max-w-none text-gray-600"
-                                        dangerouslySetInnerHTML={{ __html: termsContent.termsAndConditions }}
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(termsContent.termsAndConditions) }}
                                     />
                                 ) : (
                                     <div className="text-center py-20 text-gray-500">

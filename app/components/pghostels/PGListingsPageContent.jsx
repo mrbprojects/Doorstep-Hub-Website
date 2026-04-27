@@ -786,8 +786,27 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
         );
     };
 
+    const schemaData = sortedListings.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `Hostels and PG in ${searchParams.get('query') || 'your area'}`,
+        "description": `Browse through ${sortedListings.length} verified PG and hostel options.`,
+        "itemListElement": sortedListings.map((listing, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": listing.name,
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/pghostels/hostel/${listing.slug || listing.id}` : ""
+        }))
+    } : null;
+
     return (
         <div className="min-h-screen bg-transparent pb-16">
+            {schemaData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+                />
+            )}
             <div className="bg-[#E2E6E6]/80 border-b border-gray-300 pt-16 sm:pt-20 pb-10 sm:pb-12 relative overflow-hidden">
                 <div className="absolute inset-0 bg-grid-gray-200/50 [mask-image:linear-gradient(0deg,white,transparent)]" />
                 <div className="max-w-7xl mx-auto px-4 relative z-10">

@@ -368,6 +368,33 @@ export function ServiceDetailsPage({
     router.push('/appliances/address');
   };
 
+  // Generate Service Schema for SEO
+  const schemaData = serviceDetails ? {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": storeData.name,
+    "description": storeData.description?.replace(/<[^>]*>?/gm, '') || "Professional repair services",
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": "Doorstep Hub",
+      "image": "https://doorstephub.com/d-hub-logo.png",
+      "telephone": "+918886688666"
+    },
+    "aggregateRating": storeData.avgRating ? {
+      "@type": "AggregateRating",
+      "ratingValue": storeData.avgRating,
+      "reviewCount": storeData.totalRatings || customerRatings?.length || 10
+    } : undefined,
+    "offers": provider_rate_cards?.map(card => ({
+      "@type": "Offer",
+      "name": card.title,
+      "price": card.price,
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock",
+      "url": typeof window !== 'undefined' ? window.location.href : ''
+    }))
+  } : null;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -375,6 +402,12 @@ export function ServiceDetailsPage({
       exit={{ opacity: 0 }}
       className="min-h-screen pt-20 pb-24 lg:pb-0 overflow-x-hidden"
     >
+      {schemaData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
+      )}
       {/* Hide all scrollbars inside this detail view */}
       <style>{`
         .detail-left-panel::-webkit-scrollbar { display: none !important; width: 0 !important; }

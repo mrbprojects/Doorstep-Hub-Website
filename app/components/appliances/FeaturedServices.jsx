@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Star, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { fetchFeaturedServices, imageLoader } from '@/lib/api';
 
 export function FeaturedServices({ onViewAll, onServiceClick }) {
@@ -215,10 +216,9 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
                     {service.serviceName}
                   </h4>
 
-                  {/* Description */}
                   <div 
                     className="text-white/60 text-sm mb-4 line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: service.description }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
                   />
 
 

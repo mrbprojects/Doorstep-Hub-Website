@@ -22,6 +22,7 @@ import {
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useLocationContext } from '@/context/LocationContext';
+import DOMPurify from 'dompurify';
 
 export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const router = useRouter();
@@ -425,12 +426,49 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     return <div className="min-h-screen bg-[#0a0a0a]" />;
   }
 
+  // Generate Schema.org JSON-LD for Local SEO
+  const schemaData = centerData ? {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": centerData.business_name || `${centerData.firstName} ${centerData.lastName}`,
+    "image": (centerData.image || centerData.logo) 
+      ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${centerData.image || centerData.logo}`.replace(/([^:]\/)\/+/g, "$1")
+      : "https://doorstephub.com/d-hub-logo.png",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": centerData.cityName || centerData.city || "",
+      "addressRegion": centerData.stateName || centerData.state || "",
+      "addressCountry": "India",
+      "streetAddress": centerData.address
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": centerData.lattitude || centerData.latitude,
+      "longitude": centerData.longitude || centerData.longitude
+    },
+    "url": typeof window !== 'undefined' ? window.location.href : '',
+    "telephone": centerData.phone || "+918886688666",
+    "areaServed": centerData.cityName || centerData.city || "",
+    "serviceType": centerData.speciality || "Appliance Repair Services",
+    "aggregateRating": centerData.avgRating ? {
+      "@type": "AggregateRating",
+      "ratingValue": centerData.avgRating,
+      "reviewCount": centerData.totalRatings || centerData.reviews?.length || 10
+    } : undefined
+  } : null;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="min-h-screen pt-24 pb-20 bg-gradient-to-b from-[#0a0a0a] via-[#0f1614] to-[#0a0a0a]"
     >
+      {schemaData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
+      )}
       <style jsx global>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -645,7 +683,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             </div>
 
                             {/* Service Description */}
-                            <p className="text-white/60 text-xs line-clamp-2 max-w-2xl">{service.description}</p>
+                            <div 
+                              className="text-white/60 text-xs line-clamp-2 max-w-2xl"
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
+                            />
                           </div>
 
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-white/5 pt-4">
@@ -738,9 +779,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
               {/* Description */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-8">
-                <p className="text-white/70 text-lg leading-relaxed">
-                  {aboutBio}
-                </p>
+                <div 
+                  className="text-white/70 text-lg leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutBio) }}
+                />
               </div>
 
               {/* Trust Indicators */}
@@ -1153,7 +1195,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                           <div className="flex-1">
                             <h4 className="text-white font-semibold mb-1">{addon.childServiceName}</h4>
                             {addon.description && (
-                              <p className="text-white/60 text-sm mb-2">{addon.description}</p>
+                              <div 
+                                className="text-white/60 text-sm mb-2"
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(addon.description) }}
+                              />
                             )}
                             <div className="flex items-center gap-2">
                               <span className="text-[#037166] font-bold">₹{addon.price.toFixed(2)}</span>

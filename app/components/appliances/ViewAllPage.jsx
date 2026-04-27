@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RatingFilter } from './RatingFilter';
 import { motion, AnimatePresence } from 'motion/react';
+import DOMPurify from 'dompurify';
 import { ArrowLeft, Star, MapPin, Zap, ArrowRight, Filter, X } from 'lucide-react';
 import { fetchFeaturedServices, imageLoader } from '@/lib/api';
 import { useLocation } from '@/hooks/useLocation';
@@ -410,7 +411,7 @@ export function ViewAllPage({
                               </p>
                               <div 
                                 className="text-white/40 text-[11px] line-clamp-1 leading-tight"
-                                dangerouslySetInnerHTML={{ __html: service.description }}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
                               />
                             </div>
 

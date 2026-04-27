@@ -237,8 +237,41 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
         return <div className="min-h-screen bg-transparent" />;
     }
 
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": serviceData.name,
+        "description": serviceData.about,
+        "provider": {
+            "@type": "LocalBusiness",
+            "name": serviceData.name,
+            "image": serviceData.logo || (serviceData.images.length > 0 ? serviceData.images[0] : ""),
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": serviceData.location,
+                "addressCountry": "IN"
+            }
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": serviceData.rating,
+            "reviewCount": serviceData.reviews.length || 10
+        },
+        "offers": serviceData.packages.map(pkg => ({
+            "@type": "Offer",
+            "name": pkg.name,
+            "price": pkg.price,
+            "priceCurrency": "INR",
+            "description": pkg.description
+        }))
+    };
+
     return (
         <div className="min-h-screen bg-transparent pb-32">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+            />
             <motion.button
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}

@@ -268,9 +268,38 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
         }
     };
 
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": hostelData.name,
+        "image": hostelData.logo || hostelData.image,
+        "description": hostelData.about,
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": hostelData.address,
+            "addressCountry": "IN"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": hostelData.rating,
+            "reviewCount": hostelData.reviews.length || 15
+        },
+        "priceRange": "₹₹",
+        "makesOffer": hostelData.packages.map(pkg => ({
+            "@type": "Offer",
+            "name": pkg.name,
+            "price": pkg.price,
+            "priceCurrency": "INR",
+            "description": pkg.description
+        }))
+    };
 
     return (
         <div className="min-h-screen bg-transparent pb-32">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+            />
             {/* Back Button */}
             <motion.button
                 initial={{ opacity: 0, x: -20 }}

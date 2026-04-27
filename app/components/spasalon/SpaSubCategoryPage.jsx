@@ -364,8 +364,27 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
         );
     };
 
+    const schemaData = sortedServices.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `${subCategoryName} Experts in ${location?.city || 'Your Area'}`,
+        "description": `Top-rated ${subCategoryName} specialists and salon packages.`,
+        "itemListElement": sortedServices.map((service, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": service.name,
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/spa-salon/${service.slug || service.id}` : ""
+        }))
+    } : null;
+
     return (
         <div className="min-h-screen bg-[#F6F7FB]">
+            {schemaData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+                />
+            )}
             <div className="bg-[#1A0515] pt-24 pb-12 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#C06C84]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

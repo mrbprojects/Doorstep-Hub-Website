@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -207,8 +207,42 @@ export default function ReligiousServicesPage() {
   }, []);
 
 
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Service",
+        "name": "Trusted Religious & Spiritual Services",
+        "description": "Book verified priests for authentic rituals, poojas, and spiritual consultations. Trusted by thousands of devotees.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Doorstep Hub",
+          "url": "https://doorstephub.com"
+        },
+        "areaServed": {
+          "@type": "Country",
+          "name": "India"
+        }
+      },
+      {
+        "@type": "ItemList",
+        "name": "Sacred Service Categories",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Pooja Services" },
+          { "@type": "ListItem", "position": 2, "name": "Rituals & Ceremonies" },
+          { "@type": "ListItem", "position": 3, "name": "Astrology Consultation" },
+          { "@type": "ListItem", "position": 4, "name": "Spiritual Guidance" }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-[var(--off-white)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
 
       {/* 1. HERO SECTION - Calm & Divine with Animated Elements */}
       <section className="relative min-h-[50vh] flex items-center overflow-hidden">

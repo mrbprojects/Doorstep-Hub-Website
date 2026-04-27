@@ -339,7 +339,7 @@ export function NearbyServiceCenters() {
             <div className="h-6 w-96 bg-[#2a2a2a] rounded mx-auto animate-pulse max-w-2xl" />
           </div>
           <div className="grid lg:grid-cols-2 gap-8">
-            <div className="h-[500px] bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 rounded-3xl animate-pulse" />
+            <div className="h-[600px] bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 rounded-3xl animate-pulse" />
             <div className="space-y-4">
               {Array(3).fill(0).map((_, i) => <SkeletonService key={i} />)}
             </div>
@@ -421,7 +421,7 @@ export function NearbyServiceCenters() {
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative h-[500px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 shadow-2xl"
+            className="relative h-[700px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 shadow-2xl"
           >
             {/* Map fills entire card perfectly - DARK MODE */}
             <MapComponent />

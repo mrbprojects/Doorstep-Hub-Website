@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, Check, Loader2, AlertCircle } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 export function JobApplicationForm({ job: initialJob, onClose }) {
     const [job, setJob] = useState(initialJob);
@@ -256,7 +257,7 @@ export function JobApplicationForm({ job: initialJob, onClose }) {
                             {/* Description */}
                             <div className="prose prose-invert max-w-none">
                                 <h3 className="text-xl font-bold text-white mb-4">About the Role</h3>
-                                <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: job.description }} />
+                                <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.description) }} />
                             </div>
 
                             {/* Responsibilities */}

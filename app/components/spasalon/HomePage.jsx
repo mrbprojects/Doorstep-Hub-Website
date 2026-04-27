@@ -326,8 +326,43 @@ export function HomePage() {
         router.push(`/spa-salon/${target}`);
     };
 
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Service",
+                "name": "Premium Spa & Salon Services",
+                "description": "Professional beauty and wellness services at home or nearby centers. Includes haircuts, facials, massages, and more.",
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Doorstep Hub",
+                    "url": "https://doorstephub.com"
+                },
+                "areaServed": {
+                    "@type": "Country",
+                    "name": "India"
+                }
+            },
+            {
+                "@type": "ItemList",
+                "name": "Our Beauty & Wellness Categories",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "Haircut & Styling" },
+                    { "@type": "ListItem", "position": 2, "name": "Facial & Skincare" },
+                    { "@type": "ListItem", "position": 3, "name": "Massage & Relaxation" },
+                    { "@type": "ListItem", "position": 4, "name": "Bridal & Makeup" },
+                    { "@type": "ListItem", "position": 5, "name": "Manicure & Pedicure" }
+                ]
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen bg-transparent pt-20">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+            />
             {/* Hero Section */}
             <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-white via-[#FBEAF0] to-[#F4F3FF]">
                 {/* ... (Hero Content) ... */}

@@ -107,8 +107,27 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
         );
     }
 
+    const schemaData = subCategories.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `${categoryName} Services in ${location?.city || 'Your Area'}`,
+        "description": `Premium ${categoryName} treatments and packages.`,
+        "itemListElement": subCategories.map((sub, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": sub.name,
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/spa-salon/${sub.slug || sub._id}` : ""
+        }))
+    } : null;
+
     return (
         <div className="min-h-screen bg-gray-50">
+            {schemaData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+                />
+            )}
             <div className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-br from-[#C06C84] to-[#6C5CE7]">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                 <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none">

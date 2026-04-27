@@ -22,6 +22,7 @@ import {
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useLocationContext } from '@/context/LocationContext';
+import DOMPurify from 'dompurify';
 
 export function StoreDetailPage({ storeId, serviceId }) {
   const router = useRouter();
@@ -509,7 +510,10 @@ export function StoreDetailPage({ storeId, serviceId }) {
                         <h4 className="text-xl font-bold text-white mb-2">{service.name}</h4>
 
                         {/* Service Description */}
-                        <p className="text-white/60 text-sm mb-4 line-clamp-2">{service.description}</p>
+                        <div 
+                          className="text-white/60 text-sm mb-4 line-clamp-2"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
+                        />
 
                         {/* Price and Stats */}
                         <div className="flex items-center justify-between mb-4">
@@ -590,9 +594,10 @@ export function StoreDetailPage({ storeId, serviceId }) {
 
               {/* Description */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-8">
-                <p className="text-white/70 text-lg leading-relaxed">
-                  {aboutBio}
-                </p>
+                <div 
+                  className="text-white/70 text-lg leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutBio) }}
+                />
               </div>
 
               {/* Trust Indicators */}
@@ -999,7 +1004,10 @@ export function StoreDetailPage({ storeId, serviceId }) {
                           <div className="flex-1">
                             <h4 className="text-white font-semibold mb-1">{addon.childServiceName}</h4>
                             {addon.description && (
-                              <p className="text-white/60 text-sm mb-2">{addon.description}</p>
+                              <div 
+                                className="text-white/60 text-sm mb-2"
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(addon.description) }}
+                              />
                             )}
                             <div className="flex items-center gap-2">
                               <span className="text-[#037166] font-bold">₹{addon.price.toFixed(2)}</span>

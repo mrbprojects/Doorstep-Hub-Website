@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { NewsletterWidget } from '@/components/shared/NewsletterWidget';
+import DOMPurify from 'dompurify';
 
 export function ArticleViewPage({ slug }) {
     const router = useRouter();
@@ -193,7 +194,7 @@ export function ArticleViewPage({ slug }) {
                            If it returns plain text, we would render differently or use a markdown parser.
                            Sanitization should ideally happen on the server or use a library like DOMPurify.
                         */}
-                        <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                     </motion.div>
 
                     {/* Share Section */}

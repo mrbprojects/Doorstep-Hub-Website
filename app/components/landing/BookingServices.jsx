@@ -248,33 +248,33 @@ export function BookingServices() {
 
                     {/* Content */}
                     <div className="p-4 flex flex-col">
-                    <div className="space-y-1">
+                      <div className="space-y-1">
 
-                      {/* Category + Rating */}
-                      <div className="flex items-center justify-between">
+                        {/* Category + Rating */}
+                        <div className="flex items-center justify-between">
 
-                        {/* Category */}
-                        <h6 className="text-[10px] text-[#037166] font-medium  tracking-wider">
-                          {service.category}
-                        </h6>
+                          {/* Category */}
+                          <h6 className="text-[10px] text-[#037166] font-medium  tracking-wider">
+                            {service.category}
+                          </h6>
+                        </div>
+
+                        {/* Title */}
+                        <h4
+                          className="text-[12px] font-medium bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent leading-tight line-clamp-2"
+                          title={service.title}
+                        >
+                          {service.title}
+                        </h4>
+
                       </div>
-
-                      {/* Title */}
-                      <h4
-                        className="text-[12px] font-medium bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent leading-tight line-clamp-2"
-                        title={service.title}
-                      >
-                        {service.title}
-                      </h4>
-
                     </div>
+
+
+                    {/* Hover glow effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
                   </div>
-
-
-                  {/* Hover glow effect */}
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
-                </div>
-              </motion.div>
+                </motion.div>
               );
             })
           )}

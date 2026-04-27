@@ -34,8 +34,48 @@ export default async function Home() {
         redirect('/appliance-repair-services');
     }
 
+    const organizationSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Doorstep Hub",
+        "url": "https://doorstephub.com",
+        "logo": "https://doorstephub.com/d-hub-logo.png",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+91 8886688666",
+            "contactType": "customer service",
+            "areaServed": "IN",
+            "availableLanguage": ["en", "te", "hi"]
+        },
+        "sameAs": [
+            "https://www.facebook.com/doorstephub",
+            "https://www.instagram.com/doorstephub",
+            "https://twitter.com/doorstephub"
+        ]
+    };
+
+    const websiteSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Doorstep Hub",
+        "url": "https://doorstephub.com",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://doorstephub.com/results?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    };
+
     return (
         <div className="bg-[#0a0a0a] min-h-screen text-white overflow-x-hidden">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+            />
             <HeroSection />
             <BookingServices />
             <NearbyServiceCenters />

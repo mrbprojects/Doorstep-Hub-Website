@@ -283,7 +283,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Download,Zap ,Shield ,Star  } from 'lucide-react';
+import { Sparkles, Download, Zap, Shield, Star } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -299,7 +299,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
   const router = useRouter();
 
 
-  
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -497,7 +497,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[100px] bg-[#037166]/40 rounded-full blur-[120px]"
         />
         <motion.div
           animate={{
@@ -535,7 +535,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
 
             <span className="block text-white-900 text-[28px] sm:text-[40px] drop-shadow-sm">Everything You Need.</span>
 
-                           
+
 
             <motion.span
               key={activeIndex} // Triggers animation on change

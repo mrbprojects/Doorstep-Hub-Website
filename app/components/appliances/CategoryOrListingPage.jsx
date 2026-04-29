@@ -143,7 +143,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                         center.slug === slug || center._id === slug
                     );
                     if (matchedCenter) {
-                        router.replace(`/service-list/${matchedCenter.slug || matchedCenter._id}`);
+                        setViewType('store');
                         return;
                     }
                 }
@@ -233,7 +233,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 if (storeResponse.ok) {
                     const storeDataResult = await storeResponse.json();
                     if (storeDataResult.success) {
-                        router.replace(`/service-list/${slug}`);
+                        setViewType('store');
                         return;
                     }
                 }

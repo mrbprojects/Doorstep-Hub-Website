@@ -324,13 +324,13 @@ export function ViewAllPage({
                     >
                       <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 shadow-lg hover:shadow-[#037166]/20 transition-all duration-300 overflow-hidden">
                         {/* Image Section */}
-                        <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
-                          <img
-                            src={category.image}
-                            alt={category.title}
-                            className="w-full md:h-[32px] md:w-[32px] sm:h-full sm:w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
-                        </div>
+                          <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
+                            <img
+                              src={category.image}
+                              alt={category.title}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                          </div>
 
                         {/* Content Section */}
                         <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">

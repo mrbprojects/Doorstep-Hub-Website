@@ -11,6 +11,8 @@ import { Animated404 } from '@/components/ui/Animated404';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
+// 
+
 const appliancesTheme = {
     bgScrolled: 'bg-[#0a0a0a]/80',
     bgMobile: 'bg-[#0a0a0a]/95',

@@ -412,7 +412,7 @@ export function ViewAllPage({
                           <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
                             <div className="flex flex-col">
                             </div>
-                            <button className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg transition-all text-[11px] flex items-center gap-1">
+                            <button className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg transition-all text-[11px] flex items-center gap-1">
                               Book
                               <ArrowRight className="w-3 h-3" />
                             </button>
@@ -455,7 +455,7 @@ export function ViewAllPage({
                             <span className="text-white font-medium">{store.rating}</span>
                             <span className="text-white/40">({store.reviews} reviews)</span>
                           </div>
-                          <button className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2">
+                          <button className="w-full px-4 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2">
                             View Center
                             <ArrowRight className="w-4 h-4" />
                           </button>

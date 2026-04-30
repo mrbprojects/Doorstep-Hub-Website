@@ -367,59 +367,128 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     );
   }
 
-  if (!services || services.length === 0) return null;
+  const isScrollMode = services.length > 4;
+
+  // Helper to render a single card
+  const renderCard = (service, index, keyPrefix = '') => {
+    const theme = getServiceTheme(service.name);
+    return (
+      <motion.div
+        key={`${keyPrefix}${service._id}`}
+        initial={isScrollMode ? false : { opacity: 0, scale: 0.9 }}
+        animate={isScrollMode ? false : { opacity: 1, scale: 1 }}
+        transition={{ delay: index * 0.05 }}
+        whileHover={{ scale: 1.02 }}
+        onClick={() => handleServiceClick(service)}
+        className={`relative overflow-hidden rounded-[20px] cursor-pointer flex-shrink-0 w-[150px] sm:w-[210px] h-[70px] sm:h-[108px] shadow-sm group ${theme.bg}`}
+      >
+        {/* Text block on left */}
+        <div className="absolute top-2.5 sm:top-4 left-3 sm:left-5 w-[60%] z-10 pointer-events-none text-left">
+          <p className={`text-[11px] sm:text-[13px] font-bold leading-tight ${theme.text}`}>
+            {service.name}
+          </p>
+          <p className={`mt-0.5 text-[7px] sm:text-[11px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
+            {theme.desc}
+          </p>
+        </div>
+
+        {/* Image block */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <div className="relative w-full h-full">
+            <Image
+              loader={imageLoader}
+              src={service.image}
+              alt={service.name}
+              fill
+              priority={index < 4}
+              className="object-contain"
+            />
+          </div>
+        </div>
+
+        {/* Subtle overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-[5]" />
+      </motion.div>
+    );
+  };
 
   return (
-    <div className="mt-8 max-w-[920px] mx-auto px-3 sm:px-0 w-full">
-      {/* <div className="flex justify-between items-center mb-5 px-1">
-        <h2 className="text-xl sm:text-2xl font-bold text-white/90">
-          Select your preferences
-        </h2>
-      </div> */}
+    <div className={`mt-8 mx-auto w-full ${isScrollMode ? 'max-w-none px-0' : 'max-w-[920px] px-3 sm:px-0'}`}>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-0 justify-center">
-        {services.map((service, index) => {
-          const theme = getServiceTheme(service.name);
-          return (
-            <motion.div
-              key={service._id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              onClick={() => handleServiceClick(service)}
-              className={`relative overflow-hidden rounded-[20px] cursor-pointer w-full sm:max-w-[210px] h-[70px] sm:h-[108px] shadow-sm group ${theme.bg}`}
-            >
-              {/* Text block on left */}
-              <div className="absolute top-2.5 sm:top-4 left-3 sm:left-5 w-[60%] z-10 pointer-events-none text-left">
-                <p className={`text-[11px] sm:text-[13px] font-bold leading-tight ${theme.text}`}>
-                  {service.name}
-                </p>
-                <p className={`mt-0.5 text-[7px] sm:text-[11px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
-                  {theme.desc}
-                </p>
-              </div>
-
-              {/* Image block - FULL WIDTH & HEIGHT - Using internal image arrow */}
-              <div className="absolute inset-0 w-full h-full z-0">
-                <div className="relative w-full h-full">
-                  <Image
-                    loader={imageLoader}
-                    src={service.image}
-                    alt={service.name}
-                    fill
-                    priority={index < 4}
-                    className="object-contain"
-                  />
+      {isScrollMode ? (
+        /* ── Infinite Auto-Scroll Mode ── */
+        <div
+          className="overflow-hidden relative"
+          style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}
+        >
+          <style>{`
+            @keyframes scroll-cards {
+              0%   { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .cards-track {
+              display: flex;
+              gap: 12px;
+              width: max-content;
+              animation: scroll-cards 20s linear infinite;
+            }
+            .cards-track:hover {
+              animation-play-state: paused;
+            }
+          `}</style>
+          <div className="cards-track">
+            {/* Render twice for seamless loop */}
+            {[...services, ...services].map((service, index) =>
+              renderCard(service, index, index < services.length ? '' : 'dup-')
+            )}
+          </div>
+        </div>
+      ) : (
+        /* ── Grid Mode (≤4 services) ── */
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-0 justify-center">
+          {services.map((service, index) => {
+            const theme = getServiceTheme(service.name);
+            return (
+              <motion.div
+                key={service._id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                onClick={() => handleServiceClick(service)}
+                className={`relative overflow-hidden rounded-[20px] cursor-pointer w-full sm:max-w-[210px] h-[70px] sm:h-[108px] shadow-sm group ${theme.bg}`}
+              >
+                {/* Text block on left */}
+                <div className="absolute top-2.5 sm:top-4 left-3 sm:left-5 w-[60%] z-10 pointer-events-none text-left">
+                  <p className={`text-[11px] sm:text-[13px] font-bold leading-tight ${theme.text}`}>
+                    {service.name}
+                  </p>
+                  <p className={`mt-0.5 text-[7px] sm:text-[11px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
+                    {theme.desc}
+                  </p>
                 </div>
-              </div>
 
-              {/* Subtle overlay for depth */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-[5]" />
-            </motion.div>
-          );
-        })}
-      </div>
+                {/* Image block */}
+                <div className="absolute inset-0 w-full h-full z-0">
+                  <div className="relative w-full h-full">
+                    <Image
+                      loader={imageLoader}
+                      src={service.image}
+                      alt={service.name}
+                      fill
+                      priority={index < 4}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Subtle overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-[5]" />
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

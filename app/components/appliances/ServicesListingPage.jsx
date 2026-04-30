@@ -39,6 +39,17 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     if (category) setCategoryName(category);
   }, [category, subCategory]);
 
+  const getNearbyCentersFromResponse = (data) => {
+    const centersList =
+      data?.nearByServiceCenters ||
+      data?.nearbyServiceCenters ||
+      data?.nearestServiceCenters ||
+      data?.serviceCenters ||
+      [];
+
+    return Array.isArray(centersList) ? centersList : [];
+  };
+
   const handleRatingChange = (rating) => {
     const newRating = rating === minRating ? 0 : rating;
     setMinRating(newRating);
@@ -113,6 +124,14 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
           setServices(enrichedServices);
 
+          const responseCenters = getNearbyCentersFromResponse(servicesData).map(center => {
+            if (center.slug) return center;
+            const generatedSlug = (center.business_name || center.name || center.firstName || 'service-center')
+              .toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+            return { ...center, slug: generatedSlug };
+          });
+          setCenters(responseCenters);
+
           // Update metadata if missing
           if ((!subCategory || !category) && enrichedServices.length > 0) {
             const firstService = enrichedServices[0];
@@ -121,25 +140,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
           }
         } else {
           setServices([]);
-        }
-
-        // Fetch centers separately from the new API
-        const centersResponse = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_service_center', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lattitude: location.lat,
-            longitude: location.lng,
-            page: 1,
-            limit: 10
-          })
-        });
-
-        if (centersResponse.ok) {
-          const centersData = await centersResponse.json();
-          if (centersData.success) {
-            setCenters(centersData.nearByServiceCenters || []);
-          }
+          setCenters([]);
         }
 
       } catch (error) {
@@ -320,35 +321,27 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         </div>
 
         {/* Tabs */}
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-          <div className="flex gap-2 border-t border-white/10 pt-4">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
+          <div className="inline-flex p-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
             <button
               onClick={() => setActiveTab('services')}
-              className="relative px-6 py-3 text-sm font-medium text-white transition-all"
+              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                activeTab === 'services'
+                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              }`}
             >
               All Services
-              {activeTab === 'services' && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-white rounded-full"
-                  initial={false}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
             </button>
             <button
               onClick={() => setActiveTab('centers')}
-              className="relative px-6 py-3 text-sm font-medium text-white/70 hover:text-white transition-all"
+              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                activeTab === 'centers'
+                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              }`}
             >
               Nearby Centers
-              {activeTab === 'centers' && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-white rounded-full"
-                  initial={false}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
             </button>
           </div>
         </div>
@@ -679,13 +672,12 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                   <span className="text-white font-medium">{center.rating}</span>
                                   <span className="text-white/40 text-sm">({center.totalOrders} orders)</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-white/60 text-sm">
-                                  <MapPin className="w-4 h-4" />
-                                  2.3 km away
-                                </div>
-                                {/* <div className="text-white/60 text-sm">
-                                  Min Fare: ₹{center.minFare}
-                                </div> */}
+                                {(center.distance || center.distanceInKm || center.distanceKm) && (
+                                  <div className="flex items-center gap-1 text-white/60 text-sm">
+                                    <MapPin className="w-4 h-4" />
+                                    {parseFloat(center.distance || center.distanceInKm || center.distanceKm).toFixed(1)} km away
+                                  </div>
+                                )}
                                 {center.totalViews !== undefined && (
                                   <div className="text-white/60 text-sm">
                                     Views: {center.totalViews}

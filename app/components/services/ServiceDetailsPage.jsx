@@ -375,7 +375,7 @@ export function ServiceDetailsPage({
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-6 py-2.5 rounded-xl font-semibold transition-all whitespace-nowrap text-sm tracking-wide ${activeTab === tab
+                      className={`px-6 py-2.5 rounded-full font-semibold transition-all whitespace-nowrap text-sm tracking-wide ${activeTab === tab
                         ? 'bg-[#037166] text-white shadow-lg shadow-[#037166]/20'
                         : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
                         }`}
@@ -427,7 +427,7 @@ export function ServiceDetailsPage({
                                aria-pressed={isSelected}
                                className={`w-full p-5 rounded-2xl border text-left transition-all group ${
                                  isSelected
-                                   ? 'bg-[#037166]/15 border-[#04a99d]/70 shadow-lg shadow-[#037166]/20'
+                                   ? 'bg-[#037166]/30 border-white shadow-[0_0_25px_rgba(255,255,255,0.25)] ring-1 ring-white/50'
                                    : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
                                }`}
                              >
@@ -718,7 +718,7 @@ export function ServiceDetailsPage({
                   localStorage.setItem('booking_package_details', JSON.stringify(itemsToBook));
                   router.push('/appliances/address');
                 }}
-                className={`w-full mt-6 px-10 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 group ${
+                className={`w-full mt-6 px-10 py-4 rounded-full font-bold text-lg transition-all flex items-center justify-center gap-3 group ${
                   selectedCards.length > 0
                     ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:shadow-2xl hover:shadow-[#037166]/40'
                     : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10'

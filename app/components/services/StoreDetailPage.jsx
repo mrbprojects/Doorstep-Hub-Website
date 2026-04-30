@@ -408,23 +408,17 @@ export function StoreDetailPage({ storeId, serviceId }) {
         {/* Sticky Tab Navigation */}
         <div className="sticky top-20 z-40 mb-8 bg-[#0a0a0a]/80 backdrop-blur-xl border-y border-white/5 -mx-6 px-6 lg:-mx-8 lg:px-8">
           <div className="max-w-[1400px] mx-auto">
-            <div className="flex gap-2 overflow-x-auto py-1">
+            <div className="flex gap-2 overflow-x-auto py-2">
               {['services', 'about', 'portfolio', 'location', 'reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`relative px-6 py-4 text-sm font-medium capitalize transition-all whitespace-nowrap ${activeTab === tab ? 'text-[#037166]' : 'text-white/60 hover:text-white/80'
+                  className={`relative px-6 py-2.5 rounded-full text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
+                    ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/20'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
                     }`}
                 >
                   {tab}
-                  {activeTab === tab && (
-                    <motion.div
-                      layoutId="activeStoreTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#037166] to-[#04a99d]"
-                      initial={false}
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
                 </button>
               ))}
             </div>
@@ -474,7 +468,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleSelectPackage(service.id)}
                       className={`relative bg-white/5 backdrop-blur-sm border-2 rounded-3xl overflow-hidden cursor-pointer transition-all hover:scale-105 ${selectedPackages.includes(service.id)
-                        ? 'border-[#037166] shadow-xl shadow-[#037166]/20'
+                        ? 'bg-[#037166]/30 border-white shadow-[0_0_25px_rgba(255,255,255,0.25)] ring-1 ring-white/50'
                         : 'border-white/10 hover:border-white/20'
                         }`}
                     >
@@ -552,7 +546,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                             e.stopPropagation();
                             handleAddToCart(service);
                           }}
-                          className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-xl hover:shadow-[#037166]/30 transition-all"
+                          className="w-full px-4 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-xl hover:shadow-[#037166]/30 transition-all"
                         >
                           Add to Cart
                         </button>
@@ -572,7 +566,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 <div className="flex gap-4">
                   <button
                     onClick={() => router.push('/appliances/cart')}
-                    className="px-8 py-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all"
+                    className="px-8 py-4 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all"
                   >
                     View Cart ({selectedPackages.length})
                   </button>
@@ -910,7 +904,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 <div className="text-center">
                   <button
                     onClick={() => setReviewsToShow(prev => prev + 3)}
-                    className="px-8 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all"
+                    className="px-8 py-3 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all"
                   >
                     Load More Reviews
                   </button>
@@ -1044,13 +1038,13 @@ export function StoreDetailPage({ storeId, serviceId }) {
               <div className="flex gap-4">
                 <button
                   onClick={handleSkipAddons}
-                  className="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all"
+                  className="flex-1 px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all"
                 >
                   Skip Addons
                 </button>
                 <button
                   onClick={handleContinueWithAddons}
-                  className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-xl hover:shadow-[#037166]/30 transition-all"
+                  className="flex-1 px-6 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-xl hover:shadow-[#037166]/30 transition-all"
                 >
                   Continue ({1 + selectedAddons.length} item{selectedAddons.length !== 0 ? 's' : ''})
                 </button>

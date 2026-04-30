@@ -267,35 +267,27 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         </div>
 
         {/* Tabs */}
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-          <div className="flex gap-2 border-t border-white/10 pt-4">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
+          <div className="inline-flex p-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
             <button
               onClick={() => setActiveTab('services')}
-              className="relative px-6 py-3 text-sm font-medium text-white transition-all"
+              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                activeTab === 'services'
+                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              }`}
             >
               All Services
-              {activeTab === 'services' && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-white rounded-full"
-                  initial={false}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
             </button>
             <button
               onClick={() => setActiveTab('centers')}
-              className="relative px-6 py-3 text-sm font-medium text-white/70 hover:text-white transition-all"
+              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                activeTab === 'centers'
+                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              }`}
             >
               Nearby Centers
-              {activeTab === 'centers' && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-white rounded-full"
-                  initial={false}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
             </button>
           </div>
         </div>
@@ -624,9 +616,12 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                   <span className="text-white font-medium">{center.rating}</span>
                                   <span className="text-white/40 text-sm">({center.totalOrders} orders)</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-white/60 text-sm">
-                                  <MapPin className="w-4 h-4" />
-                                </div>
+                                {(center.distance || center.distanceInKm || center.distanceKm) && (
+                                  <div className="flex items-center gap-1 text-white/60 text-sm">
+                                    <MapPin className="w-4 h-4" />
+                                    {parseFloat(center.distance || center.distanceInKm || center.distanceKm).toFixed(1)} km away
+                                  </div>
+                                )}
                                 {/* <div className="text-white/60 text-sm">
                                   Min Fare: ₹{center.minFare}
                                 </div> */}

@@ -283,7 +283,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Download, Zap, Shield, Star } from 'lucide-react';
+import { Sparkles, Download, Zap, Shield, Star, ChevronRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -294,33 +294,11 @@ const imageLoader = ({ src }) => {
 
 
 
-/* ---------- COMPACT SERVICES SECTION ---------- */
-function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
+//* ---------- COMPACT OVERLAY CARDS SECTION ---------- */
+function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
   const router = useRouter();
 
-
-
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05 },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.4, ease: 'easeOut' },
-    },
-  };
-
-  // ✅ FIXED: Pass full service object, not just serviceName
   const handleServiceClick = (service) => {
-    // Store service details in localStorage
     localStorage.setItem('selectedService', JSON.stringify({
       id: service._id,
       name: service.name,
@@ -328,10 +306,7 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
       image: service.image
     }));
 
-    // Generate fallback slug from name
     let slug = service.name ? service.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : service._id;
-
-    // Use dynamic slugs for hubs
     const upperName = service.name ? service.name.toUpperCase() : '';
     if (upperName.includes('APPLIANCE')) slug = serviceSlugs.appliances;
     else if (upperName.includes('RELIGIOUS')) slug = serviceSlugs.religious;
@@ -341,81 +316,114 @@ function ServiceCardsSection({ services, loading, activeIndex, serviceSlugs }) {
     router.push(`/${slug}`);
   };
 
+  const getServiceTheme = (name) => {
+    const n = (name || '').toUpperCase();
+    if (n.includes('APPLIANCE')) return {
+      bg: 'bg-[#E7F3F2]',
+      text: 'text-[#064E44]',
+      sub: 'text-[#00796B]',
+      btn: 'bg-[#00796B]',
+      desc: 'Quick & Reliable\nAppliance Repair'
+    };
+    if (n.includes('PG') || n.includes('HOSTEL')) return {
+      bg: 'bg-[#EBF5FF]',
+      text: 'text-[#01579B]',
+      sub: 'text-[#0288D1]',
+      btn: 'bg-[#0288D1]',
+      desc: 'Comfortable\nStays for You'
+    };
+    if (n.includes('RELIGIOUS')) return {
+      bg: 'bg-[#FFF6E9]',
+      text: 'text-[#7D3F1B]',
+      sub: 'text-[#8E5A3C]',
+      btn: 'bg-[#F57C00]',
+      desc: 'Puja, Pandit\n& More Services'
+    };
+    if (n.includes('SPA') || n.includes('SALON')) return {
+      bg: 'bg-[#FFF0F5]',
+      text: 'text-[#880E4F]',
+      sub: 'text-[#C2185B]',
+      btn: 'bg-[#C2185B]',
+      desc: 'Relax, Refresh & Rejuvenate'
+    };
+    return {
+      bg: 'bg-[#F5F5F5]',
+      text: 'text-[#212121]',
+      sub: 'text-[#616161]',
+      btn: 'bg-[#424242]',
+      desc: 'Professional Services'
+    };
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <p className="text-gray-400">Loading services...</p>
+        <div className="flex space-x-2">
+          <div className="w-2 h-2 bg-[#037166] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <div className="w-2 h-2 bg-[#037166] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <div className="w-2 h-2 bg-[#037166] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        </div>
       </div>
     );
   }
 
-  if (!services || services.length === 0) {
-    return null;
-  }
+  if (!services || services.length === 0) return null;
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="mt-6 sm:mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full"
-    >
-      <div className="flex flex-wrap justify-center gap-2 min-[400px]:gap-3 sm:gap-6">
+    <div className="mt-8 max-w-[920px] mx-auto px-3 sm:px-0 w-full">
+      {/* <div className="flex justify-between items-center mb-5 px-1">
+        <h2 className="text-xl sm:text-2xl font-bold text-white/90">
+          Select your preferences
+        </h2>
+      </div> */}
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-0 justify-center">
         {services.map((service, index) => {
-          const isActive = index === activeIndex;
-          const isAppliance = (service.name || '').toUpperCase().includes('APPLIANCE');
+          const theme = getServiceTheme(service.name);
           return (
             <motion.div
               key={service._id}
-              variants={cardVariants}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ y: -5, scale: 1.02 }}
               onClick={() => handleServiceClick(service)}
-              className={`group relative transition-all duration-500 w-[17vw] max-w-[75px] sm:max-w-none sm:w-24 flex-shrink-0 cursor-pointer`}
+              className={`relative overflow-hidden rounded-[20px] cursor-pointer w-full sm:max-w-[210px] h-[70px] sm:h-[108px] shadow-sm group ${theme.bg}`}
             >
-              <div
-                className={`
-                  relative aspect-square rounded-xl overflow-hidden bg-transparent border-2 
-                  transition-all duration-500
-                  ${isActive
-                    ? 'border-[#007367] scale-110 shadow-[0_0_20px_rgba(3,113,102,0.2)]'
-                    : 'border-transparent hover:border-[#007367]/30 hover:scale-105'}
-                `}
-              >
-                <Image
-                  loader={imageLoader}
-                  src={service.image}
-                  alt={service.name}
-                  fill
-                  className={`object-cover transition-transform duration-500 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}
-                  sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 14vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-
-
-                {/* Service Name Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  {/* Empty overlay preserved */}
-                </div>
-
-                {/* Hover Glow */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isActive ? 1 : 0 }}
-                  whileHover={{ opacity: 1 }}
-                  className="absolute inset-0 bg-gradient-to-t from-[#037166]/30 to-transparent"
-                />
+              {/* Text block on left */}
+              <div className="absolute top-2.5 sm:top-4 left-3 sm:left-5 w-[60%] z-10 pointer-events-none text-left">
+                <p className={`text-[11px] sm:text-[13px] font-bold leading-tight ${theme.text}`}>
+                  {service.name}
+                </p>
+                <p className={`mt-0.5 text-[7px] sm:text-[11px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
+                  {theme.desc}
+                </p>
               </div>
 
-              <h5 className={`text-[10px] min-[400px]:text-[11px] sm:text-[15px] leading-[1.2] mt-1 sm:mt-2 font-medium text-center line-clamp-2 transition-colors duration-300 ${isActive ? 'text-[#04a99d]' : 'text-[#007367] group-hover:text-[#04a99d]'}`}>
-                {service.name}
-              </h5>
+              {/* Image block - FULL WIDTH & HEIGHT - Using internal image arrow */}
+              <div className="absolute inset-0 w-full h-full z-0">
+                <div className="relative w-full h-full">
+                  <Image
+                    loader={imageLoader}
+                    src={service.image}
+                    alt={service.name}
+                    fill
+                    priority={index < 4}
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+
+              {/* Subtle overlay for depth */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-[5]" />
             </motion.div>
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }
+
 
 /* ---------- HERO SECTION ---------- */
 function HeroContent({ services = [], loading = false, error = null }) {
@@ -510,7 +518,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative z-10 max-w-none mx-auto px-0 text-center w-full">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -554,7 +562,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-sm sm:text-base md:text-lg text-white-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base md:text-lg text-white-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
           >
             Your Premium Gateway to Appliance Services, Spa & Saloon, PG & Hostels, Religious Services, and More.
             A Smarter Way to Access Trusted Services.

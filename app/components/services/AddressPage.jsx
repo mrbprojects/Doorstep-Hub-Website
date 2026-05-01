@@ -558,56 +558,65 @@ export function AddressPage({
                     transition={{ delay: index * 0.1 }}
                     layout
                     onClick={() => onSelectAddress(address)}
-                    className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 ${isSelected
-                      ? 'bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 border-2 border-[#037166]'
-                      : 'bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-white/20'
+                    className={`relative cursor-pointer rounded-2xl p-5 transition-all duration-300 group ${isSelected
+                      ? 'bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 border-2 border-[#037166] shadow-lg shadow-[#037166]/10'
+                      : 'bg-[#1a1a1a] border border-white/5 hover:border-white/20'
                       }`}
                   >
-                    <div className="flex gap-6">
-                      <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected
-                        ? 'bg-gradient-to-br from-[#037166] to-[#04a99d]'
-                        : 'bg-white/5'
-                        }`}>
-                        <Icon className={`w-8 h-8 ${isSelected ? 'text-white' : 'text-[#04a99d]'}`} />
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected
+                          ? 'bg-gradient-to-br from-[#037166] to-[#04a99d]'
+                          : 'bg-white/5'
+                          }`}>
+                          <Icon className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-[#04a99d]'}`} />
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleEditClick(address); }}
+                            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-[#04a99d] transition-all"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteAddress(address._id); }}
+                            className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-500 transition-all"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h4 className="text-xl font-bold text-white capitalize">{address.type}</h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="text-lg font-bold text-white capitalize">{address.type}</h4>
                           {address.defaultAddress && (
-                            <h6 className="px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d] text-xs font-medium">
+                            <span className="px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d] text-[10px] font-bold tracking-wider">
                               DEFAULT
-                            </h6>
+                            </span>
                           )}
                         </div>
-                        <p className="font-medium text-white mb-1">{address.name}</p>
-                        <p className="text-white/80 text-sm mb-1">{address.flat}, {address.area}</p>
-                        <p className="text-white/60 text-xs">{address.cityName}, {address.postalCode}</p>
+                        <p className="font-semibold text-white/90 text-sm mb-1">{address.name}</p>
+                        <p className="text-white/60 text-xs leading-relaxed mb-1 line-clamp-2">
+                          {address.flat}, {address.area}
+                        </p>
+                        <p className="text-white/40 text-[11px] font-medium uppercase tracking-tight">
+                          {address.cityName}, {address.postalCode}
+                        </p>
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-8 h-8 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center"
-                          >
-                            <Check className="w-5 h-5 text-white" />
-                          </motion.div>
-                        )}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleEditClick(address); }}
-                          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all"
+                      {isSelected && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center border-2 border-black z-10"
                         >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteAddress(address._id); }}
-                          className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-500 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                          <Check className="w-3.5 h-3.5 text-white" />
+                        </motion.div>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -643,15 +652,14 @@ export function AddressPage({
                   addressLineOne: contextLocation?.address || ''
                 });
                 setShowAddForm(true);
-                // Auto-trigger detection
                 setTimeout(() => handleAutoDetect(), 100);
               }}
-              className="flex items-center justify-center gap-3 p-6 rounded-2xl border-2 border-dashed border-white/20 hover:border-[#037166]/50 bg-white/5 hover:bg-white/10 transition-all group"
+              className="flex flex-col items-center justify-center gap-3 p-8 rounded-2xl border-2 border-dashed border-white/10 hover:border-[#037166]/50 bg-white/5 hover:bg-[#037166]/5 transition-all group min-h-[200px]"
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Plus className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#037166] group-hover:border-[#037166] transition-all">
+                <Plus className="w-6 h-6 text-white/40 group-hover:text-white" />
               </div>
-              <span className="text-white font-medium text-lg">Add New Address</span>
+              <span className="text-white/60 group-hover:text-white font-medium text-base">Add New Address</span>
             </motion.button>
           )}
 
@@ -659,141 +667,149 @@ export function AddressPage({
           <AnimatePresence>
             {showAddForm && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="col-span-1 sm:col-span-2 lg:col-span-2"
               >
-                <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="p-8 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-2xl">
+                  <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h4 className="text-xl font-bold text-white">
-                        {editingAddress ? 'Edit Address' : 'Add New Address'}
+                      <h4 className="text-2xl font-bold text-white">
+                        {editingAddress ? 'Edit Service Address' : 'New Service Address'}
                       </h4>
-                      {!editingAddress && (
-                        <p className="text-white/40 text-xs mt-1">Information pre-filled from your profile</p>
-                      )}
+                      <p className="text-white/40 text-sm mt-1">Please provide accurate details for seamless service delivery</p>
                     </div>
                     <button
                       onClick={() => setShowAddForm(false)}
-                      className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                      className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-500 transition-all"
                     >
-                      <X className="w-5 h-5 text-white/60" />
+                      <X className="w-6 h-6" />
                     </button>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex gap-3">
-                      {['Home', 'Office', 'Friends & Relative'].map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => setNewAddress({ ...newAddress, type })}
-                          className={`flex-1 px-2 py-3 rounded-lg text-xs font-bold transition-all ${newAddress.type === type
-                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-md'
-                            : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
-                            }`}
-                        >
-                          {type}
-                        </button>
-                      ))}
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-white/60 text-xs font-bold uppercase tracking-wider mb-3 px-1">Address Type</label>
+                      <div className="flex flex-wrap gap-3">
+                        {['Home', 'Office', 'Other'].map((type) => (
+                          <button
+                            key={type}
+                            onClick={() => setNewAddress({ ...newAddress, type })}
+                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all border ${newAddress.type === type
+                              ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent shadow-lg shadow-[#037166]/20'
+                              : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
+                              }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-widest px-1">Contact Person</label>
                         <input
-                          placeholder="Full Name"
+                          placeholder="Receiver Name"
                           value={newAddress.name}
                           onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                          className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/5 text-white focus:border-[#037166] focus:bg-white/10 transition-all outline-none"
                         />
-                        <p className="text-[10px] text-white/30 px-1 italic">Recipient name for service reference</p>
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="space-y-1.5">
+                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-widest px-1">Phone Number</label>
                         <input
-                          placeholder="Mobile Number"
+                          placeholder="Contact Number"
                           value={newAddress.phone}
                           onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                          className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/5 text-white focus:border-[#037166] focus:bg-white/10 transition-all outline-none"
                         />
-                        <p className="text-[10px] text-white/30 px-1 italic">Contact number for this address</p>
                       </div>
                     </div>
 
-                    <div className="relative">
-                      <input
-                        placeholder="Flat / Plot / House No."
-                        value={newAddress.flat}
-                        onChange={(e) => setNewAddress({ ...newAddress, flat: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all pr-32"
-                      />
-                      <button
-                        onClick={handleAutoDetect}
-                        disabled={locationLoading}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#037166]/20 text-[#04a99d] text-[10px] font-bold border border-[#037166]/30 hover:bg-[#037166]/30 transition-all uppercase tracking-wider disabled:opacity-50"
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5 relative">
+                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-widest px-1">Flat / House / Office No.</label>
+                        <input
+                          placeholder="e.g. Flat 101, Plot 42"
+                          value={newAddress.flat}
+                          onChange={(e) => setNewAddress({ ...newAddress, flat: e.target.value })}
+                          className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/5 text-white focus:border-[#037166] focus:bg-white/10 transition-all outline-none pr-24"
+                        />
+                        <button
+                          onClick={handleAutoDetect}
+                          disabled={locationLoading}
+                          className="absolute right-2 bottom-1.5 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#037166]/20 text-[#04a99d] text-[10px] font-bold border border-[#037166]/30 hover:bg-[#037166]/40 transition-all disabled:opacity-50"
+                        >
+                          {locationLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <MapPin className="w-3 h-3" />}
+                          Detect
+                        </button>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-widest px-1">Area / Locality / Landmark</label>
+                        <input
+                          placeholder="e.g. Jubilee Hills, Near Metro"
+                          value={newAddress.area}
+                          onChange={(e) => setNewAddress({ ...newAddress, area: e.target.value })}
+                          className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/5 text-white focus:border-[#037166] focus:bg-white/10 transition-all outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-widest px-1">City</label>
+                        <input
+                          placeholder="City Name"
+                          value={newAddress.cityName}
+                          onChange={(e) => setNewAddress({ ...newAddress, cityName: e.target.value })}
+                          className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/5 text-white focus:border-[#037166] focus:bg-white/10 transition-all outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-widest px-1">State</label>
+                        <input
+                          placeholder="State Name"
+                          value={newAddress.stateName}
+                          onChange={(e) => setNewAddress({ ...newAddress, stateName: e.target.value })}
+                          className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/5 text-white focus:border-[#037166] focus:bg-white/10 transition-all outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-widest px-1">Pincode</label>
+                        <input
+                          placeholder="6-digit code"
+                          value={newAddress.postalCode}
+                          onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
+                          className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/5 text-white focus:border-[#037166] focus:bg-white/10 transition-all outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-2">
+                      <div
+                        onClick={() => setNewAddress({ ...newAddress, defaultAddress: !newAddress.defaultAddress })}
+                        className={`w-10 h-5 rounded-full relative cursor-pointer transition-all ${newAddress.defaultAddress ? 'bg-[#037166]' : 'bg-white/10'}`}
                       >
-                        {locationLoading ? (
-                          <Loader2 className="w-3 animate-spin" />
-                        ) : detectionSuccess ? (
-                          <Check className="w-3 text-[#04a99d]" />
-                        ) : (
-                          <MapPin className="w-3" />
-                        )}
-                        {detectionSuccess ? 'Detected' : 'Detect'}
-                      </button>
+                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${newAddress.defaultAddress ? 'left-6' : 'left-1'}`} />
+                      </div>
+                      <span className="text-sm text-white/60 font-medium">Set as default service address</span>
                     </div>
 
-                    <input
-                      placeholder="Area / Locality"
-                      value={newAddress.area}
-                      onChange={(e) => setNewAddress({ ...newAddress, area: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
-                    />
-
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <input
-                        placeholder="City"
-                        value={newAddress.cityName}
-                        onChange={(e) => setNewAddress({ ...newAddress, cityName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
-                      />
-                      <input
-                        placeholder="State"
-                        value={newAddress.stateName}
-                        onChange={(e) => setNewAddress({ ...newAddress, stateName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
-                      />
-                      <input
-                        placeholder="Postal Code"
-                        value={newAddress.postalCode}
-                        onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="defaultAddr"
-                        checked={newAddress.defaultAddress}
-                        onChange={(e) => setNewAddress({ ...newAddress, defaultAddress: e.target.checked })}
-                        className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#037166]"
-                      />
-                      <label htmlFor="defaultAddr" className="text-sm text-white/60 cursor-pointer">Set as Default Address</label>
-                    </div>
-
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex gap-4 pt-6">
                       <button
                         onClick={() => setShowAddForm(false)}
-                        className="flex-1 px-6 py-3 rounded-lg border border-white/20 text-white hover:bg-white/5 transition-all"
+                        className="flex-1 px-8 py-4 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleAddOrUpdateAddress}
                         disabled={loading}
-                        className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all disabled:opacity-50"
+                        className="flex-[2] px-8 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-xl hover:shadow-[#037166]/20 transition-all disabled:opacity-50"
                       >
-                        {loading ? 'Processing...' : editingAddress ? 'Update Address' : 'Save Address'}
+                        {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : editingAddress ? 'Update Address' : 'Save Address'}
                       </button>
                     </div>
                   </div>

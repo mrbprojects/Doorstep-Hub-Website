@@ -232,10 +232,13 @@ export const ServiceCartProvider = ({ children }) => {
         // 1. Check for Service Flow Change
         // Ignore "services" as a flow change if we are on a payment failure page, 
         // as that route is used for general error handling.
+        // Also ignore flow changes between 'services' and 'appliances' because they share the same cart natively
         const isFlowChanged = match && 
                              currentServiceFlow && 
                              currentServiceFlow !== match && 
-                             !isPaymentErrorPage;
+                             !isPaymentErrorPage &&
+                             !(currentServiceFlow === 'services' && match === 'appliances') &&
+                             !(currentServiceFlow === 'appliances' && match === 'services');
 
         // 2. Check for Location Change (compare against ref — no setState involved)
         const hasLocationChanged = locationLat != null && lastLocationRef.current != null && (

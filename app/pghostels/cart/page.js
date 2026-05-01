@@ -3,6 +3,7 @@
 import { PGCartPage } from '@/components/pghostels/PGCartPage';
 import { useRouter } from 'next/navigation';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { toast } from 'sonner';
 
 export default function PGCartRoute() {
     const router = useRouter();
@@ -10,18 +11,18 @@ export default function PGCartRoute() {
 
     const handleProceed = () => {
         const pgItem = cartItems.find(item => item.itemType === 'professional_service');
-        // Fallback: If pgItem doesn't have providerId, try to find it from any other item
-        const providerId = pgItem.providerId || cartItems.find(i => i.providerId)?.providerId;
+        const providerId = pgItem?.providerId || cartItems.find(i => i.providerId && i.providerId !== 'undefined' && i.providerId !== 'null')?.providerId;
 
-        if (pgItem && providerId && providerId !== 'undefined') {
+        if (pgItem && providerId && providerId !== 'undefined' && providerId !== 'null') {
             const addons = cartItems
                 .filter(item => item.itemType === 'professional_addon' && item.parentServiceId === pgItem.itemId)
                 .map(item => item.itemId)
                 .join(',');
 
             router.push(`/pghostels/booking/address?providerId=${providerId}&packageId=${pgItem.itemId}${addons ? `&addons=${addons}` : ''}`);
+        } else if (!pgItem && cartItems.length > 0) {
+            toast.error('Booking details not found in cart.');
         } else {
-            // Fallback or alert if no PG item is found but they are in PG cart
             router.push('/pghostels');
         }
     };

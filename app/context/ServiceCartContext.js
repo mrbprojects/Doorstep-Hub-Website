@@ -22,6 +22,7 @@ export const ServiceCartProvider = ({ children }) => {
     const { location } = useLocationContext();
     const pathname = usePathname();
     const [currentServiceFlow, setCurrentServiceFlow] = useState(null);
+    const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
 
     // Refs to hold latest values without triggering re-renders in the effect
     const cartItemsRef = React.useRef(cartItems);
@@ -75,15 +76,32 @@ export const ServiceCartProvider = ({ children }) => {
         // Defensive check: handle 'undefined' string or missing providerId
         let effectiveProviderId = providerId;
         if (!effectiveProviderId || effectiveProviderId === 'undefined' || effectiveProviderId === 'null') {
+            // 1. Try to recover from existing cart items
             const recovered = cartItems.find(item => item.providerId && item.providerId !== 'undefined' && item.providerId !== 'null');
             if (recovered) {
                 effectiveProviderId = recovered.providerId;
+            } 
+            // 2. If it's a professional service and we still don't have it, we MUST resolve it
+            else if (providerType === 'professional' && itemId) {
+                console.log('🔄 Attempting to resolve missing providerId for professional service...');
+                try {
+                    const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider-by-item`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ itemId })
+                    });
+                    const data = await resp.json();
+                    effectiveProviderId = data?.provider?._id || data?.providerId;
+                } catch (e) {
+                    console.warn('Could not resolve providerId via API', e);
+                }
             }
         }
 
         if (!effectiveProviderId || effectiveProviderId === 'undefined' || effectiveProviderId === 'null') {
             if (providerType === 'professional') {
                 console.error('❌ addToCart failed: No valid providerId found for professional service');
+                toast.error('Session expired. Please re-select the service.');
                 return false;
             }
         }
@@ -207,9 +225,8 @@ export const ServiceCartProvider = ({ children }) => {
     // NOTE: cartItems/clearCart via refs, lastLocation via ref — nothing here causes a loop.
     // Deps are all primitives or stable state; no new objects created.
     useEffect(() => {
-        const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
         const segments = pathname.split('/').filter(Boolean);
-        const isPaymentErrorPage = segments.includes('payment-failed');
+        const isPaymentErrorPage = segments.includes('payment-failed') || segments.includes('failure');
         const match = serviceCategories.find(cat => segments.includes(cat));
 
         // 1. Check for Service Flow Change

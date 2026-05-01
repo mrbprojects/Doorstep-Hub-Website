@@ -10,13 +10,16 @@ export default function PGCartRoute() {
 
     const handleProceed = () => {
         const pgItem = cartItems.find(item => item.itemType === 'professional_service');
-        if (pgItem) {
+        // Fallback: If pgItem doesn't have providerId, try to find it from any other item
+        const providerId = pgItem.providerId || cartItems.find(i => i.providerId)?.providerId;
+
+        if (pgItem && providerId && providerId !== 'undefined') {
             const addons = cartItems
                 .filter(item => item.itemType === 'professional_addon' && item.parentServiceId === pgItem.itemId)
                 .map(item => item.itemId)
                 .join(',');
 
-            router.push(`/pghostels/booking/address?providerId=${pgItem.providerId}&packageId=${pgItem.itemId}${addons ? `&addons=${addons}` : ''}`);
+            router.push(`/pghostels/booking/address?providerId=${providerId}&packageId=${pgItem.itemId}${addons ? `&addons=${addons}` : ''}`);
         } else {
             // Fallback or alert if no PG item is found but they are in PG cart
             router.push('/pghostels');

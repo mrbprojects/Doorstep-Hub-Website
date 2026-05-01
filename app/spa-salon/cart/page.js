@@ -11,7 +11,10 @@ export default function SpaCartRoute() {
     const handleProceed = () => {
         // Find the main Spa/Salon service in the cart
         const spaItem = cartItems.find(item => item.itemType === 'professional_service');
-        if (spaItem) {
+        // Fallback: If spaItem doesn't have providerId, try to find it from any other item
+        const providerId = spaItem.providerId || cartItems.find(i => i.providerId)?.providerId;
+
+        if (spaItem && providerId && providerId !== 'undefined') {
             // Find any addons associated with this service
             const addons = cartItems
                 .filter(item => item.itemType === 'professional_addon' && item.parentServiceId === spaItem.itemId)
@@ -19,8 +22,7 @@ export default function SpaCartRoute() {
                 .join(',');
 
             // Navigate to address with the parameters the booking flow expects
-            // Note: Spa flow uses packageId for the item ID
-            router.push(`/spa-salon/booking/address?providerId=${spaItem.providerId}&packageId=${spaItem.itemId}${addons ? `&addons=${addons}` : ''}`);
+            router.push(`/spa-salon/booking/address?providerId=${providerId}&packageId=${spaItem.itemId}${addons ? `&addons=${addons}` : ''}`);
         } else {
             // If the cart is empty or main item is missing, go back to top-level
             router.push('/spa-salon');

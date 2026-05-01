@@ -11,7 +11,10 @@ export default function ReligiousCartRoute() {
     const handleProceed = () => {
         // Find the main Religious service in the cart
         const religiousItem = cartItems.find(item => item.itemType === 'professional_service');
-        if (religiousItem) {
+        // Fallback: If religiousItem doesn't have providerId, try to find it from any other item
+        const providerId = religiousItem.providerId || cartItems.find(i => i.providerId)?.providerId;
+
+        if (religiousItem && providerId && providerId !== 'undefined') {
             // Find any addons associated with this service
             const addons = cartItems
                 .filter(item => item.itemType === 'professional_addon' && item.parentServiceId === religiousItem.itemId)
@@ -19,7 +22,7 @@ export default function ReligiousCartRoute() {
                 .join(',');
 
             // Navigate to address with the parameters the booking flow expects
-            router.push(`/religious-services/booking/address?providerId=${religiousItem.providerId}&packageId=${religiousItem.itemId}${addons ? `&addons=${addons}` : ''}`);
+            router.push(`/religious-services/booking/address?providerId=${providerId}&packageId=${religiousItem.itemId}${addons ? `&addons=${addons}` : ''}`);
         } else {
             // If the cart is empty or main item is missing, go back to services
             router.push('/religious-services');

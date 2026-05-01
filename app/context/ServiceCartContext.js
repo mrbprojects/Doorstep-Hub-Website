@@ -71,11 +71,28 @@ export const ServiceCartProvider = ({ children }) => {
             openAuthModal(); // Trigger the auth modal
             return false;
         }
+
+        // Defensive check: handle 'undefined' string or missing providerId
+        let effectiveProviderId = providerId;
+        if (!effectiveProviderId || effectiveProviderId === 'undefined' || effectiveProviderId === 'null') {
+            const recovered = cartItems.find(item => item.providerId && item.providerId !== 'undefined' && item.providerId !== 'null');
+            if (recovered) {
+                effectiveProviderId = recovered.providerId;
+            }
+        }
+
+        if (!effectiveProviderId || effectiveProviderId === 'undefined' || effectiveProviderId === 'null') {
+            if (providerType === 'professional') {
+                console.error('❌ addToCart failed: No valid providerId found for professional service');
+                return false;
+            }
+        }
+
         try {
-            let providerKey = providerId;
+            let providerKey = effectiveProviderId;
 
             // Ensure professional flows send provider ObjectId (backend rejects slugs here)
-            if (providerType === 'professional' && providerId && !isObjectId(providerId)) {
+            if (providerType === 'professional' && providerKey && !isObjectId(providerKey) && providerKey !== 'undefined') {
                 try {
                     const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
                         method: 'POST',

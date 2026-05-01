@@ -192,10 +192,16 @@ export const ServiceCartProvider = ({ children }) => {
     useEffect(() => {
         const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
         const segments = pathname.split('/').filter(Boolean);
+        const isPaymentErrorPage = segments.includes('payment-failed');
         const match = serviceCategories.find(cat => segments.includes(cat));
 
         // 1. Check for Service Flow Change
-        const isFlowChanged = match && currentServiceFlow && currentServiceFlow !== match;
+        // Ignore "services" as a flow change if we are on a payment failure page, 
+        // as that route is used for general error handling.
+        const isFlowChanged = match && 
+                             currentServiceFlow && 
+                             currentServiceFlow !== match && 
+                             !isPaymentErrorPage;
 
         // 2. Check for Location Change (compare against ref — no setState involved)
         const hasLocationChanged = locationLat != null && lastLocationRef.current != null && (
@@ -211,7 +217,8 @@ export const ServiceCartProvider = ({ children }) => {
         }
 
         // Update tracking: write to ref (no state update = no re-render)
-        if (match) setCurrentServiceFlow(match);
+        // Only update flow if it's a valid service category and NOT a payment error page
+        if (match && !isPaymentErrorPage) setCurrentServiceFlow(match);
         if (locationLat != null) {
             lastLocationRef.current = { lat: locationLat, lng: locationLng };
         }

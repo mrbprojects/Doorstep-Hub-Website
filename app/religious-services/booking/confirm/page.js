@@ -191,7 +191,7 @@ export default function ReligiousConfirmPage() {
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}/religious-services/booking/failure`
+                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed?type=professional&deepType=Religious Services`
             };
 
             if (paymentMethod === 'ONLINE') {

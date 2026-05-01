@@ -171,7 +171,7 @@ function PGConfirmContent() {
                 sourceOfLead: 'website',
                 providerType: 'professional',
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}/pghostels/booking/failure`
+                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed?type=professional&deepType=PG Hostels`
             };
 
             const endpoint = paymentMethod === 'ONLINE'

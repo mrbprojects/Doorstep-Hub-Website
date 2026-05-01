@@ -185,7 +185,7 @@ export default function SpaConfirmPage() {
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}/spa-salon/booking/failure`
+                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed?type=professional&deepType=Spa Saloons`
             };
 
             if (paymentMethod === 'ONLINE') {

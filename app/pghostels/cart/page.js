@@ -7,11 +7,11 @@ import { toast } from 'sonner';
 
 export default function PGCartRoute() {
     const router = useRouter();
-    const { cartItems } = useServiceCart();
+    const { cartItems, cartData } = useServiceCart();
 
     const handleProceed = () => {
         const pgItem = cartItems.find(item => item.itemType === 'professional_service');
-        const providerId = pgItem?.providerId || cartItems.find(i => i.providerId && i.providerId !== 'undefined' && i.providerId !== 'null')?.providerId;
+        const providerId = cartData?.provider?._id || cartData?.providerId || pgItem?.providerId;
 
         if (pgItem && providerId && providerId !== 'undefined' && providerId !== 'null') {
             const addons = cartItems

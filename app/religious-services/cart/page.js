@@ -7,11 +7,11 @@ import { toast } from 'sonner';
 
 export default function ReligiousCartRoute() {
     const router = useRouter();
-    const { cartItems } = useServiceCart();
+    const { cartItems, cartData } = useServiceCart();
 
     const handleProceed = () => {
         const religiousItem = cartItems.find(item => item.itemType === 'professional_service');
-        const providerId = religiousItem?.providerId || cartItems.find(i => i.providerId && i.providerId !== 'undefined' && i.providerId !== 'null')?.providerId;
+        const providerId = cartData?.provider?._id || cartData?.providerId || religiousItem?.providerId;
 
         if (religiousItem && providerId && providerId !== 'undefined' && providerId !== 'null') {
             // Find any addons associated with this service

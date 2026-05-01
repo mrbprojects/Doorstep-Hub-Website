@@ -7,11 +7,12 @@ import { toast } from 'sonner';
 
 export default function CartRoute() {
     const router = useRouter();
-    const { cartItems } = useServiceCart();
+    const { cartItems, cartData } = useServiceCart();
 
     const handleProceed = () => {
         const professionalItem = cartItems.find(item => item.itemType === 'professional_service' || item.itemType === 'service');
-        const providerId = professionalItem?.providerId || cartItems.find(i => i.providerId && i.providerId !== 'undefined' && i.providerId !== 'null')?.providerId;
+        // Extract providerId correctly from the root cart object
+        const providerId = cartData?.provider?._id || cartData?.providerId || professionalItem?.providerId;
 
         if (professionalItem && providerId && providerId !== 'undefined' && providerId !== 'null') {
             const addons = cartItems

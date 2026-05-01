@@ -105,7 +105,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
           setServices(servicesData.dhubServices || []);
 
           // Set centers from nearByServiceCenters array (same API response)
-                    const enrichedCenters = (servicesData.nearByServiceCenters || []).map(center => {
+          const enrichedCenters = (servicesData.nearByServiceCenters || []).map(center => {
             if (center.slug) return center;
             const generatedSlug = (center.business_name || center.firstName || center.name || 'service-center')
               .toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
@@ -271,21 +271,19 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
           <div className="inline-flex p-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
             <button
               onClick={() => setActiveTab('services')}
-              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
-                activeTab === 'services'
-                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-              }`}
+              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'services'
+                ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
             >
               All Services
             </button>
             <button
               onClick={() => setActiveTab('centers')}
-              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
-                activeTab === 'centers'
-                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-              }`}
+              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'centers'
+                ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
             >
               Nearby Centers
             </button>
@@ -583,12 +581,12 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         whileHover={{ y: -5 }}
                         className="group cursor-pointer"
                       >
-                        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
-                          <div className="flex flex-col md:flex-row">
+                        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 md:h-[220px]">
+                          <div className="flex flex-col md:flex-row h-full">
                             {/* Image */}
-                            <div className="relative w-full md:w-64 h-48 md:h-auto overflow-hidden">
+                            <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
                               <img
-                                src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
+                                src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.image}`}
                                 alt={center.name}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               />

@@ -429,7 +429,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     <div className="relative p-7 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] text-white shadow-2xl shadow-[#037166]/40 overflow-hidden group">
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-110" />
                                         <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-24 -mb-24 blur-2xl" />
-                                        
+
                                         <div className="relative flex justify-between items-start mb-10">
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1.5">
@@ -439,14 +439,14 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                                 <p className="text-white/60 text-[10px] font-medium uppercase tracking-widest mb-1">Available Balance</p>
                                                 <h3 className="text-4xl font-bold tracking-tight flex items-baseline gap-1">
                                                     <span className="text-2xl opacity-60">₹</span>
-                                                    {walletBalance}
+                                                    {Number(walletBalance).toFixed(2)}
                                                 </h3>
                                             </div>
                                             <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
                                                 <Wallet className="w-6 h-6 text-white" />
                                             </div>
                                         </div>
-                                        
+
                                         <div className="relative flex justify-between items-end">
                                             <div className="space-y-1">
                                                 <p className="text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
@@ -498,7 +498,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         >
                                             <div className={`w-6 h-6 flex items-center justify-center ${paymentMethod === method.id ? 'text-white' : method.disabled ? 'text-white/10' : 'text-[#04a99d]'}`}>
                                                 {method.id === 'wallet' && !walletLoading && walletBalance > 0 ? (
-                                                    <span className="text-sm font-bold">₹{walletBalance}</span>
+                                                    <span className="text-sm font-bold">₹{Number(walletBalance).toFixed(2)}</span>
                                                 ) : (
                                                     <method.icon className="w-6 h-6" />
                                                 )}
@@ -686,7 +686,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         Processing...
                                     </div>
                                 ) : (
-                                    `Confirm Booking - ₹${bookingCost.toFixed(2)}`
+                                    `Confirm Booking  ₹${bookingCost.toFixed(2)}`
                                 )}
                             </motion.button>
 

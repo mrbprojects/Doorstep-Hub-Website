@@ -639,10 +639,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         whileHover={{ y: -5 }}
                         className="group cursor-pointer"
                       >
-                        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
-                          <div className="flex flex-col md:flex-row">
+                        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 md:h-[220px]">
+                          <div className="flex flex-col md:flex-row h-full">
                             {/* Image */}
-                            <div className="relative w-full md:w-64 h-48 md:h-auto overflow-hidden">
+                            <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
                               <img
                                 src={center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                 alt={center.name}

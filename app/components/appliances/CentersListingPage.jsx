@@ -225,10 +225,10 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                                     className="group cursor-pointer"
                                     onClick={() => router.push(`/service-list/${center.slug || center._id}`)}
                                 >
-                                    <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-blue-500/50 transition-all duration-300">
-                                        <div className="flex flex-col md:flex-row">
+                                    <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-blue-500/50 transition-all duration-300 md:h-[220px]">
+                                        <div className="flex flex-col md:flex-row h-full">
                                             {/* Image */}
-                                            <div className="relative w-full md:w-72 h-48 md:h-auto overflow-hidden">
+                                            <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
                                                 <img
                                                     src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                                     alt={center.name}

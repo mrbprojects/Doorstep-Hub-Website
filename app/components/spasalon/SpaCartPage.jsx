@@ -241,7 +241,7 @@ export function SpaCartPage({
                                 <div className="space-y-4 mb-8">
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                                            <span>Services Subtotal</span>
+                                            <span>  {item.itemName}</span>
                                             <span className="text-slate-900 text-lg font-bold">₹{(cartData?.totalServiceCost || 0).toFixed(0)}</span>
                                         </div>
                                         <div className="h-px bg-slate-50" />
@@ -258,12 +258,12 @@ export function SpaCartPage({
                                         </div>
 
                                         {/* GST */}
-                                        <div className="flex justify-between items-center text-slate-500 text-sm">
+                                        {/* <div className="flex justify-between items-center text-slate-500 text-sm">
                                             <div className="flex items-center gap-1.5">
                                                 <span>GST (18%)</span>
                                             </div>
                                             <span className="text-slate-900 font-semibold">₹{(cartData?.gstAmount || 0).toFixed(0)}</span>
-                                        </div>
+                                        </div> */}
                                     </div>
 
                                     <div className="h-px bg-slate-100 mt-8 mb-6" />
@@ -272,7 +272,7 @@ export function SpaCartPage({
                                         <div className="flex justify-between items-end">
                                             <div className="flex flex-col">
                                                 <span className="text-slate-400 text-[10px] uppercase font-black tracking-[0.2em] mb-1">Payable Now</span>
-                                                <span className="text-4xl font-black text-[#C06C84] tracking-tighter">₹{(cartData?.finalAmount || 0).toFixed(0)}</span>
+                                                <span className="text-4xl font-black text-[#C06C84] tracking-tighter">₹{(cartData?.consultationFee || 0).toFixed(0)}</span>
                                             </div>
                                             <ShieldCheck className="w-8 h-8 text-[#C06C84] opacity-50" />
                                         </div>
@@ -283,8 +283,8 @@ export function SpaCartPage({
                                             onClick={onProceedToAddress}
                                             disabled={hasMixedProviders}
                                             className={`w-full px-8 py-5 rounded-2xl font-black text-xl shadow-xl transition-all flex items-center justify-center gap-3 ${hasMixedProviders
-                                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                                                    : 'bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white shadow-[#C06C84]/20 hover:shadow-[#C06C84]/40'
+                                                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white shadow-[#C06C84]/20 hover:shadow-[#C06C84]/40'
                                                 }`}
                                         >
                                             {hasMixedProviders ? 'Resolve conflicts above' : 'Book My Glow-up'}

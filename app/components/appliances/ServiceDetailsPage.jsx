@@ -400,7 +400,7 @@ export function ServiceDetailsPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-20 pb-24 lg:pb-0 overflow-x-hidden"
+      className="min-h-screen pt-20 pb-24 lg:pb-0"
     >
       {schemaData && (
         <script
@@ -408,11 +408,7 @@ export function ServiceDetailsPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
         />
       )}
-      {/* Hide all scrollbars inside this detail view */}
-      <style>{`
-        .detail-left-panel::-webkit-scrollbar { display: none !important; width: 0 !important; }
-        .detail-left-panel { scrollbar-width: none !important; -ms-overflow-style: none !important; }
-      `}</style>
+
 
       {/* ── MOBILE: Sticky bottom Book-Now bar (hidden on lg+) ─────────────── */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden px-4 pb-4 pt-2"
@@ -428,17 +424,19 @@ export function ServiceDetailsPage({
       </div>
 
       {/* ── HERO SECTION ────────────────────────────────────────────────────── */}
-      <section className="relative py-6 lg:py-12 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{ background: `linear-gradient(135deg, #025a51 0%, ${accentColor} 50%, #037166 100%)` }}
-        />
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-[120px]"
-          style={{ backgroundColor: accentColor }}
-        />
+      <section className="relative py-6 lg:py-12">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{ background: `linear-gradient(135deg, #025a51 0%, ${accentColor} 50%, #037166 100%)` }}
+          />
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
+            transition={{ duration: 8, repeat: Infinity }}
+            className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-[120px]"
+            style={{ backgroundColor: accentColor }}
+          />
+        </div>
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -481,14 +479,7 @@ export function ServiceDetailsPage({
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
 
             {/* LEFT col: Gallery + Tabs */}
-            <div
-              className="detail-left-panel order-2 lg:order-none space-y-6 lg:space-y-8 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto lg:pr-2"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
+            <div className="order-2 lg:order-none space-y-6 lg:space-y-8">
 
               {/* Image Gallery */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="w-full">
@@ -718,7 +709,7 @@ export function ServiceDetailsPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="order-1 lg:order-none lg:sticky lg:top-18 space-y-4"
+              className="order-1 lg:order-none lg:sticky lg:top-24 space-y-4"
             >
               {/* Title + Rating */}
               <div>

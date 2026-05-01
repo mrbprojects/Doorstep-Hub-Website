@@ -303,7 +303,7 @@ export function BookingConfirmationPage({
           if (paymentMethod === 'wallet' && data.required !== undefined) {
              const available = data.available || 0;
              const required = data.required;
-             throw new Error(`Insufficient wallet balance. Required: ₹${required}, Available Balance: ₹${available}`);
+             throw new Error(`Insufficient wallet balance. Required: ₹${Number(required).toFixed(2)}, Available Balance: ₹${Number(available).toFixed(2)}`);
           }
           throw new Error(data.message || 'Booking failed');
         }
@@ -552,14 +552,19 @@ export function BookingConfirmationPage({
                     <Wallet className={`w-6 h-6 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#04a99d]'}`} />
                   </div>
                   <div className="text-left flex-1">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="font-semibold">Doorstep Hub Wallet</p>
                       {!walletLoading && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/20 text-[#04a99d]'
-                        }`}>
-                          Available Balance: ₹{walletBalance}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] ${paymentMethod === 'wallet' ? 'text-white/80' : 'text-white/50'}`}>Available Balance:</span>
+                          <span className={`text-sm font-black tracking-tight px-2.5 py-0.5 rounded-md border shadow-sm ${
+                            paymentMethod === 'wallet' 
+                              ? 'bg-white/20 border-white/30 text-white shadow-black/20' 
+                              : 'bg-[#037166]/20 border-[#037166]/30 text-[#04a99d] shadow-black/10'
+                          }`}>
+                            ₹{Number(walletBalance || 0).toFixed(2)}
+                          </span>
+                        </div>
                       )}
                     </div>
                     <p className={`text-xs ${paymentMethod === 'wallet' ? 'text-white/70' : 'text-white/40'}`}>

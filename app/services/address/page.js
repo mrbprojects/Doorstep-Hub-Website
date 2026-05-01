@@ -1,11 +1,12 @@
 'use client';
 
 import { AddressPage } from '@/components/services/AddressPage';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
 
-export default function AddressRoute() {
+export function AddressRouteContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [selectedAddress, setSelectedAddress] = useState(null);
 
     return (
@@ -23,13 +24,26 @@ export default function AddressRoute() {
             }}
             onContinue={() => {
                 const isServiceCartFlow = localStorage.getItem('service_cart_flow');
+                
+                // Reconstruct query string
+                const queryString = searchParams.toString();
+                const routeSuffix = queryString ? `?${queryString}` : '';
+
                 if (isServiceCartFlow) {
-                    router.push('/services/checkout');
+                    router.push(`/services/checkout${routeSuffix}`);
                     setTimeout(() => localStorage.removeItem('service_cart_flow'), 100);
                 } else {
-                    router.push('/services/booking');
+                    router.push(`/services/booking${routeSuffix}`);
                 }
             }}
         />
+    );
+}
+
+export default function AddressRoute() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>}>
+            <AddressRouteContent />
+        </Suspense>
     );
 }

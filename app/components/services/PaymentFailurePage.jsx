@@ -49,7 +49,22 @@ export function PaymentFailurePage() {
     }, [searchParams]);
 
     const handleRetry = () => {
-        router.push('/services/cart');
+        const type = searchParams.get('type');
+        const deepType = searchParams.get('deepType');
+
+        // Logic to redirect to the correct cart based on service type
+        if (deepType === 'PG Hostels') {
+            router.push('/pghostels/cart');
+        } else if (deepType === 'Spa Saloons') {
+            router.push('/spa-salon/cart');
+        } else if (deepType === 'Religious Services') {
+            router.push('/religious-services/cart');
+        } else if (type === 'appliances') {
+            router.push('/appliances/cart');
+        } else {
+            // Default to the general services cart
+            router.push('/services/cart');
+        }
     };
 
     const handleGoHome = () => {

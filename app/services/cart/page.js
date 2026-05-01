@@ -3,22 +3,25 @@
 import { CartPage } from '@/components/services/CartPage';
 import { useRouter } from 'next/navigation';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { toast } from 'sonner';
 
 export default function CartRoute() {
     const router = useRouter();
     const { cartItems } = useServiceCart();
 
     const handleProceed = () => {
-        // Check if there's a PG Hostel service in the cart
-        const pgItem = cartItems.find(item => item.itemType === 'professional_service');
-        if (pgItem) {
-            // Find addons for this service
+        const professionalItem = cartItems.find(item => item.itemType === 'professional_service' || item.itemType === 'service');
+        const providerId = professionalItem?.providerId || cartItems.find(i => i.providerId && i.providerId !== 'undefined' && i.providerId !== 'null')?.providerId;
+
+        if (professionalItem && providerId && providerId !== 'undefined' && providerId !== 'null') {
             const addons = cartItems
-                .filter(item => item.itemType === 'professional_addon' && item.parentServiceId === pgItem.itemId)
+                .filter(item => item.itemType === 'professional_addon' && item.parentServiceId === professionalItem.itemId)
                 .map(item => item.itemId)
                 .join(',');
 
-            router.push(`/pghostels/booking/address?providerId=${pgItem.providerId}&packageId=${pgItem.itemId}${addons ? `&addons=${addons}` : ''}`);
+            router.push(`/services/address?providerId=${providerId}&packageId=${professionalItem.itemId}${addons ? `&addons=${addons}` : ''}`);
+        } else if (!professionalItem && cartItems.length > 0) {
+            toast.error('Service details not found in cart.');
         } else {
             localStorage.setItem('service_cart_flow', 'true');
             router.push('/services/address');

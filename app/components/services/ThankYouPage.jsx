@@ -75,7 +75,7 @@ export function ThankYouPage({ bookingDetails }) {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f1614] to-[#0a0a0a] flex items-center justify-center px-4 py-20">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-20">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -90,9 +90,9 @@ export function ThankYouPage({ bookingDetails }) {
                     className="flex justify-center mb-8"
                 >
                     <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full blur-2xl opacity-50 animate-pulse" />
-                        <div className="relative w-32 h-32 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center">
-                            <CheckCircle className="w-20 h-20 text-white" strokeWidth={2.5} />
+                        <div className="absolute inset-0 bg-[#04a99d]/20 rounded-full blur-2xl opacity-50 animate-pulse" />
+                        <div className="relative w-28 h-28 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center shadow-lg">
+                            <CheckCircle className="w-16 h-16 text-white" strokeWidth={2.5} />
                         </div>
                     </div>
                 </motion.div>
@@ -104,22 +104,20 @@ export function ThankYouPage({ bookingDetails }) {
                     transition={{ delay: 0.3 }}
                     className="text-center mb-8"
                 >
-                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
-                        <Sparkles className="w-8 h-8 text-[#04a99d]" />
-                        Thank You!
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
+                        Booking Confirmed!
                     </h1>
-                    <p className="text-xl text-white/80 mb-2">Your Booking Has Been Received</p>
+                    <p className="text-xl text-gray-600 mb-2">Your service request has been received</p>
                     {bookingDetails?.orderId && (
                         <div className="inline-flex flex-col items-center gap-2 mb-4">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#04a99d] font-mono text-sm">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-[#037166] font-mono text-sm shadow-sm">
                                 Booking ID: {bookingDetails.orderId}
                             </div>
-                            <p className="text-[11px] text-[#04a99d]/60 font-medium animate-pulse">
-                                Payment verification in progress. This usually takes 2-5 minutes.
+                            <p className="text-[11px] text-[#037166]/60 font-medium">
+                                We are assigning a professional to your request.
                             </p>
                         </div>
                     )}
-                    <p className="text-white/60">We've sent a Confirmation to your Registered Email </p>
                 </motion.div>
 
 
@@ -130,35 +128,35 @@ export function ThankYouPage({ bookingDetails }) {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 rounded-2xl p-8 flex flex-col h-full"
+                            className="bg-white border border-gray-200 rounded-3xl p-8 flex flex-col h-full shadow-sm"
                         >
-                            <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <h4 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                                 <Calendar className="w-5 h-5 text-[#04a99d]" />
                                 Booking Details
                             </h4>
 
                             <div className="space-y-4 flex-1">
                                 {(bookingDetails.date || bookingDetails.time) && (
-                                    <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="flex flex-col gap-3">
                                         {bookingDetails.date && (
-                                            <div className="flex-1 flex items-center gap-3 text-white/80 p-3 rounded-xl bg-white/5 border border-white/5">
-                                                <div className="w-8 h-8 rounded-lg bg-[#037166]/20 flex items-center justify-center text-[#04a99d] flex-shrink-0">
-                                                    <Calendar className="w-4 h-4" />
+                                            <div className="flex items-center gap-3 text-gray-700 p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                                                <div className="w-10 h-10 rounded-xl bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
+                                                    <Calendar className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-white/40 text-[9px] uppercase font-bold tracking-wider">Date</p>
-                                                    <p className="font-medium text-xs">{bookingDetails.date}</p>
+                                                    <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Date</p>
+                                                    <p className="font-bold text-sm">{bookingDetails.date}</p>
                                                 </div>
                                             </div>
                                         )}
                                         {bookingDetails.time && (
-                                            <div className="flex-1 flex items-center gap-3 text-white/80 p-3 rounded-xl bg-white/5 border border-white/5">
-                                                <div className="w-8 h-8 rounded-lg bg-[#037166]/20 flex items-center justify-center text-[#04a99d] flex-shrink-0">
-                                                    <Clock className="w-4 h-4" />
+                                            <div className="flex items-center gap-3 text-gray-700 p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                                                <div className="w-10 h-10 rounded-xl bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
+                                                    <Clock className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-white/40 text-[9px] uppercase font-bold tracking-wider">Time Slot</p>
-                                                    <p className="font-medium text-xs">{bookingDetails.time}</p>
+                                                    <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Time Slot</p>
+                                                    <p className="font-bold text-sm">{bookingDetails.time}</p>
                                                 </div>
                                             </div>
                                         )}
@@ -166,13 +164,13 @@ export function ThankYouPage({ bookingDetails }) {
                                 )}
 
                                 {bookingDetails.address && (
-                                    <div className="flex items-start gap-4 text-white/80 p-3 rounded-xl bg-white/5 border border-white/5">
-                                        <div className="w-10 h-10 rounded-lg bg-[#037166]/20 flex items-center justify-center text-[#04a99d] flex-shrink-0">
+                                    <div className="flex items-start gap-4 text-gray-700 p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                                        <div className="w-10 h-10 rounded-xl bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
                                             <MapPin className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-white/40 text-[10px] uppercase font-bold tracking-wider">Address</p>
-                                            <p className="font-medium text-xs leading-relaxed">{bookingDetails.address}</p>
+                                            <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Address</p>
+                                            <p className="font-medium text-xs leading-relaxed line-clamp-2">{bookingDetails.address}</p>
                                         </div>
                                     </div>
                                 )}
@@ -184,59 +182,43 @@ export function ThankYouPage({ bookingDetails }) {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 }}
-                        className="bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 rounded-2xl p-8 flex flex-col items-center text-center h-full justify-center"
+                        className="bg-gradient-to-br from-[#037166] to-[#04a99d] rounded-3xl p-8 flex flex-col items-center text-center h-full justify-center shadow-lg text-white"
                     >
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center shadow-lg shadow-[#037166]/20 mb-6 font-bold">
+                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg mb-6 font-bold">
                             <Smartphone className="w-8 h-8 text-white" />
                         </div>
-                        <h5 className="text-2xl font-bold text-white mb-3">Doorstep Hub App</h5>
-                        <p className="text-white/60 text-sm mb-8 max-w-[280px] leading-relaxed">
-                            Track your service, manage bookings, and get app-exclusive offers in real-time.
-                            <span className="block mt-2 text-[#04a99d]/80 font-medium italic">
-                                *If payment status is pending, it will update here within minutes.
-                            </span>
+                        <h5 className="text-2xl font-bold mb-3">Download App</h5>
+                        <p className="text-white/80 text-sm mb-8 max-w-[280px] leading-relaxed">
+                            Track your professional in real-time and get exclusive offers on the app.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                        <div className="flex flex-col gap-3 w-full">
                             <a
                                 href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1"
+                                className="w-full h-12 relative rounded-xl overflow-hidden bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
                             >
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="w-[110px] h-8 relative rounded-full overflow-hidden bg-gradient-to-br from-[#037166] to-[#04a99d] border border-white/10"
-                                >
-                                    <Image
-                                        src="/apple2.png"
-                                        alt="App Store"
-
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </motion.button>
+                                <Image
+                                    src="/apple2.png"
+                                    alt="App Store"
+                                    fill
+                                    className="object-cover"
+                                />
                             </a>
 
                             <a
                                 href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1"
+                                className="w-full h-12 relative rounded-xl overflow-hidden bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
                             >
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="w-[110px] h-8 relative rounded-full overflow-hidden bg-gradient-to-br from-[#037166] to-[#04a99d] border border-white/10"
-                                >
-                                    <Image
-                                        src="/android1.png"
-                                        alt="Google Play"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </motion.button>
+                                <Image
+                                    src="/android1.png"
+                                    alt="Google Play"
+                                    fill
+                                    className="object-cover"
+                                />
                             </a>
                         </div>
                     </motion.div>
@@ -247,114 +229,66 @@ export function ThankYouPage({ bookingDetails }) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    className="relative rounded-2xl overflow-hidden mb-8 group"
+                    className="relative rounded-3xl overflow-hidden mb-8 group bg-white border border-gray-200 shadow-sm"
                 >
-                    {/* Premium gradient background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#037166] via-[#025f56] to-[#013f39]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(4,169,157,0.3),transparent_60%)]" />
-                    <div className="absolute top-0 right-0 p-6 opacity-[0.07] pointer-events-none">
-                        <Gift className="w-40 h-40 text-white -rotate-12" />
-                    </div>
-
-                    <div className="relative z-10 p-6">
+                    <div className="p-6">
                         {/* Header */}
                         <div className="flex items-start justify-between mb-5">
                             <div className="flex items-center gap-3">
-                                <div className="w-11 h-11 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                                    <Gift className="w-5 h-5 text-white" />
+                                <div className="w-11 h-11 rounded-xl bg-[#037166]/10 flex items-center justify-center border border-[#037166]/20">
+                                    <Gift className="w-5 h-5 text-[#037166]" />
                                 </div>
                                 <div>
-                                    <h4 className="text-lg font-bold text-white">Refer & Earn</h4>
-                                    <p className="text-white/60 text-xs">Share your link. Earn real rewards.</p>
+                                    <h4 className="text-lg font-bold text-gray-900">Refer & Earn</h4>
+                                    <p className="text-gray-500 text-xs">Earn rewards on every successful booking.</p>
                                 </div>
                             </div>
-                            {/* Welcome Bonus Pill */}
-                            <div className="flex items-center gap-1.5 bg-yellow-400/20 border border-yellow-400/30 px-3 py-1.5 rounded-full">
-                                <Sparkles className="w-3 h-3 text-yellow-300" />
-                                <span className="text-yellow-300 text-[11px] font-bold">₹{registrationBonus} Welcome Bonus</span>
+                            <div className="flex items-center gap-1.5 bg-yellow-400/10 border border-yellow-400/20 px-3 py-1.5 rounded-full">
+                                <Sparkles className="w-3 h-3 text-yellow-600" />
+                                <span className="text-yellow-700 text-[11px] font-bold">₹{registrationBonus} Bonus</span>
                             </div>
                         </div>
 
                         {/* Dual Reward Tiles */}
                         <div className="grid grid-cols-2 gap-3 mb-5">
-                            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                                <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">You Earn</p>
-                                <p className="text-3xl font-extrabold text-white">₹{referAndEarnAmount}</p>
-                                <p className="text-white/60 text-[11px] mt-1">per referral, after 1st booking</p>
+                            <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                                <p className="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">You Earn</p>
+                                <p className="text-3xl font-extrabold text-gray-900">₹{referAndEarnAmount}</p>
                             </div>
-                            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                                <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Friend Gets</p>
-                                <p className="text-3xl font-extrabold text-yellow-300">₹{registrationBonus}</p>
-                                <p className="text-white/60 text-[11px] mt-1">on first registration</p>
+                            <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                                <p className="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-1">Friend Gets</p>
+                                <p className="text-3xl font-extrabold text-[#037166]">₹{registrationBonus}</p>
                             </div>
                         </div>
 
                         {/* Invite Link Row */}
-                        <div className="bg-black/30 backdrop-blur-md rounded-xl p-3.5 border border-white/10 flex items-center justify-between gap-3 mb-4">
+                        <div className="bg-gray-50 rounded-2xl p-3.5 border border-gray-200 flex items-center justify-between gap-3 mb-4">
                             <div className="flex-1 overflow-hidden">
-                                <p className="text-white/40 text-[9px] uppercase tracking-widest mb-0.5 font-bold">Your Invite Link</p>
-                                <p className="text-white text-xs font-medium truncate">{inviteLink}</p>
+                                <p className="text-gray-400 text-[9px] uppercase tracking-widest mb-0.5 font-bold">Invite Link</p>
+                                <p className="text-gray-900 text-xs font-medium truncate">{inviteLink}</p>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
                                 <button
                                     onClick={handleCopyLink}
-                                    className="p-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95 border border-white/10"
+                                    className="p-2.5 rounded-lg bg-white border border-gray-200 text-gray-600 hover:text-[#037166] hover:border-[#037166] transition-all"
                                     title="Copy Link"
                                 >
-                                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                                 </button>
-                                <div className="h-8 w-px bg-white/10" />
-                                <div
-                                    className="relative group/share"
-                                    onMouseEnter={() => setShowSocials(true)}
-                                    onMouseLeave={() => setShowSocials(false)}
+                                <button
+                                    onClick={handleShareWhatsApp}
+                                    className="p-2.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-all"
+                                    title="WhatsApp"
                                 >
-                                    <button
-                                        className="p-2.5 rounded-lg bg-white/15 hover:bg-white/25 text-white transition-all active:scale-95 border border-white/10"
-                                        title="Share"
-                                    >
-                                        <Share2 className="w-4 h-4" />
-                                    </button>
-                                    <AnimatePresence>
-                                        {showSocials && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                                                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 flex flex-col items-center gap-3 z-50 pointer-events-auto"
-                                            >
-                                                {socialIcons.map((social, idx) => (
-                                                    <motion.div
-                                                        key={idx}
-                                                        className="relative group/social"
-                                                        initial={{ opacity: 0, y: 10 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: (socialIcons.length - 1 - idx) * 0.05 }}
-                                                    >
-                                                        <button
-                                                            onClick={social.action}
-                                                            className="p-3 rounded-full bg-white/10 hover:bg-[#037166] text-white shadow-xl hover:scale-110 active:scale-90 transition-all border border-white/20 outline-none"
-                                                        >
-                                                            <social.icon className="w-5 h-5" />
-                                                        </button>
-                                                        <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-white text-black text-[10px] font-bold rounded shadow-xl opacity-0 translate-x-2 pointer-events-none group-hover/social:opacity-100 group-hover/social:translate-x-0 transition-all duration-200 whitespace-nowrap z-[100]">
-                                                            {social.text}
-                                                            <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-r-[6px] border-r-white" />
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
-                                                <div className="w-3 h-3 bg-[#037166] rotate-45 -mt-1.5 border-r border-b border-white/10 shadow-lg" />
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
+                                    <WhatsAppIcon className="w-4 h-4" />
+                                </button>
                             </div>
                         </div>
 
                         {/* Footer note */}
-                        <div className="flex items-center gap-2 text-[10px] text-white/40">
+                        <div className="flex items-center gap-2 text-[10px] text-gray-400">
                             <Sparkles className="w-3 h-3 text-[#04a99d] flex-shrink-0" />
-                            <span>Your reward of ₹{referAndEarnAmount} is credited after your friend completes their first booking successfully.</span>
+                            <span>Rewards are credited after your friend's first successful service.</span>
                         </div>
                     </div>
                 </motion.div>
@@ -368,14 +302,12 @@ export function ThankYouPage({ bookingDetails }) {
                 >
                     <button
                         onClick={handleGoHome}
-                        className="w-full py-4 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#037166]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        className="w-full py-4 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-[#037166]/20 transition-all"
                     >
                         <Home className="w-5 h-5" />
                         Go to Homepage
                     </button>
                 </motion.div>
-
-                {/* App Download Promo */}
 
             </motion.div>
         </div>

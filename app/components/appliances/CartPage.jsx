@@ -53,7 +53,7 @@ export function CartPage({
               className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all text-[10px] font-black uppercase tracking-widest"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Continue Shopping
+              Continue Service Booking
             </motion.button>
 
             {cartItems.length > 0 && (

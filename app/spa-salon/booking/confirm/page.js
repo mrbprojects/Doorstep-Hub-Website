@@ -43,10 +43,7 @@ export default function SpaConfirmPage() {
             router.push(`/spa-salon/thank-you?orderId=${pendingBooking.orderId || ''}&date=${pendingBooking.bookedDate || ''}&time=${pendingBooking.bookedTime || ''}&paid=${pendingBooking.paid || '0'}&remaining=${pendingBooking.remaining || '0'}`);
         } else if (status === 'failure') {
             setPaymentStatus('failure');
-            toast.error('Payment failed. Redirecting to cart for retry...');
-            setTimeout(() => {
-                router.push('/spa-salon/cart');
-            }, 2000);
+            router.push('/spa-salon/booking/failure');
         }
     }, [clearCart, router]);
 
@@ -185,7 +182,7 @@ export default function SpaConfirmPage() {
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed?type=professional&deepType=Spa Saloons`
+                furl: `${window.location.protocol}//${window.location.host}/spa-salon/booking/failure`
             };
 
             if (paymentMethod === 'ONLINE') {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -12,6 +13,7 @@ import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
     const { cartData, cartItems, clearCart } = useServiceCart();
     const { token, isAuthenticated } = useAuth();
+    const router = useRouter();
 
     const bookingCost = cartData?.finalAmount || 0;
     const inspectionCost = cartItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0);
@@ -48,10 +50,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             }
         } else if (status === 'failure') {
             setPaymentStatus('failure');
-            toast.error('Payment failed. Redirecting to cart for retry...');
-            setTimeout(() => {
-                window.location.href = '/services/cart';
-            }, 2000);
+            router.push('/services/payment-failed');
         }
     }, [clearCart, onSuccess, bookingCost]);
 
@@ -241,7 +240,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 {/* Progress Indicator */}
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6">
                     <BookingSteps
-                        flowType={FLOW_TYPES.SERVICE_CENTER}
+                        flowType={FLOW_TYPES.NORMAL}
                         currentStep="address"
                         serviceSlug="services"
                     />

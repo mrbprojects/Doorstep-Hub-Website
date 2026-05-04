@@ -64,7 +64,7 @@ export function PaymentFailurePage() {
         } else if (type === 'service-center') {
             router.push('/appliance-repair-services/cart');
         } else if (type === 'verified-partner' || type === 'professional') {
-            router.push('/services/checkout');
+            router.push('/appliances/booking');
         } else {
             // Default to the appliances cart if we are already in the appliances module
             router.push('/appliances/cart');

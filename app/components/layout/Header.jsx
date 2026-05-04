@@ -283,7 +283,7 @@ export function Header({ theme = {}, navItems = [] }) {
               </div>
 
               {/* Cart Button */}
-              <motion.button
+              {/* <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
@@ -309,7 +309,7 @@ export function Header({ theme = {}, navItems = [] }) {
                     {cartItemsCount}
                   </motion.span>
                 )}
-              </motion.button>
+              </motion.button> */}
 
               {/* Auth Button with Profile Indicator */}
               <motion.button

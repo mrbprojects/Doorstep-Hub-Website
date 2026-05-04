@@ -320,6 +320,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     const n = (name || '').toUpperCase();
     if (n.includes('APPLIANCE')) return {
       bg: 'bg-[#E7F3F2]',
+      from: 'from-[#E7F3F2]',
       text: 'text-[#064E44]',
       sub: 'text-[#00796B]',
       btn: 'bg-[#00796B]',
@@ -327,6 +328,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     };
     if (n.includes('PG') || n.includes('HOSTEL')) return {
       bg: 'bg-[#EBF5FF]',
+      from: 'from-[#EBF5FF]',
       text: 'text-[#01579B]',
       sub: 'text-[#0288D1]',
       btn: 'bg-[#0288D1]',
@@ -334,6 +336,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     };
     if (n.includes('RELIGIOUS')) return {
       bg: 'bg-[#FFF6E9]',
+      from: 'from-[#FFF6E9]',
       text: 'text-[#7D3F1B]',
       sub: 'text-[#8E5A3C]',
       btn: 'bg-[#F57C00]',
@@ -341,6 +344,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     };
     if (n.includes('SPA') || n.includes('SALON')) return {
       bg: 'bg-[#FFF0F5]',
+      from: 'from-[#FFF0F5]',
       text: 'text-[#880E4F]',
       sub: 'text-[#C2185B]',
       btn: 'bg-[#C2185B]',
@@ -348,6 +352,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     };
     return {
       bg: 'bg-[#F5F5F5]',
+      from: 'from-[#F5F5F5]',
       text: 'text-[#212121]',
       sub: 'text-[#616161]',
       btn: 'bg-[#424242]',
@@ -378,22 +383,22 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
         initial={isScrollMode ? false : { opacity: 0, scale: 0.9 }}
         animate={isScrollMode ? false : { opacity: 1, scale: 1 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ y: isScrollMode ? 0 : -5 }}
         onClick={() => handleServiceClick(service)}
-        className={`relative overflow-hidden rounded-[20px] cursor-pointer flex-shrink-0 w-[150px] sm:w-[210px] h-[70px] sm:h-[108px] shadow-sm group ${theme.bg}`}
+        className={`relative overflow-hidden rounded-[20px] cursor-pointer flex-shrink-0 ${isScrollMode ? 'w-[180px] sm:w-[310px]' : 'w-full'} h-[90px] sm:h-[150px] shadow-sm group ${theme.bg}`}
       >
         {/* Text block on left */}
-        <div className="absolute top-2.5 sm:top-4 left-3 sm:left-5 w-[60%] z-10 pointer-events-none text-left">
-          <p className={`text-[11px] sm:text-[13px] font-bold leading-tight ${theme.text}`}>
+        <div className="absolute top-3 sm:top-6 left-3 sm:left-6 w-[55%] z-10 pointer-events-none text-left">
+          <p className={`text-[11px] sm:text-[16px] font-bold leading-tight mb-1 sm:mb-2 ${theme.text}`}>
             {service.name}
           </p>
-          <p className={`mt-0.5 text-[7px] sm:text-[11px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
+          <p className={`mt-1 text-[9px] sm:text-[13px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
             {theme.desc}
           </p>
         </div>
 
         {/* Image block */}
-        <div className="absolute inset-0 w-full h-full z-0">
+        <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
             <Image
               loader={imageLoader}
@@ -401,19 +406,18 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
               alt={service.name}
               fill
               priority={index < 4}
-              className="object-contain"
+              className="object-cover object-right transition-transform duration-500"
             />
           </div>
         </div>
 
-        {/* Subtle overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-[5]" />
+
       </motion.div>
     );
   };
 
   return (
-    <div className={`mt-8 mx-auto w-full ${isScrollMode ? 'max-w-none px-0' : 'max-w-[920px] px-3 sm:px-0'}`}>
+    <div className={`mt-8 mx-auto w-full ${isScrollMode ? 'max-w-none px-0' : 'max-w-[1300px] px-3 sm:px-0'}`}>
 
       {isScrollMode ? (
         /* ── Infinite Auto-Scroll Mode ── */
@@ -428,7 +432,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
             }
             .cards-track {
               display: flex;
-              gap: 12px;
+              gap: 24px;
               width: max-content;
               animation: scroll-cards 20s linear infinite;
             }
@@ -445,48 +449,8 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
         </div>
       ) : (
         /* ── Grid Mode (≤4 services) ── */
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-0 justify-center">
-          {services.map((service, index) => {
-            const theme = getServiceTheme(service.name);
-            return (
-              <motion.div
-                key={service._id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ y: -5, scale: 1.02 }}
-                onClick={() => handleServiceClick(service)}
-                className={`relative overflow-hidden rounded-[20px] cursor-pointer w-full sm:max-w-[210px] h-[70px] sm:h-[108px] shadow-sm group ${theme.bg}`}
-              >
-                {/* Text block on left */}
-                <div className="absolute top-2.5 sm:top-4 left-3 sm:left-5 w-[60%] z-10 pointer-events-none text-left">
-                  <p className={`text-[11px] sm:text-[13px] font-bold leading-tight ${theme.text}`}>
-                    {service.name}
-                  </p>
-                  <p className={`mt-0.5 text-[7px] sm:text-[11px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
-                    {theme.desc}
-                  </p>
-                </div>
-
-                {/* Image block */}
-                <div className="absolute inset-0 w-full h-full z-0">
-                  <div className="relative w-full h-full">
-                    <Image
-                      loader={imageLoader}
-                      src={service.image}
-                      alt={service.name}
-                      fill
-                      priority={index < 4}
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-
-                {/* Subtle overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-[5]" />
-              </motion.div>
-            );
-          })}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 justify-center">
+          {services.map((service, index) => renderCard(service, index))}
         </div>
       )}
     </div>
@@ -559,7 +523,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, []);
 
   return (
-    <section className="relative min-h-[60vh] flex flex-col items-center justify-center overflow-x-hidden pt-24 pb-8">
+    <section className="relative min-h-[60vh] flex flex-col items-center justify-center overflow-x-hidden pt-16 pb-8">
       {/* Latest Booking Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -598,7 +562,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#037166]/10 border border-[#037166]/30 rounded-full mb-4 sm:mb-8 max-w-full"
+            className="inline-flex items-center space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#037166]/10 border border-[#037166]/30 rounded-full mb-2 sm:mb-4 max-w-full"
           >
             <Sparkles className="w-4 h-4 text-[#037166] shrink-0" />
             <h6 className="text-[10px] sm:text-xs md:text-sm bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent font-medium line-clamp-1 sm:line-clamp-none">

@@ -151,7 +151,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
             <div className="flex items-center space-x-3">
               {/* Location Bar */}
               <LocationBar />
-              <motion.button
+              {/* <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onCartClick?.()}
@@ -167,7 +167,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
                     {cartItemsCount}
                   </motion.span>
                 )}
-              </motion.button>
+              </motion.button> */}
 
               {/* Removed redundant Search button as it is now in LocationBar or we can keep it for product search? 
                   User request specifically asked for location search in navbar. 

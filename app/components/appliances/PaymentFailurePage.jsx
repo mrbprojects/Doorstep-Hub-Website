@@ -61,6 +61,10 @@ export function PaymentFailurePage() {
             router.push('/religious-services/cart');
         } else if (type === 'appliances') {
             router.push('/appliances/cart');
+        } else if (type === 'service-center') {
+            router.push('/appliance-repair-services/cart');
+        } else if (type === 'verified-partner' || type === 'professional') {
+            router.push('/services/checkout');
         } else {
             // Default to the appliances cart if we are already in the appliances module
             router.push('/appliances/cart');

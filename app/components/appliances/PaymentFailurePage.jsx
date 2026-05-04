@@ -50,7 +50,7 @@ export function PaymentFailurePage() {
 
     const handleRetry = () => {
         const type = searchParams.get('type');
-        const deepType = searchParams.get('deepType');
+        const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
 
         // Logic to redirect to the correct cart based on service type
         if (deepType === 'PG Hostels') {

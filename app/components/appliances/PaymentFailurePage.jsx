@@ -117,7 +117,7 @@ export function PaymentFailurePage() {
                         </div>
                         <p className="text-red-400 font-medium mt-2 flex items-center gap-2">
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            Redirecting to cart for retry in 5 seconds...
+                            Redirecting for retry in 5 seconds...
                         </p>
                     </div>
                 </motion.div>

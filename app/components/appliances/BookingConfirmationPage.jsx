@@ -168,23 +168,50 @@ export function BookingConfirmationPage({
   const availableDates = getAvailableDates();
   const availableTimesForSelectedDate = getAvailableTimes(selectedDate);
 
-  // Set initial default date based on availability
+  // Set initial default date based on availability or pending booking
   useEffect(() => {
+    let pendingDate = null;
+    let pendingTime = null;
+
+    try {
+      const pendingData = sessionStorage.getItem('pending_booking');
+      if (pendingData) {
+        const parsed = JSON.parse(pendingData);
+        if (parsed.bookedDate) pendingDate = parsed.bookedDate;
+        if (parsed.bookedTime) pendingTime = parsed.bookedTime;
+      }
+    } catch (e) {
+      console.error('Failed to parse pending booking', e);
+    }
+
     const dates = getAvailableDates();
     if (dates.length > 0) {
-      const todayValue = dates[0].value;
-      const todayTimes = getAvailableTimes(todayValue);
+      if (pendingDate && dates.some(d => d.value === pendingDate)) {
+        setSelectedDate(pendingDate);
+        if (pendingTime) {
+           setSelectedTime(pendingTime);
+        }
+      } else {
+        const todayValue = dates[0].value;
+        const todayTimes = getAvailableTimes(todayValue);
 
-      if (todayTimes.length > 0) {
-        setSelectedDate(todayValue);
-      } else if (dates.length > 1) {
-        setSelectedDate(dates[1].value);
+        if (todayTimes.length > 0) {
+          setSelectedDate(todayValue);
+        } else if (dates.length > 1) {
+          setSelectedDate(dates[1].value);
+        }
       }
     }
   }, []);
 
-  // Reset time when date changes
+  // Reset time when date changes, but not if we just restored it
+  const isInitialMount = useRef(true);
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Don't reset time on the very first render if we restored it
+      return;
+    }
     setSelectedTime('');
   }, [selectedDate]);
 

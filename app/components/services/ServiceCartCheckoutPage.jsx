@@ -150,9 +150,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
         setLoading(true);
         try {
-            const endpoint = paymentMethod === 'ONLINE'
-                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
-                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
+            const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
 
             const response = await fetch(endpoint, {
                 method: 'POST',

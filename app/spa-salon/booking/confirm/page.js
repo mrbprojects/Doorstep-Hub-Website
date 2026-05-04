@@ -171,7 +171,6 @@ export default function SpaConfirmPage() {
 
         setLoading(true);
         try {
-            let endpoint = '';
             let payload = {
                 serviceAddressId: selectedAddress._id,
                 bookedDate,
@@ -185,11 +184,7 @@ export default function SpaConfirmPage() {
                 furl: `${window.location.protocol}//${window.location.host}/spa-salon/booking/failure`
             };
 
-            if (paymentMethod === 'ONLINE') {
-                endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
-            } else {
-                endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
-            }
+            const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -525,7 +520,7 @@ export default function SpaConfirmPage() {
 
                                                 <div className="flex justify-between w-full">
                                                     <span className="line-clamp-1">{item.itemName}</span>
-                                                    {/* <span className="font-medium text-gray-900">₹{Number(item.price).toFixed(2)}</span> */}
+                                                    <span className="font-medium text-gray-900">₹{Number(item.price).toFixed(2)}</span>
                                                 </div>
 
                                             </div>
@@ -534,20 +529,20 @@ export default function SpaConfirmPage() {
                                 </div>
                                 <div className="space-y-2.5 pt-1">
                                     {/* Subtotal */}
-                                    {/* <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Subtotal</span>
                                         <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost ?? 0).toFixed(2)}</span>
-                                    </div> */}
+                                    </div>
 
 
 
                                     {/* GST */}
-                                    {/* {(cartData?.gstAmount ?? 0) > 0 && (
+                                    {(cartData?.gstAmount ?? 0) > 0 && (
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-500">GST (18%)</span>
                                             <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
                                         </div>
-                                    )} */}
+                                    )}
 
                                     {/* Consultation / Platform Fee */}
                                     {(cartData?.consultationFee ?? 0) > 0 && (
@@ -560,22 +555,30 @@ export default function SpaConfirmPage() {
                                         </div>
                                     )}
 
+
+                                     <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        </svg>
+                                        <span>Pay now.</span>
+                                    </div>
+
                                     {/* Divider */}
                                     <div className="border-t border-gray-200 pt-2.5">
                                         <div className="flex justify-between text-sm font-bold">
                                             <span className="text-gray-700">Total Amount</span>
-                                            <span className="text-gray-900">₹{(cartData?.consultationFee ?? 0).toFixed(2)}</span>
+                                            <span className="text-gray-900">₹{(cartData?.finalAmount ?? 0).toFixed(2)}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes & fees</p>
                                     </div>
 
                                     {/* Non-refundable note */}
-                                    {/* <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                    <div className="flex items-center gap-1 text-[11px] text-gray-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
                                         </svg>
                                         <span>Platform fee is non-refundable.</span>
-                                    </div> */}
+                                    </div>
                                 </div>
                             </div>
 
@@ -590,7 +593,7 @@ export default function SpaConfirmPage() {
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[#6D1357] uppercase font-bold">
-                                    {paymentOption === 'ADVANCE' ? 'Advance Payment' : 'Full Amount (incl. all fees)'}
+                                    {paymentOption === 'ADVANCE' ? '' : 'Full Amount (incl. all fees)'}
                                 </p>
                             </div>
 
@@ -621,7 +624,7 @@ export default function SpaConfirmPage() {
                                         Confirming...
                                     </div>
                                 ) : (
-                                    paymentOption === 'ADVANCE' ? 'Pay Advance & Book' : 'Pay Full Amount'
+                                    paymentOption === 'ADVANCE' ? 'Book Now' : 'Pay Full Amount'
                                 )}
                             </motion.button>
 

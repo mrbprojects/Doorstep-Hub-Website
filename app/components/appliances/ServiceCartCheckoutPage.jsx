@@ -25,7 +25,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('online');
+    const [paymentMethod, setPaymentMethod] = useState('ONLINE');
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [technicianPreference, setTechnicianPreference] = useState('any');
@@ -199,17 +199,9 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         setLoading(true);
 
         try {
-            // Only 'online' is currently enabled in UI, so we focus on that.
-            // If we ever enable COD/Wallet for Cart, we'd need to check if 'service-cart' API supports them.
-            // For now, we use the existing endpoint for everything but ensure we send the right method string.
-
-            const methodToSend = paymentMethod === 'online' ? 'ONLINE' : paymentMethod;
-            // The API might expect 'ONLINE' uppercase? The original code had 'ONLINE'. 
-            // Check original: `paymentMethod === 'ONLINE'`. It sent `paymentMethod` in body.
-            // If I send 'online', backend might reject.
-            // Let's send 'ONLINE' if it is 'online'.
-
-            const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
+            const endpoint = paymentMethod === 'ONLINE'
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
+                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -221,7 +213,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     serviceAddressId: selectedAddress._id,
                     bookedDate,
                     bookedTime,
-                    paymentMethod: methodToSend, // Send 'ONLINE'
+                    paymentMethod,
                     sourceOfLead: 'website',
                     surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
                     furl: `${window.location.protocol}//${window.location.host}/appliances/payment-failed`
@@ -232,7 +224,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             console.log('💳 Checkout Response:', data);
 
             if (data.success) {
-                if (methodToSend === 'ONLINE' && data.access_key) {
+                if (paymentMethod === 'ONLINE' && data.access_key) {
                     // Save pending booking details to sessionStorage before redirect
                     // DO NOT clear cart here — data must survive the redirect
                     sessionStorage.setItem('pending_booking', JSON.stringify({
@@ -420,7 +412,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             </h4>
 
                             {/* Virtual Wallet Card */}
-                            {paymentMethod === 'wallet' && (
+                            {paymentMethod === 'WALLET' && (
                                 <motion.div
                                     initial={{ height: 0, opacity: 0, marginBottom: 0 }}
                                     animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
@@ -471,7 +463,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             <div className="grid md:grid-cols-2 gap-3">
                                 {[
                                     {
-                                        id: 'wallet',
+                                        id: 'WALLET',
                                         label: 'Wallet Pay',
                                         icon: Wallet,
                                         disabled: false,
@@ -479,7 +471,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         showBalance: true
                                     },
                                     {
-                                        id: 'online',
+                                        id: 'ONLINE',
                                         label: 'Online Payment',
                                         icon: CreditCard,
                                         disabled: false

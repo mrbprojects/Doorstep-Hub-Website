@@ -402,7 +402,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 <h1 className="text-4xl font-bold text-white">
                   {center.firstName} {center.lastName}
                 </h1>
-                
+
                 {/* App Links beside heading */}
                 <div className="flex items-center gap-3">
                   <a
@@ -562,7 +562,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                         <h4 className="text-xl font-bold text-white mb-2">{service.name}</h4>
 
                         {/* Service Description */}
-                        <div 
+                        <div
                           className="text-white/60 text-sm mb-4 line-clamp-2"
                           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
                         />
@@ -646,7 +646,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
 
               {/* Description */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-8">
-                <div 
+                <div
                   className="text-white/70 text-lg leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutBio) }}
                 />
@@ -841,18 +841,18 @@ export function StoreDetailPage({ storeId, serviceId }) {
                   {locationData && isMapsLoaded ? (
                     <GoogleMap
                       mapContainerStyle={{ width: '100%', height: '100%' }}
-                      center={{ 
-                        lat: parseFloat(locationData.latitude), 
-                        lng: parseFloat(locationData.longitude) 
+                      center={{
+                        lat: parseFloat(locationData.latitude),
+                        lng: parseFloat(locationData.longitude)
                       }}
                       zoom={14}
                       options={MAP_OPTIONS}
                     >
                       {/* Store Marker */}
                       <Marker
-                        position={{ 
-                          lat: parseFloat(locationData.latitude), 
-                          lng: parseFloat(locationData.longitude) 
+                        position={{
+                          lat: parseFloat(locationData.latitude),
+                          lng: parseFloat(locationData.longitude)
                         }}
                         icon={CENTER_LOGO}
                       />
@@ -867,9 +867,9 @@ export function StoreDetailPage({ storeId, serviceId }) {
 
                       {/* Label for Service Center */}
                       <OverlayViewF
-                        position={{ 
-                          lat: parseFloat(locationData.latitude), 
-                          lng: parseFloat(locationData.longitude) 
+                        position={{
+                          lat: parseFloat(locationData.latitude),
+                          lng: parseFloat(locationData.longitude)
                         }}
                         mapPaneName={FLOAT_PANE}
                       >
@@ -885,7 +885,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                     </GoogleMap>
                   ) : locationData ? (
                     <div className="w-full h-full flex items-center justify-center">
-                       <div className="w-8 h-8 border-4 border-[#037166] border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-8 h-8 border-4 border-[#037166] border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-white/40">
@@ -1099,7 +1099,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                           <div className="flex-1">
                             <h4 className="text-white font-semibold mb-1">{addon.childServiceName}</h4>
                             {addon.description && (
-                              <div 
+                              <div
                                 className="text-white/60 text-sm mb-2"
                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(addon.description) }}
                               />

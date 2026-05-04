@@ -441,11 +441,10 @@ export default function ReligiousConfirmPage() {
                             <div className="grid md:grid-cols-2 gap-4">
                                 <button
                                     onClick={() => setPaymentOption('ADVANCE')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
-                                        paymentOption === 'ADVANCE'
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'ADVANCE'
                                             ? 'border-[var(--saffron)] bg-[var(--saffron)]/5'
                                             : 'border-gray-100 hover:border-[var(--saffron)]/30 bg-gray-50'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
                                         <h4 className={`font-bold text-sm ${paymentOption === 'ADVANCE' ? 'text-[var(--saffron)]' : 'text-gray-900'}`}>Pay Advance</h4>
@@ -457,11 +456,10 @@ export default function ReligiousConfirmPage() {
                                 </button>
                                 <button
                                     onClick={() => setPaymentOption('FULL')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
-                                        paymentOption === 'FULL'
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'FULL'
                                             ? 'border-[var(--saffron)] bg-[var(--saffron)]/5'
                                             : 'border-gray-100 hover:border-[var(--saffron)]/30 bg-gray-50'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
                                         <h4 className={`font-bold text-sm ${paymentOption === 'FULL' ? 'text-[var(--saffron)]' : 'text-gray-900'}`}>Full Payment</h4>
@@ -531,7 +529,7 @@ export default function ReligiousConfirmPage() {
                                     <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
                                 </div>
 
-                                   {(cartData?.gstAmount ?? 0) > 0 && (
+                                {(cartData?.gstAmount ?? 0) > 0 && (
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">GST (18%)</span>
                                         <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
@@ -548,7 +546,7 @@ export default function ReligiousConfirmPage() {
                                     </div>
                                 )}
 
-                             
+
 
                                 {/* Divider + Total */}
                                 <div className="border-t border-gray-200 pt-2.5">
@@ -621,7 +619,7 @@ export default function ReligiousConfirmPage() {
                                         Processing...
                                     </div>
                                 ) : (
-                                    paymentMethod === 'ONLINE' 
+                                    paymentMethod === 'ONLINE'
                                         ? `${paymentOption === 'ADVANCE' ? 'Pay Advance' : 'Pay Full'} ₹${paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : (cartData?.finalAmount ?? 0).toFixed(2)}`
                                         : 'Confirm Booking'
                                 )}

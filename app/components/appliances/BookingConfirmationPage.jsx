@@ -301,9 +301,9 @@ export function BookingConfirmationPage({
         } else {
           // Handle wallet specific error if present in response
           if (paymentMethod === 'wallet' && data.required !== undefined) {
-             const available = data.available || 0;
-             const required = data.required;
-             throw new Error(`Insufficient wallet balance. Required: ₹${Number(required).toFixed(2)}, Available Balance: ₹${Number(available).toFixed(2)}`);
+            const available = data.available || 0;
+            const required = data.required;
+            throw new Error(`Insufficient wallet balance. Required: ₹${Number(required).toFixed(2)}, Available Balance: ₹${Number(available).toFixed(2)}`);
           }
           throw new Error(data.message || 'Booking failed');
         }
@@ -518,16 +518,15 @@ export function BookingConfirmationPage({
               <p className="text-xs text-white/40 mb-4">Select your preferred payment method</p>
 
 
-              
+
               <div className="grid gap-3">
                 {/* Online Payment */}
                 <button
                   onClick={() => setPaymentMethod('online')}
-                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
-                    paymentMethod === 'online'
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'online'
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
                       : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   <CreditCard className="w-6 h-6" />
                   <div className="text-left flex-1">
@@ -542,11 +541,10 @@ export function BookingConfirmationPage({
                 {/* Wallet Payment */}
                 <button
                   onClick={() => setPaymentMethod('wallet')}
-                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
-                    paymentMethod === 'wallet'
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'wallet'
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
                       : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   <div className="w-6 h-6 flex items-center justify-center">
                     <Wallet className={`w-6 h-6 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#04a99d]'}`} />
@@ -557,11 +555,10 @@ export function BookingConfirmationPage({
                       {!walletLoading && (
                         <div className="flex items-center gap-1.5">
                           <span className={`text-[10px] ${paymentMethod === 'wallet' ? 'text-white/80' : 'text-white/50'}`}>Available Balance:</span>
-                          <span className={`text-sm font-black tracking-tight px-2.5 py-0.5 rounded-md border shadow-sm ${
-                            paymentMethod === 'wallet' 
-                              ? 'bg-white/20 border-white/30 text-white shadow-black/20' 
+                          <span className={`text-sm font-black tracking-tight px-2.5 py-0.5 rounded-md border shadow-sm ${paymentMethod === 'wallet'
+                              ? 'bg-white/20 border-white/30 text-white shadow-black/20'
                               : 'bg-[#037166]/20 border-[#037166]/30 text-[#04a99d] shadow-black/10'
-                          }`}>
+                            }`}>
                             ₹{Number(walletBalance || 0).toFixed(2)}
                           </span>
                         </div>
@@ -571,21 +568,17 @@ export function BookingConfirmationPage({
                       Pay using your Doorstep Hub wallet balance
                     </p>
                     {/* Referral Information Section */}
-                    <div className={`mt-4 p-3 rounded-xl flex gap-3 transition-all ${
-                      paymentMethod === 'wallet' 
-                        ? 'bg-white/10 border border-white/20' 
+                    <div className={`mt-4 p-3 rounded-xl flex gap-3 transition-all ${paymentMethod === 'wallet'
+                        ? 'bg-white/10 border border-white/20'
                         : 'bg-[#037166]/5 border border-[#037166]/10'
-                    }`}>
-                      <div className={`p-1.5 rounded-lg h-fit ${
-                        paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/10'
                       }`}>
-                        <Info className={`w-4 h-4 ${
-                          paymentMethod === 'wallet' ? 'text-white' : 'text-[#037166]'
-                        }`} />
+                      <div className={`p-1.5 rounded-lg h-fit ${paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/10'
+                        }`}>
+                        <Info className={`w-4 h-4 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#037166]'
+                          }`} />
                       </div>
-                      <p className={`text-[11px] leading-relaxed ${
-                        paymentMethod === 'wallet' ? 'text-white/80' : 'text-[#037166]'
-                      }`}>
+                      <p className={`text-[11px] leading-relaxed ${paymentMethod === 'wallet' ? 'text-white/80' : 'text-[#037166]'
+                        }`}>
                         Refer your friends and family members and earn cashback up to <span className="font-bold">₹99</span>. The amount will be credited to your Doorstep Hub Wallet after a successful booking.
                       </p>
                     </div>
@@ -640,13 +633,13 @@ export function BookingConfirmationPage({
                   <div key={item.id || item._id || idx} className="p-3 rounded-xl bg-white/5 border border-white/10">
                     <h6 className="text-white font-bold leading-tight mb-1">{item.serviceName || 'Professional Service'}</h6>
                     <div className="flex flex-col gap-1">
-                        <p className="text-[#04a99d] text-[10px] font-bold uppercase tracking-widest bg-[#037166]/10 px-2 py-0.5 rounded w-fit">
-                            {item.packageName || item.title || 'Standard Package'}
-                        </p>
-                        <p className="text-white/40 text-[10px] flex items-center gap-1 mt-1">
-                            <Info className="w-3 h-3" />
-                            Rates checked: approx. start from ₹{item.price}
-                        </p>
+                      <p className="text-[#04a99d] text-[10px] font-bold uppercase tracking-widest bg-[#037166]/10 px-2 py-0.5 rounded w-fit">
+                        {item.packageName || item.title || 'Standard Package'}
+                      </p>
+                      <p className="text-white/40 text-[10px] flex items-center gap-1 mt-1">
+                        <Info className="w-3 h-3" />
+                        Rates checked: approx. start from ₹{item.price}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -660,24 +653,24 @@ export function BookingConfirmationPage({
                   <div className="flex flex-col">
                     <span>Platform Fee</span>
                     <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
-                        <CreditCard className="w-3 h-3" /> pay online now 
+                      <CreditCard className="w-3 h-3" /> pay online now
                     </span>
                   </div>
                   <span className="font-bold text-white">₹{bookingCost}</span>
                 </div>
-                
+
                 <div className="flex justify-between items-start text-white/80 text-sm">
                   <div className="flex flex-col">
                     <span>Inspection Fee</span>
                     <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
-                        <MapPin className="w-3 h-3" /> pay at doorstep 
+                      <MapPin className="w-3 h-3" /> pay at doorstep
                     </span>
                   </div>
                   <span className="font-bold text-white">₹{inspectionCost}</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#037166]/5 border border-[#037166]/10 text-[10px] text-white/50 leading-relaxed">
-                    <p>Only the <span className="text-[#04a99d] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.</p>
+                  <p>Only the <span className="text-[#04a99d] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.</p>
                 </div>
               </div>
 

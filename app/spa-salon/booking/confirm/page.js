@@ -556,7 +556,7 @@ export default function SpaConfirmPage() {
                                     )}
 
 
-                                     <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                    <div className="flex items-center gap-1 text-[11px] text-gray-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
                                         </svg>

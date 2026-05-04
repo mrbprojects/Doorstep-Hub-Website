@@ -256,9 +256,9 @@ export function BookingConfirmationPage({
         } else {
           // Handle wallet specific error if present in response
           if (paymentMethod === 'wallet' && data.required !== undefined) {
-             const available = data.available || 0;
-             const required = data.required;
-             throw new Error(`Insufficient wallet balance. Required: ₹${required}, Available: ₹${available}`);
+            const available = data.available || 0;
+            const required = data.required;
+            throw new Error(`Insufficient wallet balance. Required: ₹${required}, Available: ₹${available}`);
           }
           throw new Error(data.message || 'Booking failed');
         }
@@ -476,7 +476,7 @@ export function BookingConfirmationPage({
                     {/* Abstract background shapes */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-24 -mb-24 blur-2xl" />
-                    
+
                     <div className="relative flex justify-between items-start mb-10">
                       <div>
                         <div className="flex items-center gap-2 mb-1.5">
@@ -493,7 +493,7 @@ export function BookingConfirmationPage({
                         <Wallet className="w-6 h-6 text-white" />
                       </div>
                     </div>
-                    
+
                     <div className="relative flex justify-between items-end">
                       <div className="space-y-1">
                         <p className="text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
@@ -502,28 +502,27 @@ export function BookingConfirmationPage({
                         </p>
                       </div>
                       <div className="text-right">
-                         <div className="flex flex-col items-end">
-                            <span className="text-[14px] font-black italic tracking-tighter text-white">DH<span className="text-white/50">PAY</span></span>
-                            <div className="flex gap-1 mt-1">
-                              <div className="w-4 h-2.5 rounded-sm bg-white/20" />
-                              <div className="w-4 h-2.5 rounded-sm bg-white/40" />
-                            </div>
-                         </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[14px] font-black italic tracking-tighter text-white">DH<span className="text-white/50">PAY</span></span>
+                          <div className="flex gap-1 mt-1">
+                            <div className="w-4 h-2.5 rounded-sm bg-white/20" />
+                            <div className="w-4 h-2.5 rounded-sm bg-white/40" />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </motion.div>
               )}
-              
+
               <div className="grid gap-3">
                 {/* Online Payment */}
                 <button
                   onClick={() => setPaymentMethod('online')}
-                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
-                    paymentMethod === 'online'
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'online'
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
                       : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   <CreditCard className="w-6 h-6" />
                   <div className="text-left flex-1">
@@ -538,11 +537,10 @@ export function BookingConfirmationPage({
                 {/* Wallet Payment */}
                 <button
                   onClick={() => setPaymentMethod('wallet')}
-                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${
-                    paymentMethod === 'wallet'
+                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'wallet'
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
                       : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   <div className="w-6 h-6 flex items-center justify-center">
                     <Wallet className={`w-6 h-6 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#04a99d]'}`} />
@@ -551,9 +549,8 @@ export function BookingConfirmationPage({
                     <div className="flex items-center justify-between">
                       <p className="font-semibold">DH Wallet</p>
                       {!walletLoading && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/20 text-[#04a99d]'
-                        }`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/20 text-[#04a99d]'
+                          }`}>
                           Available: ₹{walletBalance}
                         </span>
                       )}

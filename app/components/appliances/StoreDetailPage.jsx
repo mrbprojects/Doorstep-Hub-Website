@@ -467,7 +467,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": centerData.business_name || `${centerData.firstName} ${centerData.lastName}`,
-    "image": (centerData.image || centerData.logo) 
+    "image": (centerData.image || centerData.logo)
       ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${centerData.image || centerData.logo}`.replace(/([^:]\/)\/+/g, "$1")
       : "https://doorstephub.com/d-hub-logo.png",
     "address": {
@@ -713,7 +713,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             </div>
 
                             {/* Service Description */}
-                            <div 
+                            <div
                               className="text-white/60 text-xs line-clamp-2 max-w-2xl"
                               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
                             />
@@ -809,7 +809,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
               {/* Description */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-8">
-                <div 
+                <div
                   className="text-white/70 text-lg leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutBio) }}
                 />
@@ -1010,18 +1010,18 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   {isMapsLoaded && locationData ? (
                     <GoogleMap
                       mapContainerStyle={MAP_CONTAINER_STYLE}
-                      center={{ 
-                        lat: parseFloat(locationData.latitude), 
-                        lng: parseFloat(locationData.longitude) 
+                      center={{
+                        lat: parseFloat(locationData.latitude),
+                        lng: parseFloat(locationData.longitude)
                       }}
                       zoom={15}
                       options={MAP_OPTIONS}
                     >
                       {/* Service Center Marker */}
                       <Marker
-                        position={{ 
-                          lat: parseFloat(locationData.latitude), 
-                          lng: parseFloat(locationData.longitude) 
+                        position={{
+                          lat: parseFloat(locationData.latitude),
+                          lng: parseFloat(locationData.longitude)
                         }}
                         icon={CENTER_LOGO}
                         title={center.business_name}
@@ -1029,9 +1029,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
                       {/* Label for Service Center */}
                       <OverlayViewF
-                        position={{ 
-                          lat: parseFloat(locationData.latitude), 
-                          lng: parseFloat(locationData.longitude) 
+                        position={{
+                          lat: parseFloat(locationData.latitude),
+                          lng: parseFloat(locationData.longitude)
                         }}
                         mapPaneName={FLOAT_PANE}
                       >
@@ -1250,7 +1250,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       <div
                         key={addon._id}
                         onClick={() => toggleAddonSelection(addon._id)}
-                      className={`bg-white/5 border-2 rounded-2xl p-4 cursor-pointer transition-all hover:bg-white/10 ${selectedAddons.includes(addon._id)
+                        className={`bg-white/5 border-2 rounded-2xl p-4 cursor-pointer transition-all hover:bg-white/10 ${selectedAddons.includes(addon._id)
                           ? 'bg-[#037166]/30 border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] ring-1 ring-white/50'
                           : 'border-white/10'
                           }`}
@@ -1272,7 +1272,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                           <div className="flex-1">
                             <h4 className="text-white font-semibold mb-1">{addon.childServiceName}</h4>
                             {addon.description && (
-                              <div 
+                              <div
                                 className="text-white/60 text-sm mb-2"
                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(addon.description) }}
                               />

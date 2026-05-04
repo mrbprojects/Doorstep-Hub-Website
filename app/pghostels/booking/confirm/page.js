@@ -441,11 +441,10 @@ function PGConfirmContent() {
                             <div className="grid md:grid-cols-2 gap-4">
                                 <button
                                     onClick={() => setPaymentOption('ADVANCE')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
-                                        paymentOption === 'ADVANCE'
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'ADVANCE'
                                             ? 'border-[#037166] bg-[#037166]/5'
                                             : 'border-gray-100 hover:border-[#037166]/30 bg-gray-50'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
                                         <h4 className={`font-bold text-sm ${paymentOption === 'ADVANCE' ? 'text-[#037166]' : 'text-gray-900'}`}>Pay Advance</h4>
@@ -457,11 +456,10 @@ function PGConfirmContent() {
                                 </button>
                                 <button
                                     onClick={() => setPaymentOption('FULL')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${
-                                        paymentOption === 'FULL'
+                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'FULL'
                                             ? 'border-[#037166] bg-[#037166]/5'
                                             : 'border-gray-100 hover:border-[#037166]/30 bg-gray-50'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
                                         <h4 className={`font-bold text-sm ${paymentOption === 'FULL' ? 'text-[#037166]' : 'text-gray-900'}`}>Full Payment</h4>
@@ -627,14 +625,14 @@ function PGConfirmContent() {
                             </motion.button>
 
                             <div className="mt-4 space-y-1.5 text-center">
-                                    <p className="text-[10px] text-gray-400">
-                                        By booking, you agree to our Terms &amp; Cancellation Policy.
-                                    </p>
-                                    <div className="flex items-center justify-center gap-2 text-[10px] text-[#037166] bg-[#037166]/5 p-2.5 rounded-xl border border-[#037166]/10">
-                                        <Info className="w-3.5 h-3.5 flex-shrink-0" />
-                                        <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
-                                    </div>
+                                <p className="text-[10px] text-gray-400">
+                                    By booking, you agree to our Terms &amp; Cancellation Policy.
+                                </p>
+                                <div className="flex items-center justify-center gap-2 text-[10px] text-[#037166] bg-[#037166]/5 p-2.5 rounded-xl border border-[#037166]/10">
+                                    <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                    <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
                                 </div>
+                            </div>
                         </motion.div>
                     </div>
                 </div>

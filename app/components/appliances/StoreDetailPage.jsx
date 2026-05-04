@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { GoogleMap, Marker, OverlayViewF, FLOAT_PANE } from '@react-google-maps/api';
 import {
   ArrowLeft,
   Star,
@@ -23,6 +24,41 @@ import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
+
+// ── Map Configuration ──
+const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
+
+const MAP_OPTIONS = {
+  zoomControl: true,
+  streetViewControl: false,
+  mapTypeControl: false,
+  fullscreenControl: true,
+  styles: [
+    { featureType: 'all', elementType: 'geometry', stylers: [{ color: '#1a1a1a' }] },
+    { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#8c8c8c' }] },
+    { featureType: 'all', elementType: 'labels.text.stroke', stylers: [{ color: '#000000' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#2a2a2a' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#333333' }] },
+    { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#2d2d2d' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a1410' }] },
+    { featureType: 'transit', elementType: 'geometry.fill', stylers: [{ color: '#037166' }] },
+    { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.park', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit.station.bus', stylers: [{ visibility: 'off' }] },
+  ],
+};
+
+const GREEN_DOT = {
+  url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+  scaledSize: { width: 44, height: 44 },
+  anchor: { x: 22, y: 44 },
+};
+
+const CENTER_LOGO = {
+  url: '/servicecenterpointlogo.png',
+  scaledSize: { width: 38, height: 50 },
+  anchor: { x: 19, y: 50 },
+};
 
 export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const router = useRouter();
@@ -53,7 +89,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   // Get service cart functions from context
   const { addToCart: addToServiceCart, clearCart } = useServiceCart();
   // Get user's real location
-  const { location } = useLocationContext();
+  const { location, isMapsLoaded } = useLocationContext();
 
   // Fetch service center details from API
   useEffect(() => {
@@ -971,16 +1007,63 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               {/* Map */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden mb-8">
                 <div className="relative h-[500px] bg-gray-900">
-                  {locationData && (
-                    <iframe
-                      src={`https://www.google.com/maps?q=${locationData.latitude},${locationData.longitude}&output=embed`}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      title="Store Location"
-                    />
+                  {isMapsLoaded && locationData ? (
+                    <GoogleMap
+                      mapContainerStyle={MAP_CONTAINER_STYLE}
+                      center={{ 
+                        lat: parseFloat(locationData.latitude), 
+                        lng: parseFloat(locationData.longitude) 
+                      }}
+                      zoom={15}
+                      options={MAP_OPTIONS}
+                    >
+                      {/* Service Center Marker */}
+                      <Marker
+                        position={{ 
+                          lat: parseFloat(locationData.latitude), 
+                          lng: parseFloat(locationData.longitude) 
+                        }}
+                        icon={CENTER_LOGO}
+                        title={center.business_name}
+                      />
+
+                      {/* Label for Service Center */}
+                      <OverlayViewF
+                        position={{ 
+                          lat: parseFloat(locationData.latitude), 
+                          lng: parseFloat(locationData.longitude) 
+                        }}
+                        mapPaneName={FLOAT_PANE}
+                      >
+                        <div
+                          style={{ position: 'absolute', transform: 'translate(-50%, 10px)', pointerEvents: 'none' }}
+                          className="bg-black/60 backdrop-blur-sm border border-white/10 rounded px-2 py-1 shadow-md whitespace-nowrap"
+                        >
+                          <span className="text-white/90 text-[10px] font-bold">
+                            {center.business_name}
+                          </span>
+                        </div>
+                      </OverlayViewF>
+
+                      {/* User Location Marker */}
+                      {location && (
+                        <Marker
+                          position={{ lat: location.lat, lng: location.lng }}
+                          icon={GREEN_DOT}
+                          title="You are here"
+                        />
+                      )}
+                    </GoogleMap>
+                  ) : locationData ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900">
+                      <div className="w-10 h-10 border-4 border-[#037166] border-t-transparent rounded-full animate-spin mb-4"></div>
+                      <span className="text-white/60 text-sm">Loading Interactive Map...</span>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-800">
+                      <Loader2 className="w-10 h-10 text-[#037166] animate-spin mb-4" />
+                      <span className="text-white/60">Loading map data...</span>
+                    </div>
                   )}
                 </div>
               </div>

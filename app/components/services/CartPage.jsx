@@ -198,12 +198,12 @@ export function CartPage({
                   </div>
                   <div className="flex justify-between text-slate-600">
                     <span>Platform Fee</span>
-                    <span className="font-semibold text-slate-900">₹{(cartData?.platformFee || 0).toFixed(2)}</span>
+                    <span className="font-semibold text-slate-900">₹{(cartData?.platformFee || cartData?.consultationFee).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-slate-600">
+                  {/* <div className="flex justify-between text-slate-600">
                     <span>Consultation Fee</span>
                     <span className="font-semibold text-slate-900">₹{(cartData?.consultationFee || 0).toFixed(2)}</span>
-                  </div>
+                  </div> */}
                   <div className="flex justify-between text-slate-600">
                     <span>GST</span>
                     <span className="font-semibold text-slate-900">₹{(cartData?.gstAmount || 0).toFixed(2)}</span>

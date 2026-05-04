@@ -23,6 +23,64 @@ import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
+import { GoogleMap, Marker, OverlayViewF } from '@react-google-maps/api';
+
+const FLOAT_PANE = "floatPane";
+
+const MAP_OPTIONS = {
+  disableDefaultUI: true,
+  zoomControl: true,
+  styles: [
+    {
+      "elementType": "geometry",
+      "stylers": [{ "color": "#212121" }]
+    },
+    {
+      "elementType": "labels.icon",
+      "stylers": [{ "visibility": "off" }]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#757575" }]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [{ "color": "#212121" }]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#757575" }]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#181818" }]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.fill",
+      "stylers": [{ "color": "#2c2c2c" }]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#000000" }]
+    }
+  ],
+};
+
+const CENTER_LOGO = {
+  url: '/servicecenterpointlogo.png',
+  scaledSize: { width: 40, height: 40 },
+  anchor: { x: 20, y: 40 },
+};
+
+const GREEN_DOT = {
+  url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+  scaledSize: { width: 32, height: 32 },
+  anchor: { x: 16, y: 32 },
+};
 
 export function StoreDetailPage({ storeId, serviceId }) {
   const router = useRouter();
@@ -31,7 +89,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
   const [reviewsToShow, setReviewsToShow] = useState(3);
   const [selectedPackages, setSelectedPackages] = useState([]);
   const [resolvedProviderId, setResolvedProviderId] = useState(null);
-  const { location } = useLocationContext();
+  const { location, isMapsLoaded } = useLocationContext();
 
   // API data state
   const [loading, setLoading] = useState(true);
@@ -780,16 +838,59 @@ export function StoreDetailPage({ storeId, serviceId }) {
               {/* Map */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden mb-8">
                 <div className="relative h-[500px] bg-gray-900">
-                  {locationData && (
-                    <iframe
-                      src={`https://www.google.com/maps?q=${locationData.latitude},${locationData.longitude}&output=embed`}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      title="Store Location"
-                    />
+                  {locationData && isMapsLoaded ? (
+                    <GoogleMap
+                      mapContainerStyle={{ width: '100%', height: '100%' }}
+                      center={{ 
+                        lat: parseFloat(locationData.latitude), 
+                        lng: parseFloat(locationData.longitude) 
+                      }}
+                      zoom={14}
+                      options={MAP_OPTIONS}
+                    >
+                      {/* Store Marker */}
+                      <Marker
+                        position={{ 
+                          lat: parseFloat(locationData.latitude), 
+                          lng: parseFloat(locationData.longitude) 
+                        }}
+                        icon={CENTER_LOGO}
+                      />
+
+                      {/* User Location Marker */}
+                      {location && (
+                        <Marker
+                          position={{ lat: location.lat, lng: location.lng }}
+                          icon={GREEN_DOT}
+                        />
+                      )}
+
+                      {/* Label for Service Center */}
+                      <OverlayViewF
+                        position={{ 
+                          lat: parseFloat(locationData.latitude), 
+                          lng: parseFloat(locationData.longitude) 
+                        }}
+                        mapPaneName={FLOAT_PANE}
+                      >
+                        <div
+                          style={{ position: 'absolute', transform: 'translate(-50%, 10px)', pointerEvents: 'none' }}
+                          className="bg-black/60 backdrop-blur-sm border border-white/10 rounded px-2 py-1 shadow-md whitespace-nowrap"
+                        >
+                          <span className="text-white/90 text-[10px] font-bold">
+                            {center.firstName} {center.lastName}
+                          </span>
+                        </div>
+                      </OverlayViewF>
+                    </GoogleMap>
+                  ) : locationData ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                       <div className="w-8 h-8 border-4 border-[#037166] border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white/40">
+                      Location not available
+                    </div>
                   )}
                 </div>
               </div>

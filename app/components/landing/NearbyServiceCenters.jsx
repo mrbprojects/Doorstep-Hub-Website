@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Navigation, Star, Phone, Clock, Loader2, ArrowRight } from 'lucide-react';
-import { GoogleMap, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET } from '@react-google-maps/api';
+import { GoogleMap, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, FLOAT_PANE } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
@@ -22,8 +22,8 @@ const YELLOW_DOT_ACTIVE = {
 };
 const CENTER_LOGO = {
   url: '/servicecenterpointlogo.png',
-  scaledSize: { width: 38, height: 38 },
-  anchor: { x: 19, y: 38 },
+  scaledSize: { width: 38, height: 50 },
+  anchor: { x: 19, y: 70 },
 };
 
 // DARK MODE MAP OPTIONS - Instant dark theme
@@ -88,6 +88,25 @@ const mapOptions = {
       "stylers": [
         { "color": "#037166" }
       ]
+    },
+    {
+      "featureType": "poi.business",
+      "stylers": [
+        { "visibility": "off" }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text",
+      "stylers": [
+        { "visibility": "off" }
+      ]
+    },
+    {
+      "featureType": "transit.station.bus",
+      "stylers": [
+        { "visibility": "off" }
+      ]
     }
   ]
 };
@@ -103,9 +122,9 @@ export function NearbyServiceCenters() {
   const [error, setError] = useState(null);
   const [mapZoom, setMapZoom] = useState(13);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const mapRef = useRef(null);
+  const mapRef = React.useRef(null);
   // Lock initial center so GoogleMap center prop never changes after mount
-  const initialCenterRef = useRef(null);
+  const initialCenterRef = React.useRef(null);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -454,6 +473,7 @@ export function NearbyServiceCenters() {
                     if (newZoom !== mapZoom) setMapZoom(newZoom);
                   }
                 }}
+                onClick={() => setSelectedService(null)}
               >
                 {location && (
                   <Marker position={{ lat: location.lat, lng: location.lng }} icon={GREEN_DOT} title="You are here" zIndex={1000} />
@@ -472,24 +492,58 @@ export function NearbyServiceCenters() {
                         onMouseOver={() => setHoveredMarker(index)}
                         onMouseOut={() => setHoveredMarker(null)}
                       />
+                      {/* Permanent Mini-Label (Google style) */}
+                      {!isAct && (
+                        <OverlayViewF 
+                          position={{ lat: service.lat, lng: service.lng }} 
+                          mapPaneName={FLOAT_PANE}
+                        >
+                          <div 
+                            style={{ position: 'absolute', transform: 'translate(-50%, 10px)', pointerEvents: 'none' }}
+                            className="bg-black/60 backdrop-blur-sm border border-white/10 rounded px-1.5 py-0.5 shadow-md"
+                          >
+                            <span className="text-white/90 text-[9px] font-bold truncate max-w-[80px] block">
+                              {service.name.split(' ')[0]}
+                            </span>
+                          </div>
+                        </OverlayViewF>
+                      )}
+
                       {hoveredMarker === index && (
-                        <OverlayViewF position={{ lat: service.lat, lng: service.lng }} mapPaneName={OVERLAY_MOUSE_TARGET}>
-                          <div style={{ transform: 'translate(-50%,-115%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
-                            className="bg-black/90 border border-[#037166]/60 rounded-xl px-3 py-2 shadow-xl flex flex-col items-center gap-1">
+                        <OverlayViewF 
+                          position={{ lat: service.lat, lng: service.lng }} 
+                          mapPaneName={FLOAT_PANE}
+                        >
+                          <div 
+                            style={{ position: 'absolute', transform: 'translate(-50%, -110%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
+                            className="bg-black/90 backdrop-blur-md border border-[#037166]/60 rounded-xl px-3 py-2 shadow-2xl flex flex-col items-center gap-1 z-50"
+                          >
                             <div className="flex items-center gap-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-[#04a99d]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                              <span className="text-white text-xs font-semibold">{service.name}</span>
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#04a99d] shadow-[0_0_8px_#04a99d]" />
+                              <span className="text-white text-xs font-bold">{service.name}</span>
                             </div>
-                            <span className="text-[10px] text-[#04a99d]">Double-click to open</span>
+                            <div className="flex items-center gap-1.5 text-[10px] text-[#04a99d] font-medium opacity-80">
+                              <Navigation className="w-2.5 h-2.5" />
+                              Double-click to view details
+                            </div>
+                            {/* Connector arrow */}
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black/90 border-r border-b border-[#037166]/60 rotate-45" />
                           </div>
                         </OverlayViewF>
                       )}
                       {selectedService === index && hoveredMarker !== index && (
-                        <OverlayViewF position={{ lat: service.lat, lng: service.lng }} mapPaneName={OVERLAY_MOUSE_TARGET}>
-                          <div style={{ transform: 'translate(-50%,-125%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
-                            className="bg-[#037166]/95 border border-[#04a99d]/60 rounded-xl px-3 py-1.5 shadow-xl flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#04a99d] animate-pulse" />
-                            <span className="text-white text-xs font-semibold">{service.name}</span>
+                        <OverlayViewF 
+                          position={{ lat: service.lat, lng: service.lng }} 
+                          mapPaneName={FLOAT_PANE}
+                        >
+                          <div 
+                            style={{ position: 'absolute', transform: 'translate(-50%, -140%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
+                            className="bg-gradient-to-r from-[#037166] to-[#025951] border border-[#04a99d]/60 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 ring-2 ring-white/10 z-50"
+                          >
+                            <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]" />
+                            <span className="text-white text-xs font-bold tracking-wide uppercase">{service.name}</span>
+                            {/* Connector arrow */}
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#025951] border-r border-b border-[#04a99d]/60 rotate-45" />
                           </div>
                         </OverlayViewF>
                       )}

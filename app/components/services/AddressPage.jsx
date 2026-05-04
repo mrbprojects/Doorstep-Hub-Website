@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, X, Trash2, Edit2, Loader2, Search, Crosshair } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,6 +9,17 @@ import { useLocationContext } from '@/context/LocationContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { GoogleMap } from '@react-google-maps/api';
 import { locationManager } from '@/services/locationManager';
+
+const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
+const MAP_OPTIONS = {
+  disableDefaultUI: true,
+  zoomControl: false,
+  streetViewControl: false,
+  mapTypeControl: false,
+  fullscreenControl: false,
+  clickableIcons: false,
+  gestureHandling: 'greedy'
+};
 
 export function AddressPage({
   selectedAddress,
@@ -67,6 +78,7 @@ export function AddressPage({
     lat: Number(contextLocation?.lat) || 17.450123,
     lng: Number(contextLocation?.lng) || 78.390456
   });
+  const initialCenterRef = React.useRef(null);
 
   // Sync initial state and map center if contextLocation arrives
   useEffect(() => {
@@ -78,14 +90,12 @@ export function AddressPage({
         if (!isNaN(lat) && !isNaN(lng)) {
           const coords = { lat, lng };
           setMapCenter(coords);
+          if (!initialCenterRef.current) initialCenterRef.current = coords;
           setHasAutoDetected(true);
         }
 
         try {
-          // Even if we have contextLocation, it might be IP-based (vague)
-          // So we do a fresh reverseGeocode to get Plot/House details
           const data = await locationManager.reverseGeocode(lat, lng);
-
           setNewAddress(prev => ({
             ...prev,
             latitude: lat.toString(),
@@ -97,8 +107,6 @@ export function AddressPage({
             addressLineOne: data.address || contextLocation.address || prev.addressLineOne,
             stateName: data.state || contextLocation.state || prev.stateName
           }));
-
-          // If no addresses, show the add form automatically
           if (addresses.length === 0 && !loading) {
             setShowAddForm(true);
           }
@@ -107,7 +115,6 @@ export function AddressPage({
         }
       }
     };
-
     initLocation();
   }, [contextLocation, hasAutoDetected, addresses.length, loading]);
 
@@ -384,18 +391,10 @@ export function AddressPage({
                       </motion.div>
                     )}
                     <GoogleMap
-                      mapContainerStyle={{ width: '100%', height: '100%' }}
+                      mapContainerStyle={MAP_CONTAINER_STYLE}
                       center={mapCenter}
                       zoom={17}
-                      options={{
-                        disableDefaultUI: true,
-                        zoomControl: false,
-                        streetViewControl: false,
-                        mapTypeControl: false,
-                        fullscreenControl: false,
-                        clickableIcons: false,
-                        gestureHandling: 'greedy'
-                      }}
+                      options={MAP_OPTIONS}
                       onLoad={(map) => { mapRef.current = map; }}
                       onDragStart={() => setIsDragging(true)}
                       onDragEnd={async () => {

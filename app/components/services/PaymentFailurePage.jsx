@@ -61,6 +61,10 @@ export function PaymentFailurePage() {
             router.push('/religious-services/cart');
         } else if (type === 'appliances') {
             router.push('/appliances/cart');
+        } else if (type === 'service-center') {
+            router.push('/appliance-repair-services/cart');
+        } else if (type === 'verified-partner' || type === 'professional') {
+            router.push('/appliances/booking');
         } else {
             // Default to the general services cart
             router.push('/services/cart');
@@ -113,7 +117,7 @@ export function PaymentFailurePage() {
                         </div>
                         <p className="text-red-400 font-medium mt-2 flex items-center gap-2">
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            Redirecting to cart for retry in 5 seconds...
+                            Redirecting for retry in 5 seconds...
                         </p>
                     </div>
                 </motion.div>

@@ -241,7 +241,7 @@ export function SpaCartPage({
                                 <div className="space-y-4 mb-8">
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                                            <span>  {item.itemName}</span>
+                                            <span>Treatments Total</span>
                                             <span className="text-slate-900 text-lg font-bold">₹{(cartData?.totalServiceCost || 0).toFixed(0)}</span>
                                         </div>
                                         <div className="h-px bg-slate-50" />

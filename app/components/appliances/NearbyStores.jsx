@@ -151,7 +151,10 @@ export function NearbyServiceCenters({ onViewAll }) {
       <motion.div
         onMouseEnter={() => handleCardHover(actualIndex)}
         onMouseLeave={handleCardLeave}
-        onClick={() => navigateToService(service)}
+        onClick={(e) => {
+          e.stopPropagation();
+          navigateToService(service);
+        }}
         whileHover={{ x: 10 }}
         className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative ${isActive
             ? 'bg-gradient-to-r from-[#037166]/25 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/20'
@@ -224,7 +227,11 @@ export function NearbyServiceCenters({ onViewAll }) {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <section id="nearby-centers" className="relative py-12 overflow-hidden">
+    <section 
+      id="nearby-centers" 
+      className="relative py-12 overflow-hidden"
+      onClick={() => setSelectedService(null)}
+    >
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0a1410] to-[#0a0a0a]">
         <div className="absolute inset-0 opacity-5">
@@ -288,6 +295,7 @@ export function NearbyServiceCenters({ onViewAll }) {
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              onClick={(e) => e.stopPropagation()}
               className="relative h-[600px] rounded-3xl overflow-hidden bg-[#1a1a1a] border border-[#037166]/20 shadow-2xl"
             >
               {/* Loading overlay */}
@@ -437,6 +445,7 @@ export function NearbyServiceCenters({ onViewAll }) {
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              onClick={(e) => e.stopPropagation()}
               className="space-y-4"
             >
               {!loading && services.length > 0 && (
@@ -469,7 +478,10 @@ export function NearbyServiceCenters({ onViewAll }) {
 
           {/* Last 2 centers below */}
           {!loading && services.length >= 6 && (
-            <div className="grid lg:grid-cols-2 gap-8 mt-8">
+            <div 
+              className="grid lg:grid-cols-2 gap-8 mt-8"
+              onClick={(e) => e.stopPropagation()}
+            >
               {services.slice(4, 6).map((service, index) => (
                 <ServiceCard key={service.id} service={service} actualIndex={index + 4} />
               ))}

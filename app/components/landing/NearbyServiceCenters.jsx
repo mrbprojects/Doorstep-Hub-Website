@@ -274,7 +274,10 @@ export function NearbyServiceCenters() {
       key={service.id}
       onMouseEnter={() => handleCardHover(actualIndex)}
       onMouseLeave={handleCardLeave}
-      onClick={() => router.push(`/service-list/${service.slug || service.id}`)}
+      onClick={(e) => {
+        e.stopPropagation();
+        router.push(`/service-list/${service.slug || service.id}`);
+      }}
       whileHover={{ x: 10 }}
       name="service-card"
       className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${isActive
@@ -379,7 +382,10 @@ export function NearbyServiceCenters() {
 
   // YOUR EXACT ORIGINAL UI WITH DARK MAP & INSTANT LOAD
   return (
-    <section className="relative py-12 overflow-hidden">
+    <section 
+      className="relative py-12 overflow-hidden"
+      onClick={() => setSelectedService(null)}
+    >
       {/* Architectural World Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -449,6 +455,7 @@ export function NearbyServiceCenters() {
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            onClick={(e) => e.stopPropagation()}
             className="relative h-[700px] rounded-3xl overflow-hidden bg-[#1a1a1a] border border-[#037166]/20 shadow-2xl"
           >
             {/* Loading overlay */}

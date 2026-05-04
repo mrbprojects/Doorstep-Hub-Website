@@ -49,7 +49,7 @@ export function PaymentFailurePage() {
     }, [searchParams]);
 
     const handleRetry = () => {
-        const type = searchParams.get('type');
+        const type = searchParams.get('type') || searchParams.get('serviceType');
         const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
 
         // Logic to redirect to the correct cart based on service type
@@ -69,6 +69,14 @@ export function PaymentFailurePage() {
             // Default to the general services cart
             router.push('/services/cart');
         }
+    };
+
+    const getDestinationName = () => {
+        const type = searchParams.get('type') || searchParams.get('serviceType');
+        const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
+        if (deepType) return 'cart';
+        if (type === 'verified-partner' || type === 'professional') return 'booking';
+        return 'cart';
     };
 
     const handleGoHome = () => {
@@ -117,7 +125,7 @@ export function PaymentFailurePage() {
                         </div>
                         <p className="text-red-400 font-medium mt-2 flex items-center gap-2">
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            Redirecting for retry in 5 seconds...
+                            Redirecting to {getDestinationName()} for retry in 5 seconds...
                         </p>
                     </div>
                 </motion.div>

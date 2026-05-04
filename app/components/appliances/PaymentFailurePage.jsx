@@ -49,7 +49,7 @@ export function PaymentFailurePage() {
     }, [searchParams]);
 
     const handleRetry = () => {
-        const type = searchParams.get('type');
+        const type = searchParams.get('type') || searchParams.get('serviceType');
         const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
 
         // Logic to redirect to the correct cart based on service type
@@ -59,8 +59,6 @@ export function PaymentFailurePage() {
             router.push('/spa-salon/cart');
         } else if (deepType === 'Religious Services') {
             router.push('/religious-services/cart');
-        } else if (type === 'appliances') {
-            router.push('/appliances/cart');
         } else if (type === 'service-center') {
             router.push('/appliance-repair-services/cart');
         } else if (type === 'verified-partner' || type === 'professional') {
@@ -69,6 +67,14 @@ export function PaymentFailurePage() {
             // Default to the appliances cart if we are already in the appliances module
             router.push('/appliances/cart');
         }
+    };
+
+    const getDestinationName = () => {
+        const type = searchParams.get('type') || searchParams.get('serviceType');
+        const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
+        if (deepType) return 'cart';
+        if (type === 'verified-partner' || type === 'professional') return 'booking';
+        return 'cart';
     };
 
     const handleGoHome = () => {
@@ -117,7 +123,7 @@ export function PaymentFailurePage() {
                         </div>
                         <p className="text-red-400 font-medium mt-2 flex items-center gap-2">
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            Redirecting for retry in 5 seconds...
+                            Redirecting to {getDestinationName()} for retry in 5 seconds...
                         </p>
                     </div>
                 </motion.div>

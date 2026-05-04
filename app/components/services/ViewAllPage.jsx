@@ -456,7 +456,7 @@ export function ViewAllPage({
                             <span className="text-white/40">({store.reviews} reviews)</span>
                           </div>
                           <button className="w-full px-4 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2">
-                            View Center
+                            Book Service 
                             <ArrowRight className="w-4 h-4" />
                           </button>
                         </div>

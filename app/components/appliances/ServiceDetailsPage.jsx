@@ -356,7 +356,7 @@ export function ServiceDetailsPage({
         id: card.id || card._id || `pkg-${Math.random()}`,
         serviceId: finalServiceId,
         serviceName: storeData.name || 'Professional Service',
-        packageName: card.title || 'Standard Package',
+        packageName: card.title,
         price: cleanPrice,
         bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
         inspectionCost: storeData.inspectionCost || 0,

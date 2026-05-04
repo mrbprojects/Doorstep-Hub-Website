@@ -196,7 +196,7 @@ export function AllServicesPage({
                           <span className="text-white/40">(890 reviews)</span>
                         </div>
                         <button className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all">
-                          View Center
+                          Book Service 
                         </button>
                       </div>
                     </div>

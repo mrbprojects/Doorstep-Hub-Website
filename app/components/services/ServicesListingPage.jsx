@@ -634,7 +634,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                 onClick={() => router.push(`/appliances/store/${center._id}?serviceId=${subCategoryId}`)}
                                 className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
                               >
-                                View Center
+                                Book Service
                               </button>
                             </div>
                           </div>

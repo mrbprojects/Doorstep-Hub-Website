@@ -564,7 +564,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                                 <span className="text-white font-bold whitespace-nowrap ml-2">₹{item.price}</span>
                                             </div>
                                             <p className="text-[#04a99d] text-[10px] font-semibold uppercase tracking-wider mb-2">
-                                                {item.packageName || 'Standard Package'}
+                                                {item.packageName}
                                             </p>
 
                                             {/* Quantity Controls */}

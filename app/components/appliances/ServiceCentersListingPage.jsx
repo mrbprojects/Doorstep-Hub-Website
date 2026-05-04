@@ -272,7 +272,7 @@ export function ServiceCentersListingPage() {
                                                         {store.address}
                                                     </p>
                                                     <button className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2">
-                                                        View Center
+                                                        Book Service
                                                         <ArrowRight className="w-4 h-4" />
                                                     </button>
                                                 </div>

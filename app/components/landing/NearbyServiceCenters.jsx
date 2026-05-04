@@ -1,15 +1,29 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Navigation, Star, Phone, Clock, Loader2, ArrowRight } from 'lucide-react';
-import { GoogleMap, Marker } from '@react-google-maps/api';
+import { GoogleMap, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '100%'
+// Stable constants — defined outside component so they never re-create on render
+const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
+
+const GREEN_DOT = {
+  url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+  scaledSize: { width: 40, height: 40 },
+  anchor: { x: 20, y: 40 },
+};
+const YELLOW_DOT_ACTIVE = {
+  url: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+  scaledSize: { width: 44, height: 44 },
+  anchor: { x: 22, y: 44 },
+};
+const CENTER_LOGO = {
+  url: '/servicecenterpointlogo.png',
+  scaledSize: { width: 38, height: 38 },
+  anchor: { x: 19, y: 38 },
 };
 
 // DARK MODE MAP OPTIONS - Instant dark theme
@@ -82,11 +96,16 @@ export function NearbyServiceCenters() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const { location, detectWithGPS, loading: contextLoading, isMapsLoaded } = useLocation();
-  const [selectedService, setSelectedService] = useState(0);
+  const [selectedService, setSelectedService] = useState(null);
+  const [hoveredMarker, setHoveredMarker] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [mapZoom, setMapZoom] = useState(13);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const mapRef = useRef(null);
+  // Lock initial center so GoogleMap center prop never changes after mount
+  const initialCenterRef = useRef(null);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -146,8 +165,8 @@ export function NearbyServiceCenters() {
               description: service.description || 'No description available',
               businessname: service.business_name || 'No business name available',
               address: service.address || service.cityName || 'Hyderabad',
-              lat: location.lat + latOffset,
-              lng: location.lng + lngOffset,
+              lat: (() => { const r = parseFloat(service?.lattitude || service?.latitude); const g = parseFloat(service?.longitude); return (!isNaN(r) && r !== 0 && !isNaN(g)) ? r : location.lat + latOffset; })(),
+              lng: (() => { const r = parseFloat(service?.lattitude || service?.latitude); const g = parseFloat(service?.longitude); return (!isNaN(r) && r !== 0 && !isNaN(g)) ? g : location.lng + lngOffset; })(),
               image: service.image && !service.image.startsWith('u')
                 ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`
                 : service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : `https://images.unsplash.com/photo-${index + 1}?w=400`,
@@ -172,6 +191,27 @@ export function NearbyServiceCenters() {
     fetchNearestServiceCenters();
   }, [location, isClient]);
 
+  // Set initial center once
+  if (location && !initialCenterRef.current) {
+    initialCenterRef.current = { lat: location.lat, lng: location.lng };
+  }
+
+  const handleMapLoad = useCallback((map) => { mapRef.current = map; }, []);
+
+  const panToService = useCallback((svc) => {
+    if (mapRef.current && svc) {
+      mapRef.current.panTo({ lat: svc.lat, lng: svc.lng });
+      setMapZoom(16);
+    }
+  }, []);
+
+  const handleCardHover = useCallback((index) => {
+    setSelectedService(index);
+    if (services[index]) panToService(services[index]);
+  }, [services, panToService]);
+
+  const handleCardLeave = useCallback(() => { setSelectedService(null); }, []);
+
   // Handle GPS detection via Context
   const handleDetectLocation = async () => {
     try {
@@ -181,49 +221,7 @@ export function NearbyServiceCenters() {
     }
   };
 
-  // Map Component - PERFECT FIT WITH DARK MODE
-  const MapComponent = useCallback(() => {
-    if (!isMapsLoaded || !location) return null;
-
-    return (
-      <div className="absolute inset-0 w-full h-full">
-        <GoogleMap
-          mapContainerStyle={mapContainerStyle}
-          center={{ lat: location.lat, lng: location.lng }}
-          zoom={14}
-          options={mapOptions} // DARK MODE APPLIED HERE
-        >
-          {/* You - Green marker */}
-          <Marker
-            position={{ lat: location.lat, lng: location.lng }}
-            icon={{
-              url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-              scaledSize: { width: 40, height: 40 },
-              anchor: { x: 20, y: 40 }
-            }}
-            title="You are here"
-          />
-
-          {/* Services - Red/Yellow markers */}
-          {services.map((service, index) => (
-            <Marker
-              key={service.id}
-              position={{ lat: service.lat, lng: service.lng }}
-              title={service.businessname}
-              icon={{
-                url: selectedService === index
-                  ? 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
-                  : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                scaledSize: { width: 36, height: 36 },
-                anchor: { x: 18, y: 36 }
-              }}
-              onClick={() => setSelectedService(index)}
-            />
-          ))}
-        </GoogleMap>
-      </div>
-    );
-  }, [isMapsLoaded, location, services, selectedService]);
+  // (MapComponent removed — GoogleMap rendered directly inline to prevent white-flash remounts)
 
   // Skeleton (YOUR ORIGINAL)
   const SkeletonService = () => (
@@ -250,17 +248,27 @@ export function NearbyServiceCenters() {
   );
 
   // ─── Service Card Sub-component ──────────────────────────────────────────────
-  const ServiceCard = ({ service, actualIndex }) => (
+  const ServiceCard = ({ service, actualIndex }) => {
+    const isActive = selectedService === actualIndex;
+    return (
     <motion.div
       key={service.id}
+      onMouseEnter={() => handleCardHover(actualIndex)}
+      onMouseLeave={handleCardLeave}
       onClick={() => router.push(`/service-list/${service.slug || service.id}`)}
-      whileHover={{ y: -5 }}
+      whileHover={{ x: 10 }}
       name="service-card"
-      className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${selectedService === actualIndex
+      className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${isActive
         ? 'bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/10'
         : 'bg-[#1a1a1a]/50 border-white/10 hover:border-[#037166]/30'
         }`}
     >
+      {isActive && (
+        <span className="absolute top-3 right-16 flex h-2.5 w-2.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#04a99d] opacity-75" />
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#04a99d]" />
+        </span>
+      )}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Top Row: Distance & Rating */}
@@ -313,7 +321,8 @@ export function NearbyServiceCenters() {
         </div>
       </div>
     </motion.div>
-  );
+    );
+  };
 
   // Hydration safe rendering
   if (!isClient) {
@@ -421,22 +430,81 @@ export function NearbyServiceCenters() {
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative h-[700px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 shadow-2xl"
+            className="relative h-[700px] rounded-3xl overflow-hidden bg-[#1a1a1a] border border-[#037166]/20 shadow-2xl"
           >
-            {/* Map fills entire card perfectly - DARK MODE */}
-            <MapComponent />
-
-            {/* Simple FAST FALLBACK */}
+            {/* Loading overlay */}
             {!isMapsLoaded && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a]/95 backdrop-blur-sm z-50">
-                <div className="flex flex-col items-center space-y-4">
-                  <Loader2 className="w-10 h-10 text-[#037166] animate-spin" />
-                  <span className="text-[#037166] text-sm font-medium animate-pulse">
-                    Loading Map...
-                  </span>
-                </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a] z-50">
+                <Loader2 className="w-10 h-10 text-[#037166] animate-spin mb-3" />
+                <span className="text-[#037166] text-sm font-medium animate-pulse">Loading Map...</span>
               </div>
             )}
+
+            {/* GoogleMap rendered INLINE — never wrapped in useCallback component */}
+            {isMapsLoaded && initialCenterRef.current && (
+              <GoogleMap
+                mapContainerStyle={MAP_CONTAINER_STYLE}
+                center={initialCenterRef.current}
+                zoom={mapZoom}
+                options={mapOptions}
+                onLoad={handleMapLoad}
+                onZoomChanged={() => {
+                  if (mapRef.current) {
+                    const newZoom = mapRef.current.getZoom();
+                    if (newZoom !== mapZoom) setMapZoom(newZoom);
+                  }
+                }}
+              >
+                {location && (
+                  <Marker position={{ lat: location.lat, lng: location.lng }} icon={GREEN_DOT} title="You are here" zIndex={1000} />
+                )}
+                {services.map((service, index) => {
+                  const isAct = selectedService === index || hoveredMarker === index;
+                  return (
+                    <React.Fragment key={service.id}>
+                      <Marker
+                        position={{ lat: service.lat, lng: service.lng }}
+                        title={service.businessname}
+                        icon={isAct ? YELLOW_DOT_ACTIVE : CENTER_LOGO}
+                        zIndex={isAct ? 999 : index + 1}
+                        onClick={() => setSelectedService(index)}
+                        onDblClick={() => router.push(`/service-list/${service.slug || service.id}`)}
+                        onMouseOver={() => setHoveredMarker(index)}
+                        onMouseOut={() => setHoveredMarker(null)}
+                      />
+                      {hoveredMarker === index && (
+                        <OverlayViewF position={{ lat: service.lat, lng: service.lng }} mapPaneName={OVERLAY_MOUSE_TARGET}>
+                          <div style={{ transform: 'translate(-50%,-115%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
+                            className="bg-black/90 border border-[#037166]/60 rounded-xl px-3 py-2 shadow-xl flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-[#04a99d]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                              <span className="text-white text-xs font-semibold">{service.name}</span>
+                            </div>
+                            <span className="text-[10px] text-[#04a99d]">Double-click to open</span>
+                          </div>
+                        </OverlayViewF>
+                      )}
+                      {selectedService === index && hoveredMarker !== index && (
+                        <OverlayViewF position={{ lat: service.lat, lng: service.lng }} mapPaneName={OVERLAY_MOUSE_TARGET}>
+                          <div style={{ transform: 'translate(-50%,-125%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
+                            className="bg-[#037166]/95 border border-[#04a99d]/60 rounded-xl px-3 py-1.5 shadow-xl flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#04a99d] animate-pulse" />
+                            <span className="text-white text-xs font-semibold">{service.name}</span>
+                          </div>
+                        </OverlayViewF>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </GoogleMap>
+            )}
+
+            {/* Map legend */}
+            <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-3 flex flex-col gap-2 text-xs text-white/70 z-10 pointer-events-none">
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-400" /><span>Your Location</span></div>
+              <div className="flex items-center gap-2"><img src="/servicecenterpointlogo.png" alt="c" className="w-4 h-4 object-contain" /><span>Service Center</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-400" /><span>Selected</span></div>
+            </div>
           </motion.div>
 
           {/* Service List - First 4 */}

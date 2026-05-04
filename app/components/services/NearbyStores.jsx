@@ -46,7 +46,7 @@ const YELLOW_DOT_ACTIVE = {
 const CENTER_LOGO = {
   url: '/servicecenterpointlogo.png',
   scaledSize: { width: 38, height: 50 },
-  anchor: { x: 19, y: 70 },
+  anchor: { x: 19, y: 50 },
 };
 
 export function NearbyServiceCenters({ onViewAll }) {

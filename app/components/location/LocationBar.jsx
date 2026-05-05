@@ -10,8 +10,8 @@ const CITY_ICONS = {
     'Bangalore': '/Banglore.png',
     'Mumbai': '/Mumbai.png',
     'Chennai': '/chennai.png',
-    'Delhi': '/Delhi.png',
-    'Kolkata': '/kolkata.png',
+    // 'Delhi': '/Delhi.png',
+    // 'Kolkata': '/kolkata.png',
     'Vijayawada': '/Vijayawada.png',
     'Pune': '/pune.png'
 };
@@ -208,7 +208,7 @@ export function LocationBar({ theme = {} }) {
                                         <div className="grid grid-cols-4 gap-2">
                                             {[
                                                 'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
-                                                'Delhi', 'Kolkata', 'Vijayawada', 'Pune'
+                                                /* 'Delhi', 'Kolkata', */ 'Vijayawada', 'Pune'
                                             ].map((city) => (
                                                 <button
                                                     key={city}

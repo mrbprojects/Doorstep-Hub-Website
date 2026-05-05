@@ -16,7 +16,7 @@ export function InitialLocationModal() {
     const [showAllCities, setShowAllCities] = useState(false);
 
     const ALL_CITIES = [
-        'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 'Delhi', 'Kolkata',
+        'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', /* 'Delhi', 'Kolkata', 
         'Ahmedabad', 'Pune', 'Surat', 'Jaipur', 'Lucknow', 'Kanpur',
         'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Patna',
         'Vadodara', 'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad',
@@ -24,7 +24,7 @@ export function InitialLocationModal() {
         'Amritsar', 'Navi Mumbai', 'Prayagraj', 'Ranchi', 'Howrah', 'Coimbatore',
         'Jabalpur', 'Gwalior', 'Vijayawada', 'Jodhpur', 'Madurai', 'Raipur',
         'Kota', 'Guwahati', 'Chandigarh', 'Solapur', 'Hubli-Dharwad', 'Mysore',
-        'Tiruchirappalli', 'Bareilly', 'Aligarh', 'Gurgaon', 'Noida'
+        'Tiruchirappalli', 'Bareilly', 'Aligarh', 'Gurgaon', 'Noida'*/
     ];
 
     const CITY_ICONS = {
@@ -32,8 +32,8 @@ export function InitialLocationModal() {
         'Bangalore': '/Banglore.png',
         'Mumbai': '/Mumbai.png',
         'Chennai': '/chennai.png',
-        'Delhi': '/Delhi.png',
-        'Kolkata': '/kolkata.png',
+        // 'Delhi': '/Delhi.png',
+        // 'Kolkata': '/kolkata.png',
         'Vijayawada': '/Vijayawada.png',
         'Pune': '/pune.png'
     };
@@ -144,7 +144,7 @@ export function InitialLocationModal() {
                     className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
                 >
                     {/* Content Container */}
-                    <div className="p-6 sm:p-6 text-center relative flex-1">
+                    <div className="p-8 sm:p-10 text-center relative flex-1">
                         {/* Animated Background Orbs */}
                         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
                             <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#037166] rounded-full blur-[100px] animate-pulse" />
@@ -156,7 +156,7 @@ export function InitialLocationModal() {
                                 <motion.div
                                     animate={isDetecting ? { scale: [1, 1.1, 1] } : {}}
                                     transition={{ repeat: Infinity, duration: 2 }}
-                                    className="w-16 h-16 bg-[#037166]/10 rounded-full flex items-center justify-center mx-auto mb-2 relative"
+                                    className="w-20 h-20 bg-[#037166]/10 rounded-full flex items-center justify-center mx-auto mb-4 relative"
                                 >
                                     <div className="absolute inset-0 bg-[#037166]/20 rounded-full animate-ping" />
                                     <img 
@@ -169,11 +169,11 @@ export function InitialLocationModal() {
                                 <h2 className="text-2xl font-bold font-ubuntu text-white mb-1">
                                     Location Permission
                                 </h2>
-                                <p className="text-gray-400 text-xs mb-4 max-w-sm mx-auto leading-relaxed">
+                                <p className="text-gray-400 text-xs mb-6 max-w-sm mx-auto leading-relaxed">
                                     Doorstep Hub needs your area to show available services.
                                 </p>
 
-                                <div className="space-y-4 max-w-sm mx-auto">
+                                <div className="space-y-6 max-w-sm mx-auto">
                                     <button
                                         onClick={handleDetect}
                                         disabled={isDetecting}
@@ -206,7 +206,7 @@ export function InitialLocationModal() {
                                         <div className="grid grid-cols-4 gap-2">
                                             {[
                                                 'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
-                                                'Delhi', 'Kolkata', 'Vijayawada', 'Pune'
+                                                /* 'Delhi', 'Kolkata', */ 'Vijayawada', 'Pune'
                                             ].map(city => (
                                                 <button
                                                     key={city}
@@ -214,7 +214,7 @@ export function InitialLocationModal() {
                                                     disabled={isSearching}
                                                     className="flex flex-col items-center overflow-hidden rounded-lg bg-white/5 border border-white/10 hover:border-[#04a99d]/50 hover:bg-[#037166]/10 transition-all group disabled:opacity-50"
                                                 >
-                                                    <div className="w-full h-12 sm:h-14 bg-white flex items-center justify-center overflow-hidden">
+                                                    <div className="w-full h-16 sm:h-20 bg-white flex items-center justify-center overflow-hidden">
                                                         {CITY_ICONS[city] ? (
                                                             <img 
                                                                 src={CITY_ICONS[city]} 

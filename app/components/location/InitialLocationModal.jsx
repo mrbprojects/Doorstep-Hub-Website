@@ -204,7 +204,7 @@ export function InitialLocationModal() {
                                                     key={city}
                                                     onClick={() => handleSelectCity(city)}
                                                     disabled={isSearching}
-                                                    className="flex flex-col items-center overflow-hidden rounded-lg bg-white/5 border border-white/10 hover:border-[#04a99d]/50 hover:bg-[#037166]/10 transition-all group disabled:opacity-50"
+                                                    className="flex flex-col items-center overflow-hidden rounded-lg bg-white/5 border border-white/10 hover:border-[#04a99d]/50 hover:bg-[#037166]/10 transition-all group disabled:opacity-50 focus:outline-none"
                                                 >
                                                     <div className="w-full h-16 sm:h-20 bg-white flex items-center justify-center overflow-hidden">
                                                         {CITY_ICONS[city] ? (
@@ -247,7 +247,7 @@ export function InitialLocationModal() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Enter your street or city..."
-                                        className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#037166] transition-all"
+                                        className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 outline-none focus:outline-none focus:ring-1 focus:ring-[#037166]/30 transition-all"
                                     />
                                     {isSearching && (
                                         <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#037166] animate-spin" />

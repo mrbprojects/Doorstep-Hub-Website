@@ -111,11 +111,11 @@ export function LocationBar({ theme = {} }) {
             <motion.button
                 onClick={() => setIsOpen(true)}
                 data-location-trigger
-                className={`hidden lg:flex items-center space-x-2 px-3 py-2 rounded-xl glass-button-premium border transition-all group mr-2 ${t.buttonBg} hover:bg-opacity-80 ${t.border}`}
+                className={`hidden lg:flex items-center space-x-2 px-3 py-2 rounded-xl glass-button-premium border transition-all group mr-2 focus:outline-none ${t.buttonBg} hover:bg-opacity-80 ${t.border}`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
             >
-                <img src="/servicecenterpointlogo.png" alt="Loc" className="w-5 h-5 object-contain" />
+
                 <div className="flex flex-col items-start min-w-[100px] max-w-[160px]">
                     <span className={`text-[10px] uppercase tracking-wider font-semibold opacity-70 ${t.textMain}`}>
                         {location ? 'Your Location' : 'Location'}
@@ -170,7 +170,7 @@ export function LocationBar({ theme = {} }) {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Search for area, street name..."
-                                        className={`w-full pl-10 pr-4 py-3 ${t.buttonBg} border border-opacity-20 rounded-xl ${t.textMain} placeholder-gray-500 focus:outline-none focus:ring-1 transition-all ${t.border} focus:${t.border}`}
+                                        className={`w-full pl-10 pr-4 py-3 ${t.buttonBg} border border-opacity-20 rounded-xl ${t.textMain} placeholder-gray-500 outline-none focus:outline-none transition-all ${t.border}`}
                                         autoFocus
                                     />
                                     {isSearching && (
@@ -225,7 +225,7 @@ export function LocationBar({ theme = {} }) {
                                                             setIsSearching(false);
                                                         }
                                                     }}
-                                                    className={`flex flex-col items-center overflow-hidden rounded-xl border border-opacity-20 transition-all ${t.buttonBg} ${t.border} ${t.textMain} hover:border-[#037166] hover:bg-[#037166]/10 group`}
+                                                    className={`flex flex-col items-center overflow-hidden rounded-xl border border-opacity-20 transition-all focus:outline-none ${t.buttonBg} ${t.border} ${t.textMain} hover:border-[#037166] hover:bg-[#037166]/10 group`}
                                                 >
                                                     <div className="w-full h-10 sm:h-12 bg-white flex items-center justify-center overflow-hidden">
                                                         {CITY_ICONS[city] ? (
@@ -238,8 +238,8 @@ export function LocationBar({ theme = {} }) {
                                                             <MapPin className="w-4 h-4 text-[#037166]" />
                                                         )}
                                                     </div>
-                                                    <div className="w-full py-1 px-1 bg-black/40">
-                                                        <span className="text-[10px] font-bold uppercase tracking-tight truncate block text-center text-gray-400 group-hover:text-white">{city}</span>
+                                                    <div className={`w-full py-1 px-1 ${t.isLight ? 'bg-gray-100' : 'bg-black/40'}`}>
+                                                        <span className={`text-[10px] font-bold uppercase tracking-tight truncate block text-center ${t.isLight ? 'text-black' : 'text-gray-400'} group-hover:text-black`}>{city}</span>
                                                     </div>
                                                 </button>
                                             ))}

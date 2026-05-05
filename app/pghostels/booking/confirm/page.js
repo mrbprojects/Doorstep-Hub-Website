@@ -426,51 +426,7 @@ function PGConfirmContent() {
                             </div>
                         </motion.div>
 
-                        {/* Payment Choice: Advance vs Full */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.25 }}
-                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
-                        >
-                            <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-                                <Wallet className="w-5 h-5 text-[#037166]" />
-                                Payment Choice
-                            </h3>
-                            <p className="text-xs text-gray-400 mb-4">Choose how much to pay now</p>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <button
-                                    onClick={() => setPaymentOption('ADVANCE')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'ADVANCE'
-                                            ? 'border-[#037166] bg-[#037166]/5'
-                                            : 'border-gray-100 hover:border-[#037166]/30 bg-gray-50'
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h4 className={`font-bold text-sm ${paymentOption === 'ADVANCE' ? 'text-[#037166]' : 'text-gray-900'}`}>Pay Advance</h4>
-                                        {paymentOption === 'ADVANCE' && <CheckCircle className="w-4 h-4 text-[#037166]" />}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mb-2">Pay advance to confirm your slot.</p>
-                                    <p className="text-xl font-black text-gray-900">₹{cartData?.advPayment ?? 0}</p>
-                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Slot Confirmed</div>
-                                </button>
-                                <button
-                                    onClick={() => setPaymentOption('FULL')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'FULL'
-                                            ? 'border-[#037166] bg-[#037166]/5'
-                                            : 'border-gray-100 hover:border-[#037166]/30 bg-gray-50'
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h4 className={`font-bold text-sm ${paymentOption === 'FULL' ? 'text-[#037166]' : 'text-gray-900'}`}>Full Payment</h4>
-                                        {paymentOption === 'FULL' && <CheckCircle className="w-4 h-4 text-[#037166]" />}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mb-2">Pay total amount including all fees.</p>
-                                    <p className="text-xl font-black text-gray-900">₹{cartData?.finalAmount ?? 0}</p>
-                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Hassle Free</div>
-                                </button>
-                            </div>
-                        </motion.div>
+
 
                         {/* Booking Address */}
                         <motion.div
@@ -505,7 +461,7 @@ function PGConfirmContent() {
                             transition={{ delay: 0.4 }}
                             className="sticky top-48 p-6 rounded-3xl bg-white border border-gray-200 shadow-xl"
                         >
-                            <h3 className="text-xl font-bold text-gray-900 mb-6">Booking Summary</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h3>
 
                             {/* Cart Items */}
                             <div className="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
@@ -542,7 +498,7 @@ function PGConfirmContent() {
                                 <div className="space-y-2.5 pt-1">
                                     {/* Monthly Rent */}
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Monthly Rent</span>
+                                        <span className="text-gray-500">Subtotal</span>
                                         <span className="text-gray-900 font-semibold">₹{safeNum(cartData?.totalServiceCost).toFixed(2)}</span>
                                     </div>
 
@@ -557,6 +513,15 @@ function PGConfirmContent() {
                                         </div>
                                     )}
 
+                                    <div className="flex items-center gap-1.5 mt-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-1.5 h-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#037166" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        </svg>
+                                        <span className='text-[#037166] text-[12px]'>Pay Online.</span>
+                                    </div>
+
+
+
                                     {/* GST */}
                                     {safeNum(cartData?.gstAmount) > 0 && (
                                         <div className="flex justify-between text-sm">
@@ -568,7 +533,7 @@ function PGConfirmContent() {
                                     {/* Divider + Total */}
                                     <div className="border-t border-gray-200 pt-2.5">
                                         <div className="flex justify-between text-sm font-bold">
-                                            <span className="text-gray-700">Total Booking Fee</span>
+                                            <span className="text-gray-700">Total Amount</span>
                                             <span className="text-gray-900">₹{safeNum(cartData?.finalAmount || cartData?.totalServiceCost).toFixed(2)}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
@@ -593,11 +558,11 @@ function PGConfirmContent() {
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[#037166] uppercase font-bold">
-                                    {paymentOption === 'ADVANCE' ? 'Advance Booking Fee' : 'Full Booking Fee'}
+                                    {paymentOption === 'ADVANCE' ? '' : 'Full Amount (incl. all fees)'}
                                 </p>
                             </div>
 
-                            {paymentOption === 'ADVANCE' && (
+                            {/* {paymentOption === 'ADVANCE' && (
                                 <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500 text-sm">Remaining to Pay</span>
@@ -605,7 +570,7 @@ function PGConfirmContent() {
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at location after service</p>
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Confirm Button */}
                             <motion.button
@@ -624,7 +589,7 @@ function PGConfirmContent() {
                                         Confirming...
                                     </div>
                                 ) : (
-                                    'Confirm Booking'
+                                    'Book Now'
                                 )}
                             </motion.button>
 

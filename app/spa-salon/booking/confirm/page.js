@@ -556,11 +556,11 @@ export default function SpaConfirmPage() {
                                     )}
 
 
-                                    <div className="flex items-center gap-1 text-[11px] text-gray-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <div className="flex items-center gap-1.5 mt-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-1.5 h-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#6D1357" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
                                         </svg>
-                                        <span>Pay now.</span>
+                                        <span className='text-[#6D1357] text-[12px] font-medium'>Pay Online.</span>
                                     </div>
 
                                     {/* Divider */}
@@ -597,7 +597,7 @@ export default function SpaConfirmPage() {
                                 </p>
                             </div>
 
-                            {paymentOption === 'ADVANCE' && (
+                            {/* {paymentOption === 'ADVANCE' && (
                                 <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500 text-sm">Remaining to Pay</span>
@@ -605,7 +605,7 @@ export default function SpaConfirmPage() {
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at store after service</p>
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Confirm Button */}
                             <motion.button
@@ -624,7 +624,7 @@ export default function SpaConfirmPage() {
                                         Confirming...
                                     </div>
                                 ) : (
-                                    paymentOption === 'ADVANCE' ? 'Book Now' : 'Pay Full Amount'
+                                    'Book Now'
                                 )}
                             </motion.button>
 

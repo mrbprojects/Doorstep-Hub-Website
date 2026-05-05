@@ -597,7 +597,7 @@ export function BookingConfirmationPage({
               transition={{ delay: 0.4 }}
               className="sticky top-48 p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
             >
-              <h4 className="text-xl font-bold text-white mb-4">Booking Summary</h4>
+              <h4 className="text-xl font-bold text-white mb-4">Order Summary</h4>
 
               {/* Services */}
               <div className="space-y-3 mb-4">
@@ -696,7 +696,7 @@ export function BookingConfirmationPage({
                     Confirming...
                   </div>
                 ) : (
-                  'Confirm Booking'
+                  'Book Now'
                 )}
               </motion.button>
 

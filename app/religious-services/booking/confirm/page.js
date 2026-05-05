@@ -426,51 +426,7 @@ export default function ReligiousConfirmPage() {
                             </div>
                         </motion.div>
 
-                        {/* Payment Choice: Advance vs Full */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.35 }}
-                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
-                        >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-1 flex items-center gap-2">
-                                <Wallet className="w-5 h-5 text-[var(--saffron)]" />
-                                Payment Choice
-                            </h3>
-                            <p className="text-xs text-gray-400 mb-4">Choose how much to pay now</p>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <button
-                                    onClick={() => setPaymentOption('ADVANCE')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'ADVANCE'
-                                            ? 'border-[var(--saffron)] bg-[var(--saffron)]/5'
-                                            : 'border-gray-100 hover:border-[var(--saffron)]/30 bg-gray-50'
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h4 className={`font-bold text-sm ${paymentOption === 'ADVANCE' ? 'text-[var(--saffron)]' : 'text-gray-900'}`}>Pay Advance</h4>
-                                        {paymentOption === 'ADVANCE' && <CheckCircle className="w-4 h-4 text-[var(--saffron)]" />}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mb-2">Pay advance to confirm your slot.</p>
-                                    <p className="text-xl font-black text-gray-900">₹{cartData?.advPayment ?? 0}</p>
-                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Slot Confirmed</div>
-                                </button>
-                                <button
-                                    onClick={() => setPaymentOption('FULL')}
-                                    className={`p-5 rounded-2xl border-2 transition-all text-left ${paymentOption === 'FULL'
-                                            ? 'border-[var(--saffron)] bg-[var(--saffron)]/5'
-                                            : 'border-gray-100 hover:border-[var(--saffron)]/30 bg-gray-50'
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h4 className={`font-bold text-sm ${paymentOption === 'FULL' ? 'text-[var(--saffron)]' : 'text-gray-900'}`}>Full Payment</h4>
-                                        {paymentOption === 'FULL' && <CheckCircle className="w-4 h-4 text-[var(--saffron)]" />}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mb-2">Pay total amount including all fees.</p>
-                                    <p className="text-xl font-black text-gray-900">₹{cartData?.finalAmount ?? 0}</p>
-                                    <div className="mt-1 text-[10px] text-gray-400 uppercase font-bold">Hassle Free</div>
-                                </button>
-                            </div>
-                        </motion.div>
+
 
                         {/* Service Address */}
                         <motion.div
@@ -505,7 +461,7 @@ export default function ReligiousConfirmPage() {
                             transition={{ delay: 0.4 }}
                             className="sticky top-48 p-6 rounded-2xl bg-white border border-gray-200 shadow-lg"
                         >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-6">Booking Summary</h3>
+                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-6">Order Summary</h3>
 
                             {/* Service Details */}
                             <div className="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
@@ -554,6 +510,13 @@ export default function ReligiousConfirmPage() {
                                         </div>
                                     )}
 
+                                    <div className="flex items-center gap-1.5 mt-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-1.5 h-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="var(--saffron)" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        </svg>
+                                        <span className='text-[var(--saffron)] text-[12px]'>Pay Online.</span>
+                                    </div>
+
                                     <div className="border-t border-gray-200 pt-2.5">
                                         <div className="flex justify-between font-bold text-sm">
                                             <span className="text-gray-800">Total Amount</span>
@@ -578,11 +541,11 @@ export default function ReligiousConfirmPage() {
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[var(--saffron)] uppercase font-bold">
-                                    {paymentOption === 'ADVANCE' ? 'Advance Payment' : 'Full Payment'}
+                                    {paymentOption === 'ADVANCE' ? '' : 'Full Payment'}
                                 </p>
                             </div>
 
-                            {paymentOption === 'ADVANCE' && (
+                            {/* {paymentOption === 'ADVANCE' && (
                                 <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500 text-sm">Remaining to Pay</span>
@@ -590,7 +553,7 @@ export default function ReligiousConfirmPage() {
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at location after service</p>
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Selected Date/Time Preview */}
                             {bookedDate && bookedTime && (
@@ -622,9 +585,7 @@ export default function ReligiousConfirmPage() {
                                         Processing...
                                     </div>
                                 ) : (
-                                    paymentMethod === 'ONLINE'
-                                        ? `${paymentOption === 'ADVANCE' ? 'Pay Advance' : 'Pay Full'} ₹${paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : (cartData?.finalAmount ?? 0).toFixed(2)}`
-                                        : 'Confirm Booking'
+                                    'Book Now'
                                 )}
                             </motion.button>
 

@@ -27,6 +27,17 @@ export function InitialLocationModal() {
         'Tiruchirappalli', 'Bareilly', 'Aligarh', 'Gurgaon', 'Noida'
     ];
 
+    const CITY_ICONS = {
+        'Hyderabad': '/Hyderabad.png',
+        'Bangalore': '/Banglore.png',
+        'Mumbai': '/Mumbai.png',
+        'Chennai': '/chennai.png',
+        'Delhi': '/Delhi.png',
+        'Kolkata': '/kolkata.png',
+        'Vijayawada': '/Vijayawada.png',
+        'Pune': '/pune.png'
+    };
+
     const displayedCities = showAllCities ? ALL_CITIES : ALL_CITIES.slice(0, 4);
 
     useEffect(() => {
@@ -127,45 +138,55 @@ export function InitialLocationModal() {
                 <div className="absolute inset-0 bg-black/80 backdrop-blur-3xl" />
 
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    className="relative w-full max-w-xl bg-[#0f1110] rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden"
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
                 >
-                    <div className="absolute top-0 left-0 w-64 h-64 bg-[#037166] rounded-full blur-[100px] opacity-20 -translate-x-1/2 -translate-y-1/2" />
+                    {/* Content Container */}
+                    <div className="p-6 sm:p-6 text-center relative flex-1">
+                        {/* Animated Background Orbs */}
+                        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
+                            <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#037166] rounded-full blur-[100px] animate-pulse" />
+                            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#04a99d] rounded-full blur-[100px] animate-pulse" />
+                        </div>
 
-                    <div className="relative p-10 sm:p-12 text-center">
                         {view === 'welcome' ? (
                             <>
                                 <motion.div
                                     animate={isDetecting ? { scale: [1, 1.1, 1] } : {}}
                                     transition={{ repeat: Infinity, duration: 2 }}
-                                    className="w-20 h-20 bg-[#037166]/20 rounded-full flex items-center justify-center mx-auto mb-8"
+                                    className="w-16 h-16 bg-[#037166]/10 rounded-full flex items-center justify-center mx-auto mb-2 relative"
                                 >
-                                    <MapPin className="w-10 h-10 text-[#04a99d]" />
+                                    <div className="absolute inset-0 bg-[#037166]/20 rounded-full animate-ping" />
+                                    <img 
+                                        src="/servicecenterpointlogo.png" 
+                                        alt="Location" 
+                                        className="w-10 h-10 object-contain relative z-10"
+                                    />
                                 </motion.div>
 
-                                <h2 className="text-3xl font-bold font-ubuntu text-white mb-3">
+                                <h2 className="text-2xl font-bold font-ubuntu text-white mb-1">
                                     Location Permission
                                 </h2>
-                                <p className="text-gray-400 text-base mb-10 max-w-sm mx-auto leading-relaxed">
+                                <p className="text-gray-400 text-xs mb-4 max-w-sm mx-auto leading-relaxed">
                                     Doorstep Hub needs your area to show available services.
-                                    Please allow location access in your browser.
                                 </p>
 
                                 <div className="space-y-4 max-w-sm mx-auto">
                                     <button
                                         onClick={handleDetect}
                                         disabled={isDetecting}
-                                        className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/50 transition-all active:scale-95 disabled:opacity-50"
+                                        className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-2xl font-bold text-base hover:shadow-2xl hover:shadow-[#037166]/50 transition-all active:scale-95 disabled:opacity-50"
                                     >
                                         {isDetecting ? (
                                             <>
-                                                <Loader2 className="w-6 h-6 animate-spin" />
+                                                <Loader2 className="w-5 h-5 animate-spin" />
                                                 <span>Allowing Access...</span>
                                             </>
                                         ) : (
                                             <>
-                                                <Crosshair className="w-6 h-6" />
+                                                <Crosshair className="w-5 h-5" />
                                                 <span>Enable My Location</span>
                                             </>
                                         )}
@@ -174,10 +195,43 @@ export function InitialLocationModal() {
                                     <button
                                         onClick={() => setView('search')}
                                         disabled={!isMapsLoaded}
-                                        className="text-gray-400 hover:text-white text-sm font-medium transition-colors"
+                                        className="text-gray-400 hover:text-white text-xs font-medium transition-colors mb-2 block mx-auto"
                                     >
                                         {isMapsLoaded ? 'Or enter area manually' : 'Initializing Maps...'}
                                     </button>
+
+                                    {/* Popular Cities on Welcome Screen */}
+                                    <div className="pt-6 border-t border-white/5">
+                                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Popular Cities</div>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {[
+                                                'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
+                                                'Delhi', 'Kolkata', 'Vijayawada', 'Pune'
+                                            ].map(city => (
+                                                <button
+                                                    key={city}
+                                                    onClick={() => handleSelectCity(city)}
+                                                    disabled={isSearching}
+                                                    className="flex flex-col items-center overflow-hidden rounded-lg bg-white/5 border border-white/10 hover:border-[#04a99d]/50 hover:bg-[#037166]/10 transition-all group disabled:opacity-50"
+                                                >
+                                                    <div className="w-full h-12 sm:h-14 bg-white flex items-center justify-center overflow-hidden">
+                                                        {CITY_ICONS[city] ? (
+                                                            <img 
+                                                                src={CITY_ICONS[city]} 
+                                                                alt={city} 
+                                                                className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                                                            />
+                                                        ) : (
+                                                            <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#04a99d]" />
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full py-0.5 px-1 bg-black/40 backdrop-blur-sm">
+                                                        <span className="text-[9px] font-bold uppercase tracking-tight truncate block text-center text-gray-300 group-hover:text-white transition-colors">{city}</span>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </>
                         ) : (
@@ -228,7 +282,7 @@ export function InitialLocationModal() {
                                     ) : searchQuery && !isSearching ? (
                                         <div className="text-center py-12 text-gray-500">No results found</div>
                                     ) : (
-                                        <div className="py-8">
+                                        <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                             <div className="flex items-center justify-between mb-4">
                                                 <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Popular Cities</h4>
                                                 {!showAllCities && (
@@ -240,16 +294,31 @@ export function InitialLocationModal() {
                                                     </button>
                                                 )}
                                             </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                                {displayedCities.map(city => (
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {(showAllCities ? ALL_CITIES : [
+                                                    'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
+                                                    'Delhi', 'Kolkata', 'Vijayawada', 'Pune'
+                                                ]).map(city => (
                                                     <button
                                                         key={city}
                                                         onClick={() => handleSelectCity(city)}
                                                         disabled={isSearching}
-                                                        className="p-3 text-left bg-white/5 border border-white/5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 hover:border-[#037166]/30 transition-all text-sm flex items-center gap-2 group disabled:opacity-50"
+                                                        className="flex flex-col items-center overflow-hidden rounded-lg bg-white/5 border border-white/10 hover:border-[#04a99d]/50 hover:bg-[#037166]/10 transition-all group disabled:opacity-50"
                                                     >
-                                                        <MapPin className="w-3 h-3 text-gray-600 group-hover:text-[#04a99d]" />
-                                                        <span className="truncate">{city}</span>
+                                                        <div className="w-full h-12 sm:h-14 bg-white flex items-center justify-center overflow-hidden">
+                                                            {CITY_ICONS[city] ? (
+                                                                <img 
+                                                                    src={CITY_ICONS[city]} 
+                                                                    alt={city} 
+                                                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                                                                />
+                                                            ) : (
+                                                                <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#04a99d]" />
+                                                            )}
+                                                        </div>
+                                                        <div className="w-full py-0.5 px-1 bg-black/40 backdrop-blur-sm">
+                                                            <span className="text-[9px] font-bold uppercase tracking-tight truncate block text-center text-gray-300 group-hover:text-white transition-colors">{city}</span>
+                                                        </div>
                                                     </button>
                                                 ))}
                                             </div>

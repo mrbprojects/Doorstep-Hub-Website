@@ -5,6 +5,17 @@ import { MapPin, ChevronDown, Search, Crosshair, X, Loader2 } from 'lucide-react
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocation } from '@/hooks/useLocation';
 
+const CITY_ICONS = {
+    'Hyderabad': '/Hyderabad.png',
+    'Bangalore': '/Banglore.png',
+    'Mumbai': '/Mumbai.png',
+    'Chennai': '/chennai.png',
+    'Delhi': '/Delhi.png',
+    'Kolkata': '/kolkata.png',
+    'Vijayawada': '/Vijayawada.png',
+    'Pune': '/pune.png'
+};
+
 export function LocationBar({ theme = {} }) {
     const { location, detectWithGPS, searchLocation, setManualLocation, loading, error } = useLocation();
     const [isOpen, setIsOpen] = useState(false);
@@ -33,8 +44,30 @@ export function LocationBar({ theme = {} }) {
     const accentText = t.textHover;
     const accentBorder = t.border;
 
+    // Auto-search as user types (Debounced)
+    React.useEffect(() => {
+        const debounceTimer = setTimeout(async () => {
+            if (searchQuery.trim().length >= 3) {
+                setIsSearching(true);
+                try {
+                    const results = await searchLocation(searchQuery);
+                    setSearchResults(results);
+                } catch (error) {
+                    console.error('Search failed:', error);
+                    setSearchResults([]);
+                } finally {
+                    setIsSearching(false);
+                }
+            } else if (searchQuery.trim().length === 0) {
+                setSearchResults([]);
+            }
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(debounceTimer);
+    }, [searchQuery, searchLocation]);
+
     const handleSearch = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         if (!searchQuery.trim()) return;
 
         setIsSearching(true);
@@ -82,10 +115,10 @@ export function LocationBar({ theme = {} }) {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
             >
-                <MapPin className={`w-4 h-4 ${accentText}`} />
+                <img src="/servicecenterpointlogo.png" alt="Loc" className="w-5 h-5 object-contain" />
                 <div className="flex flex-col items-start min-w-[100px] max-w-[160px]">
                     <span className={`text-[10px] uppercase tracking-wider font-semibold opacity-70 ${t.textMain}`}>
-                        {location ? 'Delivering to' : 'Location'}
+                        {location ? 'Your Location' : 'Location'}
                     </span>
                     <span className={`text-xs font-medium truncate w-full text-left ${t.textMain}`}>
                         {loading ? 'Detecting...' : location ? location.shortAddress : 'Select location'}
@@ -128,7 +161,7 @@ export function LocationBar({ theme = {} }) {
                             </div>
 
                             {/* Search Body */}
-                            <div className="p-4 space-y-4">
+                            <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar space-y-4">
                                 {/* Search Input */}
                                 <form onSubmit={handleSearch} className="relative">
                                     <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50 ${t.textMain}`} />
@@ -145,28 +178,74 @@ export function LocationBar({ theme = {} }) {
                                     )}
                                 </form>
 
-                                {/* Detect Button */}
-                                <button
-                                    onClick={handleDetectCurrent}
-                                    disabled={isDetecting}
-                                    className={`w-full flex items-center gap-3 p-3 rounded-xl hover:bg-opacity-10 transition-colors group text-left border border-transparent hover:border-opacity-20 disabled:opacity-50 disabled:cursor-not-allowed hover:${t.border}`}
-                                >
-                                    <div className={`w-10 h-10 rounded-full bg-opacity-20 flex items-center justify-center transition-colors group-hover:bg-opacity-100 ${t.accent} group-hover:${t.accent}`}>
-                                        {isDetecting ? (
-                                            <Loader2 className={`w-5 h-5 group-hover:text-white animate-spin ${t.textHover}`} />
-                                        ) : (
-                                            <Crosshair className={`w-5 h-5 group-hover:text-white ${t.textHover}`} />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <div className={`font-semibold group-hover:text-white ${t.textHover}`}>
-                                            {isDetecting ? 'Detecting location...' : 'Use current location'}
+                                {/* Detect Button - Hide when searching */}
+                                {!searchQuery && (
+                                    <button
+                                        onClick={handleDetectCurrent}
+                                        disabled={isDetecting}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl hover:bg-opacity-10 transition-colors group text-left border border-transparent hover:border-opacity-20 disabled:opacity-50 disabled:cursor-not-allowed hover:${t.border}`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-full bg-opacity-20 flex items-center justify-center transition-colors group-hover:bg-opacity-100 ${t.accent} group-hover:${t.accent}`}>
+                                            {isDetecting ? (
+                                                <Loader2 className={`w-5 h-5 group-hover:text-white animate-spin ${t.textHover}`} />
+                                            ) : (
+                                                <Crosshair className={`w-5 h-5 group-hover:text-white ${t.textHover}`} />
+                                            )}
                                         </div>
-                                        <div className="text-xs text-gray-500">Using GPS</div>
-                                    </div>
-                                </button>
+                                        <div>
+                                            <div className={`font-semibold group-hover:text-white ${t.textHover}`}>
+                                                {isDetecting ? 'Detecting location...' : 'Use current location'}
+                                            </div>
+                                            <div className="text-xs text-gray-500">Using GPS</div>
+                                        </div>
+                                    </button>
+                                )}
 
-                                {/* Results List */}
+                                {/* Available Cities Section - Show when NOT searching */}
+                                {!searchQuery && (
+                                    <div className="mt-4">
+                                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Available Cities</div>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {[
+                                                'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
+                                                'Delhi', 'Kolkata', 'Vijayawada', 'Pune'
+                                            ].map((city) => (
+                                                <button
+                                                    key={city}
+                                                    onClick={async () => {
+                                                        setIsSearching(true);
+                                                        try {
+                                                            const results = await searchLocation(city);
+                                                            if (results && results.length > 0) {
+                                                                await handleSelectLocation(results[0]);
+                                                            }
+                                                        } catch (err) {
+                                                            console.error('City search failed:', err);
+                                                        } finally {
+                                                            setIsSearching(false);
+                                                        }
+                                                    }}
+                                                    className={`flex flex-col items-center overflow-hidden rounded-xl border border-opacity-20 transition-all ${t.buttonBg} ${t.border} ${t.textMain} hover:border-[#037166] hover:bg-[#037166]/10 group`}
+                                                >
+                                                    <div className="w-full h-10 sm:h-12 bg-white flex items-center justify-center overflow-hidden">
+                                                        {CITY_ICONS[city] ? (
+                                                            <img 
+                                                                src={CITY_ICONS[city]} 
+                                                                alt={city} 
+                                                                className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                                                            />
+                                                        ) : (
+                                                            <MapPin className="w-4 h-4 text-[#037166]" />
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full py-1 px-1 bg-black/40">
+                                                        <span className="text-[10px] font-bold uppercase tracking-tight truncate block text-center text-gray-400 group-hover:text-white">{city}</span>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                                 {searchResults.length > 0 && (
                                     <div className="mt-4 space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
                                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Search Results</div>

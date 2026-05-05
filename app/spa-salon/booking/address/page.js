@@ -11,11 +11,12 @@ import { useServiceCart } from '@/context/ServiceCartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { locationManager } from '@/services/locationManager';
 
 function SpaAddressContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { token, isAuthenticated } = useAuth();
+    const { user, token, isAuthenticated } = useAuth();
     const { addToCart, clearCart } = useServiceCart();
 
     const providerIdParam = searchParams.get('providerId');
@@ -40,6 +41,50 @@ function SpaAddressContent() {
         plotNumber: '', postalCode: '', addressLineOne: '', addressLineTwo: '',
         stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
     });
+
+    const [citySuggestions, setCitySuggestions] = useState([]);
+    const [isSearchingCity, setIsSearchingCity] = useState(false);
+
+    // Debounced Search for City/Area Suggestions
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (newAddress.cityName.trim().length >= 3) {
+                setIsSearchingCity(true);
+                try {
+                    const results = await locationManager.searchLocation(newAddress.cityName);
+                    setCitySuggestions(results);
+                } catch (error) {
+                    console.error('City search failed:', error);
+                } finally {
+                    setIsSearchingCity(false);
+                }
+            } else {
+                setCitySuggestions([]);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [newAddress.cityName]);
+
+    const handleSelectCitySuggestion = async (place) => {
+        setIsSearchingCity(true);
+        try {
+            const details = await locationManager.setManualLocation(place.place_id);
+            setMapCoords({ lat: details.lat, lng: details.lng });
+            setMapKey(k => k + 1);
+            setNewAddress(prev => ({
+                ...prev,
+                cityName: details.city || details.shortAddress.split(',')[0] || '',
+                stateName: details.state || prev.stateName,
+                area: details.area || prev.area,
+                postalCode: details.postalCode || prev.postalCode,
+            }));
+            setCitySuggestions([]);
+        } catch (error) {
+            console.error('Failed to set city from suggestion:', error);
+        } finally {
+            setIsSearchingCity(false);
+        }
+    };
 
     const fetchAddresses = useCallback(async () => {
         if (!token) return;
@@ -78,6 +123,22 @@ function SpaAddressContent() {
             return () => clearTimeout(timer);
         }
     }, [isAuthenticated, fetchAddresses]);
+
+    // Auto-fill user details from profile if authenticated
+    useEffect(() => {
+        if (isAuthenticated && user && showAddForm && !editingAddress) {
+            setNewAddress(prev => {
+                const updates = {};
+                if (!prev.name) updates.name = user.name || '';
+                if (!prev.phone) updates.phone = user.mobile || user.phone || '';
+                
+                if (Object.keys(updates).length > 0) {
+                    return { ...prev, ...updates };
+                }
+                return prev;
+            });
+        }
+    }, [isAuthenticated, user, showAddForm, editingAddress]);
 
     // ── Auto-detect location ──────────────────────────────────────────
     const handleDetectLocation = () => {
@@ -549,13 +610,35 @@ function SpaAddressContent() {
                                         {/* City, State, Pincode — auto-filled from GPS */}
                                         <div className="grid md:grid-cols-3 gap-4">
                                             <div className="relative">
-                                                <Input className="text-black" placeholder="City" value={newAddress.cityName} onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} />
+                                                <Input 
+                                                    className="text-black" 
+                                                    placeholder="City" 
+                                                    value={newAddress.cityName} 
+                                                    onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} 
+                                                />
+                                                {isSearchingCity && (
+                                                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[#6D1357]" />
+                                                )}
+                                                {citySuggestions.length > 0 && (
+                                                    <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                                        {citySuggestions.map((p, i) => (
+                                                            <button
+                                                                key={i}
+                                                                className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm border-b last:border-0"
+                                                                onClick={() => handleSelectCitySuggestion(p)}
+                                                            >
+                                                                <div className="font-semibold text-gray-800">{p.main_text}</div>
+                                                                <div className="text-[10px] text-gray-500">{p.secondary_text}</div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="relative">
                                                 <Input className="text-black" placeholder="State" value={newAddress.stateName} onChange={e => setNewAddress({ ...newAddress, stateName: e.target.value })} />
                                             </div>
                                             <div className="relative">
-                                                <Input className="text-black" placeholder="Pincode *" value={newAddress.postalCode} onChange={e => setNewAddress({ ...newAddress, postalCode: e.target.value })} />
+                                                <Input className="text-black pr-2" placeholder="Pincode *" value={newAddress.postalCode} onChange={e => setNewAddress({ ...newAddress, postalCode: e.target.value })} />
                                             </div>
                                         </div>
 
@@ -610,4 +693,3 @@ export default function SpaBookingAddressPage() {
         </Suspense>
     );
 }
-

@@ -597,7 +597,7 @@ export default function SpaConfirmPage() {
                                 </p>
                             </div>
 
-                            {/* {paymentOption === 'ADVANCE' && (
+                            {paymentOption === 'ADVANCE' && (
                                 <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500 text-sm">Remaining to Pay</span>
@@ -605,7 +605,7 @@ export default function SpaConfirmPage() {
                                     </div>
                                     <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at store after service</p>
                                 </div>
-                            )} */}
+                            )}
 
                             {/* Confirm Button */}
                             <motion.button

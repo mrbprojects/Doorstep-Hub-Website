@@ -507,62 +507,65 @@ export default function ReligiousConfirmPage() {
                         >
                             <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-6">Booking Summary</h3>
 
-                            {/* Cart Items */}
-                            <div className="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">
-                                {cartItems.map((item) => (
-                                    <div key={item.itemId || item._id} className="flex justify-between items-start text-sm">
-                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--saffron)] flex-shrink-0 mt-1.5" />
-                                            <p className="text-gray-800 font-medium line-clamp-1">{item.itemName}</p>
+                            {/* Service Details */}
+                            <div className="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
+                                <div className="flex flex-col gap-3 mb-4 pb-4 border-b border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-xl bg-[var(--saffron)]/10 flex items-center justify-center text-[var(--saffron)]">
+                                            <Sparkles className="w-6 h-6" />
                                         </div>
-                                        <span className="text-gray-700 font-semibold ml-2">₹{item.subtotal?.toFixed(2)}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="h-px bg-gray-100 mb-4" />
-
-                            {/* Fee breakdown */}
-                            <div className="space-y-2.5">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">Subtotal</span>
-                                    <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
-                                </div>
-
-                                {(cartData?.gstAmount ?? 0) > 0 && (
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">GST (18%)</span>
-                                        <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
-                                    </div>
-                                )}
-
-                                {(cartData?.consultationFee ?? 0) > 0 && (
-                                    <div className="flex justify-between text-sm">
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-gray-500">Platform Fee</span>
-                                            <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
+                                        <div>
+                                            <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Services Selected</p>
+                                            <p className="text-gray-900 font-bold">{cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}</p>
                                         </div>
-                                        <span className="text-gray-900 font-semibold">₹{(cartData?.consultationFee ?? 0).toFixed(2)}</span>
                                     </div>
-                                )}
-
-
-
-                                {/* Divider + Total */}
-                                <div className="border-t border-gray-200 pt-2.5">
-                                    <div className="flex justify-between font-bold text-sm">
-                                        <span className="text-gray-800">Total Amount</span>
-                                        <span className="text-gray-900">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                                    <div className="mt-2 space-y-2 pl-1">
+                                        {cartItems.map((item, idx) => (
+                                            <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-[var(--saffron)] mt-2"></div>
+                                                <div className="flex justify-between w-full">
+                                                    <span className="line-clamp-1">{item.itemName}</span>
+                                                    <span className="font-medium text-gray-900">₹{Number(item.subtotal || item.price || 0).toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
                                 </div>
+                                <div className="space-y-2.5 pt-1">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Subtotal</span>
+                                        <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
+                                    </div>
 
-                                {/* Non-refundable note */}
-                                <div className="flex items-center gap-1 text-[11px] text-gray-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
-                                    </svg>
-                                    <span>Platform fee is non-refundable.</span>
+                                    {(cartData?.gstAmount ?? 0) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">GST (18%)</span>
+                                            <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    {(cartData?.consultationFee ?? 0) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-gray-500">Platform Fee</span>
+                                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
+                                            </div>
+                                            <span className="text-gray-900 font-semibold">₹{(cartData?.consultationFee ?? 0).toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="border-t border-gray-200 pt-2.5">
+                                        <div className="flex justify-between font-bold text-sm">
+                                            <span className="text-gray-800">Total Amount</span>
+                                            <span className="text-gray-900">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
+                                    </div>
+
+                                    <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                        <Info className="w-3 h-3 flex-shrink-0" />
+                                        <span>Platform fee is non-refundable.</span>
+                                    </div>
                                 </div>
                             </div>
 

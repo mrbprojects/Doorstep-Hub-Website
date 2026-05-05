@@ -154,8 +154,22 @@ export function AddressPage({
     }
   }, [isAuthenticated, fetchAddresses]);
 
-  // No longer needed: Pre-fill logic moved to trigger button for better UX
-  // (prevents auto-restore when user clears the field manually)
+  // Auto-fill user details from profile if authenticated
+  useEffect(() => {
+    if (isAuthenticated && user && showAddForm && !editingAddress) {
+      setNewAddress(prev => {
+        // Only update if current fields are empty to avoid overwriting user edits
+        const updates = {};
+        if (!prev.name) updates.name = user.name || '';
+        if (!prev.phone) updates.phone = user.mobile || user.phone || '';
+        
+        if (Object.keys(updates).length > 0) {
+          return { ...prev, ...updates };
+        }
+        return prev;
+      });
+    }
+  }, [isAuthenticated, user, showAddForm, editingAddress]);
 
   const handleAutoDetect = async () => {
     setIsLocating(true);

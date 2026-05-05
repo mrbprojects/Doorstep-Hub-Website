@@ -3,22 +3,21 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Home, Briefcase,CheckCircle , MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Flower2 } from 'lucide-react';
+import { ArrowLeft, Home, Briefcase, CheckCircle, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Flower2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-// Assuming AuthModal is available
 import { AuthModal } from '@/components/auth/AuthModal';
+import { locationManager } from '@/services/locationManager';
 
 function ReligiousAddressContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { token, isAuthenticated } = useAuth();
+    const { user, token, isAuthenticated } = useAuth();
     const { addToCart, clearCart } = useServiceCart();
 
-    // Params from previous step (Standardized with PG flow)
     const providerId = searchParams.get('providerId');
     const packageId = searchParams.get('packageId');
     const addons = searchParams.get('addons');
@@ -40,8 +39,56 @@ function ReligiousAddressContent() {
         addressLineTwo: '',
         stateName: 'Telangana',
         cityName: 'Hyderabad',
-        defaultAddress: false
+        defaultAddress: false,
+        latitude: 17.4126,
+        longitude: 78.2676
     });
+
+    const [citySuggestions, setCitySuggestions] = useState([]);
+    const [isSearchingCity, setIsSearchingCity] = useState(false);
+
+    // Debounced Search for City/Area Suggestions
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (newAddress.cityName.trim().length >= 3) {
+                setIsSearchingCity(true);
+                try {
+                    const results = await locationManager.searchLocation(newAddress.cityName);
+                    setCitySuggestions(results);
+                } catch (error) {
+                    console.error('City search failed:', error);
+                } finally {
+                    setIsSearchingCity(false);
+                }
+            } else {
+                setCitySuggestions([]);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [newAddress.cityName]);
+
+    const handleSelectCitySuggestion = async (place) => {
+        setIsSearchingCity(true);
+        try {
+            const details = await locationManager.setManualLocation(place.place_id);
+            setMapCoords({ lat: details.lat, lng: details.lng });
+            setMapKey(k => k + 1);
+            setNewAddress(prev => ({
+                ...prev,
+                cityName: details.city || details.shortAddress.split(',')[0] || '',
+                stateName: details.state || prev.stateName,
+                area: details.area || prev.area,
+                postalCode: details.postalCode || prev.postalCode,
+                latitude: details.lat,
+                longitude: details.lng
+            }));
+            setCitySuggestions([]);
+        } catch (error) {
+            console.error('Failed to set city from suggestion:', error);
+        } finally {
+            setIsSearchingCity(false);
+        }
+    };
 
     // GPS / Map state
     const [gpsLoading, setGpsLoading] = useState(false);
@@ -78,7 +125,9 @@ function ReligiousAddressContent() {
                             cityName: addr.city || addr.town || addr.village || 'Hyderabad',
                             stateName: addr.state || 'Telangana',
                             postalCode: addr.postcode || '',
-                            addressLineOne: data.display_name
+                            addressLineOne: data.display_name,
+                            latitude: latitude,
+                            longitude: longitude
                         }));
                         toast.success('Location detected!');
                     }
@@ -134,6 +183,22 @@ function ReligiousAddressContent() {
         }
     }, [isAuthenticated, fetchAddresses]);
 
+    // Auto-fill user details from profile if authenticated
+    useEffect(() => {
+        if (isAuthenticated && user && showAddForm && !editingAddress) {
+            setNewAddress(prev => {
+                const updates = {};
+                if (!prev.name) updates.name = user.name || '';
+                if (!prev.phone) updates.phone = user.mobile || user.phone || '';
+                
+                if (Object.keys(updates).length > 0) {
+                    return { ...prev, ...updates };
+                }
+                return prev;
+            });
+        }
+    }, [isAuthenticated, user, showAddForm, editingAddress]);
+
     const handleAddOrUpdateAddress = async () => {
         if (!newAddress.name || !newAddress.phone || !newAddress.area || !newAddress.flat || !newAddress.postalCode) {
             toast.error('Please fill in required fields');
@@ -150,8 +215,8 @@ function ReligiousAddressContent() {
 
             const payload = {
                 ...newAddress,
-                latitude: "17.450123",
-                longitude: "78.390456",
+                latitude: newAddress.latitude.toString(),
+                longitude: newAddress.longitude.toString(),
                 defaultAddress: addresses.length === 0 ? true : newAddress.defaultAddress
             };
 
@@ -172,7 +237,8 @@ function ReligiousAddressContent() {
                 setNewAddress({
                     name: '', phone: '', type: 'Home', area: '', flat: '',
                     postalCode: '', addressLineOne: '', addressLineTwo: '',
-                    stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
+                    stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false,
+                    latitude: 17.4126, longitude: 78.2676
                 });
                 fetchAddresses();
             } else {
@@ -254,9 +320,7 @@ function ReligiousAddressContent() {
                 address: selectedAddress
             }));
 
-            // Save address for Confirm Page (standardized key used by Confirm Page helper)
-            // But verify: ReligiousConfirmPage reads 'religious_booking_address' OR 'selected_address'.
-            // I'll set 'selected_address' to reuse generic components if any, and 'religious_booking_address' for specific.
+            // Save address for Confirm Page
             sessionStorage.setItem('religious_booking_address', JSON.stringify(selectedAddress));
             sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
 
@@ -391,7 +455,7 @@ function ReligiousAddressContent() {
                     </div>
                 )}
 
-                {/* Add New Address Button (Only if form not shown) */}
+                {/* Add New Address Button */}
                 {!showAddForm && (
                     <motion.button
                         initial={{ opacity: 0, y: 10 }}
@@ -404,7 +468,6 @@ function ReligiousAddressContent() {
                                 stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
                             });
                             setShowAddForm(true);
-                            // Auto-trigger detection
                             setTimeout(() => handleDetectLocation(), 100);
                         }}
                         className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-500 hover:border-[var(--saffron)] hover:text-[var(--saffron)] transition-colors"
@@ -483,7 +546,31 @@ function ReligiousAddressContent() {
                                     </div>
 
                                     <div className="grid md:grid-cols-3 gap-4">
-                                        <Input className="text-black" placeholder="City" value={newAddress.cityName} onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} />
+                                        <div className="relative">
+                                            <Input 
+                                                className="text-black" 
+                                                placeholder="City" 
+                                                value={newAddress.cityName} 
+                                                onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} 
+                                            />
+                                            {isSearchingCity && (
+                                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[var(--saffron)]" />
+                                            )}
+                                            {citySuggestions.length > 0 && (
+                                                <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                                    {citySuggestions.map((p, i) => (
+                                                        <button
+                                                            key={i}
+                                                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm border-b last:border-0"
+                                                            onClick={() => handleSelectCitySuggestion(p)}
+                                                        >
+                                                            <div className="font-semibold text-gray-800">{p.main_text}</div>
+                                                            <div className="text-[10px] text-gray-500">{p.secondary_text}</div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                         <Input className="text-black" placeholder="State" value={newAddress.stateName} onChange={e => setNewAddress({ ...newAddress, stateName: e.target.value })} />
                                         <Input className="text-black" placeholder="Pincode" value={newAddress.postalCode} onChange={e => setNewAddress({ ...newAddress, postalCode: e.target.value })} />
                                     </div>
@@ -533,4 +620,3 @@ export default function ReligiousAddressPage() {
         </Suspense>
     );
 }
-

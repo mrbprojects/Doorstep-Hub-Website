@@ -519,15 +519,21 @@ function PGConfirmContent() {
                                             <p className="text-gray-900 font-bold">{cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}</p>
                                         </div>
                                     </div>
-                                    <div className="mt-2 space-y-1 pl-1">
+                                    <div className="mt-2 space-y-2 pl-1">
                                         {cartItems.map((item, idx) => {
                                             const name = typeof item.itemName === 'object'
                                                 ? (item.itemName?.title || item.itemName?.name || 'Room')
                                                 : (item.itemName || item.name || 'Room');
+                                            const price = typeof item.itemPrice === 'object'
+                                                ? (item.itemPrice?.amount || 0)
+                                                : (item.itemPrice || item.price || 0);
                                             return (
-                                                <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                                                    <div className="w-1 h-1 rounded-full bg-[#037166]" />
-                                                    <span className="line-clamp-1">{name}</span>
+                                                <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#037166] mt-2"></div>
+                                                    <div className="flex justify-between w-full">
+                                                        <span className="line-clamp-1">{name}</span>
+                                                        <span className="font-medium text-gray-900">₹{Number(price).toFixed(2)}</span>
+                                                    </div>
                                                 </div>
                                             );
                                         })}
@@ -591,17 +597,15 @@ function PGConfirmContent() {
                                 </p>
                             </div>
 
-                            <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 text-sm">Remaining Amount</span>
-                                    <span className="text-gray-900 font-bold">
-                                        ₹{(safeNum(cartData?.totalServiceCost) + (paymentOption === 'ADVANCE' ? (safeNum(cartData?.finalAmount || cartData?.totalServiceCost) - safeNum(cartData?.advPayment)) : 0)).toFixed(2)}
-                                    </span>
+                            {paymentOption === 'ADVANCE' && (
+                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500 text-sm">Remaining to Pay</span>
+                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0)).toFixed(2)}</span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at location after service</p>
                                 </div>
-                                <p className="text-[10px] text-gray-400 mt-1 uppercase leading-tight">
-                                    Monthly rent of ₹{safeNum(cartData?.totalServiceCost).toFixed(2)} + dues to be paid directly at hostel
-                                </p>
-                            </div>
+                            )}
 
                             {/* Confirm Button */}
                             <motion.button

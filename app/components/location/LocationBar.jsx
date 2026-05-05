@@ -208,7 +208,7 @@ export function LocationBar({ theme = {} }) {
                                         <div className="grid grid-cols-4 gap-2">
                                             {[
                                                 'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
-                                                /* 'Delhi', 'Kolkata', */ 'Vijayawada', 'Pune'
+                                                'Vijayawada', 'Pune'
                                             ].map((city) => (
                                                 <button
                                                     key={city}

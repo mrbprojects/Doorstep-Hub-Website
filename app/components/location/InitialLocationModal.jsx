@@ -16,15 +16,7 @@ export function InitialLocationModal() {
     const [showAllCities, setShowAllCities] = useState(false);
 
     const ALL_CITIES = [
-        'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', /* 'Delhi', 'Kolkata', 
-        'Ahmedabad', 'Pune', 'Surat', 'Jaipur', 'Lucknow', 'Kanpur',
-        'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Patna',
-        'Vadodara', 'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad',
-        'Meerut', 'Rajkot', 'Varanasi', 'Srinagar', 'Aurangabad', 'Dhanbad',
-        'Amritsar', 'Navi Mumbai', 'Prayagraj', 'Ranchi', 'Howrah', 'Coimbatore',
-        'Jabalpur', 'Gwalior', 'Vijayawada', 'Jodhpur', 'Madurai', 'Raipur',
-        'Kota', 'Guwahati', 'Chandigarh', 'Solapur', 'Hubli-Dharwad', 'Mysore',
-        'Tiruchirappalli', 'Bareilly', 'Aligarh', 'Gurgaon', 'Noida'*/
+        'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 'Vijayawada', 'Pune'
     ];
 
     const CITY_ICONS = {
@@ -206,7 +198,7 @@ export function InitialLocationModal() {
                                         <div className="grid grid-cols-4 gap-2">
                                             {[
                                                 'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
-                                                /* 'Delhi', 'Kolkata', */ 'Vijayawada', 'Pune'
+                                                'Vijayawada', 'Pune'
                                             ].map(city => (
                                                 <button
                                                     key={city}
@@ -285,20 +277,9 @@ export function InitialLocationModal() {
                                         <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                             <div className="flex items-center justify-between mb-4">
                                                 <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Popular Cities</h4>
-                                                {!showAllCities && (
-                                                    <button
-                                                        onClick={() => setShowAllCities(true)}
-                                                        className="text-xs font-bold text-[#04a99d] hover:underline"
-                                                    >
-                                                        See More
-                                                    </button>
-                                                )}
                                             </div>
                                             <div className="grid grid-cols-4 gap-2">
-                                                {(showAllCities ? ALL_CITIES : [
-                                                    'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
-                                                    'Delhi', 'Kolkata', 'Vijayawada', 'Pune'
-                                                ]).map(city => (
+                                                {ALL_CITIES.map(city => (
                                                     <button
                                                         key={city}
                                                         onClick={() => handleSelectCity(city)}
@@ -322,14 +303,7 @@ export function InitialLocationModal() {
                                                     </button>
                                                 ))}
                                             </div>
-                                            {showAllCities && (
-                                                <button
-                                                    onClick={() => setShowAllCities(false)}
-                                                    className="mt-6 w-full py-3 text-sm font-medium text-gray-500 hover:text-white transition-colors border-t border-white/5"
-                                                >
-                                                    Show Less
-                                                </button>
-                                            )}
+
                                         </div>
                                     )}
                                 </div>

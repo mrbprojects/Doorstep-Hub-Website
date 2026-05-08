@@ -16,7 +16,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                    className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
                 />
 
                 {/* Modal Content */}
@@ -24,54 +24,54 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="relative w-full max-w-lg bg-[#0a0a0a] border border-[#333] rounded-3xl shadow-2xl overflow-hidden"
+                    className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.15)] overflow-hidden border border-gray-100"
                 >
                     {/* Header */}
-                    <div className="relative p-6 text-center border-b border-[#333] bg-[#111]">
+                    <div className="relative p-8 text-center border-b border-gray-50 bg-white">
                         <button
                             onClick={onClose}
-                            className="absolute right-4 top-4 p-2 rounded-full hover:bg-[#222] text-gray-400 hover:text-white transition-colors"
+                            className="absolute right-6 top-6 p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
                         >
                             <X className="w-5 h-5" />
                         </button>
-                        <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Book Doorstep Hub Services</h3>
-                        <p className="text-gray-400 mt-2 font-medium">Select the type of service you need</p>
+                        <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight">How can we help?</h3>
+                        <p className="text-gray-500 mt-2 font-medium">Select your preferred service type</p>
                     </div>
 
                     {/* Options */}
-                    <div className="p-6 grid gap-4">
+                    <div className="p-8 grid gap-4">
                         {/* Verified Partner Option */}
                         <button
                             onClick={() => onSelect('partner')}
-                            className="group relative flex items-center gap-4 p-4 rounded-2xl bg-[#1a1a1a] border border-[#333] hover:border-[#037166] hover:bg-[#037166]/10 transition-all duration-300 text-left"
+                            className="group relative flex items-center gap-5 p-6 rounded-[1.5rem] bg-white border border-gray-100 hover:border-[#037166]/30 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300 text-left"
                         >
-                            <div className="w-12 h-12 rounded-full bg-[#037166]/20 flex items-center justify-center group-hover:bg-[#037166] transition-colors border border-[#037166]/30">
-                                <ShieldCheck className="w-6 h-6 text-[#037166] group-hover:text-white transition-colors" />
+                            <div className="w-14 h-14 rounded-2xl bg-[#037166]/10 flex items-center justify-center group-hover:bg-[#037166] transition-all duration-300 border border-[#037166]/20">
+                                <ShieldCheck className="w-7 h-7 text-[#037166] group-hover:text-white transition-colors" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="font-bold text-white group-hover:text-[#04a99d] transition-colors">Book Doorstep Hub Services</h4>
-                                <p className="text-sm text-gray-400 group-hover:text-gray-300">Book certified professionals for doorstep service</p>
+                                <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">Verified Partners</h4>
+                                <p className="text-sm text-gray-500 font-medium">Book certified experts for doorstep service</p>
                             </div>
                         </button>
 
                         {/* Service Center Option */}
                         <button
                             onClick={() => onSelect('center')}
-                            className="group relative flex items-center gap-4 p-4 rounded-2xl bg-[#1a1a1a] border border-[#333] hover:border-blue-500 hover:bg-blue-500/10 transition-all duration-300 text-left"
+                            className="group relative flex items-center gap-5 p-6 rounded-[1.5rem] bg-white border border-gray-100 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300 text-left"
                         >
-                            <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-600 transition-colors border border-blue-500/30">
-                                <Store className="w-6 h-6 text-blue-500 group-hover:text-white transition-colors" />
+                            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300 border border-blue-100">
+                                <Store className="w-7 h-7 text-white" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="font-bold text-white group-hover:text-blue-400 transition-colors">Nearby Service Centers</h4>
-                                <p className="text-sm text-gray-400 group-hover:text-gray-300">Find nearby authorized service centers</p>
+                                <h4 className="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">Authorized Centers</h4>
+                                <p className="text-sm text-gray-500 font-medium">Find and visit nearby service centers</p>
                             </div>
                         </button>
                     </div>
 
                     {/* Footer */}
-                    <div className="p-4 bg-[#111] border-t border-[#333] text-center text-xs text-gray-500">
-                        Doorstep Hub • India's Trusted Doortsep Service Provider
+                    <div className="p-6 bg-gray-50/50 border-t border-gray-50 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                        Doorstep Hub • India's Premium Service Network
                     </div>
                 </motion.div>
             </div>

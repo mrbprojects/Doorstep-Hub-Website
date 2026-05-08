@@ -68,7 +68,7 @@ export default function RootLayout({ children }) {
         />
         {/* End Google Tag Manager */}
       </head>
-      <body suppressHydrationWarning className={`${ubuntu.variable} font-ubuntu bg-[#0a0a0a] min-h-screen text-white overflow-x-hidden`}>
+      <body suppressHydrationWarning className={`${ubuntu.variable} font-ubuntu min-h-screen overflow-x-hidden`}>
         {/* Google Tag Manager (noscript) */}
         <noscript dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P35XQW2B" height="0" width="0" style="display:none;visibility:hidden"></iframe>` }} />
         {/* End Google Tag Manager (noscript) */}
@@ -85,7 +85,7 @@ export default function RootLayout({ children }) {
                 <CartProvider>
                   <ServiceCartProvider>
                     <ClientProviders>
-                      <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a]" />}>
+                      <Suspense fallback={<div className="min-h-screen" />}>
                         {children}
                       </Suspense>
                       <InitialLocationModal />

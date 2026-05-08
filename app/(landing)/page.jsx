@@ -67,7 +67,7 @@ export default async function Home() {
     };
 
     return (
-        <div className="bg-[#0a0a0a] min-h-screen text-white overflow-x-hidden">
+        <div className="landing-global bg-white min-h-screen text-gray-900 overflow-x-hidden">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}

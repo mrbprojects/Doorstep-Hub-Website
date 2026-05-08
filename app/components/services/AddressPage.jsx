@@ -360,7 +360,7 @@ export function AddressPage({
             className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
           >
             <MapPin className="w-8 h-8" />
-            Your Service Address
+            Manage Address
           </motion.h1>
         </div>
       </section>

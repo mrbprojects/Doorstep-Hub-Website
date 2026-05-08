@@ -11,8 +11,24 @@ export function PopularCenters({ onStoreClick }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // SEO Schema for Popular Centers
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Popular Appliance Service Centers",
+    "description": "Top-rated authorized appliance repair and service centers near you.",
+    "itemListElement": (centers || []).slice(0, 10).map((center, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": center.name,
+      "description": `Authorized service center in ${center.location}. Rating: ${center.rating}/5.`,
+      "url": center.slug ? `https://doorstephub.com/service-list/${center.slug}` : undefined
+    }))
+  };
+
   useEffect(() => {
     const fetchCenters = async () => {
+
       if (!location?.lat || !location?.lng) {
         setLoading(false);
         return;
@@ -42,8 +58,11 @@ export function PopularCenters({ onStoreClick }) {
             id: center._id,
             slug: center.slug, // Map the slug
             // Use image if available, otherwise logo, otherwise fallback
-            image: center.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.image}` :
-              (center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80'),
+            image: center.logo
+              ? `https://api.doorstephub.com/${center.logo}`
+              : center.image
+                ? `https://api.doorstephub.com/${center.image}`
+                : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80',
             name: center.name,
             location: center.cityName && center.stateName ? `${center.cityName}, ${center.stateName}` : (center.address || 'Unknown Location'),
             rating: typeof center.rating === 'string' ? parseFloat(center.rating) : (center.rating || 0),
@@ -70,25 +89,25 @@ export function PopularCenters({ onStoreClick }) {
 
   // Shimmer Skeleton Card
   const ShimmerCenterCard = () => (
-    <div className="w-80 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+    <div className="w-80 rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
       {/* Shimmer Image */}
-      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
+      <div className="relative h-48 overflow-hidden bg-gray-100 animate-shimmer" />
 
       {/* Shimmer Content */}
       <div className="p-5">
         {/* Title Shimmer */}
-        <div className="h-6 w-3/4 mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        <div className="h-6 w-3/4 mb-2 bg-gray-200 rounded animate-shimmer" />
 
         {/* Location Shimmer */}
-        <div className="h-4 w-1/2 mb-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        <div className="h-4 w-1/2 mb-4 bg-gray-200 rounded animate-shimmer" />
 
         {/* Speciality Badge Shimmer */}
-        <div className="h-6 w-1/3 mb-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+        <div className="h-6 w-1/3 mb-4 bg-gray-200 rounded-lg animate-shimmer" />
 
         {/* Rating & CTA Shimmer */}
         <div className="flex items-center justify-between">
-          <div className="h-8 w-16 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
-          <div className="h-10 w-24 rounded-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+          <div className="h-8 w-16 bg-gray-200 rounded-lg animate-shimmer" />
+          <div className="h-10 w-24 rounded-full bg-gray-200 animate-shimmer" />
         </div>
       </div>
     </div>
@@ -96,15 +115,20 @@ export function PopularCenters({ onStoreClick }) {
 
   if (loading) {
     return (
-      <section className="py-20 relative overflow-hidden">
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
+      <section className="relative py-20 overflow-hidden bg-white">
+      {/* SEO Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
           <div className="mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4">
               <Award className="w-3 h-3 text-[#04a99d]" />
               <h6 className="text-xs font-medium text-[#04a99d]">TOP RATED</h6>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">Explore Popular Services Center</h2>
-            <p className="text-white/60">Most trusted and highly-rated service providers in your area</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-3 text-gray-900">Explore Popular Services Center</h2>
+            <p className="text-gray-500">Most trusted and highly-rated service providers in your area</p>
           </div>
           <div className="flex gap-6 overflow-hidden">
             {[1, 2, 3, 4].map((i) => (
@@ -131,13 +155,19 @@ export function PopularCenters({ onStoreClick }) {
   }
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-20 relative bg-white">
+      {/* SEO Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f1614]/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50/50 to-white" />
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
+
+      <div className="relative z-10 w-full">
         {/* Section Header */}
-        <div className="mb-12">
+        <div className="mb-12 px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -151,7 +181,7 @@ export function PopularCenters({ onStoreClick }) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900"
           >
             Explore Popular Services Center
           </motion.h2>
@@ -169,7 +199,7 @@ export function PopularCenters({ onStoreClick }) {
         {/* Horizontal Scroll */}
         <div className="relative">
           <div className="overflow-x-auto scrollbar-hide pb-4">
-            <div className="flex gap-6 min-w-max">
+            <div className="flex gap-6 min-w-max px-6 lg:px-8">
               {centers.map((center, index) => (
                 <motion.div
                   key={center.id || index}
@@ -180,12 +210,12 @@ export function PopularCenters({ onStoreClick }) {
                   whileHover={{ y: -8, scale: 1.02 }}
                   className="group cursor-pointer"
                 >
-                  <div className="relative w-80 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+                  <div className="relative w-80 rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-300">
                     {/* Popular Badge */}
                     {center.popular && (
                       <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] shadow-lg">
                         <TrendingUp className="w-3 h-3 text-white" />
-                        <h6 className="text-xs font-medium text-white">Most Popular</h6>
+                        <h6 className="text-xs font-medium !text-white">Most Popular</h6>
                       </div>
                     )}
 
@@ -210,10 +240,10 @@ export function PopularCenters({ onStoreClick }) {
 
                     {/* Content */}
                     <div className="p-5">
-                      <h4 className="text-xl font-bold text-white mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-1">
+                      <h4 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-1">
                         {center.name}
                       </h4>
-                      <p className="text-white/50 text-sm mb-3 flex items-center gap-1">
+                      <p className="text-gray-500 text-sm mb-3 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {center.location}
                       </p>
@@ -225,13 +255,11 @@ export function PopularCenters({ onStoreClick }) {
 
                       {/* Rating & CTA */}
                       <div className="flex items-center justify-between">
-
-
                         <motion.button
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           whileTap={{ scale: 0.9 }}
                           className="px-4 py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-sm shadow-lg shadow-[#037166]/30 group-hover:shadow-[#037166]/50 transition-all flex items-center gap-2"
-                          onClick={() => onStoreClick?.(center.id)}
+                          onClick={() => onStoreClick?.(center.slug)}
                         >
                           View Store
                           <ArrowRight className="w-4 h-4" />
@@ -252,11 +280,9 @@ export function PopularCenters({ onStoreClick }) {
           </div>
 
           {/* Fade Edges */}
-          <div className="absolute left-0 top-0 bottom-4 w-20 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-white to-transparent pointer-events-none" />
         </div>
       </div>
     </section>
   );
 }
-

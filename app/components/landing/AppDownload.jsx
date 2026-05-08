@@ -42,7 +42,7 @@ export function AppDownload() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
         />
         <motion.div
           animate={{
@@ -50,11 +50,11 @@ export function AppDownload() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* Left: Content */}
           <motion.div
@@ -111,7 +111,7 @@ export function AppDownload() {
                 href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-36 xs:w-44 md:w-48 h-12 xs:h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
+                className="flex items-center justify-center w-36 xs:w-44 md:w-48 h-12 xs:h-14 md:h-16 bg-[#DEF2EF] rounded-full shadow-xl shadow-[#037166]/15 hover:shadow-2xl hover:shadow-[#037166]/25 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0 border border-[#9ecbc3]"
                 title="Get it on Google Play"
               >
                 <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
@@ -121,7 +121,7 @@ export function AppDownload() {
                 href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-36 xs:w-44 md:w-48 h-12 xs:h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
+                className="flex items-center justify-center w-36 xs:w-44 md:w-48 h-12 xs:h-14 md:h-16 bg-[#DEF2EF] rounded-full shadow-xl shadow-[#037166]/15 hover:shadow-2xl hover:shadow-[#037166]/25 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0 border border-[#9ecbc3]"
                 title="Download on the App Store"
               >
                 <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
@@ -170,7 +170,7 @@ export function AppDownload() {
             >
               <div className="relative w-72 h-[580px] bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-[3rem] border-8 border-[#2a2a2a] shadow-2xl overflow-hidden">
                 {/* Notch */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-[#0a0a0a] rounded-b-3xl z-20" />
+                {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-[#037166] rounded-b-3xl z-20" /> */}
 
                 {/* Screen */}
                 <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden rounded-[2.5rem]">
@@ -236,3 +236,5 @@ export function AppDownload() {
     </section>
   );
 }
+
+

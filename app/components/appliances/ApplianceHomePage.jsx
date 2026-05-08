@@ -13,6 +13,7 @@ import { NearbyServiceCenters as NearbyStores } from '@/components/appliances/Ne
 import { PopularCenters } from '@/components/appliances/PopularCenters';
 import { KnowledgeSpace } from '@/components/appliances/KnowledgeSpace';
 import { Newsletter } from '@/components/appliances/Newsletter';
+import { ApplianceBookingFlow } from '@/components/appliances/booking-flow/ApplianceBookingFlow';
 
 export function ApplianceHomePage() {
     const router = useRouter();
@@ -23,7 +24,7 @@ export function ApplianceHomePage() {
         category: 'appliances/categories',
         recentlyBooked: 'appliances/recent',
         featuredServices: 'appliances/featured',
-        serviceCenter: 'appliances/centers',
+        serviceCenter: 'appliance-repairs/services-centers',
         verifiedPartner: 'appliances/verified'
     });
 
@@ -96,39 +97,55 @@ export function ApplianceHomePage() {
     };
 
     return (
-        <>
+        <div className="relative bg-white min-h-screen">
+            {/* Website-wide background gradient finish */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white via-white to-[#037166]/5" />
+                <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#04a99d]/5 blur-[120px] rounded-full" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#037166]/5 blur-[150px] rounded-full" />
+            </div>
+
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
             />
-            <Hero
-                onBookService={openModal}
-                onViewServices={openExploreModal}
-            />
-            <ServiceBookingModal
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-            />
-            <ServiceTypeSelectionModal
-                isOpen={showExploreModal}
-                onClose={() => setShowExploreModal(false)}
-                onSelect={handleExploreSelect}
-            />
-            <TopCategories onViewAll={() => router.push(`/${serviceSlugs.category}`)} />
-            <FeaturedServices
-                onServiceClick={handleServiceClick}
-                onViewAll={() => router.push(`/${serviceSlugs.featuredServices}`)}
-            />
-            <RecentlyBooked
-                onServiceClick={handleServiceClick}
-                onViewAll={() => router.push(`/${serviceSlugs.recentlyBooked}`)}
-            />
-            <DownloadApp />
-            <NearbyStores onViewAll={() => router.push(`/${serviceSlugs.serviceCenter}`)} />
-            <PopularCenters onStoreClick={(storeId) => {
-                router.push(`/appliances/store/${storeId}`);
-            }} />
-            <Newsletter />
-        </>
+            
+            <div className="relative z-10">
+                <Hero
+                    onBookService={openModal}
+                    onViewServices={openExploreModal}
+                />
+                <ServiceBookingModal
+                    isOpen={showModal}
+                    onClose={() => setShowModal(false)}
+                />
+                <ServiceTypeSelectionModal
+                    isOpen={showExploreModal}
+                    onClose={() => setShowExploreModal(false)}
+                    onSelect={handleExploreSelect}
+                />
+                <TopCategories onViewAll={() => router.push(`/${serviceSlugs.category}`)} />
+                <ApplianceBookingFlow />
+                <FeaturedServices
+                    onServiceClick={handleServiceClick}
+                    onViewAll={() => router.push(`/${serviceSlugs.featuredServices}`)}
+                />
+                <RecentlyBooked
+                    onServiceClick={handleServiceClick}
+                    onViewAll={() => router.push(`/${serviceSlugs.recentlyBooked}`)}
+                />
+                <DownloadApp />
+                <NearbyStores onViewAll={() => router.push(`/${serviceSlugs.serviceCenter}`)} />
+                <PopularCenters onStoreClick={(storeSlug, storeId) => {
+                    if (storeSlug) {
+                        router.push(`/service-list/${storeSlug}`);
+                        return;
+                    }
+                    router.push(`/service-list/${storeId}`);
+                }} />
+                <KnowledgeSpace />
+                <Newsletter />
+            </div>
+        </div>
     );
 }

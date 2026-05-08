@@ -150,7 +150,7 @@ export function BookingServices() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
         />
         <motion.div
           animate={{
@@ -158,11 +158,11 @@ export function BookingServices() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -213,7 +213,7 @@ export function BookingServices() {
                     {/* Status Badge - Top Center */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-[#037166]/90 backdrop-blur-md rounded-b-lg rounded-t-none text-[15px]  text-white shadow-lg border border-t-0 border-[#037166]/20 whitespace-nowrap">
 
-                      <h6 className="text-[10px] font-ubuntu tracking-wide">{service.status}</h6>
+                      <span className="text-[10px] font-ubuntu tracking-wide !text-white block">{service.status}</span>
                     </div>
 
                     {/* Image - Fixed height */}
@@ -229,8 +229,8 @@ export function BookingServices() {
                       {/* Rating Badge - Bottom Left Flush */}
                       <div className="absolute bottom-0 left-0 z-20">
                         <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
-                          <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                          <span className="text-sm font-bold text-white">{service.rating}</span>
+                          <Star className="w-4 h-4 fill-white text-white" />
+                          <span className="text-sm font-bold !text-white">{service.rating}</span>
                         </div>
                       </div>
 
@@ -242,7 +242,7 @@ export function BookingServices() {
                           handleServiceClick(service);
                         }}
                       >
-                        <h6 className="text-[12px] font-ubuntu tracking-wider text-white bg-clip-text text-transparent">Book Now</h6>
+                        <span className="text-[12px] font-ubuntu tracking-wider !text-white block">Book Now</span>
                       </div>
                     </div>
 
@@ -283,5 +283,7 @@ export function BookingServices() {
     </section>
   );
 }
+
+
 
 

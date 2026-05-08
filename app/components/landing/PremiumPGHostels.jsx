@@ -267,7 +267,7 @@ export function PremiumPGHostels() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
         />
         <motion.div
           animate={{
@@ -275,7 +275,7 @@ export function PremiumPGHostels() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
         />
 
 
@@ -283,7 +283,7 @@ export function PremiumPGHostels() {
 
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -311,9 +311,9 @@ export function PremiumPGHostels() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-700/50 text-gray-400 rounded-xl font-semibold shadow-lg cursor-pointer group/header-btn relative overflow-hidden"
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-[#297A70] text-[#ffffff] rounded-xl font-semibold shadow-lg cursor-pointer group/header-btn relative overflow-hidden"
           >
-            <span>Explore All PG & Hostels</span>
+            <span className='!text-[#ffffff]'>Explore All PG & Hostels</span>
             <ArrowRight className="w-5 h-5" />
           </motion.button>
         </motion.div>
@@ -352,9 +352,9 @@ export function PremiumPGHostels() {
                 >
                   {/* Type Badge */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 px-8 py-1 bg-[#037166]/90 backdrop-blur-md rounded-full rounded-t-none border border-t-0 border-[#037166]/30 shadow-lg whitespace-nowrap">
-                    <h6 className="text-xs font-intro text-white  tracking-wider">
+                    <span className="text-xs font-intro !text-white tracking-wider block">
                       {hostel.type}
-                    </h6>
+                    </span>
                   </div>
 
 
@@ -419,7 +419,7 @@ export function PremiumPGHostels() {
                         <motion.button
                           className="cursor-pointer whitespace-nowrap rounded-full bg-[#297A70] px-2 py-1.5 text-[10px] font-semibold shadow-lg"
                         >
-                          <span className="text-gray-300">
+                          <span className="!text-white">
                             Book Now
                           </span>
                         </motion.button>
@@ -489,5 +489,8 @@ export function PremiumPGHostels() {
     </section>
   );
 }
+
+
+
 
 

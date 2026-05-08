@@ -23,7 +23,65 @@ async function fetchAPI(endpoint, body = null, method = 'POST') {
 
 const isValidSlug = (s) => s && s.length > 2 && !s.match(/^[0-9a-fA-F]{24}$/);
 
+async function getApplianceHierarchicalEntries() {
+  const entries = [];
+  try {
+    const [citiesData, categoriesData, brandsData, authData] = await Promise.all([
+      fetchAPI('/app/cities/cities_list', null, 'GET'),
+      fetchAPI('/app/applience-repairs-website/getallcategorys', { lattitude: '17.3850', longitude: '78.4867' }),
+      fetchAPI('/app/brands/all_brands', null, 'GET'),
+      fetchAPI('/app/authorized-services/all_authorized_services', null, 'GET')
+    ]);
+
+    const cities = (citiesData?.success && Array.isArray(citiesData.cities)) ? citiesData.cities : [];
+    const categories = (categoriesData?.success && Array.isArray(categoriesData.data)) ? categoriesData.data : [];
+    const brands = (brandsData?.success && Array.isArray(brandsData.brands)) ? brandsData.brands : [];
+    const authServices = (authData?.success && Array.isArray(authData.services)) ? authData.services : [];
+
+    // Create mappings for precision
+    const categoryMap = {}; // Name -> Slug
+    categories.forEach(cat => {
+      if (cat.name && cat.slug) categoryMap[cat.name.toLowerCase()] = cat.slug;
+    });
+
+    const brandMap = {}; // Name -> Slug
+    brands.forEach(brand => {
+      if (brand.name) {
+        brandMap[brand.name.toLowerCase()] = brand.slug || brand.name.toLowerCase().trim().replace(/\s+/g, '-');
+      }
+    });
+
+    cities.forEach(city => {
+      const citySlug = (city.slug || city.name || '').toLowerCase().replace(/\s+/g, '-');
+      if (!citySlug) return;
+
+      // City Level
+      entries.push({ url: `${BASE_URL}/appliances/repair-service/${citySlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 });
+
+      // Precision Hierarchical: City + Category + Brand
+      // Only generate combinations that exist in authorized services
+      authServices.forEach(auth => {
+        const catSlug = categoryMap[auth.categoryName?.toLowerCase()];
+        const brandSlug = brandMap[auth.brandName?.toLowerCase()];
+
+        if (catSlug && brandSlug) {
+          // City + Category Level (if not already added)
+          entries.push({ url: `${BASE_URL}/appliances/repair-service/${citySlug}/${catSlug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 });
+          
+          // City + Category + Brand Level
+          entries.push({ url: `${BASE_URL}/${citySlug}/${catSlug}/${brandSlug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
+        }
+      });
+    });
+  } catch (e) {
+    console.error('Sitemap Hierarchical Error:', e);
+  }
+  return entries;
+}
+
+
 async function getApplianceEntries() {
+
   const entries = [];
   try {
     const data = await fetchAPI('/app/applience-repairs-website/getallcategorys', { lattitude: '17.3850', longitude: '78.4867' });
@@ -58,11 +116,64 @@ async function getApplianceEntries() {
       }));
       entries.push(...results.flat());
     }
+    // Authorized services (e.g. samsung-ac-repair-service-center)
+    const authData = await fetchAPI('/app/authorized-services/all_authorized_services', null, 'GET');
+    if (authData?.success && Array.isArray(authData.services)) {
+      authData.services.forEach(svc => {
+        if (isValidSlug(svc.slug)) {
+          entries.push({ url: `${BASE_URL}/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
+        }
+      });
+    }
   } catch (e) {}
   return entries;
 }
 
+
+async function getApplianceBookingEntries() {
+  const entries = [];
+  try {
+    const [catData, authData] = await Promise.all([
+      fetchAPI('/app/applience-repairs-website/getallcategorys', { lattitude: '17.3850', longitude: '78.4867' }),
+      fetchAPI('/app/authorized-services/all_authorized_services', null, 'GET')
+    ]);
+
+    // Regular services
+    if (catData?.success && Array.isArray(catData.data)) {
+      await Promise.all(catData.data.map(async (cat) => {
+        const subData = await fetchAPI('/app/applience-repairs-website/getsubcategorysbycategoryid', { slug: cat.slug });
+        if (subData?.success && Array.isArray(subData.data)) {
+          await Promise.all(subData.data.map(async (sub) => {
+            const svcData = await fetchAPI('/app/applience-repairs-website/services_by_subcategory', { 
+              subcategoryId: sub._id, lattitude: '17.3850', longitude: '78.4867' 
+            });
+            if (svcData?.success && Array.isArray(svcData.dhubServices)) {
+              svcData.dhubServices.forEach(svc => {
+                if (isValidSlug(svc.slug)) {
+                  entries.push({ url: `${BASE_URL}/service-list/book-now/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
+                }
+              });
+            }
+          }));
+        }
+      }));
+    }
+
+    // Authorized services (e.g. samsung-ac-repair-service-center)
+    if (authData?.success && Array.isArray(authData.services)) {
+      authData.services.forEach(svc => {
+        if (isValidSlug(svc.slug)) {
+          entries.push({ url: `${BASE_URL}/service-list/book-now/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
+        }
+      });
+    }
+  } catch (e) {}
+  return entries;
+}
+
+
 async function getHostelEntries() {
+
   const entries = [];
   try {
     const [catData, pgListData] = await Promise.all([
@@ -186,25 +297,17 @@ async function getReligiousEntries() {
 }
 
 async function getCenterEntries() {
-  const cityCoords = [
-    { city: 'Hyderabad', lat: '17.3850', lng: '78.4867', limit: 300 },
-    { city: 'Bangalore', lat: '12.9716', lng: '77.5946', limit: 200 },
-    { city: 'Vizag', lat: '17.6868', lng: '83.2185', limit: 100 },
-    { city: 'Chennai', lat: '13.0827', lng: '80.2707', limit: 100 },
-    { city: 'Vijayawada', lat: '16.5062', lng: '80.6480', limit: 100 },
-    { city: 'Mumbai', lat: '19.0760', lng: '72.8777', limit: 100 },
-    { city: 'Pune', lat: '18.5204', lng: '73.8567', limit: 100 },
-    { city: 'Delhi', lat: '28.6139', lng: '77.2090', limit: 100 }
-  ];
-
   try {
-    const centerResults = await Promise.all(cityCoords.map(async (coord) => {
+    const citiesData = await fetchAPI('/app/cities/cities_list', null, 'GET');
+    const cities = (citiesData?.success && Array.isArray(citiesData.cities)) ? citiesData.cities : [];
+    
+    const centerResults = await Promise.all(cities.map(async (city) => {
       try {
         const data = await fetchAPI('/app/applience-repairs-website/get_service_center', { 
-          lattitude: coord.lat, 
-          longitude: coord.lng,
+          lattitude: city.latitude || '17.3850', 
+          longitude: city.longitude || '78.4867',
           page: 1,
-          limit: coord.limit
+          limit: 100
         });
         if (data?.success && Array.isArray(data.nearByServiceCenters)) {
           return data.nearByServiceCenters
@@ -236,17 +339,20 @@ export default async function sitemap() {
     { url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/book-appointment`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/services/centers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${BASE_URL}/appliances/centers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE_URL}/appliance-repairs/services-centers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
   ];
 
   const dynamicResults = await Promise.all([
     getApplianceEntries(),
+    getApplianceHierarchicalEntries(),
+    getApplianceBookingEntries(),
     getHostelEntries(),
     getSpaEntries(),
     getReligiousEntries(),
     getCenterEntries()
   ]);
+
+
 
   const allEntries = [...staticEntries, ...dynamicResults.flat()];
   const uniqueUrls = new Set();

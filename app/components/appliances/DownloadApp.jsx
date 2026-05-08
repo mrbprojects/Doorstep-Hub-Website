@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Apple, Smartphone, ThumbsUp, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Smartphone, ThumbsUp, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export function DownloadApp() {
   return (
@@ -33,11 +33,11 @@ export function DownloadApp() {
             </div>
 
             <h2 className="text-[28px] md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+              <span className="bg-[#037166]  bg-clip-text text-transparent">
                 Download the App &
               </span>
               <br />
-            
+
               <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent">
                 Grow Your Service Business
               </span>
@@ -73,45 +73,25 @@ export function DownloadApp() {
             </div>
 
             {/* App Store Buttons */}
-            <div className="flex flex-row flex-wrap sm:flex-nowrap gap-2 sm:gap-4">
+            <div className="flex flex-wrap gap-4">
               <a
                 href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 sm:flex-none"
+                className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
+                title="Download on the App Store"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(3, 113, 102, 0.4)' }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full flex items-center justify-center gap-2 sm:gap-3 px-3 py-3 sm:px-6 sm:py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium shadow-xl shadow-[#037166]/30 transition-all group"
-                >
-                  <Apple className="w-5 h-5 sm:w-6 sm:h-6" />
-                  <div className="text-left">
-                    <div className="text-[10px] sm:text-[12px] opacity-80">Download on the</div>
-                    <span className="text-xs sm:text-sm font-bold">App Store</span>
-                  </div>
-                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform ml-1 sm:ml-2" />
-                </motion.button>
+                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
               </a>
 
               <a
                 href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 sm:flex-none"
+                className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
+                title="Get it on Google Play"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full flex items-center justify-center gap-2 sm:gap-3 px-3 py-3 sm:px-6 sm:py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#037166]/50 text-white font-medium backdrop-blur-sm transition-all group"
-                >
-                  <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
-                  <div className="text-left">
-                    <div className="text-[10px] sm:text-xs opacity-80">Get it on</div>
-                    <span className="text-xs sm:text-sm font-bold">Google Play</span>
-                  </div>
-                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform ml-1 sm:ml-2" />
-                </motion.button>
+                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
               </a>
             </div>
           </motion.div>
@@ -141,7 +121,7 @@ export function DownloadApp() {
               {/* Phone Frame */}
               <div className="relative w-[280px] h-[560px] rounded-[3rem] bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border-4 border-white/10 shadow-2xl overflow-hidden">
                 {/* Notch */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-3xl z-20" />
+                {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#037166] rounded-b-3xl z-20" /> */}
 
                 {/* Screen Content */}
                 <div className="absolute inset-3 rounded-[2.5rem] overflow-hidden bg-black">

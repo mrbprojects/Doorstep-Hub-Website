@@ -266,7 +266,7 @@ export function ServiceDetailsPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-32 bg-[#0a0a0a]">
+      <div className="appliance-detail-page min-h-screen pt-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8">
             <div className="space-y-6">
@@ -289,7 +289,7 @@ export function ServiceDetailsPage({
   }
 
   if (!serviceDetails?.storeData) {
-    return <div className="min-h-screen bg-[#0a0a0a]" />;
+    return <div className="appliance-detail-page min-h-screen bg-white" />;
   }
 
   const { storeData, provider_rate_cards = [], serviceImages = [], customerRatings = [] } = serviceDetails;
@@ -400,7 +400,7 @@ export function ServiceDetailsPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-20 pb-24 lg:pb-0"
+      className="appliance-detail-page min-h-screen pt-20 pb-24 lg:pb-0 bg-white"
     >
       {schemaData && (
         <script
@@ -412,7 +412,7 @@ export function ServiceDetailsPage({
 
       {/* ── MOBILE: Sticky bottom Book-Now bar (hidden on lg+) ─────────────── */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden px-4 pb-4 pt-2"
-        style={{ background: 'linear-gradient(to top, rgba(10,10,10,1) 60%, transparent)' }}
+        style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.98) 60%, rgba(255,255,255,0))' }}
       >
         <button
           onClick={handleBookNow}
@@ -425,18 +425,6 @@ export function ServiceDetailsPage({
 
       {/* ── HERO SECTION ────────────────────────────────────────────────────── */}
       <section className="relative py-6 lg:py-12">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div
-            className="absolute inset-0 opacity-30"
-            style={{ background: `linear-gradient(135deg, #025a51 0%, ${accentColor} 50%, #037166 100%)` }}
-          />
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
-            transition={{ duration: 8, repeat: Infinity }}
-            className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-[120px]"
-            style={{ backgroundColor: accentColor }}
-          />
-        </div>
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -459,18 +447,18 @@ export function ServiceDetailsPage({
                 if (catSlug) { router.push(`/${catSlug}`); return; }
                 router.back();
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/85 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
             <div className="flex-1 min-w-0 pr-2 overflow-hidden">
-              <div className="text-white/50 text-[10px] sm:text-xs flex items-center gap-1 sm:gap-1.5 flex-wrap">
+              <div className="text-gray-500 text-[10px] sm:text-xs flex items-center gap-1 sm:gap-1.5 flex-wrap">
                 <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); router.push(c ? `/${c}` : '/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[70px] sm:max-w-[100px]">{category}</button>
                 <ChevronRight className="w-3 h-3 flex-shrink-0" />
                 <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[70px] sm:max-w-[100px]">{subCategory}</button>
                 <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <span className="text-white/30 truncate max-w-[90px] sm:max-w-[120px]">{storeData?.name}</span>
+                <span className="text-gray-400 truncate max-w-[90px] sm:max-w-[120px]">{storeData?.name}</span>
               </div>
             </div>
           </motion.div>
@@ -483,7 +471,7 @@ export function ServiceDetailsPage({
 
               {/* Image Gallery */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="w-full">
-                <div className="relative rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm border border-white/10">
+                <div className="relative rounded-2xl overflow-hidden bg-white border border-slate-200">
                   <div
                     className="relative w-full overflow-hidden"
                     style={{ aspectRatio: '16/7' }}
@@ -494,7 +482,6 @@ export function ServiceDetailsPage({
                       alt={storeData.name}
                       className="w-full h-full object-cover cursor-pointer"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
                     {/* Dots indicator on mobile */}
                     {images.length > 1 && (
                       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 lg:hidden">
@@ -541,7 +528,7 @@ export function ServiceDetailsPage({
                       onClick={() => setActiveTab(tab)}
                       className={`flex-1 min-w-max px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
                         ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                        : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
                         }`}
                     >
                       {tab}
@@ -555,8 +542,8 @@ export function ServiceDetailsPage({
                     {(activeTab === 'About Service' || activeTab === 'services') && (
                       <motion.div key="services" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
                         <div className="mb-4">
-                          <h3 className="text-lg font-bold text-white mb-0.5">About Service</h3>
-                          <p className="text-white/40 text-xs italic">Approximate service rates (Select a service to proceed)</p>
+                          <h3 className="text-lg font-bold text-gray-900 mb-0.5">About Service</h3>
+                          <p className="text-gray-500 text-xs italic">Approximate service rates (Select a service to proceed)</p>
                         </div>
                         <div className="grid gap-2 pb-4">
                           {provider_rate_cards.map((card, index) => {
@@ -574,15 +561,15 @@ export function ServiceDetailsPage({
                                 key={card.id || card._id || index}
                                 onClick={() => toggleRateCard(card)}
                                 className={`p-2 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${isSelected
-                                    ? 'bg-[#037166]/30 border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] ring-1 ring-white/50'
-                                    : 'bg-white/5 border-white/10 hover:border-[#037166]/50'
+                                    ? 'bg-white border-2 border-[#037166] shadow-none ring-0'
+                                    : 'bg-white border-slate-200 hover:border-[#037166]/50 shadow-none'
                                   }`}
                               >
                                 <div className="flex gap-2.5 sm:gap-3 items-center">
                                   {/* Selection Indicator (Left-aligned Checkbox style) */}
                                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${isSelected
                                       ? 'bg-[#037166] border-[#037166] shadow-[0_0_10px_rgba(3,113,102,0.5)]'
-                                      : 'border-white/20 group-hover:border-[#037166]/60'
+                                      : 'border-slate-300 group-hover:border-[#037166]/60'
                                     }`}>
                                     <Check className={`w-3.5 h-3.5 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={4} />
                                   </div>
@@ -602,14 +589,14 @@ export function ServiceDetailsPage({
                                   <div className="flex-1 flex flex-col justify-between min-w-0">
                                     <div className="flex items-start justify-between gap-2">
                                       <div className="min-w-0 flex-1">
-                                        <h6 className={`text-xs sm:text-sm font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#04a99d]' : 'text-white group-hover:text-[#04a99d]'}`}>{card.title}</h6>
+                                        <h6 className={`text-xs sm:text-sm font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#04a99d]' : 'text-gray-900 group-hover:text-[#04a99d]'}`}>{card.title}</h6>
                                         {card.reason && (
-                                          <p className="text-white/40 text-[10px] leading-relaxed line-clamp-1">{card.reason}</p>
+                                          <p className="text-gray-500 text-[10px] leading-relaxed line-clamp-1">{card.reason}</p>
                                         )}
                                       </div>
 
                                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                        <span className="text-[#04a99d] font-bold text-sm sm:text-base whitespace-nowrap"><span className='italic font-normal text-[9px] text-white/80'>Starts from </span>₹{card.price}</span>
+                                        <span className="text-[#04a99d] font-bold text-sm sm:text-base whitespace-nowrap"><span className='italic font-normal text-[9px] text-gray-500'>Starts from </span>₹{card.price}</span>
 
                                         {/* See More Button - Below Price */}
                                         {card.banner_images?.length > 0 && (
@@ -643,7 +630,7 @@ export function ServiceDetailsPage({
                     {/* Working Images Tab */}
                     {activeTab === 'Working Images' && (
                       <motion.div key="Working Images" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                        <h3 className="text-lg font-bold text-white mb-4">Working Images</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Working Images</h3>
                         {serviceImages.length > 0 ? (
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {serviceImages.map((img, idx) => (
@@ -666,7 +653,7 @@ export function ServiceDetailsPage({
                     {/* Ratings Tab */}
                     {(activeTab === 'Ratings' || activeTab === 'reviews') && (
                       <motion.div key="reviews" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                        <h3 className="text-lg font-bold text-white mb-4">Ratings</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Ratings</h3>
                         {customerRatings.length > 0 ? (
                           <div className="space-y-3">
                             {customerRatings.slice(0, visibleReviews).map((review, idx) => (
@@ -675,22 +662,22 @@ export function ServiceDetailsPage({
                                   <div className="w-9 h-9 rounded-full bg-[#037166] flex items-center justify-center font-bold text-white flex-shrink-0 text-sm">{review.name.charAt(0)}</div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
-                                      <h5 className="text-white font-bold text-sm truncate">{review.name}</h5>
-                                      <span className="text-white/40 text-[10px] flex-shrink-0 ml-2">{new Date(review.date).toLocaleDateString()}</span>
+                                      <h5 className="text-gray-900 font-bold text-sm truncate">{review.name}</h5>
+                                      <span className="text-gray-500 text-[10px] flex-shrink-0 ml-2">{new Date(review.date).toLocaleDateString()}</span>
                                     </div>
                                     <div className="flex items-center gap-0.5 mb-2">
                                       {[...Array(5)].map((_, i) => (
                                         <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-[#fbbf24] text-[#fbbf24]' : 'text-white/20'}`} />
                                       ))}
                                     </div>
-                                    <p className="text-white/70 text-sm leading-relaxed">{review.comment}</p>
+                                    <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
                                   </div>
                                 </div>
                               </div>
                             ))}
                             {customerRatings.length > visibleReviews && (
                               <div className="flex justify-center mt-4">
-                                <button onClick={() => setVisibleReviews(prev => prev + 4)} className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl transition-colors border border-white/20">Show More</button>
+                                <button onClick={() => setVisibleReviews(prev => prev + 4)} className="px-6 py-2.5 bg-white hover:bg-slate-50 text-gray-900 text-sm font-semibold rounded-xl transition-colors border border-slate-200">Show More</button>
                               </div>
                             )}
                           </div>
@@ -713,17 +700,17 @@ export function ServiceDetailsPage({
             >
               {/* Title + Rating */}
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2 break-words">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-2 break-words">
                   {storeData.name}
                 </h1>
-                <p className="text-white/60 text-sm mb-3">On-Demand Home Services</p>
+                <p className="text-gray-600 text-sm mb-3">On-Demand Home Services</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
                     <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                    <span className="text-white font-bold text-sm">{storeData.avgRating}</span>
-                    <span className="text-white/50 text-[10px] sm:text-xs">({storeData.totalRatings})</span>
+                    <span className="text-gray-900 font-bold text-sm">{storeData.avgRating}</span>
+                    <span className="text-gray-500 text-[10px] sm:text-xs">({storeData.totalRatings})</span>
                   </div>
-                  <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/60 text-xs flex-shrink-0">
+                  <div className="px-3 py-1.5 rounded-full bg-white/80 border border-slate-200 text-gray-600 text-xs flex-shrink-0">
                     {storeData.totalOrders}+ Orders
                   </div>
                 </div>
@@ -751,7 +738,7 @@ export function ServiceDetailsPage({
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: `${accentColor}40` }}>
                       <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: accentColor }} />
                     </div>
-                    <span className="text-white/80 text-[10px] sm:text-xs font-medium leading-tight truncate">{item.text}</span>
+                    <span className="text-gray-700 text-[10px] sm:text-xs font-medium leading-tight truncate">{item.text}</span>
                   </div>
                 ))}
               </div>

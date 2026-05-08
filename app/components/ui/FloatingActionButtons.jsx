@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 
 // Known top-level section prefixes (not service detail slugs)
 const KNOWN_SECTIONS = ['/appliances', '/services', '/book-appointment', '/appliance-repair-services',
-    '/religious-services', '/spa-salon', '/pg-hostels', '/account', '/cart', '/address'];
+    '/religious-services', '/spa-salon', '/pg-hostels', '/account', '/cart', '/address', '/service-list'];
 
 export function FloatingActionButtons() {
     const [mounted, setMounted] = useState(false);
@@ -16,7 +16,7 @@ export function FloatingActionButtons() {
     if (!mounted || !pathname) return null;
     const isBookingPage = pathname === '/book-appointment';
 
-    // Services to hide icons for: SPA, PG Hostels, Religious Services, and General Services (Professional Services)
+    // Services to hide icons for
     const hideForServices = [
         '/spa-salon',
         '/pg-hostels',
@@ -31,13 +31,10 @@ export function FloatingActionButtons() {
     ];
 
     // Check if the current path should hide the floating buttons
-    const shouldHide = hideForServices.some(path => pathname.startsWith(path));
+    const shouldHide = hideForServices.some(path => pathname.includes(path)) || pathname.includes('book-now') || pathname === '/';
 
     // Hide global Book Now pill on service detail pages (dynamic [slug] routes at root)
-    // These pages have their own sticky Book Now bar
-    const isServiceDetailPage = pathname.split('/').length === 2
-        && !KNOWN_SECTIONS.some(s => pathname.startsWith(s))
-        && pathname !== '/';
+    const isServiceDetailPage = (pathname.split('/').length === 2 && !KNOWN_SECTIONS.some(s => pathname.startsWith(s)) && pathname !== '/') || pathname.includes('book-now');
 
     // If we should hide for specific services, return null
     if (shouldHide) return null;
@@ -96,4 +93,3 @@ export function FloatingActionButtons() {
         </>
     );
 }
-

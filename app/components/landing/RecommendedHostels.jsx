@@ -172,7 +172,7 @@ export function RecommendedHostels() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 to-[#ff6b35]/10 border border-[#037166]/30 rounded-full mb-6 animate-shimmer">
               <div className="w-4 h-4 bg-gradient-to-r from-[#ff6b35]/60 via-[#ff6b35]/80 to-[#ff6b35]/60 rounded-full" />
@@ -276,7 +276,7 @@ export function RecommendedHostels() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/12 rounded-full blur-[150px]"
         />
         <motion.div
           animate={{
@@ -284,11 +284,11 @@ export function RecommendedHostels() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/10 rounded-full blur-[150px]"
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -390,9 +390,9 @@ export function RecommendedHostels() {
                     {/* Schedule Visit Button Badge - Bottom Center */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div
-                        className="px-6 py-1 bg-[#297A70] backdrop-blur-md rounded-t-lg rounded-b-none text-gray-300 shadow-lg border border-b-0 border-gray-600/20 whitespace-nowrap cursor-pointer transition-all"
+                        className="px-6 py-1 bg-[#297A70] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-gray-600/20 whitespace-nowrap cursor-pointer transition-all"
                       >
-                        <h6 className="text-[12px] font-ubuntu font-bold tracking-wider">Schedule Your Space</h6>
+                        <span className="text-[12px] font-ubuntu font-bold tracking-wider !text-white block">Schedule Your Space</span>
                       </div>
                     </div>
 
@@ -509,5 +509,7 @@ export function RecommendedHostels() {
     </section>
   );
 }
+
+
 
 

@@ -476,7 +476,7 @@ export function NearbyServiceCenters({ onViewAll }) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#037166]/50 text-white font-medium transition-all duration-300 flex items-center gap-2 group"
+            className="px-8 py-4 rounded-full bg-[#037166]/5 hover:bg-[#037166]/10 border border-[#037166]/10 hover:border-[#037166]/50 text-[#037166] font-medium transition-all duration-300 flex items-center gap-2 group"
             onClick={onViewAll}
           >
             View All Stores

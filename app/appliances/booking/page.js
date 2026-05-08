@@ -1,15 +1,15 @@
 'use client';
 
 import { BookingConfirmationPage } from '@/components/appliances/BookingConfirmationPage';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
 
 function BookingContent() {
     const router = useRouter();
     const [address, setAddress] = useState(null);
 
     useEffect(() => {
-        // Get the selectedgg address from session storage or context
+        // Get the selected address from session storage
         const savedAddress = sessionStorage.getItem('selected_address');
         if (savedAddress) {
             setAddress(JSON.parse(savedAddress));
@@ -27,11 +27,9 @@ function BookingContent() {
     );
 }
 
-import { Suspense } from 'react';
-
 export default function BookingRoute() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+        <Suspense fallback={<div className="min-h-screen bg-white" />}>
             <BookingContent />
         </Suspense>
     );

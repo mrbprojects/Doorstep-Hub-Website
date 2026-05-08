@@ -18,7 +18,7 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp, CheckCheck, Loader2
+  ThumbsUp, CheckCheck, Loader2, Store
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -34,13 +34,13 @@ const MAP_OPTIONS = {
   mapTypeControl: false,
   fullscreenControl: true,
   styles: [
-    { featureType: 'all', elementType: 'geometry', stylers: [{ color: '#1a1a1a' }] },
-    { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#8c8c8c' }] },
-    { featureType: 'all', elementType: 'labels.text.stroke', stylers: [{ color: '#000000' }] },
-    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#2a2a2a' }] },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#333333' }] },
-    { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#2d2d2d' }] },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a1410' }] },
+    { featureType: 'all', elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
+    { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
+    { featureType: 'all', elementType: 'labels.text.stroke', stylers: [{ color: '#f5f5f5' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#eeeeee' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+    { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#eeeeee' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9c9c9' }] },
     { featureType: 'transit', elementType: 'geometry.fill', stylers: [{ color: '#037166' }] },
     { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
     { featureType: 'poi.park', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
@@ -62,7 +62,7 @@ const CENTER_LOGO = {
 
 export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('services');
+  const [activeTab, setActiveTab] = useState('Service Rates');
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [reviewsToShow, setReviewsToShow] = useState(3);
   const [selectedPackages, setSelectedPackages] = useState([]);
@@ -129,8 +129,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             });
             const centersData = await centersRes.json();
             if (centersData.success && Array.isArray(centersData.nearByServiceCenters)) {
+              const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
               const matched = centersData.nearByServiceCenters.find(c =>
-                c.slug === storeId || c._id === storeId
+                c.slug === storeId || 
+                c._id === storeId ||
+                generateSlug(c.business_name || c.name) === storeId
               );
               if (matched) {
                 resolvedStoreId = matched._id;
@@ -433,33 +436,21 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   };
 
   const ShimmerServiceCard = () => (
-    <div className="h-80 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
-      <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-      <div className="h-48 bg-gray-800" />
-      <div className="p-6 space-y-3">
-        <div className="h-6 w-3/4 bg-gray-700 rounded animate-pulse" />
-        <div className="h-4 w-full bg-gray-700/50 rounded animate-pulse" />
-        <div className="h-10 w-full bg-gray-700 rounded-lg animate-pulse" />
-      </div>
-    </div>
-  );
-
-  const ShimmerCenterCard = () => (
-    <div className="h-48 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
-      <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-      <div className="flex">
-        <div className="w-64 h-48 bg-gray-800" />
-        <div className="flex-1 p-6 space-y-4">
-          <div className="h-8 w-1/2 bg-gray-700 rounded animate-pulse" />
-          <div className="h-4 w-3/4 bg-gray-700/50 rounded animate-pulse" />
-          <div className="h-10 w-32 bg-gray-700 rounded-lg animate-pulse" />
+    <div className="h-28 rounded-2xl bg-white border border-gray-100 overflow-hidden relative">
+      <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-gray-50 to-transparent" />
+      <div className="flex flex-col sm:flex-row h-full">
+        <div className="w-full sm:w-32 bg-gray-100" />
+        <div className="flex-1 p-4 space-y-3">
+          <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+          <div className="h-2 w-full bg-gray-100 rounded animate-pulse" />
         </div>
       </div>
     </div>
   );
 
+
   if (!loading && !centerData) {
-    return <div className="min-h-screen bg-[#0a0a0a]" />;
+    return <div className="appliance-detail-page min-h-screen bg-white" />;
   }
 
   // Generate Schema.org JSON-LD for Local SEO
@@ -497,7 +488,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen pt-24 pb-20 bg-gradient-to-b from-[#0a0a0a] via-[#0f1614] to-[#0a0a0a]"
+      className="appliance-detail-page min-h-screen pt-24 pb-20 bg-gray-50/30"
     >
       {schemaData && (
         <script
@@ -515,7 +506,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => onBack ? onBack() : router.back()}
-          className="inline-flex items-center gap-2 px-4 py-2 mb-4 sm:mb-8 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 hover:bg-white/10 hover:border-[#037166]/50 transition-all text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 mb-4 sm:mb-8 rounded-full bg-white border border-gray-100 text-gray-700 hover:bg-gray-50 hover:text-[#037166] transition-all text-sm font-bold"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -525,30 +516,62 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative  h-[320px] xs:h-[350px] md:h-[400px] lg:h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
+          className="relative h-[320px] xs:h-[350px] md:h-[400px] lg:h-[500px] rounded-2xl mb-8 shadow-2xl"
         >
-          {bannerImage ? (
-            <img
-              src={bannerImage}
-              alt="Service Center Banner"
-              className="w-full  object-fit"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] flex items-center justify-center">
-              <Sparkles className="w-20 h-20 text-[#037166]/20" />
-            </div>
-          )}
+          <div className="h-full w-full rounded-2xl overflow-hidden">
+            {bannerImage ? (
+              <img
+                src={bannerImage}
+                alt="Service Center Banner"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <Sparkles className="w-20 h-20 text-[#037166]/10" />
+              </div>
+            )}
+          </div>
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          {/* No Gradient Overlay - for maximum clarity */}
 
-          {/* Store Info Overlay */}
-          <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
-            <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-3.5 sm:p-5 md:p-6">
+          {/* Store Info Overlay - Half Above / Half Below */}
+          <div className="absolute left-0 right-0 bottom-0 translate-y-1/2">
+            <div className="bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl">
+            
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-1.5 md:mb-3">
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight">
-                  {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
-                </h1>
+                <div className="flex items-center gap-4 sm:gap-6">
+                  <div className="relative flex-shrink-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 border-white shadow-2xl bg-white flex items-center justify-center">
+                      {(center.logo || center.image) ? (
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${(center.logo || center.image).startsWith('/') ? (center.logo || center.image).slice(1) : (center.logo || center.image)}`}
+                          alt="Store Logo"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                          <Store className="w-10 h-10 text-[#037166]/10" />
+                        </div>
+                      )}
+                    </div>
+                    {/* Verified Badge */}
+                    {/* <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center shadow-lg">
+                      <Check className="w-4 h-4 text-white font-bold" />
+                    </div> */}
+                  </div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-1">
+                      {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
+                    </h1>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#037166] animate-pulse" />
+                      <span className="text-[10px] sm:text-xs font-bold text-[#037166] uppercase tracking-wider">Verified Professional Service</span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* App Links beside heading */}
                 <div className="flex items-center gap-3">
@@ -556,19 +579,19 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-28 md:w-32 h-8 md:h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
+                    className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover " />
                   </a>
                   <a
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-28 md:w-32 h-8 md:h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
+                    className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
                     title="Download on the App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover" />
                   </a>
                 </div>
               </div>
@@ -576,44 +599,47 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               <div className="flex flex-col gap-2 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-6 mb-3 md:mb-4">
                 <div className="flex items-start gap-1.5 md:gap-2">
                   <MapPin className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
-                  <span className="text-white/80 text-xs sm:text-sm line-clamp-1">{center.address}</span>
+                  <span className="text-gray-600 text-xs sm:text-sm font-medium line-clamp-1">{center.address}</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
                     <Star className="w-4 h-4 fill-[#037166] text-[#037166]" />
-                    <span className="text-white font-semibold text-xs sm:text-sm">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
-                    <span className="text-white/50 text-[10px] sm:text-xs">({center.totalRatings || center.reviews?.length || 0})</span>
+                    <span className="text-gray-900 font-bold text-xs sm:text-sm">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
+                    <span className="text-gray-400 text-[10px] sm:text-xs">({center.totalRatings || center.reviews?.length || 0})</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-[#037166]/20">
+                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-[#037166]/10">
                       <CheckCheck className="w-2.5 h-2.5 text-[#037166]" />
                     </div>
-                    <span className="text-white/80 text-xs sm:text-sm">{center.totalOrders || 0}+ Jobs Done</span>
+                    <span className="text-gray-700 text-xs sm:text-sm font-semibold">{center.totalOrders || 0}+ Jobs Done</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center gap-1.5">
+                <div className="px-3 py-1 rounded-full bg-[#037166]/5 border border-[#037166]/10 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-[#037166]" />
-                  <span className="text-white/80 text-[10px] sm:text-xs">Express Service</span>
+                  <span className="text-[#037166] text-[10px] sm:text-xs font-bold">Express Service</span>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
+        {/* Space for overlapped store info card */}
+        <div className="h-24 sm:h-28 md:h-32" />
+
         {/* Sticky Tab Navigation */}
-        <div className="sticky top-20 z-40 mb-8 bg-[#0a0a0a]/80 backdrop-blur-xl border-y border-white/5 -mx-6 px-6 lg:-mx-8 lg:px-8">
+        <div className="sticky top-20 z-40 mb-8 bg-white/80 backdrop-blur-xl border-y border-gray-100 -mx-6 px-6 lg:-mx-8 lg:px-8">
           <div className="max-w-[1400px] mx-auto">
             <div className="flex gap-2 overflow-x-auto py-2">
-              {['services', 'about', 'Working Images', 'location', 'reviews'].map((tab) => (
+              {['Service Rates', 'About', 'Working Images', 'Location', 'Reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`relative px-6 py-2.5 rounded-full text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
-                    ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                  className={`relative px-6 py-2 rounded-full text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
+                    ? 'bg-[#037166] text-white shadow-lg shadow-[#037166]/20'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                 >
                   {tab}
@@ -625,10 +651,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
         {/* Tab Content */}
         <AnimatePresence mode="wait">
-          {/* SERVICES TAB */}
-          {activeTab === 'services' && (
+          {activeTab === 'Service Rates' && (
             <motion.div
-              key="services"
+              key="Service Rates"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -636,25 +661,14 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             >
               {/* Header */}
               <div className="mb-6 w-full px-1">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1.5">Our Services & Rate Cards</h2>
-                <p className="text-white/60 text-sm sm:text-base">Choose from our professional repair packages</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1.5">Our Services & Rate Cards</h2>
+                <p className="text-gray-500 text-sm sm:text-base">Choose from our professional repair packages</p>
               </div>
 
-              {/* Service Cards - Using API data */}
+              {/* Service Cards */}
               {loading ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 w-full">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-28 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
-                      <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                      <div className="flex flex-col sm:flex-row h-full">
-                        <div className="w-full sm:w-32 bg-gray-800" />
-                        <div className="flex-1 p-4 space-y-3">
-                          <div className="h-4 w-3/4 bg-gray-700 rounded animate-pulse" />
-                          <div className="h-2 w-full bg-gray-700/50 rounded animate-pulse" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  {Array.from({ length: 4 }).map((_, i) => <ShimmerServiceCard key={i} />)}
                 </div>
               ) : services && services.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 w-full">
@@ -665,27 +679,25 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleSelectPackage(service.id)}
-                      className={`relative bg-white/5 backdrop-blur-sm border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
-                        ? 'bg-[#037166]/30 border-white shadow-[0_0_25px_rgba(255,255,255,0.25)] ring-1 ring-white/50'
-                        : 'border-white/10 hover:border-white/20'
+                      className={`relative bg-white border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
+                        ? 'border-[#037166] shadow-xl shadow-[#037166]/10'
+                        : 'border-gray-100 hover:border-[#037166]/20'
                         }`}
                     >
                       <div className="flex flex-col sm:flex-row h-full">
                         {/* Service Image */}
                         {service.image && (
-                          <div className="relative w-full sm:w-32 h-32 sm:h-auto overflow-hidden">
+                          <div className="relative w-full sm:w-44 h-44 sm:h-auto sm:self-stretch overflow-hidden bg-white">
                             <img
                               src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                               alt={service.name}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
                             {/* Rating Badge */}
                             {service.rating && (
-                              <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center gap-1">
-                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                                <span className="text-white font-semibold text-xs">{service.rating}</span>
+                              <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-white shadow-sm border border-gray-100 flex items-center gap-1">
+                                <Star className="w-3 h-3 fill-[#037166] text-[#037166]" />
+                                <span className="text-gray-900 font-bold text-[10px]">{service.rating}</span>
                               </div>
                             )}
                           </div>
@@ -695,63 +707,46 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                           <div className="flex-1 mb-3">
                             <div className="flex items-start justify-between">
                               <div>
-                                {/* Selection Indicator */}
                                 {selectedPackages.includes(service.id) && (
                                   <div className="inline-flex items-center gap-1.5 text-[#037166] mb-1">
                                     <CheckCircle className="w-3.5 h-3.5" />
                                     <span className="text-[10px] font-bold uppercase tracking-wider">Selected</span>
                                   </div>
                                 )}
-                                <h4 className="text-base sm:text-lg font-bold text-white mb-1 leading-snug">{service.name}</h4>
+                                <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-1 leading-snug">{service.name}</h4>
                               </div>
                               <div className="text-right flex-shrink-0 ml-2">
                                 <span className="text-xl sm:text-2xl font-bold text-[#037166]">₹{service.price}</span>
                                 {service.priceUnit && (
-                                  <span className="text-white/40 text-[10px] ml-1">/{service.priceUnit}</span>
+                                  <span className="text-gray-400 text-[10px] ml-1">/{service.priceUnit}</span>
                                 )}
                               </div>
                             </div>
 
-                            {/* Service Description */}
                             <div
-                              className="text-white/60 text-xs line-clamp-2 max-w-2xl"
+                              className="text-gray-500 text-xs font-medium line-clamp-2 max-w-2xl leading-relaxed"
                               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
                             />
                           </div>
 
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-white/5 pt-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-gray-50 pt-4">
                             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-5">
                               {service.totalOrders > 0 && (
                                 <div className="flex items-center gap-2.5">
-                                  <div className="flex items-center gap-1 text-white/60 text-xs whitespace-nowrap">
+                                  <div className="flex items-center gap-1 text-gray-500 text-xs whitespace-nowrap">
                                     <CheckCheck className="w-4 h-4 text-[#037166]" />
                                     <span>{service.totalOrders} orders</span>
                                   </div>
-
-                                  {service.bannerImages?.length > 0 && (
-                                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide max-w-[120px] py-1">
-                                      {service.bannerImages.map((img, idx) => (
-                                        <div key={idx} className="w-6 h-6 rounded-md overflow-hidden flex-shrink-0 border border-white/10 ring-1 ring-white/5 shadow-sm">
-                                          <img
-                                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
-                                            alt=""
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => { e.target.style.display = 'none'; }}
-                                          />
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
                                 </div>
                               )}
                               {service.duration && service.duration !== 'N/A' && (
-                                <div className="flex items-center gap-1.5 text-white/60 text-sm">
+                                <div className="flex items-center gap-1.5 text-gray-500 text-sm">
                                   <Clock className="w-4 h-4 text-[#037166]" />
                                   <span>{service.duration}</span>
                                 </div>
                               )}
                               {service.subcategoryName && (
-                                <div className="px-3 py-1 rounded-full bg-[#037166]/20 border border-[#037166]/30">
+                                <div className="px-3 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20">
                                   <span className="text-[#037166] text-[10px] font-bold uppercase tracking-wider">{service.subcategoryName}</span>
                                 </div>
                               )}
@@ -762,10 +757,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 e.stopPropagation();
                                 handleAddToCart(service);
                               }}
-                              className="w-full sm:w-auto px-6 py-3 sm:px-6 sm:py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-sm hover:shadow-xl hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2"
+                              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#037166] text-white font-bold text-sm whitespace-nowrap hover:bg-[#04a99d] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
                             >
                               Book Now
-                              <ArrowLeft className="w-3 h-3 rotate-180" />
+                              <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                             </button>
                           </div>
                         </div>
@@ -775,8 +770,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-white/60 text-lg mb-4">No services available at this center yet.</p>
-                  <p className="text-white/40 text-sm">Please check back later or contact the service center directly.</p>
+                  <p className="text-gray-500 text-lg mb-4">No services available at this center yet.</p>
                 </div>
               )}
 
@@ -786,7 +780,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   <button
                     onClick={handleContinueBooking}
                     disabled={loading || selectedPackages.length === 0}
-                    className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold hover:shadow-xl hover:shadow-[#037166]/30 transition-all text-center flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-8 py-3 rounded-full bg-gray-900 text-white font-bold hover:shadow-xl transition-all text-center flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : `Continue Booking (${selectedPackages.length})`}
                     {!loading && <ArrowLeft className="w-4 h-4 rotate-180" />}
@@ -796,88 +790,56 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             </motion.div>
           )}
 
-          {/* ABOUT TAB */}
-          {activeTab === 'about' && (
+          {activeTab === 'About' && (
             <motion.div
-              key="about"
+              key="About"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h2 className="text-2xl font-bold text-white mb-6">About {center.business_name}</h2>
-
-              {/* Description */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">About {center.business_name}</h2>
+              <div className="bg-white border border-gray-100 rounded-2xl p-8 mb-8 shadow-sm">
                 <div
-                  className="text-white/70 text-lg leading-relaxed"
+                  className="text-gray-600 text-lg leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutBio) }}
                 />
               </div>
 
-              {/* Trust Indicators */}
               <div className="grid md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#037166]/50 transition-all">
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-[#037166]/30 transition-all shadow-sm">
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex-shrink-0 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 rounded-full bg-[#037166]/10 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-[#037166]" />
                     </div>
-                    <h4 className="text-lg sm:text-xl font-bold text-white">Expert Technicians</h4>
+                    <h4 className="text-lg font-bold text-gray-900">Expert Technicians</h4>
                   </div>
-                  <p className="text-white/60">Certified professionals with years of experience</p>
+                  <p className="text-gray-500 font-medium">Certified professionals with years of experience</p>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#037166]/50 transition-all">
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-[#037166]/30 transition-all shadow-sm">
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex-shrink-0 flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 rounded-full bg-[#037166]/10 flex items-center justify-center">
+                      <Shield className="w-6 h-6 text-[#037166]" />
                     </div>
-                    <h4 className="text-lg sm:text-xl font-bold text-white leading-tight">30 - 90 Days Service Warranty On Repairs</h4>
+                    <h4 className="text-lg font-bold text-gray-900 leading-tight">Service Warranty</h4>
                   </div>
-                  <p className="text-white/60">All repairs backed by our guarantee</p>
+                  <p className="text-gray-500 font-medium">All repairs backed by our guarantee</p>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-[#037166]/50 transition-all">
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-[#037166]/30 transition-all shadow-sm">
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex-shrink-0 flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-white" />
-                    </div>
-                    <h4 className="text-lg sm:text-xl font-bold text-white">Same-Day Service</h4>
-                  </div>
-                  <p className="text-white/60">Fast turnaround for urgent repairs</p>
-                </div>
-              </div>
-
-              {/* Contact Info */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#037166]/20 flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-[#037166]" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-white/50 mb-1">Address</p>
-                      <p className="text-lg font-semibold text-white">{center.address}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#037166]/20 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-[#037166]/10 flex items-center justify-center">
                       <Clock className="w-6 h-6 text-[#037166]" />
                     </div>
-                    <div>
-                      <p className="text-sm text-white/50 mb-1">Last Updated</p>
-                      <p className="text-lg font-semibold text-white">{center.updateTime || 'Recently'}</p>
-                    </div>
+                    <h4 className="text-lg font-bold text-gray-900">Same-Day Service</h4>
                   </div>
+                  <p className="text-gray-500 font-medium">Fast turnaround for urgent repairs</p>
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* WORKING IMAGES TAB */}
           {activeTab === 'Working Images' && (
             <motion.div
               key="Working Images"
@@ -886,477 +848,165 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h2 className="text-3xl font-bold text-white mb-2">Our Work</h2>
-              <p className="text-white/60 mb-8 text-lg">See examples of our repair and service projects</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Our Work</h2>
+              <p className="text-gray-500 mb-8">See examples of our repair and service projects</p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {portfolioImages && portfolioImages.length > 0 ? (
+                {portfolioImages.length > 0 ? (
                   portfolioImages.map((image, index) => (
                     <motion.div
                       key={index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
                       whileHover={{ scale: 1.03 }}
                       onClick={() => setLightboxIndex(index)}
-                      className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer group"
+                      className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100 shadow-sm"
                     >
-                      <img
-                        src={image}
-                        alt={`Portfolio ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                          <Sparkles className="w-5 h-5 text-white" />
-                        </div>
-                      </div>
+                      <img src={image} alt={`Work ${index + 1}`} className="w-full h-full object-cover" />
                     </motion.div>
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-12 text-white/60">
+                  <div className="col-span-full text-center py-12 text-gray-400">
                     No working images available
                   </div>
                 )}
               </div>
-
-              {/* Lightbox with navigation */}
-              <AnimatePresence>
-                {lightboxIndex !== null && portfolioImages.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setLightboxIndex(null)}
-                    className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
-                  >
-                    {/* Close */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
-                      className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-[120]"
-                    >
-                      <X className="w-6 h-6 text-white" />
-                    </button>
-
-                    {/* Counter */}
-                    <div className="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium z-[120]">
-                      {lightboxIndex + 1} / {portfolioImages.length}
-                    </div>
-
-                    {/* Prev Button */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + portfolioImages.length) % portfolioImages.length); }}
-                      className="absolute left-4 md:left-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-[120]"
-                    >
-                      <ArrowLeft className="w-5 h-5 text-white" />
-                    </button>
-
-                    {/* Next Button */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % portfolioImages.length); }}
-                      className="absolute right-4 md:right-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-[120]"
-                    >
-                      <ArrowLeft className="w-5 h-5 text-white rotate-180" />
-                    </button>
-
-                    {/* Image */}
-                    <motion.img
-                      key={lightboxIndex}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      src={portfolioImages[lightboxIndex]}
-                      alt={`Portfolio ${lightboxIndex + 1}`}
-                      className="max-w-[calc(100%-120px)] max-h-[85vh] rounded-2xl shadow-2xl object-contain"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-
-                    {/* Thumbnail strip */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 px-4 overflow-x-auto max-w-[90vw]">
-                      {portfolioImages.map((img, i) => (
-                        <button
-                          key={i}
-                          onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); }}
-                          className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-[#037166] scale-110' : 'border-white/20 opacity-50 hover:opacity-80'
-                            }`}
-                        >
-                          <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </motion.div>
           )}
 
-          {/* LOCATION TAB */}
-          {activeTab === 'location' && (
+          {activeTab === 'Location' && (
             <motion.div
-              key="location"
+              key="Location"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h2 className="text-3xl font-bold text-white mb-2">Our Location</h2>
-              <p className="text-white/60 mb-8 text-lg">Visit us at our service center</p>
-
-              {/* Map */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden mb-8">
-                <div className="relative h-[500px] bg-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">Our Location</h2>
+              <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-lg mb-12">
+                <div className="relative h-[500px] bg-gray-50">
                   {isMapsLoaded && locationData ? (
                     <GoogleMap
                       mapContainerStyle={MAP_CONTAINER_STYLE}
-                      center={{
-                        lat: parseFloat(locationData.latitude),
-                        lng: parseFloat(locationData.longitude)
-                      }}
+                      center={{ lat: parseFloat(locationData.latitude), lng: parseFloat(locationData.longitude) }}
                       zoom={15}
                       options={MAP_OPTIONS}
                     >
-                      {/* Service Center Marker */}
-                      <Marker
-                        position={{
-                          lat: parseFloat(locationData.latitude),
-                          lng: parseFloat(locationData.longitude)
-                        }}
-                        icon={CENTER_LOGO}
-                        title={center.business_name}
-                      />
-
-                      {/* Label for Service Center */}
-                      <OverlayViewF
-                        position={{
-                          lat: parseFloat(locationData.latitude),
-                          lng: parseFloat(locationData.longitude)
-                        }}
-                        mapPaneName={FLOAT_PANE}
-                      >
-                        <div
-                          style={{ position: 'absolute', transform: 'translate(-50%, 10px)', pointerEvents: 'none' }}
-                          className="bg-black/60 backdrop-blur-sm border border-white/10 rounded px-2 py-1 shadow-md whitespace-nowrap"
-                        >
-                          <span className="text-white/90 text-[10px] font-bold">
-                            {center.business_name}
-                          </span>
-                        </div>
-                      </OverlayViewF>
-
-                      {/* User Location Marker */}
-                      {location && (
-                        <Marker
-                          position={{ lat: location.lat, lng: location.lng }}
-                          icon={GREEN_DOT}
-                          title="You are here"
-                        />
-                      )}
+                      <Marker position={{ lat: parseFloat(locationData.latitude), lng: parseFloat(locationData.longitude) }} icon={CENTER_LOGO} />
+                      {location && <Marker position={{ lat: location.lat, lng: location.lng }} icon={GREEN_DOT} />}
                     </GoogleMap>
-                  ) : locationData ? (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900">
-                      <div className="w-10 h-10 border-4 border-[#037166] border-t-transparent rounded-full animate-spin mb-4"></div>
-                      <span className="text-white/60 text-sm">Loading Interactive Map...</span>
-                    </div>
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-800">
-                      <Loader2 className="w-10 h-10 text-[#037166] animate-spin mb-4" />
-                      <span className="text-white/60">Loading map data...</span>
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <Loader2 className="w-10 h-10 animate-spin" />
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Address Details */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#037166]/20 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-6 h-6 text-[#037166]" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white mb-2 text-lg">Address</h4>
-                      <p className="text-white/60 leading-relaxed">
-                        {locationData?.address || center.address}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#037166]/20 flex items-center justify-center flex-shrink-0">
-                      <Calendar className="w-6 h-6 text-[#037166]" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white mb-2 text-lg">Get Directions</h4>
-                      <p className="text-white/60 leading-relaxed mb-3">
-                        Professional service available in {locationData?.cityName || centerData?.cityName || 'your area'}.
-                      </p>
-                      <a
-                        href={`https://www.google.com/maps?q=${locationData?.latitude},${locationData?.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-[#037166] font-semibold hover:text-[#04a99d] transition-colors"
-                      >
-                        Open in Maps
-                        <ArrowLeft className="w-4 h-4 rotate-180" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           )}
 
-          {/* REVIEWS TAB */}
-          {activeTab === 'reviews' && (
+          {activeTab === 'Reviews' && (
             <motion.div
-              key="reviews"
+              key="Reviews"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Header */}
-              <div className="flex items-end justify-between mb-8">
-                <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Customer Reviews</h2>
-                  <p className="text-white/60 text-lg">What our customers say about us</p>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Star className="w-6 h-6 fill-[#037166] text-[#037166]" />
-                    <span className="text-3xl font-bold text-white">{center.avgRating?.toFixed(1) || '0.0'}</span>
-                  </div>
-                  <p className="text-sm text-white/50">Based on {center.totalRatings || 0} reviews</p>
-                </div>
-              </div>
-
-              {/* Reviews List */}
-              <div className="space-y-6 mb-8">
-                {reviews.slice(0, reviewsToShow).map((review, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-all"
-                  >
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">Customer Reviews</h2>
+              <div className="space-y-4">
+                {reviews.slice(0, reviewsToShow).map((review, i) => (
+                  <div key={i} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-600">
                         {review.name?.charAt(0) || 'U'}
                       </div>
-
                       <div className="flex-1">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h5 className="font-semibold text-white text-lg">{review.name}</h5>
-                          </div>
-                          <div className="flex gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-5 h-5 ${i < Math.floor(review.rating)
-                                  ? 'fill-[#037166] text-[#037166]'
-                                  : 'text-white/20'
-                                  }`}
-                              />
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="font-bold text-gray-900">{review.name}</h5>
+                          <div className="flex gap-0.5">
+                            {[...Array(5)].map((_, j) => (
+                              <Star key={j} className={`w-4 h-4 ${j < Math.floor(review.rating) ? 'fill-[#037166] text-[#037166]' : 'text-gray-200'}`} />
                             ))}
                           </div>
                         </div>
-                        <p className="text-white/70 leading-relaxed">{review.description}</p>
+                        <p className="text-gray-600 text-sm font-medium">{review.description}</p>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
-
-              {/* Load More Button */}
-              {reviews.length > reviewsToShow && (
-                <div className="text-center">
-                  <button
-                    onClick={() => setReviewsToShow(prev => prev + 3)}
-                    className="px-8 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all"
-                  >
-                    Load More Reviews
-                  </button>
-                </div>
-              )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Addons Popup */}
       <AnimatePresence>
         {showAddonsPopup && addonsData && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowAddonsPopup(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25 }}
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#0f1614] border border-white/10 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Add Related Services</h2>
-                <button
-                  onClick={() => setShowAddonsPopup(false)}
-                  className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
-                >
-                  <X className="w-5 h-5 text-white/60" />
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold text-gray-900">Add Related Services</h2>
+                <button onClick={() => setShowAddonsPopup(false)} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+                  <X className="w-5 h-5 text-gray-400" />
                 </button>
               </div>
 
-              {/* Parent Service (Auto-selected) */}
-              <div className="mb-6">
-                <p className="text-white/60 text-sm mb-3">Selected Service:</p>
-                <div className="bg-white/5 border border-[#037166]/30 rounded-2xl p-4 flex items-center gap-4">
-                  {addonsData.parentServiceImage && (
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addonsData.parentServiceImage}`}
-                      alt={addonsData.parentServiceName}
-                      className="w-16 h-16 rounded-xl object-cover"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-1">{addonsData.parentServiceName}</h3>
-                    <p className="text-[#037166] font-bold">₹{addonsData.parentServicePrice.toFixed(2)}</p>
-                  </div>
-                  <div className="w-6 h-6 rounded-full bg-[#037166] flex items-center justify-center">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Addons List */}
-              {addonsData.addons && addonsData.addons.length > 0 && (
-                <div className="mb-6">
-                  <p className="text-white/60 text-sm mb-3">
-                    Additional Services ({addonsData.addons.length} available):
-                  </p>
-                  <div className="space-y-3">
-                    {addonsData.addons.map((addon) => (
-                      <div
-                        key={addon._id}
-                        onClick={() => toggleAddonSelection(addon._id)}
-                        className={`bg-white/5 border-2 rounded-2xl p-4 cursor-pointer transition-all hover:bg-white/10 ${selectedAddons.includes(addon._id)
-                          ? 'bg-[#037166]/30 border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] ring-1 ring-white/50'
-                          : 'border-white/10'
-                          }`}
-                      >
-                        <div className="flex items-start gap-4">
-                          {/* Checkbox */}
-                          <div
-                            className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-1 transition-colors ${selectedAddons.includes(addon._id)
-                              ? 'bg-[#037166] border-[#037166]'
-                              : 'border-white/30'
-                              }`}
-                          >
-                            {selectedAddons.includes(addon._id) && (
-                              <Check className="w-4 h-4 text-white" />
-                            )}
-                          </div>
-
-                          {/* Addon Info */}
-                          <div className="flex-1">
-                            <h4 className="text-white font-semibold mb-1">{addon.childServiceName}</h4>
-                            {addon.description && (
-                              <div
-                                className="text-white/60 text-sm mb-2"
-                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(addon.description) }}
-                              />
-                            )}
-                            <div className="flex items-center gap-2">
-                              <span className="text-[#037166] font-bold">₹{addon.price.toFixed(2)}</span>
-                              <span className="text-white/40 text-sm">/ {addon.priceUnit}</span>
-                            </div>
-                          </div>
-                        </div>
+              <div className="space-y-4 mb-8">
+                {addonsData.addons.map((addon) => (
+                  <div
+                    key={addon._id}
+                    onClick={() => toggleAddonSelection(addon._id)}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${selectedAddons.includes(addon._id) ? 'bg-[#037166]/5 border-[#037166]' : 'bg-white border-gray-100'}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center ${selectedAddons.includes(addon._id) ? 'bg-[#037166] border-[#037166]' : 'border-gray-200'}`}>
+                        {selectedAddons.includes(addon._id) && <Check className="w-4 h-4 text-white" />}
                       </div>
-                    ))}
+                      <div className="flex-1">
+                        <h4 className="text-gray-900 font-bold">{addon.childServiceName}</h4>
+                        <div className="text-gray-500 text-xs" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(addon.description) }} />
+                        <span className="text-[#037166] font-bold">₹{addon.price.toFixed(2)}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Total Price */}
-              <div className="bg-white/5 rounded-2xl p-4 mb-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60">Total Price:</span>
-                  <span className="text-2xl font-bold text-[#037166]">
-                    ₹
-                    {(
-                      addonsData.parentServicePrice +
-                      (addonsData.addons
-                        ?.filter((addon) => selectedAddons.includes(addon._id))
-                        .reduce((sum, addon) => sum + addon.price, 0) || 0)
-                    ).toFixed(2)}
-                  </span>
-                </div>
-                <p className="text-white/40 text-sm mt-2">
-                  {1 + selectedAddons.length} item{selectedAddons.length !== 0 ? 's' : ''} selected
-                </p>
+                ))}
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-4">
-                <button
-                  onClick={handleSkipAddons}
-                  className="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all"
-                >
-                  Skip Addons
-                </button>
-                <button
-                  onClick={handleContinueWithAddons}
-                  className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-xl hover:shadow-[#037166]/30 transition-all"
-                >
-                  Continue ({1 + selectedAddons.length} item{selectedAddons.length !== 0 ? 's' : ''})
-                </button>
+                <button onClick={handleSkipAddons} className="flex-1 py-3 rounded-full bg-gray-50 text-gray-400 font-bold">Skip</button>
+                <button onClick={handleContinueWithAddons} className="flex-1 py-3 rounded-full bg-[#037166] text-white font-bold">Add Selected</button>
               </div>
-
-              {/* Loading Overlay */}
-              {loadingAddons && (
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-3xl flex items-center justify-center">
-                  <div className="w-12 h-12 border-4 border-[#037166] border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Sticky Bottom Bar */}
+
       <AnimatePresence>
-        {selectedPackages.length > 0 && activeTab === 'services' && (
+        {selectedPackages.length > 0 && activeTab === 'Service Rates' && (
           <motion.div
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
-            className="fixed bottom-0 left-0 right-0 z-[60] p-4 bg-[#0a0a0a]/80 backdrop-blur-xl border-t border-white/10"
+            className="fixed bottom-0 left-0 right-0 z-[60] p-4 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-xl"
           >
-            <div className="max-w-[1400px] w-full mx-auto flex flex-row items-center justify-between gap-4">
-              <div className="flex flex-col">
-                <span className="text-white font-bold text-base sm:text-lg">{selectedPackages.length} Service{selectedPackages.length > 1 ? 's' : ''} Selected</span>
-                <span className="text-white/60 text-xs sm:text-sm">
-                  Total: ₹{services.filter(s => selectedPackages.includes(s.id)).reduce((acc, curr) => acc + curr.price, 0)}
-                </span>
+            <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+              <div>
+                <span className="text-gray-900 font-bold text-lg">{selectedPackages.length} Selected</span>
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Total: ₹{services.filter(s => selectedPackages.includes(s.id)).reduce((acc, curr) => acc + curr.price, 0)}</p>
               </div>
-              <button
-                onClick={handleContinueBooking}
-                disabled={loading}
-                className="px-6 py-3 sm:px-10 sm:py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-sm sm:text-lg shadow-xl shadow-[#037166]/20 hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-2 sm:gap-3"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Continue Booking'}
-                {!loading && <ArrowLeft className="w-4 h-4 rotate-180" />}
+              <button onClick={handleContinueBooking} className="px-8 py-3 rounded-full bg-gray-900 text-white font-bold transition-all flex items-center gap-2">
+                Continue Booking <ArrowLeft className="w-4 h-4 rotate-180" />
               </button>
             </div>
           </motion.div>
@@ -1369,7 +1019,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           100% { background-position: 200% 0; }
         }
         .animate-shimmer {
-          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.02) 50%, transparent 100%);
           background-size: 200% 100%;
           animation: shimmer 2s infinite;
         }

@@ -247,7 +247,7 @@ export function RecommendedSpaSalon() {
   if (loading) {
     return (
       <section className="relative py-20 overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-[#d4af37] to-white bg-clip-text text-transparent">
               Recommended Spa & Salon
@@ -283,7 +283,7 @@ export function RecommendedSpaSalon() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
         />
         <motion.div
           animate={{
@@ -291,11 +291,11 @@ export function RecommendedSpaSalon() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -344,7 +344,7 @@ export function RecommendedSpaSalon() {
                 {/* Top Badge */}
                 <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
                   <Award className="w-3 h-3 text-white" />
-                  <h6 className="text-xs font-bold text-white uppercase tracking-wider">{place.badge}</h6>
+                  <span className="text-xs font-bold !text-white uppercase tracking-wider block">{place.badge}</span>
                 </div>
 
                 {/* Image with Luxury Overlay - Original height preserved */}
@@ -402,7 +402,7 @@ export function RecommendedSpaSalon() {
 
                       <div>
                         <div className="whitespace-nowrap rounded-full bg-[#297A70] px-3 py-1.5 text-[9px] font-semibold shadow-lg">
-                          <span className="text-gray-300">
+                          <span className="!text-white">
                             View Details
                           </span>
                         </div>
@@ -481,3 +481,7 @@ export function RecommendedSpaSalon() {
     </section>
   );
 }
+
+
+
+

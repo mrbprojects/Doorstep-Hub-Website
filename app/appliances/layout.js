@@ -3,47 +3,49 @@ import { Footer } from '@/components/layout/Footer';
 
 export default function AppliancesLayout({ children }) {
     const appliancesTheme = {
-        bgScrolled: 'bg-[#0a0a0a]/80',
-        bgMobile: 'bg-[#0a0a0a]/95',
-        textMain: 'text-white/90',
+        bgScrolled: 'bg-white/80',
+        bgMobile: 'bg-white/95',
+        textMain: 'text-gray-900',
         textHover: 'text-[#037166]',
-        border: 'border-[#037166]/20',
+        border: 'border-gray-100',
         accent: 'bg-[#037166]',
         accentGradientFrom: 'from-[#037166]',
-        accentGradientTo: 'to-[#025951]',
-        buttonBg: 'bg-[#1a1a1a]',
-        isLight: false
+        accentGradientTo: 'to-[#04a99d]',
+        buttonBg: 'bg-gray-50',
+        isLight: true
     };
 
     const footerTheme = {
-        bg: 'from-[#0a0a0a] to-black',
-        borderTop: 'border-[#037166]/20',
+        bg: 'bg-white',
+        borderTop: 'border-gray-100',
         accentGlow: '#037166',
         accentColor: '#037166',
         accentHover: '#04a99d',
         accentGradientFrom: 'from-[#037166]',
         accentGradientTo: 'to-[#04a99d]',
-        headingGradient: 'from-[#037166] via-white to-[#037166]',
-        textMain: 'text-white',
-        textMuted: 'text-white/60',
-        textSubtle: 'text-white/40',
-        textLink: 'text-white/70',
-        textLinkHover: 'hover:text-[#04a99d]',
-        groupNameColor: 'text-white',
-        dividerColor: 'text-white/20',
-        socialBg: 'bg-white/5',
-        socialBorder: 'border-white/10',
-        tooltipBg: 'bg-[#1a1a1a] border-[#037166]/50',
-        tooltipText: 'text-white',
-        iconBg: 'bg-white/5',
-        iconHoverBg: 'group-hover:bg-[#037166]/20',
-        isLight: false,
+        headingGradient: 'from-[#037166] via-gray-900 to-[#037166]',
+        textMain: 'text-gray-900',
+        textMuted: 'text-gray-500',
+        textSubtle: 'text-gray-400',
+        textLink: 'text-gray-600',
+        textLinkHover: 'hover:text-[#037166]',
+        groupNameColor: 'text-gray-900',
+        dividerColor: 'text-gray-100',
+        socialBg: 'bg-gray-50',
+        socialBorder: 'border-gray-100',
+        tooltipBg: 'bg-white border-[#037166]/20',
+        tooltipText: 'text-gray-900',
+        iconBg: 'bg-gray-50',
+        iconHoverBg: 'group-hover:bg-[#037166]/10',
+        isLight: true,
     };
 
     return (
-        <div className="min-h-screen">
+        <div className="appliance-global min-h-screen bg-white">
             <Header theme={appliancesTheme} />
-            {children}
+            <main className="bg-white">
+                {children}
+            </main>
             <Footer theme={footerTheme} />
         </div>
     );

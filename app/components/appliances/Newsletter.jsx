@@ -81,27 +81,12 @@ export function Newsletter() {
   };
 
   return (
-    <section className="py-20 mt-18 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0f1614] via-[#0a0a0a] to-[#0f1614]" />
-
-      {/* Animated Orbs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.2, 0.1],
-        }}
-        transition={{ duration: 8, repeat: Infinity }}
-        className="absolute -top-1/2 left-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px]"
-      />
-      <motion.div
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.1, 0.15, 0.1],
-        }}
-        transition={{ duration: 10, repeat: Infinity }}
-        className="absolute -bottom-1/2 right-1/4 w-96 h-96 bg-cyan-500 rounded-full blur-[120px]"
-      />
+    <section className="py-24 mt-18 relative overflow-hidden bg-white">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#03716605,transparent_50%),radial-gradient(circle_at_bottom_left,#04a99d05,transparent_50%)]" />
+      
+      {/* Subtle Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
         {/* Icon */}
@@ -109,7 +94,7 @@ export function Newsletter() {
           initial={{ opacity: 0, scale: 0.8 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] mb-6 shadow-xl shadow-[#037166]/30"
+          className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-[#037166] to-[#04a99d] mb-8 shadow-2xl shadow-[#037166]/20"
         >
           <Mail className="w-8 h-8 text-white" />
         </motion.div>
@@ -119,12 +104,11 @@ export function Newsletter() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-4xl md:text-5xl font-bold mb-4"
+          className="text-4xl md:text-5xl font-black mb-6 tracking-tight"
         >
-          <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+          <span className="text-gray-900 block mb-2">
             Stay Updated With
           </span>
-          <br />
           <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent">
             Service Offers
           </span>
@@ -136,7 +120,7 @@ export function Newsletter() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="text-white/60 text-lg mb-8 max-w-2xl mx-auto"
+          className="text-gray-500 text-lg mb-10 max-w-2xl mx-auto font-medium"
         >
           Get exclusive deals, maintenance tips, and service updates delivered straight to your inbox.
         </motion.p>
@@ -148,12 +132,12 @@ export function Newsletter() {
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
           onSubmit={step === 'subscribe' ? handleSubscribe : handleVerify}
-          className="max-w-md mx-auto"
+          className="max-w-xl mx-auto"
         >
-          <div className="relative">
-            <div className="relative flex items-center gap-3 p-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:border-[#037166]/50 transition-all">
-              <div className="pl-3">
-                <Mail className="w-5 h-5 text-white/40" />
+          <div className="relative group">
+            <div className="relative flex items-center gap-3 p-2 rounded-full bg-white border-2 border-gray-100 shadow-xl shadow-gray-200/50 group-hover:border-[#037166]/30 group-hover:shadow-[#037166]/5 transition-all duration-300">
+              <div className="pl-4">
+                <Mail className="w-5 h-5 text-gray-400 group-hover:text-[#037166] transition-colors" />
               </div>
               <input
                 type={step === 'subscribe' ? "email" : "text"}
@@ -162,15 +146,15 @@ export function Newsletter() {
                 placeholder={step === 'subscribe' ? "Enter your email address" : "Enter 6-digit OTP"}
                 required
                 disabled={loading || isSubscribed}
-                className="flex-1 bg-transparent text-white placeholder:text-white/40 outline-none py-2"
+                className="flex-1 bg-transparent text-gray-900 font-bold placeholder:text-gray-300 outline-none py-3 text-base"
                 maxLength={step === 'subscribe' ? undefined : 6}
               />
               <motion.button
                 type="submit"
                 disabled={loading || isSubscribed}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-6 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium shadow-lg shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all flex items-center gap-2 group ${loading ? 'opacity-70 cursor-wait' : ''}`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`px-8 py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-[#037166]/20 hover:shadow-[#037166]/40 transition-all flex items-center gap-3 group ${loading ? 'opacity-70 cursor-wait' : ''}`}
               >
                 <span>{loading ? 'Processing...' : step === 'subscribe' ? 'Subscribe' : 'Verify'}</span>
                 {!loading && (
@@ -179,48 +163,30 @@ export function Newsletter() {
                     transition={{ duration: 0.5 }}
                   >
                     {isSubscribed ? (
-                      <CheckCircle2 className="w-5 h-5" />
+                      <CheckCircle2 className="w-4 h-4" />
                     ) : (
-                      <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     )}
                   </motion.div>
                 )}
               </motion.button>
             </div>
 
-            {/* Back to Email link if in verify step */}
-            {step === 'verify' && !isSubscribed && (
-              <button
-                type="button"
-                onClick={() => setStep('subscribe')}
-                className="mt-2 text-xs text-white/40 hover:text-white transition-colors"
-              >
-                Change email address
-              </button>
-            )}
-
-            {/* Glow Effect */}
+            {/* Status Message */}
             <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1 }}
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-[#037166]/20 to-[#04a99d]/20 blur-xl -z-10"
-            />
+                initial={{ opacity: 0, height: 0 }}
+                animate={{
+                opacity: message ? 1 : 0,
+                height: message ? 'auto' : 0,
+                }}
+                className="mt-6 overflow-hidden"
+            >
+                <div className={`flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest ${isError ? 'text-red-500' : 'text-[#037166]'}`}>
+                {!isError && <CheckCircle2 className="w-4 h-4" />}
+                <p>{message}</p>
+                </div>
+            </motion.div>
           </div>
-
-          {/* Status Message */}
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{
-              opacity: message ? 1 : 0,
-              height: message ? 'auto' : 0,
-            }}
-            className="mt-4 overflow-hidden"
-          >
-            <div className={`flex items-center justify-center gap-2 ${isError ? 'text-red-400' : 'text-[#04a99d]'}`}>
-              {!isError && <CheckCircle2 className="w-5 h-5" />}
-              <h6 className="font-medium">{message}</h6>
-            </div>
-          </motion.div>
         </motion.form>
 
         {/* Privacy Note */}
@@ -229,39 +195,39 @@ export function Newsletter() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="text-white/40 text-sm mt-6"
+          className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-10"
         >
           We respect your privacy. Unsubscribe anytime.
         </motion.p>
 
-        {/* Decorative Elements */}
+        {/* Decorative Floating Elements (Refined for Light Theme) */}
         <motion.div
           animate={{
-            y: [0, -15, 0],
-            rotate: [0, 8, 0],
+            y: [0, -12, 0],
+            rotate: [0, 5, 0],
           }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-12 -left-4 md:top-10 md:left-10 w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-[#037166]/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-[#037166]/20"
+          className="absolute -top-12 -left-4 md:top-10 md:left-4 w-20 h-20 md:w-28 md:h-28 rounded-[2.5rem] bg-white border border-gray-100 flex items-center justify-center p-5 shadow-2xl shadow-gray-200/50"
         >
           <img
             src="/electric-appliance.png"
             alt="Repair Service"
-            className="w-full h-full object-contain filter drop-shadow-xl"
+            className="w-full h-full object-contain filter grayscale-[0.2] group-hover:grayscale-0 transition-all"
           />
         </motion.div>
 
         <motion.div
           animate={{
-            y: [0, 15, 0],
-            rotate: [0, -8, 0],
+            y: [0, 12, 0],
+            rotate: [0, -5, 0],
           }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-12 -right-4 md:top-10 md:right-10 w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-cyan-500/20 to-transparent backdrop-blur-md border border-white/10 flex items-center justify-center p-4 shadow-2xl shadow-cyan-500/20"
+          className="absolute -top-12 -right-4 md:top-10 md:right-4 w-20 h-20 md:w-28 md:h-28 rounded-[2.5rem] bg-white border border-gray-100 flex items-center justify-center p-5 shadow-2xl shadow-gray-200/50"
         >
           <img
             src="/fridge-storage.png"
             alt="Fridge Service"
-            className="w-full h-full object-contain filter drop-shadow-xl"
+            className="w-full h-full object-contain filter grayscale-[0.2] group-hover:grayscale-0 transition-all"
           />
         </motion.div>
       </div>

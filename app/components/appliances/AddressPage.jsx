@@ -372,19 +372,60 @@ export function AddressPage({
             Back
           </motion.button>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
-          >
-            <MapPin className="w-8 h-8" />
-            Your Service Address
-          </motion.h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-3xl md:text-4xl font-bold !text-white flex items-center gap-3"
+            >
+              <MapPin className="w-8 h-8 !text-white" />
+              <span className="!text-white">Manage Address</span>
+            </motion.h1>
+
+            {!showAddForm && (
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                onClick={() => {
+                  setEditingAddress(null);
+                  setNewAddress({
+                    name: user?.name || '',
+                    phone: user?.mobile || user?.phone || '',
+                    type: 'Home',
+                    area: '',
+                    flat: '',
+                    postalCode: '',
+                    addressLineOne: '',
+                    addressLineTwo: '',
+                    stateName: 'Telangana',
+                    cityName: contextLocation?.city || 'Hyderabad',
+                    defaultAddress: false,
+                    latitude: contextLocation?.lat || "17.450123",
+                    longitude: contextLocation?.lng || "78.390456",
+                    area: contextLocation?.area || '',
+                    postalCode: contextLocation?.postalCode || '',
+                    flat: contextLocation?.flat || '',
+                    addressLineOne: contextLocation?.address || ''
+                  });
+                  setMapCenter({
+                    lat: Number(contextLocation?.lat) || 17.450123,
+                    lng: Number(contextLocation?.lng) || 78.390456
+                  });
+                  setShowAddForm(true);
+                }}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-white/30 bg-white/10 hover:bg-white/20 transition-all"
+              >
+                <Plus className="w-5 h-5 text-white" />
+                <span className="text-white font-semibold">Add New Address</span>
+              </motion.button>
+            )}
+          </div>
         </div>
       </section>
 
-      <div className="max-w-[1000px] mx-auto px-6 lg:px-8 py-8">
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="grid gap-6">
           {/* Saved Addresses */}
           <AnimatePresence mode="popLayout">
@@ -577,130 +618,89 @@ export function AddressPage({
               </div>
             ) : (
               // Sort addresses: Selected first, then Default
-              [...addresses]
-                .sort((a, b) => {
-                  if (selectedAddress?._id === a._id) return -1;
-                  if (selectedAddress?._id === b._id) return 1;
-                  // If neither is selected, keep default address at top
-                  if (a.defaultAddress && !selectedAddress) return -1;
-                  if (b.defaultAddress && !selectedAddress) return 1;
-                  return 0;
-                })
-                .map((address, index) => {
-                  const Icon = getIcon(address.type);
-                  const isSelected = selectedAddress?._id === address._id;
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[...addresses]
+                  .sort((a, b) => {
+                    if (selectedAddress?._id === a._id) return -1;
+                    if (selectedAddress?._id === b._id) return 1;
+                    if (a.defaultAddress && !selectedAddress) return -1;
+                    if (b.defaultAddress && !selectedAddress) return 1;
+                    return 0;
+                  })
+                  .map((address, index) => {
+                    const Icon = getIcon(address.type);
+                    const isSelected = selectedAddress?._id === address._id;
 
-                  return (
-                    <motion.div
-                      key={address._id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={{ delay: index * 0.1 }}
-                      layout
-                      onClick={() => onSelectAddress(address)}
-                      className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 ${isSelected
-                        ? 'bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 border-2 border-[#037166]'
-                        : 'bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-white/20'
-                        }`}
-                    >
-                      <div className="flex gap-6">
-                        <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected
-                          ? 'bg-gradient-to-br from-[#037166] to-[#04a99d]'
-                          : 'bg-white/5'
-                          }`}>
-                          <Icon className={`w-8 h-8 ${isSelected ? 'text-white' : 'text-[#04a99d]'}`} />
-                        </div>
-
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-xl font-bold text-white capitalize">{address.type}</h4>
-                            {address.defaultAddress && (
-                              <h6 className="px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d] text-xs font-medium">
-                                DEFAULT
-                              </h6>
-                            )}
+                    return (
+                      <motion.div
+                        key={address._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -100 }}
+                        transition={{ delay: index * 0.1 }}
+                        layout
+                        onClick={() => onSelectAddress(address)}
+                        className={`relative cursor-pointer rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm ${isSelected
+                          ? 'bg-gradient-to-br from-[#ecf7f5] to-[#f4fbfa] border-2 border-[#2f7f74]'
+                          : 'bg-white border border-gray-200 hover:border-[#99c8c0] hover:shadow-md'
+                          }`}
+                      >
+                        <div className="flex gap-4 sm:gap-6">
+                          <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected
+                            ? 'bg-gradient-to-br from-[#037166] to-[#04a99d]'
+                            : 'bg-[#eaf5f3]'
+                            }`}>
+                            <Icon className={`w-7 h-7 sm:w-8 sm:h-8 ${isSelected ? 'text-white' : 'text-[#2f7f74]'}`} />
                           </div>
-                          <p className="font-medium text-white mb-1">{address.name}</p>
-                          <p className="text-white/80 text-sm mb-1">
-                            {[address.flat, address.area].filter(Boolean).join(', ')}
-                          </p>
-                          <p className="text-white/60 text-xs">
-                            {[address.cityName, address.postalCode].filter(Boolean).join(', ')}
-                          </p>
-                        </div>
 
-                        <div className="flex flex-col gap-2">
-                          {isSelected && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="w-8 h-8 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center"
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="text-2xl font-bold text-[#0f172a] capitalize">{address.type}</h4>
+                              {address.defaultAddress && (
+                                <h6 className="px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d] text-xs font-medium">
+                                  DEFAULT
+                                </h6>
+                              )}
+                            </div>
+                            <p className="font-semibold text-[#334155] mb-1">{address.name}</p>
+                            <p className="text-[#475569] text-sm mb-1 line-clamp-2">
+                              {[address.flat, address.area].filter(Boolean).join(', ')}
+                            </p>
+                            <p className="text-[#64748b] text-xs line-clamp-1">
+                              {[address.cityName, address.postalCode].filter(Boolean).join(', ')}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-col gap-2 items-end">
+                            {isSelected && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="w-8 h-8 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center"
+                              >
+                                <Check className="w-5 h-5 text-white" />
+                              </motion.div>
+                            )}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleEditClick(address); }}
+                              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-[#0f172a] transition-all"
                             >
-                              <Check className="w-5 h-5 text-white" />
-                            </motion.div>
-                          )}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleEditClick(address); }}
-                            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleDeleteAddress(address._id); }}
-                            className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-500 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteAddress(address._id); }}
+                              className="p-2 rounded-lg bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  );
-                })
+                      </motion.div>
+                    );
+                  })}
+              </div>
             )}
           </AnimatePresence>
-
-          {/* Add New Address Button */}
-          {!showAddForm && (
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              onClick={() => {
-                setEditingAddress(null);
-                setNewAddress({
-                  name: user?.name || '',
-                  phone: user?.mobile || user?.phone || '',
-                  type: 'Home',
-                  area: '',
-                  flat: '',
-                  postalCode: '',
-                  addressLineOne: '',
-                  addressLineTwo: '',
-                  stateName: 'Telangana',
-                  cityName: contextLocation?.city || 'Hyderabad',
-                  defaultAddress: false,
-                  latitude: contextLocation?.lat || "17.450123",
-                  longitude: contextLocation?.lng || "78.390456",
-                  area: contextLocation?.area || '',
-                  postalCode: contextLocation?.postalCode || '',
-                  flat: contextLocation?.flat || '',
-                  addressLineOne: contextLocation?.address || ''
-                });
-                setMapCenter({
-                  lat: Number(contextLocation?.lat) || 17.450123,
-                  lng: Number(contextLocation?.lng) || 78.390456
-                });
-                setShowAddForm(true);
-              }}
-              className="flex items-center justify-center gap-3 p-6 rounded-2xl border-2 border-dashed border-white/20 hover:border-[#037166]/50 bg-white/5 hover:bg-white/10 transition-all group"
-            >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Plus className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-white font-medium text-lg">Add New Address</span>
-            </motion.button>
-          )}
 
           {/* Add Address Form */}
           <AnimatePresence>
@@ -711,10 +711,10 @@ export function AddressPage({
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10">
+                <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h4 className="text-xl font-bold text-white">
+                      <h4 className="text-xl font-bold text-[#0f172a]">
                         {editingAddress
                           ? 'Edit Address'
                           : (!newAddress.name || !newAddress.phone)
@@ -722,14 +722,14 @@ export function AddressPage({
                             : 'Add New Address'}
                       </h4>
                       {!editingAddress && (
-                        <p className="text-white/40 text-xs mt-1">Information pre-filled from your profile</p>
+                        <p className="text-gray-500 text-xs mt-1">Information pre-filled from your profile</p>
                       )}
                     </div>
                     <button
                       onClick={() => setShowAddForm(false)}
                       className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                     >
-                      <X className="w-5 h-5 text-white/60" />
+                      <X className="w-5 h-5 text-gray-500" />
                     </button>
                   </div>
 
@@ -741,7 +741,7 @@ export function AddressPage({
                           onClick={() => setNewAddress({ ...newAddress, type })}
                           className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${newAddress.type === type
                             ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                            : 'bg-white/5 text-white/70 hover:bg-white/10'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                         >
                           {type}
@@ -755,18 +755,18 @@ export function AddressPage({
                           placeholder="Full Name"
                           value={newAddress.name}
                           onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                          className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
                         />
-                        <p className="text-[10px] text-white/30 px-1 italic">Recipient name for service reference</p>
+                        <p className="text-[10px] text-gray-500 px-1 italic">Recipient name for service reference</p>
                       </div>
                       <div className="flex flex-col gap-1">
                         <input
                           placeholder="Phone Number"
                           value={newAddress.phone}
                           onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                          className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
                         />
-                        <p className="text-[10px] text-white/30 px-1 italic">Contact number for this address</p>
+                        <p className="text-[10px] text-gray-500 px-1 italic">Contact number for this address</p>
                       </div>
                     </div>
 
@@ -775,7 +775,7 @@ export function AddressPage({
                         placeholder="Flat / Plot / House No."
                         value={newAddress.flat}
                         onChange={(e) => setNewAddress({ ...newAddress, flat: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all pr-32"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all pr-32"
                       />
                       <button
                         onClick={handleAutoDetect}
@@ -797,7 +797,7 @@ export function AddressPage({
                       placeholder="Area / Locality"
                       value={newAddress.area}
                       onChange={(e) => setNewAddress({ ...newAddress, area: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                      className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
                     />
 
                     <div className="grid md:grid-cols-3 gap-4">
@@ -805,19 +805,19 @@ export function AddressPage({
                         placeholder="City"
                         value={newAddress.cityName}
                         onChange={(e) => setNewAddress({ ...newAddress, cityName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
                       />
                       <input
                         placeholder="State"
                         value={newAddress.stateName}
                         onChange={(e) => setNewAddress({ ...newAddress, stateName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
                       />
                       <input
                         placeholder="Postal Code"
                         value={newAddress.postalCode}
                         onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-[#037166] transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
                       />
                     </div>
 
@@ -829,13 +829,13 @@ export function AddressPage({
                         onChange={(e) => setNewAddress({ ...newAddress, defaultAddress: e.target.checked })}
                         className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#037166]"
                       />
-                      <label htmlFor="defaultAddr" className="text-sm text-white/60 cursor-pointer">Set as Default Address</label>
+                      <label htmlFor="defaultAddr" className="text-sm text-gray-600 cursor-pointer">Set as Default Address</label>
                     </div>
 
                     <div className="flex gap-3 pt-4">
                       <button
                         onClick={() => setShowAddForm(false)}
-                        className="flex-1 px-6 py-3 rounded-lg border border-white/20 text-white hover:bg-white/5 transition-all"
+                        className="flex-1 px-6 py-3 rounded-lg border border-gray-300 text-[#334155] hover:bg-gray-50 transition-all"
                       >
                         Cancel
                       </button>
@@ -860,11 +860,11 @@ export function AddressPage({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-8"
+            className="mt-8 flex justify-center"
           >
             <button
               onClick={handleContinue}
-              className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-lg hover:shadow-lg hover:shadow-[#037166]/40 transition-all"
+              className="w-full md:w-auto md:min-w-[420px] px-10 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold text-lg hover:shadow-lg hover:shadow-[#037166]/40 transition-all"
             >
               Continue to Booking
             </button>

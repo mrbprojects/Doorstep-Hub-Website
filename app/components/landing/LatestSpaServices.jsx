@@ -89,7 +89,7 @@ export function LatestSpaServices() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
         />
         <motion.div
           animate={{
@@ -97,11 +97,11 @@ export function LatestSpaServices() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -208,8 +208,8 @@ export function LatestSpaServices() {
                     {/* Rating Badge - Bottom Left Flush */}
                     <div className="absolute bottom-0 left-0 z-20">
                       <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
-                        <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                        <span className="text-sm font-bold text-white">{store.rating || '4.8'}</span>
+                        <Star className="w-4 h-4 fill-white text-white" />
+                        <span className="text-sm font-bold !text-white">{store.rating || '4.8'}</span>
                       </div>
                     </div>
 
@@ -286,5 +286,7 @@ export function LatestSpaServices() {
     </section>
   );
 }
+
+
 
 

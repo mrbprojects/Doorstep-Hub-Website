@@ -11,49 +11,47 @@ import { Animated404 } from '@/components/ui/Animated404';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
-// 
-
 const appliancesTheme = {
-    bgScrolled: 'bg-[#0a0a0a]/80',
-    bgMobile: 'bg-[#0a0a0a]/95',
-    textMain: 'text-white/90',
+    bgScrolled: 'bg-white/80',
+    bgMobile: 'bg-white/95',
+    textMain: 'text-gray-900',
     textHover: 'text-[#037166]',
-    border: 'border-[#037166]/20',
+    border: 'border-gray-100',
     accent: 'bg-[#037166]',
     accentGradientFrom: 'from-[#037166]',
-    accentGradientTo: 'to-[#025951]',
-    buttonBg: 'bg-[#1a1a1a]',
-    isLight: false
+    accentGradientTo: 'to-[#04a99d]',
+    buttonBg: 'bg-gray-50',
+    isLight: true
 };
 
 const footerTheme = {
-    bg: 'from-[#0a0a0a] to-black',
-    borderTop: 'border-[#037166]/20',
+    bg: 'bg-white',
+    borderTop: 'border-gray-100',
     accentGlow: '#037166',
     accentColor: '#037166',
     accentHover: '#04a99d',
     accentGradientFrom: 'from-[#037166]',
     accentGradientTo: 'to-[#04a99d]',
-    headingGradient: 'from-[#037166] via-white to-[#037166]',
-    textMain: 'text-white',
-    textMuted: 'text-white/60',
-    textSubtle: 'text-white/40',
-    textLink: 'text-white/70',
-    textLinkHover: 'hover:text-[#04a99d]',
-    groupNameColor: 'text-white',
-    dividerColor: 'text-white/20',
-    socialBg: 'bg-white/5',
-    socialBorder: 'border-white/10',
-    tooltipBg: 'bg-[#1a1a1a] border-[#037166]/50',
-    tooltipText: 'text-white',
-    iconBg: 'bg-white/5',
-    iconHoverBg: 'group-hover:bg-[#037166]/20',
-    isLight: false,
+    headingGradient: 'from-[#037166] via-gray-900 to-[#037166]',
+    textMain: 'text-gray-900',
+    textMuted: 'text-gray-500',
+    textSubtle: 'text-gray-400',
+    textLink: 'text-gray-600',
+    textLinkHover: 'hover:text-[#037166]',
+    groupNameColor: 'text-gray-900',
+    dividerColor: 'text-gray-100',
+    socialBg: 'bg-gray-50',
+    socialBorder: 'border-gray-100',
+    tooltipBg: 'bg-white border-[#037166]/20',
+    tooltipText: 'text-gray-900',
+    iconBg: 'bg-gray-50',
+    iconHoverBg: 'group-hover:bg-[#037166]/10',
+    isLight: true,
 };
 
 function AppliancePageShell({ children }) {
     return (
-        <div className="min-h-screen">
+        <div className="appliance-global min-h-screen bg-white">
             <Header theme={appliancesTheme} />
             {children}
             <Footer theme={footerTheme} />
@@ -68,8 +66,6 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
     const [viewType, setViewType] = useState('loading'); // 'loading', 'category', 'listing', 'detail', '404', 'store'
     const [categoryData, setCategoryData] = useState(null);
     const [serviceId, setServiceId] = useState(queryServiceId);
-
-    // Removed immediate redirect effect, returning Animated404 instead
 
     useEffect(() => {
         const checkSlugType = async () => {
@@ -116,11 +112,6 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 });
 
                 const catData = await catResponse.json();
-
-                // If the API returns successfully but has a suspicious number of subcategories (e.g. > 15),
-                // it might be returning all subcategories instead of filtering by category.
-                // We'll trust it only if it's successful and has a reasonable count, 
-                // otherwise we'll double check against the hierarchical list.
                 if (catData.success && Array.isArray(catData.data) && catData.data.length > 0 && catData.data.length < 20) {
                     setCategoryData(catData);
                     setViewType('category');
@@ -128,7 +119,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 }
 
                 // 3. Resolve root-level appliance service center slugs.
-                // Example: /anvika-computer-repair-services should show StoreDetailPage.
+                // If it matches a store, REDIRECT to /service-list/[slug]
                 const centersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_service_center`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -141,17 +132,19 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 });
                 const centersData = await centersResponse.json();
                 if (centersData.success && Array.isArray(centersData.nearByServiceCenters)) {
+                    const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
                     const matchedCenter = centersData.nearByServiceCenters.find(center =>
-                        center.slug === slug || center._id === slug
+                        center.slug === slug || 
+                        center._id === slug ||
+                        generateSlug(center.business_name || center.name) === slug
                     );
                     if (matchedCenter) {
-                        setViewType('store');
+                        router.replace(`/service-list/${slug}`);
                         return;
                     }
                 }
 
                 // 4. Try to resolve a root-level appliance subcategory slug.
-                // Example: /microwave-oven-repair should show the appliance listing page.
                 const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -199,11 +192,9 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 const allData = await allRes.json();
 
                 if (allData.success && Array.isArray(allData.data)) {
-                    // Slug generation helper
                     const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
 
                     for (const cat of allData.data) {
-                        // Check if it matches a category slug
                         if (cat.slug === slug || generateSlug(cat.name) === slug) {
                             setCategoryData({
                                 success: true,
@@ -215,18 +206,17 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                             return;
                         }
 
-                        // Check subcategories
                         const subcategories = cat.subcategories || [];
                         for (const sub of subcategories) {
                             if (sub.slug === slug || generateSlug(sub.name) === slug) {
-                                setViewType('listing'); // It's a subcategory match
+                                setViewType('listing');
                                 return;
                             }
                         }
                     }
                 }
 
-                // 6. Try to fetch as an appliance Store (Service Center)
+                // 6. Try to fetch as an appliance Store directly
                 const storeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${slug}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
@@ -235,13 +225,12 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 if (storeResponse.ok) {
                     const storeDataResult = await storeResponse.json();
                     if (storeDataResult.success) {
-                        setViewType('store');
+                        router.replace(`/service-list/${slug}`);
                         return;
                     }
                 }
 
-                // 7. Final Fallback: Assume it's an appliance Service Detail slug
-                // Let ServiceDetailsPage try to handle it.
+                // 7. Final Fallback
                 setViewType('detail');
 
             } catch (error) {
@@ -253,11 +242,11 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
         if (slug) {
             checkSlugType();
         }
-    }, [slug, categorySlug, queryServiceId]);
+    }, [slug, categorySlug, queryServiceId, router]);
 
     if (viewType === 'loading') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+            <div className="appliance-global min-h-screen flex items-center justify-center bg-white">
                 <Loader2 className="w-8 h-8 text-[#037166] animate-spin" />
             </div>
         );
@@ -310,7 +299,6 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a]" />
+        <div className="appliance-global min-h-screen bg-white" />
     );
 }
-

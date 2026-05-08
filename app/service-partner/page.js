@@ -111,7 +111,7 @@ export default function ServicePartnerPage() {
 
             <main className="pt-20">
                 {/* Hero Section */}
-                <section className="relative py-16 md:py-24 lg:py-32 overflow-hidden">
+                <section className="relative pt-16 md:pt-24 lg:pt-18 pb-6 md:pb-8 overflow-hidden">
                     {/* Animated Background */}
                     <div className="absolute inset-0">
                         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#037166]/15 via-[#04a99d]/10 to-transparent" />
@@ -137,15 +137,16 @@ export default function ServicePartnerPage() {
                                     Join 10,000+ Verified Professionals
                                 </motion.div>
 
-                                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-[0.9] tracking-tight">
+                                <h1 className="text-4xl !text-white md:text-6xl lg:text-7xl font-black mb-6 leading-[0.9] tracking-tight">
                                     Grow Your{' '}
                                     <span className="bg-gradient-to-r from-[#037166] via-[#04a99d] to-[#10b981] bg-clip-text text-transparent">
                                         Business 10X
                                     </span>
                                     <br />
-                                    <span className="text-white/70 text-2xl md:text-3xl font-normal tracking-wide">
-                                        With Doorstep Hub
-                                    </span>
+                                    
+  <span className="whitespace-nowrap bg-gradient-to-r from-[#037166] via-[#04a99d] to-[#10b981] bg-clip-text text-transparent">
+    With Doorstep Hub
+  </span>
                                 </h1>
 
                                 <p className="text-xl md:text-2xl text-white/70 mb-10 leading-relaxed max-w-lg">
@@ -175,24 +176,7 @@ export default function ServicePartnerPage() {
                                     </a>
                                 </div>
 
-                                {/* Quick Stats */}
-                                <div className="flex flex-wrap gap-6 pt-4">
-                                    {PartnerStats.slice(0, 2).map((stat, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.6 + i * 0.1 }}
-                                            className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10"
-                                        >
-                                            <stat.icon className="w-5 h-5 text-[#04a99d]" />
-                                            <div>
-                                                <div className="text-lg font-black text-white">{stat.value}</div>
-                                                <div className="text-xs text-white/60">{stat.label}</div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
+                              
                             </motion.div>
 
                             {/* Phone Mockup */}
@@ -253,6 +237,25 @@ export default function ServicePartnerPage() {
                                             <button className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold shadow-2xl hover:shadow-[#037166]/50 hover:scale-[1.02] transition-all duration-200">
                                                 Accept New Job
                                             </button>
+
+                                             {/* Quick Stats */}
+                                <div className="flex flex-wrap gap-6 pt-10">
+                                    {PartnerStats.slice(0, 2).map((stat, i) => (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.6 + i * 0.1 }}
+                                            className="flex items-center gap-2 p-3 flex-col rounded-xl bg-white/5 border border-white/10"
+                                        >
+                                            <stat.icon className="w-5 h-5 text-[#04a99d]" />
+                                            <div>
+                                                <div className="text-sm text-center font-black text-white">{stat.value}</div>
+                                                <div className="text-xs text-white/60">{stat.label}</div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
                                         </div>
                                     </div>
                                 </div>
@@ -262,7 +265,7 @@ export default function ServicePartnerPage() {
                 </section>
 
                 {/* Benefits Section */}
-                <section className="py-20 lg:py-22 relative">
+                <section className="pt-6 md:pt-8 pb-20 lg:pb-20 relative">
                     <div className="absolute inset-0 bg-gradient-to-b from-[#0f1614]/30 to-transparent pointer-events-none" />
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

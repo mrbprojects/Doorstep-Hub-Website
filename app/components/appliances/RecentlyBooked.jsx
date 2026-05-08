@@ -14,6 +14,22 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
   const scrollRef = useRef(null);
   const shouldAutoScrollDesktop = !isMobile && services.length > 6;
 
+  // SEO Schema for Recently Booked Services
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Recently Booked Appliance Services",
+    "description": "Trending appliance repair services recently booked by our customers.",
+    "itemListElement": (services || []).slice(0, 10).map((service, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": service.title,
+      "description": service.description,
+      "url": service.slug ? `https://doorstephub.com/service-list/book-now/${service.slug}` : undefined
+    }))
+  };
+
+
   useEffect(() => {
     const updateViewport = () => setIsMobile(window.innerWidth < 1280);
 
@@ -178,8 +194,13 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
   // Error state
   if (error || services.length === 0) {
     return (
-      <section className="py-20 relative overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+      <section className="py-20 relative overflow-hidden bg-white">
+      {/* SEO Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
           <div className="text-center py-20">
             <p className="text-white/60 mb-4">{error || 'No recent bookings available'}</p>
             <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white text-sm hover:bg-white/20 transition-all">
@@ -193,7 +214,13 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
 
   return (
     <section className="py-1 relative overflow-hidden">
+      {/* SEO Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+
         {/* Section Header */}
         <div className="mb-12">
           <motion.div
@@ -276,7 +303,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                           onServiceClick?.(service.id, service.categoryName, service.subcategoryName, service.slug);
                         }}
                       >
-                        <h6 className="text-[12px] font-ubuntu tracking-wider text-white">Book Now</h6>
+                        <h6 className="text-[12px] font-ubuntu tracking-wider !text-white">Book Now</h6>
                       </div>
                     </div>
 

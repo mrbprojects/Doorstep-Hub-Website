@@ -69,7 +69,7 @@ export function KnowledgeListingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
+                        <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-[#037166] bg-clip-text text-transparent">
                             Knowledge Hub
                         </h1>
                         <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">

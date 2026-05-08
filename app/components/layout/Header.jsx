@@ -26,18 +26,19 @@ export function Header({ theme = {}, navItems = [] }) {
 
   const cartItemsCount = (productCartItems?.length || 0) + (serviceCartItems?.length || 0);
 
-  // Default Theme (Landing Page / Dark)
+  // Default theme aligned with appliance service green palette
   const defaultTheme = {
-    bgScrolled: 'bg-[#0a0a0a]/80',
-    bgMobile: 'bg-[#0a0a0a]/95',
-    textMain: 'text-gray-300',
+    bgScrolled: 'bg-white/95',
+    bgMobile: 'bg-white/98',
+    textMain: 'text-[#037166]',
     textHover: 'text-[#037166]',
-    border: 'border-[#037166]/20',
+    border: 'border-[#037166]/25',
     accent: 'bg-[#037166]',
     accentGradientFrom: 'from-[#037166]',
     accentGradientTo: 'to-[#02b39a]',
-    buttonBg: 'bg-[#1a1a1a]', // For icon buttons
-    logoTextGradient: 'from-white to-gray-300', // If needed
+    buttonBg: 'bg-[#eef8f6]',
+    logoTextGradient: 'from-[#037166] to-[#025951]',
+    isLight: true,
   };
 
   const currentTheme = { ...defaultTheme, ...theme };

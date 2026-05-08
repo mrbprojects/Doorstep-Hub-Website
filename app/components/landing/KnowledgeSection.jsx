@@ -111,32 +111,12 @@ export function KnowledgeSection() {
   );
 
   return (
-    <section className="relative py-18 overflow-hidden">
-      {/* Architectural World Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
-
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
-        />
-      </div>
+    <section className="relative py-24 overflow-hidden bg-white">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#03716605,transparent_50%),radial-gradient(circle_at_bottom_left,#04a99d05,transparent_50%)]" />
+      
+      {/* Subtle Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -145,25 +125,25 @@ export function KnowledgeSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
+          <div className="inline-flex items-center space-x-2 px-5 py-2 bg-[#037166]/5 border border-[#037166]/20 rounded-full mb-8">
             <BookOpen className="w-4 h-4 text-[#037166]" />
-            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Creative Studio Cards</h6>
+            <h6 className="text-xs font-black text-[#037166] uppercase tracking-[0.2em]">Insights & Stories</h6>
           </div>
 
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">Knowledge Hub</span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 tracking-tight text-[#037166]">
+            Knowledge Hub
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-500 text-lg max-w-2xl mx-auto font-medium">
             Explore insights, tips, and stories from our community of service providers and users
           </p>
         </motion.div>
 
         {/* Articles Grid */}
-        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-4 md:mx-0 md:px-0 md:overflow-visible">
-          <div className="flex min-w-max gap-4 md:min-w-0 md:grid md:grid-cols-2 md:gap-4 xl:grid-cols-6">
+        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-12 md:mx-0 md:px-0 md:overflow-visible">
+          <div className="flex min-w-max gap-6 md:min-w-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             : articles.map((article, index) => (
@@ -173,63 +153,56 @@ export function KnowledgeSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`group w-[240px] shrink-0 md:w-auto ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
+                className={`group w-[280px] shrink-0 md:w-auto ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
               >
                 <Link href={article.isDummy ? '#' : `/knowledge/${article.slug}`}>
-                  {/* Studio Card */}
                   <motion.div
-                    whileHover={article.isDummy ? {} : { y: -10 }}
-                    className={`relative h-full overflow-hidden rounded-2xl border border-[#037166]/20 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:shadow-[#037166]/20 ${article.isDummy ? 'pointer-events-none' : ''}`}
+                    whileHover={article.isDummy ? {} : { y: -8 }}
+                    className={`relative h-full overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-[#037166]/10 transition-all duration-500 ${article.isDummy ? 'pointer-events-none' : ''}`}
                   >
                     {/* Trending Badge */}
                     {article.trending && (
-                      <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-white to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
-                        <TrendingUp className="w-3 h-3 text-[#037166]" />
-                        <h6 className="text-xs font-bold text-[#037166]">Trending</h6>
+                      <div className="absolute top-4 right-4 z-20 flex items-center space-x-1.5 rounded-full bg-[#037166] px-3 py-1.5 shadow-lg border border-white/20">
+                        <TrendingUp className="w-3.5 h-3.5 text-white" />
+                        <h6 className="text-[10px] font-black text-white uppercase tracking-wider">Trending</h6>
                       </div>
                     )}
 
-
                     {/* Image */}
-                    <div className="relative h-36 overflow-hidden">
+                    <div className="relative h-44 overflow-hidden bg-gray-50">
                       <ImageWithFallback
                         src={article.image}
                         alt={article.title}
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-
+                      
+                      {/* Removed all dark overlays */}
+                      
                       {/* Category Badge */}
-                      <div className="absolute bottom-3 left-3 rounded-full bg-[#037166]/80 px-2.5 py-1 backdrop-blur-md">
-                        <h6 className="text-xs font-semibold text-white uppercase tracking-wider">
+                      <div className="absolute bottom-4 left-4 rounded-full bg-[#037166] px-4 py-1.5 shadow-xl border border-white/10">
+                        <h6 className="text-[10px] font-black text-white uppercase tracking-widest">
                           {article.category}
                         </h6>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
-                      <h4 className="mb-2 line-clamp-1 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-base font-bold leading-snug text-transparent">
+                    <div className="p-6">
+                      <h4 className="mb-3 line-clamp-2 text-gray-900 text-lg font-black leading-tight group-hover:text-[#037166] transition-colors">
                         {article.title}
                       </h4>
-                      <p className="mb-3 line-clamp-2 text-xs text-white/60">
+                      <p className="mb-4 line-clamp-2 text-sm text-gray-500 font-medium leading-relaxed">
                         {article.summary}
                       </p>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-xs text-gray-400">
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                        <div className="flex items-center space-x-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                           <Clock className="h-3.5 w-3.5 text-[#037166]" />
                           <span>{article.readTime}</span>
                         </div>
-
-
+                        <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#037166] group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
-
-                    {/* Hover Glow */}
-                    {!article.isDummy && (
-                      <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
-                    )}
                   </motion.div>
                 </Link>
               </motion.div>
@@ -241,22 +214,24 @@ export function KnowledgeSection() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center"
+          className="text-center mt-12"
         >
           <Link href="/knowledge">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full text-white font-semibold shadow-xl shadow-[#037166]/40 hover:shadow-2xl hover:shadow-[#037166]/50 transition-all inline-flex items-center space-x-2"
+              className="px-10 py-5 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all inline-flex items-center space-x-3 group"
             >
               <span>Explore All Articles</span>
-              <ArrowRight className="w-5 h-5 mb-2" />
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </motion.button>
           </Link>
         </motion.div>
 
         {/* Newsletter Signup */}
-        <NewsletterWidget />
+        <div className="mt-28">
+            <NewsletterWidget />
+        </div>
       </div>
     </section>
   );

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, Navigation, Star, Phone, Clock, Loader2, ArrowRight } from 'lucide-react';
+import { MapPin, Navigation, Star, Phone, Clock, Loader2, ArrowRight, Check } from 'lucide-react';
 import { GoogleMap, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, FLOAT_PANE } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
@@ -26,62 +26,62 @@ const CENTER_LOGO = {
   anchor: { x: 19, y: 50 },
 };
 
-// DARK MODE MAP OPTIONS - Instant dark theme
+// Light map theme for landing page
 const mapOptions = {
   zoomControl: true,
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: true,
   styles: [
-    {
-      "featureType": "all",
-      "elementType": "geometry",
-      "stylers": [
-        { "color": "#1a1a1a" }
-      ]
-    },
-    {
-      "featureType": "all",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        { "color": "#8c8c8c" }
-      ]
-    },
-    {
-      "featureType": "all",
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        { "color": "#000000" }
-      ]
-    },
-    {
-      "featureType": "landscape",
-      "elementType": "geometry",
-      "stylers": [
-        { "color": "#2a2a2a" }
-      ]
-    },
-    {
-      "featureType": "road",
-      "elementType": "geometry",
-      "stylers": [
-        { "color": "#333333" }
-      ]
-    },
-    {
-      "featureType": "poi",
-      "elementType": "geometry",
-      "stylers": [
-        { "color": "#2d2d2d" }
-      ]
-    },
-    {
-      "featureType": "water",
-      "elementType": "geometry",
-      "stylers": [
-        { "color": "#0a1410" }
-      ]
-    },
+        {
+          "featureType": "all",
+          "elementType": "geometry",
+          "stylers": [
+        { "color": "#f8fafc" }
+          ]
+        },
+        {
+          "featureType": "all",
+          "elementType": "labels.text.fill",
+          "stylers": [
+        { "color": "#334155" }
+          ]
+        },
+        {
+          "featureType": "all",
+          "elementType": "labels.text.stroke",
+          "stylers": [
+        { "color": "#ffffff" }
+          ]
+        },
+        {
+          "featureType": "landscape",
+          "elementType": "geometry",
+          "stylers": [
+        { "color": "#eef6f5" }
+          ]
+        },
+        {
+          "featureType": "road",
+          "elementType": "geometry",
+          "stylers": [
+        { "color": "#ffffff" }
+          ]
+        },
+        {
+          "featureType": "poi",
+          "elementType": "geometry",
+          "stylers": [
+        { "color": "#f1f5f9" }
+          ]
+        },
+        {
+          "featureType": "water",
+          "elementType": "geometry",
+          "stylers": [
+        { "color": "#dbeafe" }
+          ]
+        },
     {
       "featureType": "transit",
       "elementType": "geometry.fill",
@@ -244,24 +244,24 @@ export function NearbyServiceCenters() {
 
   // Skeleton (YOUR ORIGINAL)
   const SkeletonService = () => (
-    <div className="p-6 rounded-2xl bg-[#1a1a1a]/50 backdrop-blur-sm border border-[#037166]/20 animate-pulse">
+    <div className="p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-slate-200 animate-pulse">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 space-y-2">
-          <div className="h-5 w-32 bg-[#2a2a2a] rounded" />
+          <div className="h-5 w-32 bg-slate-200 rounded" />
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
-              <div className="w-4 h-4 bg-[#2a2a2a] rounded-full" />
-              <div className="h-3 w-12 bg-[#2a2a2a] rounded" />
+              <div className="w-4 h-4 bg-slate-200 rounded-full" />
+              <div className="h-3 w-12 bg-slate-200 rounded" />
             </div>
           </div>
         </div>
       </div>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-[#2a2a2a] rounded-full" />
-          <div className="h-4 w-20 bg-[#2a2a2a] rounded" />
+          <div className="w-4 h-4 bg-slate-200 rounded-full" />
+          <div className="h-4 w-20 bg-slate-200 rounded" />
         </div>
-        <div className="h-10 w-20 bg-[#2a2a2a] rounded-lg" />
+        <div className="h-10 w-20 bg-slate-200 rounded-lg" />
       </div>
     </div>
   );
@@ -282,13 +282,12 @@ export function NearbyServiceCenters() {
       name="service-card"
       className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${isActive
         ? 'bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/10'
-        : 'bg-[#1a1a1a]/50 border-white/10 hover:border-[#037166]/30'
+        : 'bg-white/90 border-slate-200 hover:border-[#037166]/30'
         }`}
     >
       {isActive && (
-        <span className="absolute top-3 right-16 flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#04a99d] opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#04a99d]" />
+        <span className="absolute top-3 right-16 inline-flex h-6 w-6 items-center justify-center rounded-md border border-[#037166]/35 bg-white shadow-sm">
+          <Check className="h-3.5 w-3.5 text-[#037166]" />
         </span>
       )}
       <div className="flex items-start justify-between gap-4">
@@ -300,23 +299,23 @@ export function NearbyServiceCenters() {
             </span>
             <div className="flex items-center gap-1.5">
               <Star className="w-3.5 h-3.5 fill-[#04a99d] text-[#04a99d]" />
-              <span className="text-sm font-bold text-white/90">{service.rating}</span>
+              <span className="text-sm font-bold text-white">{service.rating}</span>
             </div>
           </div>
 
           {/* Business Name */}
-          <h4 className="text-xl font-bold text-white group-hover:text-[#04a99d] transition-colors leading-tight mb-1.5">
+          <h4 className="text-xl font-bold text-slate-900 group-hover:text-[#04a99d] transition-colors leading-tight mb-1.5">
             {service.name}
           </h4>
 
           {/* Address */}
-          <p className="text-white/40 text-sm line-clamp-2 mb-4">
+          <p className="text-slate-500 text-sm line-clamp-2 mb-4">
             {service.address}
           </p>
 
           {/* Bottom Row: Time and View Details */}
-          <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/5">
-            <div className="flex items-center gap-2 text-white/60">
+          <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-200">
+            <div className="flex items-center gap-2 text-slate-500">
               <Clock className="w-4 h-4 text-[#04a99d]" />
               <span className="text-xs font-medium tracking-wide">{service.status}</span>
             </div>
@@ -350,27 +349,27 @@ export function NearbyServiceCenters() {
   if (!isClient) {
     return (
       <section className="relative py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0a1410] to-[#0a0a0a]">
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f3faf8] to-white">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full">
               <defs>
                 <pattern id="map-loading" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                  <path d="M 10 10 L 90 10 L 90 90 L 10 90 Z" fill="none" stroke="rgba(3,113,102,0.3)" strokeWidth="0.5" />
-                  <circle cx="50" cy="50" r="3" fill="rgba(3,113,102,0.5)" />
+                  <path d="M 10 10 L 90 10 L 90 90 L 10 90 Z" fill="none" stroke="rgba(3,113,102,0.16)" strokeWidth="0.5" />
+                  <circle cx="50" cy="50" r="3" fill="rgba(3,113,102,0.35)" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#map-loading)" />
             </svg>
           </div>
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="h-8 w-48 bg-[#2a2a2a] rounded-full mx-auto mb-8 animate-pulse" />
-            <div className="h-12 w-64 bg-[#2a2a2a] rounded-xl mx-auto mb-4 animate-pulse" />
-            <div className="h-6 w-96 bg-[#2a2a2a] rounded mx-auto animate-pulse max-w-2xl" />
+            <div className="h-8 w-48 bg-slate-200 rounded-full mx-auto mb-8 animate-pulse" />
+            <div className="h-12 w-64 bg-slate-200 rounded-xl mx-auto mb-4 animate-pulse" />
+            <div className="h-6 w-96 bg-slate-200 rounded mx-auto animate-pulse max-w-2xl" />
           </div>
           <div className="grid lg:grid-cols-2 gap-8">
-            <div className="h-[600px] bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 border border-[#037166]/20 rounded-3xl animate-pulse" />
+            <div className="h-[600px] bg-gradient-to-br from-white to-[#f8fafc] border border-slate-200 rounded-3xl animate-pulse" />
             <div className="space-y-4">
               {Array(3).fill(0).map((_, i) => <SkeletonService key={i} />)}
             </div>
@@ -386,9 +385,9 @@ export function NearbyServiceCenters() {
       className="relative py-12 overflow-hidden"
       onClick={() => setSelectedService(null)}
     >
-      {/* Architectural World Background */}
+      {/* Section Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f3faf8] to-white" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
@@ -400,7 +399,7 @@ export function NearbyServiceCenters() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
         />
         <motion.div
           animate={{
@@ -408,11 +407,11 @@ export function NearbyServiceCenters() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -456,11 +455,11 @@ export function NearbyServiceCenters() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             onClick={(e) => e.stopPropagation()}
-            className="relative h-[700px] rounded-3xl overflow-hidden bg-[#1a1a1a] border border-[#037166]/20 shadow-2xl"
+            className="relative h-[700px] rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-2xl"
           >
             {/* Loading overlay */}
             {!isMapsLoaded && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a] z-50">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-50">
                 <Loader2 className="w-10 h-10 text-[#037166] animate-spin mb-3" />
                 <span className="text-[#037166] text-sm font-medium animate-pulse">Loading Map...</span>
               </div>
@@ -526,7 +525,9 @@ export function NearbyServiceCenters() {
                             className="bg-black/90 backdrop-blur-md border border-[#037166]/60 rounded-xl px-3 py-2 shadow-2xl flex flex-col items-center gap-1 z-50"
                           >
                             <div className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-[#04a99d] shadow-[0_0_8px_#04a99d]" />
+                              <div className="inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-[#04a99d]/60 bg-white/10">
+                                <Check className="h-2.5 w-2.5 text-[#04a99d]" />
+                              </div>
                               <span className="text-white text-xs font-bold">{service.name}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[10px] text-[#04a99d] font-medium opacity-80">
@@ -547,7 +548,9 @@ export function NearbyServiceCenters() {
                             style={{ position: 'absolute', transform: 'translate(-50%, -140%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
                             className="bg-gradient-to-r from-[#037166] to-[#025951] border border-[#04a99d]/60 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 ring-2 ring-white/10 z-50"
                           >
-                            <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]" />
+                              <div className="inline-flex h-4 w-4 items-center justify-center rounded border border-white/60 bg-white/15">
+                                <Check className="h-2.5 w-2.5 text-white" />
+                              </div>
                             <span className="text-white text-xs font-bold tracking-wide uppercase">{service.name}</span>
                             {/* Connector arrow */}
                             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#025951] border-r border-b border-[#04a99d]/60 rotate-45" />
@@ -605,18 +608,20 @@ export function NearbyServiceCenters() {
           viewport={{ once: true }}
           className="flex justify-center mt-16"
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#037166]/50 text-white font-medium transition-all duration-300 flex items-center gap-2 group"
-            onClick={() => router.push('/nearby-service-centers')}
-          >
-            Explore Service Centers
-            <Navigation className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-          </motion.button>
+         <motion.button
+  whileHover={{ scale: 1 }}
+  whileTap={{ scale: 0.99 }}
+  className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-[#037166] hover:border-[#049985] text-white font-medium transition-all duration-300 flex items-center gap-2 group"
+  onClick={() => router.push('/nearby-service-centers')}
+>
+  Explore Service Centers
+  <Navigation className="w-4 h-4" />
+</motion.button>
         </motion.div>
       </div>
     </section >
   );
 }
+
+
 

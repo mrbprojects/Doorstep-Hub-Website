@@ -523,13 +523,13 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, []);
 
   return (
-    <section className="relative min-h-[60vh] flex flex-col items-center justify-center overflow-x-hidden pt-16 pb-8">
+    <section className="relative min-h-[60vh] flex flex-col items-center justify-center overflow-x-hidden pt-20 pb-8">
       {/* Latest Booking Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-white" />
 
         {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.14)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
         {/* Gradient Orbs - Intensified */}
         <motion.div
@@ -538,7 +538,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[100px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[100px] bg-white/80 rounded-full blur-[120px]"
         />
         <motion.div
           animate={{
@@ -546,7 +546,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/85 rounded-full blur-[120px]"
         />
       </div>
 
@@ -574,9 +574,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 italic leading-[1.1]">
             {/* SVG Text for Stroke Animation */}
 
-            <span className="block text-white-900 text-[28px] sm:text-[40px] drop-shadow-sm">Everything You Need.</span>
-
-
+            <span className="block !text-[#037166] text-[28px] sm:text-[40px] drop-shadow-sm font-black">Everything You Need.</span>
 
             <motion.span
               key={activeIndex} // Triggers animation on change
@@ -584,7 +582,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
-              className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent min-h-[1.2em]"
+              className="block mt-1 sm:mt-2 !text-[#037166] min-h-[1.2em] drop-shadow-sm font-black"
             >
               {services.length > 0 ? services[activeIndex]?.name : "Doorstep Hub."}
             </motion.span>
@@ -595,7 +593,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-sm sm:text-base md:text-lg text-white-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
+            className="text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
           >
             Your Premium Gateway to Appliance Services, Spa & Saloon, PG & Hostels, Religious Services, and More.
             A Smarter Way to Access Trusted Services.
@@ -633,18 +631,18 @@ function HeroContent({ services = [], loading = false, error = null }) {
             transition={{ delay: 1.0 }}
             className="flex flex-wrap justify-center gap-4 mt-8 mb-4 relative z-20"
           >
-            <a href={appLinks.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10" title="Get it on Google Play">
-              <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+            <a href={appLinks.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Get it on Google Play">
+              <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
             </a>
-            <a href={appLinks.ios} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10" title="Download on the App Store">
-              <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+            <a href={appLinks.ios} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Download on the App Store">
+              <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
             </a>
           </motion.div>
         </motion.div>
       </div>
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent" />
     </section >
   );
 }

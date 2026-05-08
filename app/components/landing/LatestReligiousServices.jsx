@@ -177,7 +177,7 @@ export function LatestReligiousServices() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#9b59b6]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6 animate-shimmer mx-auto w-48 h-10" />
             <div className="h-12 w-80 mx-auto mb-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-xl animate-shimmer" />
@@ -227,7 +227,7 @@ export function LatestReligiousServices() {
             y: mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
         />
         <motion.div
           animate={{
@@ -235,11 +235,11 @@ export function LatestReligiousServices() {
             y: -mousePosition.y * 0.02,
           }}
           transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -316,8 +316,8 @@ export function LatestReligiousServices() {
                   {/* Rating Badge - Bottom Left Flush */}
                   <div className="absolute bottom-0 left-0 z-20">
                     <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
-                      <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                      <span className="text-sm font-bold text-white">{service.rating || '4.8'}</span>
+                      <Star className="w-4 h-4 fill-white text-white" />
+                      <span className="text-sm font-bold !text-white">{service.rating || '4.8'}</span>
                     </div>
                   </div>
 
@@ -401,5 +401,7 @@ export function LatestReligiousServices() {
     </section>
   );
 }
+
+
 
 

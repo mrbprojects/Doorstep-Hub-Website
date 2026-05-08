@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, MapPin } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
@@ -152,7 +152,7 @@ export function TopCategories({ onViewAll }) {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent"
+              className="text-4xl sm:text-5xl font-bold mb-4 text-white"
             >
               Explore Top Categories
             </motion.h2>
@@ -161,7 +161,7 @@ export function TopCategories({ onViewAll }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 text-lg max-w-2xl"
+              className="text-white text-lg max-w-2xl"
             >
               Browse our most requested services
             </motion.p>
@@ -217,7 +217,7 @@ export function TopCategories({ onViewAll }) {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
                       </div>
 
                       {/* Hover Glow Effect */}
@@ -230,7 +230,7 @@ export function TopCategories({ onViewAll }) {
                       {/* Glass Card Overlay */}
                       <div className="absolute inset-0 flex flex-col justify-end p-4">
                         <div className="relative z-10">
-                          <h4 className="text-sm sm:text-base bg-white bg-clip-text text-transparent font-bold mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-2">
+                          <h4 className="text-sm sm:text-base !text-white font-bold mb-1 transition-colors line-clamp-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
                             {category.title}
                           </h4>
                           <motion.div

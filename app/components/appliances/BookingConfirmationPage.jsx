@@ -416,8 +416,8 @@ export function BookingConfirmationPage({
             transition={{ delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
           >
-            <Sparkles className="w-8 h-8" />
-            Confirm Your Booking
+            <Sparkles className="w-8 h-8 text-white" />
+            <span className="!text-white">Confirm Your Booking</span>
           </motion.h1>
         </div>
 
@@ -431,22 +431,22 @@ export function BookingConfirmationPage({
         </div>
       </section>
 
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Date Selection */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-[#04a99d]" />
                 Select Date
               </h4>
               {availableDates.length === 0 ? (
-                <p className="text-white/70 text-sm">No dates available at this time</p>
+                <p className="text-gray-500 text-sm">No dates available at this time</p>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {availableDates.map((date) => (
@@ -455,7 +455,7 @@ export function BookingConfirmationPage({
                       onClick={() => setSelectedDate(date.value)}
                       className={`p-4 rounded-xl font-medium transition-all ${selectedDate === date.value
                         ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-gray-300'
                         }`}
                     >
                       {date.label}
@@ -470,14 +470,14 @@ export function BookingConfirmationPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-[#04a99d]" />
                 Select Time Slot
               </h4>
               {availableTimesForSelectedDate.length === 0 ? (
-                <p className="text-white/70 text-sm">
+                <p className="text-gray-500 text-sm">
                   {selectedDate
                     ? 'No time slots available for selected date'
                     : 'Please select a date first'
@@ -491,7 +491,7 @@ export function BookingConfirmationPage({
                       onClick={() => setSelectedTime(time.value)}
                       className={`p-4 rounded-xl font-medium transition-all ${selectedTime === time.value
                         ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-gray-300'
                         }`}
                     >
                       {time.label}
@@ -506,9 +506,9 @@ export function BookingConfirmationPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-[#04a99d]" />
                 Technician Preference (Optional)
               </h4>
@@ -523,7 +523,7 @@ export function BookingConfirmationPage({
                     onClick={() => setTechnicianPreference(option.value)}
                     className={`p-4 rounded-xl font-medium transition-all ${technicianPreference === option.value
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                      : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                      : 'bg-white text-[#334155] hover:bg-gray-50 border border-gray-300'
                       }`}
                   >
                     {option.label}
@@ -536,13 +536,13 @@ export function BookingConfirmationPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
+              <h4 className="text-2xl font-bold text-[#0f172a] mb-1 flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-[#04a99d]" />
                 Payment Method
               </h4>
-              <p className="text-xs text-white/40 mb-4">Select your preferred payment method</p>
+              <p className="text-xs text-gray-500 mb-4">Select your preferred payment method</p>
 
 
 
@@ -552,13 +552,13 @@ export function BookingConfirmationPage({
                   onClick={() => setPaymentMethod('online')}
                   className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'online'
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                      : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                      : 'bg-white text-[#334155] border-gray-300 hover:bg-gray-50'
                     }`}
                 >
-                  <CreditCard className="w-6 h-6" />
+                  <CreditCard className={`w-6 h-6 ${paymentMethod === 'online' ? 'text-white' : 'text-[#037166]'}`} />
                   <div className="text-left flex-1">
-                    <p className="font-semibold">Online Payment</p>
-                    <p className={`text-xs ${paymentMethod === 'online' ? 'text-white/70' : 'text-white/40'}`}>
+                    <p className={`font-semibold ${paymentMethod === 'online' ? '!text-white' : 'text-[#334155]'}`}>Online Payment</p>
+                    <p className={`text-xs ${paymentMethod === 'online' ? '!text-white/90' : 'text-gray-500'}`}>
                       Secure payment via UPI, Cards, or Net Banking
                     </p>
                   </div>
@@ -570,7 +570,7 @@ export function BookingConfirmationPage({
                   onClick={() => setPaymentMethod('wallet')}
                   className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'wallet'
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                      : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                      : 'bg-white text-[#334155] border-gray-300 hover:bg-gray-50'
                     }`}
                 >
                   <div className="w-6 h-6 flex items-center justify-center">
@@ -578,33 +578,33 @@ export function BookingConfirmationPage({
                   </div>
                   <div className="text-left flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-semibold">Doorstep Hub Wallet</p>
+                      <p className={`font-semibold ${paymentMethod === 'wallet' ? '!text-white' : 'text-[#334155]'}`}>Doorstep Hub Wallet</p>
                       {!walletLoading && (
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] ${paymentMethod === 'wallet' ? 'text-white/80' : 'text-white/50'}`}>Available Balance:</span>
+                          <span className={`text-[10px] ${paymentMethod === 'wallet' ? 'text-white/90' : 'text-gray-500'}`}>Available Balance:</span>
                           <span className={`text-sm font-black tracking-tight px-2.5 py-0.5 rounded-md border shadow-sm ${paymentMethod === 'wallet'
                               ? 'bg-white/20 border-white/30 text-white shadow-black/20'
-                              : 'bg-[#037166]/20 border-[#037166]/30 text-[#04a99d] shadow-black/10'
+                            : 'bg-[#ecf7f5] border-[#a8d8d0] text-[#037166] shadow-black/5'
                             }`}>
                             ₹{Number(walletBalance || 0).toFixed(2)}
                           </span>
                         </div>
                       )}
                     </div>
-                    <p className={`text-xs ${paymentMethod === 'wallet' ? 'text-white/70' : 'text-white/40'}`}>
+                    <p className={`text-xs ${paymentMethod === 'wallet' ? '!text-white/90' : 'text-gray-500'}`}>
                       Pay using your Doorstep Hub wallet balance
                     </p>
                     {/* Referral Information Section */}
                     <div className={`mt-4 p-3 rounded-xl flex gap-3 transition-all ${paymentMethod === 'wallet'
                         ? 'bg-white/10 border border-white/20'
-                        : 'bg-[#037166]/5 border border-[#037166]/10'
+                        : 'bg-[#f1faf8] border border-[#cde9e4]'
                       }`}>
                       <div className={`p-1.5 rounded-lg h-fit ${paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/10'
                         }`}>
                         <Info className={`w-4 h-4 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#037166]'
                           }`} />
                       </div>
-                      <p className={`text-[11px] leading-relaxed ${paymentMethod === 'wallet' ? 'text-white/80' : 'text-[#037166]'
+                      <p className={`text-[11px] leading-relaxed ${paymentMethod === 'wallet' ? 'text-white/90' : 'text-[#037166]'
                         }`}>
                         Refer your friends and family members and earn cashback up to <span className="font-bold">₹99</span>. The amount will be credited to your Doorstep Hub Wallet after a successful booking.
                       </p>
@@ -620,25 +620,25 @@ export function BookingConfirmationPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-[#04a99d]" />
                 Service Address
               </h4>
               {address ? (
-                <div className="p-4 rounded-lg bg-white/5">
-                  <h6 className="text-white font-medium mb-1">{address.name}</h6>
-                  <p className="text-white/80">
+                <div className="p-4 rounded-lg bg-[#f8fcfb] border border-[#d8ece8]">
+                  <h6 className="text-[#0f172a] font-semibold mb-1">{address.name}</h6>
+                  <p className="text-[#334155]">
                     {[address.flat, address.area].filter(Boolean).join(', ')}
                   </p>
-                  <p className="text-white/60">
+                  <p className="text-[#64748b]">
                     {[address.cityName || address.city, address.postalCode].filter(Boolean).join(', ')}
                   </p>
                 </div>
               ) : (
-                <div className="p-4 rounded-lg bg-white/5">
-                  <p className="text-white/60">No address selected</p>
+                <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                  <p className="text-gray-500">No address selected</p>
                 </div>
               )}
             </motion.div>
@@ -650,20 +650,20 @@ export function BookingConfirmationPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="sticky top-48 p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+              className="sticky top-40 p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-xl font-bold text-white mb-4">Booking Summary</h4>
+              <h4 className="text-2xl font-bold text-[#0f172a] mb-4">Booking Summary</h4>
 
               {/* Selected Services Info - No Prices Shown */}
               <div className="space-y-4 mb-6">
                 {cartItems.map((item, idx) => (
-                  <div key={item.id || item._id || idx} className="p-3 rounded-xl bg-white/5 border border-white/10">
-                    <h6 className="text-white font-bold leading-tight mb-1">{item.serviceName || 'Professional Service'}</h6>
+                  <div key={item.id || item._id || idx} className="p-3 rounded-xl bg-[#f8fcfb] border border-[#d8ece8]">
+                    <h6 className="text-[#0f172a] font-bold leading-tight mb-1">{item.serviceName || 'Professional Service'}</h6>
                     <div className="flex flex-col gap-1">
                       <p className="text-[#04a99d] text-[10px] font-bold uppercase tracking-widest bg-[#037166]/10 px-2 py-0.5 rounded w-fit">
                         {item.packageName || item.title || 'Standard Package'}
                       </p>
-                      <p className="text-white/40 text-[10px] flex items-center gap-1 mt-1">
+                      <p className="text-gray-500 text-[10px] flex items-center gap-1 mt-1">
                         <Info className="w-3 h-3" />
                         Rates checked: approx. start from ₹{item.price}
                       </p>
@@ -672,50 +672,50 @@ export function BookingConfirmationPage({
                 ))}
               </div>
 
-              <div className="h-px bg-white/10 my-4" />
+              <div className="h-px bg-gray-200 my-4" />
 
               {/* Fees Breakdown */}
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-start text-white/80 text-sm">
+                <div className="flex justify-between items-start text-[#334155] text-sm">
                   <div className="flex flex-col">
                     <span>Platform Fee</span>
                     <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
                       <CreditCard className="w-3 h-3" /> pay online now
                     </span>
                   </div>
-                  <span className="font-bold text-white">₹{bookingCost}</span>
+                  <span className="font-bold text-[#0f172a]">₹{bookingCost}</span>
                 </div>
 
-                <div className="flex justify-between items-start text-white/80 text-sm">
+                <div className="flex justify-between items-start text-[#334155] text-sm">
                   <div className="flex flex-col">
                     <span>Inspection Fee</span>
                     <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
                       <MapPin className="w-3 h-3" /> pay at doorstep
                     </span>
                   </div>
-                  <span className="font-bold text-white">₹{inspectionCost}</span>
+                  <span className="font-bold text-[#0f172a]">₹{inspectionCost}</span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#037166]/5 border border-[#037166]/10 text-[10px] text-white/50 leading-relaxed">
+                <div className="p-3 rounded-xl bg-[#f1faf8] border border-[#cde9e4] text-[10px] text-[#475569] leading-relaxed">
                   <p>Only the <span className="text-[#04a99d] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.</p>
                 </div>
               </div>
 
-              <div className="h-px bg-white/10 my-4" />
+              <div className="h-px bg-gray-200 my-4" />
 
               {/* Total Payable (Only Platform Fee) */}
-              <div className="flex justify-between items-center text-xl font-bold text-white mb-6">
+              <div className="flex justify-between items-center text-xl font-bold text-[#0f172a] mb-6">
                 <span>Payable Now</span>
                 <span className="text-[#04a99d]">₹{total}</span>
               </div>
 
               {/* Appointment Preview */}
               {selectedDate && selectedTime && (
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6">
-                  <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                <div className="p-4 rounded-xl bg-[#f8fcfb] border border-[#d8ece8] mb-6">
+                  <div className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                     <Clock className="w-3 h-3" /> Scheduled
                   </div>
-                  <p className="text-white font-bold text-sm">
+                  <p className="text-[#0f172a] font-bold text-sm">
                     {availableDates.find(d => d.value === selectedDate)?.label}
                   </p>
                   <p className="text-[#04a99d] text-xs font-medium">
@@ -731,7 +731,7 @@ export function BookingConfirmationPage({
                 onClick={handleConfirm}
                 disabled={isConfirming || !selectedDate || !selectedTime}
                 className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all ${isConfirming || !selectedDate || !selectedTime
-                  ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-xl shadow-[#037166]/30'
                   }`}
               >
@@ -745,7 +745,7 @@ export function BookingConfirmationPage({
                 )}
               </motion.button>
 
-              <p className="text-white/40 text-[10px] text-center mt-4">
+              <p className="text-gray-500 text-[10px] text-center mt-4">
                 Confirmation details will be sent via SMS/Email
               </p>
             </motion.div>

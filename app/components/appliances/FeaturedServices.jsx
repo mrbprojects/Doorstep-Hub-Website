@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
@@ -133,7 +133,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl font-bold mb-4 text-white"
           >
             Explore Our Featured Service
           </motion.h2>
@@ -169,7 +169,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
                   viewport={{ once: true }}
                   className="absolute top-0 inset-x-0 mx-auto w-fit z-20 px-6 py-1 bg-gradient-to-r from-[#037166] to-[#04a99d] backdrop-blur-md rounded-full rounded-t-none border border-t-0 border-[#037166]/30 shadow-lg whitespace-nowrap flex items-center space-x-2"
                 >
-                  <h6 className="m-0 text-white text-xs font-bold w-full text-center">{service.serviceDelhiveryType || 'Featured'}</h6>
+                  <h6 className="m-0 !text-white text-xs font-bold w-full text-center">{service.serviceDelhiveryType || 'Featured'}</h6>
                 </motion.div>
 
                 {/* Image */}
@@ -212,7 +212,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
 
 
                   {/* Title */}
-                  <h4 className="text-xl bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-bold mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-1">
+                  <h4 className="text-xl text-white font-bold mb-2 transition-colors line-clamp-1">
                     {service.serviceName}
                   </h4>
 

@@ -300,7 +300,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                 router.back();
               }
             }}
-            className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
+            className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             {categoryName ? `Back to ${categoryName}` : 'Back'}
@@ -311,10 +311,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-white/50 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold !text-white mb-2">
               {pageTitle}
             </h1>
-            <p className="text-white/80">
+            <p className="!text-white/90">
               {categoryName ? `${categoryName} • ` : ''}Professional Services
             </p>
           </motion.div>
@@ -322,13 +322,13 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
         {/* Tabs */}
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
-          <div className="inline-flex p-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
+          <div className="inline-flex p-1.5 bg-white/85 backdrop-blur-md rounded-full border border-slate-200 shadow-sm">
             <button
               onClick={() => setActiveTab('services')}
               className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                 activeTab === 'services'
                   ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
               }`}
             >
               All Services
@@ -338,7 +338,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                 activeTab === 'centers'
                   ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
               }`}
             >
               Nearby Centers
@@ -357,15 +357,15 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             transition={{ delay: 0.3 }}
             className="hidden lg:block w-80 flex-shrink-0"
           >
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10">
-              <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <h4 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <Filter className="w-5 h-5 text-[#04a99d]" />
                 Filters
               </h4>
 
               {/* Categories Filter */}
-              <div className="mb-8 border-b border-white/10 pb-6">
-                <h6 className="block text-white/80 mb-3 text-sm font-medium">Categories</h6>
+              <div className="mb-8 border-b border-slate-200 pb-6">
+                <h6 className="block text-gray-700 mb-3 text-sm font-medium">Categories</h6>
                 <div className="space-y-2">
                   {loadingCategories ? (
                     <div className="space-y-2 animate-pulse">
@@ -380,8 +380,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all ${cat.name === category
                             ? 'bg-[#037166]/10 text-[#04a99d] font-bold border border-[#037166]/20'
                             : expandedCategory === cat._id
-                              ? 'bg-white/10 text-white'
-                              : 'text-white/70 hover:bg-white/5 hover:text-white'
+                              ? 'bg-slate-100 text-gray-900'
+                              : 'text-gray-600 hover:bg-slate-50 hover:text-gray-900'
                             }`}
                         >
                           <span className="flex items-center gap-2 truncate">
@@ -391,7 +391,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           {expandedCategory === cat._id ? (
                             <ChevronDown className={`w-4 h-4 ${cat.name === category ? 'text-[#04a99d]' : 'text-[#04a99d]'}`} />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-white/40" />
+                            <ChevronRight className="w-4 h-4 text-gray-400" />
                           )}
                         </button>
 
@@ -404,7 +404,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                               exit={{ height: 0, opacity: 0 }}
                               className="overflow-hidden"
                             >
-                              <div className="pl-4 pr-1 py-1 space-y-1 mt-1 border-l border-white/10 ml-3">
+                              <div className="pl-4 pr-1 py-1 space-y-1 mt-1 border-l border-slate-200 ml-3">
                                 {loadingSubcats[cat._id] ? (
                                   <div className="px-3 py-2">
                                     <div className="w-4 h-4 border-2 border-[#037166]/20 border-t-[#037166] rounded-full animate-spin" />
@@ -416,14 +416,14 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                       onClick={() => handleSubCategorySelect(sub, cat.slug)}
                                       className={`w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors truncate ${sub.slug === slug || sub._id === subCategoryId
                                         ? 'bg-[#037166]/20 text-[#04a99d] font-medium'
-                                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                                        : 'text-gray-500 hover:text-gray-900 hover:bg-slate-50'
                                         }`}
                                     >
                                       {sub.name}
                                     </button>
                                   ))
                                 ) : (
-                                  <div className="px-3 py-2 text-xs text-white/40">No services found</div>
+                                  <div className="px-3 py-2 text-xs text-gray-400">No services found</div>
                                 )}
                               </div>
                             </motion.div>
@@ -435,31 +435,9 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                 </div>
               </div>
 
-              {/* Price Range */}
-              {/* <div className="mb-6">
-                <h6 className="block text-white/80 mb-3 text-sm font-medium">Price Range</h6>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="number"
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#037166]"
-                    placeholder="Min"
-                  />
-                  <span className="text-white/40">-</span>
-                  <input
-                    type="number"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#037166]"
-                    placeholder="Max"
-                  />
-                </div>
-              </div> */}
-
               {/* Rating Filter */}
               <div className="mb-6">
-                <h6 className="block text-white/80 mb-3 text-sm font-medium">Minimum Rating</h6>
+                <h6 className="block text-gray-700 mb-3 text-sm font-medium">Minimum Rating</h6>
                 <div className="space-y-2">
                   {[4.5, 4.0, 3.5, 3.0].map((rating) => (
                     <button
@@ -467,7 +445,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       onClick={() => handleRatingChange(rating)}
                       className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${minRating === rating
                         ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
+                        : 'bg-slate-50 text-gray-600 hover:bg-slate-100'
                         }`}
                     >
                       <Star className="w-4 h-4 fill-current" />
@@ -477,25 +455,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                 </div>
               </div>
 
-              {/* Availability */}
-              {/* <div>
-                <h6 className="block text-white/80 mb-3 text-sm font-medium">Availability</h6>
-                <div className="space-y-2">
-                  <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-white/70 hover:bg-white/10 transition-all text-sm">
-                    <Zap className="w-4 h-4 text-[#04a99d]" />
-                    Available Now
-                  </button>
-                  <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-white/70 hover:bg-white/10 transition-all text-sm">
-                    <Clock className="w-4 h-4 text-[#04a99d]" />
-                    Same Day Service
-                  </button>
-                </div>
-              </div> */}
-
               {/* Reset Button */}
               <button
                 onClick={resetFilters}
-                className="w-full mt-6 px-4 py-3 rounded-lg border border-white/20 text-white/80 hover:bg-white/5 transition-all text-sm font-medium flex items-center justify-center gap-2"
+                className="w-full mt-6 px-4 py-3 rounded-lg border border-slate-200 text-gray-700 hover:bg-slate-50 transition-all text-sm font-medium flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
                 Reset Filters
@@ -550,13 +513,6 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
 
-
-
-                            {/* Price Badge */}
-                            {/* <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white font-bold">
-                              ₹{service.minFare}
-                            </div> */}
-
                             {/* Rating Badge - Bottom Left Flush */}
                             <div className="absolute bottom-0 left-0 z-20">
                               <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
@@ -572,24 +528,6 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                               {service.name}
                             </h4>
                             <p className="text-white/60 text-[11px] mb-4 line-clamp-2">{stripHtml(service.description)}</p>
-
-                            {/* Meta Info */}
-                            <div className="flex flex-wrap items-center gap-4 mb-4 text-sm">
-                              {/* <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                                <span className="text-white font-medium">{service.rating}</span>
-                                <span className="text-white/40">({service.totalOrders})</span>
-                              </div> */}
-                              {/* <div className="flex items-center gap-1 text-white/60">
-                                <Clock className="w-4 h-4" />
-                                <span>60 mins</span>
-                              </div> */}
-                              {/* Distance placeholder if API doesn't provide */}
-                              {/* <div className="flex items-center gap-1 text-white/60">
-                                <MapPin className="w-4 h-4" />
-                                <span>2.5 km</span>
-                              </div> */}
-                            </div>
 
                             {/* CTA Button */}
                             <button
@@ -612,6 +550,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                     ))
                   ) : (
                     <div className="col-span-full text-center py-20 text-white/60">
+                      🥺 No services found.
                     </div>
                   )}
                 </motion.div>
@@ -678,15 +617,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                     {parseFloat(center.distance || center.distanceInKm || center.distanceKm).toFixed(1)} km away
                                   </div>
                                 )}
-                                {center.totalViews !== undefined && (
-                                  <div className="text-white/60 text-sm">
-                                    Views: {center.totalViews}
-                                  </div>
-                                )}
                               </div>
 
                               <button
-                                onClick={() => router.push(`/${center.slug || center._id}`)}
+                                onClick={() => router.push(`/service-list/${center.slug || center._id}`)}
                                 className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
                               >
                                 Book Service
@@ -697,7 +631,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       </motion.div>
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-20 text-white/60">
+                    <div className="col-span-full text-center !text-black py-20 ">
                       🥺 No service centers found nearby.
                     </div>
                   )}

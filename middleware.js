@@ -6,8 +6,14 @@ const DEFAULT_SLUGS = {
     'appliance-repair-services/categories': '/appliances/categories',
     'appliance-repair-services/featured': '/appliances/featured',
     'appliance-repair-services/recent': '/appliances/recent',
-    'appliance-repair-services/centers': '/appliances/centers',
+    'appliance-repair-services/centers': '/appliance-repairs/services-centers',
+    'appliances/centers': '/appliance-repairs/services-centers',
+    'services/centers': '/appliance-repairs/services-centers',
+
+
+
     'service-list/category/appliance-repair-services': '/appliances/categories',
+
     'service-list/category/appliance-repair-service': '/appliances/categories',
     'verified-appliance-repair-partners': '/appliances/child/683dbbfbb62d2a241de0f7e3',
     'salon-at-home-services': '/spa-salon',

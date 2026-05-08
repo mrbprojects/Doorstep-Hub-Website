@@ -81,11 +81,11 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
     // Default Dark Theme (Fallback)
     const defaultTheme = {
-        bgMobile: 'bg-[#0a0a0a]',
-        textMain: 'text-white',
+        bgMobile: 'bg-white/80',
+        textMain: 'text-[#0f172a]',
         textHover: 'text-[#037166]', // Accent
-        border: 'border-[#037166]/20',
-        buttonBg: 'bg-[#1a1a1a]', // Input bg
+        border: 'border-[#037166]/30',
+        buttonBg: 'bg-[#111111]', // Input bg
         accentGradientFrom: 'from-[#037166]',
         accentGradientTo: 'to-[#04a99d]',
         accent: 'bg-[#037166]'
@@ -265,7 +265,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[#037166]/10 blur-2xl" />
                 {/* Header */}
                 <div className={`relative p-6 border-b border-opacity-10 ${borderColor} flex items-center justify-between`}>
-                    <h2 className={`text-xl font-bold ${t.textMain}`}>
+                    <h2 className={`text-xl font-bold text-white`}>
                         {!isAuthenticated
                             ? 'Sign In'
                             : isFirstTimeUser
@@ -287,19 +287,20 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-opacity-10 ${t.accent}`}>
                                         <Phone className={`w-8 h-8 ${accentText}`} />
                                     </div>
-                                    <h3 className={`text-lg font-bold ${t.textMain} mb-2`}>Login with WhatsApp</h3>
-                                    <p className={`${t.textMain} opacity-60 text-sm`}>We'll send you a one-time password on WhatsApp</p>
+                                    <h3 className={`text-lg font-bold !text-white mb-2`}>Login with WhatsApp</h3>
+                                    <p className={`!text-white opacity-60 text-sm`}>We'll send you a one-time password on WhatsApp</p>
                                 </div>
 
                                 <form onSubmit={handleSendOtp} className="space-y-4">
                                     <div className="relative">
-                                        <Phone className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${t.textMain} opacity-40`} />
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
                                         <input
                                             type="tel"
                                             placeholder="Mobile Number"
                                             value={mobile}
                                             onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} placeholder:opacity-30 focus:border-opacity-100 transition-all outline-none`}
+                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/40 focus:border-opacity-100 transition-all outline-none`}
+                                            style={{ WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                             required
                                         />
                                     </div>
@@ -323,7 +324,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
                                 <button
                                     onClick={handleGoogleLogin}
-                                    className={`w-full py-4 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} ${t.textMain} hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
+                                    className={`w-full py-4 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} text-white hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
                                 >
                                     <Chrome className="w-5 h-5" />
                                     Sign in with Google
@@ -343,7 +344,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                             setLoading(false);
                                         }
                                     }}
-                                    className={`w-full py-4 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} ${t.textMain} hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
+                                    className={`w-full py-4 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} text-white hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
                                 >
                                     <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
                                         <path d="M17.05 20.28c-.98.95-2.05 1.78-3.19 1.76-1.14-.02-1.5-.72-2.82-.72-1.32 0-1.74.7-2.82.74-1.14.04-2.26-.88-3.26-1.87-2.02-1.99-3.57-5.59-1.55-9.1C4.4 9.1 6.5 7.85 8.42 7.82c1.44-.03 2.8.96 3.68.96.88 0 2.54-1.2 4.26-1.03.72.03 2.73.29 4.02 2.18-.1.06-2.4 1.4-2.38 4.19.03 3.32 2.92 4.51 2.95 4.52-.02.05-.46 1.58-1.6 3.2v-.01zM12.03 7.25c-.02-2.3 2.12-4.26 4.38-4.25-.01 2.37-2.22 4.36-4.38 4.25z" />
@@ -357,8 +358,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-opacity-10 ${t.accent}`}>
                                         <ShieldCheck className={`w-8 h-8 ${accentText}`} />
                                     </div>
-                                    <h3 className={`text-lg font-bold ${t.textMain} mb-2`}>Enter Verification Code</h3>
-                                    <p className={`${t.textMain} opacity-60 text-sm`}>Code sent to +91 {mobile}</p>
+                                    <h3 className={`text-lg font-bold !text-white mb-2`}>Enter Verification Code</h3>
+                                    <p className={`!text-white opacity-60 text-sm`}>Code sent to +91 {mobile}</p>
                                 </div>
 
                                 <form onSubmit={handleVerifyOtp} className="space-y-6">
@@ -398,7 +399,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                                         e.preventDefault();
                                                     }
                                                 }}
-                                                className={`w-12 h-14 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} text-center text-xl font-bold focus:border-opacity-100 outline-none transition-all`}
+                                                className={`w-12 h-14 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white text-center text-xl font-bold focus:border-opacity-100 outline-none transition-all`}
                                             />
                                         ))}
                                     </div>
@@ -412,15 +413,15 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
                                     <div className="text-center">
                                         {resendTimer > 0 ? (
-                                            <p className={`${t.textMain} opacity-40 text-sm`}>
-                                                Resend code in <span className="font-bold">{resendTimer}s</span>
+                                            <p className={`!text-white opacity-40 text-sm`}>
+                                                Resend code in <span className="font-bold text-white">{resendTimer}s</span>
                                             </p>
                                         ) : (
                                             <button
                                                 type="button"
                                                 onClick={handleResendOtp}
                                                 disabled={loading}
-                                                className={`text-sm font-bold ${accentText} hover:underline disabled:opacity-50 transition-all`}
+                                                className={`text-sm font-bold text-white hover:underline disabled:opacity-50 transition-all`}
                                             >
                                                 Resend OTP
                                             </button>
@@ -432,7 +433,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                             setStep('login');
                                             setOtp('');
                                         }}
-                                        className={`w-full ${t.textMain} opacity-60 text-sm hover:opacity-100 hover:underline transition-colors`}
+                                        className={`w-full text-white opacity-60 text-sm hover:opacity-100 hover:underline transition-colors`}
                                     >
                                         Back to Mobile Login
                                     </button>
@@ -498,14 +499,14 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
                             <div className="space-y-4">
                                 <div className="relative">
-                                    <Phone className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${t.textMain} opacity-40`} />
+                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
                                     <input
                                         type="tel"
                                         placeholder="Phone Number"
                                         value={profileData.phone}
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} placeholder:opacity-30 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/40 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
                                     />
                                 </div>
                                 <div className="relative">
@@ -516,7 +517,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                         value={profileData.email}
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} placeholder:opacity-30 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/40 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
                                     />
                                 </div>
                                 <div className="relative">

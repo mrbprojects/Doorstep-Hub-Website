@@ -498,26 +498,26 @@ export function BookAppointmentPage() {
             </div>
 
             {/* ── Main Form Section ── */}
-            <div className="flex-1 px-4 py-8 md:px-16 md:py-20 flex flex-col relative z-20 min-h-[calc(100vh-80px)] md:min-h-screen">
+            <div className="flex-1 px-4 py-8 md:px-16 md:py-24 flex flex-col relative z-20 min-h-[calc(100vh-80px)] md:min-h-screen bg-white">
                 <div className="max-w-xl w-full mx-auto md:mx-0">
                     {/* Step Title */}
-                    <div className="mb-8 mt-6">
-                        <p className="text-[10px] font-bold text-[#04a99d] uppercase tracking-[0.2em]  mb-2 opacity-80">Step {currentStep + 1} of {STEPS.length}</p>
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight leading-none mb-2">
+                    <div className="mb-12">
+                        <p className="text-[10px] font-black text-[#037166] uppercase tracking-[0.3em] mb-4 opacity-80">Step {currentStep + 1} of {STEPS.length}</p>
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-none mb-4">
                             {STEPS[currentStep].title}
                         </h2>
-                        <p className="text-gray-500 text-sm md:text-base font-medium">{STEPS[currentStep].subtitle}</p>
+                        <p className="text-gray-500 text-sm md:text-lg font-medium leading-relaxed">{STEPS[currentStep].subtitle}</p>
                     </div>
 
                     {renderStepContent()}
 
                     {/* Navigation Buttons */}
-                    <div className="mt-8 flex gap-3 pb-20 md:pb-0">
+                    <div className="mt-12 flex gap-4 pb-20 md:pb-0">
                         {currentStep > 0 && (
                             <button
                                 onClick={handleBack}
                                 disabled={submitting}
-                                className="flex-1 md:flex-none md:w-32 py-4 bg-white border-2 border-[#04a99d] text-[#04a99d] hover:bg-[#04a99d] hover:text-white font-bold rounded-xl transition-all shadow active:scale-95 text-base"
+                                className="flex-1 md:flex-none md:w-40 py-4 bg-white border-2 border-gray-100 text-gray-400 hover:border-[#037166]/30 hover:text-gray-900 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-sm active:scale-95"
                             >
                                 Back
                             </button>
@@ -525,15 +525,15 @@ export function BookAppointmentPage() {
                         {currentStep < 3 ? (
                             <button
                                 onClick={handleNext}
-                                className="flex-1 md:flex-none md:px-10 py-4 bg-[#00231f] hover:bg-[#038f84] text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-base"
+                                className="flex-1 md:flex-none md:px-12 py-4 bg-[#037166] hover:bg-[#04a99d] text-white font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl shadow-[#037166]/20 active:scale-95"
                             >
-                                Next →
+                                Next Step →
                             </button>
                         ) : (
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitting}
-                                className="flex-1 py-4 bg-[#00231f]  text-white text-xl  rounded-xl transition-all shadow-lg active:scale-95 text-l flex items-center justify-center gap-2"
+                                className="flex-1 py-5 bg-[#037166] text-white text-sm font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-2xl shadow-[#037166]/30 active:scale-95 flex items-center justify-center gap-3"
                             >
                                 {submitting ? (
                                     <>
@@ -550,33 +550,40 @@ export function BookAppointmentPage() {
             </div>
 
             {/* ── Right Section — Desktop Steps Panel ── */}
-            <div className="hidden md:flex w-full md:w-[380px] lg:w-[460px] bg-[#00231f] min-h-screen flex-col justify-center">
-                <div className="space-y-14 px-4">
+            <div className="hidden md:flex w-full md:w-[400px] lg:w-[500px] bg-gray-50 border-l border-gray-100 min-h-screen flex-col justify-center relative overflow-hidden">
+                {/* Decorative background elements */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#037166]/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#04a99d]/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2" />
+
+                <div className="space-y-16 px-12 relative z-10">
                     {STEPS.map((step, index) => {
                         const isActiveOrCompleted = index <= currentStep;
                         return (
-                            <div key={step.id} className="relative flex items-center pl-20 pr-10">
-                                <div className="absolute -left-10 flex items-center">
-                                    {isActiveOrCompleted ? (
-                                        <div className="w-18 h-18 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg z-30">
-                                            <step.icon className="w-8 h-8 text-[#04a99d]" strokeWidth={2} />
-                                        </div>
-                                    ) : (
-                                        <div className="relative flex items-center justify-end w-16 h-14 pointer-events-none">
-                                            <div className="absolute right-0 w-14 h-14 bg-white/20 rounded-l-full z-10 translate-x-3 flex items-center justify-center">
-                                                <step.icon className="w-5 h-5 text-white/50 ml-3" />
-                                            </div>
-                                        </div>
-                                    )}
+                            <div key={step.id} className="relative flex items-center pl-16">
+                                {/* Connector Line */}
+                                {index < STEPS.length - 1 && (
+                                    <div className={`absolute left-[31px] top-12 w-[2px] h-12 transition-all duration-700 ${isActiveOrCompleted ? 'bg-[#037166]/20' : 'bg-gray-100'}`} />
+                                )}
+                                
+                                <div className="absolute left-0 flex items-center">
+                                    <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-xl transition-all duration-500 ${
+                                        isActiveOrCompleted 
+                                            ? "bg-white text-[#037166] shadow-[#037166]/10 scale-110" 
+                                            : "bg-white text-gray-300 border border-gray-100 opacity-50"
+                                    }`}>
+                                        <step.icon className={`w-7 h-7 ${isActiveOrCompleted ? 'text-[#037166]' : 'text-gray-300'}`} strokeWidth={isActiveOrCompleted ? 2.5 : 2} />
+                                    </div>
                                 </div>
-                                <div className={`transition-all duration-500 ${isActiveOrCompleted ? 'opacity-100' : 'opacity-35'}`}>
-                                    <h3 className="text-xl font-bold text-white mb-1 leading-none">{step.title}</h3>
-                                    <p className="text-white/60 text-xs leading-snug max-w-[240px]">{step.subtitle}</p>
+                                <div className={`transition-all duration-500 pl-4 ${isActiveOrCompleted ? 'opacity-100 translate-x-0' : 'opacity-30 translate-x-2'}`}>
+                                    <h3 className={`text-xl font-black tracking-tight leading-none mb-2 ${isActiveOrCompleted ? 'text-gray-900' : 'text-gray-400'}`}>{step.title}</h3>
+                                    <p className={`text-xs font-medium leading-relaxed max-w-[240px] ${isActiveOrCompleted ? 'text-gray-500' : 'text-gray-400'}`}>{step.subtitle}</p>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
+            </div>
+
                 {/* ── Terms & Conditions Modal ── */}
                 {showTermsModal && (
                     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -635,7 +642,6 @@ export function BookAppointmentPage() {
                         </div>
                     </div>
                 )}
-            </div>
         </div>
     );
 }

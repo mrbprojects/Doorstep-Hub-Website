@@ -33,7 +33,7 @@ export function CareersHero() {
                         <span className="text-sm font-medium text-gray-300">We are Hiring</span>
                     </motion.div>
 
-                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight tracking-tight">
+                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight tracking-tight text-[#037166]">
                         Build Your <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient-x">Career at Doorstep Hub</span>
                     </h1>

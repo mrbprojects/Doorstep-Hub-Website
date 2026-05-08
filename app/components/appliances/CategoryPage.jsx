@@ -194,7 +194,7 @@ export function CategoryPage({ slug, initialData }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative min-h-screen pt-20 bg-gradient-to-b from-[#0a0a0a] via-[#0f1614] to-[#0a0a0a]"
+      className="relative min-h-screen pt-20 bg-[#f8fafc]"
     >
       {/* App Download Modal */}
       <AnimatePresence>
@@ -282,7 +282,7 @@ export function CategoryPage({ slug, initialData }) {
         )}
       </AnimatePresence>
       {/* Compact Hero Section with Breadcrumb */}
-      <section className="relative py-12 overflow-hidden border-b border-white/5">
+      <section className="relative py-12 overflow-hidden border-b border-[#dbe7e4]">
         {/* Category Image Background (if available from API) */}
         {categoryImage && (
           <div className="absolute inset-0 z-0">
@@ -311,7 +311,7 @@ export function CategoryPage({ slug, initialData }) {
           className="absolute top-0 right-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px]"
         />
 
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
+        <div className="relative z-10 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button + Breadcrumb */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -321,17 +321,17 @@ export function CategoryPage({ slug, initialData }) {
           >
             <button
               onClick={handleBack}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 hover:bg-white/10 hover:border-[#037166]/50 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-[#cfe1de] text-[#334155] hover:bg-white hover:border-[#037166]/40 transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
 
             {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-white/50">
+            <div className="flex items-center gap-2 text-sm text-[#64748b]">
               <button onClick={handleBack} className="hover:text-white/80 transition-colors">Home</button>
               <ChevronRight className="w-4 h-4" />
-              <span className="text-white/80">Services</span>
+              <span className="text-[#334155]">Services</span>
               <ChevronRight className="w-4 h-4" />
               <span className="text-[#037166]">{categoryMetadata.categoryName}</span>
             </div>
@@ -345,26 +345,26 @@ export function CategoryPage({ slug, initialData }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-[#0f172a] mb-4">
                 {categoryMetadata.categoryName}
               </h1>
-              <p className="text-lg text-white/70 leading-relaxed mb-6">
+              <p className="text-lg text-[#475569] leading-relaxed mb-6">
                 {theme.description}
               </p>
 
               {/* Trust Badges - Horizontal */}
               <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-[#d6e5e2]">
                   <Shield className="w-4 h-4 text-[#037166]" />
-                  <h6 className="text-sm text-white/80">Verified Professionals</h6>
+                  <h6 className="text-sm text-[#334155]">Verified Professionals</h6>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-[#d6e5e2]">
                   <Zap className="w-4 h-4 text-[#037166]" />
-                  <h6 className="text-sm text-white/80">Same-Day Available</h6>
+                  <h6 className="text-sm text-[#334155]">Same-Day Available</h6>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-[#d6e5e2]">
                   <Award className="w-4 h-4 text-[#037166]" />
-                  <h6 className="text-sm text-white/80">30-90 Days Warranty</h6>
+                  <h6 className="text-sm text-[#334155]">30-90 Days Warranty</h6>
                 </div>
               </div>
             </motion.div>
@@ -384,7 +384,7 @@ export function CategoryPage({ slug, initialData }) {
 
       {/* Subcategories Section - Redesigned Layout */}
       <section className="py-16 relative">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -394,14 +394,14 @@ export function CategoryPage({ slug, initialData }) {
           >
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
                   Choose Your Service
                 </h2>
-                <p className="text-white/60">
+                <p className="text-gray-600">
                   Select the specific service type you need
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm text-white/50">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
                 <TrendingUp className="w-4 h-4 text-[#037166]" />
                 {categoryMetadata.totalCount || subCategories.length} services available
               </div>
@@ -438,7 +438,7 @@ export function CategoryPage({ slug, initialData }) {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Star className="w-5 h-5 fill-[#037166] text-[#037166]" />
-                    <h3 className="text-lg font-semibold text-white">Most Popular</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">Most Popular</h3>
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-6">
@@ -454,7 +454,7 @@ export function CategoryPage({ slug, initialData }) {
                         onClick={() => handleSubCategoryClick(subCategory)}
                         className="group cursor-pointer relative h-full"
                       >
-                        <div className="relative h-full rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border-2 border-white/10 hover:border-[#037166]/50 backdrop-blur-sm transition-all duration-300 overflow-hidden flex items-stretch">
+                        <div className="relative h-full rounded-xl bg-white border-2 border-[#d8e5e2] hover:border-[#037166]/50 backdrop-blur-sm transition-all duration-300 overflow-hidden flex items-stretch shadow-sm hover:shadow-md">
                           {/* Popular Badge */}
 
 
@@ -478,7 +478,7 @@ export function CategoryPage({ slug, initialData }) {
                                 alt={subCategory.name}
                                 className="w-fit h-fit object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
                             </div>
                           )}
 
@@ -512,11 +512,11 @@ export function CategoryPage({ slug, initialData }) {
                           </div>
 
                           {/* Content */}
-                          <div className="relative z-10 flex-1 min-w-0 p-4 md:p-6 flex flex-col justify-center">
-                            <h4 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-[#04a99d] transition-colors truncate">
+                          <div className="relative z-10 flex-1 min-w-0 p-4 md:p-6 flex flex-col justify-center bg-white border-l border-[#e2e8f0]">
+                            <h4 className="text-xl md:text-2xl font-bold text-[#037166] mb-2 md:mb-3 group-hover:text-[#025951] transition-colors truncate">
                               {subCategory.name}
                             </h4>
-                            <p className="text-white/60 text-sm mb-3 md:mb-4 leading-relaxed line-clamp-2">
+                            <p className="text-[#037166]/80 text-sm mb-3 md:mb-4 leading-relaxed line-clamp-2">
                               Professional service by verified and experienced technicians
                             </p>
 
@@ -525,7 +525,7 @@ export function CategoryPage({ slug, initialData }) {
 
                             {/* CTA */}
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-[#04a99d] font-semibold text-sm">
+                              <div className="flex items-center gap-2 text-[#037166] font-semibold text-sm">
                                 View Services
                                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                               </div>
@@ -555,22 +555,22 @@ export function CategoryPage({ slug, initialData }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="mt-16 pt-8 border-t border-white/5"
+                className="mt-16 pt-8 border-t border-[#e2ecea]"
               >
                 <div className="bg-gradient-to-r from-[#037166]/10 to-[#04a99d]/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
                   <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
                         Need Help Choosing?
                       </h3>
-                      <p className="text-white/60">
+                      <p className="text-gray-600">
                         Our experts can recommend the best service for your needs
                       </p>
                     </div>
                     <div className="flex gap-4">
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all whitespace-nowrap"
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 font-semibold hover:bg-white hover:border-[#037166]/40 transition-all whitespace-nowrap"
                       >
                         <TicketCheck className="w-4 h-4 text-[#04a99d]" />
                         Raise A Ticket

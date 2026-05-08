@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Sparkles, Shield, Clock, Search, MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ServicePreviewCard } from '@/components/appliances/ServicePreviewCard';
 import { useLocationContext } from '@/context/LocationContext';
 
@@ -83,7 +85,7 @@ export function Hero({ onViewServices, onBookService }) {
           <h1 className="text-4xl sm:text-5xl lg:text-[3.8rem] font-bold mb-4 italic text-white">
             Expert Home Services
             <br />
-            <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
+            <span className="text-[#037166]">
               At Your Doorstep
             </span>
           </h1>
@@ -110,12 +112,12 @@ export function Hero({ onViewServices, onBookService }) {
 
             <button
               onClick={onViewServices}
-              className="group inline-flex items-center gap-2 px-7 py-3 rounded-full glass-button-premium border border-white/10 text-white font-semibold text-base hover:bg-white/10 hover:border-[#037166]/50 transition-all hover:scale-105"
+              className="group inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white/80 border-2 border-[#037166] text-black font-semibold text-base transition-all hover:scale-105 hover:bg-white"
             >
-              <span className="text-white">
+              <span className="text-black">
                 Find Services
               </span>
-              <Search className="w-5 h-5 group-hover:translate-x-1 transition-transform text-white" />
+              <Search className="w-5 h-5 group-hover:translate-x-1 transition-transform text-black" />
             </button>
 
           </div>
@@ -127,11 +129,11 @@ export function Hero({ onViewServices, onBookService }) {
               { icon: Clock, label: 'Same Day Service', desc: 'Book In 60 Seconds' },
               { icon: Sparkles, label: '30-90 Days Warranty', desc: 'On All Services' },
             ].map((item, i) => (
-              <div key={i} className="flex flex-row items-center gap-2 p-3 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-[#037166]/50 transition-all">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-white" />
+              <div key={i} className="flex flex-row items-center gap-3 p-3 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-[#037166]/50 transition-all">
+                <div className="w-11 h-11 shrink-0 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center">
+                  <item.icon className="w-4.5 h-4.5 text-white" />
                 </div>
-                <div className="text-center">
+                <div className="text-left">
                   <h6 className="font-semibold text-white text-[15px] mb-1">{item.label}</h6>
                   <p className="text-xs text-white/60">{item.desc}</p>
                 </div>

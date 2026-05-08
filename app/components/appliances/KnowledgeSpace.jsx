@@ -118,23 +118,7 @@ export function KnowledgeSpace() {
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/40 rounded-full blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/40 rounded-full blur-[120px]"
-        />
+        {/* Center glow removed as requested */}
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -148,11 +132,11 @@ export function KnowledgeSpace() {
         >
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <BookOpen className="w-4 h-4 text-[#037166]" />
-            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Creative Studio Cards</h6>
+            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#037166] to-[#037166] bg-clip-text text-transparent font-medium">Creative Studio Cards</h6>
           </div>
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">Knowledge Hub</span>
+              <span className="bg-gradient-to-r from-[#037166] via-[#037166] to-[#037166] bg-clip-text text-transparent">Knowledge Hub</span>
           </h2>
 
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
@@ -182,9 +166,9 @@ export function KnowledgeSpace() {
                   >
                     {/* Trending Badge */}
                     {article.trending && (
-                      <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-white to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
-                        <TrendingUp className="w-3 h-3 text-[#037166]" />
-                        <h6 className="text-xs font-bold text-[#037166]">Trending</h6>
+                      <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-[#037166] to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
+                        <TrendingUp className="w-3 h-3 !text-white" />
+                        <h6 className="text-xs font-bold !text-white">Trending</h6>
                       </div>
                     )}
 
@@ -200,7 +184,7 @@ export function KnowledgeSpace() {
 
                       {/* Category Badge */}
                       <div className="absolute bottom-3 left-3 rounded-full bg-[#037166]/80 px-2.5 py-1 backdrop-blur-md">
-                        <h6 className="text-xs font-semibold text-white uppercase tracking-wider">
+                        <h6 className="text-xs font-semibold !text-white uppercase tracking-wider">
                           {article.category}
                         </h6>
                       </div>

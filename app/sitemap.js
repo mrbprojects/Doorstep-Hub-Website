@@ -61,8 +61,10 @@ async function getApplianceHierarchicalEntries() {
       // Precision Hierarchical: City + Category + Brand
       // Only generate combinations that exist in authorized services
       authServices.forEach(auth => {
-        const catSlug = categoryMap[auth.categoryName?.toLowerCase()];
-        const brandSlug = brandMap[auth.brandName?.toLowerCase()];
+        const catName = String(auth.categoryName || '').toLowerCase();
+        const brandName = String(auth.brandName || '').toLowerCase();
+        const catSlug = categoryMap[catName];
+        const brandSlug = brandMap[brandName];
 
         if (catSlug && brandSlug) {
           // City + Category Level (if not already added)

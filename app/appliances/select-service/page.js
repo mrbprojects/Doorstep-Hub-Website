@@ -372,7 +372,11 @@ function SelectServiceContent() {
             const slug = (c.slug || c.name || '').toLowerCase().replace(/\s+/g, '-');
             return slug === citySlug?.toLowerCase() || c.name?.toLowerCase() === cityName?.toLowerCase();
           });
-          setSelectedCity(match || { name: cityName, slug: citySlug });
+          if (match) {
+            setSelectedCity(match);
+          } else {
+            setSelectedCity({ name: cityName, slug: citySlug });
+          }
         } else {
           setSelectedCity({ name: cityName, slug: citySlug });
         }

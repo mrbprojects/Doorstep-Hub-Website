@@ -76,7 +76,12 @@ function BookNowPageContent() {
         // Resolve City
         if (citySlug) {
           const match = cities.find(c => (c.slug || c.name || '').toLowerCase().replace(/\s+/g, '-') === citySlug.toLowerCase());
-          if (match) setSelectedCity(match);
+          if (match) {
+            setSelectedCity(match);
+          } else {
+            // Fallback for display, BookingModal will try to resolve the ID
+            setSelectedCity({ name: citySlug.charAt(0).toUpperCase() + citySlug.slice(1).replace(/-/g, ' '), slug: citySlug });
+          }
         }
 
         // Fetch Service

@@ -34,6 +34,9 @@ export function LocationProvider({ children }) {
         if (savedLocation) {
             setLocation(savedLocation);
             return () => clearInterval(checkGoogleMaps);
+        } else {
+            // No saved location - trigger detection (GPS -> IP -> Fallback)
+            detectLocation();
         }
 
         // 3. No IP Silencing
@@ -116,7 +119,22 @@ export function LocationProvider({ children }) {
         try {
             return await detectWithGPS();
         } catch (err) {
-            return await detectWithIP();
+            try {
+                return await detectWithIP();
+            } catch (ipErr) {
+                // Production-grade fallback: Default to Hyderabad if all else fails
+                // Why: Prevent empty UI states/blank sections for new users
+                const fallbackLocation = {
+                    lat: 17.3850,
+                    lng: 78.4867,
+                    city: 'Hyderabad',
+                    area: 'Banjara Hills',
+                    shortAddress: 'Hyderabad',
+                    source: 'fallback'
+                };
+                setLocation(fallbackLocation);
+                return fallbackLocation;
+            }
         }
     };
 

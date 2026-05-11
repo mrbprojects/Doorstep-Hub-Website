@@ -398,13 +398,13 @@ export function StoreDetailPage({ storeId, serviceId }) {
           {/* Store Info Overlay */}
           <div className="absolute bottom-8 left-8 right-8">
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
                 <h1 className="text-4xl font-bold text-white">
                   {center.firstName} {center.lastName}
                 </h1>
 
                 {/* App Links beside heading */}
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-start gap-3 md:self-end md:mb-3">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
@@ -536,7 +536,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                           <img
                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                             alt={service.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain bg-white"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
@@ -1175,3 +1175,4 @@ export function StoreDetailPage({ storeId, serviceId }) {
     </motion.div>
   );
 }
+

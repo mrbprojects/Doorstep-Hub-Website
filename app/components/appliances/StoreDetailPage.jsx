@@ -536,17 +536,17 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
           {/* Store Info Overlay - Half Above / Half Below */}
           <div className="absolute left-0 right-0 bottom-0 translate-y-1/2">
-            <div className="bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl">
+            <div className="bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl p-3 sm:p-4 md:p-4.5 shadow-2xl">
             
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-1.5 md:mb-3">
-                <div className="flex items-center gap-4 sm:gap-6">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-2.5 mb-1 md:mb-2">
+                <div className="flex items-center gap-3 sm:gap-4">
                   <div className="relative flex-shrink-0">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 border-white shadow-2xl bg-white flex items-center justify-center">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl overflow-hidden border-2 border-white shadow-xl bg-white flex items-center justify-center">
                       {(center.logo || center.image) ? (
                         <img
                           src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${(center.logo || center.image).startsWith('/') ? (center.logo || center.image).slice(1) : (center.logo || center.image)}`}
                           alt="Store Logo"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain bg-white"
                           onError={(e) => {
                             e.target.src = 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80';
                           }}
@@ -563,7 +563,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     </div> */}
                   </div>
                   <div>
-                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-1">
+                    <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight mb-0.5">
                       {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
                     </h1>
                     <div className="flex items-center gap-2">
@@ -574,34 +574,34 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
 
                 {/* App Links beside heading */}
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-start gap-2 md:self-end md:mb-1">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
+                    className="flex items-center justify-center w-32 xs:w-40 md:w-36 h-10 xs:h-11 md:h-10 bg-[#DEF2EF] rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover " />
+                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1" />
                   </a>
                   <a
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
+                    className="flex items-center justify-center w-32 xs:w-40 md:w-36 h-10 xs:h-11 md:h-10 bg-[#DEF2EF] rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                     title="Download on the App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover" />
+                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1" />
                   </a>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-6 mb-3 md:mb-4">
+              <div className="flex flex-col gap-1.5 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-4 mb-2 md:mb-2.5">
                 <div className="flex items-start gap-1.5 md:gap-2">
                   <MapPin className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
                   <span className="text-gray-600 text-xs sm:text-sm font-medium line-clamp-1">{center.address}</span>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5">
                     <Star className="w-4 h-4 fill-[#037166] text-[#037166]" />
                     <span className="text-gray-900 font-bold text-xs sm:text-sm">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
@@ -616,7 +616,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <div className="px-3 py-1 rounded-full bg-[#037166]/5 border border-[#037166]/10 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-[#037166]" />
                   <span className="text-[#037166] text-[10px] sm:text-xs font-bold">Express Service</span>
@@ -1027,3 +1027,4 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     </motion.div>
   );
 }
+

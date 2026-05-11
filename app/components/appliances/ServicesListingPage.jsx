@@ -561,7 +561,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-6"
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-6"
                 >
                   {loading ? (
                     // Center Skeleton
@@ -578,42 +578,42 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         whileHover={{ y: -5 }}
                         className="group cursor-pointer"
                       >
-                        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 md:h-[220px]">
+                        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full md:h-[185px]">
                           <div className="flex flex-col md:flex-row h-full">
                             {/* Image */}
-                            <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
+                            <div className="relative w-full md:w-44 h-36 md:h-full overflow-hidden flex-shrink-0">
                               <img
                                 src={center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                 alt={center.name}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="w-full h-full object-contain bg-white transition-transform duration-700 group-hover:scale-105"
                               />
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a1a1a]/60" />
 
                               {/* Open Badge */}
-                              <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-xs font-bold">
+                              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-[11px] font-semibold">
                                 Open Now
                               </div>
                             </div>
 
                             {/* Content */}
-                            <div className="flex-1 p-6">
-                              <h4 className="text-2xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors">
+                            <div className="flex-1 p-3 md:p-3.5 flex flex-col justify-between min-w-0">
+                              <h4 className="text-base md:text-lg leading-tight font-bold text-gray-900 mb-1 group-hover:text-[#037166] transition-colors line-clamp-2 break-words">
                                 {center.business_name || center.name}
                               </h4>
-                              <p className="text-white/60 text-sm mb-4 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
+                              <p className="text-gray-700 text-xs leading-snug mb-2 flex items-start gap-1.5 line-clamp-2 break-words">
+                                <MapPin className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-gray-600" />
                                 {center.address}
                               </p>
 
-                              <div className="flex flex-wrap items-center gap-4 mb-6">
+                              <div className="flex flex-wrap items-center gap-2 mb-2.5">
                                 <div className="flex items-center gap-1">
-                                  <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                                  <span className="text-white font-medium">{center.rating}</span>
-                                  <span className="text-white/40 text-sm">({center.totalOrders} orders)</span>
+                                  <Star className="w-3.5 h-3.5 fill-[#04a99d] text-[#04a99d]" />
+                                  <span className="text-gray-900 font-semibold text-sm">{center.rating}</span>
+                                  <span className="text-gray-600 text-xs">({center.totalOrders} orders)</span>
                                 </div>
                                 {(center.distance || center.distanceInKm || center.distanceKm) && (
-                                  <div className="flex items-center gap-1 text-white/60 text-sm">
-                                    <MapPin className="w-4 h-4" />
+                                  <div className="flex items-center gap-1 text-gray-600 text-xs md:text-sm">
+                                    <MapPin className="w-3.5 h-3.5 text-gray-500" />
                                     {parseFloat(center.distance || center.distanceInKm || center.distanceKm).toFixed(1)} km away
                                   </div>
                                 )}
@@ -621,7 +621,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
                               <button
                                 onClick={() => router.push(`/service-list/${center.slug || center._id}`)}
-                                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
+                                className="w-fit px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-xs font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
                               >
                                 Book Service
                               </button>

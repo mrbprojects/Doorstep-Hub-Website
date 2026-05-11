@@ -83,10 +83,10 @@ export function NewsletterWidget({ compact = false }) {
     if (compact) {
         // Compact version for sidebars
         return (
-            <div className="p-6 bg-[#1a1a1a] border border-white/10 rounded-2xl">
-                <h3 className="text-xl font-bold mb-2">Subscribe to our Newsletter</h3>
-                <p className="text-gray-400 text-sm mb-6">
-                    Get the latest tips and updates delivered directly to your inbox.
+            <div className="p-8 bg-white rounded-3xl">
+                <h3 className="text-xl font-extrabold mb-3 text-gray-900 leading-tight">Subscribe to our Newsletter</h3>
+                <p className="text-gray-500 text-sm mb-8">
+                    Get the latest repair tips and service updates delivered to your inbox.
                 </p>
                 <form onSubmit={step === 'subscribe' ? handleSubscribe : handleVerify}>
                     <input
@@ -97,27 +97,27 @@ export function NewsletterWidget({ compact = false }) {
                         required
                         disabled={loading || isSubscribed}
                         maxLength={step === 'subscribe' ? undefined : 6}
-                        className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white mb-4 focus:outline-none focus:border-[#037166] transition-colors placeholder:text-gray-500"
+                        className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl text-gray-900 mb-4 focus:outline-none focus:ring-2 focus:ring-[#037166]/20 focus:border-[#037166] transition-all placeholder:text-gray-400"
                     />
                     <button
                         type="submit"
                         disabled={loading || isSubscribed}
-                        className="w-full px-4 py-3 bg-[#037166] hover:bg-[#025951] disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                        className="w-full px-5 py-4 bg-gradient-to-r from-[#037166] to-[#04a99d] shadow-lg shadow-[#037166]/20 hover:shadow-[#037166]/40 disabled:opacity-50 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
                     >
                         {loading ? 'Processing...' : step === 'subscribe' ? 'Subscribe' : 'Verify'}
-                        {isSubscribed && <CheckCircle2 className="w-4 h-4" />}
+                        {isSubscribed && <CheckCircle2 className="w-4 h-4 text-white" />}
                     </button>
                     {step === 'verify' && !isSubscribed && (
                         <button
                             type="button"
                             onClick={() => setStep('subscribe')}
-                            className="mt-2 text-xs text-white/40 hover:text-white transition-colors w-full text-center"
+                            className="mt-3 text-xs text-gray-400 hover:text-[#037166] transition-colors w-full text-center font-medium"
                         >
                             Change email address
                         </button>
                     )}
                     {message && (
-                        <p className={`mt-3 text-sm text-center ${isError ? 'text-red-400' : 'text-[#04a99d]'}`}>
+                        <p className={`mt-4 text-sm text-center font-medium ${isError ? 'text-red-500' : 'text-[#037166]'}`}>
                             {message}
                         </p>
                     )}
@@ -132,11 +132,14 @@ export function NewsletterWidget({ compact = false }) {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-20 mb-10 max-w-4xl mx-auto p-8 bg-gradient-to-r from-[#1a1a1a]/80 via-[#1a1a1a]/90 to-[#1a1a1a]/80 backdrop-blur-xl border-2 border-[#037166]/30 rounded-3xl"
+            className="mt-20 mb-10 max-w-4xl mx-auto p-10 bg-white border border-gray-100 rounded-[40px] shadow-2xl shadow-gray-200/50"
         >
-            <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">Stay Updated</h3>
-                <p className="text-gray-400">
+            <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-[#037166]/10 rounded-2xl mb-4">
+                    <Mail className="w-8 h-8 text-[#037166]" />
+                </div>
+                <h3 className="text-3xl font-extrabold text-gray-900 mb-3">Stay Updated</h3>
+                <p className="text-gray-500 max-w-lg mx-auto">
                   Get Latest Service Coupons, Exclusive Discounts, and Helpful Updates Delivered Straight To Your Inbox.
                 </p>
             </div>
@@ -144,8 +147,8 @@ export function NewsletterWidget({ compact = false }) {
             <form onSubmit={step === 'subscribe' ? handleSubscribe : handleVerify}>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1 relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                            <Mail className="w-5 h-5 text-white/40" />
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2">
+                            <Mail className="w-5 h-5 text-gray-400" />
                         </div>
                         <input
                             type={step === 'subscribe' ? 'email' : 'text'}
@@ -155,7 +158,7 @@ export function NewsletterWidget({ compact = false }) {
                             required
                             disabled={loading || isSubscribed}
                             maxLength={step === 'subscribe' ? undefined : 6}
-                            className="w-full pl-12 pr-6 py-4 bg-[#0a0a0a]/80 border border-[#037166]/30 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-[#037166] transition-colors"
+                            className="w-full pl-14 pr-6 py-4.5 bg-gray-50 border border-gray-100 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#037166]/20 focus:border-[#037166] transition-all"
                         />
                     </div>
                     <motion.button
@@ -163,7 +166,7 @@ export function NewsletterWidget({ compact = false }) {
                         disabled={loading || isSubscribed}
                         whileHover={{ scale: loading || isSubscribed ? 1 : 1.02 }}
                         whileTap={{ scale: loading || isSubscribed ? 1 : 0.98 }}
-                        className="px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full text-white font-semibold shadow-lg shadow-[#037166]/40 hover:shadow-xl hover:shadow-[#037166]/50 transition-all whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="px-10 py-4.5 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-2xl text-white font-bold shadow-xl shadow-[#037166]/30 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-3"
                     >
                         {loading ? 'Processing...' : step === 'subscribe' ? 'Subscribe Now' : 'Verify OTP'}
                         {isSubscribed && <CheckCircle2 className="w-5 h-5" />}
@@ -173,7 +176,7 @@ export function NewsletterWidget({ compact = false }) {
                     <button
                         type="button"
                         onClick={() => setStep('subscribe')}
-                        className="mt-3 text-xs text-white/40 hover:text-white transition-colors mx-auto block"
+                        className="mt-4 text-xs text-gray-400 hover:text-[#037166] transition-colors mx-auto block font-medium"
                     >
                         Change email address
                     </button>
@@ -182,9 +185,9 @@ export function NewsletterWidget({ compact = false }) {
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="mt-4 text-center"
+                        className="mt-6 text-center"
                     >
-                        <p className={`flex items-center justify-center gap-2 ${isError ? 'text-red-400' : 'text-[#04a99d]'}`}>
+                        <p className={`flex items-center justify-center gap-2 font-bold ${isError ? 'text-red-500' : 'text-[#037166]'}`}>
                             {!isError && <CheckCircle2 className="w-5 h-5" />}
                             {message}
                         </p>

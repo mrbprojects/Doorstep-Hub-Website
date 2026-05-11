@@ -23,6 +23,8 @@ export default function SpaConfirmPage() {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null);
     const [mounted, setMounted] = useState(false);
+    const addressLine1 = [selectedAddress?.flat, selectedAddress?.area].filter(Boolean).join(', ');
+    const addressLine2 = [selectedAddress?.cityName, selectedAddress?.postalCode].filter(Boolean).join(', ');
 
     // Mark client-side mount to avoid hydration mismatch with new Date()
     useEffect(() => { setMounted(true); }, []);
@@ -478,9 +480,9 @@ export default function SpaConfirmPage() {
                             </h3>
                             {selectedAddress ? (
                                 <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                                    <p className="text-gray-900 font-medium mb-1">{selectedAddress.name}</p>
-                                    <p className="text-gray-600">{selectedAddress.flat}, {selectedAddress.area}</p>
-                                    <p className="text-gray-500">{selectedAddress.cityName}, {selectedAddress.postalCode}</p>
+                                    <p className="text-gray-900 font-medium mb-1">{selectedAddress.name || 'Address'}</p>
+                                    {addressLine1 && <p className="text-gray-600 break-words">{addressLine1}</p>}
+                                    {addressLine2 && <p className="text-gray-500 break-words">{addressLine2}</p>}
                                 </div>
                             ) : (
                                 <div className="p-4 rounded-lg bg-gray-50">

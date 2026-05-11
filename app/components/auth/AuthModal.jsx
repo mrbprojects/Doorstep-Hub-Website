@@ -97,17 +97,15 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     const inputBg = t.buttonBg;
     const borderColor = t.border;
     const accentText = t.textHover;
+    const isValidIndianMobile = (value) => /^[6-9]\d{9}$/.test((value || '').trim());
+    const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || '').trim());
+    const isValidName = (value) => /^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test((value || '').trim());
+    const isValidReferralCode = (value) => /^[A-Z0-9_-]{3,20}$/.test((value || '').trim());
 
     const handleSendOtp = async (e) => {
         if (e) e.preventDefault();
-        if (mobile.length !== 10) {
-            toast.error('Please enter a valid 10-digit mobile number');
-            return;
-        }
-
-        // Validate starting digit (must be 6, 7, 8, or 9)
-        if (!/^[6-9]/.test(mobile)) {
-            toast.error('Mobile number must start with 6, 7, 8, or 9');
+        if (!isValidIndianMobile(mobile)) {
+            toast.error('Please enter a valid 10-digit mobile number starting with 6-9');
             return;
         }
 
@@ -136,7 +134,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
-        if (otp.length !== 6) {
+        if (!/^\d{6}$/.test(otp)) {
             toast.error('Please enter 6-digit OTP');
             return;
         }
@@ -210,22 +208,43 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     };
 
     const handleProfileSave = async () => {
-        if (!profileData.name || !profileData.email) {
-            toast.error('Please fill in your name and email');
+        const trimmedName = (profileData.name || '').trim();
+        const trimmedEmail = (profileData.email || '').trim();
+        const trimmedPhone = (profileData.phone || '').trim();
+        const trimmedReferral = referralCode.trim();
+
+        if (!trimmedName || !trimmedEmail || !trimmedPhone) {
+            toast.error('Please fill in phone, email and full name');
+            return false;
+        }
+        if (!isValidName(trimmedName)) {
+            toast.error('Please enter a valid full name (min 2 characters)');
+            return false;
+        }
+        if (!isValidEmail(trimmedEmail)) {
+            toast.error('Please enter a valid email address');
+            return false;
+        }
+        if (!isValidIndianMobile(trimmedPhone)) {
+            toast.error('Please enter a valid 10-digit phone number starting with 6-9');
+            return false;
+        }
+        if (trimmedReferral && !isValidReferralCode(trimmedReferral)) {
+            toast.error('Referral code should be 3-20 characters (A-Z, 0-9, _ or -)');
             return false;
         }
 
         setLoading(true);
         try {
             const formData = new FormData();
-            formData.append('name', profileData.name);
-            formData.append('email', profileData.email);
-            formData.append('mobile', profileData.phone);
+            formData.append('name', trimmedName);
+            formData.append('email', trimmedEmail);
+            formData.append('mobile', trimmedPhone);
             if (selectedFile) {
                 formData.append('image', selectedFile);
             }
-            if (referralCode.trim()) {
-                formData.append('referalCode', referralCode.trim());
+            if (trimmedReferral) {
+                formData.append('referalCode', trimmedReferral);
             }
 
             await updateProfile(formData);
@@ -274,18 +293,18 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     ? 'Edit Profile'
                                     : 'Your Profile'}
                     </h2>
-                    <button onClick={handleClose} className={`p-2 rounded-xl transition-colors hover:bg-white/10 ${t.textMain} opacity-70 hover:opacity-100`}>
-                        <X className="w-5 h-5" />
+                    <button onClick={handleClose} className="p-2 rounded-xl border border-white/35 bg-white/10 transition-colors hover:bg-white/20 text-white opacity-90 hover:opacity-100">
+                        <X className="w-5 h-5 text-white" />
                     </button>
                 </div>
 
-                <div className="relative p-8">
+                <div className="relative p-6">
                     {!isAuthenticated ? (
                         step === 'login' ? (
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                                 <div className="text-center">
-                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-opacity-10 ${t.accent}`}>
-                                        <Phone className={`w-8 h-8 ${accentText}`} />
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-opacity-10 ${t.accent} border border-white/40`}>
+                                        <Phone className="w-8 h-8 text-white" />
                                     </div>
                                     <h3 className={`text-lg font-bold !text-white mb-2`}>Login with WhatsApp</h3>
                                     <p className={`!text-white opacity-60 text-sm`}>We'll send you a one-time password on WhatsApp</p>
@@ -293,27 +312,28 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
                                 <form onSubmit={handleSendOtp} className="space-y-4">
                                     <div className="relative">
-                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black/70" />
                                         <input
                                             type="tel"
                                             placeholder="Mobile Number"
                                             value={mobile}
                                             onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/40 focus:border-opacity-100 transition-all outline-none`}
-                                            style={{ WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
+                                            maxLength={10}
+                                            className={`w-full pl-12 pr-4 py-3.5 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/60 focus:border-opacity-100 transition-all outline-none`}
+                                            style={{ color: '#000000', WebkitTextFillColor: '#000000', caretColor: '#000000' }}
                                             required
                                         />
                                     </div>
                                     <button
                                         type="submit"
                                         disabled={loading || mobile.length !== 10}
-                                        className={`w-full py-4 bg-gradient-to-r ${t.accentGradientFrom} ${t.accentGradientTo} text-white font-bold rounded-xl hover:shadow-lg hover:shadow-current/30 disabled:opacity-50 transition-all`}
+                                        className={`w-full py-3.5 bg-gradient-to-r ${t.accentGradientFrom} ${t.accentGradientTo} text-white font-bold rounded-xl hover:shadow-lg hover:shadow-current/30 disabled:opacity-50 transition-all`}
                                     >
                                         {loading ? 'Sending...' : 'Send OTP'}
                                     </button>
                                 </form>
 
-                                <div className="relative py-4">
+                                <div className="relative py-2">
                                     <div className="absolute inset-0 flex items-center">
                                         <div className={`w-full border-t border-opacity-10 ${borderColor}`}></div>
                                     </div>
@@ -324,7 +344,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
                                 <button
                                     onClick={handleGoogleLogin}
-                                    className={`w-full py-4 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} text-white hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
+                                    className={`w-full py-3.5 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} text-white hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
                                 >
                                     <Chrome className="w-5 h-5" />
                                     Sign in with Google
@@ -344,7 +364,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                             setLoading(false);
                                         }
                                     }}
-                                    className={`w-full py-4 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} text-white hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
+                                    className={`w-full py-3.5 ${inputBg} glass-button-premium border border-opacity-20 ${borderColor} text-white hover:bg-opacity-80 font-bold rounded-xl flex items-center justify-center gap-3 transition-all`}
                                 >
                                     <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
                                         <path d="M17.05 20.28c-.98.95-2.05 1.78-3.19 1.76-1.14-.02-1.5-.72-2.82-.72-1.32 0-1.74.7-2.82.74-1.14.04-2.26-.88-3.26-1.87-2.02-1.99-3.57-5.59-1.55-9.1C4.4 9.1 6.5 7.85 8.42 7.82c1.44-.03 2.8.96 3.68.96.88 0 2.54-1.2 4.26-1.03.72.03 2.73.29 4.02 2.18-.1.06-2.4 1.4-2.38 4.19.03 3.32 2.92 4.51 2.95 4.52-.02.05-.46 1.58-1.6 3.2v-.01zM12.03 7.25c-.02-2.3 2.12-4.26 4.38-4.25-.01 2.37-2.22 4.36-4.38 4.25z" />
@@ -355,8 +375,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                         ) : (
                             <div className="space-y-6">
                                 <div className="text-center">
-                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-opacity-10 ${t.accent}`}>
-                                        <ShieldCheck className={`w-8 h-8 ${accentText}`} />
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-opacity-10 ${t.accent} border border-white/40`}>
+                                        <ShieldCheck className="w-8 h-8 text-white" />
                                     </div>
                                     <h3 className={`text-lg font-bold !text-white mb-2`}>Enter Verification Code</h3>
                                     <p className={`!text-white opacity-60 text-sm`}>Code sent to +91 {mobile}</p>
@@ -399,7 +419,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                                         e.preventDefault();
                                                     }
                                                 }}
-                                                className={`w-12 h-14 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white text-center text-xl font-bold focus:border-opacity-100 outline-none transition-all`}
+                                                className={`w-12 h-14 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black text-center text-xl font-bold placeholder:text-black/60 focus:border-opacity-100 outline-none transition-all`}
+                                                style={{ color: '#000000', WebkitTextFillColor: '#000000', caretColor: '#000000' }}
                                             />
                                         ))}
                                     </div>
@@ -482,66 +503,72 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     </button>
                                 </div>
                                 <div className="mt-4 text-center">
-                                    <h3 className={`text-xl font-bold ${t.textMain}`}>{user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User'}</h3>
-                                    <p className={`${t.textMain} opacity-60 text-sm`}>{profileData.phone || user?.phone || user?.mobile || 'No phone'}</p>
+                                    <h3 className={`text-xl font-bol !text-black`}>{user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User'}</h3>
+                                    <p className="!text-black text-sm select-none">{profileData.phone || user?.phone || user?.mobile || 'No phone'}</p>
                                 </div>
                                 {!isEditing && (
                                     <motion.button
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => setIsEditing(true)}
-                                        className={`absolute top-0 right-0 p-2.5 rounded-xl border transition-all bg-white/5 border-white/10 ${t.textHover} hover:bg-white/10`}
+                                        className="absolute top-0 right-0 p-2.5 rounded-xl border transition-all bg-white/10 border-white/30 text-white hover:bg-white/20"
                                     >
-                                        <Pencil className="w-5 h-5" />
+                                        <Pencil className="w-5 h-5 text-white" />
                                     </motion.button>
                                 )}
                             </div>
 
                             <div className="space-y-4">
                                 <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
+                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
                                     <input
                                         type="tel"
                                         placeholder="Phone Number"
                                         value={profileData.phone}
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/40 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
+                                        maxLength={10}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
                                     />
                                 </div>
                                 <div className="relative">
-                                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${t.textMain} opacity-40`} />
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
                                     <input
                                         type="email"
                                         placeholder="Email Address"
                                         value={profileData.email}
                                         disabled={!isEditing}
-                                        onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/40 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
+                                        onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value.trimStart() }))}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
                                     />
                                 </div>
                                 <div className="relative">
-                                    <User className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${t.textMain} opacity-40`} />
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
                                     <input
                                         type="text"
                                         placeholder="Full Name"
                                         value={profileData.name}
                                         disabled={!isEditing}
-                                        onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} placeholder:opacity-30 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'opacity-60 cursor-not-allowed'}`}
+                                        onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value.replace(/[^A-Za-z\s.'-]/g, '').slice(0, 50) }))}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
                                     />
                                 </div>
 
                                 {/* Referral Code — only shown on first-time profile completion */}
                                 {isFirstTimeUser && (
                                     <div className="relative">
-                                        <Gift className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${t.textMain} opacity-40`} />
+                                        <Gift className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
                                         <input
                                             type="text"
                                             placeholder="Referral Code (optional)"
                                             value={referralCode}
-                                            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl ${t.textMain} placeholder:opacity-30 focus:border-opacity-100 transition-all outline-none font-mono tracking-widest`}
+                                            onChange={(e) => setReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 20))}
+                                            maxLength={20}
+                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none font-mono tracking-widest`}
+                                            style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
                                         />
                                     </div>
                                 )}

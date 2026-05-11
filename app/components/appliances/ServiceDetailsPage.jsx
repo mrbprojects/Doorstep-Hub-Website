@@ -424,7 +424,7 @@ export function ServiceDetailsPage({
       </div>
 
       {/* ── HERO SECTION ────────────────────────────────────────────────────── */}
-      <section className="relative py-6 lg:py-12">
+      <section className="relative py-4 sm:py-6 lg:py-12">
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -432,8 +432,17 @@ export function ServiceDetailsPage({
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4"
+            className="flex flex-col items-start gap-2 sm:gap-3 mb-4"
           >
+            <div className="w-full min-w-0 overflow-hidden order-1">
+              <div className="text-gray-500 text-[10px] sm:text-xs flex items-center gap-1 sm:gap-1.5 whitespace-nowrap overflow-x-auto scrollbar-hide">
+                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); router.push(c ? `/${c}` : '/'); }} className="hover:text-[#04a99d] transition-colors shrink-0">{category}</button>
+                <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors shrink-0">{subCategory}</button>
+                <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                <span className="text-gray-400 truncate">{storeData?.name}</span>
+              </div>
+            </div>
             <button
               onClick={() => {
                 if (onBack) {
@@ -452,26 +461,17 @@ export function ServiceDetailsPage({
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
-            <div className="flex-1 min-w-0 pr-2 overflow-hidden">
-              <div className="text-gray-500 text-[10px] sm:text-xs flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); router.push(c ? `/${c}` : '/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[70px] sm:max-w-[100px]">{category}</button>
-                <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors truncate max-w-[70px] sm:max-w-[100px]">{subCategory}</button>
-                <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <span className="text-gray-400 truncate max-w-[90px] sm:max-w-[120px]">{storeData?.name}</span>
-              </div>
-            </div>
           </motion.div>
 
           {/* ── Desktop 2-col grid ─────────────────────────────────────────────── */}
-          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-start">
 
             {/* LEFT col: Gallery + Tabs */}
-            <div className="order-2 lg:order-none space-y-6 lg:space-y-8">
+            <div className="order-2 lg:order-none space-y-4 sm:space-y-6 lg:space-y-8">
 
               {/* Image Gallery */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="w-full">
-                <div className="relative rounded-2xl overflow-hidden bg-white border border-slate-200">
+                <div className="relative rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200">
                   <div
                     className="relative w-full overflow-hidden"
                     style={{ aspectRatio: '16/7' }}
@@ -508,7 +508,7 @@ export function ServiceDetailsPage({
                         <button
                           key={idx}
                           onClick={() => { setCurrentImageIndex(idx); setSelectedImageIndex(idx); setIsLightboxOpen(true); }}
-                          className={`relative w-16 h-16 rounded-lg overflow-hidden transition-all flex-shrink-0 ${currentImageIndex === idx ? 'ring-2 ring-[#037166] scale-105' : 'opacity-60 hover:opacity-100'}`}
+                          className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-md sm:rounded-lg overflow-hidden transition-all flex-shrink-0 ${currentImageIndex === idx ? 'ring-2 ring-[#037166] scale-105' : 'opacity-60 hover:opacity-100'}`}
                         >
                           <img src={img} alt="" className="w-full h-full object-cover" />
                         </button>
@@ -526,7 +526,7 @@ export function ServiceDetailsPage({
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`flex-1 min-w-max px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
+                      className={`flex-1 min-w-max px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
                         ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
                         : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
                         }`}
@@ -700,10 +700,10 @@ export function ServiceDetailsPage({
             >
               {/* Title + Rating */}
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-2 break-words">
+                <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-1.5 sm:mb-2 break-words">
                   {storeData.name}
                 </h1>
-                <p className="text-gray-600 text-sm mb-3">On-Demand Home Services</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-2.5 sm:mb-3">On-Demand Home Services</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
                     <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
@@ -717,7 +717,7 @@ export function ServiceDetailsPage({
               </div>
 
               {/* Description */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4">
                 {renderDescription(storeData.description)}
                 {storeData.description?.length > 125 && (
                   <button onClick={() => setIsExpanded(!isExpanded)} className="text-[#04a99d] font-bold mt-2 text-sm hover:underline focus:outline-none">
@@ -727,7 +727,7 @@ export function ServiceDetailsPage({
               </div>
 
               {/* Service Highlights — 2-col compact grid */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-2.5">
                 {[
                   { icon: Shield, text: 'Verified & Insured' },
                   { icon: Award, text: '30-90 Day Warranty' },

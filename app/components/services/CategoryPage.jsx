@@ -535,17 +535,17 @@ export function CategoryPage({ category, categoryId }) {
                         Our experts can recommend the best service for your needs
                       </p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto">
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all whitespace-nowrap"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold hover:bg-white/10 hover:border-[#037166]/50 transition-all text-sm sm:text-base"
                       >
                         <TicketCheck className="w-4 h-4 text-[#04a99d]" />
                         Raise A Ticket
                       </button>
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all whitespace-nowrap"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all text-sm sm:text-base"
                       >
                         <Smartphone className="w-4 h-4" />
                         Track Order
@@ -561,4 +561,5 @@ export function CategoryPage({ category, categoryId }) {
     </motion.div>
   );
 }
+
 

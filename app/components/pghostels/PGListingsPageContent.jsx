@@ -720,7 +720,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                         )}
                     </div>
 
-                    <div className="p-3 sm:p-6" onClick={() => isClickable && router.push(`/pghostels/hostel/${listing.slug || listing.id}`)}>
+                    <div className="p-3 sm:p-6 flex flex-col h-full" onClick={() => isClickable && router.push(`/pghostels/hostel/${listing.slug || listing.id}`)}>
                         <div className="mb-2 sm:mb-4">
                             <h3 className="text-base sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">
                                 {listing.name}
@@ -738,7 +738,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                             {listing.amenities.slice(0, 3).map((amenity, i) => {
                                 const Icon = amenityIcons[amenity];
                                 return (
@@ -756,7 +756,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                             )}
                         </div>
 
-                        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-50">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-gray-50 mt-auto">
                             <div className="min-w-0">
                                 <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-0.5">Starts at</div>
                                 <div className="flex items-baseline space-x-0.5">
@@ -771,13 +771,16 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                     isClickable && router.push(`/pghostels/hostel/${listing.slug || listing.id}`);
                                 }}
                                 disabled={!isClickable}
-                                className={`px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-bold shrink-0 transition-all flex items-center space-x-1.5 ${isClickable
-                                    ? 'bg-gradient-to-r from-[#037166] to-[#025951] text-white shadow-md active:scale-95'
+                                className={`w-11 h-11 sm:w-auto sm:h-auto px-0 sm:px-6 py-0 sm:py-3 rounded-full sm:rounded-xl font-bold shrink-0 transition-all flex items-center justify-center gap-1.5 ${isClickable
+                                    ? 'bg-transparent text-white shadow-none active:scale-95'
                                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     }`}
                             >
-                                <span className="text-xs sm:text-sm">{isClickable ? 'View Details' : 'Preview'}</span>
-                                {isClickable && <ChevronRight className="w-3.5 h-3.5" />}
+                                {isClickable && (
+                                    <span className="inline-flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#037166] to-[#025951] text-white shadow-md">
+                                        <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4" />
+                                    </span>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -907,7 +910,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                             </div>
                             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Recommended for you</h2>
                         </div>
-                        <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:px-0 sm:mx-0 sm:pb-0">
+                        <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 xl:grid-cols-4 sm:px-0 sm:mx-0 sm:pb-0">
                             {recommendedListings.map((listing) => (
                                 <div key={listing.id} className="w-[300px] sm:w-auto flex-shrink-0">
                                     <PGCard listing={listing} />
@@ -925,8 +928,8 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                         </TabsList>
                     </div>
 
-                    <div className="flex gap-8">
-                        <div className="hidden lg:block w-80 flex-shrink-0">
+                    <div className="flex flex-col xl:flex-row gap-6 xl:gap-8">
+                        <div className="hidden xl:block w-80 flex-shrink-0">
                             <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28 overflow-hidden">
                                 <FilterPanel />
                             </div>
@@ -943,7 +946,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                     ))}
                                 </div>
                             ) : sortedListings.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
                                     {sortedListings.map((listing) => (
                                         <PGCard key={listing.id} listing={listing} isNearby={activeTab === 'nearby'} />
                                     ))}
@@ -958,3 +961,9 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
         </div>
     );
 }
+
+
+
+
+
+

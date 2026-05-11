@@ -337,7 +337,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg shadow-lg shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all inline-flex items-center gap-3"
+            className="px-8 py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg shadow-lg shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all inline-flex items-center gap-3"
             onClick={onViewAll}
           >
             View All Services

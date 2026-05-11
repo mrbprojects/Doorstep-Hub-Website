@@ -121,15 +121,18 @@ export function BookAppointmentPage() {
     const getMinDate = () => new Date().toISOString().split('T')[0];
 
     // Field Validations Helper
-    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(phone);
+    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email || '').trim());
+    const isValidPhone = (phone) => /^[6-9]\d{9}$/.test((phone || '').trim());
+    const isValidName = (name) => /^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test((name || '').trim());
 
     // Step validation
     const validateStep = () => {
         switch (currentStep) {
             case 0:
                 if (!formData.firstName.trim()) { toast.error('Please enter your first name'); return false; }
-                if (formData.firstName.length < 2) { toast.error('First name must be at least 2 characters'); return false; }
+                if (!isValidName(formData.firstName)) { toast.error('Please enter a valid first name'); return false; }
+
+                if (formData.lastName.trim() && !isValidName(formData.lastName)) { toast.error('Please enter a valid last name'); return false; }
 
                 if (!formData.phone.trim()) { toast.error('Please enter your phone number'); return false; }
                 if (!isValidPhone(formData.phone.trim())) { toast.error('Please enter a valid 10-digit phone number starting with 6-9'); return false; }
@@ -142,7 +145,9 @@ export function BookAppointmentPage() {
                 return true;
             case 1:
                 if (!formData.bookingDate) { toast.error('Please select a booking date'); return false; }
+                if (formData.bookingDate < getMinDate()) { toast.error('Booking date cannot be in the past'); return false; }
                 if (!formData.bookingTime) { toast.error('Please select a preferred time slot'); return false; }
+                if ((formData.message || '').length > 300) { toast.error('Message must be 300 characters or less'); return false; }
                 return true;
             case 2:
                 if (!agreed) { toast.error('You must agree to the Terms & Conditions to proceed'); return false; }
@@ -241,14 +246,14 @@ export function BookAppointmentPage() {
                                 placeholder="First Name *"
                                 className={inputCls}
                                 value={formData.firstName}
-                                onChange={e => setFormData({ ...formData, firstName: e.target.value })}
+                                onChange={e => setFormData({ ...formData, firstName: e.target.value.replace(/[^A-Za-z\s.'-]/g, '').slice(0, 50) })}
                             />
                             <input
                                 type="text"
                                 placeholder="Last Name"
                                 className={inputCls}
                                 value={formData.lastName}
-                                onChange={e => setFormData({ ...formData, lastName: e.target.value })}
+                                onChange={e => setFormData({ ...formData, lastName: e.target.value.replace(/[^A-Za-z\s.'-]/g, '').slice(0, 50) })}
                             />
                         </div>
                         <input
@@ -256,14 +261,15 @@ export function BookAppointmentPage() {
                             placeholder="Phone Number * (e.g. 8886688666)"
                             className={inputCls}
                             value={formData.phone}
-                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                            maxLength={10}
+                            onChange={e => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                         />
                         <input
                             type="email"
                             placeholder="Email Address *"
                             className={inputCls}
                             value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            onChange={e => setFormData({ ...formData, email: e.target.value.trimStart() })}
                         />
 
                         {/* City Dropdown */}
@@ -498,7 +504,7 @@ export function BookAppointmentPage() {
             </div>
 
             {/* ── Main Form Section ── */}
-            <div className="flex-1 px-4 py-8 md:px-16 md:py-24 flex flex-col relative z-20 min-h-[calc(100vh-80px)] md:min-h-screen bg-white">
+            <div className="flex-1 px-4 pt-12 pb-8 md:px-16 md:py-24 flex flex-col relative z-20 min-h-[calc(100vh-80px)] md:min-h-screen bg-white">
                 <div className="max-w-xl w-full mx-auto md:mx-0">
                     {/* Step Title */}
                     <div className="mb-12">
@@ -512,12 +518,12 @@ export function BookAppointmentPage() {
                     {renderStepContent()}
 
                     {/* Navigation Buttons */}
-                    <div className="mt-12 flex gap-4 pb-20 md:pb-0">
+                    <div className="mt-12 flex gap-3 sm:gap-4 pb-24 md:pb-0">
                         {currentStep > 0 && (
                             <button
                                 onClick={handleBack}
                                 disabled={submitting}
-                                className="flex-1 md:flex-none md:w-40 py-4 bg-white border-2 border-gray-100 text-gray-400 hover:border-[#037166]/30 hover:text-gray-900 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-sm active:scale-95"
+                                className="flex-1 md:flex-none md:w-40 py-4 bg-white border-2 border-gray-100 text-gray-400 hover:border-[#037166]/30 hover:text-gray-900 font-black uppercase tracking-[0.12em] sm:tracking-widest text-xs sm:text-sm rounded-2xl transition-all shadow-sm active:scale-95"
                             >
                                 Back
                             </button>
@@ -533,7 +539,7 @@ export function BookAppointmentPage() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitting}
-                                className="flex-1 py-5 bg-[#037166] text-white text-sm font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-2xl shadow-[#037166]/30 active:scale-95 flex items-center justify-center gap-3"
+                                className="flex-1 py-4 sm:py-5 px-3 sm:px-4 bg-[#037166] text-white text-xs sm:text-sm font-black uppercase tracking-[0.12em] sm:tracking-[0.2em] rounded-2xl transition-all shadow-2xl shadow-[#037166]/30 active:scale-95 flex items-center justify-center gap-2 sm:gap-3 text-center leading-tight"
                             >
                                 {submitting ? (
                                     <>

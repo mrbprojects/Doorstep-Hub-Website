@@ -14,6 +14,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/religious/AddonsModal';
 import { isObjectId } from '@/utils/slugHelper';
+import DOMPurify from 'dompurify';
 
 const amenityIcons = {
     Wifi: Wifi,
@@ -72,6 +73,11 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     const [isCheckingAddons, setIsCheckingAddons] = useState(false);
     const [viewingRateCard, setViewingRateCard] = useState(null);
     const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
+    const renderSanitizedHtml = (htmlContent) => ({
+        __html: DOMPurify.sanitize(htmlContent || '', {
+            USE_PROFILES: { html: true },
+        }),
+    });
 
     const sliderSettings = {
         dots: true,
@@ -505,7 +511,10 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
                             <div>
                                 <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-2">About Service</h3>
-                                <p className="text-gray-600 leading-relaxed">{serviceData.about}</p>
+                                <div
+                                    className="text-gray-600 leading-relaxed whitespace-pre-wrap"
+                                    dangerouslySetInnerHTML={renderSanitizedHtml(serviceData.about)}
+                                />
                             </div>
                             <div>
                                 <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-2">Prerequisites</h3>

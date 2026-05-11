@@ -110,15 +110,13 @@ export function KnowledgeSpace() {
   );
 
   return (
-    <section className="relative py-18 overflow-hidden">
-      {/* Architectural World Background */}
+    <section className="relative py-24 overflow-hidden bg-white">
+      {/* Architectural Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f8fafc] via-white to-[#f8fafc]" />
 
         {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
-
-        {/* Center glow removed as requested */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -128,25 +126,26 @@ export function KnowledgeSpace() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
-            <BookOpen className="w-4 h-4 text-[#037166]" />
-            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#037166] to-[#037166] bg-clip-text text-transparent font-medium">Creative Studio Cards</h6>
+          <div className="inline-flex items-center space-x-3 px-5 py-2.5 bg-[#037166]/5 border border-[#037166]/10 rounded-full mb-8 shadow-sm">
+            <BookOpen className="w-5 h-5 text-[#037166]" />
+            <h6 className="text-sm text-[#037166] font-bold uppercase tracking-widest">Knowledge Base</h6>
           </div>
 
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#037166] via-[#037166] to-[#037166] bg-clip-text text-transparent">Knowledge Hub</span>
+          <h2 className="text-4xl sm:text-6xl font-extrabold mb-6 tracking-tight">
+              <span className="text-gray-900">Expert Insights & </span>
+              <span className="text-[#037166]">Knowledge Hub</span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Explore insights, tips, and stories from our community of service providers and users
+          <p className="text-gray-500 text-xl max-w-3xl mx-auto leading-relaxed">
+            Master your home maintenance with professional tips, technical insights, and stories from our expert community.
           </p>
         </motion.div>
 
         {/* Articles Grid */}
-        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-4 md:mx-0 md:px-0 md:overflow-visible">
-          <div className="flex min-w-max gap-4 md:min-w-0 md:grid md:grid-cols-2 md:gap-4 xl:grid-cols-6">
+        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-8 md:mx-0 md:px-0 md:overflow-visible">
+          <div className="flex min-w-max gap-6 md:min-w-0 md:grid md:grid-cols-2 md:gap-8 xl:grid-cols-6">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             : articles.map((article, index) => (
@@ -156,63 +155,60 @@ export function KnowledgeSpace() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`group w-[240px] shrink-0 md:w-auto ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
+                className={`group w-[280px] shrink-0 md:w-auto ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-60' : ''}`}
               >
                 <Link href={article.isDummy ? '#' : `/knowledge/${article.slug}`}>
                   {/* Studio Card */}
                   <motion.div
-                    whileHover={article.isDummy ? {} : { y: -10 }}
-                    className={`relative h-full overflow-hidden rounded-2xl border border-[#037166]/20 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:shadow-[#037166]/20 ${article.isDummy ? 'pointer-events-none' : ''}`}
+                    whileHover={article.isDummy ? {} : { y: -12 }}
+                    className={`relative h-full overflow-hidden rounded-[32px] border border-gray-100 bg-white shadow-xl shadow-gray-200/50 transition-all duration-500 hover:shadow-2xl hover:shadow-[#037166]/10 ${article.isDummy ? 'pointer-events-none' : ''}`}
                   >
                     {/* Trending Badge */}
                     {article.trending && (
-                      <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-[#037166] to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
-                        <TrendingUp className="w-3 h-3 !text-white" />
-                        <h6 className="text-xs font-bold !text-white">Trending</h6>
+                      <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none bg-gradient-to-r from-[#037166] to-[#04a99d] px-6 py-1.5 shadow-lg">
+                        <TrendingUp className="w-3.5 h-3.5 text-white" />
+                        <h6 className="text-[10px] font-black uppercase tracking-widest text-white">Trending</h6>
                       </div>
                     )}
 
 
                     {/* Image */}
-                    <div className="relative h-36 overflow-hidden">
+                    <div className="relative h-44 overflow-hidden">
                       <ImageWithFallback
                         src={article.image}
                         alt={article.title}
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+                        className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-transparent" />
 
                       {/* Category Badge */}
-                      <div className="absolute bottom-3 left-3 rounded-full bg-[#037166]/80 px-2.5 py-1 backdrop-blur-md">
-                        <h6 className="text-xs font-semibold !text-white uppercase tracking-wider">
+                      <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3.5 py-1.5 backdrop-blur-md shadow-sm">
+                        <h6 className="text-[10px] font-black text-[#037166] uppercase tracking-widest">
                           {article.category}
                         </h6>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
-                      <h4 className="mb-2 line-clamp-1 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-base font-bold leading-snug text-transparent">
+                    <div className="p-6">
+                      <h4 className="mb-3 line-clamp-2 text-gray-900 text-lg font-bold leading-snug group-hover:text-[#037166] transition-colors">
                         {article.title}
                       </h4>
-                      <p className="mb-3 line-clamp-2 text-xs text-white/60">
+                      <p className="mb-6 line-clamp-2 text-sm text-gray-500 leading-relaxed">
                         {article.summary}
                       </p>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-xs text-gray-400">
-                          <Clock className="h-3.5 w-3.5 text-[#037166]" />
-                          <span>{article.readTime}</span>
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                        <div className="flex items-center space-x-2 text-xs text-gray-400 font-bold">
+                          <Clock className="h-4 w-4 text-[#037166]" />
+                          <span className="uppercase tracking-widest">{article.readTime}</span>
                         </div>
-
-
+                        
+                        <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#037166] transition-colors">
+                          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
+                        </div>
                       </div>
                     </div>
-
-                    {/* Hover Glow */}
-                    {!article.isDummy && (
-                      <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
-                    )}
                   </motion.div>
                 </Link>
               </motion.div>
@@ -221,50 +217,22 @@ export function KnowledgeSpace() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center"
+          className="text-center mt-12"
         >
           <Link href="/knowledge">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full text-white font-semibold shadow-xl shadow-[#037166]/40 hover:shadow-2xl hover:shadow-[#037166]/50 transition-all inline-flex items-center space-x-2"
+              className="px-10 py-5 mb-5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-black text-xl shadow-2xl shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all duration-300 inline-flex items-center gap-4 group"
             >
               <span>Explore All Articles</span>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
             </motion.button>
           </Link>
         </motion.div>
-
-        {/* Newsletter Signup */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-20 max-w-3xl mx-auto p-8 bg-gradient-to-r from-[#1a1a1a]/80 via-[#1a1a1a]/90 to-[#1a1a1a]/80 backdrop-blur-xl border-2 border-[#037166]/30 rounded-3xl"
-        >
-          <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold text-white mb-2">Stay Updated</h3>
-            <p className="text-gray-400">Get the latest articles and exclusive insights delivered to your inbox</p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-6 py-4 bg-[#0a0a0a]/80 border border-[#037166]/30 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-[#037166] transition-colors"
-            />
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-8 py-4 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full text-white font-semibold shadow-lg shadow-[#037166]/40 hover:shadow-xl hover:shadow-[#037166]/50 transition-all whitespace-nowrap"
-            >
-              Subscribe Now
-            </motion.button>
-          </div>
-        </motion.div> */}
       </div>
     </section>
   );

@@ -266,7 +266,7 @@ export function ThankYouPage({ bookingDetails }) {
                                 </div>
                                 <div>
                                     <h4 className="text-lg font-bold text-white">Refer & Earn</h4>
-                                    <p className="text-white/60 text-xs">Share your link. Earn real rewards.</p>
+                                    <p className="text-white/90 text-xs">Share your link. Earn real rewards.</p>
                                 </div>
                             </div>
                             {/* Welcome Bonus Pill */}
@@ -280,24 +280,24 @@ export function ThankYouPage({ bookingDetails }) {
                         <div className="grid grid-cols-2 gap-3 mb-5">
                             {/* Tile 1 — Per Referral */}
                             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                                <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">You Earn</p>
+                                <p className="text-white/85 text-[10px] uppercase tracking-widest font-bold mb-1">You Earn</p>
                                 <p className="text-3xl font-extrabold text-white">₹{referralAmount}</p>
-                                <p className="text-white/60 text-[11px] mt-1">per referral, after 1st booking</p>
+                                <p className="text-white/90 text-[11px] mt-1">per referral, after 1st booking</p>
                             </div>
                             {/* Tile 2 — Friend Bonus */}
                             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                                <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Friend Gets</p>
+                                <p className="text-white/85 text-[10px] uppercase tracking-widest font-bold mb-1">Friend Gets</p>
                                 <p className="text-3xl font-extrabold text-yellow-300">₹{registrationBonus}</p>
-                                <p className="text-white/60 text-[11px] mt-1">on first registration</p>
+                                <p className="text-white/90 text-[11px] mt-1">on first registration</p>
                             </div>
                         </div>
 
                         {/* Invite Link Row */}
                         <div className="bg-black/30 backdrop-blur-md rounded-xl p-3.5 border border-white/10 flex items-center justify-between gap-3 mb-4">
                             <div className="flex-1 overflow-hidden">
-                                <p className="text-white/40 text-[9px] uppercase tracking-widest mb-0.5 font-bold">Your Referral Code</p>
+                                <p className="text-white/85 text-[9px] uppercase tracking-widest mb-0.5 font-bold">Your Referral Code</p>
                                 <p className="text-white text-xs font-mono font-semibold truncate">{referralCode}</p>
-                                <p className="text-white/30 text-[10px] truncate mt-0.5">{inviteLink}</p>
+                                <p className="text-white/80 text-[10px] truncate mt-0.5">{inviteLink}</p>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
                                 <button
@@ -357,7 +357,7 @@ export function ThankYouPage({ bookingDetails }) {
                         </div>
 
                         {/* Footer note */}
-                        <div className="flex items-center gap-2 text-[10px] text-white/40">
+                        <div className="flex items-center gap-2 text-[10px] text-white/90">
                             <Sparkles className="w-3 h-3 text-[#04a99d] flex-shrink-0" />
                             <span>Your reward of ₹{referralAmount} is credited after your friend completes their first booking successfully.</span>
                         </div>

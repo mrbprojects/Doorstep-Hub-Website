@@ -117,22 +117,22 @@ export function ArticleViewPage({ slug }) {
     }
 
     return (
-        <article className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden">
+        <article className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
             {/* Reading Progress Bar - Could be added later */}
 
             {/* Hero Section */}
-            <div className="relative h-[60vh] min-h-[500px] w-full">
+            <div className="relative h-[65vh] min-h-[500px] w-full bg-gray-900">
                 <div className="absolute inset-0">
                     <ImageWithFallback
                         src={article.image}
                         alt={article.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover opacity-60"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 </div>
 
-                <div className="absolute inset-0 flex flex-col justify-end pb-20">
-                    <div className="max-w-4xl mx-auto w-full px-6 lg:px-8">
+                <div className="absolute inset-0 flex flex-col justify-end pb-16">
+                    <div className="max-w-5xl mx-auto w-full px-6 lg:px-8">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -140,37 +140,39 @@ export function ArticleViewPage({ slug }) {
                         >
                             <Link
                                 href="/"
-                                className="inline-flex items-center gap-2 text-white/80 hover:text-[#037166] transition-colors mb-6 group"
+                                className="inline-flex items-center gap-2 text-white/90 hover:text-[#037166] transition-colors mb-8 group"
                             >
                                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                                Back to Home
+                                <span className="font-medium">Back to Home</span>
                             </Link>
 
-                            <div className="flex flex-wrap items-center gap-4 mb-4 text-sm font-medium">
-                                <span className="px-3 py-1 bg-[#037166] text-white rounded-full">
+                            <div className="flex flex-wrap items-center gap-4 mb-6">
+                                <span className="px-4 py-1.5 bg-[#037166] text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-lg shadow-[#037166]/20">
                                     {article.category}
                                 </span>
-                                <span className="flex items-center gap-1 text-white/80">
-                                    <Clock className="w-4 h-4" />
-                                    {article.readTime}
-                                </span>
-                                <span className="flex items-center gap-1 text-white/80">
-                                    <Calendar className="w-4 h-4" />
-                                    {article.date}
-                                </span>
+                                <div className="flex items-center gap-4 text-sm text-white/80 font-medium">
+                                    <span className="flex items-center gap-1.5">
+                                        <Clock className="w-4 h-4" />
+                                        {article.readTime}
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Calendar className="w-4 h-4" />
+                                        {article.date}
+                                    </span>
+                                </div>
                             </div>
 
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
                                 {article.title}
                             </h1>
 
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-[#037166]/20 flex items-center justify-center border border-[#037166]/50">
-                                    <User className="w-5 h-5 text-[#037166]" />
+                                <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                                    <User className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-white">Written by</p>
-                                    <p className="text-[#037166]">{article.author}</p>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-white/60">Written by</p>
+                                    <p className="text-lg font-bold text-white leading-tight">{article.author}</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -179,7 +181,7 @@ export function ArticleViewPage({ slug }) {
             </div>
 
             {/* Content Section */}
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 grid grid-cols-1 lg:grid-cols-12 gap-16">
 
                 {/* Main Content */}
                 <div className="lg:col-span-8">
@@ -187,67 +189,66 @@ export function ArticleViewPage({ slug }) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.6 }}
-                        className="prose prose-invert prose-lg max-w-none"
+                        className="prose prose-lg max-w-none prose-slate prose-headings:text-gray-900 prose-p:text-gray-600 prose-strong:text-gray-900 prose-a:text-[#037166] prose-img:rounded-3xl"
                     >
-                        {/* 
-                           We are dangerously setting HTML here assuming the API returns HTML content.
-                           If it returns plain text, we would render differently or use a markdown parser.
-                           Sanitization should ideally happen on the server or use a library like DOMPurify.
-                        */}
                         <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                     </motion.div>
 
                     {/* Share Section */}
-                    <div className="mt-12 pt-8 border-t border-white/10">
-                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            <Share2 className="w-5 h-5 text-[#037166]" />
+                    <div className="mt-16 pt-10 border-t border-gray-100">
+                        <h3 className="text-xl font-bold mb-6 flex items-center gap-3 text-gray-900">
+                            <Share2 className="w-6 h-6 text-[#037166]" />
                             Share this article
                         </h3>
                         <div className="flex gap-4">
-                            <button onClick={() => handleShare('facebook')} className="p-3 bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] rounded-full transition-colors">
-                                <Facebook className="w-5 h-5" />
+                            <button onClick={() => handleShare('facebook')} className="p-4 bg-gray-50 hover:bg-[#1877F2] hover:text-white text-[#1877F2] rounded-2xl transition-all duration-300 group shadow-sm hover:shadow-md">
+                                <Facebook className="w-6 h-6" />
                             </button>
-                            <button onClick={() => handleShare('twitter')} className="p-3 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] rounded-full transition-colors">
-                                <Twitter className="w-5 h-5" />
+                            <button onClick={() => handleShare('twitter')} className="p-4 bg-gray-50 hover:bg-[#1DA1F2] hover:text-white text-[#1DA1F2] rounded-2xl transition-all duration-300 group shadow-sm hover:shadow-md">
+                                <Twitter className="w-6 h-6" />
                             </button>
-                            <button onClick={() => handleShare('linkedin')} className="p-3 bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[#0A66C2] rounded-full transition-colors">
-                                <Linkedin className="w-5 h-5" />
+                            <button onClick={() => handleShare('linkedin')} className="p-4 bg-gray-50 hover:bg-[#0A66C2] hover:text-white text-[#0A66C2] rounded-2xl transition-all duration-300 group shadow-sm hover:shadow-md">
+                                <Linkedin className="w-6 h-6" />
                             </button>
-                            <button onClick={() => handleShare('copy')} className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors">
-                                <LinkIcon className="w-5 h-5" />
+                            <button onClick={() => handleShare('copy')} className="p-4 bg-gray-50 hover:bg-gray-900 hover:text-white text-gray-900 rounded-2xl transition-all duration-300 group shadow-sm hover:shadow-md">
+                                <LinkIcon className="w-6 h-6" />
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Sidebar */}
-                <aside className="lg:col-span-4 space-y-8">
+                <aside className="lg:col-span-4 space-y-12">
                     {/* Newsletter Widget */}
-                    <NewsletterWidget compact />
+                    <div className="bg-gray-50 rounded-3xl p-1 border border-gray-100 shadow-sm">
+                        <NewsletterWidget compact />
+                    </div>
 
                     {/* Related Articles */}
                     {relatedArticles.length > 0 && (
-                        <div>
-                            <h3 className="text-xl font-bold mb-6 border-b border-white/10 pb-2">Related Articles</h3>
-                            <div className="space-y-6">
+                        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                            <h3 className="text-2xl font-bold mb-8 text-gray-900">Related Articles</h3>
+                            <div className="space-y-8">
                                 {relatedArticles.map((item) => (
                                     <Link key={item.id} href={`/knowledge/${item.slug}`} className="group block">
-                                        <div className="flex gap-4">
-                                            <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-800">
+                                        <div className="flex gap-5">
+                                            <div className="w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden bg-gray-100 ring-1 ring-gray-200">
                                                 <ImageWithFallback
                                                     src={item.image}
                                                     alt={item.title}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />
                                             </div>
-                                            <div className="flex-1">
-                                                <span className="text-xs text-[#037166] font-medium mb-1 block">{item.category}</span>
-                                                <h4 className="text-white font-medium line-clamp-2 group-hover:text-[#037166] transition-colors mb-2">
+                                            <div className="flex-1 min-w-0">
+                                                <span className="text-xs text-[#037166] font-bold uppercase tracking-wider mb-2 block">{item.category}</span>
+                                                <h4 className="text-gray-900 font-bold text-lg line-clamp-2 group-hover:text-[#037166] transition-colors mb-2 leading-tight">
                                                     {item.title}
                                                 </h4>
-                                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                    <Clock className="w-3 h-3" />
-                                                    {item.readTime}
+                                                <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                                                    <span className="flex items-center gap-1.5">
+                                                        <Clock className="w-3.5 h-3.5 text-[#037166]" />
+                                                        {item.readTime}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

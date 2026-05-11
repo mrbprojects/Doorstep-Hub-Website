@@ -564,10 +564,10 @@ export function NearbyServiceCenters() {
             )}
 
             {/* Map legend */}
-            <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-3 flex flex-col gap-2 text-xs text-white/70 z-10 pointer-events-none">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-400" /><span>Your Location</span></div>
-              <div className="flex items-center gap-2"><img src="/servicecenterpointlogo.png" alt="c" className="w-4 h-4 object-contain" /><span>Service Center</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-400" /><span>Selected</span></div>
+            <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-3 flex flex-col gap-2 text-xs text-white z-10 pointer-events-none">
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-400" /><span style={{ color: '#ffffff' }}>Your Location</span></div>
+              <div className="flex items-center gap-2"><img src="/servicecenterpointlogo.png" alt="c" className="w-4 h-4 object-contain" /><span style={{ color: '#ffffff' }}>Service Center</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-400" /><span style={{ color: '#ffffff' }}>Selected</span></div>
             </div>
           </motion.div>
 

@@ -236,22 +236,22 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
         </div>
 
         {/* View All Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex justify-center mt-12"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 rounded-full  bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent hover:bg-white/10 border border-white/10 hover:border-[#037166]/50 text-white font-medium transition-all duration-300 flex items-center gap-2 group"
-            onClick={onViewAll}
-          >
-            View All Services
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
-        </motion.div>
+          <motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  className="flex justify-center mt-12 mb-5"
+>
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className="px-8 py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg shadow-lg shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all duration-300 inline-flex items-center gap-3 group"
+    onClick={onViewAll}
+  >
+    View All Services
+    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+  </motion.button>
+</motion.div>
       </div>
     </section>
   );

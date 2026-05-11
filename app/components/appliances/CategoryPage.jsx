@@ -441,7 +441,7 @@ export function CategoryPage({ slug, initialData }) {
                     <h3 className="text-lg font-semibold text-gray-900">Most Popular</h3>
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     {subCategories.slice(0, Math.min(subCategories.length, featuredCount)).map((subCategory, index) => (
                       <motion.div
                         key={subCategory._id || `featured-${index}`}
@@ -483,7 +483,7 @@ export function CategoryPage({ slug, initialData }) {
                           )}
 
                           {/* Icon/Image */}
-                          <div className="relative z-10 flex-shrink-0 w-28 md:w-40 bg-white/5">
+                          <div className="relative z-10 flex-shrink-0 w-24 sm:w-28 md:w-40 bg-white/5">
                             {subCategory.image ? (
                               <div className="w-full h-full overflow-hidden">
                                 <img
@@ -512,11 +512,11 @@ export function CategoryPage({ slug, initialData }) {
                           </div>
 
                           {/* Content */}
-                          <div className="relative z-10 flex-1 min-w-0 p-4 md:p-6 flex flex-col justify-center bg-white border-l border-[#e2e8f0]">
-                            <h4 className="text-xl md:text-2xl font-bold text-[#037166] mb-2 md:mb-3 group-hover:text-[#025951] transition-colors truncate">
+                          <div className="relative z-10 flex-1 min-w-0 p-3 sm:p-4 md:p-6 flex flex-col justify-center bg-white border-l border-[#e2e8f0]">
+                            <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-[#037166] mb-1.5 sm:mb-2 md:mb-3 group-hover:text-[#025951] transition-colors line-clamp-1">
                               {subCategory.name}
                             </h4>
-                            <p className="text-[#037166]/80 text-sm mb-3 md:mb-4 leading-relaxed line-clamp-2">
+                            <p className="text-[#037166]/80 text-xs sm:text-sm mb-2 sm:mb-3 md:mb-4 leading-relaxed line-clamp-2">
                               Professional service by verified and experienced technicians
                             </p>
 
@@ -525,7 +525,7 @@ export function CategoryPage({ slug, initialData }) {
 
                             {/* CTA */}
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-[#037166] font-semibold text-sm">
+                              <div className="flex items-center gap-1.5 sm:gap-2 text-[#037166] font-semibold text-xs sm:text-sm">
                                 View Services
                                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                               </div>
@@ -567,17 +567,17 @@ export function CategoryPage({ slug, initialData }) {
                         Our experts can recommend the best service for your needs
                       </p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto">
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 font-semibold hover:bg-white hover:border-[#037166]/40 transition-all whitespace-nowrap"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 font-semibold hover:bg-white hover:border-[#037166]/40 transition-all text-sm sm:text-base"
                       >
                         <TicketCheck className="w-4 h-4 text-[#04a99d]" />
                         Raise A Ticket
                       </button>
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all whitespace-nowrap"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all text-sm sm:text-base"
                       >
                         <Smartphone className="w-4 h-4" />
                         Track Order
@@ -593,3 +593,4 @@ export function CategoryPage({ slug, initialData }) {
     </motion.div>
   );
 }
+

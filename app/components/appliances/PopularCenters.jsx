@@ -54,10 +54,14 @@ export function PopularCenters({ onStoreClick }) {
         const data = await response.json();
 
         if (data.success && Array.isArray(data.featuredServiceCenters)) {
+          const stripHtml = (html) => {
+            if (!html) return '';
+            return html.replace(/<[^>]*>?/gm, '');
+          };
+
           const mappedCenters = data.featuredServiceCenters.map(center => ({
             id: center._id,
-            slug: center.slug, // Map the slug
-            // Use image if available, otherwise logo, otherwise fallback
+            slug: center.slug,
             image: center.logo
               ? `https://api.doorstephub.com/${center.logo}`
               : center.image
@@ -66,9 +70,9 @@ export function PopularCenters({ onStoreClick }) {
             name: center.name,
             location: center.cityName && center.stateName ? `${center.cityName}, ${center.stateName}` : (center.address || 'Unknown Location'),
             rating: typeof center.rating === 'string' ? parseFloat(center.rating) : (center.rating || 0),
-            reviews: 0, // Not provided by API
-            speciality: center.bio || 'Service Center',
-            popular: true, // Assuming all featured centers are popular
+            reviews: 0,
+            speciality: stripHtml(center.bio) || 'Service Center',
+            popular: true,
             charges: center.serviceCharge
           }));
           setCenters(mappedCenters);

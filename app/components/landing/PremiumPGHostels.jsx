@@ -311,6 +311,7 @@ export function PremiumPGHostels() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => router.push('/pghostels')}
             className="inline-flex items-center space-x-2 px-6 py-3 bg-[#297A70] text-[#ffffff] rounded-xl font-semibold shadow-lg cursor-pointer group/header-btn relative overflow-hidden"
           >
             <span className='!text-[#ffffff]'>Explore All PG & Hostels</span>

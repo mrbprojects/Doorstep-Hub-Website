@@ -129,26 +129,26 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                         animate={{ opacity: 1, x: 0 }}
                         className="hidden lg:block w-80 flex-shrink-0"
                     >
-                        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 sticky top-24">
-                            <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <div className="p-6 rounded-2xl bg-white border border-[#d8e2e8] sticky top-24 shadow-sm">
+                            <h4 className="text-xl font-bold text-[#0f172a] mb-6 flex items-center gap-2">
                                 <Filter className="w-5 h-5 text-blue-400" />
                                 Filters
                             </h4>
 
                             <div className="mb-6">
-                                <h6 className="block text-white/80 mb-3 text-sm font-medium">Minimum Rating</h6>
+                                <h6 className="block text-[#334155] mb-3 text-sm font-semibold">Minimum Rating</h6>
                                 <div className="space-y-2">
                                     {[4.5, 4.0, 3.5, 3.0].map((rating) => (
                                         <button
                                             key={rating}
                                             onClick={() => handleRatingChange(rating)}
                                             className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${minRating === rating
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                                ? 'bg-[#037166] text-white border border-[#037166]'
+                                                : 'bg-white text-[#0f172a] border border-[#cbd5e1] hover:border-[#037166]/50 hover:bg-[#f8fafc]'
                                                 }`}
                                         >
                                             <Star className="w-4 h-4 fill-current" />
-                                            <span className="text-sm">{rating}+ Stars</span>
+                                            <span className="text-sm font-medium">{rating}+ Stars</span>
                                         </button>
                                     ))}
                                 </div>
@@ -156,7 +156,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
 
                             <button
                                 onClick={resetFilters}
-                                className="w-full mt-6 px-4 py-3 rounded-lg border border-white/20 text-white/80 hover:bg-white/5 transition-all text-sm font-medium flex items-center justify-center gap-2"
+                                className="w-full mt-6 px-4 py-3 rounded-lg border border-[#cbd5e1] text-[#334155] hover:bg-[#f8fafc] transition-all text-sm font-medium flex items-center justify-center gap-2"
                             >
                                 <RotateCcw className="w-4 h-4" />
                                 Reset Filters

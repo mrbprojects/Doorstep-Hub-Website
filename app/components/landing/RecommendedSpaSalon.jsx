@@ -246,7 +246,7 @@ export function RecommendedSpaSalon() {
 
   if (loading) {
     return (
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-18 overflow-hidden">
         <div className="relative w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-[#d4af37] to-white bg-clip-text text-transparent">

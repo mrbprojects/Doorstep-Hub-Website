@@ -220,7 +220,6 @@ export function NearbyServiceCenters() {
   const panToService = useCallback((svc) => {
     if (mapRef.current && svc) {
       mapRef.current.panTo({ lat: svc.lat, lng: svc.lng });
-      setMapZoom(16);
     }
   }, []);
 
@@ -230,6 +229,19 @@ export function NearbyServiceCenters() {
   }, [services, panToService]);
 
   const handleCardLeave = useCallback(() => { setSelectedService(null); }, []);
+
+  // Keep map zoomed out enough so all points are visible.
+  useEffect(() => {
+    if (!mapRef.current || !isMapsLoaded || !location) return;
+    if (!services || services.length === 0) return;
+    if (!window.google?.maps?.LatLngBounds) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+    bounds.extend({ lat: location.lat, lng: location.lng });
+    services.forEach((svc) => bounds.extend({ lat: svc.lat, lng: svc.lng }));
+
+    mapRef.current.fitBounds(bounds, 70);
+  }, [services, location, isMapsLoaded]);
 
   // Handle GPS detection via Context
   const handleDetectLocation = async () => {
@@ -528,9 +540,9 @@ export function NearbyServiceCenters() {
                               <div className="inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-[#04a99d]/60 bg-white/10">
                                 <Check className="h-2.5 w-2.5 text-[#04a99d]" />
                               </div>
-                              <span className="text-white text-xs font-bold">{service.name}</span>
+                              <span className="text-xs font-bold" style={{ color: '#ffffff' }}>{service.name}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-[10px] text-[#04a99d] font-medium opacity-80">
+                            <div className="flex items-center gap-1.5 text-[10px] font-medium opacity-80" style={{ color: '#ffffff' }}>
                               <Navigation className="w-2.5 h-2.5" />
                               Double-click to view details
                             </div>
@@ -551,7 +563,7 @@ export function NearbyServiceCenters() {
                               <div className="inline-flex h-4 w-4 items-center justify-center rounded border border-white/60 bg-white/15">
                                 <Check className="h-2.5 w-2.5 text-white" />
                               </div>
-                            <span className="text-white text-xs font-bold tracking-wide uppercase">{service.name}</span>
+                            <span className="text-xs font-bold tracking-wide uppercase" style={{ color: '#ffffff' }}>{service.name}</span>
                             {/* Connector arrow */}
                             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#025951] border-r border-b border-[#04a99d]/60 rotate-45" />
                           </div>

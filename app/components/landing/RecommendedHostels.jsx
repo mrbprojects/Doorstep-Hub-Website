@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { Heart, Users, Star, Check, Home, Wifi, Shield, Building2, Bed, Coffee, Flame, Scroll, Flower2, Utensils, Bell, Clock, BookOpen } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useRouter } from 'next/navigation';
+import { fetchLandingJson } from '@/lib/landingApiCache';
 
 export function RecommendedHostels() {
   const router = useRouter();
@@ -42,8 +43,10 @@ export function RecommendedHostels() {
     const fetchLatestHostels = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_pg_hostels`);
-        const data = await response.json();
+        const data = await fetchLandingJson(
+          'landing:latest-pg-hostels',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_pg_hostels`
+        );
 
         if (data.success && data.hostels) {
           const mappedHostels = data.hostels.map((hostel, index) => {

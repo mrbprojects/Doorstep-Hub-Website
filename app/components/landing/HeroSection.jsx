@@ -286,6 +286,7 @@ import { motion } from 'motion/react';
 import { Sparkles, Download, Zap, Shield, Star, ChevronRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { fetchLandingJson } from '@/lib/landingApiCache';
 
 /* ---------- IMAGE LOADER ---------- */
 const imageLoader = ({ src }) => {
@@ -474,10 +475,10 @@ function HeroContent({ services = [], loading = false, error = null }) {
   useEffect(() => {
     const fetchSlugs = async () => {
       try {
-        const res = await fetch(
+        const data = await fetchLandingJson(
+          'landing:service-slug:appliances',
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
         );
-        const data = await res.json();
         if (data.success && data.data?.home) {
           setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
         }
@@ -663,18 +664,16 @@ export function HeroSection() {
           ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${process.env.NEXT_PUBLIC_API_ALL_SERVICES_ENDPOINT}`
           : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`;
 
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`API Error: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        const data = await fetchLandingJson(
+          'landing:all-services',
+          apiUrl,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
         if (!data || typeof data !== 'object') {
           throw new Error('Invalid API response format');

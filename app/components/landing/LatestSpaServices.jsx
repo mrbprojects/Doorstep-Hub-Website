@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { Waves, Star, Clock, Heart, MapPin } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
+import { fetchLandingJson } from '@/lib/landingApiCache';
 
 export function LatestSpaServices() {
   const router = useRouter();
@@ -29,15 +30,16 @@ export function LatestSpaServices() {
   useEffect(() => {
     const fetchSpaServices = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_spa_stores`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-
-        });
-
-        const data = await response.json();
+        const data = await fetchLandingJson(
+          'landing:latest-spa-stores',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_spa_stores`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
         if (data.success) {
           setSpaStores(data.stores || []);
         }

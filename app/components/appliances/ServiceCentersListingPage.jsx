@@ -61,14 +61,22 @@ export function ServiceCentersListingPage() {
                 console.log(result)
 
 
+                const toImageUrl = (path, fallback) => {
+                    if (!path) return fallback;
+                    if (typeof path === 'string' && path.startsWith('http')) return path;
+                    const clean = String(path).replace(/^\/+/, '');
+                    return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${clean}`;
+                };
+
                 if (result.success && result.nearByServiceCenters) {
                     setStores(result.nearByServiceCenters.map(item => ({
                         id: item._id,
                         slug: item.slug, // Map the slug
                         name: item.business_name || `${item.firstName} ${item.lastName}`,
                         address: item.address || item.cityName || 'Location not specified',
-                        rating: item.rating || 4.5,
-                        image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400',
+                        rating: item.rating || item.avgRating || 4.5,
+                        logo: toImageUrl(item.logo, 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'),
+                        image: toImageUrl(item.image, 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'),
                         reviews: item.reviews || 'New'
                     })));
                 }
@@ -253,9 +261,12 @@ export function ServiceCentersListingPage() {
                                             <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full flex flex-col">
                                                 <div className="relative h-48 overflow-hidden">
                                                     <img
-                                                        src={store.image}
-                                                        alt={store.name}
+                                                        src={store.logo}
+                                                        alt={`${store.name} logo`}
                                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                        onError={(e) => {
+                                                            e.currentTarget.src = store.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400';
+                                                        }}
                                                     />
                                                     {/* Rating Badge - Bottom Left Flush */}
                                                     <div className="absolute bottom-0 left-0 z-20">

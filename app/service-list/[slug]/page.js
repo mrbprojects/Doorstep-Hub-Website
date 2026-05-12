@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/Footer';
 const appliancesTheme = {
     bgScrolled: 'bg-[#0a0a0a]/80',
     bgMobile: 'bg-[#0a0a0a]/95',
-    textMain: 'text-white/90',
+    textMain: 'text-[#037166]',
     textHover: 'text-[#037166]',
     border: 'border-[#037166]/20',
     accent: 'bg-[#037166]',

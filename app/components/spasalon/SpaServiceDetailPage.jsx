@@ -40,6 +40,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
     const [loading, setLoading] = useState(true);
     const [selectedPackages, setSelectedPackages] = useState([]);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
+    const [globalSettings, setGlobalSettings] = useState(null);
     const { cartItems, clearCart } = useServiceCart();
 
     const sliderSettings = {
@@ -171,6 +172,21 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
 
         fetchServiceData();
     }, [slugOrId]);
+
+    useEffect(() => {
+        const fetchGlobalSettings = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const data = await response.json();
+                if (data.success && data.policy) {
+                    setGlobalSettings(data.policy);
+                }
+            } catch (error) {
+                console.error('Error fetching global settings:', error);
+            }
+        };
+        fetchGlobalSettings();
+    }, []);
 
     const togglePackage = (pkg) => {
         setSelectedPackages(prev => {
@@ -328,7 +344,27 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
+                            <div className="flex flex-col items-start gap-3">
+                                <a
+                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Get it on Google Play"
+                                >
+                                    <img src="/andriod1.png" alt="Google Play" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                </a>
+                                <a
+                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[222px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Download on the App Store"
+                                >
+                                    <img src="/apple2.png" alt="App Store" className="h-[90px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                </a>
+                            </div>
                             <div className="bg-[#6D1357]/10 rounded-2xl p-3 md:p-4 border border-[#6D1357]/20 min-w-[100px] md:min-w-[120px] flex flex-col items-center">
                                 <div className="flex items-center justify-center mb-0.5">
                                     <Star className="w-4 h-4 md:w-5 md:h-5 fill-[#6D1357] text-[#6D1357] mr-1" />
@@ -345,19 +381,23 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     <div className="sticky top-[72px] z-40 bg-gray-50/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-1.5 md:p-2 overflow-hidden">
                         <TabsList className="bg-transparent w-full flex overflow-x-auto hide-scrollbar gap-1 md:gap-2 no-scrollbar justify-start md:justify-around">
-                            {['Services', 'Reviews', 'Amenities', 'About'].map((tab) => (
-                                <TabsTrigger
-                                    key={tab.toLowerCase()}
-                                    value={tab === 'Services' ? 'portfolio' : tab.toLowerCase()}
-                                    className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#6D1357] data-[state=active]:to-[#6D1357] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap"
-                                >
-                                    {tab}
-                                </TabsTrigger>
-                            ))}
+                            <TabsTrigger value="about" className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#6D1357] data-[state=active]:to-[#6D1357] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap">
+                                Shortly Aboutus
+                            </TabsTrigger>
+                            <TabsTrigger value="portfolio" className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#6D1357] data-[state=active]:to-[#6D1357] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap">
+                                Service Rates Cards
+                            </TabsTrigger>
+                            <TabsTrigger value="amenities" className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#6D1357] data-[state=active]:to-[#6D1357] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap">
+                                Amentites
+                            </TabsTrigger>
+                            <TabsTrigger value="reviews" className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#6D1357] data-[state=active]:to-[#6D1357] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap">
+                                Ratings
+                            </TabsTrigger>
                         </TabsList>
                     </div>
 
                     <TabsContent value="portfolio" className="space-y-4 outline-none">
+                        <h3 className="text-lg md:text-xl font-bold text-gray-900">Service Rates Cards</h3>
                         {serviceData.packages.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 {serviceData.packages.map((pkg, index) => (
@@ -386,9 +426,11 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                         <div className="p-4">
                                             <h3 className="font-bold text-gray-900 mb-1">{pkg.name}</h3>
                                             <p className="text-gray-600 text-sm mb-3 line-clamp-2">{pkg.description}</p>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[#C06C84] font-bold text-lg">₹{pkg.price}</span>
-                                                <span className="text-xs text-gray-500">{pkg.priceUnit}</span>
+                                            <div className="flex items-center justify-between gap-2">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-gray-500 italic font-bold uppercase tracking-wider">Starts From</span>
+                                                    <span className="text-[#C06C84] font-bold text-lg">₹{pkg.price}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -443,7 +485,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                         <div className="bg-white p-5 md:p-8 rounded-2xl border border-gray-100 shadow-sm">
                             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <ShieldCheck className="w-5 h-5 text-[#C06C84]" />
-                                About this Service
+                                Shortly Aboutus
                             </h3>
                             <p className="text-gray-600 text-sm md:text-base leading-relaxed whitespace-pre-line">
                                 {serviceData.about}

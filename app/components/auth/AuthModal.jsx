@@ -284,7 +284,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[#037166]/10 blur-2xl" />
                 {/* Header */}
                 <div className={`relative p-6 border-b border-opacity-10 ${borderColor} flex items-center justify-between`}>
-                    <h2 className={`text-xl font-bold text-white`}>
+                    <h2 className={`text-xl font-bold !text-white`}>
                         {!isAuthenticated
                             ? 'Sign In'
                             : isFirstTimeUser

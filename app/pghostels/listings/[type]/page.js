@@ -865,29 +865,40 @@ function PGListingsContent() {
                         </div>
 
                         {/* Price & CTA */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-gray-50 mt-auto">
-                            <div className="min-w-0">
-                                <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-0.5">Starts at</div>
-                                <div className="flex items-baseline space-x-0.5">
-                                    <span className="text-xl sm:text-2xl font-black text-gray-900">₹{listing.monthlyPrice.toLocaleString()}</span>
-                                    <span className="text-[10px] sm:text-xs text-gray-400">/mo</span>
-                                </div>
-                            </div>
 
-                            <button
-                                disabled={!isClickable}
-                                className={`w-11 h-11 sm:w-auto sm:h-auto px-0 sm:px-6 py-0 sm:py-3 rounded-full sm:rounded-xl font-bold shrink-0 transition-all flex items-center justify-center gap-1.5 ${isClickable
-                                    ? 'bg-transparent text-white shadow-none active:scale-95'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    }`}
-                            >
-                                {isClickable && (
-                                    <span className="inline-flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#037166] to-[#025951] text-white shadow-md">
-                                        <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4" />
-                                    </span>
-                                )}
-                            </button>
-                        </div>
+
+                                <div className="flex items-end justify-between gap-3 pt-3 border-t border-gray-100 mt-auto">
+
+  {/* Price Section */}
+  <div className="min-w-0">
+    <div className="text-[10px] sm:text-[11px] text-gray-400 italic uppercase tracking-[0.22em] font-bold leading-tight">
+      Starts
+      <br />
+      From
+    </div>
+
+    <div className="mt-1">
+      <span className="text-2xl sm:text-[38px] font-black text-[#0F172A] leading-none">
+        ₹{listing.monthlyPrice.toLocaleString()}
+      </span>
+    </div>
+  </div>
+
+  {/* Actions */}
+  <div className="flex items-center gap-2 shrink-0">
+
+    {/* Book Service */}
+    <button className="group flex items-center gap-2 bg-gradient-to-r from-[#037166] to-[#025951] hover:from-[#025951] hover:to-[#01463f] text-white px-3 sm:px-6 py-2.5 rounded-full font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 leading-none">
+      
+      <span className="whitespace-nowrap">
+        Book
+      </span>
+
+      <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+    </button>
+
+  </div>
+</div>
                     </div>
                 </div>
             </motion.div>
@@ -1104,7 +1115,7 @@ function PGListingsContent() {
                                         ))}
                                     </div>
                                 ) : sortedListings.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                                         {sortedListings.map((listing) => (
                                             <PGCard key={listing.id} listing={listing} />
                                         ))}
@@ -1128,7 +1139,7 @@ function PGListingsContent() {
 
                             <TabsContent value="nearby" className="mt-0">
                                 {sortedListings.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                                         {sortedListings
                                             .sort((a, b) => a.distance - b.distance)
                                             .map((listing) => (

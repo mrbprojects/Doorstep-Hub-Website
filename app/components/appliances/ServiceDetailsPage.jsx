@@ -727,7 +727,7 @@ export function ServiceDetailsPage({
               </div>
 
               {/* Service Highlights — 2-col compact grid */}
-              <div className="grid grid-cols-1 xs:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5">
                 {[
                   { icon: Shield, text: 'Verified & Insured' },
                   { icon: Award, text: '30-90 Day Warranty' },

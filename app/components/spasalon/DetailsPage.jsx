@@ -19,6 +19,7 @@ export function DetailsPage() {
     const [viewingRateCard, setViewingRateCard] = useState(null);
     const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [globalSettings, setGlobalSettings] = useState(null);
 
     useEffect(() => {
         const fetchServiceDetails = async () => {
@@ -82,6 +83,21 @@ export function DetailsPage() {
         };
         fetchServiceDetails();
     }, [params?.id, params?.slug]);
+
+    useEffect(() => {
+        const fetchGlobalSettings = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const data = await response.json();
+                if (data.success && data.policy) {
+                    setGlobalSettings(data.policy);
+                }
+            } catch (error) {
+                console.error('Error fetching global settings:', error);
+            }
+        };
+        fetchGlobalSettings();
+    }, []);
 
     useEffect(() => {
         if (!loading && !service) {
@@ -170,8 +186,8 @@ export function DetailsPage() {
                             <p className="text-xl text-gray-600">{service.provider}</p>
                         </div>
 
-                        {/* Right - Quick Stats */}
-                        <div className="flex flex-wrap gap-4">
+                        {/* Right - Quick Stats + App Download */}
+                        <div className="flex flex-col md:items-end gap-3">
                             {/* Rating Card */}
                             <div className="bg-gradient-to-br from-[#F59E0B]/10 to-[#F59E0B]/5 rounded-2xl p-4 border border-[#F59E0B]/20 min-w-[120px]">
                                 <div className="flex items-center justify-center mb-1">
@@ -179,6 +195,27 @@ export function DetailsPage() {
                                     <span className="text-2xl font-bold text-gray-900">{service.rating}</span>
                                 </div>
                                 <div className="text-xs text-gray-500 text-center">Rating</div>
+                            </div>
+
+                            <div className="flex flex-col items-start gap-3">
+                                <a
+                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Get it on Google Play"
+                                >
+                                    <img src="/andriod1.png" alt="Google Play" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" />
+                                </a>
+                                <a
+                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Download on the App Store"
+                                >
+                                    <img src="/apple2.png" alt="App Store" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" />
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -574,24 +574,24 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
 
                 {/* App Links beside heading */}
-                <div className="flex flex-col items-start gap-2 md:self-end md:mb-1">
+                <div className="flex flex-col items-start gap-3 md:self-end md:mb-0">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-32 xs:w-40 md:w-36 h-10 xs:h-11 md:h-10 bg-[#DEF2EF] rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1" />
+                    <img src="/andriod1.png" alt="Google Play" className="h-[80px] w-auto max-w-[100%] object-contain block mx-auto" />
                   </a>
                   <a
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-32 xs:w-40 md:w-36 h-10 xs:h-11 md:h-10 bg-[#DEF2EF] rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                     title="Download on the App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1" />
+                    <img src="/apple2.png" alt="App Store" className="h-[80px] w-auto max-w-[100%] object-contain block mx-auto" />
                   </a>
                 </div>
               </div>
@@ -714,6 +714,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                   </div>
                                 )}
                                 <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-1 leading-snug">{service.name}</h4>
+                                {service.subcategoryName && (
+                                  <div className="mb-1 inline-flex px-3 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20">
+                                    <span className="text-[#037166] text-[10px] font-bold uppercase tracking-wider">{service.subcategoryName}</span>
+                                  </div>
+                                )}
                               </div>
                               <div className="text-right flex-shrink-0 ml-2">
                                 <span className="text-xl sm:text-2xl font-bold text-[#037166]">₹{service.price}</span>
@@ -743,11 +748,6 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 <div className="flex items-center gap-1.5 text-gray-500 text-sm">
                                   <Clock className="w-4 h-4 text-[#037166]" />
                                   <span>{service.duration}</span>
-                                </div>
-                              )}
-                              {service.subcategoryName && (
-                                <div className="px-3 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20">
-                                  <span className="text-[#037166] text-[10px] font-bold uppercase tracking-wider">{service.subcategoryName}</span>
                                 </div>
                               )}
                             </div>

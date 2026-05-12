@@ -63,7 +63,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                                 <Store className="w-7 h-7 text-white" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">Authorized Centers</h4>
+                                <h4 className="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">Near by Service Centers</h4>
                                 <p className="text-sm text-gray-500 font-medium">Find and visit nearby service centers</p>
                             </div>
                         </button>

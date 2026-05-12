@@ -50,6 +50,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
     const [showAddonsModal, setShowAddonsModal] = useState(false);
     const [addonsData, setAddonsData] = useState(null);
     const [isCheckingAddons, setIsCheckingAddons] = useState(false);
+    const [globalSettings, setGlobalSettings] = useState(null);
     const { addToCart, clearCart } = useServiceCart();
 
     const sliderSettings = {
@@ -151,6 +152,21 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
 
         fetchHostelData();
     }, [slugOrId]);
+
+    useEffect(() => {
+        const fetchGlobalSettings = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const data = await response.json();
+                if (data.success && data.policy) {
+                    setGlobalSettings(data.policy);
+                }
+            } catch (error) {
+                console.error('Error fetching global settings:', error);
+            }
+        };
+        fetchGlobalSettings();
+    }, []);
 
     // Immediate redirection logic
     useEffect(() => {
@@ -354,7 +370,27 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                         </div>
 
                         {/* Right - Quick Stats */}
-                        <div className="flex flex-row items-center gap-2 sm:gap-4 flex-shrink-0">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-shrink-0">
+                            <div className="flex flex-col items-start gap-3">
+                                <a
+                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Get it on Google Play"
+                                >
+                                    <img src="/andriod1.png" alt="Google Play" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                </a>
+                                <a
+                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Download on the App Store"
+                                >
+                                    <img src="/apple2.png" alt="App Store" className="h-[86px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                </a>
+                            </div>
                             {/* Rating pill */}
                             <div className="flex-1 sm:flex-none bg-gradient-to-br from-[#F59E0B]/10 to-[#F59E0B]/5 rounded-2xl p-2.5 sm:p-4 border border-[#F59E0B]/20 min-w-[90px] sm:min-w-[120px] text-center shadow-sm">
                                 <div className="flex items-center justify-center mb-0.5">
@@ -365,12 +401,18 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                             </div>
 
                             {/* Base Price pill */}
-                            <div className="flex-1 sm:flex-none bg-gradient-to-br from-[#037166]/10 to-[#037166]/5 rounded-2xl p-2.5 sm:p-4 border border-[#037166]/20 min-w-[90px] sm:min-w-[120px] text-center shadow-sm">
-                                <div className="flex items-center justify-center mb-0.5">
-                                    <span className="text-lg sm:text-2xl font-bold text-gray-900">₹{hostelData.basePrice}</span>
-                                </div>
-                                <div className="text-[9px] sm:text-xs text-[#037166] font-bold uppercase tracking-wider whitespace-nowrap">/Month</div>
-                            </div>
+
+                         <div className="flex-1 sm:flex-none bg-gradient-to-br from-[#037166]/10 to-[#037166]/5 rounded-2xl p-2.5 sm:p-4 border border-[#037166]/20 min-w-[90px] sm:min-w-[120px] text-center shadow-sm">
+  <div className="flex flex-col items-center justify-center">
+    <div className="text-[9px] sm:text-xs text-[#037166] font-bold italic whitespace-nowrap mb-1">
+      Starts From
+    </div>
+
+    <span className="text-lg sm:text-2xl font-bold text-gray-900 leading-none">
+      ₹{hostelData.basePrice}
+    </span>
+  </div>
+</div>
                         </div>
                     </div>
                 </motion.div>
@@ -392,21 +434,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                 className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
                             >
                                 <Home className="w-4 h-4 mr-2" />
-                                <span>Room Sharings</span>
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="reviews"
-                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
-                            >
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                                <span>Reviews</span>
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="gallery"
-                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
-                            >
-                                <Camera className="w-4 h-4 mr-2" />
-                                <span>Gallery</span>
+                                <span>Rate Cards</span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value="amenities"
@@ -420,7 +448,21 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                 className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
                             >
                                 <MapPin className="w-4 h-4 mr-2" />
-                                <span>About</span>
+                                <span>About Us</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="gallery"
+                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
+                            >
+                                <Camera className="w-4 h-4 mr-2" />
+                                <span>PG And Hostel Images</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="reviews"
+                                className="flex-shrink-0 data-[state=active]:bg-[#037166] data-[state=active]:text-white text-gray-700 hover:bg-gray-50 rounded-xl transition-all whitespace-nowrap px-4 sm:px-6 py-2 sm:py-2.5 font-bold flex items-center h-full border-none shadow-none"
+                            >
+                                <MessageSquare className="w-4 h-4 mr-2" />
+                                <span>Ratings</span>
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -432,7 +474,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                             Please select a room type to proceed:
                         </div>
                         {hostelData.packages.length > 0 ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                                 {hostelData.packages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
@@ -464,6 +506,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
 
                                             <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
                                                 <div className="flex flex-col">
+                                                    <span className="text-[10px] text-gray-500 font-bold italic uppercase tracking-wider">Starts From</span>
                                                     <span className="text-[#037166] font-bold text-xl sm:text-2xl">₹{pkg.price}</span>
                                                     <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">{pkg.priceUnit || 'per month'}</span>
                                                 </div>
@@ -491,7 +534,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                         )}
                     </TabsContent>
 
-                    {/* Reviews Tab */}
+                    {/* Ratings Tab */}
                     <TabsContent value="reviews" className="space-y-4">
                         {hostelData.reviews.length > 0 ? (
                             hostelData.reviews.map((review, index) => (

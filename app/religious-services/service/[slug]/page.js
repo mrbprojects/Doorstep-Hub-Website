@@ -71,6 +71,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
     const [isCheckingAddons, setIsCheckingAddons] = useState(false);
+    const [globalSettings, setGlobalSettings] = useState(null);
     const [viewingRateCard, setViewingRateCard] = useState(null);
     const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
     const renderSanitizedHtml = (htmlContent) => ({
@@ -189,6 +190,21 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
 
         fetchServiceData();
     }, [slugOrId]);
+
+    useEffect(() => {
+        const fetchGlobalSettings = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const data = await response.json();
+                if (data.success && data.policy) {
+                    setGlobalSettings(data.policy);
+                }
+            } catch (error) {
+                console.error('Error fetching global settings:', error);
+            }
+        };
+        fetchGlobalSettings();
+    }, []);
 
     const handleContinueToBook = async () => {
         if (!selectedPackage) {
@@ -339,7 +355,27 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-4">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                            <div className="flex flex-col items-start gap-3">
+                                <a
+                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Get it on Google Play"
+                                >
+                                    <img src="/andriod1.png" alt="Google Play" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                </a>
+                                <a
+                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center w-[214px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    title="Download on the App Store"
+                                >
+                                    <img src="/apple2.png" alt="App Store" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                </a>
+                            </div>
                             <div className="bg-[var(--saffron)]/10 rounded-2xl p-4 border border-[var(--saffron)]/20 min-w-[120px]">
                                 <div className="flex items-center justify-center mb-1">
                                     <Star className="w-5 h-5 fill-[var(--saffron)] text-[var(--saffron)] mr-1" />
@@ -363,34 +399,34 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
             <div className="max-w-7xl mx-auto px-4 mt-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     <div className="sticky top-20 z-40 bg-[var(--off-white)]/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-2">
-                        <TabsList className="bg-transparent w-full grid grid-cols-4 gap-2">
+                        <TabsList className="bg-transparent w-full h-14 grid grid-cols-1 md:grid-cols-3 gap-2">
                             <TabsTrigger
                                 value="portfolio"
-                                className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
+                                className="h-full py-0 px-4 text-gray-600 font-semibold leading-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center"
                             >
                                 <Flower2 className="w-4 h-4 mr-2" />
-                                Services
+                                Spiritual Rate Cards
                             </TabsTrigger>
                             <TabsTrigger
                                 value="reviews"
-                                className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
+                                className="h-full py-0 px-4 text-gray-600 font-semibold leading-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center"
                             >
                                 <MessageSquare className="w-4 h-4 mr-2" />
-                                Reviews
+                                Ratings
                             </TabsTrigger>
-                            <TabsTrigger
+                            {/* <TabsTrigger
                                 value="amenities"
                                 className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
                             >
                                 <Sparkles className="w-4 h-4 mr-2" />
                                 Amenities
-                            </TabsTrigger>
+                            </TabsTrigger> */}
                             <TabsTrigger
                                 value="about"
-                                className="text-gray-600 font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl"
+                                className="h-full py-0 px-4 text-gray-600 font-semibold leading-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center"
                             >
                                 <MapPin className="w-4 h-4 mr-2" />
-                                About
+                                Shortly Aboutus
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -401,7 +437,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                             Please select a sacred offering to proceed:
                         </div>
                         {serviceData.packages.length > 0 ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {serviceData.packages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
@@ -430,8 +466,8 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                                 <div className="flex justify-between items-start mb-2">
                                                     <h3 className="text-xl font-bold text-[var(--deep-charcoal)]">{pkg.name}</h3>
                                                     <div className="flex flex-col items-end">
+                                                        <span className="text-[10px] text-gray-500 italic uppercase tracking-wider">Starts From</span>
                                                         <span className="text-[var(--saffron)] font-bold text-xl">₹{pkg.price}</span>
-                                                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">{pkg.priceUnit}</span>
                                                     </div>
                                                 </div>
                                                 <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2 md:line-clamp-none">
@@ -471,6 +507,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                     </TabsContent>
 
                     <TabsContent value="reviews" className="space-y-4">
+                        <h3 className="text-xl font-bold text-[var(--deep-charcoal)]">Like our Devotees say&apos;s</h3>
                         {serviceData.reviews.length > 0 ? (
                             serviceData.reviews.map((review, i) => (
                                 <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -491,7 +528,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                         ) : <div className="text-center py-10 text-gray-400">No reviews yet.</div>}
                     </TabsContent>
 
-                    <TabsContent value="amenities">
+                    {/* <TabsContent value="amenities">
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {serviceData.amenities.map((amenity, i) => {
                                 const Icon = amenity.icon;
@@ -505,7 +542,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                 )
                             })}
                         </div>
-                    </TabsContent>
+                    </TabsContent> */}
 
                     <TabsContent value="about">
                         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
@@ -547,9 +584,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                     ? `₹${selectedPackage.price.toLocaleString()}`
                                     : `₹${serviceData.basePrice.toLocaleString()}`}
                             </span>
-                            <span className="text-sm text-gray-500">
-                                {selectedPackage ? `/${selectedPackage.priceUnit}` : '/service'}
-                            </span>
+                            <span className="text-sm text-gray-500"> </span>
                         </div>
                     </div>
 

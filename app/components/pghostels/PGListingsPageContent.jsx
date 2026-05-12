@@ -756,12 +756,14 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                             )}
                         </div>
 
+
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-gray-50 mt-auto">
                             <div className="min-w-0">
-                                <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-0.5">Starts at</div>
+                                <div className="text-[10px] sm:text-xs text-gray-400 italic uppercase tracking-wider font-bold mb-0.5">Starts From</div>
                                 <div className="flex items-baseline space-x-0.5">
-                                    <span className="text-xl sm:text-2xl font-black text-gray-900">₹{listing.monthlyPrice.toLocaleString()}</span>
-                                    <span className="text-[10px] sm:text-xs text-gray-400">/mo</span>
+                                    {/* <span className='text-[#037166]'>starts from</span> */}
+                                    <span className="text-xl sm:text-2xl font-black text-gray-900">{listing.monthlyPrice.toLocaleString()}</span>
+                                    {/* <span className="text-[10px] sm:text-xs text-gray-400">/mo</span> */}
                                 </div>
                             </div>
 
@@ -910,7 +912,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                             </div>
                             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Recommended for you</h2>
                         </div>
-                        <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 xl:grid-cols-4 sm:px-0 sm:mx-0 sm:pb-0">
+                        <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 xl:grid-cols-3 sm:px-0 sm:mx-0 sm:pb-0">
                             {recommendedListings.map((listing) => (
                                 <div key={listing.id} className="w-[300px] sm:w-auto flex-shrink-0">
                                     <PGCard listing={listing} />
@@ -946,7 +948,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                     ))}
                                 </div>
                             ) : sortedListings.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                                     {sortedListings.map((listing) => (
                                         <PGCard key={listing.id} listing={listing} isNearby={activeTab === 'nearby'} />
                                     ))}

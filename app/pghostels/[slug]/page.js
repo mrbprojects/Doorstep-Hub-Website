@@ -6,6 +6,7 @@ import NewHostelDetailPage from '@/pghostels/hostel-detail/[slug]/page';
 import PGSubcategoryPage from '../subcategory/[slug]/page';
 import { resolveParam } from '@/utils/slugHelper';
 import { PGListingsPageContent } from '@/components/pghostels/PGListingsPageContent';
+import { fetchLandingJson } from '@/lib/landingApiCache';
 
 const PG_SERVICE_ID = '69524fb157bb211ca094e5ee';
 
@@ -26,12 +27,15 @@ export default function PGHostelSlugPage({ params: propParams }) {
 
         const resolveSlug = async () => {
             try {
-                const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ serviceId: PG_SERVICE_ID }),
-                });
-                const categoriesData = await categoriesResponse.json();
+                const categoriesData = await fetchLandingJson(
+                    `slug-resolve:pg:categories:${PG_SERVICE_ID}`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ serviceId: PG_SERVICE_ID }),
+                    }
+                );
 
                 if (!active) return;
 
@@ -50,12 +54,15 @@ export default function PGHostelSlugPage({ params: propParams }) {
 
                 if (Array.isArray(categories)) {
                     for (const category of categories) {
-                        const subcategoryResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ categorySlug: category.slug, serviceId: PG_SERVICE_ID }),
-                        });
-                        const subcategoryData = await subcategoryResponse.json();
+                        const subcategoryData = await fetchLandingJson(
+                            `slug-resolve:pg:subcategories:${category.slug}:${PG_SERVICE_ID}`,
+                            `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`,
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ categorySlug: category.slug, serviceId: PG_SERVICE_ID }),
+                            }
+                        );
                         if (!active) return;
 
                         if (subcategoryData.success && Array.isArray(subcategoryData.data)) {
@@ -77,12 +84,15 @@ export default function PGHostelSlugPage({ params: propParams }) {
                     ...resolveParam(slug, 'categoryId', 'categorySlug'),
                     serviceId: PG_SERVICE_ID,
                 };
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-                const data = await response.json();
+                const data = await fetchLandingJson(
+                    `slug-resolve:pg:subcategories:payload:${JSON.stringify(payload)}`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    }
+                );
 
                 if (!active) return;
 

@@ -7,7 +7,9 @@ import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, C
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useRef } from 'react';
 import { useLocationContext } from '@/context/LocationContext';
+import { fetchLandingJson } from '@/lib/landingApiCache';
 
 const footerLinks = {
 
@@ -83,30 +85,43 @@ export function Footer({ theme = {} }) {
   const [showHomeScreen, setShowHomeScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hoveredSocial, setHoveredSocial] = useState(null);
+  const lastFetchKeyRef = useRef(null);
 
   useEffect(() => {
+    const lat = location?.lat || '17.3850';
+    const lng = location?.lng || '78.4866';
+    const fetchKey = `${lat}:${lng}`;
+    if (lastFetchKeyRef.current === fetchKey) return;
+    lastFetchKeyRef.current = fetchKey;
+
     const fetchFooterData = async () => {
       try {
         // Step 1: Fetch Appliance Categories
-        const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lattitude: location?.lat || '17.3850',
-            longitude: location?.lng || '78.4866'
-          })
-        });
-        const catData = await catResponse.json();
+        const catData = await fetchLandingJson(
+          `landing:getallcategorys:${fetchKey}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lattitude: lat,
+              longitude: lng
+            })
+          }
+        );
 
         if (catData.success && Array.isArray(catData.data)) {
           const groups = await Promise.all(catData.data.map(async (category) => {
             try {
-              const subResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ slug: category.slug })
-              });
-              const subData = await subResponse.json();
+              const subData = await fetchLandingJson(
+                `landing:getsubcategorysbycategoryid:${category.slug}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ slug: category.slug })
+                }
+              );
               return {
                 id: category._id,
                 name: category.name,
@@ -122,38 +137,48 @@ export function Footer({ theme = {} }) {
         }
 
         // Step 2: Fetch Professional Services Catalog
-        const profResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/professional-services-catalog`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const profData = await profResponse.json();
+        const profData = await fetchLandingJson(
+          'landing:professional-services-catalog',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/professional-services-catalog`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
 
         if (profData.success && Array.isArray(profData.data)) {
           setProfessionalServices(profData.data);
         }
 
         // Step 3: Fetch Global Settings
-        const globalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const globalData = await globalResponse.json();
+        const globalData = await fetchLandingJson(
+          'landing:global-settings',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
         if (globalData.success && globalData.policy) {
           setGlobalSettings(globalData.policy);
         }
 
         // Step 4: Fetch Service Slugs (only appliance ID is supported by this endpoint)
         try {
-          const slugRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
-          const slugData = await slugRes.json();
+          const slugData = await fetchLandingJson(
+            'landing:service-slug:appliances',
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
+          );
           if (slugData.success && slugData.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: slugData.data.home }));
           }
         } catch (e) { /* use default slug */ }
 
         // Step 5: Fetch Screen Settings
-        const screenSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`);
-        const screenSettingsData = await screenSettingsResponse.json();
+        const screenSettingsData = await fetchLandingJson(
+          'landing:screen-settings',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`
+        );
         const isHomeEnabled = screenSettingsData.success && screenSettingsData.data?.homescreen;
         setShowHomeScreen(isHomeEnabled);
 

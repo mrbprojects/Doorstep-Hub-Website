@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Church, Calendar, MapPin, Users, Bell, Flame, User, Scroll, Flower2, Utensils, Home, Clock, BookOpen, Building2, Star } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+import { fetchLandingJson } from '@/lib/landingApiCache';
 
 export function LatestReligiousServices() {
   const router = useRouter();
@@ -63,8 +64,10 @@ export function LatestReligiousServices() {
     const fetchLatestServices = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_religious_services`);
-        const data = await response.json();
+        const data = await fetchLandingJson(
+          'landing:latest-religious-services',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_religious_services`
+        );
 
         if (data.success && data.services) {
           const mappedServices = data.services.map((service) => {

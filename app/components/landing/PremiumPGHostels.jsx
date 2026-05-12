@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { Building2, Wifi, Coffee, Shield, Bed, Users, ArrowRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useRouter } from 'next/navigation';
+import { fetchLandingJson } from '@/lib/landingApiCache';
 
 const dummyHostels = [
   {
@@ -90,8 +91,10 @@ export function PremiumPGHostels() {
     const fetchFeaturedPGHostels = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_pg_hostels`);
-        const data = await response.json();
+        const data = await fetchLandingJson(
+          'landing:featured-pg-hostels',
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_pg_hostels`
+        );
 
         if (data.success && data.hostels && data.hostels.length > 0) {
           const mappedHostels = data.hostels.map((hostel, index) => {

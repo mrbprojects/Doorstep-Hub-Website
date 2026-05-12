@@ -126,6 +126,7 @@ export function NearbyServiceCenters({ onViewAll }) {
   const panToService = useCallback((service) => {
     if (mapRef.current && service) {
       mapRef.current.panTo({ lat: service.lat, lng: service.lng });
+      setMapZoom(16);
     }
   }, []);
 
@@ -145,19 +146,6 @@ export function NearbyServiceCenters({ onViewAll }) {
   const handleMapLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
-
-  // Keep map zoomed out enough to show all points.
-  useEffect(() => {
-    if (!mapRef.current || !isMapsLoaded || !location) return;
-    if (!services || services.length === 0) return;
-    if (!window.google?.maps?.LatLngBounds) return;
-
-    const bounds = new window.google.maps.LatLngBounds();
-    bounds.extend({ lat: location.lat, lng: location.lng });
-    services.forEach((svc) => bounds.extend({ lat: svc.lat, lng: svc.lng }));
-
-    mapRef.current.fitBounds(bounds, 70);
-  }, [services, location, isMapsLoaded]);
 
   // ── Service Card ─────────────────────────────────────────────────────────────
   const ServiceCard = ({ service, actualIndex }) => {
@@ -396,9 +384,9 @@ export function NearbyServiceCenters({ onViewAll }) {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#04a99d] shadow-[0_0_8px_#04a99d]" />
-                                <span className="text-xs font-bold" style={{ color: '#ffffff' }}>{service.name}</span>
+                                <span className="text-white text-xs font-bold">{service.name}</span>
                               </div>
-                              <div className="flex items-center gap-1.5 text-[10px] font-medium opacity-80" style={{ color: '#ffffff' }}>
+                              <div className="flex items-center gap-1.5 text-[10px] text-[#04a99d] font-medium opacity-80">
                                 <Navigation className="w-2.5 h-2.5" />
                                 Double-click to view details
                               </div>
@@ -419,7 +407,7 @@ export function NearbyServiceCenters({ onViewAll }) {
                               className="bg-gradient-to-r from-[#037166] to-[#025951] border border-[#04a99d]/60 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 ring-2 ring-white/10 z-50"
                             >
                               <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]" />
-                              <span className="text-xs font-bold tracking-wide uppercase" style={{ color: '#ffffff' }}>{service.name}</span>
+                              <span className="text-white text-xs font-bold tracking-wide uppercase">{service.name}</span>
                               {/* Connector arrow */}
                               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#025951] border-r border-b border-[#04a99d]/60 rotate-45" />
                             </div>

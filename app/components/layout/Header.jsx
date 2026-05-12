@@ -12,7 +12,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useRouter } from 'next/navigation';
-import { fetchLandingJson } from '@/lib/landingApiCache';
 
 export function Header({ theme = {}, navItems = [] }) {
   const pathname = usePathname();
@@ -61,38 +60,30 @@ export function Header({ theme = {}, navItems = [] }) {
       try {
         // 1. Fetch Slugs — only the appliance ID is supported by this endpoint
         try {
-          const data = await fetchLandingJson(
-            'landing:service-slug:appliances',
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
-          );
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
+          const data = await res.json();
           if (data.success && data.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
           }
         } catch (e) { /* use default slug */ }
 
         // 3. Fetch Screen Settings
-        const screenSettingsData = await fetchLandingJson(
-          'landing:screen-settings',
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`
-        );
+        const screenSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`);
+        const screenSettingsData = await screenSettingsResponse.json();
         if (screenSettingsData.success && screenSettingsData.data?.homescreen) {
           setShowHomeScreen(true);
         }
 
         // 4. Fetch Global Settings
-        const globalSettingsData = await fetchLandingJson(
-          'landing:global-settings',
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`
-        );
+        const globalSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+        const globalSettingsData = await globalSettingsResponse.json();
         if (globalSettingsData.success && globalSettingsData.policy) {
           setGlobalSettings(globalSettingsData.policy);
         }
 
         // Fetch Navbar CMS Items
-        const navData = await fetchLandingJson(
-          'landing:website-navbar',
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-navbar`
-        );
+        const navResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-navbar`);
+        const navData = await navResponse.json();
 
         if (navData.success && navData.data) {
           const visibleItems = navData.data

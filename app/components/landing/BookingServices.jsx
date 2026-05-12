@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Calendar, Clock, Star, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
-import { fetchLandingJson } from '@/lib/landingApiCache';
 
 function SkeletonCard() {
   return (
@@ -37,27 +36,21 @@ export function BookingServices() {
       try {
         // 1. Fetch Slugs (only appliance ID is supported by this endpoint)
         try {
-          const data = await fetchLandingJson(
-            'landing:service-slug:appliances',
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
-          );
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
+          const data = await res.json();
           if (data.success && data.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
           }
         } catch (e) { /* use default slug */ }
 
         // 2. Fetch Latest Booking Services
-        const data = await fetchLandingJson(
-          'landing:latest-bookings-services',
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`);
+        const data = await response.json();
 
         if (data.success && data.services) {
           // Fetch all services for slug enrichment
-          const allData = await fetchLandingJson(
-            'landing:all-services',
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`
-          );
+          const allRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
+          const allData = await allRes.json();
           const allServices = allData.success && Array.isArray(allData.data) ? allData.data : [];
 
           const transformedServices = data.services.slice(0, 6).map(service => {

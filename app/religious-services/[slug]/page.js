@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import CategorySlugPage from '../category/[slug]/page';
 import ReligiousServiceDetailPage from '../service/[slug]/page';
 import SubCategoryServicesPage from '../subcategory/[slug]/page';
-import { fetchLandingJson } from '@/lib/landingApiCache';
 
 /**
  * Root slug router for Religious Services.
@@ -22,18 +21,15 @@ export default function ReligiousRootSlugPage() {
     const detect = async () => {
       try {
         // 1) Check if slug matches a category (fetch full list and match locally to avoid provider call on category slugs)
-        const catData = await fetchLandingJson(
-          'slug-resolve:religious:categories',
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              serviceId: '695250aa57bb211ca094e5fd',
-              serviceSlug: 'rituals-and-religious-services'
-            })
-          }
-        );
+        const catResp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            serviceId: '695250aa57bb211ca094e5fd',
+            serviceSlug: 'rituals-and-religious-services'
+          })
+        });
+        const catData = await catResp.json();
         if (active && catData?.success && Array.isArray(catData.category)) {
           const isCategory = catData.category.some(
             (c) =>
@@ -46,18 +42,15 @@ export default function ReligiousRootSlugPage() {
           }
 
           for (const category of catData.category) {
-            const subData = await fetchLandingJson(
-              `slug-resolve:religious:subcategories:${category.slug}`,
-              `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  categorySlug: category.slug,
-                  serviceSlug: 'rituals-and-religious-services'
-                })
-              }
-            );
+            const subResp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                categorySlug: category.slug,
+                serviceSlug: 'rituals-and-religious-services'
+              })
+            });
+            const subData = await subResp.json();
             if (!active) return;
 
             if (subData?.success && Array.isArray(subData.data)) {
@@ -76,15 +69,12 @@ export default function ReligiousRootSlugPage() {
         }
 
         // 2) Fallback: check provider
-        const provData = await fetchLandingJson(
-          `slug-resolve:religious:provider:${slug}`,
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ providerSlug: slug })
-          }
-        );
+        const provResp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/single-professional-provider`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ providerSlug: slug })
+        });
+        const provData = await provResp.json();
         if (!active) return;
         const hasProvider = provData?.success && Array.isArray(provData.storeData) && provData.storeData.length > 0;
         setMode(hasProvider ? 'service' : 'category');

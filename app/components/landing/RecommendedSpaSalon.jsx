@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Sparkles, Award, TrendingUp, Crown, CloudFog, HandHeart, Coffee, Flame, Droplets, Scissors, Palette, Wind } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
-import { fetchLandingJson } from '@/lib/landingApiCache';
 
 export function RecommendedSpaSalon() {
   const router = useRouter();
@@ -59,10 +58,8 @@ export function RecommendedSpaSalon() {
     const fetchFeaturedSpaStores = async () => {
       try {
         setLoading(true);
-        const data = await fetchLandingJson(
-          'landing:featured-spa-stores',
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_spa_stores`
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_spa_stores`);
+        const data = await response.json();
 
         if (data.success && data.stores && data.stores.length > 0) {
           const mappedStores = data.stores.map((store, index) => {
@@ -484,6 +481,7 @@ export function RecommendedSpaSalon() {
     </section>
   );
 }
+
 
 
 

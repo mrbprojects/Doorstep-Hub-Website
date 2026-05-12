@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Compass, Star, Clock, Heart, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
-import { fetchLandingJson } from '@/lib/landingApiCache';
 
 export function RecommendedReligious() {
   const router = useRouter();
@@ -63,10 +62,8 @@ export function RecommendedReligious() {
     const fetchFeaturedServices = async () => {
       try {
         setLoading(true);
-        const data = await fetchLandingJson(
-          'landing:featured-religious-services',
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_religious_services`
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/featured_religious_services`);
+        const data = await response.json();
 
         if (data.success && data.services) {
           const mappedJourneys = data.services.map((service, index) => {
@@ -106,6 +103,8 @@ export function RecommendedReligious() {
     };
 
     fetchFeaturedServices();
+    const interval = setInterval(fetchFeaturedServices, 60000); // 1 minute refresh
+    return () => clearInterval(interval);
   }, []);
 
   // Auto-scroller for the horizontal container

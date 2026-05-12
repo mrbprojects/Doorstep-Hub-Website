@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import SpaCategoryPage from '@/components/spasalon/SpaCategoryPage';
 import SpaSubCategoryPage from '@/components/spasalon/SpaSubCategoryPage';
 import SpaServiceDetailPage from '@/components/spasalon/SpaServiceDetailPage';
-import { fetchLandingJson } from '@/lib/landingApiCache';
 
 const SPA_SERVICE_ID = '69524f4a57bb211ca094e5e6';
 
@@ -20,15 +19,12 @@ export default function SpaSalonSlugPage() {
 
         const resolveSlug = async () => {
             try {
-                const categoryData = await fetchLandingJson(
-                    `slug-resolve:spa:categories:${SPA_SERVICE_ID}`,
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ serviceId: SPA_SERVICE_ID })
-                    }
-                );
+                const categoryResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serviceId: SPA_SERVICE_ID })
+                });
+                const categoryData = await categoryResponse.json();
 
                 if (!active) return;
 
@@ -41,15 +37,12 @@ export default function SpaSalonSlugPage() {
                     }
 
                     for (const category of categoryData.category) {
-                        const subcategoryData = await fetchLandingJson(
-                            `slug-resolve:spa:subcategories:${category.slug}`,
-                            `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`,
-                            {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ categorySlug: category.slug, serviceSlug: 'spa-salon' })
-                            }
-                        );
+                        const subcategoryResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ categorySlug: category.slug, serviceSlug: 'spa-salon' })
+                        });
+                        const subcategoryData = await subcategoryResponse.json();
 
                         if (!active) return;
 

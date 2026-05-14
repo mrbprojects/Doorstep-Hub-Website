@@ -631,7 +631,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             <span>Doorstep Inspection Fee</span>
                                             <span className="text-[10px] text-[#04a99d] inline-flex items-center gap-1">
                                                 <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
-                                                Collected at doorstep
+                                                    Pay at doorstep
                                             </span>
                                         </div>
                                         <span className="text-[#374151] font-semibold">₹{inspectionCost.toFixed(2)}</span>

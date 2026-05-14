@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { Star, MapPin, Clock, Heart, ChevronRight, Sparkles, Award, Users, BookOpen } from 'lucide-react';
+import { Star, MapPin, Clock, Heart,PawPrint ,Scissors ,ShieldCheck ,Clock3 ,CalendarCheck2 , ChevronRight, Sparkles, Award, Users, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { QuestionnaireModal } from './QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
@@ -364,181 +364,254 @@ export function HomePage() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
             />
             {/* Hero Section */}
-            <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-white via-[#FBEAF0] to-[#F4F3FF]">
-                {/* ... (Hero Content) ... */}
-                <div className="absolute inset-0 overflow-hidden">
-                    {/* Floating Service Icons - Scattered across left, right, and bottom */}
-                    <div className="hidden lg:block">
-                        {(subcategories.length > 0 ? subcategories : [
-                            { name: 'Facial', icon: '✨', rating: 4.8 },
-                            { name: 'Hair Spa', icon: '💇', rating: 4.7 },
-                            { name: 'Massage', icon: '💆', rating: 4.6 },
-                            { name: 'Makeup', icon: '💄', rating: 4.5 },
-                            { name: 'Mani-Pedi', icon: '💅', rating: 4.4 }
-                        ]).map((sub, index) => {
-                            // Define scattered positions - adjusted right-side icons to be more towards the middle
-                            const positions = [
-                                { left: '2%', top: '35%' },      // Far Left
-                                { right: '12%', top: '22%' },    // Right (Middle-Right)
-                                { left: '5%', bottom: '5%' },    // Bottom Left
-                                { right: '15%', bottom: '18%' }, // Bottom Right (Middle-Right)
-                                { left: '50%', bottom: '2%', x: '-50%' } // Far Bottom Center
-                            ];
-                            const pos = positions[index % positions.length];
+            <section className="relative overflow-hidden bg-gradient-to-br from-[#fff8fb] via-white to-[#f7f4ff] py-8 lg:py-10">
 
-                            return (
-                                <motion.div
-                                    key={sub._id || sub.name}
-                                    className="absolute cursor-pointer z-0"
-                                    style={pos}
-                                    initial={{ opacity: 0, scale: 0.5 }}
-                                    animate={{ 
-                                        opacity: 1, 
-                                        scale: 1,
-                                        y: [0, -15, 0],
-                                        rotate: [0, 1.5, 0, -1.5, 0]
-                                    }}
-                                    transition={{
-                                        opacity: { duration: 0.8, delay: index * 0.1 },
-                                        scale: { duration: 0.8, delay: index * 0.1 },
-                                        y: { duration: 4 + index, repeat: Infinity, ease: "easeInOut" },
-                                        rotate: { duration: 5 + index, repeat: Infinity, ease: "easeInOut" }
-                                    }}
-                                    onClick={() => {
-                                        if (sub.slug || sub._id) {
-                                            const subSlug = sub.slug || sub._id;
-                                            router.push(`/spa-salon/${subSlug}`);
-                                        } else {
-                                            setModalOpen(true);
-                                        }
-                                    }}
-                                    whileHover={{ scale: 1.1, zIndex: 5 }}
-                                >
-                                    <div className="flex items-center gap-3 transition-colors">
-                                        <div className="text-3xl">
-                                            {sub.image ? (
-                                                <img
-                                                    src={sub.image.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image.startsWith('/') ? sub.image.substring(1) : sub.image}`}
-                                                    alt={sub.name}
-                                                    className="w-10 h-10 object-cover rounded-full shadow-inner"
-                                                    onError={(e) => {
-                                                        e.target.src = 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=200';
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span>{sub.icon || ['✨', '💇', '💆', '💄', '💅'][index % 5]}</span>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="text-[#0F172A] text-xs font-bold leading-none mb-1">{sub.name}</p>
-                                            <div className="flex items-center gap-0.5 text-[#FBBF24]">
-                                                <Star className="w-2.5 h-2.5 fill-current" />
-                                                <span className="text-[#0F172A] text-[10px] font-bold">{sub.rating || (4.8 - (index * 0.1)).toFixed(1)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
+    {/* Soft Background */}
+    <div className="absolute top-[-120px] left-[-120px] w-[320px] h-[320px] bg-pink-200/20 blur-3xl rounded-full" />
+    <div className="absolute bottom-[-100px] right-[-100px] w-[320px] h-[320px] bg-violet-200/20 blur-3xl rounded-full" />
+
+    <div className="relative z-10 max-w-[1400px] mx-auto px-5 lg:px-8">
+
+        {/* ================= HERO ================= */}
+        <div className="grid lg:grid-cols-[1fr_1.02fr] items-center gap-4 lg:gap-6">
+
+            {/* ================= LEFT SIDE ================= */}
+            <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7 }}
+                className="max-w-[640px]"
+            >
+
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#f2dce6] shadow-md mb-5">
+                    <Sparkles className="w-4 h-4 text-[#c06c84]" />
+
+                    <span className="text-[#111827] text-sm font-medium">
+                        Premium Salon & Pet Salon Services
+                    </span>
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-                    <div className="grid lg:grid-cols-2 gap-3 lg:gap-5 items-center">
-                        {/* Left Side */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8 }}
-                        >
-                            <motion.div
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8ECF2] mb-5 shadow-sm"
-                            >
-                                <Sparkles className="w-4 h-4 text-[#C06C84] mb" />
-                                <h6 className="text-[#0F172A] text-xs sm:text-sm ">Premium Wellness Services</h6>
-                            </motion.div>
+                {/* Heading */}
+                <h1 className="text-[3.3rem] xl:text-[3.8rem] leading-[0.92] font-bold tracking-[-2px] text-[#0f172a]">
+                    <span className="block">
+                        Style That{" "}
+                        <span className="bg-gradient-to-r from-[#c06c84] to-[#c05cff] bg-clip-text text-transparent">
+                            Shine.
+                        </span>
+                    </span>
+                    <span className="block">
+                        Care That Makes Them{" "}
+                        <span className="bg-gradient-to-r from-[#c06c84] to-[#c05cff] bg-clip-text text-transparent">
+                            Happy.
+                        </span>
+                    </span>
+                </h1>
 
-                            <h1 className="text-[2.45rem] sm:text-[2.9rem] md:text-[3.2rem] lg:text-[3.0rem] font-bold text-[#0F172A] mb-5 leading-[0.88]">
-                                Glow Up .
-                                <span className="text-[#C06C84] mb-5">Chill Out.</span>
-                                <br />
-                                Book in Minutes.
-                            </h1>
+                {/* Description */}
+                <p className="mt-4 text-[17px] leading-[1.7] text-[#64748b] max-w-[500px]">
+                    Hair, beauty & grooming experts for you and your pets.
+                    At home or nearby centers.
+                </p>
 
-                            <p className="text-sm sm:text-[15px] text-[#64748B] mb-5">
-                                Premium salon & spa services at home or nearby centers.
+                {/* CTA */}
+                <div className="flex flex-wrap items-center gap-3 mt-7">
+
+                    <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="h-[56px] px-8 rounded-2xl bg-gradient-to-r from-[#741b5d] to-[#c7378f] text-white font-semibold text-base shadow-[0_15px_40px_rgba(199,55,143,0.25)] flex items-center gap-2"
+                    >
+                        Explore Services
+                        <ChevronRight className="w-5 h-5" />
+                    </motion.button>
+
+                    {/* App Store */}
+                    <motion.a
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        href="#"
+                        className="h-[56px] px-5 rounded-2xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
+                    >
+                        <img
+                            src="/apple2.png"
+                            alt="apple"
+                            className="h-9 object-contain brightness-0 invert"
+                        />
+                    </motion.a>
+
+                    {/* Play Store */}
+                    <motion.a
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        href="#"
+                        className="h-[56px] px-5 rounded-2xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
+                    >
+                        <img
+                            src="/andriod1.png"
+                            alt="android"
+                            className="h-9 object-contain brightness-0 invert"
+                        />
+                    </motion.a>
+                </div>
+
+                {/* ================= STATS ================= */}
+                <div className="grid grid-cols-4 gap-5 mt-10">
+
+                    {[
+                        {
+                            icon: <Users className="w-5 h-5" />,
+                            value: '50K+',
+                            label: 'Happy Clients',
+                            color: 'from-pink-500 to-pink-400'
+                        },
+                        {
+                            icon: <Award className="w-5 h-5" />,
+                            value: '500+',
+                            label: 'Expert Staff',
+                            color: 'from-violet-500 to-fuchsia-400'
+                        },
+                        {
+                            icon: <Star className="w-5 h-5" />,
+                            value: '4.9',
+                            label: 'Avg Rating',
+                            color: 'from-rose-500 to-pink-400'
+                        },
+                        {
+                            icon: <PawPrint className="w-5 h-5" />,
+                            value: '10K+',
+                            label: 'Pets Groomed',
+                            color: 'from-purple-500 to-pink-400'
+                        }
+                    ].map((item, i) => (
+                        <div key={i}>
+
+                            <div className={`w-[56px] h-[56px] rounded-[18px] bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg mb-4`}>
+                                {item.icon}
+                            </div>
+
+                            <h3 className="text-[2.5rem] leading-none font-bold text-[#0f172a]">
+                                {item.value}
+                            </h3>
+
+                            <p className="mt-1 text-[#64748b] text-sm">
+                                {item.label}
                             </p>
-
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => {
-                                        setSelectedCategory(null);
-                                        setModalOpen(true);
-                                    }}
-                                    className="px-5 py-2 mb-5 sm:px-6 sm:py-2.5 bg-[#6d1357] text-white rounded-xl text-sm sm:text-base font-medium hover:shadow-lg hover:shadow-[#6d1357]/40 transition-all flex items-center justify-center gap-2 font-bold"
-                                >
-                                    Explore Spa Services
-                                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </motion.button>
-
-                                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                                    <motion.a
-                                        href={globalSettings?.appStore || "#"}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
-                                        title="Download on the App Store"
-                                    >
-                                        <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
-                                    </motion.a>
-
-                                    <motion.a
-                                        href={globalSettings?.playStore || "#"}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#6d1357] to-[#C06C84] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
-                                        title="Get it on Google Play"
-                                    >
-                                        <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
-                                    </motion.a>
-                                </div>
-
-                                {/* <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => {
-                                        setSelectedCategory(null);
-                                        setModalOpen(true);
-                                    }}
-                                    className="px-8 py-4 bg-white text-[#C06C84] rounded-xl font-medium border-2 border-[#C06C84] hover:bg-[#C06C84] hover:text-white transition-all"
-                                >
-                                    Book Appointment Now
-                                </motion.button> */}
-                            </div>
-
-                            {/* Stats */}
-                            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mt-3">
-                                <StatCard icon={<Users />} value="50K+" label="Happy Clients" />
-                                <StatCard icon={<Award />} value="500+" label="Expert Staff" />
-                                <StatCard icon={<Star />} value="4.9" label="Avg Rating" />
-                            </div>
-                        </motion.div>
-
-                        {/* Empty right column to balance grid if needed, or we can make left side wider */}
-                        <div className="hidden lg:block h-full" />
-                    </div>
+                        </div>
+                    ))}
                 </div>
-            </section>
+            </motion.div>
 
+            {/* ================= RIGHT SIDE ================= */}
+                    {/* ================= RIGHT SIDE ================= */}
+{/* ================= RIGHT SIDE ================= */}
+<motion.div
+  initial={{ opacity: 0, x: 30 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.7 }}
+  className="relative flex justify-center items-center"
+>
+  <div className="relative w-[700px] h-[560px]">
+
+    {/* Main Generated Right Image */}
+    <img
+      src="/right-side-image.png"
+      alt="Salon and Pet Grooming"
+      className="w-full h-full object-contain"
+    />
+
+    {/* Floating Hair Salon Card */}
+    <motion.div
+      animate={{ y: [0, -8, 0] }}
+      transition={{ repeat: Infinity, duration: 4 }}
+      className="absolute top-[45px] right-[10px] z-50 bg-white/95 backdrop-blur-xl rounded-[26px] border border-[#f3dce5] shadow-2xl px-4 py-3 flex items-center gap-3"
+    >
+      <div className="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center text-2xl">
+        💇🏻‍♀️
+      </div>
+
+      <div>
+        <h4 className="text-[#111827] font-semibold text-lg leading-none">
+          Hair Salon
+        </h4>
+        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-sm">
+          ⭐ 4.8
+        </div>
+      </div>
+    </motion.div>
+
+    {/* Floating Pet Grooming Card */}
+    <motion.div
+      animate={{ y: [0, 10, 0] }}
+      transition={{ repeat: Infinity, duration: 5 }}
+      className="absolute top-[145px] right-[0px] z-50 bg-white/95 backdrop-blur-xl rounded-[26px] border border-[#f3dce5] shadow-2xl px-4 py-3 flex items-center gap-3"
+    >
+      <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-2xl">
+        🐶
+      </div>
+
+      <div>
+        <h4 className="text-[#111827] font-semibold text-lg leading-none">
+          Pet Grooming
+        </h4>
+        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-sm">
+          ⭐ 4.7
+        </div>
+      </div>
+    </motion.div>
+
+  </div>
+</motion.div>
+        </div>
+
+        {/* ================= FEATURES ================= */}
+        <div className="mt-6 bg-white/95 backdrop-blur-xl rounded-[32px] border border-[#f5edf3] shadow-[0_20px_60px_rgba(0,0,0,0.06)] px-8 py-6">
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+
+                {[
+                    {
+                        icon: <ShieldCheck className="w-6 h-6" />,
+                        title: 'Verified Experts',
+                        desc: 'Certified professionals'
+                    },
+                    {
+                        icon: <Sparkles className="w-6 h-6" />,
+                        title: 'Hygiene Assured',
+                        desc: 'Clean premium products'
+                    },
+                    {
+                        icon: <Clock3 className="w-6 h-6" />,
+                        title: 'On-time Service',
+                        desc: 'Reliable & punctual'
+                    },
+                    {
+                        icon: <CalendarCheck2 className="w-6 h-6" />,
+                        title: 'Easy Booking',
+                        desc: 'Book in few taps'
+                    }
+                ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-4">
+
+                        <div className="w-[58px] h-[58px] rounded-2xl bg-[#fff2f7] flex items-center justify-center text-[#d946ef]">
+                            {item.icon}
+                        </div>
+
+                        <div>
+                            <h4 className="text-[#111827] text-lg font-semibold">
+                                {item.title}
+                            </h4>
+
+                            <p className="text-[#64748b] text-sm mt-1">
+                                {item.desc}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+</section>
             {/* Explore Categories */}
             <section id="categories" className="py-18 mt-8 px-4 sm:px-6 lg:px-8 bg-transparent">
                 <div className="max-w-7xl mx-auto">

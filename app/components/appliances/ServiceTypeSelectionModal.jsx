@@ -50,7 +50,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                             </div>
                             <div className="flex-1">
                                 <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">Verified Partners</h4>
-                                <p className="text-sm text-gray-500 font-medium">Book certified experts for doorstep service</p>
+                                <p className="text-sm text-gray-500 font-medium">Book certified experts for Doorstep Hub service</p>
                             </div>
                         </button>
 
@@ -60,11 +60,11 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                             className="group relative flex items-center gap-5 p-6 rounded-[1.5rem] bg-white border border-gray-100 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300 text-left"
                         >
                             <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300 border border-blue-100">
-                                <Store className="w-7 h-7 text-white" />
+                                <Store className="w-7 h-7 text-white-500" />
                             </div>
                             <div className="flex-1">
                                 <h4 className="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">Near by Service Centers</h4>
-                                <p className="text-sm text-gray-500 font-medium">Find and visit nearby service centers</p>
+                                <p className="text-sm text-gray-500 font-medium">Find and book nearby service centers</p>
                             </div>
                         </button>
                     </div>

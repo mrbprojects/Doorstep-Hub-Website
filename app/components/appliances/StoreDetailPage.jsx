@@ -506,7 +506,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => onBack ? onBack() : router.back()}
-          className="inline-flex items-center gap-2 px-4 py-2 mb-4 sm:mb-8 rounded-full bg-white border border-gray-100 text-gray-700 hover:bg-gray-50 hover:text-[#037166] transition-all text-sm font-bold"
+          className="inline-flex items-center gap-2 px-4 py-2 mb-4 sm:mb-8 rounded-full bg-white border border-black text-gray-700 hover:bg-gray-50 hover:text-[#037166] transition-all text-sm font-bold"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -536,10 +536,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
           {/* Store Info Overlay - Half Above / Half Below */}
           <div className="absolute left-0 right-0 bottom-0 translate-y-1/2">
-            <div className="bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl p-3 sm:p-4 md:p-4.5 shadow-2xl">
+            <div className="max-w-[1240px] mx-auto bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl p-3 sm:p-4 md:pb-6 shadow-2xl">
             
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-2.5 mb-1 md:mb-2">
-                <div className="flex items-center gap-3 sm:gap-4">
+              <div className="relative flex flex-col gap-2 mb-1">
+                <div className="flex items-center gap-3 sm:gap-4 md:pr-[320px]">
                   <div className="relative flex-shrink-0">
                     <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl overflow-hidden border-2 border-white shadow-xl bg-white flex items-center justify-center">
                       {(center.logo || center.image) ? (
@@ -574,7 +574,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
 
                 {/* App Links beside heading */}
-                <div className="flex flex-col items-center gap-3 w-full md:w-auto md:self-end md:mb-0">
+                <div className="flex flex-col items-center gap-3 w-full md:w-auto md:absolute md:top-0 md:right-0">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
@@ -596,7 +596,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-4 mb-2 md:mb-2.5">
+              <div className="flex flex-col gap-1.5 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-4 mb-1">
                 <div className="flex items-start gap-1.5 md:gap-2">
                   <MapPin className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
                   <span className="text-gray-600 text-xs sm:text-sm font-medium line-clamp-1">{center.address}</span>

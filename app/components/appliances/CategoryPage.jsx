@@ -525,7 +525,7 @@ export function CategoryPage({ slug, initialData }) {
 
                             {/* CTA */}
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1.5 sm:gap-2 text-[#037166] font-semibold text-xs sm:text-sm">
+                              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/25 text-[#037166] font-semibold text-xs sm:text-sm hover:bg-[#037166] hover:text-white transition-all">
                                 View Services
                                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                               </div>

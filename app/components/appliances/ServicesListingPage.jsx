@@ -284,28 +284,6 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
       {/* Header with Teal Gradient */}
       <div className="z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={() => {
-              if (categoryName) {
-                const activeCat = allCategories.find(c => c.name === categoryName);
-                if (activeCat?.slug) {
-                  // Navigate to Category Page
-                  router.push(`/${activeCat.slug}`);
-                } else {
-                  router.back();
-                }
-              } else {
-                router.back();
-              }
-            }}
-            className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {categoryName ? `Back to ${categoryName}` : 'Back'}
-          </motion.button>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -321,8 +299,30 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         </div>
 
         {/* Tabs */}
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
-          <div className="inline-flex p-1.5 bg-white/85 backdrop-blur-md rounded-full border border-slate-200 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6 mt-4">
+          <div className="flex items-center justify-between gap-4">
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              onClick={() => {
+                if (categoryName) {
+                  const activeCat = allCategories.find(c => c.name === categoryName);
+                  if (activeCat?.slug) {
+                    router.push(`/${activeCat.slug}`);
+                  } else {
+                    router.back();
+                  }
+                } else {
+                  router.back();
+                }
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm whitespace-nowrap"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {categoryName ? `Back to ${categoryName}` : 'Back'}
+            </motion.button>
+
+            <div className="inline-flex p-1.5 bg-white/85 backdrop-blur-md rounded-full border border-slate-200 shadow-sm">
             <button
               onClick={() => setActiveTab('services')}
               className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
@@ -343,6 +343,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             >
               Nearby Centers
             </button>
+            </div>
           </div>
         </div>
       </div>

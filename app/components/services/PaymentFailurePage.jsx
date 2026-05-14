@@ -54,23 +54,20 @@ export function PaymentFailurePage() {
 
         // Logic to redirect to the correct cart based on service type
         if (deepType === 'PG Hostels') {
-            router.push('/pghostels/cart');
+            router.push('/pghostels');
         } else if (deepType === 'Spa Saloons') {
-            router.push('/spa-salon/cart');
+            router.push('/spa-salon');
         } else if (deepType === 'Religious Services') {
-            router.push('/religious-services/cart');
+            router.push('/religious-services');
         } else if (type === 'appliances') {
-            router.push('/appliances/cart');
+            router.push('/appliances');
         } else if (type === 'service-center') {
             router.push('/appliance-repair-services');
         } else if (type === 'verified-partner') {
             router.push('/appliance-repair-services');
         } else if (type === 'professional') {
             router.push('/appliances/booking');
-        } else {
-            // Default to the general services cart
-            router.push('/services/cart');
-        }
+        } 
     };
 
     const getDestinationName = () => {

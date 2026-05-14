@@ -523,7 +523,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               <img
                 src={bannerImage}
                 alt="Service Center Banner"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">

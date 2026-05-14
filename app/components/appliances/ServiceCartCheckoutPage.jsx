@@ -426,12 +426,12 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1.5">
                                                     <div className="w-2 h-2 rounded-full bg-[#05bfb0] animate-pulse" />
-                                                    <p className="text-white/70 text-[10px] font-bold uppercase tracking-[0.2em]">DH Active Wallet</p>
+                                                    <p className="!text-white/70 text-[10px] font-bold uppercase tracking-[0.2em]">DH Active Wallet</p>
                                                 </div>
-                                                <p className="text-white/60 text-[10px] font-medium uppercase tracking-widest mb-1">Available Balance</p>
+                                                <p className="!text-white/60 text-[10px] font-medium uppercase tracking-widest mb-1">Available Balance</p>
                                                 <h3 className="text-4xl font-bold tracking-tight flex items-baseline gap-1">
-                                                    <span className="text-2xl opacity-60">₹</span>
-                                                    {Number(walletBalance).toFixed(2)}
+                                                    <span className="text-2xl !text-white  opacity-60">₹</span>
+                                                    <span className="!text-white">{Number(walletBalance).toFixed(2)}</span>
                                                 </h3>
                                             </div>
                                             <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
@@ -441,8 +441,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
                                         <div className="relative flex justify-between items-end">
                                             <div className="space-y-1">
-                                                <p className="text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
-                                                <p className="text-sm font-mono tracking-[0.3em] font-medium">
+                                                <p className="!text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
+                                                <p className="!text-white text-sm font-mono tracking-[0.3em] font-medium">
                                                     {walletData?.walletId ? `**** ${walletData.walletId.split('-').pop()}` : '**** **** 7269'}
                                                 </p>
                                             </div>

@@ -404,7 +404,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 </h1>
 
                 {/* App Links beside heading */}
-                <div className="flex flex-col items-start gap-3 md:self-end md:mb-3">
+                <div className="hidden md:flex flex-col items-start gap-3 md:self-end md:mb-3">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"

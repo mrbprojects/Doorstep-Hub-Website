@@ -574,7 +574,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
 
                 {/* App Links beside heading */}
-                <div className="flex flex-col items-center gap-3 w-full md:w-auto md:absolute md:top-0 md:right-0">
+                <div className="hidden md:flex flex-col items-center gap-3 w-full md:w-auto md:absolute md:top-0 md:right-0">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"

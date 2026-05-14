@@ -21,7 +21,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const consultationFee = Number(cartData?.consultationFee || 0);
     const bookingCost = Number(cartData?.finalAmount || (baseServiceCost + gstAmount + consultationFee));
 
-    const inspectionCost = cartItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0);
+    const inspectionCost = Number(cartData?.inspectionCost || 0);
 
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
@@ -488,7 +488,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                                     : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                                                 }`}
                                         >
-                                            <div className={`w-6 h-6 flex items-center justify-center ${paymentMethod === method.id ? 'text-white' : method.disabled ? 'text-white/10' : 'text-[#04a99d]'}`}>
+                                            <div className={`w-6 h-6 flex items-center justify-center ${paymentMethod === method.id ? '!text-white' : method.disabled ? 'text-white/10' : 'text-[#04a99d]'}`}>
                                                 {method.id === 'wallet' && !walletLoading && walletBalance > 0 ? (
                                                     <span className="text-sm font-bold">₹{Number(walletBalance).toFixed(2)}</span>
                                                 ) : (
@@ -496,7 +496,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                                 )}
                                             </div>
 
-                                            <h6 className="text-sm font-medium">{method.label}</h6>
+                                            <h6 className={`text-sm font-medium ${paymentMethod === method.id ? '!text-white' : ''}`}>{method.label}</h6>
 
                                             {method.id === 'wallet' && (
                                                 <i className="text-[9px] text-white/40 block mt-0.5 leading-tight">

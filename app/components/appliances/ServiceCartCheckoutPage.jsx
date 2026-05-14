@@ -284,7 +284,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                         className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
                     >
                         <Sparkles className="w-8 h-8 !text-white" />
-                        <span className='!textwhite'> Confirm Your Booking</span>
+                        <span className="text-white"> Confirm Your Booking</span>
                     </motion.h1>
                 </div>
 
@@ -616,11 +616,26 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         <div className="flex justify-between items-center text-[#374151] text-sm">
                                             <div className="flex flex-col">
                                                 <span>Platform Fee</span>
-                                                <span className="text-[10px] text-[#04a99d]">Non-refundable booking fee</span>
+                                                <span className="text-[10px] text-[#04a99d] inline-flex items-center gap-1">
+                                                    <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
+                                                    Non-refundable booking fee
+                                                </span>
                                             </div>
                                             <span className="text-[#374151] font-semibold">₹{consultationFee.toFixed(2)}</span>
                                         </div>
                                     )}
+
+                                    <div className="flex justify-between items-center text-[#374151] text-sm">
+                                        <div className="flex flex-col">
+                                            
+                                            <span>Doorstep Inspection Fee</span>
+                                            <span className="text-[10px] text-[#04a99d] inline-flex items-center gap-1">
+                                                <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
+                                                Collected at doorstep
+                                            </span>
+                                        </div>
+                                        <span className="text-[#374151] font-semibold">₹{inspectionCost.toFixed(2)}</span>
+                                    </div>
                                 </div>
 
                                 <div className="h-px bg-white/10" />
@@ -639,12 +654,12 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         </div>
                                     </div>
 
-                                    <div className="flex items-start gap-2 p-3 rounded-xl bg-[#04a99d]/5 border border-[#04a99d]/10 mt-4">
+                                    {/* <div className="flex items-start gap-2 p-3 rounded-xl bg-[#04a99d]/5 border border-[#04a99d]/10 mt-4">
                                         <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
                                         <p className="text-[11px] text-[#4b5563] leading-relaxed">
-                                            This is the total amount to be paid online. All taxes and service charges are included in this quote.
+                                            We collect the Doorstep Inspection Fee at doorstep.
                                         </p>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
 

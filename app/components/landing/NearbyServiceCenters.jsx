@@ -508,7 +508,7 @@ export function NearbyServiceCenters() {
                             style={{ position: 'absolute', transform: 'translate(-50%, 10px)', pointerEvents: 'none' }}
                             className="bg-black/60 backdrop-blur-sm border border-white/10 rounded px-1.5 py-0.5 shadow-md"
                           >
-                            <span className="text-white/90 text-[9px] font-bold truncate max-w-[80px] block">
+                            <span className="text-white text-[9px] font-bold truncate max-w-[80px] block">
                               {service.name.split(' ')[0]}
                             </span>
                           </div>
@@ -530,7 +530,7 @@ export function NearbyServiceCenters() {
                               </div>
                               <span className="text-white text-xs font-bold">{service.name}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-[10px] text-[#04a99d] font-medium opacity-80">
+                            <div className="flex items-center gap-1.5 text-[10px] text-white font-medium opacity-90">
                               <Navigation className="w-2.5 h-2.5" />
                               Double-click to view details
                             </div>

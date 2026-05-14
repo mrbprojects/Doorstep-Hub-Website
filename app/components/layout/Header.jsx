@@ -42,6 +42,16 @@ export function Header({ theme = {}, navItems = [] }) {
   };
 
   const currentTheme = { ...defaultTheme, ...theme };
+  const authModalTheme = {
+    bgMobile: 'bg-white/80',
+    textMain: 'text-[#0f172a]',
+    textHover: 'text-[#037166]',
+    border: 'border-[#037166]/30',
+    buttonBg: 'bg-[#111111]',
+    accentGradientFrom: 'from-[#037166]',
+    accentGradientTo: 'to-[#04a99d]',
+    accent: 'bg-[#037166]'
+  };
 
 
   const [apiNavItems, setApiNavItems] = useState([]);
@@ -326,7 +336,9 @@ export function Header({ theme = {}, navItems = [] }) {
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
-                  <User className={`w-5 h-5 ${currentTheme.textHover ? currentTheme.textHover : 'text-[#037166]'}`} />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
                 )}
 
                 {/* Profile Incomplete Warning Badge */}
@@ -415,7 +427,7 @@ export function Header({ theme = {}, navItems = [] }) {
         </AnimatePresence>
       </motion.header>
 
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} theme={currentTheme} />
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} theme={authModalTheme} />
     </>
   );
 }

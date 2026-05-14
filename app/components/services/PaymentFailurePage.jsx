@@ -62,8 +62,10 @@ export function PaymentFailurePage() {
         } else if (type === 'appliances') {
             router.push('/appliances/cart');
         } else if (type === 'service-center') {
-            router.push('/appliance-repair-services/cart');
-        } else if (type === 'verified-partner' || type === 'professional') {
+            router.push('/appliance-repair-services');
+        } else if (type === 'verified-partner') {
+            router.push('/appliance-repair-services');
+        } else if (type === 'professional') {
             router.push('/appliances/booking');
         } else {
             // Default to the general services cart
@@ -75,7 +77,8 @@ export function PaymentFailurePage() {
         const type = searchParams.get('type') || searchParams.get('serviceType');
         const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
         if (deepType) return 'cart';
-        if (type === 'verified-partner' || type === 'professional') return 'booking';
+        if (type === 'verified-partner') return 'services';
+        if (type === 'professional') return 'booking';
         return 'cart';
     };
 

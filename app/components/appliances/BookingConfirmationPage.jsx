@@ -604,7 +604,7 @@ export function BookingConfirmationPage({
                         <Info className={`w-4 h-4 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#037166]'
                           }`} />
                       </div>
-                      <p className={`text-[11px] leading-relaxed ${paymentMethod === 'wallet' ? 'text-white/90' : 'text-[#037166]'
+                      <p className={`text-[11px] leading-relaxed ${paymentMethod === 'wallet' ? '!text-white/90' : 'text-[#037166]'
                         }`}>
                         Refer your friends and family members and earn cashback up to <span className="font-bold">₹99</span>. The amount will be credited to your Doorstep Hub Wallet after a successful booking.
                       </p>

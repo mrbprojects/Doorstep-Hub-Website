@@ -15,11 +15,11 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const { token, isAuthenticated, loading: authLoading } = useAuth();
     const router = useRouter();
 
-    // Calculate final payable amount: Service Cost + 18% GST + Fixed Consultation Fee (125)
-    const baseServiceCost = cartData?.totalServiceCost || 0;
-    const gstAmount = baseServiceCost * 0.18;
-    const consultationFee = 125; // Fixed Consultation Fee
-    const bookingCost = baseServiceCost + gstAmount + consultationFee;
+    // Calculate final payable amount directly from service-cart/get response
+    const baseServiceCost = Number(cartData?.totalServiceCost || 0);
+    const gstAmount = Number(cartData?.gstAmount || 0);
+    const consultationFee = Number(cartData?.consultationFee || 0);
+    const bookingCost = Number(cartData?.finalAmount || (baseServiceCost + gstAmount + consultationFee));
 
     const inspectionCost = cartItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0);
 
@@ -283,8 +283,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                         transition={{ delay: 0.1 }}
                         className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
                     >
-                        <Sparkles className="w-8 h-8" />
-                        Confirm Your Booking
+                        <Sparkles className="w-8 h-8 !text-white" />
+                        <span className='!textwhite'> Confirm Your Booking</span>
                     </motion.h1>
                 </div>
 
@@ -313,7 +313,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 Select Date
                             </h4>
                             {availableDates.length === 0 ? (
-                                <p className="text-white/70 text-sm">No dates available at this time</p>
+                                <p className="text-white/90 text-sm">No dates available at this time</p>
                             ) : (
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {availableDates.map((date) => (
@@ -322,7 +322,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             onClick={() => setBookedDate(date.value)}
                                             className={`p-4 rounded-xl font-medium transition-all ${bookedDate === date.value
                                                 ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                                                : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                                                : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
                                                 }`}
                                         >
                                             {date.label}
@@ -344,7 +344,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 Select Time Slot
                             </h4>
                             {availableTimesForSelectedDate.length === 0 ? (
-                                <p className="text-white/70 text-sm">
+                                <p className="text-white/90 text-sm">
                                     {bookedDate
                                         ? 'No time slots available for selected date'
                                         : 'Please select a date first'
@@ -358,7 +358,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             onClick={() => setBookedTime(time.value)}
                                             className={`p-4 rounded-xl font-medium transition-all ${bookedTime === time.value
                                                 ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                                                : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                                                : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
                                                 }`}
                                         >
                                             {time.label}
@@ -390,7 +390,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         onClick={() => setTechnicianPreference(option.value)}
                                         className={`p-4 rounded-xl font-medium transition-all ${technicianPreference === option.value
                                             ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                                            : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                                            : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
                                             }`}
                                     >
                                         {option.label}
@@ -552,10 +552,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     <div key={item.itemId} className="flex justify-between text-sm">
                                         <div className="flex-1">
                                             <div className="flex justify-between items-start mb-1">
-                                                <h6 className="text-white/90 font-bold max-w-[180px] leading-tight">{item.itemName}</h6>
-                                                <span className="text-white font-bold whitespace-nowrap ml-2">₹{item.price}</span>
+                                                <h6 className="text-[#111827] font-bold max-w-[180px] leading-tight">{item.itemName}</h6>
+                                                <span className="text-[#1f2937] font-bold whitespace-nowrap ml-2">₹{item.price}</span>
                                             </div>
-                                            <p className="text-[#04a99d] text-[10px] font-semibold uppercase tracking-wider mb-2">
+                                            <p className="text-[#0f766e] text-[10px] font-semibold uppercase tracking-wider mb-2">
                                                 {item.packageName}
                                             </p>
 
@@ -563,14 +563,14 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             <div className="flex items-center gap-2.5">
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item, -1)}
-                                                    className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+                                                    className="w-7 h-7 rounded-lg bg-white/80 border border-[#d1d5db] flex items-center justify-center text-[#111827] hover:bg-white transition-all active:scale-95"
                                                 >
                                                     <Minus className="w-3 h-3" />
                                                 </button>
-                                                <span className="text-white text-sm font-bold w-4 text-center">{item.quantity || 1}</span>
+                                                <span className="text-[#111827] text-sm font-bold w-4 text-center">{item.quantity || 1}</span>
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item, 1)}
-                                                    className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+                                                    className="w-7 h-7 rounded-lg bg-white/80 border border-[#d1d5db] flex items-center justify-center text-[#111827] hover:bg-white transition-all active:scale-95"
                                                 >
                                                     <Plus className="w-3 h-3" />
                                                 </button>
@@ -586,7 +586,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             <div className="space-y-4 mb-6">
                                 {/* Item Subtotal */}
                                 <div className="space-y-2">
-                                    <div className="flex justify-between items-center text-white/50 text-xs uppercase tracking-wider font-bold">
+                                        <div className="flex justify-between items-center text-[#374151] text-xs uppercase tracking-wider font-bold">
                                         <span>Services Subtotal</span>
                                         <span>₹{baseServiceCost.toFixed(2)}</span>
                                     </div>
@@ -596,29 +596,29 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 {/* Fees & Taxes */}
                                 <div className="space-y-3">
                                     {gstAmount > 0 && (
-                                        <div className="flex justify-between items-center text-white/70 text-sm">
+                                        <div className="flex justify-between items-center text-[#374151] text-sm">
                                             <div className="flex items-center gap-1.5">
                                                 <span>GST</span>
-                                                <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10">18%</span>
+                                                <span className="text-[10px] bg-black/5 px-1.5 py-0.5 rounded border border-black/10">18%</span>
                                             </div>
-                                            <span>₹{gstAmount.toFixed(2)}</span>
+                                            <span className="text-[#374151] font-semibold">₹{gstAmount.toFixed(2)}</span>
                                         </div>
                                     )}
 
                                     {cartData?.platformFee > 0 && (
-                                        <div className="flex justify-between items-center text-white/70 text-sm">
+                                        <div className="flex justify-between items-center text-[#374151] text-sm">
                                             <span>Platform Fee</span>
-                                            <span>₹{cartData.platformFee.toFixed(2)}</span>
+                                            <span className="text-[#374151] font-semibold">₹{cartData.platformFee.toFixed(2)}</span>
                                         </div>
                                     )}
 
                                     {(
-                                        <div className="flex justify-between items-center text-white/70 text-sm">
+                                        <div className="flex justify-between items-center text-[#374151] text-sm">
                                             <div className="flex flex-col">
                                                 <span>Platform Fee</span>
                                                 <span className="text-[10px] text-[#04a99d]">Non-refundable booking fee</span>
                                             </div>
-                                            <span>₹{consultationFee.toFixed(2)}</span>
+                                            <span className="text-[#374151] font-semibold">₹{consultationFee.toFixed(2)}</span>
                                         </div>
                                     )}
                                 </div>
@@ -629,8 +629,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-end">
                                         <div className="flex flex-col">
-                                            <span className="text-white/60 text-xs uppercase font-bold">Grand Total</span>
-                                            <span className="text-white font-bold text-2xl">₹{bookingCost.toFixed(2)}</span>
+                                            <span className="text-[#4b5563] text-xs uppercase font-bold">Grand Total</span>
+                                            <span className="text-[#111827] font-bold text-2xl">₹{bookingCost.toFixed(2)}</span>
                                         </div>
                                         <div className="flex flex-col items-end">
                                             <span className="text-[#04a99d] text-[10px] font-bold uppercase py-1 px-2 bg-[#04a99d]/10 rounded-lg border border-[#04a99d]/20">
@@ -641,7 +641,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
                                     <div className="flex items-start gap-2 p-3 rounded-xl bg-[#04a99d]/5 border border-[#04a99d]/10 mt-4">
                                         <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
-                                        <p className="text-[11px] text-white/70 leading-relaxed">
+                                        <p className="text-[11px] text-[#4b5563] leading-relaxed">
                                             This is the total amount to be paid online. All taxes and service charges are included in this quote.
                                         </p>
                                     </div>
@@ -651,11 +651,11 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             {/* Selected Date/Time Preview */}
                             {bookedDate && bookedTime && (
                                 <div className="p-4 rounded-lg bg-[#037166]/10 border border-[#037166]/20 mb-6">
-                                    <p className="text-white/80 text-sm mb-2">Scheduled for:</p>
-                                    <p className="text-white font-medium">
+                                    <p className="text-[#4b5563] text-sm mb-2">Scheduled for:</p>
+                                    <p className="text-[#1f2937] font-medium">
                                         {availableDates.find(d => d.value === bookedDate)?.label}
                                     </p>
-                                    <p className="text-white font-medium">
+                                    <p className="text-[#1f2937] font-medium">
                                         {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
                                     </p>
                                 </div>
@@ -682,7 +682,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 )}
                             </motion.button>
 
-                            <p className="text-white/60 text-[10px] text-center mt-4">
+                            <p className="text-[#6b7280] text-[10px] text-center mt-4">
                                 By booking, you agree to our Terms & Cancellation Policy.
                             </p>
                             <div className="flex items-center justify-center gap-2 text-[10px] text-[#037166] bg-[#037166]/5 p-2.5 rounded-xl border border-[#037166]/10 mt-3">

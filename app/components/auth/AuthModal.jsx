@@ -312,15 +312,15 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
                                 <form onSubmit={handleSendOtp} className="space-y-4">
                                     <div className="relative">
-                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black/70" />
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/90" />
                                         <input
                                             type="tel"
                                             placeholder="Mobile Number"
                                             value={mobile}
                                             onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
                                             maxLength={10}
-                                            className={`w-full pl-12 pr-4 py-3.5 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/60 focus:border-opacity-100 transition-all outline-none`}
-                                            style={{ color: '#000000', WebkitTextFillColor: '#000000', caretColor: '#000000' }}
+                                            className={`w-full pl-12 pr-4 py-3.5 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none`}
+                                            style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                             required
                                         />
                                     </div>
@@ -419,8 +419,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                                         e.preventDefault();
                                                     }
                                                 }}
-                                                className={`w-12 h-14 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black text-center text-xl font-bold placeholder:text-black/60 focus:border-opacity-100 outline-none transition-all`}
-                                                style={{ color: '#000000', WebkitTextFillColor: '#000000', caretColor: '#000000' }}
+                                                className={`w-12 h-14 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white text-center text-xl font-bold placeholder:text-white/70 focus:border-opacity-100 outline-none transition-all`}
+                                                style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                             />
                                         ))}
                                     </div>
@@ -503,8 +503,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     </button>
                                 </div>
                                 <div className="mt-4 text-center">
-                                    <h3 className={`text-xl font-bol !text-black`}>{user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User'}</h3>
-                                    <p className="!text-black text-sm select-none">{profileData.phone || user?.phone || user?.mobile || 'No phone'}</p>
+                                    <h3 className={`text-xl font-bol !text-white`}>{user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User'}</h3>
+                                    <p className="!text-white text-sm select-none">{profileData.phone || user?.phone || user?.mobile || 'No phone'}</p>
                                 </div>
                                 {!isEditing && (
                                     <motion.button
@@ -520,7 +520,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
                             <div className="space-y-4">
                                 <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
+                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/80" />
                                     <input
                                         type="tel"
                                         placeholder="Phone Number"
@@ -528,47 +528,47 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                                         maxLength={10}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
-                                        style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                     />
                                 </div>
                                 <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/80" />
                                     <input
                                         type="email"
                                         placeholder="Email Address"
                                         value={profileData.email}
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value.trimStart() }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
-                                        style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                     />
                                 </div>
                                 <div className="relative">
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/80" />
                                     <input
                                         type="text"
                                         placeholder="Full Name"
                                         value={profileData.name}
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value.replace(/[^A-Za-z\s.'-]/g, '').slice(0, 50) }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
-                                        style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                     />
                                 </div>
 
                                 {/* Referral Code — only shown on first-time profile completion */}
                                 {isFirstTimeUser && (
                                     <div className="relative">
-                                        <Gift className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60" />
+                                        <Gift className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/80" />
                                         <input
                                             type="text"
                                             placeholder="Referral Code (optional)"
                                             value={referralCode}
                                             onChange={(e) => setReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 20))}
                                             maxLength={20}
-                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-black placeholder:text-black/50 focus:border-opacity-100 transition-all outline-none font-mono tracking-widest`}
-                                            style={{ color: '#000000', WebkitTextFillColor: '#000000' }}
+                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none font-mono tracking-widest`}
+                                            style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                         />
                                     </div>
                                 )}

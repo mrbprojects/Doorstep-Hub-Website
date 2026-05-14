@@ -574,12 +574,12 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
 
                 {/* App Links beside heading */}
-                <div className="flex flex-col items-start gap-3 md:self-end md:mb-0">
+                <div className="flex flex-col items-center gap-3 w-full md:w-auto md:self-end md:mb-0">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                    className="inline-flex items-center justify-center w-[75%] max-w-[260px] min-w-[200px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                     title="Get it on Google Play"
                   >
                     <img src="/andriod1.png" alt="Google Play" className="h-[80px] w-auto max-w-[100%] object-contain block mx-auto" />
@@ -588,7 +588,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                    className="inline-flex items-center justify-center w-[75%] max-w-[260px] min-w-[200px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                     title="Download on the App Store"
                   >
                     <img src="/apple2.png" alt="App Store" className="h-[80px] w-auto max-w-[100%] object-contain block mx-auto" />
@@ -1005,7 +1005,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 <span className="text-gray-900 font-bold text-lg">{selectedPackages.length} Selected</span>
                 <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Total: ₹{services.filter(s => selectedPackages.includes(s.id)).reduce((acc, curr) => acc + curr.price, 0)}</p>
               </div>
-              <button onClick={handleContinueBooking} className="px-8 py-3 rounded-full bg-gray-900 text-white font-bold transition-all flex items-center gap-2">
+              <button onClick={handleContinueBooking} className="px-8 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold transition-all flex items-center gap-2 shadow-lg shadow-[#037166]/20 hover:shadow-[#037166]/35">
                 Continue Booking <ArrowLeft className="w-4 h-4 rotate-180" />
               </button>
             </div>
@@ -1027,4 +1027,3 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     </motion.div>
   );
 }
-

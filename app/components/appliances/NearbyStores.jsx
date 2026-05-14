@@ -365,7 +365,7 @@ export function NearbyServiceCenters({ onViewAll }) {
                               style={{ position: 'absolute', transform: 'translate(-50%, 10px)', pointerEvents: 'none' }}
                               className="bg-black/60 backdrop-blur-sm border border-white/10 rounded px-1.5 py-0.5 shadow-md"
                             >
-                              <span className="text-white/90 text-[9px] font-bold truncate max-w-[80px] block">
+                              <span className="text-white text-[9px] font-bold truncate max-w-[80px] block">
                                 {service.name.split(' ')[0]}
                               </span>
                             </div>
@@ -384,9 +384,9 @@ export function NearbyServiceCenters({ onViewAll }) {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#04a99d] shadow-[0_0_8px_#04a99d]" />
-                                <span className="text-white text-xs font-bold">{service.name}</span>
+                                <span className="text-white text-xs font-bold" style={{ color: '#ffffff' }}>{service.name}</span>
                               </div>
-                              <div className="flex items-center gap-1.5 text-[10px] text-[#04a99d] font-medium opacity-80">
+                              <div className="flex items-center gap-1.5 text-[10px] text-white font-medium opacity-90" style={{ color: '#ffffff' }}>
                                 <Navigation className="w-2.5 h-2.5" />
                                 Double-click to view details
                               </div>
@@ -407,7 +407,7 @@ export function NearbyServiceCenters({ onViewAll }) {
                               className="bg-gradient-to-r from-[#037166] to-[#025951] border border-[#04a99d]/60 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 ring-2 ring-white/10 z-50"
                             >
                               <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]" />
-                              <span className="text-white text-xs font-bold tracking-wide uppercase">{service.name}</span>
+                              <span className="!text-white text-xs font-bold tracking-wide uppercase">{service.name}</span>
                               {/* Connector arrow */}
                               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#025951] border-r border-b border-[#04a99d]/60 rotate-45" />
                             </div>

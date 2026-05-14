@@ -289,18 +289,6 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h1 className="text-3xl md:text-4xl font-bold !text-white mb-2">
-              {pageTitle}
-            </h1>
-            <p className="!text-white/90">
-              {categoryName ? `${categoryName} • ` : ''}Professional Services
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Tabs */}
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6 mt-4">
-          <div className="flex items-center justify-between gap-4">
             <motion.button
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -316,7 +304,40 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                   router.back();
                 }
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm whitespace-nowrap"
+              className="inline-flex lg:hidden items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm whitespace-nowrap"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {categoryName ? `Back to ${categoryName}` : 'Back'}
+            </motion.button>
+
+            <h1 className="text-3xl md:text-4xl font-bold !text-white mb-2">
+              {pageTitle}
+            </h1>
+            <p className="!text-white/90">
+              {categoryName ? `${categoryName} • ` : ''}Professional Services
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Tabs */}
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6 mt-4">
+          <div className="flex items-center justify-center lg:justify-between gap-4">
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              onClick={() => {
+                if (categoryName) {
+                  const activeCat = allCategories.find(c => c.name === categoryName);
+                  if (activeCat?.slug) {
+                    router.push(`/${activeCat.slug}`);
+                  } else {
+                    router.back();
+                  }
+                } else {
+                  router.back();
+                }
+              }}
+              className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm whitespace-nowrap"
             >
               <ArrowLeft className="w-4 h-4" />
               {categoryName ? `Back to ${categoryName}` : 'Back'}

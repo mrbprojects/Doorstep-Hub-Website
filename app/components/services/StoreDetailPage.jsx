@@ -669,7 +669,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleSelectPackage(service.id)}
-                      className={`relative bg-white/5 backdrop-blur-sm border-2 rounded-3xl overflow-hidden cursor-pointer transition-all hover:scale-105 ${selectedPackages.includes(service.id)
+                      className={`relative h-full bg-white/5 backdrop-blur-sm border-2 rounded-3xl overflow-hidden cursor-pointer transition-all hover:scale-105 ${selectedPackages.includes(service.id)
                         ? 'bg-[#037166]/30 border-white shadow-[0_0_25px_rgba(255,255,255,0.25)] ring-1 ring-white/50'
                         : 'border-white/10 hover:border-white/20'
                         }`}

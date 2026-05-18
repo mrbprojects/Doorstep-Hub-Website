@@ -6,16 +6,16 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 const appliancesTheme = {
-    bgScrolled: 'bg-[#0a0a0a]/80',
-    bgMobile: 'bg-[#0a0a0a]/95',
+    bgScrolled: 'bg-white/80',
+    bgMobile: 'bg-white/95',
     textMain: 'text-[#037166]',
     textHover: 'text-[#037166]',
-    border: 'border-[#037166]/20',
+    border: 'border-gray-100',
     accent: 'bg-[#037166]',
     accentGradientFrom: 'from-[#037166]',
-    accentGradientTo: 'to-[#025951]',
-    buttonBg: 'bg-[#1a1a1a]',
-    isLight: false
+    accentGradientTo: 'to-[#04a99d]',
+    buttonBg: 'bg-gray-50',
+    isLight: true
 };
 
 const footerTheme = {

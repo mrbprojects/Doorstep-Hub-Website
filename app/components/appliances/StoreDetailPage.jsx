@@ -789,11 +789,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
               {/* Service Cards */}
               {loading ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8 w-full">
                   {Array.from({ length: 4 }).map((_, i) => <ShimmerServiceCard key={i} />)}
                 </div>
               ) : services && services.length > 0 ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8 w-full">
                   {services.map((service, index) => (
                     <motion.div
                       key={service.id || index}
@@ -801,7 +801,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleSelectPackage(service.id)}
-                      className={`relative bg-white border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
+                      className={`relative h-full min-h-[250px] bg-white border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
                         ? 'border-[#037166] shadow-xl shadow-[#037166]/10'
                         : 'border-gray-100 hover:border-[#037166]/20'
                         }`}
@@ -809,7 +809,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       <div className="flex flex-col sm:flex-row h-full">
                         {/* Service Image */}
                         {service.image && (
-                          <div className="relative w-full sm:w-44 h-44 sm:h-auto sm:self-stretch overflow-hidden bg-white">
+                          <div className="relative w-full sm:w-[36%] h-40 sm:h-auto sm:self-stretch overflow-hidden bg-white">
                             <img
                               src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                               alt={service.name}
@@ -825,28 +825,28 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                           </div>
                         )}
 
-                        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                        <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
                           <div className="flex-1 mb-3">
                             <div className="flex items-start justify-between">
-                              <div>
+                              <div className="min-w-0">
                                 {selectedPackages.includes(service.id) && (
                                   <div className="inline-flex items-center gap-1.5 text-[#037166] mb-1">
                                     <CheckCircle className="w-3.5 h-3.5" />
                                     <span className="text-[10px] font-bold uppercase tracking-wider">Selected</span>
                                   </div>
                                 )}
-                                <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-1 leading-snug">{service.name}</h4>
+                                <h4 className="text-[18px] sm:text-[20px] font-bold text-gray-900 mb-1 leading-snug line-clamp-2">{service.name}</h4>
                                 {service.subcategoryName && (
-                                  <div className="mb-1 inline-flex px-3 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20">
-                                    <span className="text-[#037166] text-[10px] font-bold uppercase tracking-wider">{service.subcategoryName}</span>
+                                  <div className="mb-1 inline-flex px-2.5 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20">
+                                    <span className="text-[#037166] text-[11px] font-semibold uppercase tracking-wide">{service.subcategoryName}</span>
                                   </div>
                                 )}
                               </div>
                               <div className="text-right flex-shrink-0 ml-2">
                                 <p className="text-gray-600 text-xs italic">Starting from</p>
-                                <span className="text-xl sm:text-2xl font-bold text-[#037166]">₹{service.price}</span>
+                                <span className="text-[28px] sm:text-[32px] font-bold text-[#037166] leading-none">₹{service.price}</span>
                                 {service.priceUnit && (
-                                  <span className="text-gray-400 text-[10px] ml-1">/{service.priceUnit}</span>
+                                  <span className="text-gray-400 text-xs ml-1">/{service.priceUnit}</span>
                                 )}
                               </div>
                             </div>
@@ -857,7 +857,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             />
                           </div>
 
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-gray-50 pt-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-t border-gray-50 pt-2.5">
                             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-5">
                               {service.totalOrders > 0 && (
                                 <div className="flex items-center gap-2.5">
@@ -880,7 +880,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 e.stopPropagation();
                                 handleAddToCart(service);
                               }}
-                              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#037166] text-white font-bold text-sm whitespace-nowrap hover:bg-[#04a99d] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+                              className="w-full sm:w-auto px-4 py-2 rounded-full bg-[#037166] text-white font-bold text-sm whitespace-nowrap hover:bg-[#04a99d] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
                             >
                               Book Now
                               <ArrowLeft className="w-3.5 h-3.5 rotate-180" />

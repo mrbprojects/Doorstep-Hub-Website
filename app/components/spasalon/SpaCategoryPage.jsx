@@ -181,9 +181,14 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
                                 className="group cursor-pointer relative"
                             >
                                 <div className="absolute inset-0 bg-[#C06C84] rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition-opacity top-4"></div>
-                                <div className="bg-white rounded-[2rem] p-4 border border-gray-100 relative overflow-hidden h-full shadow-xl hover:-translate-y-2 transition-transform duration-300">
-                                    <div className="relative h-56 rounded-[1.5rem] overflow-hidden mb-6 bg-gray-100">
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
+                                <div className="bg-white rounded-[2rem] border border-gray-100 relative overflow-hidden h-full shadow-xl hover:-translate-y-2 transition-transform duration-300 flex flex-col justify-between">
+                                    <div className="relative h-56 w-full overflow-hidden rounded-t-[2rem] bg-gray-100">
+                                        {/* Floating Top Rated Badge */}
+                                        <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full text-[#C06C84] text-xs font-bold shadow-md border border-pink-100/30">
+                                            <Sparkles className="w-3.5 h-3.5 fill-[#C06C84]/15" />
+                                            <span>Top Rated</span>
+                                        </div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                                         {subCat.image ? (
                                             <img
                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
@@ -202,17 +207,14 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
                                         </div>
                                     </div>
 
-                                    <div className="px-2 pb-2">
-                                        <p className="text-gray-600 line-clamp-2 mb-4 text-sm leading-relaxed">
+                                    <div className="p-6 pt-4 flex flex-col flex-1 justify-between">
+                                        <p className="text-gray-600 line-clamp-2 mb-4 text-sm leading-relaxed text-center">
                                             {subCat.description || `Experience premium ${subCat.name} services.`}
                                         </p>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-1 text-[#C06C84] text-sm font-semibold">
-                                                <Sparkles className="w-4 h-4" />
-                                                <span>Top Rated</span>
-                                            </div>
-                                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#6D1357] group-hover:text-white transition-colors">
-                                                <ChevronRight className="w-5 h-5" />
+                                        <div className="flex justify-center mt-2">
+                                            <div className="px-5 py-2 rounded-full bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 group-hover:from-[#b05d75] group-hover:to-[#5a4cdb] group-hover:scale-105 duration-300">
+                                                Explore Services
+                                                <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
                                             </div>
                                         </div>
                                     </div>
@@ -230,4 +232,3 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
         </div>
     );
 }
-

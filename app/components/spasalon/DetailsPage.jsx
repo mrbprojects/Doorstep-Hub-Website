@@ -202,7 +202,7 @@ export function DetailsPage() {
                                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    className="inline-flex items-center justify-center w-[75%] md:w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Get it on Google Play"
                                 >
                                     <img src="/andriod1.png" alt="Google Play" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" />
@@ -211,7 +211,7 @@ export function DetailsPage() {
                                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    className="inline-flex items-center justify-center w-[75%] md:w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Download on the App Store"
                                 >
                                     <img src="/apple2.png" alt="App Store" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" />

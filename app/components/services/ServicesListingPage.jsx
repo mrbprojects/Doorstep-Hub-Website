@@ -579,6 +579,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -5 }}
+                        onClick={() => router.push(`/appliances/store/${center._id}?serviceId=${subCategoryId}`)}
                         className="group cursor-pointer"
                       >
                         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 md:h-[220px]">
@@ -631,7 +632,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                               </div>
 
                               <button
-                                onClick={() => router.push(`/appliances/store/${center._id}?serviceId=${subCategoryId}`)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/appliances/store/${center._id}?serviceId=${subCategoryId}`);
+                                }}
                                 className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
                               >
                                 Book Service

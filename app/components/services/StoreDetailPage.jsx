@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
@@ -17,7 +17,7 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp
+  ThumbsUp, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -102,6 +102,23 @@ export function StoreDetailPage({ storeId, serviceId }) {
   const [locationData, setLocationData] = useState(null);
   const [globalSettings, setGlobalSettings] = useState(null);
 
+  // Subcategory filtering states
+  const [subcategories, setSubcategories] = useState([]);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('all');
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+
+  // Tabs scroll reference and logic
+  const tabsRef = useRef(null);
+  const scrollTabs = (direction) => {
+    if (tabsRef.current) {
+      const scrollAmount = 200;
+      tabsRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   // Addons popup state
   const [showAddonsPopup, setShowAddonsPopup] = useState(false);
   const [currentService, setCurrentService] = useState(null);
@@ -111,6 +128,84 @@ export function StoreDetailPage({ storeId, serviceId }) {
 
   // Get service cart functions from context
   const { addToCart: addToServiceCart, clearCart } = useServiceCart();
+
+  // Fetch subcategories
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (!storeId) return;
+      setLoadingSubcategories(true);
+      try {
+        const isMongoId = /^[0-9a-fA-F]{24}$/.test(storeId);
+        const endpoint = isMongoId
+          ? `service_center_subcategories/${storeId}`
+          : `service_center_subcategories_by_slug/${storeId}`;
+
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/${endpoint}`;
+        console.log('Fetching subcategories from:', url);
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Subcategories loaded:', data);
+          if (data.success) {
+            const list = data.subcategories || data.data || [];
+            setSubcategories(list);
+            if (list.length > 0) {
+              const firstId = list[0].subcategoryId || list[0]._id || list[0].id;
+              setSelectedSubcategoryId(firstId);
+              // Also trigger the service load for this subcategory by default
+              handleSubcategoryTabChange(firstId);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+      } finally {
+        setLoadingSubcategories(false);
+      }
+    };
+
+    fetchSubcategories();
+  }, [storeId]);
+
+  // Handle subcategory filtering
+  const handleSubcategoryTabChange = async (subcatId) => {
+    setSelectedSubcategoryId(subcatId);
+    setLoading(true);
+    try {
+      const providerId = resolvedProviderId || storeId;
+      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${providerId}`;
+      if (subcatId && subcatId !== 'all') {
+        url += `?subcategoryId=${subcatId}`;
+      }
+      
+      console.log('Fetching services for subcategory:', subcatId, 'from:', url);
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          const rawServices = data.services || data.data?.services || [];
+          const mappedServices = rawServices.map(s => ({
+            id: s._id || s.id,
+            name: s.name || s.title,
+            description: s.description || s.bio,
+            price: s.price || s.minFare || s.inspectionCost || 0,
+            image: s.image || s.logo,
+            rating: s.rating || 4.5,
+            totalOrders: s.totalOrders || 0,
+            duration: s.duration || '60 mins',
+            subcategoryName: s.subcategoryName,
+            bannerImages: s.banner_images || []
+          }));
+          setServices(mappedServices);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching filtered services:', error);
+      toast.error('Failed to load services for this subcategory');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch service center details from API
   useEffect(() => {
@@ -404,12 +499,12 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 </h1>
 
                 {/* App Links beside heading */}
-                <div className="hidden md:flex flex-col items-start gap-3 md:self-end md:mb-3">
+                <div className="flex flex-row md:flex-col items-start gap-2 md:gap-3 md:self-end md:mb-3">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
+                    className="flex items-center justify-center w-[46%] md:w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
                     title="Get it on Google Play"
                   >
                     <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
@@ -418,7 +513,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
+                    className="flex items-center justify-center w-[46%] md:w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
                     title="Download on the App Store"
                   >
                     <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
@@ -459,6 +554,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </motion.div>
@@ -494,10 +590,58 @@ export function StoreDetailPage({ storeId, serviceId }) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Header */}
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-white mb-2">Available Services</h2>
-                <p className="text-white/60 text-lg">Choose from our professional repair packages</p>
+              {/* Header & Subcategory Filter Tabs */}
+              <div className="mb-8 w-full border-b border-white/5 pb-6">
+                <div className="mb-4">
+                  <h2 className="text-3xl font-bold text-white mb-2">Available Services</h2>
+                  <p className="text-white/60 text-lg">Choose from our professional repair packages</p>
+                </div>
+                
+                {/* Subcategory Filter Tabs */}
+                {subcategories.length > 0 && (
+                  <div className="relative flex items-center max-w-full shrink-0">
+                    {/* Left scroll arrow */}
+                    <button
+                      onClick={() => scrollTabs('left')}
+                      className="p-2 rounded-full bg-white/5 border border-white/10 shadow-md text-white hover:bg-white/10 active:scale-95 transition-all mr-2 shrink-0 flex items-center justify-center"
+                      title="Scroll left"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Tabs Container */}
+                    <div
+                      ref={tabsRef}
+                      className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide scroll-smooth"
+                    >
+                      {subcategories.map((subcat) => {
+                        const id = subcat.subcategoryId || subcat._id || subcat.id;
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => handleSubcategoryTabChange(id)}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
+                              selectedSubcategoryId === id
+                                ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white border-transparent shadow-md shadow-[#037166]/20'
+                                : 'bg-white/5 backdrop-blur-sm text-white/75 border-white/10 hover:border-white/20 hover:text-white'
+                            }`}
+                          >
+                            {subcat.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Right scroll arrow */}
+                    <button
+                      onClick={() => scrollTabs('right')}
+                      className="p-2 rounded-full bg-white/5 border border-white/10 shadow-md text-white hover:bg-white/10 active:scale-95 transition-all ml-2 shrink-0 flex items-center justify-center"
+                      title="Scroll right"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Service Cards - Using API data */}

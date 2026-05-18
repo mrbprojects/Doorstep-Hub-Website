@@ -422,7 +422,8 @@ function SelectServiceCatchAllContent() {
     (async () => {
       try {
         setBrandLoading(true);
-        const data = await fetchAllBrands();
+        const catId = selectedCategory?._id || selectedCategory?.id || '';
+        const data = await fetchAllBrands(catId);
         setBrands(data);
 
         if (brandSlug) {
@@ -435,7 +436,7 @@ function SelectServiceCatchAllContent() {
       } catch (e) { console.error(e); }
       finally { setBrandLoading(false); }
     })();
-  }, [step, brandSlug]);
+  }, [step, brandSlug, selectedCategory]);
 
   // Load services when on step 3 or 4
   useEffect(() => {

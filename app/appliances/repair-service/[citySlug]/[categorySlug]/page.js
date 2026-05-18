@@ -52,7 +52,7 @@ function BrandPageContent() {
     (async () => {
       try {
         setLoading(true);
-        const [cities, cats, brandData] = await Promise.all([fetchCities(), fetchCategories(), fetchAllBrands()]);
+        const [cities, cats] = await Promise.all([fetchCities(), fetchCategories()]);
         
         const cityMatch = cities.find(c => (c.slug || c.name || '').toLowerCase().replace(/\s+/g, '-') === citySlug.toLowerCase());
         setSelectedCity(cityMatch || { name: citySlug, slug: citySlug });
@@ -60,6 +60,8 @@ function BrandPageContent() {
         const catMatch = cats.find(c => c.slug === categorySlug);
         setSelectedCategory(catMatch || { name: categorySlug, slug: categorySlug });
         
+        const catId = catMatch?._id || catMatch?.id || '';
+        const brandData = await fetchAllBrands(catId, '');
         setBrands(brandData);
       } catch (e) {
         console.error(e);
@@ -68,6 +70,32 @@ function BrandPageContent() {
       }
     })();
   }, [citySlug, categorySlug]);
+
+  // Fetch brands dynamically when search changes (debounced by 300ms)
+  useEffect(() => {
+    if (!selectedCategory) return;
+    
+    let active = true;
+    const fetchBrands = async () => {
+      try {
+        const catId = selectedCategory?._id || selectedCategory?.id || '';
+        const brandData = await fetchAllBrands(catId, search);
+        if (active) {
+          setBrands(brandData);
+        }
+      } catch (error) {
+        console.error('Error fetching brands:', error);
+      }
+    };
+
+    const delay = search ? 300 : 0;
+    const timer = setTimeout(fetchBrands, delay);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [search, selectedCategory]);
 
   const schemaData = {
     "@context": "https://schema.org",
@@ -164,33 +192,41 @@ function BrandPageContent() {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9 gap-3">
-          {filtered.map(brand => {
-            const bSlug = (brand.slug || brand.name || '').toLowerCase().trim().replace(/\s+/g, '-');
-            const logo = (brand.image || brand.logo || brand.brandLogo);
-            return (
-              <button
-                key={brand.name || brand}
-                onClick={() => {
-                  router.push(`/${citySlug}/${categorySlug}/${bSlug}`);
-                }}
-                className="group relative rounded-2xl border-2 border-gray-100 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[#037166]/30 hover:shadow-md shadow-sm"
-              >
-                <div className="h-28 flex items-center justify-center overflow-hidden p-2">
-                  {logo ? (
-                    <img
-                      src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
-                      alt={brand.name}
-                      className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="text-xl font-black text-gray-200">{(brand.name || brand)?.[0]?.toUpperCase()}</div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        {filtered.length > 0 ? (
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9 gap-3">
+            {filtered.map(brand => {
+              const bSlug = (brand.slug || brand.name || '').toLowerCase().trim().replace(/\s+/g, '-');
+              const logo = (brand.image || brand.logo || brand.brandLogo);
+              return (
+                <button
+                  key={brand.name || brand}
+                  onClick={() => {
+                    router.push(`/${citySlug}/${categorySlug}/${bSlug}`);
+                  }}
+                  className="group relative rounded-2xl border-2 border-gray-100 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[#037166]/30 hover:shadow-md shadow-sm"
+                >
+                  <div className="h-28 flex items-center justify-center overflow-hidden p-2">
+                    {logo ? (
+                      <img
+                        src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
+                        alt={brand.name}
+                        className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="text-xl font-black text-gray-200">{(brand.name || brand)?.[0]?.toUpperCase()}</div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-20 text-center border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
+            <Search size={40} className="text-gray-300 mx-auto mb-4" />
+            <p className="text-lg font-bold text-gray-500">No brands found</p>
+            <p className="text-sm text-gray-400 mt-1">There are no brands available under the {selectedCategory?.name} category currently.</p>
+          </div>
+        )}
       </div>
     </main>
   );

@@ -18,7 +18,7 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp, CheckCheck, Loader2, Store
+  ThumbsUp, CheckCheck, Loader2, Store, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -79,6 +79,23 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const [locationData, setLocationData] = useState(null);
   const [globalSettings, setGlobalSettings] = useState(null);
 
+  // Subcategory filtering states
+  const [subcategories, setSubcategories] = useState([]);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('all');
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+
+  // Tabs scroll reference and logic
+  const tabsRef = useRef(null);
+  const scrollTabs = (direction) => {
+    if (tabsRef.current) {
+      const scrollAmount = 200;
+      tabsRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   // Addons popup state
   const [showAddonsPopup, setShowAddonsPopup] = useState(false);
   const [currentService, setCurrentService] = useState(null);
@@ -90,6 +107,84 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const { addToCart: addToServiceCart, clearCart } = useServiceCart();
   // Get user's real location
   const { location, isMapsLoaded } = useLocationContext();
+
+  // Fetch subcategories
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (!storeId) return;
+      setLoadingSubcategories(true);
+      try {
+        const isMongoId = /^[0-9a-fA-F]{24}$/.test(storeId);
+        const endpoint = isMongoId
+          ? `service_center_subcategories/${storeId}`
+          : `service_center_subcategories_by_slug/${storeId}`;
+
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/${endpoint}`;
+        console.log('Fetching subcategories from:', url);
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Subcategories loaded:', data);
+          if (data.success) {
+            const list = data.subcategories || data.data || [];
+            setSubcategories(list);
+            if (list.length > 0) {
+              const firstId = list[0].subcategoryId || list[0]._id || list[0].id;
+              setSelectedSubcategoryId(firstId);
+              // Also trigger the service load for this subcategory by default
+              handleSubcategoryTabChange(firstId);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+      } finally {
+        setLoadingSubcategories(false);
+      }
+    };
+
+    fetchSubcategories();
+  }, [storeId]);
+
+  // Handle subcategory filtering
+  const handleSubcategoryTabChange = async (subcatId) => {
+    setSelectedSubcategoryId(subcatId);
+    setLoading(true);
+    try {
+      const providerId = resolvedProviderId || storeId;
+      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${providerId}`;
+      if (subcatId && subcatId !== 'all') {
+        url += `?subcategoryId=${subcatId}`;
+      }
+      
+      console.log('Fetching services for subcategory:', subcatId, 'from:', url);
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          const rawServices = data.services || data.data?.services || [];
+          const mappedServices = rawServices.map(s => ({
+            id: s._id || s.id,
+            name: s.name || s.title,
+            description: s.description || s.bio,
+            price: s.price || s.minFare || s.inspectionCost || 0,
+            image: s.image || s.logo,
+            rating: s.rating || 4.5,
+            totalOrders: s.totalOrders || 0,
+            duration: s.duration || '60 mins',
+            subcategoryName: s.subcategoryName,
+            bannerImages: s.banner_images || []
+          }));
+          setServices(mappedServices);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching filtered services:', error);
+      toast.error('Failed to load services for this subcategory');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch service center details from API
   useEffect(() => {
@@ -659,10 +754,58 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Header */}
-              <div className="mb-6 w-full px-1">
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1.5">Our Services & Rate Cards</h2>
-                <p className="text-gray-500 text-sm sm:text-base">Choose from our professional repair packages</p>
+              {/* Header & Subcategory Filter Tabs */}
+              <div className="mb-8 w-full px-1 border-b border-gray-100 pb-6">
+                <div className="mb-4">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1.5">Our Services & Rate Cards</h2>
+                  <p className="text-gray-500 text-sm sm:text-base">Choose from our professional repair packages</p>
+                </div>
+                
+                {/* Subcategory Filter Tabs */}
+                {subcategories.length > 0 && (
+                  <div className="relative flex items-center max-w-full shrink-0">
+                    {/* Left scroll arrow */}
+                    <button
+                      onClick={() => scrollTabs('left')}
+                      className="p-2 rounded-full bg-white border border-gray-200 shadow-md text-gray-600 hover:bg-gray-50 active:scale-95 transition-all mr-2 shrink-0 flex items-center justify-center"
+                      title="Scroll left"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Tabs Container */}
+                    <div
+                      ref={tabsRef}
+                      className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide scroll-smooth"
+                    >
+                      {subcategories.map((subcat) => {
+                        const id = subcat.subcategoryId || subcat._id || subcat.id;
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => handleSubcategoryTabChange(id)}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
+                              selectedSubcategoryId === id
+                                ? 'bg-[#037166] text-white border-[#037166] shadow-md shadow-[#037166]/20'
+                                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            {subcat.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Right scroll arrow */}
+                    <button
+                      onClick={() => scrollTabs('right')}
+                      className="p-2 rounded-full bg-white border border-gray-200 shadow-md text-gray-600 hover:bg-gray-50 active:scale-95 transition-all ml-2 shrink-0 flex items-center justify-center"
+                      title="Scroll right"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Service Cards */}
@@ -721,6 +864,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 )}
                               </div>
                               <div className="text-right flex-shrink-0 ml-2">
+                                <p className="text-gray-600 text-xs italic">Starting from</p>
                                 <span className="text-xl sm:text-2xl font-bold text-[#037166]">₹{service.price}</span>
                                 {service.priceUnit && (
                                   <span className="text-gray-400 text-[10px] ml-1">/{service.priceUnit}</span>

@@ -345,24 +345,24 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                         </div>
 
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
-                            <div className="flex flex-col items-start gap-3">
+                            <div className="flex flex-col items-center md:items-start gap-3 w-full">
                                 <a
                                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    className="inline-flex items-center justify-center w-[68%] md:w-[220px] h-[56px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Get it on Google Play"
                                 >
-                                    <img src="/andriod1.png" alt="Google Play" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                    <img src="/andriod1.png" alt="Google Play" className="w-full h-full object-contain block mx-auto px-2" />
                                 </a>
                                 <a
                                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[222px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    className="inline-flex items-center justify-center w-[68%] md:w-[220px] h-[56px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Download on the App Store"
                                 >
-                                    <img src="/apple2.png" alt="App Store" className="h-[90px] w-auto max-w-[100%] object-contain block mx-auto" />
+                                    <img src="/apple2.png" alt="App Store" className="w-full h-full object-contain block mx-auto px-2" />
                                 </a>
                             </div>
                             <div className="bg-[#6D1357]/10 rounded-2xl p-3 md:p-4 border border-[#6D1357]/20 min-w-[100px] md:min-w-[120px] flex flex-col items-center">

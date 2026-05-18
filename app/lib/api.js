@@ -161,10 +161,18 @@ export async function fetchCategories(location = null) {
  * @param {string} searchQuery - Optional search query for brands
  * @returns {Promise<Array>} Array of brand objects
  */
-export async function fetchAllBrands(searchQuery = '') {
-    const url = searchQuery 
-        ? `${API_BASE_URL}/app/brands/all_brands?searchQuery=${encodeURIComponent(searchQuery)}`
+export async function fetchAllBrands(categoryId = '', searchQuery = '') {
+    const params = new URLSearchParams();
+    if (categoryId) params.set('categoryId', categoryId);
+    if (searchQuery) params.set('searchQuery', searchQuery);
+
+    const queryStr = params.toString();
+    const url = queryStr
+        ? `${API_BASE_URL}/app/brands/all_brands?${queryStr}`
         : `${API_BASE_URL}/app/brands/all_brands`;
+
+
+
 
     const response = await fetch(url, {
         method: 'GET',

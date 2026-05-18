@@ -18,7 +18,8 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp, CheckCheck, Loader2, Store
+  ThumbsUp, CheckCheck, Loader2, Store,
+  VerifiedIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -108,18 +109,13 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   // Get user's real location
   const { location, isMapsLoaded } = useLocationContext();
 
-  // Fetch subcategories
+  // Fetch subcategories once resolvedProviderId is determined
   useEffect(() => {
     const fetchSubcategories = async () => {
-      if (!storeId) return;
+      if (!resolvedProviderId) return;
       setLoadingSubcategories(true);
       try {
-        const isMongoId = /^[0-9a-fA-F]{24}$/.test(storeId);
-        const endpoint = isMongoId
-          ? `service_center_subcategories/${storeId}`
-          : `service_center_subcategories_by_slug/${storeId}`;
-
-        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/${endpoint}`;
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_subcategories/${resolvedProviderId}`;
         console.log('Fetching subcategories from:', url);
         const res = await fetch(url);
         if (res.ok) {
@@ -131,8 +127,12 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             if (list.length > 0) {
               const firstId = list[0].subcategoryId || list[0]._id || list[0].id;
               setSelectedSubcategoryId(firstId);
-              // Also trigger the service load for this subcategory by default
+              // Trigger the service load for this subcategory by default
               handleSubcategoryTabChange(firstId);
+            } else {
+              // No subcategories, show all services
+              setSelectedSubcategoryId('all');
+              handleSubcategoryTabChange('all');
             }
           }
         }
@@ -144,7 +144,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     };
 
     fetchSubcategories();
-  }, [storeId]);
+  }, [resolvedProviderId]);
 
   // Handle subcategory filtering
   const handleSubcategoryTabChange = async (subcatId) => {
@@ -156,7 +156,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
       if (subcatId && subcatId !== 'all') {
         url += `?subcategoryId=${subcatId}`;
       }
-      
+
       console.log('Fetching services for subcategory:', subcatId, 'from:', url);
       const res = await fetch(url);
       if (res.ok) {
@@ -226,7 +226,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             if (centersData.success && Array.isArray(centersData.nearByServiceCenters)) {
               const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
               const matched = centersData.nearByServiceCenters.find(c =>
-                c.slug === storeId || 
+                c.slug === storeId ||
                 c._id === storeId ||
                 generateSlug(c.business_name || c.name) === storeId
               );
@@ -265,22 +265,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             setResolvedProviderId(prev => prev || center._id);
           }
 
-          // Set services
-          // Map array if it exists, otherwise try to find it in the center object
-          const rawServices = data.services || center?.services || [];
-          const mappedServices = rawServices.map(s => ({
-            id: s._id || s.id,
-            name: s.name || s.title,
-            description: s.description || s.bio,
-            price: s.price || s.minFare || s.inspectionCost || 0,
-            image: s.image || s.logo,
-            rating: s.rating || 4.5,
-            totalOrders: s.totalOrders || 0,
-            duration: s.duration || '60 mins',
-            subcategoryName: s.subcategoryName || center?.speciality,
-            bannerImages: s.banner_images || []
-          }));
-          setServices(mappedServices);
+
 
           // Set reviews
           setReviews(data.reviews || center?.reviews || []);
@@ -603,36 +588,35 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           Back
         </motion.button>
 
-        {/* Hero Image Gallery */}
+        {/* Hero Image Gallery - 3 Cards Layout */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative h-[320px] xs:h-[350px] md:h-[400px] lg:h-[500px] rounded-2xl mb-8 shadow-2xl"
+          className="relative mb-8"
         >
-          <div className="h-full w-full rounded-2xl overflow-hidden">
-            {bannerImage ? (
-              <img
-                src={bannerImage}
-                alt="Service Center Banner"
-                className="w-full h-full object-cover object-top"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <Sparkles className="w-20 h-20 text-[#037166]/10" />
-              </div>
-            )}
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[45%_38%_17%] gap-6">
 
-          {/* No Gradient Overlay - for maximum clarity */}
+            {/* CARD 1: BANNER IMAGE CARD */}
+            <div className="relative h-[250px] rounded-2xl border border-gray-100 shadow-xl overflow-hidden bg-white flex items-center justify-center">
+              {bannerImage ? (
+                <img
+                  src={bannerImage}
+                  alt="Service Center Banner"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  <Sparkles className="w-12 h-12 text-[#037166]/10" />
+                </div>
+              )}
+            </div>
 
-          {/* Store Info Overlay - Half Above / Half Below */}
-          <div className="absolute left-0 right-0 bottom-0 translate-y-1/2">
-            <div className="max-w-[1240px] mx-auto bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl p-3 sm:p-4 md:pb-6 shadow-2xl">
-            
-              <div className="relative flex flex-col gap-2 mb-1">
-                <div className="flex items-center gap-3 sm:gap-4 md:pr-[320px]">
+            {/* CARD 2: STORE INFO CARD */}
+            <div className="relative h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-3">
                   <div className="relative flex-shrink-0">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl overflow-hidden border-2 border-white shadow-xl bg-white flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white flex items-center justify-center">
                       {(center.logo || center.image) ? (
                         <img
                           src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${(center.logo || center.image).startsWith('/') ? (center.logo || center.image).slice(1) : (center.logo || center.image)}`}
@@ -644,81 +628,125 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                          <Store className="w-10 h-10 text-[#037166]/10" />
+                          <Store className="w-8 h-8 text-[#037166]/10" />
                         </div>
                       )}
                     </div>
-                    {/* Verified Badge */}
-                    {/* <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center shadow-lg">
-                      <Check className="w-4 h-4 text-white font-bold" />
-                    </div> */}
                   </div>
-                  <div>
-                    <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight mb-0.5">
+
+                  <div className="min-w-0">
+                    <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight mb-1 truncate">
                       {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
                     </h1>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#037166] animate-pulse" />
-                      <span className="text-[10px] sm:text-xs font-bold text-[#037166] uppercase tracking-wider">Verified Professional Service</span>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-[#037166] text-[#037166]" />
+                        <span className="text-gray-900 font-bold text-xs sm:text-sm">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
+                        <span className="text-gray-400 text-[10px] sm:text-xs">({center.totalRatings || center.reviews?.length || 0})</span>
+                      </div>
+
+                      <div className="px-2 py-0.5 rounded-full bg-[#037166]/5 border border-[#037166]/10 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-[#037166]" />
+                        <span className="text-[#037166] text-[10px] font-bold">Express Service</span>
+                      </div>
+                      <div className="px-2 py-0.5 rounded-full bg-[#037166]/5 border border-[#037166]/10 flex items-center gap-1">
+                        <VerifiedIcon className="w-3 h-3 text-[#037166]" />
+                        <span className="text-[#037166] text-[10px] font-bold">Verified Partner</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* App Links beside heading */}
-                <div className="hidden md:flex flex-col items-center gap-3 w-full md:w-auto md:absolute md:top-0 md:right-0">
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-start gap-1.5">
+                    <MapPin className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600 text-xs sm:text-sm font-medium line-clamp-2">
+                      {center.address}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-[#037166]/10">
+                      <CheckCheck className="w-2.5 h-2.5 text-[#037166]" />
+                    </div>
+                    <span className="text-gray-700 text-xs sm:text-sm font-semibold">
+                      {center.totalOrders || 0}+ Jobs Done
+                    </span>
+                  </div>
+
+                     <div className="flex items-center justify-center gap-3 mt-1">
                   <a
                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-[75%] max-w-[260px] min-w-[200px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                    className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-[80px] w-auto max-w-[100%] object-contain block mx-auto" />
+                    <img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" />
                   </a>
                   <a
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-[75%] max-w-[260px] min-w-[200px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                    className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
                     title="Download on the App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-[80px] w-auto max-w-[100%] object-contain block mx-auto" />
+                    <img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" />
                   </a>
                 </div>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1.5 md:grid md:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-4 mb-1">
-                <div className="flex items-start gap-1.5 md:gap-2">
-                  <MapPin className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600 text-xs sm:text-sm font-medium line-clamp-1">{center.address}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <Star className="w-4 h-4 fill-[#037166] text-[#037166]" />
-                    <span className="text-gray-900 font-bold text-xs sm:text-sm">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
-                    <span className="text-gray-400 text-[10px] sm:text-xs">({center.totalRatings || center.reviews?.length || 0})</span>
+            
+            </div>
+
+            {/* CARD 3: STORE TIMINGS CARD */}
+            <div className="relative h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2.5 mb-4 pb-2.5 border-b border-gray-100">
+                  <div className="w-9 h-9 rounded-xl bg-[#037166]/10 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-[#037166]" />
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-[#037166]/10">
-                      <CheckCheck className="w-2.5 h-2.5 text-[#037166]" />
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900 leading-tight">Working Hours</h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span>
                     </div>
-                    <span className="text-gray-700 text-xs sm:text-sm font-semibold">{center.totalOrders || 0}+ Jobs Done</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Monday - Saturday</span>
+                    <span className="text-gray-800 text-xs sm:text-sm font-extrabold block">
+                      {center.opening_time && center.closing_time
+                        ? `${center.opening_time} - ${center.closing_time}`
+                        : center.timings || "09:00 AM - 08:00 PM"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Sunday</span>
+                    <span className="text-gray-800 text-xs sm:text-sm font-extrabold block">
+                      {center.sunday_opening_time && center.sunday_closing_time
+                        ? `${center.sunday_opening_time} - ${center.sunday_closing_time}`
+                        : "11:00 AM - 04:00 PM"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="px-3 py-1 rounded-full bg-[#037166]/5 border border-[#037166]/10 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#037166]" />
-                  <span className="text-[#037166] text-[10px] sm:text-xs font-bold">Express Service</span>
-                </div>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                <span>* Timings may vary on holidays</span>
+                <span className="text-[#037166] font-bold">24/7 Booking</span>
               </div>
             </div>
+
           </div>
         </motion.div>
-
-        {/* Space for overlapped store info card */}
-        <div className="h-24 sm:h-28 md:h-32" />
 
         {/* Sticky Tab Navigation */}
         <div className="sticky top-20 z-40 mb-8 bg-white/80 backdrop-blur-xl border-y border-gray-100 -mx-6 px-6 lg:-mx-8 lg:px-8">
@@ -756,7 +784,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1.5">Our Services & Rate Cards</h2>
                   <p className="text-gray-500 text-sm sm:text-base">Choose from our professional repair packages</p>
                 </div>
-                
+
                 {/* Subcategory Filter Tabs */}
                 {subcategories.length > 0 && (
                   <div className="relative flex items-center max-w-full shrink-0">
@@ -771,11 +799,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                           <button
                             key={id}
                             onClick={() => handleSubcategoryTabChange(id)}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
-                              selectedSubcategoryId === id
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${selectedSubcategoryId === id
                                 ? 'bg-[#037166] text-white border-[#037166] shadow-md shadow-[#037166]/20'
                                 : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                            }`}
+                              }`}
                           >
                             {subcat.name}
                           </button>
@@ -801,7 +828,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleSelectPackage(service.id)}
-                      className={`relative h-full min-h-[250px] bg-white border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
+                      className={`relative h-full min-h-[200px] bg-white border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
                         ? 'border-[#037166] shadow-xl shadow-[#037166]/10'
                         : 'border-gray-100 hover:border-[#037166]/20'
                         }`}
@@ -809,7 +836,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       <div className="flex flex-col sm:flex-row h-full">
                         {/* Service Image */}
                         {service.image && (
-                          <div className="relative w-full sm:w-[36%] h-40 sm:h-auto sm:self-stretch overflow-hidden bg-white">
+                          <div className="relative w-full sm:w-[30%] h-36 sm:h-auto sm:self-stretch overflow-hidden bg-white">
                             <img
                               src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                               alt={service.name}
@@ -817,39 +844,40 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             />
                             {/* Rating Badge */}
                             {service.rating && (
-                              <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-white shadow-sm border border-gray-100 flex items-center gap-1">
-                                <Star className="w-3 h-3 fill-[#037166] text-[#037166]" />
-                                <span className="text-gray-900 font-bold text-[10px]">{service.rating}</span>
+                              <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-white shadow-sm border border-gray-100 flex items-center gap-1">
+                                <Star className="w-2.5 h-2.5 fill-[#037166] text-[#037166]" />
+                                <span className="text-gray-900 font-bold text-[9px]">{service.rating}</span>
                               </div>
                             )}
                           </div>
                         )}
 
-                        <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
-                          <div className="flex-1 mb-3">
-                            <div className="flex items-start justify-between">
+                        <div className="p-3 flex-1 flex flex-col justify-between">
+                          <div className="flex-1 mb-2">
+                            <div className="flex items-start justify-between mb-1">
                               <div className="min-w-0">
                                 {selectedPackages.includes(service.id) && (
-                                  <div className="inline-flex items-center gap-1.5 text-[#037166] mb-1">
-                                    <CheckCircle className="w-3.5 h-3.5" />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider">Selected</span>
+                                  <div className="inline-flex items-center gap-1 text-[#037166] mb-0.5">
+                                    <CheckCircle className="w-3 h-3" />
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Selected</span>
                                   </div>
                                 )}
-                                <h4 className="text-[18px] sm:text-[20px] font-bold text-gray-900 mb-1 leading-snug line-clamp-2">{service.name}</h4>
-                                {service.subcategoryName && (
-                                  <div className="mb-1 inline-flex px-2.5 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20">
-                                    <span className="text-[#037166] text-[11px] font-semibold uppercase tracking-wide">{service.subcategoryName}</span>
-                                  </div>
-                                )}
+                                <h4 className="text-[16px] sm:text-[18px] font-extrabold text-gray-900 leading-snug line-clamp-2">{service.name}</h4>
                               </div>
                               <div className="text-right flex-shrink-0 ml-2">
-                                <p className="text-gray-600 text-xs italic">Starting from</p>
-                                <span className="text-[28px] sm:text-[32px] font-bold text-[#037166] leading-none">₹{service.price}</span>
+                                <p className="text-gray-500 text-[10px] italic">Starting from</p>
+                                <span className="text-[22px] sm:text-[25px] font-extrabold text-[#037166] leading-none">₹{service.price}</span>
                                 {service.priceUnit && (
-                                  <span className="text-gray-400 text-xs ml-1">/{service.priceUnit}</span>
+                                  <span className="text-gray-400 text-[10px] ml-0.5">/{service.priceUnit}</span>
                                 )}
                               </div>
                             </div>
+
+                            {service.subcategoryName && (
+                              <div className="mb-1.5 inline-flex px-2 py-0.5 rounded-full bg-[#037166]/10 border border-[#037166]/20">
+                                <span className="text-[#037166] text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap">{service.subcategoryName}</span>
+                              </div>
+                            )}
 
                             <div
                               className="text-gray-500 text-xs font-medium line-clamp-2 max-w-2xl leading-relaxed"
@@ -857,19 +885,19 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             />
                           </div>
 
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-t border-gray-50 pt-2.5">
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-5">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-gray-50 pt-2">
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4">
                               {service.totalOrders > 0 && (
-                                <div className="flex items-center gap-2.5">
+                                <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1 text-gray-500 text-xs whitespace-nowrap">
-                                    <CheckCheck className="w-4 h-4 text-[#037166]" />
+                                    <CheckCheck className="w-3.5 h-3.5 text-[#037166]" />
                                     <span>{service.totalOrders} orders</span>
                                   </div>
                                 </div>
                               )}
                               {service.duration && service.duration !== 'N/A' && (
-                                <div className="flex items-center gap-1.5 text-gray-500 text-sm">
-                                  <Clock className="w-4 h-4 text-[#037166]" />
+                                <div className="flex items-center gap-1 text-gray-500 text-xs">
+                                  <Clock className="w-3.5 h-3.5 text-[#037166]" />
                                   <span>{service.duration}</span>
                                 </div>
                               )}
@@ -880,10 +908,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                                 e.stopPropagation();
                                 handleAddToCart(service);
                               }}
-                              className="w-full sm:w-auto px-4 py-2 rounded-full bg-[#037166] text-white font-bold text-sm whitespace-nowrap hover:bg-[#04a99d] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+                              className="w-full sm:w-auto px-3.5 py-1.5 rounded-full bg-[#037166] text-white font-bold text-xs whitespace-nowrap hover:bg-[#04a99d] transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow active:scale-95"
                             >
                               Book Now
-                              <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+                              <ArrowLeft className="w-3 h-3 rotate-180" />
                             </button>
                           </div>
                         </div>

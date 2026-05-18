@@ -177,7 +177,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
       if (subcatId && subcatId !== 'all') {
         url += `?subcategoryId=${subcatId}`;
       }
-      
+
       console.log('Fetching services for subcategory:', subcatId, 'from:', url);
       const res = await fetch(url);
       if (res.ok) {
@@ -596,7 +596,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                   <h2 className="text-3xl font-bold text-white mb-2">Available Services</h2>
                   <p className="text-white/60 text-lg">Choose from our professional repair packages</p>
                 </div>
-                
+
                 {/* Subcategory Filter Tabs */}
                 {subcategories.length > 0 && (
                   <div className="relative flex items-center max-w-full shrink-0">
@@ -620,11 +620,10 @@ export function StoreDetailPage({ storeId, serviceId }) {
                           <button
                             key={id}
                             onClick={() => handleSubcategoryTabChange(id)}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
-                              selectedSubcategoryId === id
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${selectedSubcategoryId === id
                                 ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white border-transparent shadow-md shadow-[#037166]/20'
                                 : 'bg-white/5 backdrop-blur-sm text-white/75 border-white/10 hover:border-white/20 hover:text-white'
-                            }`}
+                              }`}
                           >
                             {subcat.name}
                           </button>

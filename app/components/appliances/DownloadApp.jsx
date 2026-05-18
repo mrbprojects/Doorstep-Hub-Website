@@ -34,7 +34,7 @@ export function DownloadApp() {
 
             <h2 className="text-[28px] md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
               <span className="bg-[#037166]  bg-clip-text text-transparent">
-                Download the App now ..
+                Download App now ..
               </span>
               <br />
 

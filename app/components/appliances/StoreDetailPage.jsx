@@ -594,7 +594,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           animate={{ opacity: 1, y: 0 }}
           className="relative mb-8"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-[45%_38%_17%] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[4.5fr_3.8fr_1.7fr] gap-6">
 
             {/* CARD 1: BANNER IMAGE CARD */}
             <div className="relative h-[250px] rounded-2xl border border-gray-100 shadow-xl overflow-hidden bg-white flex items-center justify-center">
@@ -749,7 +749,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         </motion.div>
 
         {/* Sticky Tab Navigation */}
-        <div className="sticky top-20 z-40 mb-8 bg-white/80 backdrop-blur-xl border-y border-gray-100 -mx-6 px-6 lg:-mx-8 lg:px-8">
+        <div className="sticky top-20 z-40 mb-8 bg-[#DEF2EF]/65 backdrop-blur-xl border-y border-[#9ecbc3]/30 -mx-6 px-6 lg:-mx-8 lg:px-8">
           <div className="max-w-[1400px] mx-auto">
             <div className="flex gap-2 overflow-x-auto py-2">
               {['Service Rates', 'About', 'Working Images', 'Location', 'Reviews'].map((tab) => (
@@ -758,7 +758,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   onClick={() => setActiveTab(tab)}
                   className={`relative px-6 py-2 rounded-full text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
                     ? 'bg-[#037166] text-white shadow-lg shadow-[#037166]/20'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                    : 'text-gray-600 hover:text-[#037166] hover:bg-[#037166]/10'
                     }`}
                 >
                   {tab}
@@ -781,7 +781,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               {/* Header & Subcategory Filter Tabs */}
               <div className="mb-8 w-full px-1 border-b border-gray-100 pb-6">
                 <div className="mb-4">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1.5">Our Services & Rate Cards</h2>
+                  <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1.5">Our Services & Rate Cards</h2>
                   <p className="text-gray-500 text-sm sm:text-base">Choose from our professional repair packages</p>
                 </div>
 

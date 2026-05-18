@@ -304,7 +304,7 @@ export function NearbyServiceCenters() {
           </div>
 
           {/* Business Name */}
-          <h4 className="text-xl font-bold text-slate-900 group-hover:text-[#04a99d] transition-colors leading-tight mb-1.5">
+          <h4 className="text-xl font-bold text-slate-900 group-hover:text-white transition-colors leading-tight mb-1.5">
             {service.name}
           </h4>
 

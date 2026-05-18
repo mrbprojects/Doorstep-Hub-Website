@@ -69,6 +69,8 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     const [serviceData, setServiceData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedPackage, setSelectedPackage] = useState(null);
+    const [subcategories, setSubcategories] = useState([]);
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('all');
     const [showAddonsModal, setShowAddonsModal] = useState(false);
     const [isCheckingAddons, setIsCheckingAddons] = useState(false);
     const [globalSettings, setGlobalSettings] = useState(null);
@@ -190,6 +192,20 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
 
         fetchServiceData();
     }, [slugOrId]);
+    useEffect(() => {
+        const run = async () => {
+            if (!slugOrId) return;
+            try {
+                const payload = isObjectId(slugOrId) ? { providerId: slugOrId } : { providerSlug: slugOrId };
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/dhubApi/app/professional-services-flow/public/provider-subcategories`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data?.success) setSubcategories(Array.isArray(data.subcategories || data.data) ? (data.subcategories || data.data) : []);
+            } catch (e) { console.error('Error fetching provider subcategories:', e); }
+        };
+        run();
+    }, [slugOrId]);
 
     useEffect(() => {
         const fetchGlobalSettings = async () => {
@@ -261,6 +277,13 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     if (!serviceData) {
         return <div className="min-h-screen bg-[var(--off-white)]" />;
     }
+    const filteredPackages = (serviceData.packages || []).filter((pkg) => {
+        if (selectedSubcategoryId === 'all') return true;
+        const x = pkg.subcategoryId || pkg.subCategoryId || pkg.serviceSubCategoryId || pkg.subcategory?._id;
+        if (Array.isArray(x)) return x.includes(selectedSubcategoryId);
+        if (x && typeof x === 'object') return x._id === selectedSubcategoryId || x.id === selectedSubcategoryId;
+        return x === selectedSubcategoryId;
+    });
 
     const schemaData = {
         "@context": "https://schema.org",
@@ -432,13 +455,21 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                     </div>
 
                     <TabsContent value="portfolio" className="space-y-4">
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                            <button onClick={() => setSelectedSubcategoryId('all')} className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap border ${selectedSubcategoryId === 'all' ? 'bg-[var(--saffron)] text-white border-[var(--saffron)]' : 'bg-white text-gray-700 border-gray-200'}`}>All</button>
+                            {subcategories.map((s, i) => {
+                                const id = s.subcategoryId || s._id || s.id;
+                                const name = s.subcategoryName || s.name || `Subcategory ${i + 1}`;
+                                return <button key={id || i} onClick={() => setSelectedSubcategoryId(id)} className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap border ${selectedSubcategoryId === id ? 'bg-[var(--saffron)] text-white border-[var(--saffron)]' : 'bg-white text-gray-700 border-gray-200'}`}>{name}</button>;
+                            })}
+                        </div>
                         <div className="mb-4 text-sm text-gray-500 flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-[var(--saffron)]" />
                             Please select a sacred offering to proceed:
                         </div>
                         {serviceData.packages.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {serviceData.packages.map((pkg, index) => (
+                                {filteredPackages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => setSelectedPackage(pkg)}
@@ -713,4 +744,3 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
         </div>
     );
 }
-

@@ -5,17 +5,26 @@ import { createPortal } from 'react-dom';
 import { MapPin, ChevronDown, Search, Crosshair, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocation } from '@/hooks/useLocation';
+import { fetchCities } from '@/lib/api';
 
+// Fallback static icons (used only when API image is missing)
 const CITY_ICONS = {
     'Hyderabad': '/Hyderabad.png',
     'Bangalore': '/Banglore.png',
     'Mumbai': '/Mumbai.png',
     'Chennai': '/chennai.png',
-    // 'Delhi': '/Delhi.png',
-    // 'Kolkata': '/kolkata.png',
     'Vijayawada': '/Vijayawada.png',
-    'Pune': '/pune.png'
+    'Pune': '/pune.png',
 };
+
+const FALLBACK_CITIES = [
+    { name: 'Hyderabad', icon: '/Hyderabad.png' },
+    { name: 'Bangalore', icon: '/Banglore.png' },
+    { name: 'Mumbai', icon: '/Mumbai.png' },
+    { name: 'Chennai', icon: '/chennai.png' },
+    { name: 'Vijayawada', icon: '/Vijayawada.png' },
+    { name: 'Pune', icon: '/pune.png' },
+];
 
 export function LocationBar({ theme = {} }) {
     const { location, detectWithGPS, searchLocation, setManualLocation, loading, error } = useLocation();
@@ -25,24 +34,50 @@ export function LocationBar({ theme = {} }) {
     const [isSearching, setIsSearching] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [availableCities, setAvailableCities] = useState([]);
+    const [loadingCities, setLoadingCities] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
+    // Load cities from API whenever modal opens — same logic as ApplianceBookingFlow.jsx
+    useEffect(() => {
+        if (!isOpen) return;
+        setLoadingCities(true);
+        fetchCities()
+            .then((citiesData) => {
+                if (citiesData && citiesData.length > 0) {
+                    // Map API response exactly as ApplianceBookingFlow does
+                    const mapped = citiesData.map((c) => ({
+                        id: c._id,
+                        name: c.name,
+                        icon: c.image
+                            ? (c.image.startsWith('http') ? c.image : `https://api.doorstephub.com${c.image}`)
+                            : (CITY_ICONS[c.name] || null),
+                    }));
+                    setAvailableCities(mapped);
+                } else {
+                    setAvailableCities(FALLBACK_CITIES);
+                }
+            })
+            .catch(() => {
+                setAvailableCities(FALLBACK_CITIES);
+            })
+            .finally(() => setLoadingCities(false));
+    }, [isOpen]);
+
     // Default Dark Theme (Fallback)
     const defaultTheme = {
         bgScrolled: 'bg-[#0a0a0a]/80',
         textMain: 'text-gray-300',
-        textHover: 'text-[#037166]', // Accent color
+        textHover: 'text-[#037166]',
         border: 'border-[#037166]/20',
         buttonBg: 'bg-[#1a1a1a]',
     };
 
-    // Merge provided theme with default or use if comprehensive
     const t = typeof theme === 'object' && Object.keys(theme).length > 0 ? theme : defaultTheme;
 
-    // Extract accent color for icons
     const accentClass = t.textHover.replace('text-', '');
     const accentText = t.textHover;
     const accentBorder = t.border;
@@ -104,6 +139,20 @@ export function LocationBar({ theme = {} }) {
             console.error('GPS detection failed:', error);
         } finally {
             setIsDetecting(false);
+        }
+    };
+
+    const handleCityClick = async (cityName) => {
+        setIsSearching(true);
+        try {
+            const results = await searchLocation(cityName);
+            if (results && results.length > 0) {
+                await handleSelectLocation(results[0]);
+            }
+        } catch (err) {
+            console.error('City search failed:', err);
+        } finally {
+            setIsSearching(false);
         }
     };
 
@@ -201,51 +250,44 @@ export function LocationBar({ theme = {} }) {
                                         </button>
                                     )}
 
-                                    {/* Available Cities Section - Show when NOT searching */}
+                                    {/* Available Cities — loaded from API */}
                                     {!searchQuery && (
                                         <div className="mt-4">
                                             <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Available Cities</div>
-                                            <div className="grid grid-cols-4 gap-3">
-                                                {[
-                                                    'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 
-                                                    'Vijayawada', 'Pune'
-                                                ].map((city) => (
-                                                    <button
-                                                        key={city}
-                                                        onClick={async () => {
-                                                            setIsSearching(true);
-                                                            try {
-                                                                const results = await searchLocation(city);
-                                                                if (results && results.length > 0) {
-                                                                    await handleSelectLocation(results[0]);
-                                                                }
-                                                            } catch (err) {
-                                                                console.error('City search failed:', err);
-                                                            } finally {
-                                                                setIsSearching(false);
-                                                            }
-                                                        }}
-                                                        className={`flex flex-col items-center overflow-hidden rounded-xl border border-gray-100 transition-all focus:outline-none bg-white hover:border-[#037166] hover:bg-[#037166]/5 group shadow-sm hover:shadow-md`}
-                                                    >
-                                                        <div className="w-full h-12 bg-white flex items-center justify-center overflow-hidden border-b border-gray-50">
-                                                            {CITY_ICONS[city] ? (
-                                                                <img 
-                                                                    src={CITY_ICONS[city]} 
-                                                                    alt={city} 
-                                                                    className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500" 
-                                                                />
-                                                            ) : (
-                                                                <MapPin className="w-4 h-4 text-[#037166]" />
-                                                            )}
-                                                        </div>
-                                                        <div className={`w-full py-2 px-1 bg-gray-50 group-hover:bg-[#037166]/10 transition-colors`}>
-                                                            <span className={`text-[10px] font-bold uppercase tracking-tight truncate block text-center text-gray-600 group-hover:text-[#037166]`}>{city}</span>
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            {loadingCities ? (
+                                                <div className="flex items-center justify-center py-8">
+                                                    <Loader2 className="w-6 h-6 animate-spin text-[#037166]" />
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    {availableCities.map((city) => (
+                                                        <button
+                                                            key={city.id || city.name}
+                                                            onClick={() => handleCityClick(city.name)}
+                                                            className={`flex flex-col items-center overflow-hidden rounded-xl border border-gray-100 transition-all focus:outline-none bg-white hover:border-[#037166] hover:bg-[#037166]/5 group shadow-sm hover:shadow-md`}
+                                                        >
+                                                            <div className="w-full h-12 bg-white flex items-center justify-center overflow-hidden border-b border-gray-50">
+                                                                {city.icon ? (
+                                                                    <img
+                                                                        src={city.icon}
+                                                                        alt={city.name}
+                                                                        className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
+                                                                    />
+                                                                ) : (
+                                                                    <MapPin className="w-4 h-4 text-[#037166]" />
+                                                                )}
+                                                            </div>
+                                                            <div className={`w-full py-2 px-1 bg-gray-50 group-hover:bg-[#037166]/10 transition-colors`}>
+                                                                <span className={`text-[10px] font-bold uppercase tracking-tight truncate block text-center text-gray-600 group-hover:text-[#037166]`}>{city.name}</span>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
+
+                                    {/* Search Results */}
                                     {searchResults.length > 0 && (
                                         <div className="mt-4 space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
                                             <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Search Results</div>

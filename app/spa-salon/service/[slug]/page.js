@@ -41,6 +41,9 @@ export default function SpaServiceDetailPage() {
     const [serviceData, setServiceData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedPackages, setSelectedPackages] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('all');
+    const [loadingSubcategories, setLoadingSubcategories] = useState(false);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
     const { cartItems, clearCart } = useServiceCart();
 
@@ -180,6 +183,38 @@ export default function SpaServiceDetailPage() {
         fetchServiceData();
     }, [slugOrId]);
 
+    useEffect(() => {
+        const fetchProviderSubcategories = async () => {
+            if (!slugOrId) return;
+            setLoadingSubcategories(true);
+            try {
+                const payload = isObjectId(slugOrId)
+                    ? { providerId: slugOrId }
+                    : { providerSlug: slugOrId };
+
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/dhubApi/app/professional-services-flow/public/provider-subcategories`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }
+                );
+                const data = await response.json();
+                if (data?.success) {
+                    const list = data.subcategories || data.data || [];
+                    setSubcategories(Array.isArray(list) ? list : []);
+                }
+            } catch (error) {
+                console.error('Error fetching provider subcategories:', error);
+            } finally {
+                setLoadingSubcategories(false);
+            }
+        };
+
+        fetchProviderSubcategories();
+    }, [slugOrId]);
+
     const togglePackage = (pkg) => {
         setSelectedPackages(prev => {
             const isSelected = prev.some(p => p._id === pkg._id);
@@ -192,6 +227,13 @@ export default function SpaServiceDetailPage() {
     };
 
     const totalPrice = selectedPackages.reduce((sum, pkg) => sum + (parseFloat(pkg.price) || 0), 0);
+    const filteredPackages = (serviceData?.packages || []).filter((pkg) => {
+        if (selectedSubcategoryId === 'all') return true;
+        const pkgSubcat = pkg.subcategoryId || pkg.subCategoryId || pkg.serviceSubCategoryId || pkg.subcategory?._id;
+        if (Array.isArray(pkgSubcat)) return pkgSubcat.includes(selectedSubcategoryId);
+        if (pkgSubcat && typeof pkgSubcat === 'object') return pkgSubcat._id === selectedSubcategoryId || pkgSubcat.id === selectedSubcategoryId;
+        return pkgSubcat === selectedSubcategoryId;
+    });
 
     const handleContinueToBook = async () => {
         if (selectedPackages.length === 0) {
@@ -351,9 +393,35 @@ export default function SpaServiceDetailPage() {
                     </div>
 
                     <TabsContent value="portfolio" className="space-y-4 outline-none">
-                        {serviceData.packages.length > 0 ? (
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                            <button
+                                onClick={() => setSelectedSubcategoryId('all')}
+                                className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap border transition-all ${selectedSubcategoryId === 'all' ? 'bg-[#6D1357] text-white border-[#6D1357]' : 'bg-white text-gray-700 border-gray-200'}`}
+                            >
+                                All
+                            </button>
+                            {subcategories.map((subcat, idx) => {
+                                const id = subcat.subcategoryId || subcat._id || subcat.id;
+                                const name = subcat.subcategoryName || subcat.name || `Subcategory ${idx + 1}`;
+                                return (
+                                    <button
+                                        key={id || idx}
+                                        onClick={() => setSelectedSubcategoryId(id)}
+                                        className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap border transition-all ${selectedSubcategoryId === id ? 'bg-[#6D1357] text-white border-[#6D1357]' : 'bg-white text-gray-700 border-gray-200'}`}
+                                    >
+                                        {name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {loadingSubcategories ? (
+                            <div className="text-sm text-gray-500">Loading subcategories...</div>
+                        ) : null}
+
+                        {filteredPackages.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {serviceData.packages.map((pkg, index) => (
+                                {filteredPackages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => togglePackage(pkg)}

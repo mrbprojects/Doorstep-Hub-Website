@@ -39,6 +39,9 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
     const [serviceData, setServiceData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedPackages, setSelectedPackages] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState(null);
+    const [loadingSubcategories, setLoadingSubcategories] = useState(false);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
     const [globalSettings, setGlobalSettings] = useState(null);
     const { cartItems, clearCart } = useServiceCart();
@@ -174,6 +177,42 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
     }, [slugOrId]);
 
     useEffect(() => {
+        const fetchProviderSubcategories = async () => {
+            if (!slugOrId) return;
+            setLoadingSubcategories(true);
+            try {
+                // Use providerId for MongoDB ObjectIds, providerSlug for slugs
+                const payload = isObjectId(slugOrId)
+                    ? { providerId: slugOrId }
+                    : { providerSlug: slugOrId };
+
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/provider-subcategories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data?.success) {
+                    const list = data.subcategories || data.data || [];
+                    const normalized = Array.isArray(list) ? list : [];
+                    setSubcategories(normalized);
+                    if (normalized.length > 0) {
+                        const firstId = normalized[0].subcategoryId || normalized[0]._id || normalized[0].id;
+                        setSelectedSubcategoryId(firstId || null);
+                    } else {
+                        setSelectedSubcategoryId(null);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching provider subcategories:', error);
+            } finally {
+                setLoadingSubcategories(false);
+            }
+        };
+        fetchProviderSubcategories();
+    }, [slugOrId, serviceData?.id]);
+
+    useEffect(() => {
         const fetchGlobalSettings = async () => {
             try {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
@@ -200,6 +239,13 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
     };
 
     const totalPrice = selectedPackages.reduce((sum, pkg) => sum + (parseFloat(pkg.price) || 0), 0);
+    const filteredPackages = (serviceData?.packages || []).filter((pkg) => {
+        if (!selectedSubcategoryId) return true;
+        const pkgSubcat = pkg.subcategoryId || pkg.subCategoryId || pkg.serviceSubCategoryId || pkg.subcategory?._id;
+        if (Array.isArray(pkgSubcat)) return pkgSubcat.includes(selectedSubcategoryId);
+        if (pkgSubcat && typeof pkgSubcat === 'object') return pkgSubcat._id === selectedSubcategoryId || pkgSubcat.id === selectedSubcategoryId;
+        return pkgSubcat === selectedSubcategoryId;
+    });
 
     const handleContinueToBook = async () => {
         if (selectedPackages.length === 0) {
@@ -398,39 +444,77 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
 
                     <TabsContent value="portfolio" className="space-y-4 outline-none">
                         <h3 className="text-lg md:text-xl font-bold text-gray-900">Service Rates Cards</h3>
-                        {serviceData.packages.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {serviceData.packages.map((pkg, index) => (
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                            {subcategories.map((subcat, idx) => {
+                                const id = subcat.subcategoryId || subcat._id || subcat.id;
+                                const name = subcat.subcategoryName || subcat.name || `Subcategory ${idx + 1}`;
+                                return (
+                                    <button
+                                        key={id || idx}
+                                        onClick={() => setSelectedSubcategoryId(id)}
+                                        className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap border transition-all ${selectedSubcategoryId === id ? 'bg-[#6D1357] text-white border-[#6D1357]' : 'bg-white text-gray-700 border-gray-200'}`}
+                                    >
+                                        {name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {loadingSubcategories ? <div className="text-sm text-gray-500">Loading subcategories...</div> : null}
+
+                        {filteredPackages.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                                {filteredPackages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => togglePackage(pkg)}
-                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative ${selectedPackages.some(p => p._id === pkg._id)
-                                            ? 'border-2 border-[#C06C84] ring-2 ring-[#C06C84]/10'
+                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-row h-auto min-h-[130px] sm:min-h-[160px] ${selectedPackages.some(p => p._id === pkg._id)
+                                            ? 'border-2 border-[#6D1357] ring-2 ring-[#6D1357]/10'
                                             : 'border-gray-100'
                                             }`}
                                     >
                                         {selectedPackages.some(p => p._id === pkg._id) && (
-                                            <div className="absolute top-3 right-3 z-10 bg-[#C06C84] text-white p-1 rounded-full shadow-lg">
-                                                <Check className="w-4 h-4" />
+                                            <div className="absolute top-2 right-2 z-10 bg-[#6D1357] text-white p-1 rounded-full shadow-lg">
+                                                <Check className="w-3.5 h-3.5" />
                                             </div>
                                         )}
-                                        <div className="h-48 bg-gray-100 relative">
+                                        <div className="w-24 sm:w-48 h-auto sm:h-full bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
                                                 <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
-                                                <div className="flex items-center justify-center h-full text-gray-400 bg-gray-100">
-                                                    <Scissors className="w-12 h-12 opacity-20" />
+                                                <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                                                    <Scissors className="w-8 h-8 opacity-20" />
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-4">
-                                            <h3 className="font-bold text-gray-900 mb-1">{pkg.name}</h3>
-                                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{pkg.description}</p>
-                                            <div className="flex items-center justify-between gap-2">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[10px] text-gray-500 italic font-bold uppercase tracking-wider">Starts From</span>
-                                                    <span className="text-[#C06C84] font-bold text-lg">₹{pkg.price}</span>
+                                        <div className="p-3.5 sm:p-5 flex flex-col justify-between flex-1 min-w-0">
+                                            <div className="min-w-0">
+                                                <div className="flex justify-between items-start mb-0.5">
+                                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{pkg.name}</h3>
                                                 </div>
+                                                <p className="text-gray-500 text-xs sm:text-sm mb-2 line-clamp-2 leading-snug">{pkg.description}</p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-gray-500 font-bold italic uppercase tracking-wider">Starts From</span>
+                                                    <span className="text-[#6D1357] font-bold text-xl sm:text-2xl">₹{pkg.price}</span>
+                                                    {pkg.priceUnit && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">{pkg.priceUnit}</span>}
+                                                </div>
+
+                                                {pkg.banner_images && pkg.banner_images.length > 0 && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setViewingRateCard(pkg);
+                                                            setRateCardImageIndex(0);
+                                                        }}
+                                                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6D1357]/10 text-[#6D1357] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#6D1357] hover:text-white transition-all flex items-center gap-1"
+                                                    >
+                                                        Details
+                                                        <ChevronRight className="w-3 h-3 sm:w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

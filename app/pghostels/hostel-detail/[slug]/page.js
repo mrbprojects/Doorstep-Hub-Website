@@ -47,6 +47,8 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [selectedPackage, setSelectedPackage] = useState(null);
+    const [subcategories, setSubcategories] = useState([]);
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState(null);
     const [showAddonsModal, setShowAddonsModal] = useState(false);
     const [addonsData, setAddonsData] = useState(null);
     const [isCheckingAddons, setIsCheckingAddons] = useState(false);
@@ -152,6 +154,29 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
 
         fetchHostelData();
     }, [slugOrId]);
+    useEffect(() => {
+        const run = async () => {
+            if (!slugOrId) return;
+            try {
+                const payload = isObjectId(slugOrId) ? { providerId: slugOrId } : { providerSlug: slugOrId };
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/provider-subcategories`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data?.success) {
+                    const list = Array.isArray(data.subcategories || data.data) ? (data.subcategories || data.data) : [];
+                    setSubcategories(list);
+                    if (list.length > 0) {
+                        const firstId = list[0].subcategoryId || list[0]._id || list[0].id;
+                        setSelectedSubcategoryId(firstId || null);
+                    } else {
+                        setSelectedSubcategoryId(null);
+                    }
+                }
+            } catch (e) { console.error('Error fetching provider subcategories:', e); }
+        };
+        run();
+    }, [slugOrId]);
 
     useEffect(() => {
         const fetchGlobalSettings = async () => {
@@ -186,6 +211,13 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
     if (fetchError || !hostelData) {
         return <div className="min-h-screen bg-white" />;
     }
+    const filteredPackages = (hostelData.packages || []).filter((pkg) => {
+        if (!selectedSubcategoryId) return true;
+        const x = pkg.subcategoryId || pkg.subCategoryId || pkg.serviceSubCategoryId || pkg.subcategory?._id;
+        if (Array.isArray(x)) return x.includes(selectedSubcategoryId);
+        if (x && typeof x === 'object') return x._id === selectedSubcategoryId || x.id === selectedSubcategoryId;
+        return x === selectedSubcategoryId;
+    });
 
     const handleContinueToBook = async () => {
         if (!selectedPackage) {
@@ -469,13 +501,20 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
 
                     {/* Room Types Tab */}
                     <TabsContent value="roomTypes" className="space-y-4">
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                            {subcategories.map((s, i) => {
+                                const id = s.subcategoryId || s._id || s.id;
+                                const name = s.subcategoryName || s.name || `Subcategory ${i + 1}`;
+                                return <button key={id || i} onClick={() => setSelectedSubcategoryId(id)} className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap border ${selectedSubcategoryId === id ? 'bg-[#037166] text-white border-[#037166]' : 'bg-white text-gray-700 border-gray-200'}`}>{name}</button>;
+                            })}
+                        </div>
                         <div className="mb-4 text-xs sm:text-sm text-gray-500 flex items-center gap-2">
                             <Sparkles className="w-3.5 h-3.5 sm:w-4 h-4 text-[#037166]" />
                             Please select a room type to proceed:
                         </div>
                         {hostelData.packages.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                                {hostelData.packages.map((pkg, index) => (
+                                {filteredPackages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => setSelectedPackage(pkg)}

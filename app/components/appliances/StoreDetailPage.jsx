@@ -18,7 +18,7 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp, CheckCheck, Loader2, Store, ChevronLeft, ChevronRight
+  ThumbsUp, CheckCheck, Loader2, Store
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -333,12 +333,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     fetchGlobalSettings();
   }, []);
 
-  // Immediate redirection logic
-  useEffect(() => {
-    if (!loading && !centerData) {
-      router.replace('/appliance-repair-services');
-    }
-  }, [loading, centerData, router]);
+  // Keep users on the detail route if center data is temporarily unavailable.
+  // The previous forced redirect caused valid slug detail views to bounce to home.
 
   // Pre-select serviceId if provided
   useEffect(() => {
@@ -764,15 +760,6 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 {/* Subcategory Filter Tabs */}
                 {subcategories.length > 0 && (
                   <div className="relative flex items-center max-w-full shrink-0">
-                    {/* Left scroll arrow */}
-                    <button
-                      onClick={() => scrollTabs('left')}
-                      className="p-2 rounded-full bg-white border border-gray-200 shadow-md text-gray-600 hover:bg-gray-50 active:scale-95 transition-all mr-2 shrink-0 flex items-center justify-center"
-                      title="Scroll left"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                    </button>
-
                     {/* Tabs Container */}
                     <div
                       ref={tabsRef}
@@ -796,14 +783,6 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       })}
                     </div>
 
-                    {/* Right scroll arrow */}
-                    <button
-                      onClick={() => scrollTabs('right')}
-                      className="p-2 rounded-full bg-white border border-gray-200 shadow-md text-gray-600 hover:bg-gray-50 active:scale-95 transition-all ml-2 shrink-0 flex items-center justify-center"
-                      title="Scroll right"
-                    >
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 )}
               </div>

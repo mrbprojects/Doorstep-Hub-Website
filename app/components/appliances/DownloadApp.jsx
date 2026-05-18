@@ -34,12 +34,12 @@ export function DownloadApp() {
 
             <h2 className="text-[28px] md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
               <span className="bg-[#037166]  bg-clip-text text-transparent">
-                Download the App &
+                Download the App now ..
               </span>
               <br />
 
               <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent">
-                Grow Your Service Business
+               Everything in Your Pocket
               </span>
             </h2>
 

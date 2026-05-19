@@ -602,7 +602,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               {bannerImage ? (
                 <img
                   src={bannerImage}
-                  alt="Service Center Banner"
+                  alt={centerData?.name}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -613,7 +613,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             </div>
 
             {/* CARD 2: STORE INFO CARD */}
-            <div className="relative h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+            <div className="relative h-[250px] bg-white border border-gray-100 rounded-none p-5 shadow-xl flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="relative flex-shrink-0">
@@ -734,7 +734,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div>
                     <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Monday - Saturday</span>
                     <span className="text-gray-800 text-xs sm:text-sm font-extrabold block">
@@ -754,9 +754,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400 font-medium">
-                <span>* Timings may vary on holidays</span>
-                <span className="text-[#037166] font-bold">24/7 Booking</span>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-center">
+                <span className="inline-flex w-44 flex-col items-start justify-center rounded-xl px-6 py-2 text-white bg-gradient-to-r from-[#00907f] to-[#007367] shadow-md shadow-[#007367]/30 leading-tight text-left">
+                  <span className="text-[10px] font-bold  tracking-wide">Available For</span>
+                  <span className="text-md font-extrabold">24/7 Booking</span>
+                </span>
               </div>
             </div>
 

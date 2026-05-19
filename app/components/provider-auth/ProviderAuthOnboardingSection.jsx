@@ -13,7 +13,19 @@ import {
   verifyProviderOtp,
 } from '@/lib/providerAuthApi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ArrowRight, UserPlus } from 'lucide-react';
+import { Users,
+  ShieldCheck,
+  Target,
+  IndianRupee,
+  CalendarDays,
+  Smartphone,
+  Headphones,
+  BriefcaseBusiness,
+  Star,
+  Building2,
+  CheckCircle2,
+  ArrowRight,
+  BadgeCheck,TrendingUp } from 'lucide-react';
 
 const SESSION_KEY = 'provider_partner_session';
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
@@ -192,129 +204,366 @@ export function ProviderAuthOnboardingSection() {
     }
   }
 
-  return (
-    <section className={`relative ${step === 'success' || step === 'profile' ? 'py-6' : 'py-10'} min-h-[500px] flex items-center transition-all duration-500`}>
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#041614] to-transparent opacity-60" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-        <AnimatePresence mode="wait">
-          {step === 'idle' ? (
-            <motion.div
-              key="idle-view"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              className="flex flex-col items-center justify-center max-w-4xl mx-auto text-center space-y-8"
-            >
-              <div className="space-y-3">
-                <h2 className="text-3xl sm:text-5xl font-black text-white leading-tight">
-                  Start Your Journey <br /> as a <span className="text-[#04a99d]">Partner</span>
-                </h2>
-                <p className="text-white/60 text-base sm:text-lg max-w-lg mx-auto">
-                  Register today and join 50,000+ professionals growing their business with Doorstep Hub.
-                </p>
+return (
+  <section
+    className={`relative overflow-hidden bg-[#f8fbfa] transition-all duration-500 ${
+      step === 'success' || step === 'profile'
+        ? 'py-6'
+        : 'py-12 lg:py-16'
+    }`}
+  >
+
+    <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <AnimatePresence mode="wait">
+        {step === 'idle' ? (
+          <motion.div
+            key="idle-view"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            className="flex flex-col items-center"
+          >
+            {/* Top Heading */}
+            <div className="mx-auto text-center">
+              <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-[#037166]/20 bg-[#037166]/5 px-6 py-2 text-sm font-black uppercase tracking-wide text-[#037166] shadow-sm backdrop-blur-xl">
+                <Users size={17} />
+                Join Our Growing Network
               </div>
 
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center rounded-3xl overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-[#04a99d]/10 blur-[80px] rounded-full" />
-                <img 
-                  src="/partner_holding_button_dark_bg_1775831624262.png" 
-                  alt="Partner Partner" 
-                  className="w-full h-full object-cover relative z-10 drop-shadow-[0_0_30px_rgba(4,169,157,0.4)] rounded-[2.5rem]"
-                />
-                
-                {/* Precisely Aligned Overlay Button */}
-                <div className="absolute top-[38%] left-1/2 -translate-x-1/2 z-20 w-[62%] h-[18%]">
-                  <button 
-                    onClick={() => setStep('mobile')}
-                    className="w-full h-full flex items-center justify-center font-black text-white transition-all duration-300 bg-[#04a99d] rounded-lg hover:bg-[#037166] active:scale-[0.98] border-2 border-white/20 shadow-inner group"
-                  >
-                    <span className="text-[10px] sm:text-xs md:text-sm tracking-[0.2em] uppercase ml-2 animate-pulse mb-1">
-                      Register Now
-                    </span>
-                    <ArrowRight className="ml-2 w-3 h-3 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="active-form-view"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className={`grid ${step === 'success' || step === 'profile' ? 'grid-cols-1' : 'lg:grid-cols-5'} gap-12 items-center`}
-            >
-              {step !== 'success' && step !== 'profile' && (
-                <div className="lg:col-span-2 space-y-8">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="relative"
-                  >
-                    <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-[#04a99d] to-transparent rounded-full opacity-30" />
-                    <h2 className="text-4xl font-black leading-tight bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
-                      Partner <span className="text-[#04a99d]">Onboarding</span>
-                    </h2>
-                  </motion.div>
+              <h1 className="mx-auto max-w-4xl text-2xl font-extrabold leading-[1.1] tracking-tight text-[#0f172a] sm:text-4xl lg:text-[2.6rem]">
+                Start Your Journey <br />
+                as a{" "}
+                <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent">
+                  Partner
+                </span>
+              </h1>
 
-                  <motion.div 
+              <p className="mx-auto mt-3 max-w-xl text-xs font-medium leading-6 text-[#5b6778] sm:text-sm">
+                Register today and join 50,000+ professionals growing their
+                business with Doorstep Hub.
+              </p>
+            </div>
+
+            {/* Hero Layout */}
+            <div className="relative mt-2 grid w-full items-start gap-8 lg:grid-cols-[1fr_1.1fr_1fr]">
+              {/* Left Benefits */}
+              <div className="space-y-5 lg:space-y-8 pt-4 lg:pt-8">
+                {[
+                  {
+                    icon: ShieldCheck,
+                    title: "Verified & Trusted",
+                    desc: "Build customer trust with our verified partner badge.",
+                    color: "text-[#037166]",
+                  },
+                  {
+                    icon: Target,
+                    title: "More Leads, More Jobs",
+                    desc: "Get instant service requests from nearby customers.",
+                    color: "text-[#037166]",
+                  },
+                  {
+                    icon: IndianRupee,
+                    title: "Set Your Own Rates",
+                    desc: "Manage your service prices and grow your earnings.",
+                    color: "text-[#037166]",
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <div
+                      key={item.title}
+                      className="group"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
+                          <Icon className={item.color} size={22} />
+                        </div>
+
+                        <div>
+                          <h3 className={`text-base font-bold ${item.color}`}>
+                            {item.title}
+                          </h3>
+
+                          <p className="mt-1 max-w-[280px] text-xs font-normal leading-relaxed text-[#5b6778]">
+                            {item.desc}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Center Hero */}
+              <div className="relative mx-auto flex w-full max-w-[600px] justify-center">
+
+                {/* Partner Image */}
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="relative z-10 flex flex-col items-center"
+                >
+                    <div 
+                      className="relative overflow-hidden rounded-[2.4rem] flex items-center justify-center cursor-pointer"
+                      onClick={() => setStep('mobile')}
+                    >
+                      <img
+                        src="/Join as a service partner.png"
+                        alt="Join as a service partner"
+                        className="h-[520px] w-[460px] object-contain object-center drop-shadow-[0_0_24px_rgba(4,169,157,0.4)] transition-transform duration-500 hover:scale-105"
+                      />
+                    </div>
+                </motion.div>
+              </div>
+
+              {/* Right Benefits */}
+              <div className="space-y-5 lg:space-y-8 pt-4 lg:pt-8">
+                {[
+                  {
+                    icon: CalendarDays,
+                    title: "Easy Booking Management",
+                    desc: "Manage bookings, availability and customers with ease.",
+                    color: "text-[#037166]",
+                  },
+                  {
+                    icon: Smartphone,
+                    title: "Run on the Go",
+                    desc: "Control your business from your mobile, anytime.",
+                    color: "text-[#037166]",
+                  },
+                  {
+                    icon: Headphones,
+                    title: "Dedicated Partner Support",
+                    desc: "Get priority support from our expert partner success team.",
+                    color: "text-[#037166]",
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <div
+                      key={item.title}
+                      className="group"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
+                          <Icon className={item.color} size={22} />
+                        </div>
+
+                        <div>
+                          <h3 className={`text-base font-bold ${item.color}`}>
+                            {item.title}
+                          </h3>
+
+                          <p className="mt-1 max-w-[280px] text-xs font-normal leading-relaxed text-[#5b6778]">
+                            {item.desc}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-2 w-full rounded-[24px] border border-[#cfe4de] bg-white p-4 shadow-lg lg:p-5">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  {
+                    icon: Users,
+                    value: "50,000+",
+                    label: "Active Partners",
+                    color: "text-teal-300",
+                  },
+                  {
+                    icon: BriefcaseBusiness,
+                    value: "10,00,000+",
+                    label: "Jobs Completed",
+                    color: "text-sky-300",
+                  },
+                  {
+                    icon: Star,
+                    value: "4.8/5",
+                    label: "Partner Rating",
+                    color: "text-yellow-300",
+                  },
+                  {
+                    icon: Building2,
+                    value: "500+",
+                    label: "Cities Covered",
+                    color: "text-violet-300",
+                  },
+                ].map((stat, index, arr) => {
+                  const Icon = stat.icon;
+
+                  return (
+                    <div
+                      key={stat.label}
+                      className={`flex items-center gap-5 px-4 py-3 ${
+                        index !== arr.length - 1
+                          ? "lg:border-r lg:border-[#deece8]"
+                          : ""
+                      }`}
+                    >
+                      <div className="grid h-14 w-14 place-items-center rounded-full bg-[#eefaf7] shadow-sm">
+                        <Icon className={stat.color} size={30} />
+                      </div>
+
+                      <div>
+                        <p className={`text-2xl font-extrabold ${stat.color}`}>
+                          {stat.value}
+                        </p>
+
+                        <p className="mt-1 text-sm font-medium text-[#5b6778]">
+                          {stat.label}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Points */}
+            <div className="mx-auto mt-6 grid max-w-4xl gap-4 text-[#475569] sm:grid-cols-3">
+              {[
+                "No Registration Fee",
+                "100% Transparent",
+                "Grow Your Business Faster",
+              ].map((text) => (
+                <div
+                  key={text}
+                  className="flex items-center justify-center gap-3 text-sm font-bold"
+                >
+                  <CheckCircle2 className="text-teal-300" size={21} />
+                  {text}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="active-form-view"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`grid ${
+              step === 'success' || step === 'profile'
+                ? 'grid-cols-1'
+                : 'lg:grid-cols-5'
+            } gap-8 lg:gap-10 items-start`}
+          >
+            {/* Left Side */}
+            {step !== 'success' && step !== 'profile' && (
+              <div className="lg:col-span-2">
+                <div className="sticky top-10 rounded-[32px] border border-[#cfe4de] bg-white p-7 shadow-lg">
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-extrabold text-[#0f172a] leading-tight">
+                      Partner <br />
+                      <span className="bg-gradient-to-r from-teal-300 to-emerald-400 bg-clip-text text-transparent">
+                        Onboarding
+                      </span>
+                    </h2>
+
+                    <p className="mt-4 text-[#5b6778] leading-7">
+                      Complete your onboarding process and start receiving
+                      bookings instantly.
+                    </p>
+                  </div>
+
+                  <motion.div
                     layoutId="partner-image"
-                    className="relative w-48 h-48 lg:w-64 lg:h-64 rounded-3xl bg-gradient-to-br from-[#04a99d]/10 to-transparent border border-white/5 p-1 overflow-hidden"
+                    className="relative mx-auto mb-10 h-64 w-64 overflow-hidden rounded-[2rem]"
                   >
-                    <img 
-                      src="/walking_partner_dark_bg_1775831681952.png" 
-                      alt="Walking Partner" 
-                      className="w-full h-full object-cover filter drop-shadow-[0_0_20px_rgba(4,169,157,0.3)] rounded-2xl"
+                    <img
+                      src="/partner-walking.png"
+                      alt="Walking Partner"
+                      className="h-full w-full object-cover"
                     />
                   </motion.div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-5">
                     {[
                       { id: 'mobile', label: 'Phone Verification' },
                       { id: 'otp', label: 'Security Check' },
                       { id: 'register', label: 'Business Details' },
                       { id: 'success', label: 'Complete' },
                     ].map((s, idx) => {
-                      const isCompleted = ['mobile', 'otp', 'register', 'success'].indexOf(step) > ['mobile', 'otp', 'register', 'success'].indexOf(s.id);
+                      const steps = ['mobile', 'otp', 'register', 'success'];
+
+                      const isCompleted =
+                        steps.indexOf(step) > steps.indexOf(s.id);
+
                       const isActive = step === s.id;
-                      
+
                       return (
-                        <motion.div 
+                        <motion.div
                           key={s.id}
-                          animate={{ x: isActive ? 10 : 0, opacity: isActive || isCompleted ? 1 : 0.3 }}
+                          animate={{
+                            x: isActive ? 10 : 0,
+                            opacity: isActive || isCompleted ? 1 : 0.45,
+                          }}
                           className="flex items-center gap-4"
                         >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
-                            isCompleted ? 'bg-[#04a99d] border-[#04a99d]' : 
-                            isActive ? 'border-[#04a99d] shadow-[0_0_15px_rgba(4,169,157,0.3)]' : 
-                            'border-white/10 text-white/20'
-                          }`}>
+                          <div
+                            className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                              isCompleted
+                                ? 'border-teal-400 bg-teal-400'
+                                : isActive
+                                ? 'border-teal-400 shadow-[0_0_20px_rgba(45,212,191,0.45)]'
+                                : 'border-[#cbd5e1] text-[#64748b]'
+                            }`}
+                          >
                             {isCompleted ? (
-                              <Check className="w-6 h-6 text-black stroke-[3px]" />
+                              <Check className="h-6 w-6 text-black stroke-[3px]" />
                             ) : (
-                              <span className="text-sm font-bold">{idx + 1}</span>
+                              <span className="text-sm font-black">
+                                {idx + 1}
+                              </span>
                             )}
                           </div>
-                          <div>
-                            <span className={`text-sm font-black tracking-widest uppercase ${isActive ? 'text-[#04a99d]' : 'text-white/40'}`}>
-                              {s.label}
-                            </span>
-                          </div>
+
+                          <span
+                            className={`text-sm font-black uppercase tracking-[0.2em] ${
+                              isActive
+                                ? 'text-teal-300'
+                                : 'text-[#64748b]'
+                            }`}
+                          >
+                            {s.label}
+                          </span>
                         </motion.div>
                       );
                     })}
                   </div>
                 </div>
-              )}
-              <div className={`lg:col-span-3 rounded-[3rem] border border-white/10 bg-[#0a0f0e]/90 backdrop-blur-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden group transition-all duration-500 ${step === 'success' || step === 'profile' ? 'max-w-lg mx-auto w-full !p-8' : ''}`}>
-                <div className="absolute top-0 right-0 w-96 h-96 bg-[#04a99d]/10 rounded-full blur-[120px] -z-10" />
-                
+              </div>
+            )}
+
+            {/* Form Area */}
+            <div
+              className={`${
+                step === 'success' || step === 'profile'
+                  ? 'mx-auto max-w-xl'
+                  : 'lg:col-span-3'
+              }`}
+            >
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] sm:p-8 md:p-10">
+                <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-[#04a99d]/10 blur-[120px]" />
+
                 <AnimatePresence mode="wait">
                   {step === 'mobile' ? (
-                    <motion.div key="mobile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                    <motion.div
+                      key="mobile"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
                       <MobileNumberPage
                         phone={phone}
                         onPhoneChange={setPhone}
@@ -324,8 +573,14 @@ export function ProviderAuthOnboardingSection() {
                       />
                     </motion.div>
                   ) : null}
+
                   {step === 'otp' ? (
-                    <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                    <motion.div
+                      key="otp"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
                       <OtpVerificationPage
                         phone={phone}
                         otp={otp}
@@ -337,8 +592,14 @@ export function ProviderAuthOnboardingSection() {
                       />
                     </motion.div>
                   ) : null}
+
                   {step === 'register' ? (
-                    <motion.div key="register" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                    <motion.div
+                      key="register"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
                       <RegisterPage
                         token={token}
                         phone={phone}
@@ -348,17 +609,26 @@ export function ProviderAuthOnboardingSection() {
                       />
                     </motion.div>
                   ) : null}
+
                   {step === 'success' || step === 'profile' ? (
-                    <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                      <RegistrationSuccessPage onClose={resetForm} isNewUser={isNewUser} />
+                    <motion.div
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                    >
+                      <RegistrationSuccessPage
+                        onClose={resetForm}
+                        isNewUser={isNewUser}
+                      />
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </section>
-  );
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  </section>
+);
 }

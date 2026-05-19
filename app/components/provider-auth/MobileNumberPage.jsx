@@ -47,12 +47,12 @@ export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, erro
   return (
     <form className="space-y-6 flex flex-col items-center" onSubmit={onSubmit}>
       <div className="text-center">
-        <h2 className="text-2xl font-black text-white">Verify Your Phone</h2>
-        <p className="text-sm text-white/60">Enter your 10-digit number to receive a secure login code.</p>
+        <h2 className="text-2xl font-black text-[#0f172a]">Verify Your Phone</h2>
+        <p className="text-sm text-gray-600">Enter your 10-digit number to receive a secure login code.</p>
       </div>
       
       <div className="space-y-3 w-full flex flex-col items-center">
-        <label className="text-sm font-semibold text-white">Mobile Number</label>
+        <label className="text-sm font-semibold text-[#334155]">Mobile Number</label>
         <div className="flex justify-center gap-1 sm:gap-1.5 w-full" onPaste={handlePaste}>
           {digits.map((digit, i) => (
             <input
@@ -64,7 +64,7 @@ export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, erro
               value={digit}
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className="w-full max-w-[36px] h-11 sm:h-12 md:h-14 text-center font-bold text-lg rounded-lg border border-white/20 bg-white/5 text-white focus:border-[#04a99d] focus:ring-1 focus:ring-[#04a99d] outline-none transition-all"
+              className="w-full max-w-[36px] h-11 sm:h-12 md:h-14 text-center font-bold text-lg rounded-lg border border-[#cbd5e1] bg-white text-[#0f172a] focus:border-[#04a99d] focus:ring-1 focus:ring-[#04a99d] outline-none transition-all"
               autoFocus={i === 0 && phone.length === 0}
             />
           ))}

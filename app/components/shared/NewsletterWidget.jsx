@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, CheckCircle2 } from 'lucide-react';
 
-export function NewsletterWidget({ compact = false }) {
+export function NewsletterWidget({ compact = false, splitLayout = false }) {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState('subscribe'); // 'subscribe' or 'verify'
@@ -132,20 +132,26 @@ export function NewsletterWidget({ compact = false }) {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-20 mb-10 max-w-4xl mx-auto p-10 bg-white border border-gray-100 rounded-[40px] shadow-2xl shadow-gray-200/50"
+            className={`mt-20 mb-10 max-w-5xl mx-auto rounded-[40px] shadow-2xl shadow-[#9fbfb8]/30 overflow-hidden ${
+                splitLayout ? 'bg-white border-2 border-[#bcd4ce] p-0 opacity-100' : 'p-10 bg-white border-2 border-[#bcd4ce]'
+            }`}
         >
-            <div className="text-center mb-8">
+            <div className={`${splitLayout ? 'grid lg:grid-cols-2 items-stretch bg-white' : ''}`}>
+            <div className={`mb-8 ${splitLayout ? 'mb-0 text-center bg-white px-10 py-12 flex flex-col items-center justify-center border-y-2 border-l-2 border-[#bcd4ce]' : 'text-center'}`}>
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-[#037166]/10 rounded-2xl mb-4">
                     <Mail className="w-8 h-8 text-[#037166]" />
                 </div>
                 <h3 className="text-3xl font-extrabold text-gray-900 mb-3">Stay Updated</h3>
-                <p className="text-gray-500 max-w-lg mx-auto">
+                <p className={`text-gray-500 max-w-lg ${splitLayout ? '' : 'mx-auto'}`}>
                   Get Latest Service Coupons, Exclusive Discounts, and Helpful Updates Delivered Straight To Your Inbox.
                 </p>
             </div>
 
-            <form onSubmit={step === 'subscribe' ? handleSubscribe : handleVerify}>
-                <div className="flex flex-col sm:flex-row gap-4">
+            <form
+                onSubmit={step === 'subscribe' ? handleSubscribe : handleVerify}
+                className={`${splitLayout ? 'bg-white px-10 py-12 border-y-2 border-r-2 border-[#bcd4ce] flex items-center opacity-100' : ''}`}
+            >
+                <div className={`${splitLayout ? 'flex w-full flex-col gap-5' : 'flex flex-col sm:flex-row gap-4'}`}>
                     <div className="flex-1 relative">
                         <div className="absolute left-5 top-1/2 -translate-y-1/2">
                             <Mail className="w-5 h-5 text-gray-400" />
@@ -158,7 +164,7 @@ export function NewsletterWidget({ compact = false }) {
                             required
                             disabled={loading || isSubscribed}
                             maxLength={step === 'subscribe' ? undefined : 6}
-                            className="w-full pl-14 pr-6 py-4.5 bg-gray-50 border border-gray-100 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#037166]/20 focus:border-[#037166] transition-all"
+                            className={`w-full pl-14 pr-6 ${splitLayout ? 'py-5 text-xl rounded-3xl' : 'py-4.5 rounded-2xl'} bg-white border border-[#c9d9d4] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#037166]/20 focus:border-[#037166] transition-all`}
                         />
                     </div>
                     <motion.button
@@ -166,7 +172,7 @@ export function NewsletterWidget({ compact = false }) {
                         disabled={loading || isSubscribed}
                         whileHover={{ scale: loading || isSubscribed ? 1 : 1.02 }}
                         whileTap={{ scale: loading || isSubscribed ? 1 : 0.98 }}
-                        className="px-10 py-4.5 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-2xl text-white font-bold shadow-xl shadow-[#037166]/30 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-3"
+                        className={`${splitLayout ? 'w-full py-5 text-2xl rounded-3xl' : 'py-4.5 rounded-2xl'} px-10 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold shadow-xl shadow-[#037166]/30 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-3`}
                     >
                         {loading ? 'Processing...' : step === 'subscribe' ? 'Subscribe Now' : 'Verify OTP'}
                         {isSubscribed && <CheckCircle2 className="w-5 h-5" />}
@@ -194,6 +200,7 @@ export function NewsletterWidget({ compact = false }) {
                     </motion.div>
                 )}
             </form>
+            </div>
         </motion.div>
     );
 }

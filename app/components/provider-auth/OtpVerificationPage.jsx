@@ -56,12 +56,12 @@ export function OtpVerificationPage({
   return (
     <form className="space-y-6 flex flex-col items-center" onSubmit={onSubmit}>
       <div className="text-center">
-        <h2 className="text-2xl font-black text-white">Secure Login</h2>
-        <p className="text-sm text-white/60">A 6-digit code has been sent to +91 {phone}</p>
+        <h2 className="text-2xl font-black text-[#0f172a]">Secure Login</h2>
+        <p className="text-sm text-gray-600">A 6-digit code has been sent to +91 {phone}</p>
       </div>
 
       <div className="space-y-3 w-full flex flex-col items-center">
-        <label className="text-sm font-semibold text-white">Verification Code</label>
+        <label className="text-sm font-semibold text-[#334155]">Verification Code</label>
         {/* Centered with justify-center and max-width */}
         <div className="flex justify-center gap-3 w-full" onPaste={handlePaste}>
           {digits.map((digit, i) => (
@@ -74,7 +74,7 @@ export function OtpVerificationPage({
               value={digit}
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className="w-full max-w-[48px] h-12 md:h-14 text-center font-bold text-xl rounded-lg border border-white/20 bg-white/5 text-white focus:border-[#04a99d] focus:ring-1 focus:ring-[#04a99d] outline-none transition-all"
+              className="w-full max-w-[48px] h-12 md:h-14 text-center font-bold text-xl rounded-lg border border-[#cbd5e1] bg-white text-[#0f172a] focus:border-[#04a99d] focus:ring-1 focus:ring-[#04a99d] outline-none transition-all"
               autoFocus={i === 0 && otp.length === 0}
             />
           ))}
@@ -90,7 +90,7 @@ export function OtpVerificationPage({
             variant="outline"
             onClick={onBack}
             disabled={loading}
-            className="h-12 border-white/20 bg-transparent text-white font-bold hover:bg-white/5 transition-all"
+            className="h-12 border-[#cbd5e1] bg-white text-[#0f172a] font-bold hover:bg-[#f8fafc] transition-all"
           >
             Back
           </Button>

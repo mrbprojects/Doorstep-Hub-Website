@@ -41,7 +41,7 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
       {/* Prominent Close Button */}
       <button 
         onClick={onClose}
-        className="absolute -top-2 -right-2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white/60 hover:text-white transition-all shadow-xl border border-white/20 z-50 group"
+        className="absolute -top-2 -right-2 p-2 bg-white hover:bg-[#f1f5f9] rounded-full text-[#64748b] hover:text-[#0f172a] transition-all shadow-xl border border-[#cbd5e1] z-50 group"
         aria-label="Close"
       >
         <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
@@ -62,7 +62,7 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
       <motion.h2
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="text-2xl sm:text-3xl font-black mb-2 text-white tracking-tight leading-tight"
+        className="text-2xl sm:text-3xl font-black mb-2 text-[#0f172a] tracking-tight leading-tight"
       >
         {isNewUser ? 'Registration Successful!' : "You're Already With Us!"}
       </motion.h2>
@@ -70,7 +70,7 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
       <motion.p
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="text-white/60 text-[13px] sm:text-sm mb-6 max-w-sm mx-auto leading-relaxed"
+        className="text-[#475569] text-[13px] sm:text-sm mb-6 max-w-sm mx-auto leading-relaxed"
       >
         {isNewUser ? (
           "Thank you for joining our professional network. Please download the Doorstep Hub Partner app to manage your service requests."
@@ -106,7 +106,7 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="mt-6 flex items-center gap-2 text-white/40 text-[9px] font-bold uppercase tracking-[0.3em]"
+        className="mt-6 flex items-center gap-2 text-[#64748b] text-[9px] font-bold uppercase tracking-[0.3em]"
       >
         <Download className="w-3 h-3" />
         <span>Manage Jobs on the Go</span>

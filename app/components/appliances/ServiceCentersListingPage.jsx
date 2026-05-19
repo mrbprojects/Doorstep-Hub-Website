@@ -130,7 +130,7 @@ export function ServiceCentersListingPage() {
                         Back
                     </button>
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <h1 className="text-4xl md:text-5xl font-bold !text-white">Nearest Appliance Service Centers</h1>
+                        <h1 className="text-4xl md:text-5xl font-bold !text-white">Verified Service Providers</h1>
 
                         <div className="relative w-full md:w-96">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />

@@ -32,12 +32,12 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
 
       <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
-          <p className="font-bold uppercase tracking-[0.3em] text-[#037166]">City Wise Centers</p>
+          <p className="font-bold  tracking-[0.3em] text-[#037166]">City Wise Doorstep Hub Services</p>
           <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl text-gray-900 leading-tight">
-            Choose Your <span className="text-[#037166]">Nearest City</span>
+            Choose Your <span className="text-[#037166]">City</span>
           </h2>
         </div>
-        <div className="flex items-center gap-3 rounded-[1.5rem] border border-gray-200 bg-white px-6 py-4 shadow-xl shadow-gray-200/50">
+        {/* <div className="flex items-center gap-3 rounded-[1.5rem] border border-gray-200 bg-white px-6 py-4 shadow-xl shadow-gray-200/50">
           <Search size={20} className="text-[#037166]" />
           <input 
             type="text"
@@ -46,7 +46,7 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
             onChange={(e) => onSearchChange(e.target.value)}
             className="bg-transparent text-base font-bold text-gray-900 outline-none placeholder:text-gray-400 w-full"
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="min-h-[400px] relative">
@@ -61,14 +61,13 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
             filteredCities.map((city) => {
               const active = selectedCity?.name === city.name;
               return (
-                <button 
-                  key={city.id || city.name} 
-                  onClick={() => onSelectCity(city)} 
-                  className={`group rounded-3xl border overflow-hidden text-left transition-all duration-500 hover:-translate-y-2 h-[130px] sm:h-[150px] w-full ${
-                      active 
-                        ? "border-[#037166] bg-white shadow-2xl shadow-[#037166]/20 ring-1 ring-[#037166]" 
-                        : "border-gray-100 bg-white hover:border-[#037166]/30 shadow-xl shadow-gray-200/40"
-                  }`}
+                <button
+                  key={city.id || city.name}
+                  onClick={() => onSelectCity(city)}
+                  className={`group rounded-3xl border overflow-hidden text-left transition-all duration-500 hover:-translate-y-2 h-[130px] sm:h-[150px] w-full ${active
+                      ? "border-[#037166] bg-white shadow-2xl shadow-[#037166]/20 ring-1 ring-[#037166]"
+                      : "border-gray-100 bg-white hover:border-[#037166]/30 shadow-xl shadow-gray-200/40"
+                    }`}
                 >
                   <div className="flex items-stretch h-full">
                     {/* Image Area - Fits card height */}
@@ -99,11 +98,10 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
                           <span className="line-clamp-1">{city.centers} Authorised Centers</span>
                         </p>
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all ${
-                            active
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all ${active
                               ? 'bg-[#037166] text-white'
                               : 'bg-[#037166]/10 text-[#037166] group-hover:bg-[#037166] group-hover:text-white'
-                          }`}
+                            }`}
                         >
                           Book Services
                           <ArrowRight className="w-3 h-3" />

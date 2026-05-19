@@ -49,7 +49,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                                 <ShieldCheck className="w-7 h-7 text-[#037166] group-hover:text-white transition-colors" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">Verified Partners</h4>
+                                <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">On Demand Doorstep Hub Services</h4>
                                 <p className="text-sm text-gray-500 font-medium">Book certified experts for Doorstep Hub service</p>
                             </div>
                         </button>
@@ -63,7 +63,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                                 <Store className="w-7 h-7 text-white-500" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">Near by Service Centers</h4>
+                                <h4 className="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">Near by Service Providers</h4>
                                 <p className="text-sm text-gray-500 font-medium">Find and book nearby service centers</p>
                             </div>
                         </button>

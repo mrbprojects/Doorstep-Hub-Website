@@ -14,6 +14,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/spasalon/AddonsModal';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { isObjectId } from '@/utils/slugHelper';
+import DOMPurify from 'dompurify';
 
 const amenityIcons = {
     Wifi: Sparkles,
@@ -114,8 +115,8 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                             const toUrl = (p) => p ? (p.startsWith('http') ? p : `${baseUrl}${p}`) : null;
 
                             const bannerImg = toUrl(store.image);
-                            const logoImg   = toUrl(store.logo);
-                            const extras    = (data.serviceImages || []).map(toUrl).filter(Boolean);
+                            const logoImg = toUrl(store.logo);
+                            const extras = (data.serviceImages || []).map(toUrl).filter(Boolean);
 
                             const primary = bannerImg || logoImg;
                             const deduped = primary
@@ -260,7 +261,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                 `Your cart already has services from a different professional.\n\nDo you want to clear your existing cart and book with this professional instead?`
             );
             if (!confirmed) return;
-            await clearCart(true); 
+            await clearCart(true);
         }
 
         setShowAddonsModal(true);
@@ -344,18 +345,18 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
             </motion.button>
 
             <motion.div
-  style={{ opacity: headerOpacity }}
-  className="relative h-[420px] overflow-hidden bg-gray-900"
->
-  <div
-    className="w-full h-full bg-cover bg-center"
-    style={{
-      backgroundImage: `url(${serviceData?.images?.[0] || 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800'})`,
-    }}
-  >
-    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-  </div>
-</motion.div>
+                style={{ opacity: headerOpacity }}
+                className="relative h-full overflow-hidden bg-gray-900"
+            >
+                <div
+                    className="w-full h-full bg-cover bg-fit"
+                    style={{
+                        backgroundImage: `url(${serviceData.banner_image})`,
+                    }}
+                >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                </div>
+            </motion.div>
 
             <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-10">
                 <motion.div
@@ -389,7 +390,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                     href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[68%] md:w-[220px] h-[56px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
+                                    className="inline-flex items-center justify-center w-[78%] md:w-[180px] h-[56px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Get it on Google Play"
                                 >
                                     <img src="/andriod1.png" alt="Google Play" className="w-full h-full object-contain block mx-auto px-2" />
@@ -461,38 +462,38 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => togglePackage(pkg)}
-                                        className={`bg-white rounded-xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-row h-[110px] sm:h-[130px] ${selectedPackages.some(p => p._id === pkg._id)
+                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-row h-auto min-h-[130px] sm:min-h-[160px] ${selectedPackages.some(p => p._id === pkg._id)
                                             ? 'border-2 border-[#6D1357] ring-2 ring-[#6D1357]/10'
                                             : 'border-gray-100'
                                             }`}
                                     >
                                         {selectedPackages.some(p => p._id === pkg._id) && (
-                                            <div className="absolute top-1 right-1 z-10 bg-[#6D1357] text-white p-0.5 rounded-full shadow-lg">
-                                                <Check className="w-3 h-3" />
+                                            <div className="absolute top-2 right-2 z-10 bg-[#6D1357] text-white p-1 rounded-full shadow-lg">
+                                                <Check className="w-3.5 h-3.5" />
                                             </div>
                                         )}
-                                        <div className="w-28 sm:w-36 h-full bg-gray-100 relative flex-shrink-0">
+                                        <div className="w-24 sm:w-48 h-auto sm:h-full bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
                                                 <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full text-gray-400 text-xs">
-                                                    <Scissors className="w-6 h-6 opacity-20" />
+                                                    <Scissors className="w-8 h-8 opacity-20" />
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-2 sm:p-3 flex flex-col justify-between flex-1 min-w-0">
+                                        <div className="p-3.5 sm:p-5 flex flex-col justify-between flex-1 min-w-0">
                                             <div className="min-w-0">
                                                 <div className="flex justify-between items-start mb-0.5">
-                                                    <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">{pkg.name}</h3>
+                                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{pkg.name}</h3>
                                                 </div>
-                                                <p className="text-gray-500 text-[10px] sm:text-xs mb-1 line-clamp-1 sm:line-clamp-2 leading-tight">{pkg.description}</p>
+                                                <p className="text-gray-500 text-xs sm:text-sm mb-2 line-clamp-2 leading-snug">{pkg.description}</p>
                                             </div>
 
-                                            <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+                                            <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
                                                 <div className="flex flex-col">
-                                                    <span className="text-[9px] text-gray-500 font-bold italic uppercase tracking-wider">Starts From</span>
-                                                    <span className="text-[#6D1357] font-bold text-base sm:text-lg leading-none">₹{pkg.price}</span>
-                                                    {pkg.priceUnit && <span className="text-[9px] text-gray-400 font-medium uppercase tracking-tight">{pkg.priceUnit}</span>}
+                                                    <span className="text-[10px] text-gray-500 font-bold italic uppercase tracking-wider">Starts From</span>
+                                                    <span className="text-[#6D1357] font-bold text-xl sm:text-2xl">₹{pkg.price}</span>
+                                                    {pkg.priceUnit && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">{pkg.priceUnit}</span>}
                                                 </div>
 
                                                 {pkg.banner_images && pkg.banner_images.length > 0 && (
@@ -564,9 +565,14 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                 <ShieldCheck className="w-5 h-5 text-[#C06C84]" />
                                 Shortly Aboutus
                             </h3>
-                            <p className="text-gray-600 text-sm md:text-base leading-relaxed whitespace-pre-line">
-                                {serviceData.about}
-                            </p>
+                            <div
+                                className="text-gray-600 text-sm md:text-base leading-relaxed whitespace-break-spaces [&_a]:text-[#6D1357] [&_a]:underline"
+                                dangerouslySetInnerHTML={{
+                                    __html: DOMPurify.sanitize(serviceData.about || '', {
+                                        ADD_ATTR: ['target', 'rel'],
+                                    }),
+                                }}
+                            />
                         </div>
                     </TabsContent>
                 </Tabs>

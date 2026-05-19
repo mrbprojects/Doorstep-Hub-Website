@@ -343,6 +343,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     serviceBookingCost: 0
   };
   const whatsappLink = 'https://wa.me/918886688666';
+  const businessName = center.business_name || `${center.firstName || ''} ${center.lastName || ''}`.trim() || 'Service Center';
 
   const handleSelectPackage = (packageId) => {
     setSelectedPackages(prev =>
@@ -602,7 +603,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               {bannerImage ? (
                 <img
                   src={bannerImage}
-                  alt={centerData?.name}
+                  alt={center.business_name}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -621,7 +622,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       {(center.logo || center.image) ? (
                         <img
                           src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${(center.logo || center.image).startsWith('/') ? (center.logo || center.image).slice(1) : (center.logo || center.image)}`}
-                          alt="Store Logo"
+                          alt={`${businessName} Logo`}
                           className="w-full h-full object-contain bg-white"
                           onError={(e) => {
                             e.target.src = 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80';
@@ -1032,7 +1033,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       onClick={() => setLightboxIndex(index)}
                       className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100 shadow-sm"
                     >
-                      <img src={image} alt={`Work ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={image} alt={`${businessName} Work ${index + 1}`} className="w-full h-full object-cover" />
                     </motion.div>
                   ))
                 ) : (

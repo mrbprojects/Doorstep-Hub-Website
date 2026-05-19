@@ -17,7 +17,7 @@ import {
   X,
   Check,
   Sparkles,
-  ThumbsUp, ChevronLeft, ChevronRight
+  ThumbsUp, ChevronLeft, ChevronRight, MessageCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -299,6 +299,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
     inspectionCost: 0,
     serviceBookingCost: 0
   };
+  const whatsappLink = 'https://wa.me/918886688666';
 
   const handleSelectPackage = (packageId) => {
     setSelectedPackages(prev =>
@@ -517,6 +518,16 @@ export function StoreDetailPage({ storeId, serviceId }) {
                     title="Download on the App Store"
                   >
                     <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                  </a>
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-[#25D366] shadow-lg shadow-[#25D366]/30 hover:bg-[#20bd5a] transition-all border border-white/10"
+                    title="Chat on WhatsApp"
+                    aria-label="Chat on WhatsApp"
+                  >
+                    <MessageCircle className="w-5 h-5 text-white" />
                   </a>
                 </div>
               </div>
@@ -790,8 +801,12 @@ export function StoreDetailPage({ storeId, serviceId }) {
               {/* Description */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-8">
                 <div
-                  className="text-white/70 text-lg leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutBio) }}
+                  className="text-white/70 text-lg leading-relaxed whitespace-break-spaces [&_a]:text-[#04a99d] [&_a]:underline"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(aboutBio || '', {
+                      ADD_ATTR: ['target', 'rel'],
+                    })
+                  }}
                 />
               </div>
 

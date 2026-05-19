@@ -342,6 +342,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     inspectionCost: 0,
     serviceBookingCost: 0
   };
+  const whatsappLink = 'https://wa.me/918886688666';
 
   const handleSelectPackage = (packageId) => {
     setSelectedPackages(prev =>
@@ -693,6 +694,20 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   >
                     <img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" />
                   </a>
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-[56px] h-[56px] rounded-full bg-[#25D366] hover:bg-[#20bd5a] transition-all border border-[#1da851]/40 shadow-sm"
+                    title="Chat on WhatsApp"
+                    aria-label="Chat on WhatsApp"
+                  >
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                      alt="WhatsApp"
+                      className="w-7 h-7"
+                    />
+                  </a>
                 </div>
                 </div>
               </div>
@@ -952,8 +967,12 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">About {center.business_name}</h2>
               <div className="bg-white border border-gray-100 rounded-2xl p-8 mb-8 shadow-sm">
                 <div
-                  className="text-gray-600 text-lg leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutBio) }}
+                  className="text-gray-600 text-lg leading-relaxed whitespace-break-spaces [&_a]:text-[#037166] [&_a]:underline"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(aboutBio || '', {
+                      ADD_ATTR: ['target', 'rel'],
+                    })
+                  }}
                 />
               </div>
 

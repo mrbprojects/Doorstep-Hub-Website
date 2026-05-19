@@ -410,7 +410,7 @@ export function CategoryPage({ category, categoryId }) {
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-6">
-                    {subCategories.slice(0, Math.min(subCategories.length, featuredCount)).map((subCategory, index) => (
+                    {subCategories.map((subCategory, index) => (
                       <motion.div
                         key={subCategory._id || `featured-${index}`}
                         initial={{ opacity: 0, y: 30 }}

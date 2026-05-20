@@ -330,7 +330,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
     };
 
     return (
-        <div className="min-h-screen bg-transparent pb-32">
+        <div className="min-h-screen bg-transparent pb-32 pt-24 md:pt-28">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
@@ -339,19 +339,19 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => router.back()}
-                className="fixed top-20 mt-5 left-4 z-50 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
+                className="fixed top-24 md:top-28 left-4 z-50 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
             >
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
             </motion.button>
 
             <motion.div
                 style={{ opacity: headerOpacity }}
-                className="relative h-full overflow-hidden bg-gray-900"
+                className="relative h-[420px] overflow-hidden bg-gray-900"
             >
                 <div
-                    className="w-full h-full bg-cover bg-fit"
+                    className="w-full h-full bg-cover bg-center"
                     style={{
-                        backgroundImage: `url(${serviceData.banner_image})`,
+                        backgroundImage: `url(${serviceData?.images?.[0] || 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800'})`,
                     }}
                 >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -419,7 +419,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
 
             <div className="max-w-7xl mx-auto px-4 mt-8 text-black">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <div className="sticky top-[72px] z-40 bg-gray-50/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-1.5 md:p-2 overflow-hidden">
+                    <div className="sticky top-[110px] md:top-[120px] z-40 bg-gray-50/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-1.5 md:p-2 overflow-hidden">
                         <TabsList className="bg-transparent w-full flex overflow-x-auto hide-scrollbar gap-1 md:gap-2 no-scrollbar justify-start md:justify-around">
                             <TabsTrigger value="about" className="text-gray-900 font-semibold px-4 md:px-8 py-2 md:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#6D1357] data-[state=active]:to-[#6D1357] data-[state=active]:text-white rounded-xl transition-all text-xs md:text-sm whitespace-nowrap">
                                 Shortly Aboutus

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Waves, Star, Clock, Heart, MapPin } from 'lucide-react';
+import { Waves, Star, Clock, Heart, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
 
@@ -51,27 +51,14 @@ export function LatestSpaServices() {
     fetchSpaServices();
   }, []);
 
-  // Auto-scroller logic
   const scrollRef = React.useRef(null);
-  useEffect(() => {
-    if (loading || spaStores.length === 0) return;
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        const cards = Array.from(scrollRef.current.querySelectorAll('[data-scroll-card="latest-spa"]'));
-        if (scrollLeft + clientWidth >= scrollWidth - 5) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          const nextCard = cards.find((card) => card.offsetLeft > scrollLeft + 5);
-          scrollRef.current.scrollTo({
-            left: nextCard ? nextCard.offsetLeft : 0,
-            behavior: 'smooth'
-          });
-        }
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [loading, spaStores]);
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-scroll-card="latest-spa"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 260;
+    const amount = cardWidth + 24;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
 
   return (
     <section className="relative py-22 overflow-hidden">
@@ -135,11 +122,19 @@ export function LatestSpaServices() {
             Experience tranquility and rejuvenation with our premium spa treatments
           </motion.p>
         </motion.div>
+        <div className="mb-4 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
 
         {/* Spa Services Slider */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide scroll-px-4 -mx-4 px-4 sm:scroll-px-6 sm:px-6 lg:px-8"
+          className="flex overflow-x-auto gap-6 pb-8 snap-x scroll-px-4 -mx-4 px-4 sm:scroll-px-6 sm:px-6 lg:px-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <div className="w-4 shrink-0 sm:w-6 lg:w-8" aria-hidden="true" />
           {loading ? (

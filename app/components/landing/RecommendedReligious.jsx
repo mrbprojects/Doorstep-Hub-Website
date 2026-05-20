@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Compass, Star, Clock, Heart, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2 } from 'lucide-react';
+import { Compass, Star, Clock, Heart, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function RecommendedReligious() {
@@ -107,23 +107,15 @@ export function RecommendedReligious() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroller for the horizontal container
   const scrollRef = React.useRef(null);
   const shouldDesktopScroll = isDesktop && journeys.length > 6;
-  useEffect(() => {
-    if (loading || journeys.length === 0 || !shouldDesktopScroll) return;
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        if (scrollLeft + clientWidth >= scrollWidth - 5) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollBy({ left: clientWidth / 2, behavior: 'smooth' });
-        }
-      }
-    }, 3000); // Scroll every 3 seconds
-    return () => clearInterval(interval);
-  }, [loading, journeys, shouldDesktopScroll]);
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-recommended-religious-card="true"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 240;
+    const amount = cardWidth + 16;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
 
   // Skeleton Shimmer Component
   const SkeletonCard = () => (
@@ -266,6 +258,14 @@ export function RecommendedReligious() {
             Embark on transformative spiritual experiences curated for seekers of all paths
           </p>
         </motion.div>
+        <div className="mb-4 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
 
         {/* Journey Cards - Horizontal Scroller */}
         <div
@@ -276,6 +276,7 @@ export function RecommendedReligious() {
           {journeys.map((journey, index) => (
             <motion.div
               key={journey.id || index}
+              data-recommended-religious-card="true"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}

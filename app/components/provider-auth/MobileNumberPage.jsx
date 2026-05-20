@@ -6,32 +6,41 @@ import { Button } from '@/components/ui/button';
 export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, error }) {
   const inputRefs = useRef([]);
 
-  const digits = phone.split('').concat(Array(10 - phone.length).fill(''));
+  const getDigits = () => {
+    const clean = (phone || '').replace(/\D/g, '').slice(0, 10);
+    return Array.from({ length: 10 }, (_, i) => clean[i] || '');
+  };
+
+  const digits = getDigits();
 
   const handleChange = (index, value) => {
     const cleanValue = value.replace(/\D/g, '').slice(-1);
-    const newPhone = phone.split('');
-    
-    if (cleanValue) {
-      newPhone[index] = cleanValue;
-      onPhoneChange(newPhone.join('').slice(0, 10));
-      if (index < 9) {
-        inputRefs.current[index + 1]?.focus();
-      }
+    const nextDigits = getDigits();
+
+    if (!cleanValue) {
+      nextDigits[index] = '';
+      onPhoneChange(nextDigits.join(''));
+      return;
+    }
+
+    nextDigits[index] = cleanValue;
+    onPhoneChange(nextDigits.join(''));
+    if (index < 9) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === 'Backspace') {
+      e.preventDefault();
+      const nextDigits = getDigits();
       if (!digits[index] && index > 0) {
-        const newPhone = phone.split('');
-        newPhone[index - 1] = '';
-        onPhoneChange(newPhone.join(''));
+        nextDigits[index - 1] = '';
+        onPhoneChange(nextDigits.join(''));
         inputRefs.current[index - 1]?.focus();
       } else {
-        const newPhone = phone.split('');
-        newPhone[index] = '';
-        onPhoneChange(newPhone.join(''));
+        nextDigits[index] = '';
+        onPhoneChange(nextDigits.join(''));
       }
     }
   };

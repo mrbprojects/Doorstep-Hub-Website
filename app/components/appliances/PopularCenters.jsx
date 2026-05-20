@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Star, Award, ArrowRight, TrendingUp, MapPin } from 'lucide-react';
+import { Star, Award, ArrowRight, TrendingUp, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocationContext } from '../../context/LocationContext';
 
 export function PopularCenters({ onStoreClick }) {
@@ -10,6 +10,15 @@ export function PopularCenters({ onStoreClick }) {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const scrollRef = React.useRef(null);
+
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-popular-center-card="true"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 320;
+    const amount = cardWidth + 24;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
 
   // SEO Schema for Popular Centers
   const schemaData = {
@@ -199,14 +208,23 @@ export function PopularCenters({ onStoreClick }) {
             Most trusted and highly-rated service providers in your area
           </motion.p>
         </div>
+        <div className="mb-2 flex items-center justify-end gap-2 px-6 lg:px-8">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
 
         {/* Horizontal Scroll */}
         <div className="relative">
-          <div className="overflow-x-auto scrollbar-hide pb-4">
+          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex gap-6 min-w-max px-6 lg:px-8">
               {centers.map((center, index) => (
                 <motion.div
                   key={center.id || index}
+                  data-popular-center-card="true"
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

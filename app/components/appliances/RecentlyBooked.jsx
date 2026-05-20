@@ -2,17 +2,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { TrendingUp, ArrowRight } from 'lucide-react';
+import { TrendingUp, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function RecentlyBooked({ onServiceClick, onViewAll }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const scrollRef = useRef(null);
-  const shouldAutoScrollDesktop = !isMobile && services.length > 6;
 
   // SEO Schema for Recently Booked Services
   const schemaData = {
@@ -30,38 +27,13 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
   };
 
 
-  useEffect(() => {
-    const updateViewport = () => setIsMobile(window.innerWidth < 1280);
-
-    updateViewport();
-    window.addEventListener('resize', updateViewport);
-
-    return () => window.removeEventListener('resize', updateViewport);
-  }, []);
-
-  useEffect(() => {
-    const container = scrollRef.current;
-
-    if (!container || !shouldAutoScrollDesktop) {
-      return;
-    }
-
-    let animationId;
-    const scroll = () => {
-      if (!isPaused && container) {
-        if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 1) {
-          container.scrollLeft = 0;
-        } else {
-          container.scrollLeft += 1;
-        }
-      }
-      animationId = requestAnimationFrame(scroll);
-    };
-
-    animationId = requestAnimationFrame(scroll);
-
-    return () => cancelAnimationFrame(animationId);
-  }, [shouldAutoScrollDesktop, isPaused, services.length]);
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-recent-card="true"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 260;
+    const amount = cardWidth + 16;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
 
   // Fetch real recently booked services
   useEffect(() => {
@@ -250,26 +222,33 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
             See what services your neighbors are booking right now
           </motion.p>
         </div>
+        <div className="mb-2 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
 
         <div
           className="relative"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
         >
           <div
             ref={scrollRef}
-            className={`overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6 ${!shouldAutoScrollDesktop ? 'xl:mx-0 xl:px-0 xl:overflow-visible' : ''}`}
+            className="overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6 xl:mx-0 xl:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            <div className={`flex min-w-max gap-4 ${!shouldAutoScrollDesktop ? 'xl:min-w-0 xl:grid xl:grid-cols-6' : ''}`}>
+            <div className="flex min-w-max gap-4">
               {services.map((service, index) => (
                 <motion.div
                   key={service.id || index}
+                  data-recent-card="true"
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ y: -6, scale: 1.01 }}
-                  className={`group cursor-pointer w-[260px] flex-shrink-0 ${!shouldAutoScrollDesktop ? 'xl:w-auto' : ''}`}
+                  className="group cursor-pointer w-[260px] flex-shrink-0"
                   onClick={() => onServiceClick?.(service.id, service.categoryName, service.subcategoryName, service.slug)}
                 >
                   <div className="relative w-full h-[260px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Church, Calendar, MapPin, Users, Bell, Flame, User, Scroll, Flower2, Utensils, Home, Clock, BookOpen, Building2, Star } from 'lucide-react';
+import { Church, Calendar, MapPin, Users, Bell, Flame, User, Scroll, Flower2, Utensils, Home, Clock, BookOpen, Building2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function LatestReligiousServices() {
@@ -105,23 +105,15 @@ export function LatestReligiousServices() {
     fetchLatestServices();
   }, []);
 
-  // Auto-scroller logic
   const scrollRef = React.useRef(null);
   const shouldDesktopScroll = isDesktop && services.length > 6;
-  useEffect(() => {
-    if (loading || services.length === 0 || !shouldDesktopScroll) return;
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        if (scrollLeft + clientWidth >= scrollWidth - 5) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollBy({ left: clientWidth, behavior: 'smooth' });
-        }
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [loading, services, shouldDesktopScroll]);
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-latest-religious-card="true"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 240;
+    const amount = cardWidth + 16;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
 
   // Skeleton Shimmer Component
   const SkeletonCard = () => (
@@ -265,16 +257,25 @@ export function LatestReligiousServices() {
             Connect with your spiritual side through sacred ceremonies and community gatherings
           </p>
         </motion.div>
+        <div className="mb-4 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
 
         {/* Services - Horizontal Scroller */}
         <div
           ref={scrollRef}
-          className={`overflow-x-auto scrollbar-hide pb-12 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
+          className={`overflow-x-auto pb-12 -mx-4 px-4 xl:mx-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
         >
           <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
           {services.map((service, index) => (
             <motion.div
               key={service.id || index}
+              data-latest-religious-card="true"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}

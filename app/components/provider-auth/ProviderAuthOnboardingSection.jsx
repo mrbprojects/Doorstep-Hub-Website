@@ -26,6 +26,7 @@ import { Users,
   CheckCircle2,
   ArrowRight,
   BadgeCheck,TrendingUp } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 const SESSION_KEY = 'provider_partner_session';
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
@@ -209,7 +210,7 @@ return (
     className={`relative overflow-hidden bg-[#f8fbfa] transition-all duration-500 ${
       step === 'success' || step === 'profile'
         ? 'py-6'
-        : 'py-12 lg:py-16'
+        : 'py-8 lg:py-10'
     }`}
   >
 
@@ -238,16 +239,16 @@ return (
                 </span>
               </h1>
 
-              <p className="mx-auto mt-3 max-w-xl text-xs font-medium leading-6 text-[#5b6778] sm:text-sm">
+              <p className="mx-auto mt-2 max-w-xl text-xs font-medium leading-6 text-[#5b6778] sm:text-sm">
                 Register today and join 50,000+ professionals growing their
                 business with Doorstep Hub.
               </p>
             </div>
 
             {/* Hero Layout */}
-            <div className="relative mt-2 grid w-full items-start gap-8 lg:grid-cols-[1fr_1.1fr_1fr]">
+            <div className="relative mt-1 grid w-full items-start gap-6 lg:grid-cols-[1fr_1.1fr_1fr]">
               {/* Left Benefits */}
-              <div className="space-y-5 lg:space-y-8 pt-4 lg:pt-8">
+              <div className="space-y-4 lg:space-y-6 pt-3 lg:pt-5">
                 {[
                   {
                     icon: ShieldCheck,
@@ -276,12 +277,12 @@ return (
                       className="group"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
-                          <Icon className={item.color} size={22} />
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
+                          <Icon className={item.color} size={18} />
                         </div>
 
                         <div>
-                          <h3 className={`text-base font-bold ${item.color}`}>
+                          <h3 className={`text-sm lg:text-base font-bold ${item.color}`}>
                             {item.title}
                           </h3>
 
@@ -296,7 +297,7 @@ return (
               </div>
 
               {/* Center Hero */}
-              <div className="relative mx-auto flex w-full max-w-[600px] justify-center">
+              <div className="relative mx-auto flex w-full max-w-[520px] justify-center">
 
                 {/* Partner Image */}
                 <motion.div
@@ -315,14 +316,14 @@ return (
                       <img
                         src="/Join as a service partner.png"
                         alt="Join as a service partner"
-                        className="h-[520px] w-[460px] object-contain object-center drop-shadow-[0_0_24px_rgba(4,169,157,0.4)] transition-transform duration-500 hover:scale-105"
+                        className="h-[460px] w-[410px] object-contain object-center drop-shadow-[0_0_20px_rgba(4,169,157,0.35)] transition-transform duration-500 hover:scale-105"
                       />
                     </div>
                 </motion.div>
               </div>
 
               {/* Right Benefits */}
-              <div className="space-y-5 lg:space-y-8 pt-4 lg:pt-8">
+              <div className="space-y-4 lg:space-y-6 pt-3 lg:pt-5">
                 {[
                   {
                     icon: CalendarDays,
@@ -351,12 +352,12 @@ return (
                       className="group"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
-                          <Icon className={item.color} size={22} />
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
+                          <Icon className={item.color} size={18} />
                         </div>
 
                         <div>
-                          <h3 className={`text-base font-bold ${item.color}`}>
+                          <h3 className={`text-sm lg:text-base font-bold ${item.color}`}>
                             {item.title}
                           </h3>
 
@@ -372,12 +373,12 @@ return (
             </div>
 
             {/* Stats */}
-            <div className="mt-2 w-full rounded-[24px] border border-[#cfe4de] bg-white p-4 shadow-lg lg:p-5">
+            <div className="mt-1 w-full rounded-[24px] border border-[#cfe4de] bg-white p-3 shadow-lg lg:p-4">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   {
                     icon: Users,
-                    value: "50,000+",
+                    value: "700+",
                     label: "Active Partners",
                     color: "text-teal-300",
                   },
@@ -395,8 +396,8 @@ return (
                   },
                   {
                     icon: Building2,
-                    value: "500+",
-                    label: "Cities Covered",
+                    value: "8+",
+                    label: "MetroCities Covered",
                     color: "text-violet-300",
                   },
                 ].map((stat, index, arr) => {
@@ -433,7 +434,7 @@ return (
             {/* Bottom Points */}
             <div className="mx-auto mt-6 grid max-w-4xl gap-4 text-[#475569] sm:grid-cols-3">
               {[
-                "No Registration Fee",
+                "No Secuirity Deposit",
                 "100% Transparent",
                 "Grow Your Business Faster",
               ].map((text) => (
@@ -461,11 +462,11 @@ return (
             {/* Left Side */}
             {step !== 'success' && step !== 'profile' && (
               <div className="lg:col-span-2">
-                <div className="sticky top-10 rounded-[32px] border border-[#cfe4de] bg-white p-7 shadow-lg">
+                <div className="sticky top-10 overflow-hidden rounded-[32px] border border-[#cfe4de] bg-white p-7 shadow-lg">
                   <div className="mb-8">
                     <h2 className="text-3xl font-extrabold text-[#0f172a] leading-tight">
                       Partner <br />
-                      <span className="bg-gradient-to-r from-teal-300 to-emerald-400 bg-clip-text text-transparent">
+                      <span className="bg-[#057166] bg-clip-text text-transparent">
                         Onboarding
                       </span>
                     </h2>
@@ -476,70 +477,73 @@ return (
                     </p>
                   </div>
 
-                  <motion.div
-                    layoutId="partner-image"
-                    className="relative mx-auto mb-10 h-64 w-64 overflow-hidden rounded-[2rem]"
-                  >
-                    <img
-                      src="/partner-walking.png"
-                      alt="Walking Partner"
-                      className="h-full w-full object-cover"
-                    />
-                  </motion.div>
+                  <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-5">
+                    <motion.div
+                      layoutId="partner-image"
+                      className="relative mx-auto h-48 w-48 overflow-hidden rounded-[2rem] lg:mx-0 lg:h-56 lg:w-56 lg:shrink-0"
+                    >
+                      <img
+                        src="/partner-walking.png"
+                        alt="Walking Partner"
+                        className="h-full w-full object-cover"
+                      />
+                    </motion.div>
 
-                  <div className="space-y-5">
-                    {[
-                      { id: 'mobile', label: 'Phone Verification' },
-                      { id: 'otp', label: 'Security Check' },
-                      { id: 'register', label: 'Business Details' },
-                      { id: 'success', label: 'Complete' },
-                    ].map((s, idx) => {
-                      const steps = ['mobile', 'otp', 'register', 'success'];
+                    <div className="space-y-5 lg:min-w-0 lg:max-w-[260px] lg:flex-1">
+                      {[
+                        { id: 'mobile', label: 'Phone Verification' },
+                        { id: 'otp', label: 'Security Check' },
+                        { id: 'register', label: 'Business Details' },
+                        { id: 'success', label: 'Complete' },
+                      ].map((s, idx) => {
+                        const steps = ['mobile', 'otp', 'register', 'success'];
 
-                      const isCompleted =
-                        steps.indexOf(step) > steps.indexOf(s.id);
+                        const isCompleted =
+                          steps.indexOf(step) > steps.indexOf(s.id);
 
-                      const isActive = step === s.id;
+                        const isActive = step === s.id;
 
-                      return (
-                        <motion.div
-                          key={s.id}
-                          animate={{
-                            x: isActive ? 10 : 0,
-                            opacity: isActive || isCompleted ? 1 : 0.45,
-                          }}
-                          className="flex items-center gap-4"
-                        >
-                          <div
-                            className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-500 ${
-                              isCompleted
-                                ? 'border-teal-400 bg-teal-400'
-                                : isActive
-                                ? 'border-teal-400 shadow-[0_0_20px_rgba(45,212,191,0.45)]'
-                                : 'border-[#cbd5e1] text-[#64748b]'
-                            }`}
+                        return (
+                          <motion.div
+                            key={s.id}
+                            animate={{
+                              x: isActive ? 10 : 0,
+                              opacity: isActive || isCompleted ? 1 : 0.45,
+                            }}
+                            className="flex items-center gap-3 lg:gap-4"
                           >
-                            {isCompleted ? (
-                              <Check className="h-6 w-6 text-black stroke-[3px]" />
-                            ) : (
-                              <span className="text-sm font-black">
-                                {idx + 1}
-                              </span>
-                            )}
-                          </div>
+                            <div
+                              className={`flex h-12 w-12 min-w-[3rem] aspect-square items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                                isCompleted
+                                  ? 'border-teal-400 bg-teal-400'
+                                  : isActive
+                                  ? 'border-teal-400 shadow-[0_0_20px_rgba(45,212,191,0.45)]'
+                                  : 'border-[#cbd5e1] text-[#64748b]'
+                              }`}
+                            >
+                              {isCompleted ? (
+                                <Check className="h-6 w-6 text-black stroke-[3px]" />
+                              ) : (
+                                <span className="text-sm font-black">
+                                  {idx + 1}
+                                </span>
+                              )}
+                            </div>
 
-                          <span
-                            className={`text-sm font-black uppercase tracking-[0.2em] ${
-                              isActive
-                                ? 'text-teal-300'
-                                : 'text-[#64748b]'
-                            }`}
-                          >
-                            {s.label}
-                          </span>
-                        </motion.div>
-                      );
-                    })}
+                            <span
+                              className={`text-xs sm:text-sm font-black uppercase tracking-[0.1em] leading-tight break-words ${
+                                isActive
+                                  ? 'text-[#065f46]'
+                                  : 'text-[#64748b]'
+                              }`}
+                            >
+                              {s.label}
+                            </span>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+
                   </div>
                 </div>
               </div>

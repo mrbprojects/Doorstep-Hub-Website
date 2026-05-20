@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Sparkles, Award, TrendingUp, Crown, CloudFog, HandHeart, Coffee, Flame, Droplets, Scissors, Palette, Wind } from 'lucide-react';
+import { Sparkles, Award, TrendingUp, Crown, CloudFog, HandHeart, Coffee, Flame, Droplets, Scissors, Palette, Wind, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function RecommendedSpaSalon() {
@@ -220,29 +220,15 @@ export function RecommendedSpaSalon() {
     fetchFeaturedSpaStores();
   }, []);
 
-  // Auto-scroller logic
   const scrollRef = React.useRef(null);
   const shouldDesktopScroll = isDesktop && featured.length > 6;
-  useEffect(() => {
-    if (loading || featured.length === 0 || !shouldDesktopScroll) return;
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        const cards = Array.from(scrollRef.current.querySelectorAll('[data-scroll-card="spa-salon"]'));
-
-        if (scrollLeft + clientWidth >= scrollWidth - 5) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          const nextCard = cards.find((card) => card.offsetLeft > scrollLeft + 5);
-          scrollRef.current.scrollTo({
-            left: nextCard ? nextCard.offsetLeft : 0,
-            behavior: 'smooth'
-          });
-        }
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [loading, featured, shouldDesktopScroll]);
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-scroll-card="spa-salon"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 228;
+    const amount = cardWidth + 16;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
 
   if (loading) {
     return (
@@ -321,6 +307,14 @@ export function RecommendedSpaSalon() {
             Premium destinations handpicked for the ultimate pampering experience
           </p>
         </motion.div>
+        <div className="mb-4 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
 
         {/* Featured Cards - Horizontal Scroller */}
         <div

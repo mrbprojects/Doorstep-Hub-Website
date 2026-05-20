@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Calendar, Clock, Star, ChevronRight } from 'lucide-react';
+import { Calendar, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 function SkeletonCard() {
@@ -65,7 +65,7 @@ export function BookingServices() {
               image: service.mainImage
                 ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}`
                 : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?w=400',
-              status: service.status === 'active' ? 'Save 10% On Services' : 'Unavailable',
+              status: service.status === 'active' ? '10% Off On Repairs' : 'Unavailable',
             };
           });
           setServices(transformedServices);
@@ -88,22 +88,18 @@ export function BookingServices() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Auto-scroller for the horizontal container
   const scrollRef = React.useRef(null);
-  useEffect(() => {
-    if (loading || services.length === 0) return;
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        if (scrollLeft + clientWidth >= scrollWidth - 5) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollBy({ left: clientWidth, behavior: 'smooth' });
-        }
-      }
-    }, 3000); // Scroll every 3 seconds
-    return () => clearInterval(interval);
-  }, [loading, services]);
+
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-booking-card="true"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 280;
+    const amount = cardWidth + 16; // card width + gap-4
+    scrollRef.current.scrollBy({
+      left: direction === 'left' ? -amount : amount,
+      behavior: 'smooth',
+    });
+  };
 
   const handleServiceClick = (service) => {
     const categoryParam = encodeURIComponent(service.category);
@@ -186,9 +182,28 @@ export function BookingServices() {
           </p>
         </motion.div>
 
+        <div className="mb-4 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => scrollCards('left')}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollCards('right')}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-4 pb-8 scrollbar-hide snap-x snap-mandatory"
+          className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {loading ? (
             [1, 2, 3, 4, 5, 6].map((i) => (
@@ -206,6 +221,7 @@ export function BookingServices() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
                   whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  data-booking-card="true"
                   className="group relative flex-shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[15.8%] snap-start flex flex-col cursor-pointer"
                   onClick={() => handleServiceClick(service)}
                 >

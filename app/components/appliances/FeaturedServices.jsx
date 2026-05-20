@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Star, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { Star, ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { fetchFeaturedServices, imageLoader } from '@/lib/api';
 
@@ -11,6 +11,15 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const scrollRef = React.useRef(null);
+
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-featured-card="true"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 260;
+    const amount = cardWidth + 24;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
 
   useEffect(() => {
     const loadServices = async () => {
@@ -147,12 +156,21 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
             Top-rated services trusted by thousands of customers
           </motion.p>
         </div>
+        <div className="mb-2 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
 
         {/* Services Horizontal Scroller */}
-        <div className="flex overflow-x-auto gap-6 scroll-smooth snap-x snap-mandatory py-6">
+        <div ref={scrollRef} className="flex overflow-x-auto gap-6 scroll-smooth snap-x snap-mandatory py-6 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {services.map((service, index) => (
             <motion.div
               key={service._id}
+              data-featured-card="true"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

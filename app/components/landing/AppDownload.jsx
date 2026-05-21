@@ -26,7 +26,7 @@ export function AppDownload() {
   }, []);
 
   return (
-    <section id="app-download" className="relative min-h-screen flex items-center overflow-hidden py-5 lg:py-5">
+    <section id="app-download" className="relative flex items-center overflow-hidden pt-0 pb-2 lg:pb-3 -mt-8 md:-mt-10">
       {/* Architectural World Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -54,7 +54,7 @@ export function AppDownload() {
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-8 xl:gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-6 xl:gap-10 items-center">
           {/* Left: Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}

@@ -129,7 +129,7 @@ export function PopularCenters({ onStoreClick }) {
 
   if (loading) {
     return (
-      <section className="relative py-20 overflow-hidden bg-white">
+      <section className="relative pt-14 pb-6 overflow-hidden bg-white">
       {/* SEO Schema */}
       <script
         type="application/ld+json"
@@ -169,7 +169,7 @@ export function PopularCenters({ onStoreClick }) {
   }
 
   return (
-    <section className="py-20 relative bg-white">
+    <section className="pt-14 pb-6 relative bg-white">
       {/* SEO Schema */}
       <script
         type="application/ld+json"
@@ -220,7 +220,7 @@ export function PopularCenters({ onStoreClick }) {
 
         {/* Cards Scroller */}
         <div className="relative px-6 lg:px-8">
-            <div ref={scrollRef} className="flex overflow-x-auto gap-5 scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div ref={scrollRef} className="flex overflow-x-auto gap-5 scroll-smooth snap-x snap-mandatory pb-1 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {centers.map((center, index) => (
                 <motion.div
                   key={center.id || index}

@@ -89,14 +89,14 @@ export default function PrivacyPolicy() {
                 {/* Content */}
                 <div className="prose prose-invert max-w-none">
                     <div
-                        className="text-gray-300 leading-relaxed space-y-6"
+                        className="leading-relaxed space-y-6 text-white [&_*]:text-white [&_a]:text-[#7cebdd] [&_a]:underline"
                         dangerouslySetInnerHTML={{ __html: content?.privacyPolicy }}
                     />
                 </div>
 
                 {/* Footer Info */}
                 <div className="mt-16 p-8 rounded-3xl bg-white/5 border border-white/10 text-center">
-                    <h3 className="text-xl font-bold mb-4">Questions about our Privacy Policy?</h3>
+                    <h3 className="text-xl text-white font-bold mb-4">Questions about our Privacy Policy?</h3>
                     <p className="text-gray-400 mb-6">
                         If you have any questions regarding this privacy policy, you can contact us at:
                     </p>

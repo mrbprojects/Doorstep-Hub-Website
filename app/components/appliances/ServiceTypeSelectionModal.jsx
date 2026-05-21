@@ -50,20 +50,20 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                             </div>
                             <div className="flex-1">
                                 <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">On Demand Doorstep Hub Services</h4>
-                                <p className="text-sm text-gray-500 font-medium">Book certified experts for Doorstep Hub service</p>
+                                <p className="text-sm text-gray-500 font-medium">Book certified experts at Doorstep Hub</p>
                             </div>
                         </button>
 
                         {/* Service Center Option */}
-                        <button
+                         <button
                             onClick={() => onSelect('center')}
-                            className="group relative flex items-center gap-5 p-6 rounded-[1.5rem] bg-white border border-gray-100 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300 text-left"
+                            className="group relative flex items-center gap-5 p-6 rounded-[1.5rem] bg-white border border-gray-100 hover:border-[#037166]/30 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300 text-left"
                         >
-                            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300 border border-blue-100">
-                                <Store className="w-7 h-7 text-white-500" />
+                            <div className="w-14 h-14 rounded-2xl bg-[#037166]/10 flex items-center justify-center group-hover:bg-[#037166] transition-all duration-300 border border-[#037166]/20">
+                                <Store className="w-7 h-7 text-[#037166] group-hover:text-white transition-colors" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">Near by Service Providers</h4>
+                                <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">Near by Verified Providers</h4>
                                 <p className="text-sm text-gray-500 font-medium">Find and book nearby service centers</p>
                             </div>
                         </button>
@@ -71,7 +71,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
 
                     {/* Footer */}
                     <div className="p-6 bg-gray-50/50 border-t border-gray-50 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                        Doorstep Hub • India's Premium Service Network
+                        Doorstep Hub • India's Trusted Doorstep Service Provider
                     </div>
                 </motion.div>
             </div>

@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Smartphone, ThumbsUp, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Smartphone, CheckCircle2 } from 'lucide-react';
 
 export function DownloadApp() {
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-5 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0f1614] via-[#0a0a0a] to-[#0f1614]" />
       <motion.div
@@ -136,28 +136,6 @@ export function DownloadApp() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#037166]/20 to-transparent" />
                 </div>
 
-                {/* Floating App Icons */}
-                <motion.div
-                  animate={{
-                    y: [0, -10, 0],
-                    rotate: [0, 5, 0],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                  className="absolute -right-4 top-20 w-16 h-16 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] shadow-xl flex items-center justify-center"
-                >
-                  <CheckCircle2 className="w-8 h-8 text-white" />
-                </motion.div>
-
-                <motion.div
-                  animate={{
-                    y: [0, -15, 0],
-                    rotate: [0, -5, 0],
-                  }}
-                  transition={{ duration: 3.5, repeat: Infinity, delay: 1 }}
-                  className="absolute -left-4 bottom-32 w-14 h-14 rounded-xl bg-gradient-to-br from-[#037166] to-[#065f46] shadow-xl flex items-center justify-center"
-                >
-                  <ThumbsUp className="w-7 h-7 text-white" />
-                </motion.div>
               </div>
             </motion.div>
           </motion.div>

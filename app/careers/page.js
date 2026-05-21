@@ -54,7 +54,7 @@ export default function CareersPage() {
 
                     <div className="max-w-7xl mx-auto px-4 md:px-8">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-black mb-4">Open Positions</h2>
+                            <h2 className="text-4xl md:text-5xl text-white !font-white mb-4">Open Positions</h2>
                             <p className="text-xl text-gray-400">Find your place in our growing team</p>
                         </div>
 

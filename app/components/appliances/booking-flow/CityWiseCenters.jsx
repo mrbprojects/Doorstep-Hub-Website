@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Search, CheckCircle2, ArrowRight } from 'lucide-react';
+import { MapPin, Search, Check, ArrowRight } from 'lucide-react';
 
 export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuery, onSearchChange, loading }) {
   // Local filtering is now disabled in favor of API search, 
@@ -86,7 +86,6 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
                       <div>
                         <div className="flex items-center justify-between gap-2">
                           <h3 className="text-xl font-black text-[#037166] leading-tight tracking-tight">{city.name}</h3>
-                          {active && <CheckCircle2 className="text-[#037166] w-6 h-6 flex-shrink-0" />}
                         </div>
                         <p className="mt-2 text-sm font-bold leading-tight text-gray-500 uppercase tracking-tight line-clamp-1">
                           {city.area}
@@ -97,15 +96,16 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
                         <p className="text-[10px] sm:text-xs font-black text-[#037166] min-w-0">
                           <span className="line-clamp-1">{city.centers} Authorised Centers</span>
                         </p>
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all ${active
-                              ? 'bg-[#037166] text-white'
-                              : 'bg-[#037166]/10 text-[#037166] group-hover:bg-[#037166] group-hover:text-white'
-                            }`}
-                        >
-                          Book Services
-                          <ArrowRight className="w-3 h-3" />
-                        </span>
+                        {active ? (
+                          <span className="inline-flex items-center justify-center rounded-full p-1.5 bg-[#037166] text-white shadow-md shadow-[#037166]/40">
+                            <Check className="w-6 h-6" />
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all bg-[#037166]/10 text-[#037166] group-hover:bg-[#037166] group-hover:text-white">
+                            Book Services
+                            <ArrowRight className="w-3 h-3" />
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

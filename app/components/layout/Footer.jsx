@@ -364,7 +364,7 @@ export function Footer({ theme = {} }) {
                   />
                 </div>
                 {/* About text */}
-                <p className={`${t.textMuted} leading-relaxed max-w-sm text-sm`}>
+                <p className={`${t.textMuted} leading-relaxed max-w-sm text-sm text-justify`}>
                   {globalSettings?.aboutus
                     ? globalSettings.aboutus.trim().replace(/^<p>/i, '').replace(/<\/p>$/i, '').trim()
                     : "Your trusted partner for all home service needs. Connecting you with verified professionals for quick, reliable, and affordable solutions."}
@@ -480,7 +480,7 @@ export function Footer({ theme = {} }) {
               {showHomeScreen && (
                 <li>
                   <a
-                    href="/services"
+                    href="/appliance-repair-services"
                     className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block`}
                   >
                     All Services

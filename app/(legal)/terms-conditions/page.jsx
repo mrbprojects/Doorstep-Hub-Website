@@ -89,14 +89,14 @@ export default function TermsConditions() {
                 {/* Content */}
                 <div className="prose prose-invert max-w-none">
                     <div
-                        className="text-gray-300 leading-relaxed space-y-6"
+                        className="leading-relaxed space-y-6 text-white [&_*]:text-white [&_a]:text-[#7cebdd] [&_a]:underline"
                         dangerouslySetInnerHTML={{ __html: content?.termsAndConditions }}
                     />
                 </div>
 
                 {/* Footer Info */}
                 <div className="mt-16 p-8 rounded-3xl bg-white/5 border border-white/10 text-center">
-                    <h3 className="text-xl font-bold mb-4">Need Clarification?</h3>
+                    <h3 className="text-xl text-white font-bold mb-4">Need Clarification?</h3>
                     <p className="text-gray-400 mb-6">
                         By using Doorstep Hub, you agree to these terms. If you have any questions, please reach out.
                     </p>

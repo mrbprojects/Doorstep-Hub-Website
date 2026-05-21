@@ -203,7 +203,7 @@ export function BookingServices() {
 
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex overflow-x-auto overflow-y-visible gap-4 pt-4 pb-8 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {loading ? (
             [1, 2, 3, 4, 5, 6].map((i) => (
@@ -226,12 +226,6 @@ export function BookingServices() {
                   onClick={() => handleServiceClick(service)}
                 >
                   <div className="relative flex-1 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#037166]/20 transition-all duration-300 flex flex-col">
-                    {/* Status Badge - Top Center */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-[#037166]/90 backdrop-blur-md rounded-b-lg rounded-t-none text-[15px]  text-white shadow-lg border border-t-0 border-[#037166]/20 whitespace-nowrap">
-
-                      <span className="text-[10px] font-ubuntu tracking-wide !text-white block">{service.status}</span>
-                    </div>
-
                     {/* Image - Fixed height */}
                     <div className="relative h-40 overflow-hidden flex-shrink-0">
                       <ImageWithFallback
@@ -241,6 +235,11 @@ export function BookingServices() {
                         style={{ width: '100%', height: '100%' }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+
+                      {/* Status Badge - Top Center */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full z-20 px-3 py-1 bg-[#037166]/90 backdrop-blur-md rounded-b-lg rounded-t-none text-[15px] text-white shadow-lg border border-t-0 border-[#037166]/20 whitespace-nowrap transition-all duration-300 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
+                        <span className="text-[10px] font-ubuntu tracking-wide !text-white block">{service.status}</span>
+                      </div>
 
                       {/* Rating Badge - Bottom Left Flush */}
                       <div className="absolute bottom-0 left-0 z-20">
@@ -252,7 +251,7 @@ export function BookingServices() {
 
                       {/* Book Now Button Badge - Bottom Center */}
                       <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 px-6 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:opacity-100 hover:bg-[#025951]"
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full z-20 px-6 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-[#025951]"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleServiceClick(service);

@@ -75,6 +75,7 @@ export function ServiceCentersListingPage() {
                         name: item.business_name || `${item.firstName} ${item.lastName}`,
                         address: item.address || item.cityName || 'Location not specified',
                         rating: item.rating || item.avgRating || 4.5,
+                        bannerImage: toImageUrl(item.banner_image, ''),
                         logo: toImageUrl(item.logo, 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'),
                         image: toImageUrl(item.image, 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'),
                         reviews: item.reviews || 'New'
@@ -259,13 +260,13 @@ export function ServiceCentersListingPage() {
                                             className="group cursor-pointer"
                                         >
                                             <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full flex flex-col">
-                                                <div className="relative h-48 overflow-hidden">
+                                                <div className="relative h-48 overflow-hidden bg-[#eaf5f2]">
                                                     <img
-                                                        src={store.logo}
+                                                        src={store.bannerImage || store.logo || store.image}
                                                         alt={`${store.name} logo`}
-                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                        className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                                                         onError={(e) => {
-                                                            e.currentTarget.src = store.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400';
+                                                            e.currentTarget.src = store.logo || store.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400';
                                                         }}
                                                     />
                                                     {/* Rating Badge - Bottom Left Flush */}

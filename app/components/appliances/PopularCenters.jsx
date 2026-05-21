@@ -70,7 +70,9 @@ export function PopularCenters({ onStoreClick }) {
           const mappedCenters = data.featuredServiceCenters.map(center => ({
             id: center._id,
             slug: center.slug,
-            image: center.logo
+            image: center.banner_image
+              ? `https://api.doorstephub.com/${center.banner_image}`
+              : center.logo
               ? `https://api.doorstephub.com/${center.logo}`
               : center.image
                 ? `https://api.doorstephub.com/${center.image}`

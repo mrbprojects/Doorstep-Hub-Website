@@ -55,6 +55,7 @@ const MOCK_CATEGORIES = [
 
 export function HomePage() {
     const router = useRouter();
+    const SERVICE_SLUG = 'spa-salon';
     const { location, detectWithIP } = useLocationContext();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -420,6 +421,10 @@ export function HomePage() {
                     <motion.button
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
+                        onClick={() => {
+                            setSelectedCategory(null);
+                            setModalOpen(true);
+                        }}
                         className="h-[56px] px-8 rounded-2xl bg-gradient-to-r from-[#741b5d] to-[#c7378f] text-white font-semibold text-base shadow-[0_15px_40px_rgba(199,55,143,0.25)] flex items-center gap-2"
                     >
                         Explore Services
@@ -431,12 +436,12 @@ export function HomePage() {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         href="#"
-                        className="h-[56px] px-5 rounded-2xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
+                        className="h-[43px] px-1 rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
                     >
                         <img
                             src="/apple2.png"
                             alt="apple"
-                            className="h-9 object-contain brightness-0 invert"
+                            className="h-11 object-contain brightness-0 invert"
                         />
                     </motion.a>
 
@@ -445,12 +450,12 @@ export function HomePage() {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         href="#"
-                        className="h-[56px] px-5 rounded-2xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
+                        className="h-[40px] px-1 rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
                     >
                         <img
                             src="/andriod1.png"
                             alt="android"
-                            className="h-9 object-contain brightness-0 invert"
+                            className="h-11 object-contain brightness-0 invert"
                         />
                     </motion.a>
                 </div>

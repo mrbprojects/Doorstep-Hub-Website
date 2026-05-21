@@ -233,7 +233,7 @@ export function NearbyServiceCenters({ onViewAll }) {
   return (
     <section 
       id="nearby-centers" 
-      className="relative pt-10 pb-28 md:py-12 overflow-hidden"
+      className="relative pt-8 pb-16 md:py-12 overflow-hidden"
       onClick={() => setSelectedService(null)}
     >
       {/* Background */}
@@ -266,15 +266,15 @@ export function NearbyServiceCenters({ onViewAll }) {
             </h6>
           </div>
 
-          <h2 className="text-2xl sm:text-5xl font-bold mb-3 md:mb-4 text-[#0f172a] leading-tight">
+          <h2 className="text-[1.55rem] sm:text-5xl font-bold mb-3 md:mb-4 text-[#0f172a] leading-tight px-1">
             Nearest Appliance Service Centers
           </h2>
 
-          <p className="text-[#475569] text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[#475569] text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed px-2">
             Find expert repair centers near you for all your home appliances.
-            <span className="hidden sm:block text-sm text-[#64748b] mt-1">
+            {/* <span className="hidden sm:block text-sm text-[#64748b] mt-1">
               Hover a center to highlight it on the map · Double-click marker to open
-            </span>
+            </span> */}
           </p>
 
           {!location && (
@@ -292,7 +292,7 @@ export function NearbyServiceCenters({ onViewAll }) {
 
         {/* Main Content */}
         <div>
-          <div className="grid lg:grid-cols-2 gap-5 lg:gap-8">
+          <div className="grid lg:grid-cols-2 gap-4 lg:gap-8">
 
             {/* ── MAP — rendered directly (no useCallback wrapper) ── */}
             <motion.div
@@ -300,7 +300,7 @@ export function NearbyServiceCenters({ onViewAll }) {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               onClick={(e) => e.stopPropagation()}
-              className="relative h-[320px] sm:h-[420px] lg:h-[600px] rounded-2xl md:rounded-3xl overflow-hidden bg-white border border-[#cfe7e2] shadow-xl"
+              className="relative order-1 h-[280px] sm:h-[420px] lg:h-[600px] rounded-2xl md:rounded-3xl overflow-hidden bg-white border border-[#cfe7e2] shadow-xl"
             >
               {/* Loading overlay */}
               {!isMapsLoaded && (
@@ -450,13 +450,13 @@ export function NearbyServiceCenters({ onViewAll }) {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               onClick={(e) => e.stopPropagation()}
-            className="space-y-4"
+            className="order-2 space-y-3 sm:space-y-4"
             >
               {!loading && services.length > 0 && (
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2 h-2 rounded-full bg-[#04a99d] animate-pulse" />
                   <span className="text-xs text-[#64748b]">
-                    {services.length} centers found near you · Hover to highlight on map
+                    {services.length} centers found near you 
                   </span>
                 </div>
               )}

@@ -188,9 +188,9 @@ export function NearbyServiceCenters({ onViewAll }) {
 
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Find expert repair centers near you for all your home appliances.
-            <span className="block text-sm text-white/30 mt-1">
+            {/* <span className="block text-sm text-white/30 mt-1">
               Hover a center to highlight it on the map · Double-click marker to open
-            </span>
+            </span> */}
           </p>
 
           {!location && (
@@ -370,7 +370,7 @@ export function NearbyServiceCenters({ onViewAll }) {
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-[#04a99d] animate-pulse" />
                 <span className="text-xs text-white/50">
-                  {services.length} centers found near you · Hover to highlight on map
+                  {services.length} centers found near you 
                 </span>
               </div>
             )}

@@ -281,7 +281,7 @@ export function NearbyServiceCenters() {
       whileHover={{ x: 10 }}
       name="service-card"
       className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${isActive
-        ? 'bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 border-[#037166] shadow-lg shadow-[#037166]/10'
+        ? 'bg-gradient-to-r from-[#e6f4f1] to-[#d8efe9] border-[#7dbeb3] shadow-lg shadow-[#037166]/10'
         : 'bg-white/90 border-slate-200 hover:border-[#037166]/30'
         }`}
     >
@@ -294,7 +294,7 @@ export function NearbyServiceCenters() {
         <div className="flex-1 min-w-0">
           {/* Top Row: Distance & Rating */}
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[#037166]/20 text-[#04a99d] whitespace-nowrap">
+            <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[#cbe8e1] text-[#1f4f49] whitespace-nowrap">
               {service.distance} AWAY
             </span>
             <div className="flex items-center gap-1.5">
@@ -304,7 +304,7 @@ export function NearbyServiceCenters() {
           </div>
 
           {/* Business Name */}
-          <h4 className="text-xl font-bold text-slate-900 group-hover:text-white transition-colors leading-tight mb-1.5">
+          <h4 className={`text-xl font-bold transition-colors leading-tight mb-1.5 ${isActive ? 'text-white' : 'text-slate-900 group-hover:text-white'}`}>
             {service.name}
           </h4>
 
@@ -521,16 +521,16 @@ export function NearbyServiceCenters() {
                           mapPaneName={FLOAT_PANE}
                         >
                           <div 
-                            style={{ position: 'absolute', transform: 'translate(-50%, -110%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
+                            style={{ position: 'absolute', transform: 'translate(-50%, -110%)', pointerEvents: 'none', whiteSpace: 'nowrap', color: '#ffffff' }}
                             className="bg-black/90 backdrop-blur-md border border-[#037166]/60 rounded-xl px-3 py-2 shadow-2xl flex flex-col items-center gap-1 z-50"
                           >
                             <div className="flex items-center gap-2">
                               <div className="inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-[#04a99d]/60 bg-white/10">
                                 <Check className="h-2.5 w-2.5 text-[#04a99d]" />
                               </div>
-                              <span className="text-white text-xs font-bold">{service.name}</span>
+                              <span className="text-xs font-bold" style={{ color: '#ffffff' }}>{service.name}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-[10px] text-white font-medium opacity-90">
+                            <div className="flex items-center gap-1.5 text-[10px] font-medium opacity-90" style={{ color: '#ffffff' }}>
                               <Navigation className="w-2.5 h-2.5" />
                               Double-click to view details
                             </div>
@@ -548,10 +548,10 @@ export function NearbyServiceCenters() {
                             style={{ position: 'absolute', transform: 'translate(-50%, -140%)', pointerEvents: 'none', whiteSpace: 'nowrap' }}
                             className="bg-gradient-to-r from-[#037166] to-[#025951] border border-[#04a99d]/60 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 ring-2 ring-white/10 z-50"
                           >
-                              <div className="inline-flex h-4 w-4 items-center justify-center rounded border border-white/60 bg-white/15">
+                              <div className="inline-flex h-4 w-4 items-center justify-center rounded border border-white/70 bg-white/20">
                                 <Check className="h-2.5 w-2.5 text-white" />
                               </div>
-                            <span className="text-white text-xs font-bold tracking-wide uppercase">{service.name}</span>
+                            <span className="text-xs font-bold tracking-wide uppercase" style={{ color: '#ffffff' }}>{service.name}</span>
                             {/* Connector arrow */}
                             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#025951] border-r border-b border-[#04a99d]/60 rotate-45" />
                           </div>

@@ -35,7 +35,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
     const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // Filter State
-    const [priceRange, setPriceRange] = useState([200, 5000]);
+    const [priceRange, setPriceRange] = useState([0, 5000]);
     const [minRating, setMinRating] = useState(0);
 
     const sortOptions = [
@@ -68,7 +68,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
     useEffect(() => {
         const timer = setTimeout(() => {
             const currentParams = new URLSearchParams(searchParams.toString());
-            if (priceRange[0] !== 200 || priceRange[1] !== 5000) {
+            if (priceRange[0] !== 0 || priceRange[1] !== 5000) {
                 currentParams.set('minPrice', priceRange[0]);
                 currentParams.set('maxPrice', priceRange[1]);
             }
@@ -312,18 +312,18 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                     <h6 className="block text-gray-400 mb-4 text-[10px] font-black uppercase tracking-widest">Price Range</h6>
                     <div className="px-1">
                         <Slider
-                            defaultValue={[200, 5000]}
-                            min={100}
+                            defaultValue={[0, 5000]}
+                            min={0}
                             max={10000}
                             step={100}
                             value={priceRange}
                             onValueChange={setPriceRange}
-                            className="mb-4"
+                            className="mb-4 [&_[data-slot=slider-track]]:bg-gray-200 [&_[data-slot=slider-track]]:h-2.5 [&_[data-slot=slider-range]]:bg-[#2E7D6E] [&_[data-slot=slider-thumb]]:size-5 [&_[data-slot=slider-thumb]]:border-[#2E7D6E] [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-thumb]]:shadow-md"
                         />
                     </div>
-                    <div className="flex justify-between text-[10px] font-bold text-gray-400">
-                        <span>₹{priceRange[0].toLocaleString()}</span>
-                        <span>₹{priceRange[1].toLocaleString()}</span>
+                    <div className="flex justify-between text-[11px] font-bold text-gray-600">
+                        <span>Min ₹{priceRange[0].toLocaleString()}</span>
+                        <span>Max ₹{priceRange[1].toLocaleString()}</span>
                     </div>
                 </div>
 
@@ -352,7 +352,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                 <button 
                     className="w-full mt-4 border border-gray-200 text-gray-400 hover:text-[#C06C84] hover:border-[#C06C84]/30 h-10 text-[10px] font-black rounded-xl gap-2 transition-all flex items-center justify-center shadow-sm"
                     onClick={() => {
-                        setPriceRange([200, 5000]);
+                        setPriceRange([0, 5000]);
                         setMinRating(0);
                         router.push(pathname);
                     }}
@@ -564,7 +564,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                                     description="We couldn't find any experts matching your criteria in this category. Try adjusting your filters."
                                     actionLabel="Reset All Filters"
                                     onAction={() => {
-                                        setPriceRange([200, 5000]);
+                                        setPriceRange([0, 5000]);
                                         setMinRating(0);
                                         router.push(pathname);
                                     }}

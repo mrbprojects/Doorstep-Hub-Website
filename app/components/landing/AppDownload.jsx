@@ -71,9 +71,9 @@ export function AppDownload() {
             </a>
 
             {/* Heading */}
-            <h2 className="text-3xl sm:text-5xl lg:text-[4.75rem] lg:leading-[1.04] font-bold mb-5">
+            <h2 className="text-3xl sm:text-5xl lg:text-[4.25rem] lg:leading-[1.04] font-bold mb-5">
               <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
-                Everything in Your Pocket
+                <span className="whitespace-nowrap">Everything in Your Pocket</span>
               </span>
             </h2>
 
@@ -105,7 +105,7 @@ export function AppDownload() {
             </div>
 
             {/* Download Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
+            <div className="flex flex-wrap lg:flex-nowrap items-center gap-4 mb-6">
               <a
                 href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
                 target="_blank"
@@ -130,7 +130,7 @@ export function AppDownload() {
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="flex items-center gap-5 lg:ml-3"
+                className="flex items-center gap-5 lg:ml-3 shrink-0"
               >
                 <div>
                   <div className="text-2xl xl:text-3xl font-bold text-[#037166] mb-0.5">4.8★</div>

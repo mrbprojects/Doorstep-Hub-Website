@@ -364,7 +364,7 @@ export function HomePage() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
             />
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-[#fff8fb] via-white to-[#f7f4ff] py-8 lg:py-10">
+            <section className="relative overflow-hidden bg-gradient-to-br from-[#fff8fb] via-white to-[#f7f4ff] py-3 lg:py-4">
 
     {/* Soft Background */}
     <div className="absolute top-[-120px] left-[-120px] w-[320px] h-[320px] bg-pink-200/20 blur-3xl rounded-full" />
@@ -373,34 +373,34 @@ export function HomePage() {
     <div className="relative z-10 max-w-[1400px] mx-auto px-5 lg:px-8">
 
         {/* ================= HERO ================= */}
-        <div className="grid lg:grid-cols-[1fr_1.02fr] items-center gap-4 lg:gap-6">
+        <div className="grid lg:grid-cols-[1fr_1.02fr] items-center gap-3 lg:gap-4">
 
             {/* ================= LEFT SIDE ================= */}
             <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7 }}
-                className="max-w-[640px]"
+                className="max-w-[620px]"
             >
 
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#f2dce6] shadow-md mb-5">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#f2dce6] shadow-md mb-4">
                     <Sparkles className="w-4 h-4 text-[#c06c84]" />
 
-                    <span className="text-[#111827] text-sm font-medium">
+                    <span className="text-[#111827] text-xs sm:text-sm font-medium">
                         Premium Salon & Pet Salon Services
                     </span>
                 </div>
 
                 {/* Heading */}
-                <h1 className="text-[3.3rem] xl:text-[3.8rem] leading-[0.92] font-bold tracking-[-2px] text-[#0f172a]">
-                    <span className="block">
+                <h1 className="text-[2.1rem] sm:text-[2.6rem] xl:text-[3rem] leading-[0.95] font-bold tracking-[-1.2px] text-[#0f172a]">
+                    <span className="block whitespace-nowrap">
                         Style That{" "}
                         <span className="bg-gradient-to-r from-[#c06c84] to-[#c05cff] bg-clip-text text-transparent">
                             Shine.
                         </span>
                     </span>
-                    <span className="block">
+                    <span className="block whitespace-nowrap">
                         Care That Makes Them{" "}
                         <span className="bg-gradient-to-r from-[#c06c84] to-[#c05cff] bg-clip-text text-transparent">
                             Happy.
@@ -409,13 +409,13 @@ export function HomePage() {
                 </h1>
 
                 {/* Description */}
-                <p className="mt-4 text-[17px] leading-[1.7] text-[#64748b] max-w-[500px]">
+                <p className="mt-2 text-[14px] sm:text-[15px] leading-[1.55] text-[#64748b] max-w-[500px]">
                     Hair, beauty & grooming experts for you and your pets.
                     At home or nearby centers.
                 </p>
 
                 {/* CTA */}
-                <div className="flex flex-wrap items-center gap-3 mt-7">
+                <div className="flex flex-wrap items-center gap-3 mt-5">
 
                     <motion.button
                         whileHover={{ scale: 1.03 }}
@@ -456,7 +456,7 @@ export function HomePage() {
                 </div>
 
                 {/* ================= STATS ================= */}
-                <div className="grid grid-cols-4 gap-5 mt-10">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 mt-4">
 
                     {[
                         {
@@ -484,17 +484,17 @@ export function HomePage() {
                             color: 'from-purple-500 to-pink-400'
                         }
                     ].map((item, i) => (
-                        <div key={i}>
+                        <div key={i} className="min-w-0">
 
-                            <div className={`w-[56px] h-[56px] rounded-[18px] bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg mb-4`}>
+                            <div className={`w-[46px] h-[46px] rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg mb-2`}>
                                 {item.icon}
                             </div>
 
-                            <h3 className="text-[2.5rem] leading-none font-bold text-[#0f172a]">
+                            <h3 className="text-[1.8rem] sm:text-[2rem] leading-none font-bold text-[#0f172a]">
                                 {item.value}
                             </h3>
 
-                            <p className="mt-1 text-[#64748b] text-sm">
+                            <p className="mt-0.5 text-[#64748b] text-[11px] sm:text-xs leading-tight">
                                 {item.label}
                             </p>
                         </div>
@@ -511,7 +511,7 @@ export function HomePage() {
   transition={{ duration: 0.7 }}
   className="relative flex justify-center items-center"
 >
-  <div className="relative w-[700px] h-[560px]">
+  <div className="relative w-[600px] lg:w-[640px] h-[430px] lg:h-[470px]">
 
     {/* Main Generated Right Image */}
     <img
@@ -524,17 +524,17 @@ export function HomePage() {
     <motion.div
       animate={{ y: [0, -8, 0] }}
       transition={{ repeat: Infinity, duration: 4 }}
-      className="absolute top-[45px] right-[10px] z-50 bg-white/95 backdrop-blur-xl rounded-[26px] border border-[#f3dce5] shadow-2xl px-4 py-3 flex items-center gap-3"
+      className="absolute top-[24px] right-[6px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3"
     >
       <div className="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center text-2xl">
         💇🏻‍♀️
       </div>
 
       <div>
-        <h4 className="text-[#111827] font-semibold text-lg leading-none">
+        <h4 className="text-[#111827] font-semibold text-base leading-none">
           Hair Salon
         </h4>
-        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-sm">
+        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-xs">
           ⭐ 4.8
         </div>
       </div>
@@ -544,17 +544,17 @@ export function HomePage() {
     <motion.div
       animate={{ y: [0, 10, 0] }}
       transition={{ repeat: Infinity, duration: 5 }}
-      className="absolute top-[145px] right-[0px] z-50 bg-white/95 backdrop-blur-xl rounded-[26px] border border-[#f3dce5] shadow-2xl px-4 py-3 flex items-center gap-3"
+      className="absolute top-[108px] right-[0px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3"
     >
       <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-2xl">
         🐶
       </div>
 
       <div>
-        <h4 className="text-[#111827] font-semibold text-lg leading-none">
+        <h4 className="text-[#111827] font-semibold text-base leading-none">
           Pet Grooming
         </h4>
-        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-sm">
+        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-xs">
           ⭐ 4.7
         </div>
       </div>
@@ -565,7 +565,7 @@ export function HomePage() {
         </div>
 
         {/* ================= FEATURES ================= */}
-        <div className="mt-6 bg-white/95 backdrop-blur-xl rounded-[32px] border border-[#f5edf3] shadow-[0_20px_60px_rgba(0,0,0,0.06)] px-8 py-6">
+        <div className="mt-2 bg-white/95 backdrop-blur-xl rounded-[28px] border border-[#f5edf3] shadow-[0_16px_48px_rgba(0,0,0,0.06)] px-6 py-3.5">
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
 

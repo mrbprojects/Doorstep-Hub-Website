@@ -73,7 +73,7 @@ export function DownloadApp() {
             </div>
 
             {/* App Store Buttons */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <a
                 href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
                 target="_blank"
@@ -93,6 +93,12 @@ export function DownloadApp() {
               >
                 <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
               </a>
+
+              <div className="h-12 xs:h-14 px-4 rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl flex items-center gap-2 text-[#0f3f3a]">
+                <span className="text-lg leading-none">4.8</span>
+                <span className="text-yellow-500 text-base leading-none">★</span>
+                <span className="text-xs font-medium uppercase tracking-wide">App Rating</span>
+              </div>
             </div>
           </motion.div>
 

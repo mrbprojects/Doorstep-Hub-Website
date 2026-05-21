@@ -15,11 +15,10 @@ export function PopularCenters({ onStoreClick }) {
   const scrollCards = (direction) => {
     if (!scrollRef.current) return;
     const firstCard = scrollRef.current.querySelector('[data-popular-center-card="true"]');
-    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 320;
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 260;
     const amount = cardWidth + 24;
     scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
   };
-
   // SEO Schema for Popular Centers
   const schemaData = {
     "@context": "https://schema.org",
@@ -143,8 +142,8 @@ export function PopularCenters({ onStoreClick }) {
             <h2 className="text-4xl md:text-5xl font-bold mb-3 text-gray-900">Explore Popular Services Center</h2>
             <p className="text-gray-500">Most trusted and highly-rated service providers in your area</p>
           </div>
-          <div className="flex gap-6 overflow-hidden">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+            {[1, 2, 3, 4, 5].map((i) => (
               <ShimmerCenterCard key={i} />
             ))}
           </div>
@@ -209,18 +208,17 @@ export function PopularCenters({ onStoreClick }) {
           </motion.p>
         </div>
         <div className="mb-2 flex items-center justify-end gap-2 px-6 lg:px-8">
-          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Horizontal Scroll */}
-        <div className="relative">
-          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex gap-6 min-w-max px-6 lg:px-8">
+        {/* Cards Scroller */}
+        <div className="relative px-6 lg:px-8">
+            <div ref={scrollRef} className="flex overflow-x-auto gap-5 scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {centers.map((center, index) => (
                 <motion.div
                   key={center.id || index}
@@ -230,9 +228,9 @@ export function PopularCenters({ onStoreClick }) {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ y: -8, scale: 1.02 }}
-                  className="group cursor-pointer"
+                  className="flex-shrink-0 w-[85%] sm:w-[48%] md:w-[31%] lg:w-[23%] xl:w-[18.4%] snap-start group cursor-pointer"
                 >
-                  <div className="relative w-80 rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-300">
+                  <div className="relative h-full rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-300">
                     {/* Popular Badge */}
                     {center.popular && (
                       <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] shadow-lg">
@@ -242,7 +240,7 @@ export function PopularCenters({ onStoreClick }) {
                     )}
 
                     {/* Image */}
-                    <div className="relative h-48 overflow-hidden bg-[#0a0a0a]">
+                    <div className="relative h-40 xl:h-36 overflow-hidden bg-[#0a0a0a]">
                       <img
                         src={center.image}
                         alt={center.name}
@@ -261,18 +259,18 @@ export function PopularCenters({ onStoreClick }) {
                     </div>
 
                     {/* Content */}
-                    <div className="p-5">
-                      <h4 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-1">
+                    <div className="p-4">
+                      <h4 className="text-base font-bold text-gray-900 mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-1">
                         {center.name}
                       </h4>
-                      <p className="text-gray-500 text-sm mb-3 flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
+                      <p className="text-gray-500 text-xs mb-3 flex items-center gap-1 line-clamp-1">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
                         {center.location}
                       </p>
 
                       {/* Speciality Badge */}
                       <div className="inline-block px-3 py-1 rounded-lg bg-[#037166]/20 border border-[#037166]/30 mb-4 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                        <h6 className="text-xs font-medium text-[#04a99d] line-clamp-1">{center.speciality}</h6>
+                        <h6 className="text-[11px] font-medium text-[#04a99d] line-clamp-1">{center.speciality}</h6>
                       </div>
 
                       {/* Rating & CTA */}
@@ -280,7 +278,7 @@ export function PopularCenters({ onStoreClick }) {
                         <motion.button
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           whileTap={{ scale: 0.9 }}
-                          className="px-4 py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-sm shadow-lg shadow-[#037166]/30 group-hover:shadow-[#037166]/50 transition-all flex items-center gap-2"
+                          className="px-3 py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-xs shadow-lg shadow-[#037166]/30 group-hover:shadow-[#037166]/50 transition-all flex items-center gap-1.5"
                           onClick={() => onStoreClick?.(center.slug)}
                         >
                           View Store
@@ -299,10 +297,6 @@ export function PopularCenters({ onStoreClick }) {
                 </motion.div>
               ))}
             </div>
-          </div>
-
-          {/* Fade Edges */}
-          <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-white to-transparent pointer-events-none" />
         </div>
       </div>
     </section>

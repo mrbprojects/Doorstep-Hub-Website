@@ -335,87 +335,43 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
             />
-            <motion.button
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                onClick={() => router.back()}
-                className="fixed top-24 md:top-28 left-4 z-50 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
-            >
-                <ArrowLeft className="w-5 h-5 text-gray-700" />
-            </motion.button>
-
-            <motion.div
-                style={{ opacity: headerOpacity }}
-                className="relative h-[420px] overflow-hidden bg-gray-900"
-            >
-                <div
-                    className="w-full h-full bg-cover bg-center"
-                    style={{
-                        backgroundImage: `url(${serviceData?.images?.[0] || 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800'})`,
-                    }}
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-6 relative z-10">
+                <motion.button
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    onClick={() => router.back()}
+                    className="absolute -left-2 sm:left-0 top-3 sm:top-4 z-[80] w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                </div>
-            </motion.div>
-
-            <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-5 md:p-8"
-                >
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                        <div className="flex items-start space-x-4">
-                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 border-[#C06C84] flex-shrink-0">
-                                {serviceData.logo ? (
-                                    <img src={serviceData.logo} alt={serviceData.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full bg-pink-50 flex items-center justify-center"><Scissors className="w-8 h-8 text-[#C06C84]" /></div>
-                                )}
-                            </div>
-                            <div>
-                                <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-1 leading-tight">
-                                    {serviceData.name}
-                                </h1>
-                                <div className="flex items-start text-gray-600 text-sm md:text-base">
-                                    <MapPin className="w-4 h-4 mr-2 text-[#C06C84] mt-1 shrink-0" />
-                                    <span className="leading-relaxed">{serviceData.location}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
-                            <div className="flex flex-col items-center md:items-start gap-3 w-full">
-                                <a
-                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[78%] md:w-[180px] h-[56px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
-                                    title="Get it on Google Play"
-                                >
-                                    <img src="/andriod1.png" alt="Google Play" className="w-full h-full object-contain block mx-auto px-2" />
-                                </a>
-                                <a
-                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[68%] md:w-[220px] h-[56px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
-                                    title="Download on the App Store"
-                                >
-                                    <img src="/apple2.png" alt="App Store" className="w-full h-full object-contain block mx-auto px-2" />
-                                </a>
-                            </div>
-                            <div className="bg-[#6D1357]/10 rounded-2xl p-3 md:p-4 border border-[#6D1357]/20 min-w-[100px] md:min-w-[120px] flex flex-col items-center">
-                                <div className="flex items-center justify-center mb-0.5">
-                                    <Star className="w-4 h-4 md:w-5 md:h-5 fill-[#6D1357] text-[#6D1357] mr-1" />
-                                    <span className="text-xl md:text-2xl font-bold text-gray-900">{serviceData.rating}</span>
-                                </div>
-                                <div className="text-[10px] md:text-xs text-gray-500 text-center uppercase font-semibold">Rating</div>
-                            </div>
+                    <ArrowLeft className="w-5 h-5 text-gray-700" />
+                </motion.button>
+                <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-[1.7fr_1.4fr_290px] gap-5 items-start">
+                    <div className="h-[250px] self-start rounded-2xl overflow-hidden border border-[#6D1357]/20 shadow-xl">
+                        <img src={serviceData?.images?.[0] || ''} alt={serviceData.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="h-[250px] self-start bg-white border border-gray-100 rounded-2xl p-5 shadow-xl">
+                        <h1 className="text-2xl font-bold text-gray-900">{serviceData.name}</h1>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-600"><MapPin className="w-4 h-4 text-[#6D1357]" />{serviceData.location}</div>
+                        <div className="flex items-center gap-1 mt-2"><Star className="w-4 h-4 fill-[#6D1357] text-[#6D1357]" /><span className="font-bold">{serviceData.rating}</span></div>
+                        <div className="flex items-center gap-3 mt-5">
+                            <a href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" /></a>
+                            <a href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" /></a>
                         </div>
                     </div>
+                    <div className="h-[250px] self-start bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center gap-2.5 mb-4 pb-2.5 border-b border-gray-100">
+                                <div className="w-9 h-9 rounded-xl bg-[#6D1357]/10 flex items-center justify-center"><Clock className="w-5 h-5 text-[#6D1357]" /></div>
+                                <div><h3 className="text-sm font-bold text-gray-900">Salon Hours</h3><span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span></div>
+                            </div>
+                            <div className="space-y-2 text-xs">
+                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Monday - Saturday</span><span className="text-gray-800 font-extrabold">09:00 AM - 08:00 PM</span></div>
+                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Sunday</span><span className="text-gray-800 font-extrabold">10:00 AM - 06:00 PM</span></div>
+                            </div>
+                        </div>
+                        <span className="inline-flex w-44 flex-col rounded-xl px-4 py-2 text-white bg-gradient-to-r from-[#8A1D6E] to-[#6D1357]"><span className="text-[10px] font-bold tracking-wide">Available For</span><span className="text-md font-extrabold">Home/Salon Booking</span></span>
+                    </div>
                 </motion.div>
-            </div >
+            </div>
 
             <div className="max-w-7xl mx-auto px-4 mt-8 text-black">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -457,12 +413,12 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                         {loadingSubcategories ? <div className="text-sm text-gray-500">Loading subcategories...</div> : null}
 
                         {filteredPackages.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 items-stretch">
                                 {filteredPackages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => togglePackage(pkg)}
-                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-row h-auto min-h-[130px] sm:min-h-[160px] ${selectedPackages.some(p => p._id === pkg._id)
+                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-row h-[180px] sm:h-[210px] ${selectedPackages.some(p => p._id === pkg._id)
                                             ? 'border-2 border-[#6D1357] ring-2 ring-[#6D1357]/10'
                                             : 'border-gray-100'
                                             }`}
@@ -472,7 +428,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                                 <Check className="w-3.5 h-3.5" />
                                             </div>
                                         )}
-                                        <div className="w-24 sm:w-48 h-auto sm:h-full bg-gray-100 relative flex-shrink-0">
+                                        <div className="w-28 sm:w-44 h-full bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
                                                 <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" />
                                             ) : (
@@ -481,10 +437,10 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-3.5 sm:p-5 flex flex-col justify-between flex-1 min-w-0">
+                                        <div className="p-3 sm:p-4 flex flex-col justify-between flex-1 min-w-0 h-full">
                                             <div className="min-w-0">
                                                 <div className="flex justify-between items-start mb-0.5">
-                                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{pkg.name}</h3>
+                                                    <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">{pkg.name}</h3>
                                                 </div>
                                                 <p className="text-gray-500 text-xs sm:text-sm mb-2 line-clamp-2 leading-snug">{pkg.description}</p>
                                             </div>
@@ -492,7 +448,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                             <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
                                                 <div className="flex flex-col">
                                                     <span className="text-[10px] text-gray-500 font-bold italic uppercase tracking-wider">Starts From</span>
-                                                    <span className="text-[#6D1357] font-bold text-xl sm:text-2xl">₹{pkg.price}</span>
+                                                    <span className="text-[#6D1357] font-bold text-lg sm:text-2xl">₹{pkg.price}</span>
                                                     {pkg.priceUnit && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">{pkg.priceUnit}</span>}
                                                 </div>
 

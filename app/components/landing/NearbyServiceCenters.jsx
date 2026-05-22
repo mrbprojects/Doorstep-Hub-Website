@@ -426,7 +426,7 @@ export function NearbyServiceCenters() {
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
-              Nearby Appliance Service Centers
+              Nearby Appliance Service Providers
             </span>
           </h2>
 

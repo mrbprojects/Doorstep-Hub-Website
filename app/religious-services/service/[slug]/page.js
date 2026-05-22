@@ -315,105 +315,51 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--off-white)] pb-32">
+        <div className="min-h-screen bg-[var(--off-white)] pb-32 pt-24 md:pt-28">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
             />
-            {/* Back Button */}
-            <motion.button
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                onClick={() => {
-                    const targetSubcat = subcategoryId || context.subcategoryId;
-                    if (targetSubcat) {
-                        router.push(`/religious-services/${targetSubcat}`);
-                    } else {
-                        router.back();
-                    }
-                }}
-                className="fixed top-24 left-4 z-50 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
-            >
-                <ArrowLeft className="w-5 h-5 text-[var(--deep-charcoal)]" />
-            </motion.button>
-
-            {/* Slider / Hero Section */}
-            <motion.div
-                style={{ opacity: headerOpacity }}
-                className="relative h-[500px] overflow-hidden"
-            >
-                <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                        backgroundImage: `url(${serviceData.mainImage || serviceData.logo})`
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-6 relative z-10">
+                {/* Back Button */}
+                <motion.button
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    onClick={() => {
+                        const targetSubcat = subcategoryId || context.subcategoryId;
+                        if (targetSubcat) {
+                            router.push(`/religious-services/${targetSubcat}`);
+                        } else {
+                            router.back();
+                        }
                     }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-            </motion.div>
-
-            {/* Header Info */}
-            <div className="max-w-7xl mx-auto px-4 -mt-32 relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-8"
+                    className="absolute -left-2 sm:left-0 top-2 sm:top-3 z-[80] w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
                 >
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                        <div className="flex items-start space-x-4">
-                            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-[var(--saffron)] flex-shrink-0">
-                                <img
-                                    src={serviceData.logo}
-                                    alt={serviceData.name}
-                                    className="w-full h-full object-cover"
-                                />
+                    <ArrowLeft className="w-5 h-5 text-[var(--deep-charcoal)]" />
+                </motion.button>
+                <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-[1.7fr_1.4fr_290px] gap-5 items-stretch">
+                    <div className="h-[250px] rounded-2xl overflow-hidden border border-[var(--saffron)]/30"><img src={serviceData.mainImage || serviceData.logo} alt={serviceData.name} className="w-full h-full object-cover" /></div>
+                    <div className="h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl">
+                        <h1 className="text-2xl font-bold text-[var(--deep-charcoal)]">{serviceData.name}</h1>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-600"><MapPin className="w-4 h-4 text-[var(--saffron)]" />{serviceData.location}</div>
+                        <div className="flex items-center gap-1 mt-2"><Star className="w-4 h-4 fill-[var(--saffron)] text-[var(--saffron)]" /><span className="font-bold">{serviceData.rating}</span><span className="text-xs text-gray-500">Starts from ₹{serviceData.basePrice}</span></div>
+                        <div className="flex items-center gap-3 mt-5">
+                            <a href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" /></a>
+                            <a href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" /></a>
+                        </div>
+                    </div>
+                    <div className="h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center gap-2.5 mb-4 pb-2.5 border-b border-gray-100">
+                                <div className="w-9 h-9 rounded-xl bg-[var(--saffron)]/10 flex items-center justify-center"><Clock className="w-5 h-5 text-[var(--saffron)]" /></div>
+                                <div><h3 className="text-sm font-bold text-gray-900">Puja Booking Hours</h3><span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span></div>
                             </div>
-                            <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-2">
-                                    {serviceData.name}
-                                </h1>
-                                <div className="flex items-center text-gray-600">
-                                    <MapPin className="w-4 h-4 mr-1 text-[var(--saffron)]" />
-                                    <span>{serviceData.location}</span>
-                                </div>
+                            <div className="space-y-2 text-xs">
+                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Monday - Saturday</span><span className="text-gray-800 font-extrabold">06:00 AM - 09:00 PM</span></div>
+                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Sunday</span><span className="text-gray-800 font-extrabold">06:00 AM - 10:00 PM</span></div>
                             </div>
                         </div>
-
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                            <div className="flex flex-col items-start gap-3">
-                                <a
-                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
-                                    title="Get it on Google Play"
-                                >
-                                    <img src="/andriod1.png" alt="Google Play" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
-                                </a>
-                                <a
-                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[214px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
-                                    title="Download on the App Store"
-                                >
-                                    <img src="/apple2.png" alt="App Store" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
-                                </a>
-                            </div>
-                            <div className="bg-[var(--saffron)]/10 rounded-2xl p-4 border border-[var(--saffron)]/20 min-w-[120px]">
-                                <div className="flex items-center justify-center mb-1">
-                                    <Star className="w-5 h-5 fill-[var(--saffron)] text-[var(--saffron)] mr-1" />
-                                    <span className="text-2xl font-bold text-[var(--deep-charcoal)]">{serviceData.rating}</span>
-                                </div>
-                                <div className="text-xs text-gray-500 text-center">Rating</div>
-                            </div>
-
-                            <div className="bg-[var(--temple-red)]/5 rounded-2xl p-4 border border-[var(--temple-red)]/20 min-w-[120px]">
-                                <div className="flex items-center justify-center mb-1">
-                                    <span className="text-2xl font-bold text-[var(--deep-charcoal)]">₹{serviceData.basePrice}</span>
-                                </div>
-                                <div className="text-xs text-gray-500 text-center">Starts From</div>
-                            </div>
-                        </div>
+                        <span className="inline-flex w-44 flex-col rounded-xl px-4 py-2 text-white bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)]"><span className="text-[10px] font-bold tracking-wide">Available For</span><span className="text-md font-extrabold">Same-day Ritual Booking</span></span>
                     </div>
                 </motion.div>
             </div>

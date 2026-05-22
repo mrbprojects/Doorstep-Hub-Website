@@ -343,109 +343,44 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
     };
 
     return (
-        <div className="min-h-screen bg-transparent pb-32">
+        <div className="min-h-screen bg-transparent pb-32 pt-24 md:pt-28">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
             />
-            {/* Back Button */}
-            <motion.button
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                onClick={() => fromListing ? router.push(`/pghostels/listings/${fromListing}`) : router.back()}
-                className="fixed top-24 left-4 z-50 w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
-            >
-                <ArrowLeft className="w-5 h-5 text-gray-900" />
-            </motion.button>
-
-            {/* Image Gallery Slider */}
-            <motion.div
-                style={{ opacity: headerOpacity }}
-                className="relative h-[500px] overflow-hidden"
-            >
-                <div
-                    className="absolute inset-0 bg-fit bg-center"
-                    style={{
-                        backgroundImage: `url(${hostelData.image})`
-                    }}
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-            </motion.div>
-
-            {/* Hostel Header Info - Floating Card */}
-            <div className="max-w-7xl mx-auto px-4 -mt-32 relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-5 sm:p-8"
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-6 relative z-10">
+                {/* Back Button */}
+                <motion.button
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    onClick={() => fromListing ? router.push(`/pghostels/listings/${fromListing}`) : router.back()}
+                    className="absolute -left-2 sm:left-0 top-2 sm:top-3 z-[80] w-10 h-10 sm:w-12 sm:h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
                 >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-4">
-                        {/* Left - Name & Logo */}
-                        <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
-                            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-gray-100 flex-shrink-0 shadow-sm">
-                                <img
-                                    src={hostelData.logo}
-                                    alt={hostelData.name}
-                                    className="w-full h-full object-cover"
-                                />
+                    <ArrowLeft className="w-5 h-5 text-gray-900" />
+                </motion.button>
+                <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-[1.7fr_1.4fr_290px] gap-5 items-stretch">
+                    <div className="h-[250px] rounded-2xl overflow-hidden border border-[#037166]/20"><img src={hostelData.image} alt={hostelData.name} className="w-full h-full object-cover" /></div>
+                    <div className="h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl">
+                        <h1 className="text-2xl font-bold text-gray-900">{hostelData.name}</h1>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-600"><MapPin className="w-4 h-4 text-[#037166]" />{hostelData.location}</div>
+                        <div className="flex items-center gap-1 mt-2"><Star className="w-4 h-4 fill-[#037166] text-[#037166]" /><span className="font-bold">{hostelData.rating}</span><span className="text-xs text-gray-500">Starts from ₹{hostelData.basePrice}</span></div>
+                        <div className="flex items-center gap-3 mt-5">
+                            <a href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" /></a>
+                            <a href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" /></a>
+                        </div>
+                    </div>
+                    <div className="h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center gap-2.5 mb-4 pb-2.5 border-b border-gray-100">
+                                <div className="w-9 h-9 rounded-xl bg-[#037166]/10 flex items-center justify-center"><Clock className="w-5 h-5 text-[#037166]" /></div>
+                                <div><h3 className="text-sm font-bold text-gray-900">Hostel Office Hours</h3><span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span></div>
                             </div>
-                            <div className="min-w-0">
-                                <h1 className="text-xl sm:text-3xl font-bold text-gray-900 line-clamp-1 leading-tight mb-0.5 sm:mb-1">
-                                    {hostelData.name}
-                                </h1>
-                                <div className="flex items-center text-gray-500 text-xs sm:text-sm">
-                                    <MapPin className="w-3.5 h-3.5 mr-1 text-[#037166]/60" />
-                                    <span className="truncate">{hostelData.location}</span>
-                                </div>
+                            <div className="space-y-2 text-xs">
+                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Monday - Saturday</span><span className="text-gray-800 font-extrabold">09:00 AM - 08:00 PM</span></div>
+                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Sunday</span><span className="text-gray-800 font-extrabold">10:00 AM - 05:00 PM</span></div>
                             </div>
                         </div>
-
-                        {/* Right - Quick Stats */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-shrink-0">
-                            <div className="flex flex-col items-start gap-3">
-                                <a
-                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
-                                    title="Get it on Google Play"
-                                >
-                                    <img src="/andriod1.png" alt="Google Play" className="h-[84px] w-auto max-w-[100%] object-contain block mx-auto" />
-                                </a>
-                                <a
-                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
-                                    title="Download on the App Store"
-                                >
-                                    <img src="/apple2.png" alt="App Store" className="h-[86px] w-auto max-w-[100%] object-contain block mx-auto" />
-                                </a>
-                            </div>
-                            {/* Rating pill */}
-                            <div className="flex-1 sm:flex-none bg-gradient-to-br from-[#F59E0B]/10 to-[#F59E0B]/5 rounded-2xl p-2.5 sm:p-4 border border-[#F59E0B]/20 min-w-[90px] sm:min-w-[120px] text-center shadow-sm">
-                                <div className="flex items-center justify-center mb-0.5">
-                                    <Star className="w-3.5 h-3.5 sm:w-4 h-4 fill-[#F59E0B] text-[#F59E0B] mr-1" />
-                                    <span className="text-lg sm:text-2xl font-bold text-gray-900">{hostelData.rating}</span>
-                                </div>
-                                <div className="text-[9px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider">Rating</div>
-                            </div>
-
-                            {/* Base Price pill */}
-
-                         <div className="flex-1 sm:flex-none bg-gradient-to-br from-[#037166]/10 to-[#037166]/5 rounded-2xl p-2.5 sm:p-4 border border-[#037166]/20 min-w-[90px] sm:min-w-[120px] text-center shadow-sm">
-  <div className="flex flex-col items-center justify-center">
-    <div className="text-[9px] sm:text-xs text-[#037166] font-bold italic whitespace-nowrap mb-1">
-      Starts From
-    </div>
-
-    <span className="text-lg sm:text-2xl font-bold text-gray-900 leading-none">
-      ₹{hostelData.basePrice}
-    </span>
-  </div>
-</div>
-                        </div>
+                        <span className="inline-flex w-44 flex-col rounded-xl px-4 py-2 text-white bg-gradient-to-r from-[#00907f] to-[#007367]"><span className="text-[10px] font-bold tracking-wide">Available For</span><span className="text-md font-extrabold">24/7 Stay Assistance</span></span>
                     </div>
                 </motion.div>
             </div>

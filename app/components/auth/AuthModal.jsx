@@ -21,6 +21,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     const [resendTimer, setResendTimer] = useState(0);
     const [referralCode, setReferralCode] = useState('');
     const [profileSavedForBooking, setProfileSavedForBooking] = useState(false);
+    const [showRequiredErrors, setShowRequiredErrors] = useState(false);
 
     // Auto-fill referral code from URL ?ref= param
     React.useEffect(() => {
@@ -43,6 +44,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         setPreviewImage(null);
         setResendTimer(0);
         setProfileSavedForBooking(false);
+        setShowRequiredErrors(false);
         profileToastShown.current = false;
     }, []);
 
@@ -52,10 +54,25 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     }, [onClose, resetModalState]);
 
     const handleLogout = React.useCallback(() => {
+        const trimmedName = (profileData.name || '').trim();
+        const trimmedEmail = (profileData.email || '').trim();
+        const trimmedPhone = (profileData.phone || '').trim();
+        const hasCompletedRequiredProfile =
+            /^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test(trimmedName) &&
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) &&
+            /^[6-9]\d{9}$/.test(trimmedPhone);
+
+        // In complete-profile flow, prevent logout until required details are filled.
+        if (step === 'profile' && !hasCompletedRequiredProfile) {
+            setShowRequiredErrors(true);
+            toast.error('Please complete your profile details before logout');
+            return;
+        }
+
         resetModalState();
         logout();
         onClose?.();
-    }, [logout, onClose, resetModalState]);
+    }, [logout, onClose, profileData.email, profileData.name, profileData.phone, resetModalState, step]);
 
     // Timer logic for Resend OTP
     React.useEffect(() => {
@@ -249,6 +266,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
 
             await updateProfile(formData);
             setProfileSavedForBooking(true);
+            setShowRequiredErrors(false);
             setIsEditing(false);
             setSelectedFile(null);
             return true;
@@ -518,7 +536,13 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                 )}
                             </div>
 
-                            <div className="space-y-4">
+                            <form
+                                className="space-y-4"
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    await handleProfileSave();
+                                }}
+                            >
                                 <div className="relative">
                                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/80" />
                                     <input
@@ -528,7 +552,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                                         maxLength={10}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        required
+                                        className={`auth-modal-input w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${showRequiredErrors && !/^[6-9]\d{9}$/.test((profileData.phone || '').trim()) ? 'border-red-500 border-opacity-100' : ''} ${!isEditing && 'cursor-not-allowed'}`}
                                         style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                     />
                                 </div>
@@ -540,7 +565,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                         value={profileData.email}
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value.trimStart() }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        required
+                                        className={`auth-modal-input w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${showRequiredErrors && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((profileData.email || '').trim()) ? 'border-red-500 border-opacity-100' : ''} ${!isEditing && 'cursor-not-allowed'}`}
                                         style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                     />
                                 </div>
@@ -552,10 +578,14 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                         value={profileData.name}
                                         disabled={!isEditing}
                                         onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value.replace(/[^A-Za-z\s.'-]/g, '').slice(0, 50) }))}
-                                        className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${!isEditing && 'cursor-not-allowed'}`}
+                                        required
+                                        className={`auth-modal-input w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none ${showRequiredErrors && !/^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test((profileData.name || '').trim()) ? 'border-red-500 border-opacity-100' : ''} ${!isEditing && 'cursor-not-allowed'}`}
                                         style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                     />
                                 </div>
+                                {showRequiredErrors && (
+                                    <p className="text-red-400 text-sm px-1">Phone, email and full name are required.</p>
+                                )}
 
                                 {/* Referral Code — only shown on first-time profile completion */}
                                 {isFirstTimeUser && (
@@ -567,26 +597,24 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                             value={referralCode}
                                             onChange={(e) => setReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 20))}
                                             maxLength={20}
-                                            className={`w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none font-mono tracking-widest`}
+                                        className={`auth-modal-input w-full pl-12 pr-4 py-4 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none font-mono tracking-widest`}
                                             style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                                         />
                                     </div>
                                 )}
-                            </div>
 
                             {isEditing && (
                                 <motion.button
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    onClick={async () => {
-                                        await handleProfileSave();
-                                    }}
+                                    type="submit"
                                     disabled={loading}
                                     className={`w-full py-4 border border-green-500/30 text-green-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-green-500/10 transition-all disabled:opacity-50`}
                                 >
                                     {loading ? 'Saving...' : 'Save'}
                                 </motion.button>
                             )}
+                            </form>
 
                             {!isEditing && (
                                 <motion.button
@@ -611,6 +639,18 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                     )}
                 </div>
             </motion.div>
+            <style jsx global>{`
+                .auth-modal-input:-webkit-autofill,
+                .auth-modal-input:-webkit-autofill:hover,
+                .auth-modal-input:-webkit-autofill:focus,
+                .auth-modal-input:-webkit-autofill:active {
+                    -webkit-text-fill-color: #ffffff !important;
+                    caret-color: #ffffff !important;
+                    box-shadow: 0 0 0 1000px #111111 inset !important;
+                    -webkit-box-shadow: 0 0 0 1000px #111111 inset !important;
+                    transition: background-color 9999s ease-in-out 0s;
+                }
+            `}</style>
         </div>
     );
 }

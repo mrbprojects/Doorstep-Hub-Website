@@ -56,8 +56,29 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Google Tag Manager */}
+        {/*
+          Define the Maps callback function BEFORE the Maps script loads.
+          This is tiny (<50 bytes), synchronous, and required so the Maps
+          SDK can call it when ready — replaces the 100ms polling interval.
+        */}
         <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__onGoogleMapsLoaded=function(){window.dispatchEvent(new Event('google-maps-loaded'));};`,
+          }}
+        />
+      </head>
+      <body suppressHydrationWarning className={`${ubuntu.variable} font-ubuntu min-h-screen overflow-x-hidden`}>
+        {/* Google Tag Manager (noscript) */}
+        <noscript dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P35XQW2B" height="0" width="0" style="display:none;visibility:hidden"></iframe>` }} />
+        {/* End Google Tag Manager (noscript) */}
+
+        {/*
+          GTM — afterInteractive means it loads AFTER the page is interactive.
+          Previously it was a blocking inline script in <head> which stalled TBT.
+        */}
+        <Script
+          id="google-tag-manager"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -66,17 +87,18 @@ export default function RootLayout({ children }) {
             })(window,document,'script','dataLayer','GTM-P35XQW2B');`,
           }}
         />
-        {/* End Google Tag Manager */}
-      </head>
-      <body suppressHydrationWarning className={`${ubuntu.variable} font-ubuntu min-h-screen overflow-x-hidden`}>
-        {/* Google Tag Manager (noscript) */}
-        <noscript dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P35XQW2B" height="0" width="0" style="display:none;visibility:hidden"></iframe>` }} />
-        {/* End Google Tag Manager (noscript) */}
+
+        {/*
+          Google Maps — afterInteractive (was beforeInteractive, which blocked ALL rendering).
+          callback=__onGoogleMapsLoaded fires a window event so LocationContext
+          can react without polling every 100ms on the main thread.
+        */}
         <Script
           id="google-maps-script"
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&loading=async&v=weekly`}
-          strategy="beforeInteractive"
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&callback=__onGoogleMapsLoaded&v=weekly`}
+          strategy="afterInteractive"
         />
+
         <ErrorBoundary>
           <DynamicSEO />
           <LocationProvider>

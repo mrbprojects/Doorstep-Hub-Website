@@ -33,29 +33,12 @@ export function InitialLocationModal() {
     const displayedCities = showAllCities ? ALL_CITIES : ALL_CITIES.slice(0, 4);
 
     useEffect(() => {
-        // If no location is set, show the modal
+        // Show the modal when no location is saved.
+        // We no longer auto-fire GPS on page load — that caused unnecessary
+        // main-thread work (GPS prompt + IP fallback fetch) on every visit.
+        // The user explicitly clicks "Enable My Location" when ready.
         if (!location) {
             setIsOpen(true);
-            // PROACTIVE: Try to trigger GPS immediately as per user request
-            // Mobile browsers/Modern Chrome might block this, but we'll try!
-            const autoDetect = async () => {
-                setIsDetecting(true);
-                try {
-                    await detectWithGPS();
-                    setIsOpen(false);
-                } catch (error) {
-                    console.log('Auto-detection blocked or failed, user must click.');
-                    // Stay on welcome screen or auto-switch to search?
-                    // User said "only ask for permission... instead of showing this message"
-                    // So we stay quiet and wait for them to click if auto-detect fails
-                } finally {
-                    setIsDetecting(false);
-                }
-            };
-
-            // Wait for maps to be ready conceptually, or just fire it
-            const timer = setTimeout(autoDetect, 1500);
-            return () => clearTimeout(timer);
         } else {
             setIsOpen(false);
         }

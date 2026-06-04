@@ -20,29 +20,34 @@ export function LocationProvider({ children }) {
     const [isMapsLoaded, setIsMapsLoaded] = useState(false);
 
     useEffect(() => {
-        // 1. Wait for Google Maps (already loading in layout.js)
-        const checkGoogleMaps = setInterval(() => {
-            if (window.google && window.google.maps && window.google.maps.Map) {
-                setIsMapsLoaded(true);
-                locationManager.initializeGoogleServices();
-                clearInterval(checkGoogleMaps);
-            }
-        }, 100);
+        // 1. Event-driven Maps init — no more 100ms polling on the main thread.
+        //    The Maps SDK calls window.__onGoogleMapsLoaded (defined in layout.js)
+        //    which dispatches 'google-maps-loaded'. We just listen for that event.
+        const initMaps = () => {
+            setIsMapsLoaded(true);
+            locationManager.initializeGoogleServices();
+        };
+
+        if (typeof window !== 'undefined' && window.google?.maps?.Map) {
+            // Already loaded (e.g., navigating back, hot reload)
+            initMaps();
+        } else {
+            window.addEventListener('google-maps-loaded', initMaps);
+        }
 
         // 2. Check localStorage first (instant, no async)
         const savedLocation = locationManager.getSavedLocation();
         if (savedLocation) {
             setLocation(savedLocation);
-            return () => clearInterval(checkGoogleMaps);
         } else {
-            // No saved location - trigger detection (GPS -> IP -> Fallback)
+            // No saved location — trigger GPS → IP → Fallback chain
             detectLocation();
         }
 
-        // 3. No IP Silencing
-        // We only rely on stored location or explicitly requested GPS/Manual input
-
-        return () => clearInterval(checkGoogleMaps);
+        return () => {
+            window.removeEventListener('google-maps-loaded', initMaps);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // 4. Active Cache Maintenance (Every 5 minutes)

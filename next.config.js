@@ -2,6 +2,28 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  // Tree-shake heavy packages — only imported symbols get bundled.
+  // This directly reduces the large chunk sizes seen in Lighthouse.
+  experimental: {
+    optimizePackageImports: [
+      '@mui/material',
+      '@mui/icons-material',
+      '@emotion/react',
+      '@emotion/styled',
+      'lucide-react',
+      'framer-motion',
+      'recharts',
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+    ],
+  },
+
   basePath: "",
   images: {
     domains: ['images.unsplash.com', 'api.dicebear.com', 'api.doorstephub.com'],
@@ -29,3 +51,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+

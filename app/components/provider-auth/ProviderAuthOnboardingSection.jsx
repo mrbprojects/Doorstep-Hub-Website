@@ -483,8 +483,8 @@ return (
                       className="relative mx-auto h-48 w-48 overflow-hidden rounded-[2rem] lg:mx-0 lg:h-56 lg:w-56 lg:shrink-0"
                     >
                       <img
-                        src="/partner-walking.png"
-                        alt="Walking Partner"
+                        src="/service-partner-phone-image.webp"
+                        alt="Service Partner Phone"
                         className="h-full w-full object-cover"
                       />
                     </motion.div>

@@ -42,21 +42,21 @@ export function PromoBanner() {
     <section className="py-20 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0">
-        <motion.div
+        <motion.div initial={false}
           animate={{
             scale: [1, 1.1, 1],
             opacity: [0.1, 0.15, 0.1],
           }}
           transition={{ duration: 8, repeat: Infinity }}
-          className="absolute -top-1/2 -left-1/4 w-96 h-96 bg-purple-500 rounded-full blur-[150px]"
+          className="absolute -top-1/2 -left-1/4 w-96 h-96 bg-purple-500 rounded-full blur-[150px] pointer-events-none"
         />
-        <motion.div
+        <motion.div initial={false}
           animate={{
             scale: [1.1, 1, 1.1],
             opacity: [0.1, 0.15, 0.1],
           }}
           transition={{ duration: 10, repeat: Infinity }}
-          className="absolute -bottom-1/2 -right-1/4 w-96 h-96 bg-cyan-500 rounded-full blur-[150px]"
+          className="absolute -bottom-1/2 -right-1/4 w-96 h-96 bg-cyan-500 rounded-full blur-[150px] pointer-events-none"
         />
       </div>
 

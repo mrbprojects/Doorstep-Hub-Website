@@ -207,7 +207,7 @@ function BrandPageContent() {
                 >
                   <div className="h-28 flex items-center justify-center overflow-hidden p-2">
                     {logo ? (
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
                         alt={brand.name}
                         className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"

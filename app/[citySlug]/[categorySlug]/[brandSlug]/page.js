@@ -1,8 +1,12 @@
-'use client';
+import SeoBrandRoutePageClient from './page-client';
+import { getSEOMetadata } from '@/lib/seo';
 
-import RepairServiceBrandPage from '../../../appliances/repair-service/[citySlug]/[categorySlug]/[brandSlug]/page';
-
-export default function SeoBrandRoutePage() {
-  return <RepairServiceBrandPage />;
+export async function generateMetadata({ params }) {
+    const { citySlug, categorySlug, brandSlug } = params;
+    const path = `/${citySlug}/${categorySlug}/${brandSlug}`;
+    return await getSEOMetadata(path);
 }
 
+export default async function SeoBrandRoutePage() {
+    return <SeoBrandRoutePageClient />;
+}

@@ -10,16 +10,7 @@ export function RecommendedSpaSalon() {
   const router = useRouter();
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
@@ -243,7 +234,7 @@ export function RecommendedSpaSalon() {
             <div className="flex min-w-max gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="w-[228px] shrink-0 animate-pulse xl:w-auto">
-                <div className="bg-gray-800 h-64 rounded-3xl" />
+                <div className="bg-gray-800 h-[380px] rounded-3xl" />
               </div>
             ))}
             </div>
@@ -256,29 +247,15 @@ export function RecommendedSpaSalon() {
   return (
     <section className="relative py-20 overflow-hidden">
       {/* Architectural World Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/20 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">

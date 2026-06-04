@@ -495,7 +495,33 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                         {loading ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden animate-pulse h-[450px]" />
+                                    <div key={i} className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden animate-pulse h-[450px] flex flex-col">
+                                        {/* Image placeholder */}
+                                        <div className="bg-gray-200 h-48 w-full" />
+                                        
+                                        {/* Content placeholder */}
+                                        <div className="p-6 flex-1 flex flex-col justify-between">
+                                            <div>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="h-6 bg-gray-200 rounded w-2/3" />
+                                                    <div className="h-6 bg-gray-200 rounded w-10" />
+                                                </div>
+                                                <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="h-3 bg-gray-200 rounded w-full" />
+                                                    <div className="h-3 bg-gray-200 rounded w-5/6" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between pt-5 border-t border-gray-50">
+                                                <div>
+                                                    <div className="h-3 bg-gray-200 rounded w-16 mb-1" />
+                                                    <div className="h-8 bg-gray-200 rounded w-24" />
+                                                </div>
+                                                <div className="h-10 bg-gray-200 rounded-[15px] w-24" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         ) : sortedServices.length > 0 ? (
@@ -512,7 +538,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                                     >
                                         <div className="relative h-48 overflow-hidden">
                                             {service.image ? (
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={service.image}
                                                     alt={service.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

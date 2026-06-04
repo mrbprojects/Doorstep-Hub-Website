@@ -1,4 +1,6 @@
-import { ServiceDetailsPage } from '@/components/services/ServiceDetailsPage';
+import dynamic from 'next/dynamic';
+
+const ServiceDetailsPage = dynamic(() => import('@/components/services/ServiceDetailsPage').then(m => m.ServiceDetailsPage), { ssr: false });
 
 export default function ServiceDetailRoute({ params, searchParams }) {
     return (

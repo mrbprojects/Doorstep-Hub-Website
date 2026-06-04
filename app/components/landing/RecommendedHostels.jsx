@@ -11,16 +11,7 @@ export function RecommendedHostels() {
   const router = useRouter();
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
@@ -101,53 +92,30 @@ export function RecommendedHostels() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative flex h-full w-[240px] shrink-0 flex-col overflow-hidden rounded-3xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] shadow-2xl xl:w-auto"
+      className="relative flex w-[240px] shrink-0 flex-col overflow-hidden rounded-3xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] shadow-2xl xl:w-auto"
     >
-      {/* Skeleton Trust Badge */}
-      <div className="absolute top-6 right-6 z-20">
-        <div className="relative w-20 h-20">
-          <div className="w-full h-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
-        </div>
-      </div>
-
       {/* Skeleton Image */}
-      <div className="relative h-40 overflow-hidden">
+      <div className="relative h-36 overflow-hidden">
         <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
-        <div className="absolute top-6 left-6 w-12 h-12 bg-[#1a1a1a]/80 backdrop-blur-md border border-[#037166]/30 rounded-full animate-shimmer" />
       </div>
 
       {/* Skeleton Content */}
-      <div className="p-4 flex-1 flex flex-col">
-        <div className="mb-6">
-          <div className="h-8 w-64 mb-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
-          <div className="h-5 w-48 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+      <div className="p-4 flex-1 flex flex-col justify-between">
+        {/* Title */}
+        <div className="mb-2">
+          <div className="h-6 w-3/4 mb-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
         </div>
 
-        {/* Stats */}
-        <div className="flex items-center space-x-6 mb-6">
-          <div className="flex items-center space-x-2">
-            <div className="w-5 h-5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
-            <div className="h-6 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-5 h-5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
-            <div className="h-5 w-28 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="space-y-3 mb-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-gradient-to-r from-[#037166]/30 via-[#037166]/50 to-[#037166]/30 rounded-full animate-shimmer" />
-              <div className="h-4 w-40 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        {/* Amenities */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center space-x-2 rounded-lg bg-[#1a1a1a]/50 p-2">
+              <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+              <div className="h-3 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
             </div>
           ))}
         </div>
-
-        {/* Button */}
-        <div className="mt-auto h-10 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-xl animate-shimmer" />
       </div>
     </motion.div>
   );
@@ -157,13 +125,13 @@ export function RecommendedHostels() {
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0f0a0a] to-[#0a0a0a]" />
-          <motion.div
+          <motion.div initial={false}
             animate={{
               opacity: [0.15, 0.25, 0.15],
               scale: [1, 1.1, 1],
             }}
             transition={{ duration: 6, repeat: Infinity }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[#037166]/20 via-[#ff6b35]/10 to-transparent rounded-full blur-3xl"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[#037166]/20 via-[#ff6b35]/10 to-transparent rounded-full blur-3xl pointer-events-none"
           />
         </div>
 
@@ -258,29 +226,15 @@ export function RecommendedHostels() {
   return (
     <section className="relative py-20 overflow-hidden">
       {/* Architectural World Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/12 rounded-full blur-[150px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/10 rounded-full blur-[150px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#037166]/10 rounded-full blur-[150px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/8 rounded-full blur-[150px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">

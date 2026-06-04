@@ -80,7 +80,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none"
                     />
 
                     {/* Modal Content */}
@@ -141,7 +141,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
                                                     {/* Image or Icon */}
                                                     <div className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 ${isSelected ? 'ring-2 ring-[#037166] ring-offset-2' : 'bg-gray-100'}`}>
                                                         {addon.image ? (
-                                                            <img
+                                                            <img loading="lazy" decoding="async"
                                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addon.image}`}
                                                                 alt={addon.childServiceName}
                                                                 className="w-full h-full object-cover"

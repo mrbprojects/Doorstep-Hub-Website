@@ -131,7 +131,33 @@ export function FeaturedPackagesPage() {
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[...Array(8)].map((_, i) => (
-                            <div key={i} className="h-[480px] bg-gray-200 rounded-2xl animate-pulse" />
+                            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] shadow-lg animate-pulse h-[480px] flex flex-col">
+                                <div className="h-56 bg-gray-200 w-full" />
+                                <div className="p-6 flex flex-col flex-1 justify-between">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-3.5 h-3.5 bg-gray-200 rounded-full" />
+                                            <div className="h-4 bg-gray-200 rounded w-1/3" />
+                                        </div>
+                                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-3" />
+                                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-3" />
+                                        <div className="flex gap-2 mb-4">
+                                            <div className="h-5 bg-gray-200 rounded w-16" />
+                                            <div className="h-5 bg-gray-200 rounded w-16" />
+                                        </div>
+                                    </div>
+                                    <div className="pt-4 border-t border-[#F1F5F9]">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <div className="h-6 bg-gray-200 rounded w-16 mb-1" />
+                                                <div className="h-3 bg-gray-200 rounded w-12" />
+                                            </div>
+                                            <div className="h-4 bg-gray-200 rounded w-16" />
+                                        </div>
+                                        <div className="h-11 bg-gray-200 rounded-xl w-full" />
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 ) : filteredStores.length > 0 ? (
@@ -163,7 +189,7 @@ function StoreListingCard({ store, index, router }) {
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-[480px] flex flex-col"
         >
             <div className="relative h-56 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                     src={store.image}
                     alt={store.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

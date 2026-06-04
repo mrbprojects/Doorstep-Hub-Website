@@ -162,7 +162,7 @@ export function DetailsPage() {
 
             {/* Hero Image */}
             <div className="relative h-[400px] overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                     src={service.image}
                     alt={service.name}
                     className="w-full h-full object-cover"
@@ -205,7 +205,7 @@ export function DetailsPage() {
                                     className="inline-flex items-center justify-center w-[75%] md:w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Get it on Google Play"
                                 >
-                                    <img src="/andriod1.png" alt="Google Play" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" />
+                                    <img src="/andriod1.png" alt="Google Play" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" loading="lazy" decoding="async" />
                                 </a>
                                 <a
                                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
@@ -214,7 +214,7 @@ export function DetailsPage() {
                                     className="inline-flex items-center justify-center w-[75%] md:w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Download on the App Store"
                                 >
-                                    <img src="/apple2.png" alt="App Store" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" />
+                                    <img src="/apple2.png" alt="App Store" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" loading="lazy" decoding="async" />
                                 </a>
                             </div>
                         </div>
@@ -290,7 +290,7 @@ export function DetailsPage() {
                                             <div className="flex gap-4">
                                                 {/* Package Image */}
                                                 <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                                                    <img
+                                                    <img loading="lazy" decoding="async"
                                                         src={pkg.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}` : service.image}
                                                         alt={pkg.name}
                                                         className="w-full h-full object-cover"
@@ -492,7 +492,7 @@ export function DetailsPage() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="absolute inset-0 bg-black/90 backdrop-blur-md"
+                        className="absolute inset-0 bg-black/90 backdrop-blur-md pointer-events-none"
                         onClick={() => setViewingRateCard(null)}
                     />
 
@@ -569,7 +569,7 @@ export function DetailsPage() {
                                         onClick={() => setRateCardImageIndex(idx)}
                                         className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[#C06C84] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                     >
-                                        <img
+                                        <img loading="lazy" decoding="async"
                                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                             className="w-full h-full object-cover"
                                             alt=""

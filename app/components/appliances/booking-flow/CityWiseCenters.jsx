@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import { MapPin, Search, Check, ArrowRight } from 'lucide-react';
 
 export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuery, onSearchChange, loading }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   // Local filtering is now disabled in favor of API search, 
   // but we keep the variable name to minimize changes to the JSX
   const filteredCities = cities;
+  const visibleCities = isExpanded ? filteredCities : (filteredCities || []).slice(0, 8);
 
   // SEO Schema for City-wise section
   const schemaData = {
@@ -37,16 +39,16 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
             Choose Your <span className="text-[#037166]">City</span>
           </h2>
         </div>
-        {/* <div className="flex items-center gap-3 rounded-[1.5rem] border border-gray-200 bg-white px-6 py-4 shadow-xl shadow-gray-200/50">
-          <Search size={20} className="text-[#037166]" />
-          <input 
-            type="text"
-            placeholder="Search by city or area"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="bg-transparent text-base font-bold text-gray-900 outline-none placeholder:text-gray-400 w-full"
-          />
-        </div> */}
+        {filteredCities && filteredCities.length > 8 && (
+          <div className="flex-shrink-0">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-white hover:text-white font-black text-xs tracking-widest uppercase transition-all duration-300 bg-gradient-to-r from-[#037166] to-[#04a99d] hover:opacity-90 px-8 py-3.5 rounded-full hover:shadow-xl shadow-md hover:-translate-y-0.5 transform"
+            >
+              {isExpanded ? 'Show Less' : 'Show More'}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="min-h-[400px] relative">
@@ -57,8 +59,8 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
         )}
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {filteredCities && filteredCities.length > 0 ? (
-            filteredCities.map((city) => {
+          {visibleCities && visibleCities.length > 0 ? (
+            visibleCities.map((city) => {
               const active = selectedCity?.name === city.name;
               return (
                 <button
@@ -73,7 +75,7 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
                     {/* Image Area - Fits card height */}
                     <div className={`w-32 sm:w-40 h-full flex-shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-105`}>
                       {city.icon ? (
-                        <img src={city.icon} alt={city.name} className="w-full h-full object-contain object-center" />
+                        <img loading="lazy" decoding="async" src={city.icon} alt={city.name} className="w-full h-full object-contain object-center" />
                       ) : (
                         <div className="w-full h-full bg-[#037166]/5 flex items-center justify-center">
                           <MapPin className="text-[#037166]" size={32} />
@@ -118,6 +120,8 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
             </div>
           )}
         </div>
+
+
       </div>
     </section>
   );

@@ -482,10 +482,11 @@ export function StoreDetailPage({ storeId, serviceId }) {
           animate={{ opacity: 1, y: 0 }}
           className="relative h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
         >
-          <img
+          <img loading="lazy" decoding="async"
             src={bannerImage || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200'}
             alt="Service Center"
             className="w-full h-full object-cover"
+            fetchpriority="high"
           />
 
           {/* Gradient Overlay */}
@@ -508,7 +509,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                     className="flex items-center justify-center w-[46%] md:w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" loading="lazy" decoding="async" />
                   </a>
                   <a
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
@@ -517,7 +518,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                     className="flex items-center justify-center w-[46%] md:w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
                     title="Download on the App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" loading="lazy" decoding="async" />
                   </a>
                   <a
                     href={whatsappLink}
@@ -687,7 +688,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                       {/* Service Image */}
                       {service.image && (
                         <div className="relative h-48 overflow-hidden">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                             alt={service.name}
                             className="w-full h-full object-contain bg-white"
@@ -890,7 +891,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                       onClick={() => setLightboxIndex(index)}
                       className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer group"
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={image}
                         alt={`Portfolio ${index + 1}`}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -971,7 +972,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                           className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-[#037166] scale-110' : 'border-white/20 opacity-50 hover:opacity-80'
                             }`}
                         >
-                          <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
+                          <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </button>
                       ))}
                     </div>
@@ -1208,7 +1209,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 <p className="text-white/60 text-sm mb-3">Selected Service:</p>
                 <div className="bg-white/5 border border-[#037166]/30 rounded-2xl p-4 flex items-center gap-4">
                   {addonsData.parentServiceImage && (
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addonsData.parentServiceImage}`}
                       alt={addonsData.parentServiceName}
                       className="w-16 h-16 rounded-xl object-cover"

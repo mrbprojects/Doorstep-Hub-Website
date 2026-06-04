@@ -55,13 +55,13 @@ export function KnowledgeSpace() {
   return (
     <section className="py-20 relative overflow-hidden">
       {/* Background Elements */}
-      <motion.div
+      <motion.div initial={false}
         animate={{
           scale: [1, 1.1, 1],
           opacity: [0.05, 0.1, 0.05],
         }}
         transition={{ duration: 10, repeat: Infinity }}
-        className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#037166] rounded-full blur-[150px]"
+        className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#037166] rounded-full blur-[150px] pointer-events-none"
       />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
@@ -124,7 +124,7 @@ export function KnowledgeSpace() {
                 <div className="relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
                   {/* Image */}
                   <div className="relative h-56 overflow-hidden">
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={article.image}
                       alt={article.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

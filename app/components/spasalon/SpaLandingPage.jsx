@@ -101,11 +101,11 @@ export function SpaLandingPage() {
                     {[...Array(15)].map((_, i) => (
                         <motion.div
                             key={i}
-                            className="absolute rounded-full bg-[#C06C84]/20 blur-xl"
+                            className="absolute rounded-full bg-[#C06C84]/20 blur-xl pointer-events-none"
                             initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: [0.1, 0.3, 0.1], scale: [1, 1.5, 1], x: Math.random() * 100, y: Math.random() * 100 }}
-                            transition={{ duration: 5 + Math.random() * 5, repeat: Infinity }}
-                            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, width: '100px', height: '100px' }}
+                            animate={{ opacity: [0.1, 0.3, 0.1], scale: [1, 1.5, 1], x: (i * 13) % 100, y: (i * 19) % 100 }}
+                            transition={{ duration: 5 + (i * 3) % 7, repeat: Infinity }}
+                            style={{ left: `${(i * 17) % 100}%`, top: `${(i * 23) % 100}%`, width: '100px', height: '100px' }}
                         />
                     ))}
                 </div>
@@ -175,7 +175,21 @@ export function SpaLandingPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {categoriesLoading ? (
                                 [1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
+                                    <div key={i} className="border border-gray-100 shadow-lg rounded-2xl overflow-hidden bg-white animate-pulse flex flex-col h-[300px]">
+                                        {/* Image placeholder */}
+                                        <div className="h-48 bg-gray-100 w-full" />
+                                        {/* Content placeholder */}
+                                        <div className="p-4 flex flex-col flex-1 justify-between">
+                                            <div>
+                                                <div className="h-4 bg-gray-200 rounded w-full mb-2" />
+                                                <div className="h-4 bg-gray-200 rounded w-2/3" />
+                                            </div>
+                                            <div className="flex items-center gap-1 mt-4">
+                                                <div className="h-4 bg-gray-200 rounded w-24" />
+                                                <div className="h-4 bg-gray-200 rounded w-4" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))
                             ) : categories.map((cat, index) => (
                                 <motion.div
@@ -187,7 +201,7 @@ export function SpaLandingPage() {
                                     <Card className="h-full border-none shadow-lg hover:shadow-xl transition-all overflow-hidden">
                                         <div className="h-48 relative overflow-hidden bg-gray-100">
                                             {cat.image && !cat.image.includes('mock') ? (
-                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" decoding="async" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-[#FBEAF0]">
                                                     <Scissors className="w-12 h-12 text-[#C06C84]" />

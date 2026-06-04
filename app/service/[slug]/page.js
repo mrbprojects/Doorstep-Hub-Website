@@ -1,7 +1,9 @@
-'use client';
+import dynamic from 'next/dynamic';
 
-// Proxy to expose spa-salon service details at root-level: /service/{slug}
-import SpaServiceDetailPage from '../../spa-salon/service/[slug]/page';
+const SpaServiceDetailPage = dynamic(
+    () => import('@/components/spasalon/SpaServiceDetailPage'),
+    { ssr: false }
+);
 
 export default function RootSpaServicePage() {
     return <SpaServiceDetailPage />;

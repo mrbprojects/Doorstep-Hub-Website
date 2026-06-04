@@ -770,7 +770,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    isClickable && router.push(`/pghostels/hostel/${listing.slug || listing.id}`);
+                                    if (isClickable) router.push(`/pghostels/hostel/${listing.slug || listing.id}`);
                                 }}
                                 disabled={!isClickable}
                                 className={`w-11 h-11 sm:w-auto sm:h-auto px-0 sm:px-6 py-0 sm:py-3 rounded-full sm:rounded-xl font-bold shrink-0 transition-all flex items-center justify-center gap-1.5 ${isClickable

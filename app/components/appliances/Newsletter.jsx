@@ -209,7 +209,7 @@ export function Newsletter() {
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -top-12 -left-4 md:top-10 md:left-4 w-20 h-20 md:w-28 md:h-28 rounded-[2.5rem] bg-white border border-gray-100 flex items-center justify-center p-5 shadow-2xl shadow-gray-200/50"
         >
-          <img
+          <img loading="lazy" decoding="async"
             src="/electric-appliance.png"
             alt="Repair Service"
             className="w-full h-full object-contain filter grayscale-[0.2] group-hover:grayscale-0 transition-all"
@@ -224,7 +224,7 @@ export function Newsletter() {
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -top-12 -right-4 md:top-10 md:right-4 w-20 h-20 md:w-28 md:h-28 rounded-[2.5rem] bg-white border border-gray-100 flex items-center justify-center p-5 shadow-2xl shadow-gray-200/50"
         >
-          <img
+          <img loading="lazy" decoding="async"
             src="/fridge-storage.png"
             alt="Fridge Service"
             className="w-full h-full object-contain filter grayscale-[0.2] group-hover:grayscale-0 transition-all"

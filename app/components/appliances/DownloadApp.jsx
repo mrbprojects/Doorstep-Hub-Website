@@ -9,13 +9,13 @@ export function DownloadApp() {
     <section className="py-5 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0f1614] via-[#0a0a0a] to-[#0f1614]" />
-      <motion.div
+      <motion.div initial={false}
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.15, 0.25, 0.15],
         }}
         transition={{ duration: 8, repeat: Infinity }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#037166] rounded-full blur-[150px]"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#037166] rounded-full blur-[150px] pointer-events-none"
       />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
@@ -81,7 +81,7 @@ export function DownloadApp() {
                 className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
                 title="Download on the App Store"
               >
-                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
               </a>
 
               <a
@@ -91,7 +91,7 @@ export function DownloadApp() {
                 className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]"
                 title="Get it on Google Play"
               >
-                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
               </a>
 
               {/* <div className="h-12 xs:h-14 px-4 rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl flex items-center gap-2 text-[#0f3f3a]">

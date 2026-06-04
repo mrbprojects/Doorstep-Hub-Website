@@ -188,11 +188,10 @@ export function TopCategories({ onViewAll }) {
                   >
                     <div className="relative w-56 sm:w-64 lg:w-[210px] h-48 sm:h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
                       <div className="absolute inset-0">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={category.image}
                           alt={category.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                       </div>
@@ -222,7 +221,7 @@ export function TopCategories({ onViewAll }) {
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         whileHover={{ opacity: 1, x: 0 }}
-                        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center"
+                        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center pointer-events-none"
                       >
                         <ChevronRight className="w-5 h-5 text-[#04a99d]" />
                       </motion.div>

@@ -16,7 +16,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+                    className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm pointer-events-none"
                 />
 
                 {/* Modal Content */}

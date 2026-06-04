@@ -158,7 +158,7 @@ function SpaCategoryContent() {
                                     <div className="relative h-56 rounded-[1.5rem] overflow-hidden mb-6 bg-gray-100">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
                                         {subCat.image ? (
-                                            <img
+                                            <img loading="lazy" decoding="async"
                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
                                                 alt={subCat.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BookingModal } from '@/components/appliances/booking-flow/BookingModal';
-import { ChevronLeft, ChevronRight, Wrench, Cpu, Star, MapPin, CheckCircle2, Search, Loader2, Monitor, Tv, Wind, Waves, Droplets, Flame, Microwave, Snowflake, Shield, Award, ThumbsUp, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wrench, Cpu, Star, MapPin, CheckCircle2, Search, Loader2, Monitor, Tv, Wind, Waves, Droplets, Flame, Microwave, Snowflake, Shield, Award, ThumbsUp, ArrowRight, Clock } from 'lucide-react';
 import { fetchCategories, fetchAllBrands, fetchServicesByBrand, fetchAuthorizedServices, fetchCities } from '@/lib/api';
 
 // ─── Step indicator ─────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ function CategoryStep({ categories, selected, onSelect, loading }) {
             >
               <div className="h-44 overflow-hidden bg-gray-50">
                 {cat.image ? (
-                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
+                  <img loading="lazy" decoding="async" src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Wrench size={32} className="text-gray-300" />
@@ -162,7 +162,7 @@ function BrandStep({ brands, selected, onSelect, loading }) {
             >
               <div className="h-24 flex items-center justify-center overflow-hidden p-3">
                 {(brand.image || brand.logo || brand.brandLogo) ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={(brand.image || brand.logo || brand.brandLogo).startsWith('http') 
                       ? (brand.image || brand.logo || brand.brandLogo) 
                       : `https://api.doorstephub.com/${brand.image || brand.logo || brand.brandLogo}`}
@@ -216,7 +216,7 @@ function ServiceStep({ services, onSelect, loading }) {
           <div className="flex h-full">
             <div className="w-44 flex-shrink-0 h-full bg-gray-50 overflow-hidden">
               {service.image ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={`https://api.doorstephub.com/${service.image}`}
                   alt={service.serviceName}
                   className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110"
@@ -268,7 +268,7 @@ function ServiceDetailStep({ service, onBook, loading }) {
         <div className="grid md:grid-cols-2">
           <div className="h-64 md:h-auto bg-gray-50 overflow-hidden flex items-center justify-center p-8">
             {service.image ? (
-              <img src={`https://api.doorstephub.com/${service.image}`} alt={service.serviceName} className="max-h-full max-w-full object-contain" />
+              <img loading="lazy" decoding="async" src={`https://api.doorstephub.com/${service.image}`} alt={service.serviceName} className="max-h-full max-w-full object-contain" />
             ) : (
               <Wrench size={64} className="text-gray-200" />
             )}

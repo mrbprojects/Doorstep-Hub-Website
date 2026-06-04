@@ -14,7 +14,7 @@ export function ServicePreviewCard({ service, index }) {
     >
       <div className="w-48 h-64 rounded-2xl overflow-hidden bg-[#1a1a1a]/90 backdrop-blur-xl border border-[#037166]/30 shadow-xl relative group-hover:border-[#037166]/50 transition-colors duration-300">
         <div className="relative h-full">
-          <img
+          <img loading="lazy" decoding="async"
             src={service.image}
             alt={service.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"

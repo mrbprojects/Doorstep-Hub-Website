@@ -126,7 +126,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+                    className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm pointer-events-none"
                 />
 
                 {/* Modal Content */}
@@ -199,7 +199,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                             className="group flex items-center gap-4 p-5 rounded-[1.5rem] bg-white border border-gray-100 hover:border-[#037166]/30 hover:shadow-2xl hover:shadow-gray-200/50 transition-all text-left"
                                         >
                                             <div className="w-16 h-16 rounded-2xl bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100 group-hover:border-[#037166]/20 transition-colors">
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`}
                                                     alt={cat.name}
                                                     className="w-full h-full object-cover transition-transform group-hover:scale-110"
@@ -225,7 +225,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                             className="group flex items-center gap-4 p-5 rounded-[1.5rem] bg-white border border-gray-100 hover:border-[#037166]/30 hover:shadow-2xl hover:shadow-gray-200/50 transition-all text-left"
                                         >
                                             <div className="w-16 h-16 rounded-2xl bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100 group-hover:border-[#037166]/20 transition-colors">
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={sub.image?.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image}`}
                                                     alt={sub.name}
                                                     className="w-full h-full object-cover transition-transform group-hover:scale-110"

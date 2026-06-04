@@ -243,7 +243,7 @@ export function PopularCenters({ onStoreClick }) {
 
                     {/* Image */}
                     <div className="relative h-40 xl:h-36 overflow-hidden bg-[#0a0a0a]">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={center.image}
                         alt={center.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

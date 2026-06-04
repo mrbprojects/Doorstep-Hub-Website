@@ -340,7 +340,7 @@ export function NearbyServiceCenters({ onViewAll }) {
                 <span>Your Location</span>
               </div>
               <div className="flex items-center gap-2">
-                <img src="/servicecenterpointlogo.png" alt="center" className="w-4 h-4 object-contain" />
+                <img loading="lazy" decoding="async" src="/servicecenterpointlogo.png" alt="center" className="w-4 h-4 object-contain" />
                 <span>Service Center</span>
               </div>
               <div className="flex items-center gap-2">

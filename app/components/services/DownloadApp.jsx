@@ -9,13 +9,13 @@ export function DownloadApp() {
     <section className="py-20 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0f1614] via-[#0a0a0a] to-[#0f1614]" />
-      <motion.div
+      <motion.div initial={false}
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.15, 0.25, 0.15],
         }}
         transition={{ duration: 8, repeat: Infinity }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#037166] rounded-full blur-[150px]"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#037166] rounded-full blur-[150px] pointer-events-none"
       />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
@@ -85,7 +85,7 @@ export function DownloadApp() {
                   className="w-full min-h-[180px] flex items-center justify-between px-8 py-8 rounded-[2.5rem] bg-gradient-to-r from-[#3f7f77] to-[#62aca4] text-white shadow-2xl shadow-[#037166]/30 transition-all group"
                 >
                   <div className="flex flex-col items-start gap-5 text-left">
-                    <img src="/apple2.png" alt="App Store" className="h-9 w-auto object-contain brightness-0 invert opacity-95" />
+                    <img src="/apple2.png" alt="App Store" className="h-9 w-auto object-contain brightness-0 invert opacity-95" loading="lazy" decoding="async" />
                     <div>
                       <div className="text-2xl md:text-3xl font-semibold leading-tight text-white/90">Download on the</div>
                       <span className="text-4xl md:text-5xl font-bold leading-tight">App Store</span>
@@ -107,7 +107,7 @@ export function DownloadApp() {
                   className="w-full min-h-[180px] flex items-center justify-between px-8 py-8 rounded-[2.5rem] bg-gradient-to-r from-[#3f7f77] to-[#62aca4] text-white shadow-2xl shadow-[#037166]/30 transition-all group"
                 >
                   <div className="flex flex-col items-start gap-5 text-left">
-                    <img src="/andriod1.png" alt="Google Play" className="h-9 w-auto object-contain brightness-0 invert opacity-95" />
+                    <img src="/andriod1.png" alt="Google Play" className="h-9 w-auto object-contain brightness-0 invert opacity-95" loading="lazy" decoding="async" />
                     <div>
                       <div className="text-2xl md:text-3xl font-semibold leading-tight text-white/90">Get it on</div>
                       <span className="text-4xl md:text-5xl font-bold leading-tight">Google Play</span>

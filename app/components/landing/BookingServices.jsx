@@ -8,11 +8,11 @@ import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 function SkeletonCard() {
   return (
-    <div className="h-auto bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden">
-      <div className="h-40 bg-gradient-to-r from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] animate-pulse" />
-      <div className="p-4 space-y-2">
+    <div className="h-[250px] bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden flex flex-col">
+      <div className="h-40 bg-gradient-to-r from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] animate-pulse flex-shrink-0" />
+      <div className="p-4 space-y-2 flex-1">
         <div className="h-3 w-24 bg-[#2a2a2a] rounded animate-pulse" />
-        <div className="h-5 bg-[#2a2a2a] rounded animate-pulse w-3/4" />
+        <div className="h-8 bg-[#2a2a2a] rounded animate-pulse w-3/4" />
       </div>
     </div>
   );
@@ -22,7 +22,6 @@ export function BookingServices() {
   const router = useRouter();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
     religious: 'religious-services',
@@ -80,13 +79,6 @@ export function BookingServices() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   const scrollRef = React.useRef(null);
 
@@ -139,23 +131,9 @@ export function BookingServices() {
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/20 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
@@ -225,7 +203,7 @@ export function BookingServices() {
                   className="group relative flex-shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[15.8%] snap-start flex flex-col cursor-pointer"
                   onClick={() => handleServiceClick(service)}
                 >
-                  <div className="relative flex-1 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#037166]/20 transition-all duration-300 flex flex-col">
+                  <div className="relative h-[250px] bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#037166]/20 transition-all duration-300 flex flex-col">
                     {/* Image - Fixed height */}
                     <div className="relative h-40 overflow-hidden flex-shrink-0">
                       <ImageWithFallback

@@ -158,7 +158,7 @@ export function BookingSteps({
                     <div className="flex items-center h-full gap-6">
                       <div className="w-28 h-full bg-white overflow-hidden flex-shrink-0 border-r border-gray-100/50">
                         {category.image ? (
-                          <img 
+                          <img loading="lazy" decoding="async" 
                             src={category.image} 
                             alt={category.name} 
                             className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
@@ -254,7 +254,7 @@ export function BookingSteps({
                       <div className="flex h-full">
                         <div className="w-[42%] min-w-[220px] h-full bg-white flex-shrink-0 relative overflow-hidden">
                           {service.image ? (
-                            <img 
+                            <img loading="lazy" decoding="async" 
                               src={service.isAuthorized ? `https://api.doorstephub.com/${service.image}` : `https://api.doorstephub.com/${service.image}`} 
                               alt={service.serviceName} 
                               className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" 

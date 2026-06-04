@@ -254,7 +254,7 @@ function ReligiousCategoryContent() {
                                 >
                                     {/* Image */}
                                     <div className="relative h-52 overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50">
-                                        <img
+                                        <img loading="lazy" decoding="async"
                                             src={
                                                 service.logo
                                                     ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}`

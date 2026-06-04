@@ -38,22 +38,14 @@ const featuredCount = 3;
 // Skeleton Loader Component
 function CategorySkeleton() {
   return (
-    <div className="relative h-full p-8 rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
-      {/* Shimmer Effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
-
-      {/* Icon Skeleton */}
-      <div className="w-16 h-16 rounded-xl bg-white/10 mb-6 animate-pulse" />
-
-      {/* Text Skeletons */}
-      <div className="space-y-3">
-        <div className="h-6 w-3/4 bg-white/10 rounded animate-pulse" />
-        <div className="h-4 w-1/2 bg-white/10 rounded animate-pulse" />
-      </div>
-
-      {/* Button Skeleton */}
-      <div className="mt-6 flex items-center gap-2">
-        <div className="h-4 w-24 bg-white/10 rounded animate-pulse" />
+    <div className="relative h-[160px] rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border-2 border-white/10 overflow-hidden flex items-stretch animate-pulse">
+      {/* Image area skeleton */}
+      <div className="flex-shrink-0 w-28 md:w-40 bg-white/5" />
+      {/* Content area skeleton */}
+      <div className="flex-1 p-4 md:p-6 flex flex-col justify-center space-y-3">
+        <div className="h-6 w-3/4 bg-white/10 rounded" />
+        <div className="h-4 w-full bg-white/5 rounded" />
+        <div className="h-4 w-24 bg-white/10 rounded mt-2" />
       </div>
     </div>
   );
@@ -254,7 +246,7 @@ export function CategoryPage({ category, categoryId }) {
         {/* Category Image Background (if available from API) */}
         {categoryImage && (
           <div className="absolute inset-0 z-0">
-            <img
+            <img loading="lazy" decoding="async"
               src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${categoryImage}`}
               alt={categoryMetadata.categoryName}
               className="w-full h-full object-cover opacity-10"
@@ -270,13 +262,13 @@ export function CategoryPage({ category, categoryId }) {
         />
 
         {/* Animated glow orb - category specific intensity */}
-        <motion.div
+        <motion.div initial={false}
           animate={{
             scale: [1, 1.3, 1],
             opacity: [theme.glowIntensity * 0.5, theme.glowIntensity, theme.glowIntensity * 0.5],
           }}
           transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-0 right-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px]"
+          className="absolute top-0 right-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px] pointer-events-none"
         />
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
@@ -441,7 +433,7 @@ export function CategoryPage({ category, categoryId }) {
                           {/* Image Background if available (low opacity) */}
                           {subCategory.image && (
                             <div className="absolute inset-0 z-0">
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
                                 alt={subCategory.name}
                                 className="w-fit h-fit object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
@@ -454,7 +446,7 @@ export function CategoryPage({ category, categoryId }) {
                           <div className="relative z-10 flex-shrink-0 w-28 md:w-40 bg-white/5">
                             {subCategory.image ? (
                               <div className="w-full h-full overflow-hidden">
-                                <img
+                                <img loading="lazy" decoding="async"
                                   src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
                                   alt={subCategory.name}
                                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"

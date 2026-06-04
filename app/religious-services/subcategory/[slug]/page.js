@@ -481,7 +481,7 @@ function SubCategoryServicesContent() {
                                                 <div className="flex flex-col md:flex-row h-full">
                                                     {/* Image Section */}
                                                     <div className="relative w-full md:w-52 h-40 md:h-auto overflow-hidden shrink-0">
-                                                        <img
+                                                        <img loading="lazy" decoding="async"
                                                             src={service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                                             alt={service.business_name}
                                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"

@@ -76,7 +76,7 @@ export function LifeAtDoorstepHub() {
                         className="md:col-span-8 h-[400px] relative rounded-3xl overflow-hidden group"
                     >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
-                        <img
+                        <img loading="lazy" decoding="async"
                             src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80"
                             alt="Team collaboration"
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -96,7 +96,7 @@ export function LifeAtDoorstepHub() {
                         className="md:col-span-4 h-[400px] relative rounded-3xl overflow-hidden group"
                     >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
-                        <img
+                        <img loading="lazy" decoding="async"
                             src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80"
                             alt="Office Vibes"
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -116,7 +116,7 @@ export function LifeAtDoorstepHub() {
                         className="md:col-span-4 h-[300px] relative rounded-3xl overflow-hidden group"
                     >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
-                        <img
+                        <img loading="lazy" decoding="async"
                             src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80"
                             alt="Team Meeting"
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -134,7 +134,7 @@ export function LifeAtDoorstepHub() {
                         className="md:col-span-4 h-[300px] relative rounded-3xl overflow-hidden group"
                     >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
-                        <img
+                        <img loading="lazy" decoding="async"
                             src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&q=80"
                             alt="Celebrations"
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"

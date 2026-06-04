@@ -469,7 +469,19 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                   {loading ? (
                     // Service Skeleton
                     [1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-80 rounded-2xl bg-white/5 animate-pulse" />
+                      <div key={i} className="rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden flex flex-col h-[380px] animate-pulse">
+                        <div className="h-48 bg-white/10 w-full" />
+                        <div className="flex flex-col flex-1 p-6 justify-between">
+                          <div>
+                            <div className="h-5 bg-white/15 rounded w-3/4 mb-3" />
+                            <div className="space-y-2 mb-4">
+                              <div className="h-3 bg-white/10 rounded w-full" />
+                              <div className="h-3 bg-white/10 rounded w-5/6" />
+                            </div>
+                          </div>
+                          <div className="h-11 w-full bg-white/15 rounded-lg mt-auto" />
+                        </div>
+                      </div>
                     ))
                   ) : filteredServices.length > 0 ? (
                     filteredServices.map((service, index) => (
@@ -484,7 +496,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         <div className="flex flex-col relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                           {/* Image */}
                           <div className="relative h-48 overflow-hidden">
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'} // Fallback image
                               alt={service.name}
                               className="w-full h-full object-cover transition-transform duration-700"
@@ -569,7 +581,23 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                   {loading ? (
                     // Center Skeleton
                     [1, 2].map((i) => (
-                      <div key={i} className="h-48 rounded-2xl bg-white/5 animate-pulse" />
+                      <div key={i} className="relative rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/10 animate-pulse md:h-[220px] flex flex-col md:flex-row">
+                        {/* Image Placeholder */}
+                        <div className="w-full md:w-72 h-48 md:h-full bg-white/10 flex-shrink-0" />
+                        
+                        {/* Content Placeholder */}
+                        <div className="flex-1 p-6 flex flex-col justify-between">
+                          <div>
+                            <div className="h-7 w-1/2 bg-white/15 rounded mb-2" />
+                            <div className="h-4 w-3/4 bg-white/10 rounded mb-4" />
+                            <div className="flex items-center gap-4">
+                              <div className="h-4 w-20 bg-white/10 rounded" />
+                              <div className="h-4 w-24 bg-white/10 rounded" />
+                            </div>
+                          </div>
+                          <div className="h-10 w-32 bg-white/15 rounded-lg mt-4 md:mt-0" />
+                        </div>
+                      </div>
                     ))
                   ) : filteredCenters.length > 0 ? (
                     filteredCenters.map((center, index) => (
@@ -586,7 +614,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           <div className="flex flex-col md:flex-row h-full">
                             {/* Image */}
                             <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.image}`}
                                 alt={center.name}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

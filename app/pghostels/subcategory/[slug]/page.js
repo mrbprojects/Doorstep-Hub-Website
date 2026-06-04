@@ -162,7 +162,7 @@ function PGSubcategoryContent() {
                                         <div className="relative mb-6 h-56 overflow-hidden rounded-[1.5rem] bg-[#eef3f2]">
                                             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/65 to-transparent" />
                                             {imageUrl ? (
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={imageUrl}
                                                     alt={sub.name}
                                                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"

@@ -176,7 +176,7 @@ export default function AboutUsPage() {
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 rounded-3xl blur-2xl" />
                                     <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#037166]/20 aspect-[4/3]">
-                                        <img
+                                        <img loading="lazy" decoding="async"
                                             src={aboutData?.image}
                                             alt={aboutData?.title || 'About Doorstep Hub'}
                                             className="w-full h-full object-cover"
@@ -197,7 +197,7 @@ export default function AboutUsPage() {
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10 rounded-3xl blur-2xl" />
                                 <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#037166]/20 aspect-[4/3] sm:aspect-square md:aspect-[4/3] lg:aspect-square">
-                                    <img
+                                    <img loading="lazy" decoding="async"
                                         src="/Bharath.png"
                                         alt="Mr. Bharath Ch - Founder & CEO"
                                         className="w-full h-full object-cover rounded-3xl object-top"

@@ -217,7 +217,7 @@ function ReligiousCategoryContent() {
                                     <div className="relative h-56 rounded-[1.5rem] overflow-hidden mb-6 bg-gray-100">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                                         {subCat.image ? (
-                                            <img
+                                            <img loading="lazy" decoding="async"
                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
                                                 alt={subCat.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -282,7 +282,7 @@ function ReligiousCategoryContent() {
                                     onClick={() => router.push(`/religious-services/${target}`)}
                                 >
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                                        <img
+                                        <img loading="lazy" decoding="async"
                                             src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                             alt={service.business_name}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

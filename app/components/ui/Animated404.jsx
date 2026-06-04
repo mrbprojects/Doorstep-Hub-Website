@@ -21,7 +21,7 @@ export function Animated404() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center"
             >
-                <img
+                <img loading="lazy" decoding="async"
                     src="/doorstepanimation.gif"
                     alt="Doorstep Hub Logo Animation"
                     className="w-64 md:w-80 h-auto object-contain mb-8 mix-blend-multiply"

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { BookingModal } from '@/components/appliances/booking-flow/BookingModal';
+import dynamic from 'next/dynamic';
+const BookingModal = dynamic(() => import('@/components/appliances/booking-flow/BookingModal').then(m => m.BookingModal), { ssr: false });
 import { ChevronLeft, Star, Clock, Shield, Award, ThumbsUp, ArrowRight, Loader2, Wrench, CheckCircle2, MapPin } from 'lucide-react';
 import { fetchCities, fetchCategories, fetchAllBrands } from '@/lib/api';
 import { Header } from '@/components/layout/Header';
@@ -207,7 +208,7 @@ function BookNowPageContent() {
             >
               {service.image ? (
                 <div className="relative w-full h-full z-10">
-                  <img 
+                  <img loading="lazy" decoding="async" 
                     src={imageUrl} 
                     alt={service.serviceName} 
                     className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-700 group-hover:scale-105" 

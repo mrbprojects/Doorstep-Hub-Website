@@ -119,17 +119,17 @@ export function ServiceDetail() {
               key={i}
               className="absolute w-1 h-1 bg-[#037166] rounded-full"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: `${(i * 13) % 100}%`,
+                top: `${(i * 17) % 100}%`,
               }}
               animate={{
                 y: [0, -30, 0],
                 opacity: [0.2, 0.5, 0.2],
               }}
               transition={{
-                duration: 3 + Math.random() * 2,
+                duration: 3 + (i % 3) * 0.7,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: (i % 5) * 0.4,
               }}
             />
           ))}
@@ -418,7 +418,7 @@ export function ServiceDetail() {
                     <div className="flex items-start space-x-4">
                       {/* Avatar */}
                       <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#037166]/30 flex-shrink-0">
-                        <img src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
+                        <img loading="lazy" decoding="async" src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
                       </div>
 
                       <div className="flex-1">

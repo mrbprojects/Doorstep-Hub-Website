@@ -118,7 +118,7 @@ export function AllServicesPage({
                 >
                   <div className="relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                     <div className="relative h-48 overflow-hidden">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={`https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400`}
                         alt="Service"
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -174,7 +174,7 @@ export function AllServicesPage({
                   <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                     <div className="flex flex-col md:flex-row">
                       <div className="relative w-full md:w-64 h-48 md:h-auto overflow-hidden">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400"
                           alt="Center"
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

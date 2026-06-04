@@ -289,7 +289,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleClose}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none"
             />
 
             <motion.div
@@ -486,7 +486,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                 <div className="relative group">
                                     <div className={`w-24 h-24 rounded-full border-2 border-opacity-50 ${borderColor} overflow-hidden ${inputBg}`}>
                                         {previewImage || user?.image ? (
-                                            <img
+                                            <img loading="lazy" decoding="async"
                                                 src={previewImage || (user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`)}
                                                 alt={user.name}
                                                 className="w-full h-full object-cover"

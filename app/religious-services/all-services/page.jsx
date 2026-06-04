@@ -151,7 +151,7 @@ function AllReligiousServicesContent() {
                                     }}
                                 >
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                                        <img
+                                        <img loading="lazy" decoding="async"
                                             src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                             alt={service.business_name}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"

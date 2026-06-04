@@ -330,7 +330,7 @@ export function Header({ theme = {}, navItems = [] }) {
                 className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all overflow-hidden shadow-md hover:shadow-lg`}
               >
                 {isAuthenticated && user?.image ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                     alt={user.name || 'User'}
                     className="w-full h-full object-cover rounded-full"

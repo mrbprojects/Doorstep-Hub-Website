@@ -268,7 +268,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30 }}
-              className="absolute top-0 right-0 bottom-0 w-80 bg-[#0a0a0a]/95 backdrop-blur-2xl border-l border-[#037166]/20"
+              className="absolute top-0 right-0 bottom-0 w-80 bg-[#0a0a0a]/95 backdrop-blur-2xl border-l border-[#037166]/20 pointer-events-none"
             >
               <div className="flex flex-col h-full p-6">
                 {/* Close Button */}

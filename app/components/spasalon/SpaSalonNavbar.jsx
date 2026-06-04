@@ -125,7 +125,7 @@ export function SpaSalonNavbar() {
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-[#C06C84]/10 hover:text-[#C06C84] transition-all overflow-hidden border border-transparent hover:border-[#C06C84]/20"
                         >
                             {isAuthenticated && user?.image ? (
-                                <img
+                                <img loading="lazy" decoding="async"
                                     src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                                     alt={user.name}
                                     className="w-full h-full object-cover rounded-full"

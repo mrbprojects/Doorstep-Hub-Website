@@ -129,7 +129,7 @@ export function ReligiousNavbar() {
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 hover:bg-[var(--saffron)]/10 text-gray-600 hover:text-[var(--saffron)] transition-all border border-gray-200 hover:border-[var(--saffron)]/30"
                     >
                         {isAuthenticated && user?.image ? (
-                            <img
+                            <img loading="lazy" decoding="async"
                                 src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                                 alt={user.name}
                                 className="w-full h-full object-cover rounded-full"

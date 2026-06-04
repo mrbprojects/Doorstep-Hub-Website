@@ -9,21 +9,30 @@ import { CartProvider } from './context/CartContext';
 import { ServiceCartProvider } from './context/ServiceCartContext';
 import { ClientProviders } from './components/providers/ClientProviders';
 import ErrorBoundary from './components/ErrorBoundary';
-import { InitialLocationModal } from './components/location/InitialLocationModal';
-import { FloatingActionButtons } from './components/ui/FloatingActionButtons';
 import { DynamicSEO } from './components/ui/DynamicSEO';
+import dynamic from 'next/dynamic';
+
+const InitialLocationModal = dynamic(() => import('./components/location/InitialLocationModal').then(m => m.InitialLocationModal), { ssr: false });
+const FloatingActionButtons = dynamic(() => import('./components/ui/FloatingActionButtons').then(m => m.FloatingActionButtons), { ssr: false });
 
 const ubuntu = Ubuntu({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+  // 300 was unused — dropping it removes one woff2 from the critical chain.
+  // next/font preloads the first weight automatically; having fewer weights
+  // means fewer files to fetch before text can render.
+  weight: ['400', '500', '700'],
   variable: '--font-ubuntu',
   display: 'swap',
+  preload: true,
 });
 
 export const metadata = {
   metadataBase: new URL('https://doorstephub.com'),
-  title: 'DoorstepHub',
-  description: 'DoorstepHub - Your All-in-One Service Platform',
+  title: {
+    default: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
+    template: '%s | Doorstep Hub'
+  },
+  description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.',
   authors: [{ name: 'D-Hub' }],
   robots: {
     index: true,
@@ -31,6 +40,9 @@ export const metadata = {
     googleBot: {
       index: true,
       follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
   other: {
@@ -56,6 +68,27 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/*
+          ── Resource hints ───────────────────────────────────────────────────────
+          These fire at HTML parse time, before the browser sees any CSS or JS,
+          so connections are established in parallel with the main document.
+        */}
+
+        {/* Doorstep Hub API — preconnect so data-fetch RTTs are already resolved */}
+        <link rel="preconnect" href="https://api.doorstephub.com" />
+        <link rel="dns-prefetch" href="https://api.doorstephub.com" />
+
+        {/* Google Maps JS — preconnect cuts TLS handshake out of the main thread */}
+        <link rel="preconnect" href="https://maps.googleapis.com" />
+        <link rel="preconnect" href="https://maps.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Google Tag Manager — establish connection early so it loads faster */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+
+        {/* Unsplash / Dicebear (image CDNs used in cards) */}
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://api.dicebear.com" />
+
         {/*
           Define the Maps callback function BEFORE the Maps script loads.
           This is tiny (<50 bytes), synchronous, and required so the Maps

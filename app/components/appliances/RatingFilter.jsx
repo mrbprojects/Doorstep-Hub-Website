@@ -25,7 +25,7 @@ export function RatingFilter({ selectedRating, onSelectRating }) {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute top-full mt-2 w-48 bg-[#0a0a0a] border border-[#037166]/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden backdrop-blur-xl"
+                        className="absolute top-full mt-2 w-48 bg-[#0a0a0a] border border-[#037166]/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden backdrop-blur-xl pointer-events-none"
                     >
                         <div className="p-2 space-y-1">
                             <button

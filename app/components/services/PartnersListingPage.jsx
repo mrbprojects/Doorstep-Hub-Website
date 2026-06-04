@@ -181,7 +181,7 @@ export function PartnersListingPage({ category, subCategory, childCategoryId }) 
                                     >
                                         <div className="relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                                             <div className="relative h-48 overflow-hidden">
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'}
                                                     alt={service.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

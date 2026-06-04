@@ -131,21 +131,21 @@
 //         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
 //         {/* Gradient Orbs */}
-//         <motion.div
+//         <motion.div initial={false}
 //           animate={{
 //             x: mousePosition.x * 0.02,
 //             y: mousePosition.y * 0.02,
 //           }}
 //           transition={{ type: 'spring', damping: 30 }}
-//           className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#037166]/20 rounded-full blur-[100px]"
+//           className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#037166]/20 rounded-full blur-[100px] pointer-events-none"
 //         />
-//         <motion.div
+//         <motion.div initial={false}
 //           animate={{
 //             x: -mousePosition.x * 0.015,
 //             y: -mousePosition.y * 0.015,
 //           }}
 //           transition={{ type: 'spring', damping: 30 }}
-//           className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#025951]/20 rounded-full blur-[100px]"
+//           className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#025951]/20 rounded-full blur-[100px] pointer-events-none"
 //         />
 //       </div>
 
@@ -460,7 +460,6 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
 
 /* ---------- HERO SECTION ---------- */
 function HeroContent({ services = [], loading = false, error = null }) {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [serviceSlugs, setServiceSlugs] = useState({
@@ -486,14 +485,6 @@ function HeroContent({ services = [], loading = false, error = null }) {
       }
     };
     fetchSlugs();
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   // Auto-rotation Logic
@@ -532,22 +523,8 @@ function HeroContent({ services = [], loading = false, error = null }) {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.14)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
         {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[100px] bg-white/80 rounded-full blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/85 rounded-full blur-[120px]"
-        />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[100px] bg-white/80 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/85 rounded-full blur-[120px] pointer-events-none" />
       </div>
 
       {/* Main Content */}
@@ -582,7 +559,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
-              className="block mt-1 sm:mt-2 !text-[#037166] min-h-[1.2em] drop-shadow-sm font-black"
+              className="block mt-1 sm:mt-2 !text-[#037166] min-h-[1.2em] drop-shadow-sm font-black truncate max-w-full px-4 sm:px-0"
             >
               {services.length > 0 ? services[activeIndex]?.name : "Doorstep Hub."}
             </motion.span>
@@ -632,10 +609,10 @@ function HeroContent({ services = [], loading = false, error = null }) {
             className="flex flex-wrap justify-center gap-4 mt-8 mb-4 relative z-20"
           >
             <a href={appLinks.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Get it on Google Play">
-              <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
+              <img src="/andriod1.png" alt="Google Play" loading="lazy" decoding="async" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
             </a>
             <a href={appLinks.ios} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Download on the App Store">
-              <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
+              <img src="/apple2.png" alt="App Store" loading="lazy" decoding="async" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
             </a>
           </motion.div>
         </motion.div>

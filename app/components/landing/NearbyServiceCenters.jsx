@@ -121,18 +121,9 @@ export function NearbyServiceCenters() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mapZoom, setMapZoom] = useState(13);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const mapRef = React.useRef(null);
   // Lock initial center so GoogleMap center prop never changes after mount
   const initialCenterRef = React.useRef(null);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     setIsClient(true);
@@ -393,22 +384,8 @@ export function NearbyServiceCenters() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
         {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
@@ -566,7 +543,7 @@ export function NearbyServiceCenters() {
             {/* Map legend */}
             <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-3 flex flex-col gap-2 text-xs text-white z-10 pointer-events-none">
               <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-400" /><span style={{ color: '#ffffff' }}>Your Location</span></div>
-              <div className="flex items-center gap-2"><img src="/servicecenterpointlogo.png" alt="c" className="w-4 h-4 object-contain" /><span style={{ color: '#ffffff' }}>Service Center</span></div>
+              <div className="flex items-center gap-2"><img src="/servicecenterpointlogo.png" alt="c" loading="lazy" decoding="async" className="w-4 h-4 object-contain" /><span style={{ color: '#ffffff' }}>Service Center</span></div>
               <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-400" /><span style={{ color: '#ffffff' }}>Selected</span></div>
             </div>
           </motion.div>

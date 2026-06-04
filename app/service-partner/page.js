@@ -34,7 +34,9 @@ import {
 import Link from 'next/link';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
-import { ProviderAuthOnboardingSection } from '@/components/provider-auth/ProviderAuthOnboardingSection';
+import dynamic from 'next/dynamic';
+
+const ProviderAuthOnboardingSection = dynamic(() => import('@/components/provider-auth/ProviderAuthOnboardingSection').then(m => m.ProviderAuthOnboardingSection), { ssr: false });
 
 const PartnerBenefits = [
     {
@@ -141,9 +143,6 @@ export default function ServicePartnerPage() {
     const [globalSettings, setGlobalSettings] = useState(null);
 
 
-    const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-
-
      const videoRef = React.useRef(null);
     
       React.useEffect(() => {
@@ -243,7 +242,7 @@ export default function ServicePartnerPage() {
                                         className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
                                         title="Get it on Google Play"
                                     >
-                                        <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
+                                        <img loading="lazy" decoding="async" src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
                                     </a>
 
                                     <a
@@ -253,7 +252,7 @@ export default function ServicePartnerPage() {
                                         className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
                                         title="Download on the App Store"
                                     >
-                                        <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
+                                        <img loading="lazy" decoding="async" src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
                                     </a>
                                 </div>
 
@@ -276,7 +275,7 @@ export default function ServicePartnerPage() {
                                             <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-white/10">
                                                 <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden">
                                                     {globalSettings?.workerLogo ? (
-                                                        <img 
+                                                        <img loading="lazy" decoding="async" 
                                                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.workerLogo}`} 
                                                             alt="Partner Logo" 
                                                             className="w-full h-full object-contain p-2"
@@ -453,7 +452,7 @@ export default function ServicePartnerPage() {
                 className="flex items-center justify-center w-40 md:w-44 h-12 md:h-14 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl hover:shadow-[#037166]/35 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
                 title="Get it on Google Play"
               >
-                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
+                <img loading="lazy" decoding="async" src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
               </a>
 
               <a
@@ -463,7 +462,7 @@ export default function ServicePartnerPage() {
                 className="flex items-center justify-center w-40 md:w-44 h-12 md:h-14 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl hover:shadow-[#037166]/35 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
                 title="Download on the App Store"
               >
-                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
+                <img loading="lazy" decoding="async" src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
               </a>
             </div>
 

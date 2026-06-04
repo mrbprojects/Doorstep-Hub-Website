@@ -15,10 +15,12 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useLocationContext } from '@/context/LocationContext';
-import { ReligiousQuestionnaireModal } from '@/components/religious/ReligiousQuestionnaireModal';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import dynamic from 'next/dynamic';
+
+const ReligiousQuestionnaireModal = dynamic(() => import('@/components/religious/ReligiousQuestionnaireModal').then(m => m.ReligiousQuestionnaireModal), { ssr: false });
 
 // Section wrapper with scroll reveal
 function SectionReveal({ children, delay = 0 }) {
@@ -337,7 +339,7 @@ export default function ReligiousServicesPage() {
                 ease: "easeInOut",
                 delay: Math.random() * 5
               }}
-              className="absolute rounded-full blur-sm"
+              className="absolute rounded-full blur-sm pointer-events-none"
               style={{
                 width: 3 + Math.random() * 5,
                 height: 3 + Math.random() * 5,
@@ -481,7 +483,7 @@ export default function ReligiousServicesPage() {
     className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
     title="Get it on Google Play"
   >
-    <img 
+    <img loading="lazy" decoding="async" 
       src="/andriod1.png" 
       alt="Google Play" 
       className="h-full w-full object-cover brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
@@ -498,7 +500,7 @@ export default function ReligiousServicesPage() {
     className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
     title="Download on the App Store"
   >
-    <img 
+    <img loading="lazy" decoding="async" 
       src="/apple2.png" 
       alt="App Store" 
       className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" 
@@ -582,7 +584,7 @@ export default function ReligiousServicesPage() {
                       {/* Full image area */}
                       <div className="relative h-44 overflow-hidden bg-gradient-to-br from-orange-100 to-red-50">
                         {category.image ? (
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${category.image}`}
                             alt={category.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -666,7 +668,7 @@ export default function ReligiousServicesPage() {
             {/* Image Circle */}
             <div className="h-14 w-14 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--saffron)]/10 to-[var(--temple-red)]/10 group-hover:scale-110 transition-transform shadow-sm flex-shrink-0">
               {service.image ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                   alt={service.serviceName}
                   className="h-full w-full object-cover"
@@ -760,7 +762,7 @@ export default function ReligiousServicesPage() {
                       }}
                     >
                       <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                           alt={service.business_name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -906,7 +908,7 @@ export default function ReligiousServicesPage() {
                     >
                       <Card className="overflow-hidden group cursor-pointer border-2 border-transparent hover:border-[var(--saffron)]/30 transition-all flex flex-col h-full" onClick={() => router.push(`/religious-services/${ritual.slug || ritual._id}`)}>
                         <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={ritual.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${ritual.image}` : 'https://images.unsplash.com/photo-1599030859770-940e6a970d4d?auto=format&fit=crop&w=600&q=80'}
                             alt={ritual.serviceName}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

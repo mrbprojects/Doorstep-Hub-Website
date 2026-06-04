@@ -10,16 +10,7 @@ export function RecommendedReligious() {
   const router = useRouter();
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
@@ -137,7 +128,7 @@ export function RecommendedReligious() {
       </div>
 
       {/* Skeleton Content */}
-      <div className="p-4">
+      <div className="h-[160px] flex flex-col justify-between p-4">
         {/* Title & Description */}
         <div className="mb-4">
           <div className="mb-3 h-6 w-4/5 rounded-lg bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
@@ -213,23 +204,9 @@ export function RecommendedReligious() {
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/20 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">

@@ -1,6 +1,11 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
+export const metadata = {
+    title: 'Home Appliance Repair & Services | Doorstep Hub',
+    description: 'Book professional home appliance repair services online. Expert technicians for AC, Refrigerator, Washing Machine, Geyser, TV repair & service.',
+};
+
 export default function AppliancesLayout({ children }) {
     const appliancesTheme = {
         bgScrolled: 'bg-white/80',

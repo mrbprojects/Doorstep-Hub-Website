@@ -177,7 +177,7 @@ function CategoryPageContent() {
               >
                 <div className="h-44 overflow-hidden bg-gray-50">
                   {cat.image ? (
-                    <img src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
+                    <img loading="lazy" decoding="async" src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Wrench size={32} className="text-gray-300" />

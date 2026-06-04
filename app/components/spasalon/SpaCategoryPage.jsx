@@ -190,7 +190,7 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
                                         </div>
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                                         {subCat.image ? (
-                                            <img
+                                            <img loading="lazy" decoding="async"
                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
                                                 alt={subCat.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"

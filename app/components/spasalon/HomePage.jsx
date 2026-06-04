@@ -438,7 +438,7 @@ export function HomePage() {
                         href="#"
                         className="h-[43px] px-1 rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
                     >
-                        <img
+                        <img loading="lazy" decoding="async"
                             src="/apple2.png"
                             alt="apple"
                             className="h-11 object-contain brightness-0 invert"
@@ -452,7 +452,7 @@ export function HomePage() {
                         href="#"
                         className="h-[40px] px-1 rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
                     >
-                        <img
+                        <img loading="lazy" decoding="async"
                             src="/andriod1.png"
                             alt="android"
                             className="h-11 object-contain brightness-0 invert"
@@ -519,17 +519,17 @@ export function HomePage() {
   <div className="relative w-[600px] lg:w-[640px] h-[430px] lg:h-[470px]">
 
     {/* Main Generated Right Image */}
-    <img
+    <img loading="lazy" decoding="async"
       src="/right-side-image.png"
       alt="Salon and Pet Grooming"
       className="w-full h-full object-contain"
     />
 
     {/* Floating Hair Salon Card */}
-    <motion.div
+    <motion.div initial={false}
       animate={{ y: [0, -8, 0] }}
       transition={{ repeat: Infinity, duration: 4 }}
-      className="absolute top-[24px] right-[6px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3"
+      className="absolute top-[24px] right-[6px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3 pointer-events-none"
     >
       <div className="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center text-2xl">
         💇🏻‍♀️
@@ -546,10 +546,10 @@ export function HomePage() {
     </motion.div>
 
     {/* Floating Pet Grooming Card */}
-    <motion.div
+    <motion.div initial={false}
       animate={{ y: [0, 10, 0] }}
       transition={{ repeat: Infinity, duration: 5 }}
-      className="absolute top-[108px] right-[0px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3"
+      className="absolute top-[108px] right-[0px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3 pointer-events-none"
     >
       <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-2xl">
         🐶
@@ -674,7 +674,7 @@ export function HomePage() {
                                 onClick={() => handleCategoryClick(category)}
                                 className="flex-shrink-0 w-64 md:w-80 relative aspect-[3/4] rounded-3xl overflow-hidden cursor-pointer group"
                             >
-                                <img
+                                <img loading="lazy" decoding="async"
                                     src={category.image}
                                     alt={category.name}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -731,7 +731,24 @@ export function HomePage() {
                         {loadingFeatured ? (
                             // Skeleton Loading
                             [1, 2, 3, 4].map((_, index) => (
-                                <div key={index} className="flex-shrink-0 w-80 h-[480px] bg-gray-100 rounded-2xl animate-pulse" />
+                                <div key={index} className="flex-shrink-0 w-72 lg:w-[calc((100%-7.5rem)/6)] bg-white/30 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 animate-pulse flex flex-col h-[400px]">
+                                    <div className="h-52 bg-gray-200 w-full" />
+                                    <div className="p-6 flex flex-col flex-1 justify-between">
+                                        <div>
+                                            <div className="flex items-center gap-1.5 mb-2">
+                                                <div className="w-3.5 h-3.5 bg-gray-200 rounded-full" />
+                                                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                                            </div>
+                                            <div className="h-6 bg-gray-200 rounded w-3/4 mb-1" />
+                                            <div className="h-6 bg-gray-200 rounded w-1/2" />
+                                        </div>
+                                        <div className="mt-4 flex flex-col gap-2">
+                                            <div className="h-3 bg-gray-200 rounded w-16 mb-1" />
+                                            <div className="h-6 bg-gray-200 rounded w-24" />
+                                            <div className="h-9 bg-gray-200 rounded-xl w-full mt-1" />
+                                        </div>
+                                    </div>
+                                </div>
                             ))
                         ) : featuredPackages.length > 0 ? (
                             featuredPackages.map((pkg, index) => (
@@ -771,7 +788,25 @@ export function HomePage() {
                     <div className="flex gap-6 overflow-x-auto pb-4">
                         {loadingFeatured ? ( // Using loadingFeatured as recentStores is removed
                             [1, 2, 3].map((i) => (
-                                <div key={i} className="flex-shrink-0 w-80 h-48 bg-gray-200 rounded-xl animate-pulse" />
+                                <div key={i} className="flex-shrink-0 w-64 lg:w-[calc((100%-7.5rem)/6)] bg-white/30 backdrop-blur-md rounded-xl overflow-hidden border border-white/20 animate-pulse flex flex-col h-[280px]">
+                                    <div className="h-40 bg-gray-200 w-full" />
+                                    <div className="p-4 flex flex-col flex-1 justify-between">
+                                        <div>
+                                            <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-3 h-3 bg-gray-200 rounded-full" />
+                                                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-end justify-between mt-3 gap-2">
+                                            <div>
+                                                <div className="h-2.5 bg-gray-200 rounded w-12 mb-1" />
+                                                <div className="h-5 bg-gray-200 rounded w-16" />
+                                            </div>
+                                            <div className="h-7 bg-gray-200 rounded-lg w-16" />
+                                        </div>
+                                    </div>
+                                </div>
                             ))
                         ) : featuredPackages.length > 0 ? ( // Using featuredPackages for recently booked
                             <div
@@ -830,7 +865,27 @@ export function HomePage() {
                         {loadingNearby ? (
                             // Skeleton Loading
                             [1, 2, 3, 4].map((_, index) => (
-                                <div key={index} className="flex-shrink-0 w-72 h-[380px] bg-gray-100 rounded-3xl animate-pulse" />
+                                <div key={index} className="flex-shrink-0 w-64 lg:w-[calc((100%-7.5rem)/6)] bg-white/30 backdrop-blur-md rounded-3xl overflow-hidden border border-white/20 animate-pulse flex flex-col h-[340px]">
+                                    <div className="h-48 bg-gray-200 w-full" />
+                                    <div className="p-6 flex flex-col flex-1 justify-between">
+                                        <div>
+                                            <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 bg-gray-200 rounded-full" />
+                                                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                                            </div>
+                                        </div>
+                                        <div className="mt-2">
+                                            <div className="flex items-end justify-between mb-2">
+                                                <div>
+                                                    <div className="h-2.5 bg-gray-200 rounded w-16 mb-1" />
+                                                    <div className="h-5 bg-gray-200 rounded w-20" />
+                                                </div>
+                                            </div>
+                                            <div className="h-8 bg-gray-200 rounded-xl w-full" />
+                                        </div>
+                                    </div>
+                                </div>
                             ))
                         ) : nearbyCenters.length > 0 ? (
                             nearbyCenters.map((center, index) => (
@@ -889,7 +944,7 @@ function PackageCard({ package: pkg, index, router }) {
             className="bg-white/30 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 cursor-pointer group shadow-lg hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-52 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                     src={pkg.image}
                     alt={pkg.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -939,7 +994,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
             className="bg-white/30 backdrop-blur-md rounded-xl overflow-hidden border border-white/20 cursor-pointer shadow-md hover:shadow-lg transition-all h-full"
         >
             <div className="relative h-40">
-                <img
+                <img loading="lazy" decoding="async"
                     src={pkg.image}
                     alt={pkg.name}
                     className="w-full h-full object-cover"
@@ -988,7 +1043,7 @@ function NearbyCenterCard({ center, index, router }) {
             className="bg-white/30 backdrop-blur-md rounded-3xl overflow-hidden border border-white/20 cursor-pointer group hover:shadow-xl transition-all h-full"
         >
             <div className="relative h-48 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                     src={center.image}
                     alt={center.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -1035,7 +1090,7 @@ function MoodCard({ mood, service, image, color, router }) {
             onClick={() => router.push('/spa-salon')}
             className="relative h-80 rounded-2xl overflow-hidden cursor-pointer group"
         >
-            <img
+            <img loading="lazy" decoding="async"
                 src={image}
                 alt={service}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -1065,7 +1120,7 @@ function BlogCard({ title, image, readTime }) {
             className="bg-white/30 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 cursor-pointer shadow-md hover:shadow-lg transition-all"
         >
             <div className="relative h-48 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                     src={image}
                     alt={title}
                     className="w-full h-full object-cover"

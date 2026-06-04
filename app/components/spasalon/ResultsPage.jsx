@@ -588,7 +588,30 @@ export function ResultsPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {loading ? (
                                         [1, 2, 4, 5].map((i) => (
-                                            <div key={i} className="bg-white rounded-3xl overflow-hidden border border-[#E8ECF2] shadow-md animate-pulse h-[400px]" />
+                                            <div key={i} className="bg-white rounded-[32px] overflow-hidden border border-gray-100 shadow-sm animate-pulse flex flex-col h-[410px]">
+                                                {/* Image placeholder */}
+                                                <div className="bg-gray-200 h-56 w-full" />
+                                                
+                                                {/* Content placeholder */}
+                                                <div className="p-7 flex flex-col justify-between flex-1">
+                                                    <div>
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div className="h-6 bg-gray-200 rounded w-2/3" />
+                                                            <div className="h-5 bg-gray-200 rounded w-10" />
+                                                        </div>
+                                                        <div className="h-4 bg-gray-200 rounded w-1/3 mb-6" />
+                                                        <div className="h-6 bg-gray-200 rounded-full w-24 mb-6" />
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+                                                        <div>
+                                                            <div className="h-3 bg-gray-200 rounded w-16 mb-1" />
+                                                            <div className="h-8 bg-gray-200 rounded w-24" />
+                                                        </div>
+                                                        <div className="h-11 bg-gray-200 rounded-xl w-28" />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         ))
                                     ) : sortedServices.length > 0 ? (
                                         sortedServices.map((service, index) => (
@@ -663,7 +686,7 @@ function ServiceCard({ service, index, router }) {
         >
             {/* Image */}
             <div className="relative h-56 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                     src={service.image}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

@@ -148,7 +148,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                                 className="flex items-center justify-center w-32 h-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden"
                                 title="Get it on Google Play"
                             >
-                                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                                <img loading="lazy" decoding="async" src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
                             </a>
                             <a
                                 href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
@@ -157,7 +157,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                                 className="flex items-center justify-center w-32 h-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden"
                                 title="Download on the App Store"
                             >
-                                <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
+                                <img loading="lazy" decoding="async" src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" />
                             </a>
                         </motion.div>
                     </div>
@@ -229,7 +229,7 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                                         <div className="flex flex-col md:flex-row h-full">
                                             {/* Image */}
                                             <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                                     alt={center.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

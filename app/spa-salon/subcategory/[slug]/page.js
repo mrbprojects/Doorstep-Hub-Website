@@ -483,7 +483,7 @@ function SpaSubCategoryContent() {
                                     >
                                         <div className="relative h-48 overflow-hidden">
                                             {service.image ? (
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={service.image}
                                                     alt={service.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

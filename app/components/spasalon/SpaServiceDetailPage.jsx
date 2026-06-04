@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Star, DollarSign, Sparkles, MapPin, Check,
-    Loader2, Flower, Scissors, ShieldCheck, Heart, Clock
+    Loader2, Flower, Scissors, ShieldCheck, Heart, Clock, ChevronRight
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs'; // Reusing tabs
 import Slider from 'react-slick';
@@ -277,19 +277,28 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-transparent pb-32">
-                <div className="h-[420px] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
-                <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-10">
-                    <div className="bg-white/95 rounded-3xl shadow-2xl border border-gray-200 p-8 animate-pulse">
-                        <div className="flex items-start gap-4 mb-6">
-                            <div className="w-20 h-20 rounded-2xl bg-gray-200" />
-                            <div className="space-y-3 flex-1">
-                                <div className="h-8 bg-gray-200 rounded-lg w-1/2" />
-                                <div className="h-5 bg-gray-100 rounded-lg w-1/3" />
+            <div className="min-h-screen bg-transparent pb-32 pt-24 md:pt-28">
+                <div className="max-w-[1400px] mx-auto px-4 lg:px-6 relative z-10">
+                    <div className="absolute -left-2 sm:left-0 top-3 sm:top-4 z-[80] w-12 h-12 bg-gray-200 rounded-full animate-pulse" />
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1.4fr_290px] gap-5 items-start">
+                        <div className="h-[250px] self-start rounded-2xl bg-gray-200 animate-pulse border border-[#6D1357]/20 shadow-xl" />
+                        <div className="h-[250px] self-start bg-white border border-gray-100 rounded-2xl p-5 shadow-xl space-y-4">
+                            <div className="h-8 bg-gray-200 rounded w-3/4 animate-pulse" />
+                            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse mt-2" />
+                            <div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse mt-2" />
+                            <div className="flex items-center gap-3 mt-5">
+                                <div className="w-[160px] h-[56px] rounded-3xl bg-gray-200 animate-pulse" />
+                                <div className="w-[160px] h-[56px] rounded-3xl bg-gray-200 animate-pulse" />
                             </div>
-                            <div className="h-16 w-28 bg-gray-200 rounded-2xl" />
                         </div>
-                        <div className="h-12 bg-gray-100 rounded-2xl mb-8" />
+                        <div className="h-[250px] self-start bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                            <div className="space-y-4">
+                                <div className="h-10 bg-gray-200 rounded animate-pulse" />
+                                <div className="h-12 bg-gray-200 rounded animate-pulse" />
+                            </div>
+                            <div className="h-12 w-44 rounded-xl bg-gray-200 animate-pulse" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -346,15 +355,15 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                 </motion.button>
                 <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-[1.7fr_1.4fr_290px] gap-5 items-start">
                     <div className="h-[250px] self-start rounded-2xl overflow-hidden border border-[#6D1357]/20 shadow-xl">
-                        <img src={serviceData?.images?.[0] || ''} alt={serviceData.name} className="w-full h-full object-cover" />
+                        <img src={serviceData?.images?.[0] || ''} alt={serviceData.name} className="w-full h-full object-cover" fetchpriority="high" loading="eager" decoding="sync" />
                     </div>
                     <div className="h-[250px] self-start bg-white border border-gray-100 rounded-2xl p-5 shadow-xl">
                         <h1 className="text-2xl font-bold text-gray-900">{serviceData.name}</h1>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-600"><MapPin className="w-4 h-4 text-[#6D1357]" />{serviceData.location}</div>
                         <div className="flex items-center gap-1 mt-2"><Star className="w-4 h-4 fill-[#6D1357] text-[#6D1357]" /><span className="font-bold">{serviceData.rating}</span></div>
                         <div className="flex items-center gap-3 mt-5">
-                            <a href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" /></a>
-                            <a href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" /></a>
+                            <a href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" /></a>
+                            <a href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" /></a>
                         </div>
                     </div>
                     <div className="h-[250px] self-start bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
@@ -430,7 +439,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                         )}
                                         <div className="w-28 sm:w-44 h-full bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
-                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" />
+                                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}`} alt={pkg.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full text-gray-400 text-xs">
                                                     <Scissors className="w-8 h-8 opacity-20" />

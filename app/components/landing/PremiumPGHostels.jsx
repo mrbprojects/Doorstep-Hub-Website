@@ -58,16 +58,7 @@ export function PremiumPGHostels() {
   const router = useRouter();
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
@@ -154,65 +145,41 @@ export function PremiumPGHostels() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-3xl border border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] shadow-2xl xl:w-auto"
+      className="relative w-[240px] shrink-0 overflow-hidden rounded-3xl border border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] shadow-2xl xl:w-auto"
     >
-      {/* Skeleton Badge */}
-      <div className="absolute top-6 left-6 z-20 px-4 py-2 bg-[#1a1a1a]/80 backdrop-blur-md border border-[#037166]/50 rounded-full shimmer">
-        <div className="h-4 w-16 bg-gradient-to-r from-[#037166]/40 via-[#037166]/60 to-[#037166]/40 rounded-full animate-shimmer" />
-      </div>
-
       {/* Skeleton Image */}
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative h-36 overflow-hidden">
         <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
       </div>
 
       {/* Skeleton Content */}
-      <div className="p-6">
+      <div className="p-4">
         {/* Title */}
-        <div className="h-8 w-3/4 mb-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+        <div className="h-12 w-3/4 mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
 
-        {/* Description Placeholder - 5 lines */}
-        <div className="space-y-2 mb-6">
-          <div className="h-4 w-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-2/3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        {/* Location */}
+        <div className="flex justify-between mb-3 text-xs">
+          <div className="h-4 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          <div className="h-4 w-24 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
         </div>
 
-        {/* Location & Occupancy */}
-        <div className="space-y-3 mb-6">
-          <div className="flex justify-between">
-            <div className="h-4 w-20 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-            <div className="h-4 w-24 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        {/* Price & Button Block */}
+        <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-[#037166]/20 p-2 bg-[#037166]/5">
+          <div className="w-24">
+            <div className="h-3 w-16 mb-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+            <div className="h-4 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
           </div>
-          <div className="flex justify-between">
-            <div className="h-4 w-20 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-            <div className="h-4 w-24 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          </div>
-        </div>
-
-        {/* Price */}
-        <div className="mb-6 p-4 bg-[#037166]/10 border border-[#037166]/20 rounded-xl">
-          <div className="h-4 w-24 mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-10 w-28 bg-gradient-to-r from-[#037166]/40 via-[#037166]/60 to-[#037166]/40 rounded-lg animate-shimmer" />
+          <div className="h-7 w-16 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
         </div>
 
         {/* Amenities */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center space-x-2 p-1 bg-[#1a1a1a]/50 rounded-lg">
-              <div className="w-4 h-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-              <div className="h-4 w-20 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+            <div key={i} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg">
+              <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+              <div className="h-3 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
             </div>
-          ))}
-        </div>
-
-        {/* Buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-11 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-xl animate-shimmer" />
           ))}
         </div>
       </div>
@@ -255,23 +222,9 @@ export function PremiumPGHostels() {
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/20 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
 
 
         {/* Central Highlight Glow - Warm Warmth */}

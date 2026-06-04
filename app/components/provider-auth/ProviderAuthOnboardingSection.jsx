@@ -313,7 +313,7 @@ return (
                       className="relative overflow-hidden rounded-[2.4rem] flex items-center justify-center cursor-pointer"
                       onClick={() => setStep('mobile')}
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src="/Join as a service partner.png"
                         alt="Join as a service partner"
                         className="h-[460px] w-[410px] object-contain object-center drop-shadow-[0_0_20px_rgba(4,169,157,0.35)] transition-transform duration-500 hover:scale-105"
@@ -482,7 +482,7 @@ return (
                       layoutId="partner-image"
                       className="relative mx-auto h-48 w-48 overflow-hidden rounded-[2rem] lg:mx-0 lg:h-56 lg:w-56 lg:shrink-0"
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src="/service-partner-phone-image.webp"
                         alt="Service Partner Phone"
                         className="h-full w-full object-cover"

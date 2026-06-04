@@ -120,7 +120,7 @@ export function PGHostelNavbar() {
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-[#037166]/10 hover:text-[#037166] transition-all overflow-hidden border border-transparent hover:border-[#037166]/20"
                         >
                             {isAuthenticated && user?.image ? (
-                                <img
+                                <img loading="lazy" decoding="async"
                                     src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                                     alt={user.name}
                                     className="w-full h-full object-cover rounded-full"

@@ -1,19 +1,20 @@
+import React from 'react';
+import nextDynamic from 'next/dynamic';
 import HeroSection from '@/components/landing/HeroSection';
-import { BookingServices } from '@/components/landing/BookingServices';
-import { NearbyServiceCenters } from '@/components/landing/NearbyServiceCenters';
-import { LatestSpaServices } from '@/components/landing/LatestSpaServices';
-import { RecommendedSpaSalon } from '@/components/landing/RecommendedSpaSalon';
-import { PremiumPGHostels } from '@/components/landing/PremiumPGHostels';
-import { RecommendedHostels } from '@/components/landing/RecommendedHostels';
-import { LatestReligiousServices } from '@/components/landing/LatestReligiousServices';
-import { RecommendedReligious } from '@/components/landing/RecommendedReligious';
-import { AppDownload } from '@/components/landing/AppDownload';
-import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
-
 import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
+// Dynamically load below-the-fold sections to optimize initial bundle size & reduce JS execution time
+const BookingServices = nextDynamic(() => import('@/components/landing/BookingServices').then(m => m.BookingServices), { ssr: false });
+const NearbyServiceCenters = nextDynamic(() => import('@/components/landing/NearbyServiceCenters').then(m => m.NearbyServiceCenters), { ssr: false });
+const PremiumPGHostels = nextDynamic(() => import('@/components/landing/PremiumPGHostels').then(m => m.PremiumPGHostels), { ssr: false });
+const RecommendedHostels = nextDynamic(() => import('@/components/landing/RecommendedHostels').then(m => m.RecommendedHostels), { ssr: false });
+const LatestReligiousServices = nextDynamic(() => import('@/components/landing/LatestReligiousServices').then(m => m.LatestReligiousServices), { ssr: false });
+const RecommendedReligious = nextDynamic(() => import('@/components/landing/RecommendedReligious').then(m => m.RecommendedReligious), { ssr: false });
+const LatestSpaServices = nextDynamic(() => import('@/components/landing/LatestSpaServices').then(m => m.LatestSpaServices), { ssr: false });
+const RecommendedSpaSalon = nextDynamic(() => import('@/components/landing/RecommendedSpaSalon').then(m => m.RecommendedSpaSalon), { ssr: false });
+const AppDownload = nextDynamic(() => import('@/components/landing/AppDownload').then(m => m.AppDownload), { ssr: false });
 
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
     let showHomeScreen = false;
@@ -86,8 +87,6 @@ export default async function Home() {
             <LatestSpaServices />
             <RecommendedSpaSalon />
             <AppDownload />
-            {/* <KnowledgeSection /> */}
         </div>
     );
 }
-

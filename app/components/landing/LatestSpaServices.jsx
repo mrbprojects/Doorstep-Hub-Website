@@ -12,15 +12,6 @@ export function LatestSpaServices() {
   const router = useRouter();
   const [spaStores, setSpaStores] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   const handleStoreClick = (store) => {
     router.push(`/spa-salon/${store.slug || store._id}`);
@@ -63,29 +54,15 @@ export function LatestSpaServices() {
   return (
     <section className="relative py-22 overflow-hidden">
       {/* Architectural World Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/20 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
@@ -141,26 +118,20 @@ export function LatestSpaServices() {
             // Skeleton Loading
             [1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="group relative w-[calc(100%/1.5)] md:w-[calc(100%/3.5)] lg:w-[calc(100%/6.5)] h-auto flex-shrink-0 snap-start">
-                <div className="relative h-full flex flex-col bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden animate-pulse">
+                <div className="relative h-[240px] flex flex-col bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden animate-pulse">
                   {/* Image skeleton */}
                   <div className="relative h-40 bg-white/10 flex-shrink-0" />
                   {/* Content skeleton */}
                   <div className="p-4 flex flex-col flex-1">
                     <div className="flex items-start justify-between mb-2">
                       <div className="h-6 w-3/4 bg-white/10 rounded" />
-                      <div className="h-6 w-1/4 bg-white/10 rounded" />
                     </div>
                     <div className="flex-1 min-h-0 overflow-hidden">
-                      <div className="flex items-start gap-2 mb-2">
+                      <div className="flex items-start gap-2 mb-1">
                         <div className="h-4 w-4 bg-white/10 rounded-full flex-shrink-0" />
                         <div className="h-4 w-2/3 bg-white/10 rounded" />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mb-6 mt-auto">
-                      <div className="h-4 w-1/3 bg-white/10 rounded" />
-                      <div className="h-6 w-1/4 bg-white/10 rounded" />
-                    </div>
-                    <div className="w-full py-3 bg-white/10 rounded-xl" />
                   </div>
                 </div>
               </div>
@@ -189,7 +160,7 @@ export function LatestSpaServices() {
                     ],
                   }}
                   transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
-                  className="relative h-full flex flex-col bg-gradient-to-br from-[#1a1a1a]/60 via-[#1a1510]/60 to-[#0f0f0f]/60 backdrop-blur-2xl border border-[#037166]/20 rounded-2xl overflow-hidden"
+                  className="relative h-[240px] flex flex-col bg-gradient-to-br from-[#1a1a1a]/60 via-[#1a1510]/60 to-[#0f0f0f]/60 backdrop-blur-2xl border border-[#037166]/20 rounded-2xl overflow-hidden"
                 >
                   {/* Image */}
                   <div className="relative h-40 overflow-hidden flex-shrink-0">
@@ -211,9 +182,9 @@ export function LatestSpaServices() {
 
 
                     {/* Floating Heart Icon */}
-                    {/* <motion.div
+                    {/* <motion.div initial={false}
                       whileHover={{ scale: 1.2, rotate: 360 }}
-                      className="absolute top-4 right-4 w-12 h-12 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center"
+                      className="absolute top-4 right-4 w-12 h-12 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center pointer-events-none"
                     >
                       <Heart className="w-6 h-6 text-[#037166]" />
                     </motion.div> */}

@@ -88,7 +88,7 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
           className="flex items-center justify-center w-[135px] sm:w-[160px] h-11 sm:h-12 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
           title="Get it on Google Play"
         >
-          <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover scale-110 brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+          <img loading="lazy" decoding="async" src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover scale-110 brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
         </a>
 
         <a
@@ -98,7 +98,7 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
           className="flex items-center justify-center w-[135px] sm:w-[160px] h-11 sm:h-12 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0"
           title="Download on the App Store"
         >
-          <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover scale-110 brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+          <img loading="lazy" decoding="async" src="/apple2.png" alt="App Store" className="h-full w-full object-cover scale-110 brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
         </a>
       </div>
 

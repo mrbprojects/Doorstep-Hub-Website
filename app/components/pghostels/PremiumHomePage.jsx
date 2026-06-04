@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from 'motion/react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, useScroll, useInView, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
     MapPin, Search, Users, Home, Bed, Sparkles, Star, ChevronRight,
@@ -32,7 +32,6 @@ const testimonials = [
 export function PremiumHomePage() {
     const router = useRouter();
     const { location, detectWithGPS } = useLocationContext();
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState({ id: '', name: '' });
     const [featuredHostels, setFeaturedHostels] = useState([]);
@@ -57,25 +56,18 @@ export function PremiumHomePage() {
         }
     }, [apiCategories.length]);
 
-    useEffect(() => {
-        const handleMouseMove = (e) => {
-            setMousePosition({ x: e.clientX, y: e.clientY });
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
 
-    const handleSearch = () => {
+    const handleSearch = useCallback(() => {
         if (searchQuery.trim()) {
             router.push(`/pghostels/listings/all?query=${encodeURIComponent(searchQuery)}`);
         }
-    };
+    }, [searchQuery, router]);
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
             handleSearch();
         }
-    };
+    }, [handleSearch]);
 
     // Fetch Featured Hostels
     useEffect(() => {
@@ -136,24 +128,19 @@ export function PremiumHomePage() {
         fetchGlobalSettings();
     }, []);
 
-    const parallaxY = useTransform(scrollY, [0, 500], [0, 150]);
-    const parallaxYSpring = useSpring(parallaxY, { stiffness: 100, damping: 30 });
-
-    const handleCategoryClick = (categoryId, categoryName, categorySlug) => {
-        // setSelectedCategory({ id: categoryId, name: categoryName });
-        // setIsModalOpen(true);
+    const handleCategoryClick = useCallback((categoryId, categoryName, categorySlug) => {
         if (categorySlug) {
             router.push(`/pghostels/${categorySlug}`);
         } else {
             console.warn('Category slug is missing');
         }
-    };
+    }, [router]);
 
-    const scrollToCategories = () => {
+    const scrollToCategories = useCallback(() => {
         categoriesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
+    }, []);
 
-    const schemaData = {
+    const schemaData = useMemo(() => ({
         "@context": "https://schema.org",
         "@graph": [
             {
@@ -173,12 +160,12 @@ export function PremiumHomePage() {
             {
                 "@type": "ItemList",
                 "name": "Our Lifestyle Stays",
-                "itemListElement": apiCategories.length > 0 
+                "itemListElement": apiCategories.length > 0
                     ? apiCategories.map((cat, index) => ({
                         "@type": "ListItem",
                         "position": index + 1,
                         "name": cat.name,
-                        "url": typeof window !== 'undefined' ? `${window.location.origin}/pghostels/${cat.slug || cat._id}` : ""
+                        "url": `https://doorstephub.com/pghostels/${cat.slug || cat._id}`
                     }))
                     : [
                         { "@type": "ListItem", "position": 1, "name": "Student Hostels" },
@@ -188,7 +175,7 @@ export function PremiumHomePage() {
                     ]
             }
         ]
-    };
+    }), [location?.city, apiCategories]);
 
     return (
         <div className="min-h-screen bg-[#E2E6E6] overflow-hidden">
@@ -196,24 +183,8 @@ export function PremiumHomePage() {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
             />
-            {/* Floating Particles Background */}
-            <div className="fixed inset-0 pointer-events-none">
-                {[...Array(20)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute w-2 h-2 bg-[#037166]/20 rounded-full"
-                        animate={{
-                            x: [Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920), Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920)],
-                            y: [Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080), Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080)],
-                        }}
-                        transition={{
-                            duration: Math.random() * 20 + 10,
-                            repeat: Infinity,
-                            ease: "linear"
-                        }}
-                    />
-                ))}
-            </div>
+            {/* Subtle static background accent */}
+            <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-[#037166]/3 via-transparent to-[#037166]/5" />
 
             {/* Hero Section */}
             <section ref={heroRef} className="relative min-h-[70vh] flex items-center pt-20">
@@ -324,7 +295,7 @@ export function PremiumHomePage() {
                                             className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
                                             title="Download on the App Store"
                                         >
-                                            <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                                            <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
                                         </motion.a>
 
                                         <motion.a
@@ -336,7 +307,7 @@ export function PremiumHomePage() {
                                             className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
                                             title="Get it on Google Play"
                                         >
-                                            <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" />
+                                            <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
                                         </motion.a>
                                     </motion.div>
                                 </div>
@@ -371,9 +342,6 @@ export function PremiumHomePage() {
                         animate={isHeroInView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.8, ease: [0.6, 0.05, 0.01, 0.9] }}
                         className="relative h-[390px] md:h-[470px] flex items-center justify-center p-3 md:p-4"
-                        style={{
-                            transform: typeof window !== 'undefined' ? `perspective(1000px) rotateY(${(mousePosition.x - window.innerWidth / 2) / 60}deg) rotateX(${-(mousePosition.y - window.innerHeight / 2) / 60}deg)` : 'none'
-                        }}
                     >
                         {/* Main Card Slider */}
                         <motion.div
@@ -429,8 +397,8 @@ export function PremiumHomePage() {
                         </motion.div>
 
                         {/* Floating Price Card */}
-                        <motion.div
-                            className="absolute top-12 left-0 md:-left-8 bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-2xl border border-white/50 z-20"
+                        <motion.div initial={false}
+                            className="absolute top-12 left-0 md:-left-8 bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-2xl border border-white/50 z-20 pointer-events-none"
                             animate={{
                                 y: [0, 10, 0],
                             }}
@@ -447,8 +415,8 @@ export function PremiumHomePage() {
                         </motion.div>
 
                         {/* Floating Rating Card */}
-                        <motion.div
-                            className="absolute bottom-12 right-0 md:-right-8 bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-2xl border border-white/50 z-20"
+                        <motion.div initial={false}
+                            className="absolute bottom-12 right-0 md:-right-8 bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-2xl border border-white/50 z-20 pointer-events-none"
                             animate={{
                                 y: [0, -10, 0],
                             }}
@@ -558,7 +526,7 @@ export function PremiumHomePage() {
                 {/* Category Icon */}
                 <div className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#037166] group-hover:border-[#037166] group-hover:scale-110 transition-all duration-300 shadow-lg overflow-hidden">
                   {iconImg ? (
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={iconImg}
                       alt={cat.name}
                       className="w-full h-full object-cover rounded-2xl"
@@ -616,84 +584,6 @@ export function PremiumHomePage() {
     );
 }
 
-// Near You Section Component
-function NearYouSection({ listings, router }) {
-    const scrollRef = useRef(null);
-
-    return (
-        <section className="py-24 bg-gradient-to-b from-transparent to-gray-50/50">
-            <div className="max-w-7xl mx-auto px-4">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="mb-12"
-                >
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
-                        Available near you
-                    </h2>
-                    <p className="text-xl text-gray-600">Top rated stays in your selected location</p>
-                </motion.div>
-
-                <div
-                    ref={scrollRef}
-                    className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory scrollbar-hide"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                    {listings.map((listing, i) => (
-                        <motion.div
-                            key={listing.id}
-                            initial={{ opacity: 0, x: 50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            whileHover={{ y: -10, rotateY: 5 }}
-                            onClick={() => router.push(`/pghostels/${listing.slug || listing.id}`)}
-                            className="group flex-shrink-0 w-80 snap-start cursor-pointer"
-                        >
-                            <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-100">
-                                {/* Image */}
-                                <div className="relative h-56 overflow-hidden">
-                                    <div
-                                        className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
-                                        style={{ backgroundImage: `url(${listing.image})` }}
-                                    />
-                                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center space-x-1">
-                                        <Star className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
-                                        <span className="font-semibold text-sm">{listing.rating}</span>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 bg-[#037166] text-white px-3 py-1 rounded-full text-sm font-medium">
-                                        {listing.distance} km away
-                                    </div>
-                                </div>
-
-                                {/* Content */}
-                                <div className="p-6">
-                                    <h4 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-[#037166] transition-colors">
-                                        {listing.name}
-                                    </h4>
-                                    <p className="text-gray-600 text-sm mb-4 flex items-center">
-                                        <MapPin className="w-4 h-4 mr-1" />
-                                        {listing.area}
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <span className="text-3xl font-bold text-gray-900">₹{listing.price.toLocaleString()}</span>
-                                            <span className="text-gray-500 text-sm">/month</span>
-                                        </div>
-                                        <button className="px-6 py-2 bg-[#037166] text-white rounded-xl font-medium hover:bg-[#025951] transition-colors">
-                                            View
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-}
 
 // Top Deals Section
 function TopDealsSection({ router }) {

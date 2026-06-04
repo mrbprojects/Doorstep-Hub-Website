@@ -605,6 +605,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   src={bannerImage}
                   alt={center.business_name}
                   className="w-full h-full object-cover"
+                  fetchpriority="high"
+                  loading="eager"
+                  decoding="sync"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
@@ -620,7 +623,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   <div className="relative flex-shrink-0">
                     <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white flex items-center justify-center">
                       {(center.logo || center.image) ? (
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${(center.logo || center.image).startsWith('/') ? (center.logo || center.image).slice(1) : (center.logo || center.image)}`}
                           alt={`${businessName} Logo`}
                           className="w-full h-full object-contain bg-white"
@@ -684,7 +687,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" />
+                    <img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
                   </a>
                   <a
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
@@ -693,7 +696,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
                     title="Download on the App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" />
+                    <img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
                   </a>
                   <a
                     href={whatsappLink}
@@ -703,7 +706,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     title="Chat on WhatsApp"
                     aria-label="Chat on WhatsApp"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
                       alt="WhatsApp"
                       className="w-7 h-7"
@@ -855,11 +858,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                         {/* Service Image */}
                         {service.image && (
                           <div className="relative w-full sm:w-[30%] h-36 sm:h-auto sm:self-stretch overflow-hidden bg-white">
-                            <img
-                              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
-                              alt={service.name}
-                              className="w-full h-full object-cover"
-                            />
+                            <img loading="lazy" decoding="async"
+                               src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
+                               alt={service.name}
+                               className="w-full h-full object-cover"
+                             />
                             {/* Rating Badge */}
                             {service.rating && (
                               <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-white shadow-sm border border-gray-100 flex items-center gap-1">
@@ -1033,7 +1036,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       onClick={() => setLightboxIndex(index)}
                       className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100 shadow-sm"
                     >
-                      <img src={image} alt={`${businessName} Work ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={image} alt={`${businessName} Work ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     </motion.div>
                   ))
                 ) : (

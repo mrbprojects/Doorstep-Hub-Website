@@ -86,21 +86,21 @@ export function Newsletter() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#0f1614] via-[#0a0a0a] to-[#0f1614]" />
 
       {/* Animated Orbs */}
-      <motion.div
+      <motion.div initial={false}
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.1, 0.2, 0.1],
         }}
         transition={{ duration: 8, repeat: Infinity }}
-        className="absolute -top-1/2 left-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px]"
+        className="absolute -top-1/2 left-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px] pointer-events-none"
       />
-      <motion.div
+      <motion.div initial={false}
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.1, 0.15, 0.1],
         }}
         transition={{ duration: 10, repeat: Infinity }}
-        className="absolute -bottom-1/2 right-1/4 w-96 h-96 bg-cyan-500 rounded-full blur-[120px]"
+        className="absolute -bottom-1/2 right-1/4 w-96 h-96 bg-cyan-500 rounded-full blur-[120px] pointer-events-none"
       />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
@@ -203,7 +203,7 @@ export function Newsletter() {
             <motion.div
               initial={{ opacity: 0 }}
               whileHover={{ opacity: 1 }}
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-[#037166]/20 to-[#04a99d]/20 blur-xl -z-10"
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-[#037166]/20 to-[#04a99d]/20 blur-xl -z-10 pointer-events-none"
             />
           </div>
 
@@ -235,21 +235,21 @@ export function Newsletter() {
         </motion.p>
 
         {/* Decorative Elements */}
-        <motion.div
+        <motion.div initial={false}
           animate={{
             y: [0, -10, 0],
             rotate: [0, 5, 0],
           }}
           transition={{ duration: 3, repeat: Infinity }}
-          className="absolute top-10 left-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-[#037166]/20 to-transparent backdrop-blur-sm border border-white/10"
+          className="absolute top-10 left-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-[#037166]/20 to-transparent backdrop-blur-sm border border-white/10 pointer-events-none"
         />
-        <motion.div
+        <motion.div initial={false}
           animate={{
             y: [0, 10, 0],
             rotate: [0, -5, 0],
           }}
           transition={{ duration: 4, repeat: Infinity }}
-          className="absolute bottom-10 right-10 w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500/20 to-transparent backdrop-blur-sm border border-white/10"
+          className="absolute bottom-10 right-10 w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500/20 to-transparent backdrop-blur-sm border border-white/10 pointer-events-none"
         />
       </div>
     </section>

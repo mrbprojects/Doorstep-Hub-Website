@@ -266,21 +266,49 @@ export function ServiceDetailsPage({
 
   if (loading) {
     return (
-      <div className="appliance-detail-page min-h-screen pt-32 bg-white">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div className="aspect-video w-full rounded-2xl bg-white/5 animate-pulse" />
-              <div className="h-40 w-full rounded-2xl bg-white/5 animate-pulse" />
-            </div>
-            <div className="space-y-6">
-              <div className="h-12 w-3/4 rounded-xl bg-white/5 animate-pulse" />
-              <div className="h-6 w-1/2 rounded-xl bg-white/5 animate-pulse" />
-              <div className="h-32 w-full rounded-xl bg-white/5 animate-pulse" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="h-20 rounded-xl bg-white/5 animate-pulse" />
-                <div className="h-20 rounded-xl bg-white/5 animate-pulse" />
+      <div className="appliance-detail-page min-h-screen pt-20 pb-24 bg-white">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-12">
+          {/* Breadcrumb skeleton */}
+          <div className="flex flex-col items-start gap-2 mb-4">
+            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="h-9 w-20 bg-gray-100 rounded-full animate-pulse" />
+          </div>
+          {/* 2-col grid skeleton */}
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-start">
+            {/* Left: gallery + tabs */}
+            <div className="order-2 lg:order-none space-y-4 sm:space-y-6 lg:space-y-8">
+              <div className="w-full rounded-2xl overflow-hidden border border-slate-200">
+                <div className="w-full bg-gray-200 animate-pulse" style={{ aspectRatio: '16/7' }} />
               </div>
+              <div className="rounded-3xl overflow-hidden bg-gray-50 border border-gray-200">
+                <div className="flex gap-2 p-2 border-b border-gray-100">
+                  <div className="flex-1 h-9 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="flex-1 h-9 bg-gray-100 rounded-full animate-pulse" />
+                  <div className="flex-1 h-9 bg-gray-100 rounded-full animate-pulse" />
+                </div>
+                <div className="p-6 space-y-3">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Right: info */}
+            <div className="order-1 lg:order-none space-y-4">
+              <div className="h-9 w-3/4 bg-gray-200 rounded-xl animate-pulse" />
+              <div className="h-5 w-1/3 bg-gray-100 rounded animate-pulse" />
+              <div className="flex gap-2">
+                <div className="h-8 w-28 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+              </div>
+              <div className="h-20 w-full bg-gray-100 rounded-xl animate-pulse" />
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="h-14 rounded-xl bg-gray-100 animate-pulse" />
+                <div className="h-14 rounded-xl bg-gray-100 animate-pulse" />
+                <div className="h-14 rounded-xl bg-gray-100 animate-pulse" />
+                <div className="h-14 rounded-xl bg-gray-100 animate-pulse" />
+              </div>
+              <div className="hidden lg:block h-14 w-full rounded-full bg-gray-200 animate-pulse" />
             </div>
           </div>
         </div>
@@ -477,10 +505,11 @@ export function ServiceDetailsPage({
                     style={{ aspectRatio: '16/7' }}
                     onClick={() => { setSelectedImageIndex(currentImageIndex); setIsLightboxOpen(true); }}
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={images[currentImageIndex]}
                       alt={storeData.name}
                       className="w-full h-full object-cover cursor-pointer"
+                      fetchpriority="high"
                     />
                     {/* Dots indicator on mobile */}
                     {images.length > 1 && (
@@ -510,7 +539,7 @@ export function ServiceDetailsPage({
                           onClick={() => { setCurrentImageIndex(idx); setSelectedImageIndex(idx); setIsLightboxOpen(true); }}
                           className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-md sm:rounded-lg overflow-hidden transition-all flex-shrink-0 ${currentImageIndex === idx ? 'ring-2 ring-[#037166] scale-105' : 'opacity-60 hover:opacity-100'}`}
                         >
-                          <img src={img} alt="" className="w-full h-full object-cover" />
+                          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </button>
                       ))}
                     </div>
@@ -577,7 +606,7 @@ export function ServiceDetailsPage({
                                   {/* Rate Card Thumbnail */}
                                   {card.image && (
                                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
-                                      <img
+                                      <img loading="lazy" decoding="async"
                                         src={`https://api.doorstephub.com/${card.image}`}
                                         alt={card.title}
                                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -639,7 +668,7 @@ export function ServiceDetailsPage({
                                 onClick={() => { setSelectedImageIndex(idx + 1); setIsLightboxOpen(true); }}
                                 className="aspect-square rounded-xl overflow-hidden group cursor-pointer relative border border-white/10"
                               >
-                                <img src={`https://api.doorstephub.com/${img}`} alt={`Working Images ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} alt={`Working Images ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                               </div>
                             ))}
@@ -795,7 +824,7 @@ export function ServiceDetailsPage({
                 className="group cursor-pointer bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden hover:border-[#037166]/50 transition-all"
               >
                 <div className="relative h-40 overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={service.mainImage ? `https://api.doorstephub.com/${service.mainImage}` : '/placeholder-service.jpg'}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -872,7 +901,7 @@ export function ServiceDetailsPage({
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-5xl w-full h-full flex items-center justify-center"
             >
-              <img
+              <img loading="lazy" decoding="async"
                 src={images[selectedImageIndex]}
                 alt={`Gallery Image ${selectedImageIndex + 1}`}
                 onClick={(e) => {
@@ -909,7 +938,7 @@ export function ServiceDetailsPage({
               </div>
 
               <div className="relative aspect-square md:aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black/20">
-                <img
+                <img loading="lazy" decoding="async"
                   src={`https://api.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
                   alt={rateCardModal.title}
                   className="w-full h-full object-contain"

@@ -261,7 +261,7 @@ export function ServiceCentersListingPage() {
                                         >
                                             <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full flex flex-col">
                                                 <div className="relative h-48 overflow-hidden bg-[#eaf5f2]">
-                                                    <img
+                                                    <img loading="lazy" decoding="async"
                                                         src={store.bannerImage || store.logo || store.image}
                                                         alt={`${store.name} logo`}
                                                         className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"

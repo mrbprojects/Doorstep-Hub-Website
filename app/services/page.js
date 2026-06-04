@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Hero } from '@/components/services/Hero';
-import { ServiceBookingModal } from '@/components/services/ServiceBookingModal';
-import { ServiceTypeSelectionModal } from '@/components/services/ServiceTypeSelectionModal';
 import { TopCategories } from '@/components/services/TopCategories';
 import { FeaturedServices } from '@/components/services/FeaturedServices';
-import { RecentlyBooked } from '@/components/services/RecentlyBooked';
-import { PromoBanner } from '@/components/services/PromoBanner';
 import { DownloadApp } from '@/components/services/DownloadApp';
-import { NearbyServiceCenters as NearbyStores } from '@/components/services/NearbyStores';
-import { PopularCenters } from '@/components/services/PopularCenters';
-import { KnowledgeSpace } from '@/components/services/KnowledgeSpace';
-import { Newsletter } from '@/components/services/Newsletter';
+
+// Below-the-fold and modal components dynamically loaded to reduce JS bundle size and evaluation time
+const ServiceBookingModal = dynamic(() => import('@/components/services/ServiceBookingModal').then(m => m.ServiceBookingModal), { ssr: false });
+const ServiceTypeSelectionModal = dynamic(() => import('@/components/services/ServiceTypeSelectionModal').then(m => m.ServiceTypeSelectionModal), { ssr: false });
+const RecentlyBooked = dynamic(() => import('@/components/services/RecentlyBooked').then(m => m.RecentlyBooked), { ssr: false });
+const NearbyStores = dynamic(() => import('@/components/services/NearbyStores').then(m => m.NearbyServiceCenters), { ssr: false });
+const PopularCenters = dynamic(() => import('@/components/services/PopularCenters').then(m => m.PopularCenters), { ssr: false });
+const KnowledgeSpace = dynamic(() => import('@/components/services/KnowledgeSpace').then(m => m.KnowledgeSpace), { ssr: false });
+const Newsletter = dynamic(() => import('@/components/services/Newsletter').then(m => m.Newsletter), { ssr: false });
 
 export default function ServicesPage() {
     const router = useRouter();

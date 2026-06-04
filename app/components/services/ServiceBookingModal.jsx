@@ -120,7 +120,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                    className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-none"
                 />
 
                 {/* Modal Content */}
@@ -193,7 +193,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                             className="group flex items-center gap-4 p-4 rounded-xl bg-[#1a1a1a] border border-[#333] hover:border-[#037166] hover:bg-[#037166]/10 transition-all text-left"
                                         >
                                             <div className="w-12 h-12 rounded-lg bg-[#222] overflow-hidden flex-shrink-0 border border-[#333] group-hover:border-[#037166]/30">
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`}
                                                     alt={cat.name}
                                                     className="w-full h-full object-cover"
@@ -217,7 +217,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                             className="group flex items-center gap-4 p-4 rounded-xl bg-[#1a1a1a] border border-[#333] hover:border-[#037166] hover:bg-[#037166]/10 transition-all text-left"
                                         >
                                             <div className="w-12 h-12 rounded-lg bg-[#222] overflow-hidden flex-shrink-0 border border-[#333] group-hover:border-[#037166]/30">
-                                                <img
+                                                <img loading="lazy" decoding="async"
                                                     src={sub.image?.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image}`}
                                                     alt={sub.name}
                                                     className="w-full h-full object-cover"

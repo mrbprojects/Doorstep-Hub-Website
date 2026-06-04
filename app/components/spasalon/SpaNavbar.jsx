@@ -129,7 +129,7 @@ export function SpaNavbar() {
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 hover:bg-[#C06C84]/10 text-gray-600 hover:text-[#C06C84] transition-all border border-gray-200 hover:border-[#C06C84]/30"
                     >
                         {isAuthenticated && user?.image ? (
-                            <img
+                            <img loading="lazy" decoding="async"
                                 src={user.image}
                                 alt={user.name}
                                 className="w-full h-full object-cover rounded-full"

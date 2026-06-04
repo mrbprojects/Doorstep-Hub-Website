@@ -11,16 +11,7 @@ export function LatestReligiousServices() {
   const router = useRouter();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     const updateViewport = () => setIsDesktop(window.innerWidth >= 1280);
@@ -88,7 +79,7 @@ export function LatestReligiousServices() {
               name: service.serviceName || `${service.firstName} ${service.lastName}`,
               location: service.cityName || service.address || 'Hyderabad',
               amenities: displayedAmenities,
-              attendees: Math.floor(Math.random() * 50) + 80,
+              attendees: 90,
               image: service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1712999533944-9200e6b20e27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZW1wbGUlMjBzcGlyaXR1YWwlMjByZWxpZ2lvdXN8ZW58MXx8fHwxNzY4MDI2NzQ2fDA&ixlib=rb-4.1.0&q=80&w=1080',
               bio: service.bio
             };
@@ -140,16 +131,21 @@ export function LatestReligiousServices() {
       <div className="p-4">
         <div className="h-5 w-40 mb-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
 
-        <div className="space-y-2 mb-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center space-x-3">
-              <div className="w-4 h-4 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
-              <div className="h-4 w-32 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center space-x-2 text-xs">
+            <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
+            <div className="h-3 w-32 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg border border-[#037166]/10">
+              <div className="w-3 h-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
+              <div className="h-2 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
             </div>
           ))}
         </div>
-
-        <div className="h-10 bg-gradient-to-r from-[#037166]/40 via-[#9b59b6]/40 to-[#037166]/40 rounded-xl animate-shimmer" />
       </div>
     </motion.div>
   );
@@ -157,15 +153,16 @@ export function LatestReligiousServices() {
   if (loading) {
     return (
       <section className="relative py-32 overflow-hidden">
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0a10] to-[#0a0a0a]" />
           <motion.div
+            initial={false}
             animate={{
               opacity: [0.1, 0.2, 0.1],
               scale: [1, 1.2, 1],
             }}
             transition={{ duration: 8, repeat: Infinity }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-br from-[#037166]/15 via-[#9b59b6]/10 to-transparent rounded-full blur-3xl"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-br from-[#037166]/15 via-[#9b59b6]/10 to-transparent rounded-full blur-3xl pointer-events-none"
           />
         </div>
 
@@ -206,29 +203,15 @@ export function LatestReligiousServices() {
   return (
     <section className="relative py-15 overflow-hidden">
       {/* Architectural World Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
 
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/20 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
@@ -291,9 +274,9 @@ export function LatestReligiousServices() {
                 </div> */}
 
                 {/* Bell Icon */}
-                <motion.div
+                <motion.div initial={false}
                   whileHover={{ rotate: [0, -15, 15, -15, 0] }}
-                  className="absolute top-4 right-4 z-20 h-10 w-10 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center"
+                  className="absolute top-4 right-4 z-20 h-10 w-10 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center pointer-events-none"
                 >
                   <Bell className="w-5 h-5 text-[#9b59b6]" />
                 </motion.div>
@@ -325,13 +308,13 @@ export function LatestReligiousServices() {
 
 
                   {/* Subtle Glow Animation */}
-                  <motion.div
+                  <motion.div initial={false}
                     animate={{
                       opacity: [0, 0.3, 0],
                       scale: [0.8, 1.2, 0.8],
                     }}
                     transition={{ duration: 3, repeat: Infinity }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-[#9b59b6]/30 rounded-full blur-2xl"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-[#9b59b6]/30 rounded-full blur-2xl pointer-events-none"
                   />
                 </div>
 
@@ -368,12 +351,12 @@ export function LatestReligiousServices() {
                 </div>
 
                 {/* Divine Glow Effect */}
-                <motion.div
+                <motion.div initial={false}
                   animate={{
                     opacity: [0, 0.5, 0],
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="absolute -inset-1 bg-gradient-to-r from-[#037166]/20 via-[#9b59b6]/20 to-[#037166]/20 blur-xl -z-10"
+                  className="absolute -inset-1 bg-gradient-to-r from-[#037166]/20 via-[#9b59b6]/20 to-[#037166]/20 blur-xl -z-10 pointer-events-none"
                 />
               </div>
             </motion.div>

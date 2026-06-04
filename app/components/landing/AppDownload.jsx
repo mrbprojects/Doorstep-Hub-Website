@@ -5,15 +5,6 @@ import { motion } from 'motion/react';
 import { Download, Star, Shield, Zap } from 'lucide-react';
 
 export function AppDownload() {
-  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-
-  React.useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   const videoRef = React.useRef(null);
 
@@ -34,23 +25,9 @@ export function AppDownload() {
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        {/* Gradient Orbs - Intensified */}
-        <motion.div
-          animate={{
-            x: mousePosition.x * 0.02,
-            y: mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/35 rounded-full blur-[170px]"
-        />
-        <motion.div
-          animate={{
-            x: -mousePosition.x * 0.02,
-            y: -mousePosition.y * 0.02,
-          }}
-          transition={{ type: 'spring', damping: 30 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px]"
-        />
+        {/* Static Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/20 rounded-full blur-[170px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
@@ -113,7 +90,7 @@ export function AppDownload() {
                 className="flex items-center justify-center w-36 xs:w-44 md:w-44 h-12 xs:h-14 md:h-14 bg-[#DEF2EF] rounded-full shadow-xl shadow-[#037166]/15 hover:shadow-2xl hover:shadow-[#037166]/25 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0 border border-[#9ecbc3]"
                 title="Get it on Google Play"
               >
-                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
+                <img src="/andriod1.png" alt="Google Play" loading="lazy" decoding="async" className="h-full w-full object-cover brightness-0 invert" />
               </a>
 
               <a
@@ -123,7 +100,7 @@ export function AppDownload() {
                 className="flex items-center justify-center w-36 xs:w-44 md:w-44 h-12 xs:h-14 md:h-14 bg-[#DEF2EF] rounded-full shadow-xl shadow-[#037166]/15 hover:shadow-2xl hover:shadow-[#037166]/25 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden flex-shrink-0 border border-[#9ecbc3]"
                 title="Download on the App Store"
               >
-                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
+                <img src="/apple2.png" alt="App Store" loading="lazy" decoding="async" className="h-full w-full object-cover brightness-0 invert" />
               </a>
 
               <motion.div
@@ -167,9 +144,6 @@ export function AppDownload() {
               className="relative z-10"
             >
               <div className="relative w-[clamp(15rem,16vw,18rem)] h-[clamp(30rem,70vh,36rem)] bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-[3rem] border-8 border-[#2a2a2a] shadow-2xl overflow-hidden">
-                {/* Notch */}
-                {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-[#037166] rounded-b-3xl z-20" /> */}
-
                 {/* Screen */}
                 <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden rounded-[2.5rem]">
                   <video
@@ -194,5 +168,3 @@ export function AppDownload() {
     </section>
   );
 }
-
-

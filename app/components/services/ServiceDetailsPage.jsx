@@ -145,19 +145,29 @@ export function ServiceDetailsPage({
     return (
       <div className="min-h-screen pt-32 bg-[#0a0a0a]">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
+          <div className="h-10 w-40 rounded-full bg-white/5 animate-pulse mb-6" />
+          <div className="h-4 w-64 rounded bg-white/5 animate-pulse mb-6" />
+          
+          <div className="grid lg:grid-cols-2 gap-8 items-start relative">
+            <div className="lg:col-span-1 space-y-8 h-auto">
               <div className="aspect-video w-full rounded-2xl bg-white/5 animate-pulse" />
-              <div className="h-40 w-full rounded-2xl bg-white/5 animate-pulse" />
+              <div className="h-[400px] w-full rounded-3xl bg-white/5 animate-pulse" />
             </div>
-            <div className="space-y-6">
-              <div className="h-12 w-3/4 rounded-xl bg-white/5 animate-pulse" />
-              <div className="h-6 w-1/2 rounded-xl bg-white/5 animate-pulse" />
-              <div className="h-32 w-full rounded-xl bg-white/5 animate-pulse" />
+            <div className="lg:col-span-1 space-y-6">
+              <div className="h-10 w-3/4 rounded-xl bg-white/5 animate-pulse" />
+              <div className="h-6 w-1/3 rounded bg-white/5 animate-pulse" />
+              <div className="h-6 w-1/2 rounded bg-white/5 animate-pulse" />
+              
+              <div className="h-24 w-full rounded-xl bg-white/5 animate-pulse" />
+              
               <div className="grid grid-cols-2 gap-4">
-                <div className="h-20 rounded-xl bg-white/5 animate-pulse" />
-                <div className="h-20 rounded-xl bg-white/5 animate-pulse" />
+                <div className="h-16 rounded-lg bg-white/5 animate-pulse" />
+                <div className="h-16 rounded-lg bg-white/5 animate-pulse" />
+                <div className="h-16 rounded-lg bg-white/5 animate-pulse" />
+                <div className="h-16 rounded-lg bg-white/5 animate-pulse" />
               </div>
+              
+              <div className="h-14 w-full rounded-full bg-white/5 animate-pulse mt-8" />
             </div>
           </div>
         </div>
@@ -261,14 +271,14 @@ export function ServiceDetailsPage({
         />
 
         {/* Animated glow orb */}
-        <motion.div
+        <motion.div initial={false}
 
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.2, 0.3, 0.2],
           }}
           transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-[120px]"
+          className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none"
           style={{ backgroundColor: accentColor }}
         />
 
@@ -317,10 +327,11 @@ export function ServiceDetailsPage({
                       setIsLightboxOpen(true);
                     }}
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={images[currentImageIndex]}
                       alt={storeData.name}
                       className="w-full h-full object-cover"
+                      fetchpriority="high"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
@@ -359,7 +370,7 @@ export function ServiceDetailsPage({
                             : 'opacity-60 hover:opacity-100'
                             }`}
                         >
-                          <img src={img} alt="" className="w-full h-full object-cover" />
+                          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </button>
                       ))}
                     </div>
@@ -441,7 +452,7 @@ export function ServiceDetailsPage({
                                  </div>
 
                                  {cardImage && (
-                                   <img
+                                   <img loading="lazy" decoding="async"
                                      src={cardImage}
                                      alt={card.title || 'Service rate card'}
                                      className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0"
@@ -514,7 +525,7 @@ export function ServiceDetailsPage({
                               }}
                               className="aspect-square rounded-2xl overflow-hidden group cursor-pointer relative border border-white/10"
                             >
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                 alt={`Portfolio ${idx + 1}`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -780,7 +791,7 @@ export function ServiceDetailsPage({
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-5xl w-full h-full flex items-center justify-center"
             >
-              <img
+              <img loading="lazy" decoding="async"
                 src={images[selectedImageIndex]}
                 alt={`Gallery Image ${selectedImageIndex + 1}`}
                 onClick={(e) => {

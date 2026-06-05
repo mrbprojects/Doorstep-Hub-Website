@@ -812,13 +812,6 @@ export function ServiceDetailsPage({
                 <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-1.5 sm:mb-2 break-words">
                   {storeData.title || storeData.name}
                 </h1>
-                {storeData.description ? (
-                  <p className="text-gray-600 text-xs sm:text-sm mb-2.5 sm:mb-3 leading-relaxed">
-                    {storeData.description.replace(/<[^>]*>?/gm, '')}
-                  </p>
-                ) : (
-                  <p className="text-gray-600 text-xs sm:text-sm mb-2.5 sm:mb-3">On-Demand Home Services</p>
-                )}
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
                     <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
@@ -871,6 +864,53 @@ export function ServiceDetailsPage({
                   <ArrowRight className="w-2 h-5 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
               </div>
+
+              {/* FAQs — only when API returns faqs */}
+              {(() => {
+                const faqs = storeData?.faqs || serviceDetails?.faqs || [];
+                if (!faqs.length) return null;
+                return (
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden">
+                    <h3 className="text-sm font-bold text-gray-900 px-4 pt-4 pb-2">Frequently Asked Questions</h3>
+                    <div className="divide-y divide-slate-100">
+                      {faqs.map((faq, index) => (
+                        <div key={index} className="overflow-hidden">
+                          <button
+                            onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
+                            className="w-full px-4 py-3 flex items-center justify-between text-left gap-3 hover:bg-slate-50 transition-colors"
+                          >
+                            <span className="text-xs sm:text-sm font-semibold text-gray-800">
+                              {faq.question || faq.title}
+                            </span>
+                            <svg
+                              className={`w-4 h-4 flex-shrink-0 text-[#037166] transition-transform duration-300 ${
+                                faqActiveIndex === index ? 'rotate-180' : ''
+                              }`}
+                              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          <AnimatePresence initial={false}>
+                            {faqActiveIndex === index && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.25 }}
+                              >
+                                <div className="px-4 pb-3 text-xs text-gray-600 leading-relaxed border-t border-slate-100 pt-2">
+                                  {faq.answer || faq.description}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </motion.div>
           </div>
         </div>

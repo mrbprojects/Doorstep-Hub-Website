@@ -209,6 +209,12 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                         const subcategories = cat.subcategories || [];
                         for (const sub of subcategories) {
                             if (sub.slug === slug || generateSlug(sub.name) === slug) {
+                                setCategoryData({
+                                    categoryName: cat.name,
+                                    categorySlug: cat.slug || cat.name?.toLowerCase().replace(/\s+/g, '-'),
+                                    subCategoryName: sub.name,
+                                    subCategoryId: sub._id || sub.id
+                                });
                                 setViewType('listing');
                                 return;
                             }

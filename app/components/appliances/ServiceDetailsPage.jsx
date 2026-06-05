@@ -35,6 +35,7 @@ export function ServiceDetailsPage({
   const searchParams = useSearchParams();
   const { addToCart } = useServiceCart();
   const [activeTab, setActiveTab] = useState('About Service');
+  const [faqActiveIndex, setFaqActiveIndex] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -468,7 +469,7 @@ export function ServiceDetailsPage({
                 <ChevronRight className="w-3 h-3 flex-shrink-0" />
                 <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors shrink-0">{subCategory}</button>
                 <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <span className="text-gray-400 truncate">{storeData?.name}</span>
+                <span className="text-gray-400 truncate">{storeData?.title || storeData?.name}</span>
               </div>
             </div>
             <button
@@ -551,18 +552,25 @@ export function ServiceDetailsPage({
               <div className="bg-[#1a1a1a]/60 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden">
                 {/* Tab bar */}
                 <div className="flex gap-2 p-2 border-b border-white/10 overflow-x-auto scrollbar-hide">
-                  {['About Service', 'Working Images', 'Ratings'].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`flex-1 min-w-max px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
-                        ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                        : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
-                        }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
+                  {(() => {
+                    const faqs = storeData?.faqs || serviceDetails?.faqs || [];
+                    const tabsList = ['About Service', 'Working Images', 'Ratings'];
+                    if (faqs && faqs.length > 0) {
+                      tabsList.push('FAQs');
+                    }
+                    return tabsList.map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 min-w-max px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
+                          ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                          : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
+                          }`}
+                      >
+                        {tab}
+                      </button>
+                    ));
+                  })()}
                 </div>
 
                 <div className="p-3 sm:p-6">
@@ -715,6 +723,78 @@ export function ServiceDetailsPage({
                         )}
                       </motion.div>
                     )}
+
+                    {/* FAQs Tab */}
+                    {activeTab === 'FAQs' && (
+                      <motion.div
+                        key="FAQs"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
+                        {(() => {
+                          const faqs = storeData?.faqs || serviceDetails?.faqs || [];
+                          return faqs.length > 0 ? (
+                            <div className="space-y-3">
+                              {faqs.map((faq, index) => (
+                                <div
+                                  key={index}
+                                  className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
+                                    faqActiveIndex === index
+                                      ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
+                                      : 'bg-white border-slate-200 hover:border-[#037166]/30'
+                                  }`}
+                                >
+                                  <button
+                                    onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
+                                    className="w-full px-5 py-4 flex items-center justify-between text-left gap-4"
+                                  >
+                                    <span className="text-sm font-bold text-gray-900">
+                                      {faq.question || faq.title}
+                                    </span>
+                                    <span className="text-[#037166] flex-shrink-0">
+                                      <svg
+                                        className={`w-4 h-4 transition-transform duration-300 ${
+                                          faqActiveIndex === index ? 'rotate-180' : ''
+                                        }`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M19 9l-7 7-7-7"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </button>
+                                  <AnimatePresence initial={false}>
+                                    {faqActiveIndex === index && (
+                                      <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                      >
+                                        <div className="px-5 pb-4 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-slate-100 pt-3">
+                                          {faq.answer || faq.description}
+                                        </div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No FAQs available yet</div>
+                          );
+                        })()}
+                      </motion.div>
+                    )}
                   </AnimatePresence>
                 </div>
               </div>
@@ -730,9 +810,15 @@ export function ServiceDetailsPage({
               {/* Title + Rating */}
               <div>
                 <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-1.5 sm:mb-2 break-words">
-                  {storeData.name}
+                  {storeData.title || storeData.name}
                 </h1>
-                <p className="text-gray-600 text-xs sm:text-sm mb-2.5 sm:mb-3">On-Demand Home Services</p>
+                {storeData.description ? (
+                  <p className="text-gray-600 text-xs sm:text-sm mb-2.5 sm:mb-3 leading-relaxed">
+                    {storeData.description.replace(/<[^>]*>?/gm, '')}
+                  </p>
+                ) : (
+                  <p className="text-gray-600 text-xs sm:text-sm mb-2.5 sm:mb-3">On-Demand Home Services</p>
+                )}
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
                     <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />

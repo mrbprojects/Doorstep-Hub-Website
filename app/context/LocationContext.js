@@ -40,7 +40,7 @@ export function LocationProvider({ children }) {
         if (savedLocation) {
             setLocation(savedLocation);
         } else {
-            // No saved location — trigger GPS → IP → Fallback chain
+            // No saved location — trigger GPS → IP → Fallback chain (prompts browser location access)
             detectLocation();
         }
 

@@ -67,3 +67,6 @@ build_final_cmd.txt
 # typescript
 *.tsbuildinfo
 
+# scratch files
+scratch/
+

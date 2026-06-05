@@ -134,8 +134,12 @@ function BrandPageContent() {
         
         <div className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">Select Appliance Brand</h1>
-            <p className="mt-2 text-gray-400 font-medium">Category: {selectedCategory?.name}</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">
+              {selectedCategory?.title || selectedCategory?.categoryTitle || "Select Appliance Brand"}
+            </h1>
+            <p className="mt-2 text-gray-400 font-medium">
+              {selectedCategory?.description || selectedCategory?.categoryDescription || `Category: ${selectedCategory?.name || ''}`}
+            </p>
           </div>
           <div className="relative w-full lg:w-[420px] lg:flex-shrink-0">
             <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" />

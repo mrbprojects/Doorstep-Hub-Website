@@ -116,8 +116,12 @@ function CategoryPageContent() {
         </div>
         
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">Choose Service Category</h1>
-          <p className="mt-2 text-gray-400 font-medium">What type of appliance do you need serviced?</p>
+          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">
+            {selectedCity?.title || "Choose Service Category"}
+          </h1>
+          <p className="mt-2 text-gray-400 font-medium">
+            {selectedCity?.description || "What type of appliance do you need serviced?"}
+          </p>
         </div>
 
         <div className="relative mb-8">

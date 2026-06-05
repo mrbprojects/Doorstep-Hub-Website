@@ -12,7 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { DynamicSEO } from './components/ui/DynamicSEO';
 import dynamic from 'next/dynamic';
 
-const InitialLocationModal = dynamic(() => import('./components/location/InitialLocationModal').then(m => m.InitialLocationModal), { ssr: false });
+// const InitialLocationModal = dynamic(() => import('./components/location/InitialLocationModal').then(m => m.InitialLocationModal), { ssr: false });
 const FloatingActionButtons = dynamic(() => import('./components/ui/FloatingActionButtons').then(m => m.FloatingActionButtons), { ssr: false });
 
 const ubuntu = Ubuntu({
@@ -143,7 +143,7 @@ export default function RootLayout({ children }) {
                       <Suspense fallback={<div className="min-h-screen" />}>
                         {children}
                       </Suspense>
-                      <InitialLocationModal />
+                      {/* <InitialLocationModal /> */}
                       <FloatingActionButtons />
                     </ClientProviders>
                   </ServiceCartProvider>

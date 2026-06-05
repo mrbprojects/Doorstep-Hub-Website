@@ -213,8 +213,12 @@ function ServicePageContent() {
         </div>
         
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">Available Services</h1>
-          <p className="mt-2 text-gray-400 font-medium">{selectedCategory?.name} · {selectedBrand?.name}</p>
+          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">
+            {selectedBrand?.title || "Available Services"}
+          </h1>
+          <p className="mt-2 text-gray-400 font-medium">
+            {selectedBrand?.description || `${selectedCategory?.name || ''} · ${selectedBrand?.name || ''}`}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2 mb-8">
           <button

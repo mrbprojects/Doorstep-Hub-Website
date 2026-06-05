@@ -65,8 +65,12 @@ export function CategoryPage({ slug, initialData }) {
   const [categoryMetadata, setCategoryMetadata] = useState({
     categoryName: '',
     totalCount: 0,
-    detectedCity: null
+    detectedCity: null,
+    categoryTitle: '',
+    categoryDescription: '',
+    categoryFaqs: []
   });
+  const [faqActiveIndex, setFaqActiveIndex] = useState(null);
 
   // Fetch app links from global settings
   useEffect(() => {
@@ -107,7 +111,10 @@ export function CategoryPage({ slug, initialData }) {
           categoryName: initialData.categoryName || '',
           slug: initialData.slug || initialData.categorySlug || slug, // Use API slug if available, else prop
           totalCount: initialData.totalCount || initialData.data.length,
-          detectedCity: initialData.detectedCity
+          detectedCity: initialData.detectedCity,
+          categoryTitle: initialData.categoryTitle || initialData.title || '',
+          categoryDescription: initialData.categoryDescription || initialData.description || '',
+          categoryFaqs: initialData.categoryFaqs || initialData.faqs || []
         });
         setLoading(false);
         return;
@@ -160,7 +167,10 @@ export function CategoryPage({ slug, initialData }) {
             categoryName: data.categoryName || '',
             slug: data.slug || data.categorySlug || slug, // Use API slug if available, else prop
             totalCount: data.totalCount || filteredData.length,
-            detectedCity: data.detectedCity
+            detectedCity: data.detectedCity,
+            categoryTitle: data.categoryTitle || data.title || '',
+            categoryDescription: data.categoryDescription || data.description || '',
+            categoryFaqs: data.categoryFaqs || data.faqs || []
           });
         }
       } catch (err) {
@@ -179,6 +189,12 @@ export function CategoryPage({ slug, initialData }) {
       router.replace(`/${categoryMetadata.slug}`);
     }
   }, [categoryMetadata.slug, slug, router]);
+
+  console.log("CategoryPage Render State:", {
+    categoryMetadata,
+    subCategoriesCount: subCategories.length,
+    subCategoriesFaqs: subCategories.map(s => ({ name: s.name, faqs: s.faqs }))
+  });
 
   return (
     <motion.div
@@ -303,7 +319,7 @@ export function CategoryPage({ slug, initialData }) {
           className="absolute top-0 right-1/4 w-96 h-96 bg-[#037166] rounded-full blur-[120px] pointer-events-none"
         />
 
-        <div className="relative z-10 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8">
           {/* Back Button + Breadcrumb */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -329,23 +345,26 @@ export function CategoryPage({ slug, initialData }) {
             </div>
           </motion.div>
 
-          {/* Category Header - Horizontal Layout */}
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            {/* Left: Title & Description */}
+          {/* Category Header - Full Width Layout */}
+          <div className="w-full flex justify-center">
+            {/* Title & Description */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
+              className="w-full flex flex-col items-center text-center"
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-[#0f172a] mb-4">
-                {categoryMetadata.categoryName}
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-3 leading-tight w-full text-center">
+                {categoryMetadata.categoryTitle || categoryMetadata.categoryName}
               </h1>
-              <p className="text-lg text-[#475569] leading-relaxed mb-6">
-                {theme.description}
-              </p>
+              {(categoryMetadata.categoryDescription || theme.description) && (
+                <p className="text-[12px] md:text-base text-[#475569] leading-relaxed mb-6 w-full text-center max-w-4xl">
+                  {categoryMetadata.categoryDescription || theme.description}
+                </p>
+              )}
 
               {/* Trust Badges - Horizontal */}
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap justify-center gap-3">
                 <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-[#d6e5e2]">
                   <Shield className="w-4 h-4 text-[#037166]" />
                   <h6 className="text-sm text-[#334155]">Verified Professionals</h6>
@@ -359,16 +378,6 @@ export function CategoryPage({ slug, initialData }) {
                   <h6 className="text-sm text-[#334155]">30-90 Days Warranty</h6>
                 </div>
               </div>
-            </motion.div>
-
-            {/* Right: Stats Cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-3 gap-4"
-            >
-
             </motion.div>
           </div>
         </div>
@@ -387,7 +396,7 @@ export function CategoryPage({ slug, initialData }) {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  Choose Your Service
+                  {categoryMetadata.categoryName || "Choose Your Service"}
                 </h2>
                 <p className="text-gray-600">
                   Select the specific service type you need
@@ -505,11 +514,11 @@ export function CategoryPage({ slug, initialData }) {
 
                           {/* Content */}
                           <div className="relative z-10 flex-1 min-w-0 p-3 sm:p-4 md:p-6 flex flex-col justify-center bg-white border-l border-[#e2e8f0]">
-                            <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-[#037166] mb-1.5 sm:mb-2 md:mb-3 group-hover:text-[#025951] transition-colors line-clamp-1">
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#037166] mb-1.5 sm:mb-2 md:mb-3 group-hover:text-[#025951] transition-colors line-clamp-1">
                               {subCategory.name}
-                            </h4>
+                            </h3>
                             <p className="text-[#037166]/80 text-xs sm:text-sm mb-2 sm:mb-3 md:mb-4 leading-relaxed line-clamp-2">
-                              Professional service by verified and experienced technicians
+                              {subCategory.title || subCategory.description || "Professional service by verified and experienced technicians"}
                             </p>
 
                             {/* Price */}
@@ -541,6 +550,81 @@ export function CategoryPage({ slug, initialData }) {
 
               {/* All Other Subcategories - Compact Grid (Remaining) */}
 
+
+              {/* FAQ Section */}
+              {(() => {
+                const allFaqs = [
+                  ...(categoryMetadata.categoryFaqs || []),
+                  ...subCategories.flatMap(sub => sub.faqs || [])
+                ].filter(faq => faq && (faq.question || faq.title) && (faq.answer || faq.description));
+                return allFaqs.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                    className="mt-16 pt-8 border-t border-[#e2ecea]"
+                  >
+                    <div className="mb-8">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        Frequently Asked Questions
+                      </h3>
+                      <p className="text-gray-600">
+                        Got questions? We've got answers.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                      {allFaqs.slice(0, 9).map((faq, index) => (
+                        <div
+                          key={index}
+                          className={`border rounded-2xl overflow-hidden transition-all duration-300 ${faqActiveIndex === index
+                              ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
+                              : 'bg-white border-[#e2e8f0] hover:border-[#cbd5e1]'
+                            }`}
+                        >
+                          <button
+                            onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
+                            className="w-full px-5 py-4 flex items-center justify-between text-left gap-4"
+                          >
+                            <span className="text-base font-semibold text-gray-900 leading-tight">
+                              {faq.question || faq.title}
+                            </span>
+                            <span className="text-[#037166] flex-shrink-0">
+                              <svg
+                                className={`w-5 h-5 transition-transform duration-300 ${faqActiveIndex === index ? 'rotate-180' : ''
+                                  }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </span>
+                          </button>
+                          <AnimatePresence initial={false}>
+                            {faqActiveIndex === index && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <div className="px-5 pb-5 text-gray-600 text-sm leading-relaxed border-t border-[#f1f5f9] pt-3.5">
+                                  {faq.answer || faq.description}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                );
+              })()}
 
               {/* Bottom CTA Strip */}
               <motion.div

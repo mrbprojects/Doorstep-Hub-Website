@@ -67,6 +67,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [reviewsToShow, setReviewsToShow] = useState(3);
   const [selectedPackages, setSelectedPackages] = useState([]);
+  const [faqActiveIndex, setFaqActiveIndex] = useState(null);
 
   // API data state
   const [loading, setLoading] = useState(true);
@@ -641,8 +642,13 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
                   <div className="min-w-0">
                     <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight mb-1 truncate">
-                      {center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
+                      {center.title || center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
                     </h1>
+                    {center.description && (
+                      <p className="text-gray-500 text-xs sm:text-sm mb-1.5 leading-relaxed">
+                        {center.description}
+                      </p>
+                    )}
                     <div className="flex items-center gap-3 flex-wrap">
                       <div className="flex items-center gap-1">
                         <Star className="w-3.5 h-3.5 fill-[#037166] text-[#037166]" />
@@ -773,18 +779,25 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <div className="sticky top-20 z-40 mb-8 bg-[#DEF2EF]/65 backdrop-blur-xl border-y border-[#9ecbc3]/30 -mx-6 px-6 lg:-mx-8 lg:px-8">
           <div className="max-w-[1400px] mx-auto">
             <div className="flex gap-2 overflow-x-auto py-2">
-              {['Service Rates', 'About', 'Working Images', 'Location', 'Reviews'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`relative px-6 py-2 rounded-full text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
-                    ? 'bg-[#037166] text-white shadow-lg shadow-[#037166]/20'
-                    : 'text-gray-600 hover:text-[#037166] hover:bg-[#037166]/10'
-                    }`}
-                >
-                  {tab}
-                </button>
-              ))}
+              {(() => {
+                const faqs = centerData?.faqs || center?.faqs || [];
+                const tabsList = ['Service Rates', 'About', 'Working Images', 'Location', 'Reviews'];
+                if (faqs && faqs.length > 0) {
+                  tabsList.push('FAQs');
+                }
+                return tabsList.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`relative px-6 py-2 rounded-full text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
+                      ? 'bg-[#037166] text-white shadow-lg shadow-[#037166]/20'
+                      : 'text-gray-600 hover:text-[#037166] hover:bg-[#037166]/10'
+                      }`}
+                  >
+                    {tab}
+                  </button>
+                ));
+              })()}
             </div>
           </div>
         </div>
@@ -1110,6 +1123,77 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   </div>
                 ))}
               </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'FAQs' && (
+            <motion.div
+              key="FAQs"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">Frequently Asked Questions</h2>
+              {(() => {
+                const faqs = centerData?.faqs || center?.faqs || [];
+                return faqs.length > 0 ? (
+                  <div className="space-y-4">
+                    {faqs.map((faq, index) => (
+                      <div
+                        key={index}
+                        className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
+                          faqActiveIndex === index
+                            ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
+                            : 'bg-white border-gray-150 hover:border-[#cbd5e1]'
+                        }`}
+                      >
+                        <button
+                          onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
+                          className="w-full px-6 py-5 flex items-center justify-between text-left gap-4"
+                        >
+                          <span className="text-lg font-medium text-gray-900">
+                            {faq.question || faq.title}
+                          </span>
+                          <span className="text-[#037166] flex-shrink-0">
+                            <svg
+                              className={`w-5 h-5 transition-transform duration-300 ${
+                                faqActiveIndex === index ? 'rotate-180' : ''
+                              }`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </span>
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {faqActiveIndex === index && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <div className="px-6 pb-6 text-gray-600 leading-relaxed border-t border-[#f1f5f9] pt-4">
+                                {faq.answer || faq.description}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 text-gray-400">No FAQs available yet</div>
+                );
+              })()}
             </motion.div>
           )}
         </AnimatePresence>

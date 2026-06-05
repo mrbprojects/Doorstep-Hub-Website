@@ -33,11 +33,41 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   // Metadata State (derived from props or API)
   const [pageTitle, setPageTitle] = useState(subCategory || '');
   const [categoryName, setCategoryName] = useState(category || '');
+  const [customTitle, setCustomTitle] = useState('');
+  const [customDescription, setCustomDescription] = useState('');
+  const [categoryFaqs, setCategoryFaqs] = useState([]);
+  const [faqActiveIndex, setFaqActiveIndex] = useState(null);
+  const [activeSubcatData, setActiveSubcatData] = useState(null);
 
   useEffect(() => {
     if (subCategory) setPageTitle(subCategory);
     if (category) setCategoryName(category);
   }, [category, subCategory]);
+
+  useEffect(() => {
+    const fetchSubcatDetails = async () => {
+      if (!category) return;
+      try {
+        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: category })
+        });
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          const matched = data.data.find(sub => 
+            sub.slug === slug || sub._id === subCategoryId
+          );
+          if (matched) {
+            setActiveSubcatData(matched);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching subcat details:", err);
+      }
+    };
+    fetchSubcatDetails();
+  }, [category, slug, subCategoryId]);
 
   const getNearbyCentersFromResponse = (data) => {
     const centersList =
@@ -113,6 +143,11 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         const servicesData = await servicesResponse.json();
 
         if (servicesData.success) {
+          // Extract custom metadata & FAQs
+          setCustomTitle(servicesData.categoryTitle || servicesData.title || '');
+          setCustomDescription(servicesData.categoryDescription || servicesData.description || '');
+          setCategoryFaqs(servicesData.categoryFaqs || servicesData.faqs || []);
+
           // Enrich services with slugs without an extra API call
           const enrichedServices = (servicesData.dhubServices || []).map(service => {
             if (service.slug) return service;
@@ -310,11 +345,29 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               {categoryName ? `Back to ${categoryName}` : 'Back'}
             </motion.button>
 
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-xs text-white/75 mb-3">
+              <span className="hover:underline cursor-pointer" onClick={() => router.push('/appliances')}>Home</span>
+              <ChevronRight className="w-3 h-3 text-white/50" />
+              {categoryName && (
+                <>
+                  <span className="hover:underline cursor-pointer" onClick={() => {
+                    const activeCat = allCategories.find(c => c.name === categoryName);
+                    if (activeCat?.slug) {
+                      router.push(`/${activeCat.slug}`);
+                    }
+                  }}>{categoryName}</span>
+                  <ChevronRight className="w-3 h-3 text-white/50" />
+                </>
+              )}
+              <span className="text-white font-medium">{pageTitle}</span>
+            </div>
+
             <h1 className="text-3xl md:text-4xl font-bold !text-white mb-2">
-              {pageTitle}
+              {activeSubcatData?.title || activeSubcatData?.name || customTitle || pageTitle}
             </h1>
             <p className="!text-white/90">
-              {categoryName ? `${categoryName} • ` : ''}Professional Services
+              {activeSubcatData?.description || customDescription || (categoryName ? `${categoryName} • Professional Services` : 'Professional Services')}
             </p>
           </motion.div>
         </div>
@@ -664,6 +717,83 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* FAQs Accordion Section */}
+            {(() => {
+              const allFaqs = [
+                ...(activeSubcatData?.faqs || []),
+                ...(categoryFaqs || [])
+              ].filter(faq => faq && (faq.question || faq.title) && (faq.answer || faq.description));
+              return allFaqs.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="mt-16 pt-8 border-t border-slate-200"
+                >
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      Frequently Asked Questions
+                    </h3>
+                    <p className="text-gray-600">
+                      Find quick answers to common questions about {activeSubcatData?.name || customTitle || pageTitle} services.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    {allFaqs.slice(0, 9).map((faq, index) => (
+                      <div
+                        key={index}
+                        className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
+                          faqActiveIndex === index
+                            ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
+                            : 'bg-white border-[#e2e8f0] hover:border-[#cbd5e1]'
+                        }`}
+                      >
+                        <button
+                          onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
+                          className="w-full px-6 py-5 flex items-center justify-between text-left gap-4"
+                        >
+                          <span className="text-lg font-medium text-gray-900">
+                            {faq.question || faq.title}
+                          </span>
+                          <span className="text-[#037166] flex-shrink-0">
+                            <svg
+                              className={`w-5 h-5 transition-transform duration-300 ${
+                                faqActiveIndex === index ? 'rotate-180' : ''
+                              }`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </span>
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {faqActiveIndex === index && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <div className="px-6 pb-6 text-gray-600 leading-relaxed border-t border-[#f1f5f9] pt-4">
+                                {faq.answer || faq.description}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })()}
           </div>
         </div>
       </div>

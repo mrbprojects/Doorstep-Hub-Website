@@ -58,6 +58,7 @@ function CategoryPageContent() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCity, setSelectedCity] = useState(null);
+  const [faqActiveIndex, setFaqActiveIndex] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -151,8 +152,14 @@ function CategoryPageContent() {
         </div>
         
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">Choose Service Category</h1>
-          <p className="mt-2 text-gray-400 font-medium">What type of appliance do you need serviced?</p>
+          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">
+            {selectedCity?.title || selectedCity?.name || "Choose Service Category"}
+          </h1>
+          {(selectedCity?.description || "What type of appliance do you need serviced?") && (
+            <p className="mt-2 text-gray-400 font-medium">
+              {selectedCity?.description || "What type of appliance do you need serviced?"}
+            </p>
+          )}
         </div>
 
         <div className="relative mb-8">
@@ -198,6 +205,70 @@ function CategoryPageContent() {
             );
           })}
         </div>
+
+        {/* FAQ Section */}
+        {(() => {
+          const allFaqs = [
+            ...(selectedCity?.faqs || []),
+            ...categories.flatMap(cat => cat.faqs || [])
+          ].filter(faq => faq && (faq.question || faq.title) && (faq.answer || faq.description));
+          
+          return allFaqs.length > 0 && (
+            <div className="mt-16 pt-8 border-t border-gray-100">
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  Frequently Asked Questions
+                </h3>
+                <p className="text-gray-500">
+                  Got questions? We've got answers.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                {allFaqs.slice(0, 9).map((faq, index) => (
+                  <div
+                    key={index}
+                    className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
+                      faqActiveIndex === index
+                        ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
+                        : 'bg-white border-gray-100 hover:border-gray-200'
+                    }`}
+                  >
+                    <button
+                      onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
+                      className="w-full px-5 py-4 flex items-center justify-between text-left gap-4"
+                    >
+                      <span className="text-base font-semibold text-gray-900 leading-tight">
+                        {faq.question || faq.title}
+                      </span>
+                      <span className="text-[#037166] flex-shrink-0">
+                        <svg
+                          className={`w-5 h-5 transition-transform duration-300 ${
+                            faqActiveIndex === index ? 'rotate-180' : ''
+                          }`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                    {faqActiveIndex === index && (
+                      <div className="px-5 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-50 pt-3.5">
+                        {faq.answer || faq.description}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </main>
   );

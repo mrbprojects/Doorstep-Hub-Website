@@ -127,41 +127,49 @@ export function AppDownload() {
             </div>
           </motion.div>
 
-          {/* Right: Floating Phone Mockups */}
+          {/* Right: Phone Mockup */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: 50, rotate: -5 }}
+            whileInView={{ opacity: 1, x: 0, rotate: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="relative h-[calc(100vh-6rem)] min-h-[520px] max-h-[650px] hidden lg:flex items-center justify-center"
+            transition={{ duration: 0.8 }}
+            className="relative flex justify-center lg:justify-end"
           >
-            {/* Main Phone */}
             <motion.div
               animate={{
                 y: [0, -20, 0],
               }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="relative z-10"
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              className="relative"
             >
-              <div className="relative w-[clamp(15rem,16vw,18rem)] h-[clamp(30rem,70vh,36rem)] bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-[3rem] border-8 border-[#2a2a2a] shadow-2xl overflow-hidden">
-                {/* Screen */}
-                <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden rounded-[2.5rem]">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#037166]/30 via-[#04a99d]/20 to-transparent blur-3xl" />
+
+              {/* Phone Frame */}
+              <div className="relative w-[280px] h-[560px] rounded-[3rem] bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border-4 border-white/10 shadow-2xl overflow-hidden">
+                {/* Notch */}
+                {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#037166] rounded-b-3xl z-20" /> */}
+
+                {/* Screen Content */}
+                <div className="absolute inset-3 rounded-[2.5rem] overflow-hidden bg-black">
                   <video
                     ref={videoRef}
                     src="/dhubvideo.mp4"
                     autoPlay
-                    loop
                     muted
+                    loop
                     playsInline
-                    className="w-full h-full object-cover scale-110"
+                    className="w-full h-full object-cover"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#037166]/20 to-transparent" />
                 </div>
 
-                {/* Screen Glow */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/30 to-[#02b39a]/30 blur-2xl -z-10" />
               </div>
             </motion.div>
-
           </motion.div>
         </div>
       </div>

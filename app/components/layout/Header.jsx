@@ -101,7 +101,7 @@ export function Header({ theme = {}, navItems = [] }) {
             .map(item => {
               const isJoinUs = item.label === 'Join Us' || item.url === '/service-partner';
               return {
-                name: isJoinUs ? 'App Download' : item.label,
+                name: isJoinUs ? 'App Download Here' : item.label,
                 href: isJoinUs ? '/app' : item.url,
                 originalService: null
               };

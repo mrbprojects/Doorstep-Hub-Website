@@ -18,7 +18,7 @@ const nextConfig = {
 
   // ─── Security & performance headers ──────────────────────────────────────────
   async headers() {
-    return [
+    const headersList = [
       {
         source: '/:path*',
         headers: [
@@ -40,39 +40,47 @@ const nextConfig = {
           },
         ],
       },
-      // Long-lived cache for static Next.js assets (JS, CSS, fonts, images)
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      // Cache public assets (images, icons) for 7 days
-      {
-        source: '/(.*)\\.(png|jpg|jpeg|gif|ico|svg|webp)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=604800, stale-while-revalidate=86400',
-          },
-        ],
-      },
-      // ─── Edge / CDN cache for rendered HTML pages ──────────────────────────
-      // s-maxage: CDN serves cached HTML for 1 h; stale-while-revalidate: CDN
-      // may serve stale HTML for up to 24 h while regenerating in background.
-      {
-        source: '/((?!_next|api|.*\\.[^/]+$).*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, s-maxage=3600, stale-while-revalidate=86400',
-          },
-        ],
-      },
     ];
+
+    // Only apply aggressive caching in production to prevent caching stale JS/CSS in development
+    if (process.env.NODE_ENV === 'production') {
+      headersList.push(
+        // Long-lived cache for static Next.js assets (JS, CSS, fonts, images)
+        {
+          source: '/_next/static/:path*',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
+          ],
+        },
+        // Cache public assets (images, icons) for 7 days
+        {
+          source: '/(.*)\\.(png|jpg|jpeg|gif|ico|svg|webp)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=604800, stale-while-revalidate=86400',
+            },
+          ],
+        },
+        // ─── Edge / CDN cache for rendered HTML pages ──────────────────────────
+        // s-maxage: CDN serves cached HTML for 1 h; stale-while-revalidate: CDN
+        // may serve stale HTML for up to 24 h while regenerating in background.
+        {
+          source: '/((?!_next|api|.*\\.[^/]+$).*)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, s-maxage=3600, stale-while-revalidate=86400',
+            },
+          ],
+        },
+      );
+    }
+
+    return headersList;
   },
 
   // Tree-shake heavy packages — only imported symbols get bundled.

@@ -94,16 +94,18 @@ export function Header({ theme = {}, navItems = [] }) {
         // Fetch Navbar CMS Items
         const navResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-navbar`);
         const navData = await navResponse.json();
-
         if (navData.success && navData.data) {
           const visibleItems = navData.data
             .filter(item => item.isVisible)
             .sort((a, b) => a.order - b.order)
-            .map(item => ({
-              name: item.label,
-              href: item.url,
-              originalService: null
-            }));
+            .map(item => {
+              const isJoinUs = item.label === 'Join Us' || item.url === '/service-partner';
+              return {
+                name: isJoinUs ? 'App Download' : item.label,
+                href: isJoinUs ? '/app' : item.url,
+                originalService: null
+              };
+            });
 
           let finalNavItems = [];
           if (visibleItems.length > 4) {

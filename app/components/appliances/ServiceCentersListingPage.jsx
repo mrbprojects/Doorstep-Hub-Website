@@ -131,8 +131,16 @@ export function ServiceCentersListingPage() {
                         Back
                     </button>
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <h1 className="text-4xl md:text-5xl font-bold !text-white">Verified Service Providers</h1>
+                          <div className="flex flex-col">
+        <h1 className="text-4xl md:text-3xl font-bold !text-white">
+            Book Verified Service Providers Nearby You
+        </h1>
 
+        <p className="!text-white mt-2">
+           Book verified nearby service centers and repair professionals through DoorstepHub. Get fast, reliable, and affordable doorstep services for your home appliances.
+
+        </p>
+    </div>
                         <div className="relative w-full md:w-96">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                             <input
@@ -260,11 +268,11 @@ export function ServiceCentersListingPage() {
                                             className="group cursor-pointer"
                                         >
                                             <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full flex flex-col">
-                                                <div className="relative h-48 overflow-hidden bg-[#eaf5f2]">
+                                                <div className="relative h-32 sm:h-36 overflow-hidden bg-[#eaf5f2]">
                                                     <img loading="lazy" decoding="async"
                                                         src={store.bannerImage || store.logo || store.image}
                                                         alt={`${store.name} logo`}
-                                                        className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
+                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                         onError={(e) => {
                                                             e.currentTarget.src = store.logo || store.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400';
                                                         }}
@@ -277,15 +285,15 @@ export function ServiceCentersListingPage() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="p-6 flex flex-col flex-1">
-                                                    <h4 className="text-xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-1">
+                                                <div className="p-4 sm:p-5 flex flex-col flex-1">
+                                                    <h4 className="text-lg font-bold text-white mb-4 group-hover:text-[#04a99d] transition-colors line-clamp-1">
                                                         {store.name}
                                                     </h4>
                                                     {/* <p className="text-white/60 text-sm mb-4 flex items-center gap-2 line-clamp-1">
                                                         <MapPin className="w-4 h-4 text-[#04a99d]" />
                                                         {store.address}
                                                     </p> */}
-                                                    <button className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2">
+                                                    <button className="w-full mt-auto px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all flex items-center justify-center gap-2 text-sm">
                                                         Book Service
                                                         <ArrowRight className="w-4 h-4" />
                                                     </button>

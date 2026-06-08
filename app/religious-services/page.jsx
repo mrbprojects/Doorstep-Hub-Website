@@ -22,6 +22,29 @@ import dynamic from 'next/dynamic';
 
 const ReligiousQuestionnaireModal = dynamic(() => import('@/components/religious/ReligiousQuestionnaireModal').then(m => m.ReligiousQuestionnaireModal), { ssr: false });
 
+// Pre-computed stable particle data (avoids Math.random() during render → hydration mismatch)
+const PARTICLES = Array.from({ length: 12 }, (_, i) => ({
+  x0: 20 + (i * 37) % 60,
+  y0: 10 + (i * 53) % 80,
+  yA: -30 - (i * 17) % 70,
+  yB: 10 + (i * 29) % 90,
+  xA: -25 - (i * 11) % 25,
+  xB: 20 + (i * 13) % 80,
+  duration: 8 + (i * 7) % 10,
+  delay: (i * 3) % 5,
+  size: 3 + (i * 2) % 5,
+  isEven: i % 2 === 0,
+  left: `${5 + (i * 8.3) % 90}%`,
+  top: `${5 + (i * 9.1) % 90}%`,
+}));
+
+const SPARKLES = Array.from({ length: 8 }, (_, i) => ({
+  duration: 3 + (i * 4) % 4,
+  delay: (i * 6) % 6,
+  left: `${20 + (i * 10.3) % 60}%`,
+  top: `${20 + (i * 11.7) % 60}%`,
+}));
+
 // Section wrapper with scroll reveal
 function SectionReveal({ children, delay = 0 }) {
   const ref = useRef(null);
@@ -312,46 +335,34 @@ export default function ReligiousServicesPage() {
           </motion.div>
 
           {/* Floating Particles - Gold/Saffron Dots */}
-          {[...Array(12)].map((_, i) => (
+          {PARTICLES.map((p, i) => (
             <motion.div
               key={i}
-              initial={{
-                opacity: 0,
-                x: Math.random() * 100,
-                y: Math.random() * 100
-              }}
+              initial={{ opacity: 0, x: p.x0, y: p.y0 }}
               animate={{
                 opacity: [0, 0.3, 0],
-                y: [
-                  Math.random() * 100,
-                  Math.random() * -100,
-                  Math.random() * 100
-                ],
-                x: [
-                  Math.random() * 100,
-                  Math.random() * -50,
-                  Math.random() * 100
-                ]
+                y: [p.y0, p.yA, p.yB],
+                x: [p.x0, p.xA, p.xB]
               }}
               transition={{
-                duration: 8 + Math.random() * 10,
+                duration: p.duration,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: Math.random() * 5
+                delay: p.delay
               }}
               className="absolute rounded-full blur-sm pointer-events-none"
               style={{
-                width: 3 + Math.random() * 5,
-                height: 3 + Math.random() * 5,
-                backgroundColor: i % 2 === 0 ? 'var(--saffron)' : 'var(--warm-gold)',
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                width: p.size,
+                height: p.size,
+                backgroundColor: p.isEven ? 'var(--saffron)' : 'var(--warm-gold)',
+                left: p.left,
+                top: p.top,
               }}
             />
           ))}
 
           {/* Glowing Sparkles - Diya-like Light Effects */}
-          {[...Array(8)].map((_, i) => (
+          {SPARKLES.map((s, i) => (
             <motion.div
               key={`sparkle-${i}`}
               initial={{ opacity: 0, scale: 0 }}
@@ -360,16 +371,13 @@ export default function ReligiousServicesPage() {
                 scale: [0, 1.2, 0]
               }}
               transition={{
-                duration: 3 + Math.random() * 4,
+                duration: s.duration,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: Math.random() * 6
+                delay: s.delay
               }}
               className="absolute"
-              style={{
-                left: `${20 + Math.random() * 60}%`,
-                top: `${20 + Math.random() * 60}%`,
-              }}
+              style={{ left: s.left, top: s.top }}
             >
               <div className="h-2 w-2 bg-[var(--warm-gold)] rounded-full blur-md shadow-lg shadow-[var(--warm-gold)]" />
             </motion.div>

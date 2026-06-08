@@ -460,8 +460,6 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
 
 /* ---------- HERO SECTION ---------- */
 function HeroContent({ services = [], loading = false, error = null }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
     religious: 'religious-services',
@@ -487,17 +485,8 @@ function HeroContent({ services = [], loading = false, error = null }) {
     fetchSlugs();
   }, []);
 
-  // Auto-rotation Logic
-  useEffect(() => {
-    if (!services || services.length === 0 || isPaused) return;
 
-    const intervalId = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % services.length);
-    }, 1000); // Change every 1 second
-
-    return () => clearInterval(intervalId);
-  }, [services, isPaused]); // Re-run if services load/change or pause state changes
-
+  const isScrollMode = services.length > 4;
 
   const videoRef = React.useRef(null);
   const appLinks = {
@@ -529,63 +518,34 @@ function HeroContent({ services = [], loading = false, error = null }) {
 
       {/* Main Content */}
       <div className="relative z-10 max-w-none mx-auto px-0 text-center w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
+        <div>
           {/* Eyebrow */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
+          <div
             className="inline-flex items-center space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#037166]/10 border border-[#037166]/30 rounded-full mb-2 sm:mb-4 max-w-full"
           >
             <Sparkles className="w-4 h-4 text-[#037166] shrink-0" />
             <h6 className="text-[10px] sm:text-xs md:text-sm bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent font-medium line-clamp-1 sm:line-clamp-none">
               We are Committed to Provide you a Safe Service Experience
             </h6>
-          </motion.div>
+          </div>
 
           {/* Main Heading */}
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 italic leading-[1.1]">
-            {/* SVG Text for Stroke Animation */}
-
-            <span className="block !text-[#037166] text-[28px] sm:text-[40px] drop-shadow-sm font-black">Everything You Need.</span>
-
-            <motion.span
-              key={activeIndex} // Triggers animation on change
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="block mt-1 sm:mt-2 !text-[#037166] min-h-[1.2em] drop-shadow-sm font-black truncate max-w-full px-4 sm:px-0"
-            >
-              {services.length > 0 ? services[activeIndex]?.name : "Doorstep Hub."}
-            </motion.span>
+            <span className="block !text-[#037166] text-[28px] sm:text-[40px] drop-shadow-sm font-black">Everything You Need,</span>
+            <span className="block mt-1 sm:mt-2 !text-[#037166] drop-shadow-sm font-black">
+              Right at Your Doorstep
+            </span>
           </h1>
 
           {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
+          <p
+            className={`text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 mx-auto w-full leading-relaxed text-justify ${isScrollMode ? 'max-w-none px-[155px]' : 'max-w-[1000px] px-3 sm:px-0'}`}
           >
-            Your Premium Gateway to Appliance Services, Spa & Saloon, PG & Hostels, Religious Services, and More.
-            A Smarter Way to Access Trusted Services.
-          </motion.p>
-
-          {/* Tour Trigger Button */}
+            Find trusted appliance repair services, spa and salon bookings, PG and hostel accommodations, and religious pooja services all in one place. Enjoy convenient doorstep solutions, verified professionals, easy booking, and reliable support for your everyday needs. Experience hassle-free home and lifestyle services with just a few clicks.
+          </p>
 
           {/* Service Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-          >
+          <div>
             {error ? (
               <div className="mt-12 text-center">
                 <p className="text-red-400 text-sm mb-2">{error}</p>
@@ -597,15 +557,12 @@ function HeroContent({ services = [], loading = false, error = null }) {
                 </button>
               </div>
             ) : (
-              <ServiceCardsSection services={services} loading={loading} activeIndex={activeIndex} serviceSlugs={serviceSlugs} />
+              <ServiceCardsSection services={services} loading={loading} activeIndex={0} serviceSlugs={serviceSlugs} />
             )}
-          </motion.div>
+          </div>
 
           {/* Download Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0 }}
+          <div
             className="flex flex-wrap justify-center gap-4 mt-8 mb-4 relative z-20"
           >
             <a href={appLinks.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Get it on Google Play">
@@ -614,8 +571,8 @@ function HeroContent({ services = [], loading = false, error = null }) {
             <a href={appLinks.ios} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Download on the App Store">
               <img src="/apple2.png" alt="App Store" loading="lazy" decoding="async" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Bottom Gradient */}

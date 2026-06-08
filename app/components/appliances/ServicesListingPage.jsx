@@ -55,7 +55,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         });
         const data = await response.json();
         if (data.success && Array.isArray(data.data)) {
-          const matched = data.data.find(sub => 
+          const matched = data.data.find(sub =>
             sub.slug === slug || sub._id === subCategoryId
           );
           if (matched) {
@@ -363,7 +363,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               <span className="text-white font-medium">{pageTitle}</span>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold !text-white mb-2">
+            <h1 className="text-3xl md:text-xl font-bold !text-white mb-2">
               {activeSubcatData?.title || activeSubcatData?.name || customTitle || pageTitle}
             </h1>
             <p className="!text-white/90">
@@ -397,26 +397,24 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             </motion.button>
 
             <div className="inline-flex p-1.5 bg-white/85 backdrop-blur-md rounded-full border border-slate-200 shadow-sm">
-            <button
-              onClick={() => setActiveTab('services')}
-              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
-                activeTab === 'services'
-                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
-              }`}
-            >
-              All Services
-            </button>
-            <button
-              onClick={() => setActiveTab('centers')}
-              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
-                activeTab === 'centers'
-                  ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
-              }`}
-            >
-              Nearby Centers
-            </button>
+              <button
+                onClick={() => setActiveTab('services')}
+                className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'services'
+                    ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
+                  }`}
+              >
+                All Services
+              </button>
+              <button
+                onClick={() => setActiveTab('centers')}
+                className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'centers'
+                    ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
+                  }`}
+              >
+                Nearby Centers
+              </button>
             </div>
           </div>
         </div>
@@ -743,11 +741,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                     {allFaqs.slice(0, 9).map((faq, index) => (
                       <div
                         key={index}
-                        className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                          faqActiveIndex === index
+                        className={`border rounded-2xl overflow-hidden transition-all duration-300 ${faqActiveIndex === index
                             ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
                             : 'bg-white border-[#e2e8f0] hover:border-[#cbd5e1]'
-                        }`}
+                          }`}
                       >
                         <button
                           onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
@@ -758,9 +755,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           </span>
                           <span className="text-[#037166] flex-shrink-0">
                             <svg
-                              className={`w-5 h-5 transition-transform duration-300 ${
-                                faqActiveIndex === index ? 'rotate-180' : ''
-                              }`}
+                              className={`w-5 h-5 transition-transform duration-300 ${faqActiveIndex === index ? 'rotate-180' : ''
+                                }`}
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"

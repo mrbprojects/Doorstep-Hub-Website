@@ -272,7 +272,7 @@ function PGResultsContent() {
                             <div>
                                 <div className="text-sm text-gray-500 mb-1">Starting at</div>
                                 <div className="flex items-baseline space-x-1">
-                                    <span className="text-3xl font-bold text-gray-900">₹{listing.monthlyPrice.toLocaleString()}</span>
+                                    <span className="text-3xl font-bold text-gray-900">₹{listing.monthlyPrice.toLocaleString('en-IN')}</span>
                                     {/* <span className="text-sm text-gray-500">/month</span> */}
                                 </div>
                             </div>

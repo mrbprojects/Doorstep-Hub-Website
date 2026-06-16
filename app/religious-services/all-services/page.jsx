@@ -193,7 +193,7 @@ function AllReligiousServicesContent() {
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter mb-0.5 text-left">Starting Rituals From</span>
                                                 <div className="flex items-baseline gap-1">
-                                                    <span className="text-2xl font-extrabold text-[var(--saffron)] tracking-tight">₹{(service.startingAt || service.BasePrice || service.minFare || 1000).toLocaleString()}</span>
+                                                    <span className="text-2xl font-extrabold text-[var(--saffron)] tracking-tight">₹{(service.startingAt || service.BasePrice || service.minFare || 1000).toLocaleString('en-IN')}</span>
                                                     <span className="text-[10px] text-gray-400 font-medium">incl. taxes</span>
                                                 </div>
                                             </div>

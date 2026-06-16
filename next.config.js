@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  distDir: process.env.NEXT_BUILD_DIR || '.next',
 
   // ─── HTTP → HTTPS permanent redirect ─────────────────────────────────────────
   // Eliminates the 1.5 s redirect latency seen in GTMetrix critical-chain report.

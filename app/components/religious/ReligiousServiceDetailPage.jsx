@@ -535,8 +535,8 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                         <div className="flex items-baseline space-x-2">
                             <span className="text-3xl font-bold text-[var(--deep-charcoal)]">
                                 {selectedPackage
-                                    ? `₹${selectedPackage.price.toLocaleString()}`
-                                    : `₹${serviceData.basePrice.toLocaleString()}`}
+                                    ? `₹${selectedPackage.price.toLocaleString('en-IN')}`
+                                    : `₹${serviceData.basePrice.toLocaleString('en-IN')}`}
                             </span>
                             <span className="text-sm text-gray-500"> </span>
                         </div>

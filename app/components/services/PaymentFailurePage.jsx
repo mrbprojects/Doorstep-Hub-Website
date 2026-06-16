@@ -67,7 +67,9 @@ export function PaymentFailurePage() {
             router.push('/appliance-repair-services');
         } else if (type === 'professional') {
             router.push('/appliances/booking');
-        } 
+        } else {
+            router.push('/');
+        }
     };
 
     const getDestinationName = () => {
@@ -76,7 +78,7 @@ export function PaymentFailurePage() {
         if (deepType) return 'cart';
         if (type === 'verified-partner') return 'services';
         if (type === 'professional') return 'booking';
-        return 'cart';
+        return 'home';
     };
 
     const handleGoHome = () => {

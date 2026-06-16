@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AuthModalProvider } from './context/AuthModalContext';
 import { CartProvider } from './context/CartContext';
 import { ServiceCartProvider } from './context/ServiceCartContext';
+import { GlobalSettingsProvider } from './context/GlobalSettingsContext';
 import { ClientProviders } from './components/providers/ClientProviders';
 import ErrorBoundary from './components/ErrorBoundary';
 import { DynamicSEO } from './components/ui/DynamicSEO';
@@ -139,13 +140,15 @@ export default function RootLayout({ children }) {
               <AuthModalProvider>
                 <CartProvider>
                   <ServiceCartProvider>
-                    <ClientProviders>
-                      <Suspense fallback={<div className="min-h-screen" />}>
-                        {children}
-                      </Suspense>
-                      {/* <InitialLocationModal /> */}
-                      <FloatingActionButtons />
-                    </ClientProviders>
+                    <GlobalSettingsProvider>
+                      <ClientProviders>
+                        <Suspense fallback={<div className="min-h-screen" />}>
+                          {children}
+                        </Suspense>
+                        {/* <InitialLocationModal /> */}
+                        <FloatingActionButtons />
+                      </ClientProviders>
+                    </GlobalSettingsProvider>
                   </ServiceCartProvider>
                 </CartProvider>
               </AuthModalProvider>

@@ -560,7 +560,7 @@ function PGListingsContent() {
             <div className="mb-8 border-b border-gray-100 pb-6">
                 <div className="flex items-center justify-between mb-4">
                     <h6 className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Monthly Budget</h6>
-                    <span className="text-[11px] font-bold text-[#037166] bg-[#037166]/10 px-2.5 py-1 rounded-full border border-[#037166]/10">₹{priceRange[1].toLocaleString()}</span>
+                    <span className="text-[11px] font-bold text-[#037166] bg-[#037166]/10 px-2.5 py-1 rounded-full border border-[#037166]/10">₹{priceRange[1].toLocaleString('en-IN')}</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mb-6">
@@ -606,8 +606,8 @@ function PGListingsContent() {
                     />
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-gray-400">
-                    <span>₹{priceRange[0].toLocaleString()}</span>
-                    <span>₹{priceRange[1].toLocaleString()}</span>
+                    <span>₹{priceRange[0].toLocaleString('en-IN')}</span>
+                    <span>₹{priceRange[1].toLocaleString('en-IN')}</span>
                 </div>
             </div>
 
@@ -879,7 +879,7 @@ function PGListingsContent() {
 
     <div className="mt-1">
       <span className="text-2xl sm:text-[38px] font-black text-[#0F172A] leading-none">
-        ₹{listing.monthlyPrice.toLocaleString()}
+        ₹{listing.monthlyPrice.toLocaleString('en-IN')}
       </span>
     </div>
   </div>

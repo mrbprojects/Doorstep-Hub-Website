@@ -375,8 +375,8 @@ export function ResultsPage() {
                         />
                     </div>
                     <div className="flex justify-between text-[10px] font-bold text-gray-400">
-                        <span>₹{priceRange[0].toLocaleString()}</span>
-                        <span>₹{priceRange[1].toLocaleString()}</span>
+                        <span>₹{priceRange[0].toLocaleString('en-IN')}</span>
+                        <span>₹{priceRange[1].toLocaleString('en-IN')}</span>
                     </div>
                 </div>            
 
@@ -743,7 +743,7 @@ function ServiceCard({ service, index, router }) {
                 <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                     <div>
                         <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Starting at</p>
-                        <p className="text-2xl font-black text-gray-900">₹{service.price.toLocaleString()}</p>
+                        <p className="text-2xl font-black text-gray-900">₹{service.price.toLocaleString('en-IN')}</p>
                     </div>
                     <motion.button
                         whileHover={{ scale: 1.02 }}

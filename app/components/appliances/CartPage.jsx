@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Trash2, ShoppingCart, Loader2, Tag, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 
 export function CartPage({
   onBack,
@@ -23,7 +24,11 @@ export function CartPage({
   };
 
   const inspectionCost = cartItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0);
-  const platformFee = cartData?.platformFee || 0;
+
+  // Fees from GlobalSettingsContext (fetched once at app level)
+  const { onlineBookingFee, doorstepInspectionFee } = useGlobalSettings() || {};
+  const platformFee = onlineBookingFee ?? cartData?.platformFee ?? 0;
+  const consultationFee = doorstepInspectionFee ?? cartData?.consultationFee ?? 0;
 
   if (loading && cartItems.length === 0) {
     return (

@@ -11,6 +11,7 @@ import { Input } from '@/components/pghostels/ui/input';
 import { QuestionnaireModal } from '@/components/pghostels/QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
 import { NearbyHostelsSection } from './NearbyHostelsSection';
+import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
 const SERVICE_ID = '69524fb157bb211ca094e5ee'; // PG Hostels Service ID
@@ -448,112 +449,58 @@ export function PremiumHomePage() {
             {/* Quick Search Strip */}
 
 
-            {/* Featured Categories Grid */}
-           <section ref={categoriesRef} className="py-15 relative">
-  <div className="max-w-7xl mx-auto px-4">
-
-    {/* Heading */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="text-center mb-12"
-    >
-      <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
-        Browse by lifestyle
-      </h2>
-      <p className="text-lg md:text-xl text-gray-600">
-        Choose what fits your comfort & budget
-      </p>
-    </motion.div>
-
-    {/* Container */}
-    <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 px-1 md:px-0 hide-scrollbar scroll-smooth">
-
-      {loading ? (
-        [...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className="relative h-80 min-w-[260px] md:min-w-0 rounded-3xl overflow-hidden bg-gray-200 animate-pulse"
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-300 to-gray-200" />
-            <div className="absolute inset-0 p-6 flex flex-col justify-end">
-              <div className="w-14 h-14 bg-gray-300 rounded-2xl mb-4" />
-              <div className="h-8 bg-gray-300 rounded w-3/4 mb-2" />
-              <div className="h-4 bg-gray-300 rounded w-1/2" />
-            </div>
-          </div>
-        ))
-      ) : (
-        apiCategories.map((cat, i) => {
-          const bgImage = cat.image
-            ? getImageUrl(cat.image)
-            : cat.categoryIcon
-            ? getImageUrl(cat.categoryIcon)
-            : '';
-
-          const iconImg = cat.categoryIcon
-            ? getImageUrl(cat.categoryIcon)
-            : null;
-
-          return (
-            <motion.div
-              key={cat._id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -12, scale: 1.03 }}
-              onClick={() => handleCategoryClick(cat._id, cat.name, cat.slug)}
-              className="group cursor-pointer relative h-96 min-w-[260px] md:min-w-0 rounded-[2.5rem] overflow-hidden shadow-xl snap-start"
-            >
-              {/* Background Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{
-                  backgroundImage: `url("${bgImage}")`,
-                  backgroundPosition: 'center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
+            <section ref={categoriesRef} className="py-15 relative">
+              <CategorySubcategorySection
+                categories={apiCategories}
+                categoriesLoading={loading}
+                isLocationReady={true}
+                onViewAll={() => router.push('/pghostels/listings/all')}
+                onOpenCategory={(category) => router.push(`/pghostels/${category.slug || category._id}`)}
+                onSubcategoryClick={(subCategory) => router.push(`/pghostels/${subCategory.slug || subCategory._id}`)}
+                fetchSubcategoriesForCategory={async (category) => {
+                  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categorySlug: category.slug, serviceId: SERVICE_ID }),
+                  });
+                  const data = await response.json();
+                  return data.success && Array.isArray(data.data) ? data.data : [];
+                }}
+                theme={{
+                  eyebrow: 'Lifestyle',
+                  title: 'Browse by lifestyle',
+                  description: 'Choose the stay category that matches your comfort and budget, then jump straight into the exact PG or hostel type.',
+                  viewAllLabel: 'View all',
+                  sectionClass: 'bg-transparent',
+                  eyebrowClass: 'text-[#037166]',
+                  titleClass: 'text-gray-900',
+                  descriptionClass: 'text-gray-600',
+                  viewAllClass: 'text-[#037166] hover:text-[#025951]',
+                  locationBoxClass: 'border border-[#d9e4e2] bg-white/90',
+                  locationIconClass: 'text-[#037166]/60',
+                  locationTitleClass: 'text-gray-900',
+                  locationButtonClass: 'bg-[#037166] text-white hover:bg-[#025951]',
+                  mutedCardClass: 'border border-[#dbe4e2] bg-white/80',
+                  categoryCardClass: 'border-[#dbe4e2] bg-white hover:border-[#bdd5d0] hover:bg-gradient-to-r hover:from-[#f7fbfa] hover:to-white',
+                  activeCategoryCardClass: 'border-[#bdd5d0] bg-gradient-to-r from-[#eef6f4] via-white to-[#f4fbf9] shadow-[0_20px_40px_rgba(3,113,102,0.12)]',
+                  thumbClass: 'border-[#dde8e6] bg-[#f7fbfa]',
+                  activeThumbClass: 'border-[#bdd5d0] bg-white shadow-sm',
+                  categoryTextClass: 'text-gray-900',
+                  activeCategoryTextClass: 'text-[#037166]',
+                  categoryAccentTextClass: 'text-[#037166]',
+                  countTextClass: 'text-gray-500',
+                  arrowClass: 'bg-[#f7f9f9] text-[#95a5a2] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#025951] group-hover:text-white',
+                  activeArrowClass: 'bg-gradient-to-r from-[#037166] to-[#025951] text-white shadow-[0_10px_24px_rgba(3,113,102,0.24)]',
+                  gridCardHeightClass: 'h-[190px]',
+                  gridFallbackClass: 'bg-gradient-to-br from-[#d7ebe7] to-[#eef4f3]',
+                  gridOverlayClass: 'bg-gradient-to-t from-[rgba(12,31,28,0.92)] via-[rgba(12,31,28,0.3)] to-transparent',
+                  showMoreClass: 'border-[#d0ddda] text-[#037166] hover:bg-[#f4fbf9]',
+                  emptyBoxClass: 'border border-[#dbe4e2] bg-white',
+                  emptyTitleClass: 'text-gray-900',
+                  emptyTextClass: 'text-gray-500',
                 }}
               />
-
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-
-              {/* Content */}
-              <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                {/* Category Icon */}
-                <div className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#037166] group-hover:border-[#037166] group-hover:scale-110 transition-all duration-300 shadow-lg overflow-hidden">
-                  {iconImg ? (
-                    <img loading="lazy" decoding="async"
-                      src={iconImg}
-                      alt={cat.name}
-                      className="w-full h-full object-cover rounded-2xl"
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                  ) : (
-                    <Users className="w-8 h-8 text-white" />
-                  )}
-                </div>
-
-                <h4 className="text-xl font-bold text-white mb-3 tracking-tight">
-                  {cat.name}
-                </h4>
-
-                <div className="h-1 w-12 bg-[#037166] rounded-full group-hover:w-24 transition-all duration-300" />
-              </div>
-
-              {/* Hover Border Glow */}
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#037166]/50 rounded-[2.5rem] transition-colors duration-300" />
-            </motion.div>
-          );
-        })
-      )}
-
-    </div>
-  </div>
-</section>
+            </section>
 
             {/* Near You Section */}
             <NearbyHostelsSection router={router} />
@@ -933,7 +880,7 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                                     <div className="flex items-center justify-between pt-3 border-t border-white/20">
                                                         <div className="flex flex-col">
                                                             <span className="text-[10px] text-white/60 uppercase">Starts at</span>
-                                                            <span className="text-xl font-bold text-white">₹{Number(hostelPrice || 0).toLocaleString()}/-</span>
+                                                            <span className="text-xl font-bold text-white">₹{Number(hostelPrice || 0).toLocaleString('en-IN')}/-</span>
                                                         </div>
                                                         <div className="w-10 h-10 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-lg">
                                                             <ChevronRight className="w-5 h-5" />

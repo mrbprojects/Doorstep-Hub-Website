@@ -157,6 +157,42 @@ export async function fetchCategories(location = null) {
 }
 
 /**
+ * Fetch subcategories for an appliance category by slug
+ * @param {string} slug - Category slug
+ * @param {Object|null} location - Optional location with lat and lng
+ * @returns {Promise<Array>} Array of subcategory objects
+ */
+export async function fetchSubcategoriesByCategorySlug(slug, location = null) {
+    const body = {
+        slug,
+        ...(location ? {
+            lattitude: location.lat?.toString(),
+            longitude: location.lng?.toString()
+        } : {})
+    };
+
+    const response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && Array.isArray(data.data)) {
+        return data.data;
+    }
+
+    throw new Error(data.message || 'Failed to fetch subcategories');
+}
+
+/**
  * Fetch all brands
  * @param {string} searchQuery - Optional search query for brands
  * @returns {Promise<Array>} Array of brand objects

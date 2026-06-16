@@ -312,8 +312,8 @@ function SpaSubCategoryContent() {
                         />
                     </div>
                     <div className="flex justify-between text-[11px] font-bold text-gray-600">
-                        <span>Min ₹{priceRange[0].toLocaleString()}</span>
-                        <span>Max ₹{priceRange[1].toLocaleString()}</span>
+                        <span>Min ₹{priceRange[0].toLocaleString('en-IN')}</span>
+                        <span>Max ₹{priceRange[1].toLocaleString('en-IN')}</span>
                     </div>
                 </div>
 
@@ -517,7 +517,7 @@ function SpaSubCategoryContent() {
                                             <div className="flex items-center justify-between pt-5 border-t border-gray-50">
                                                 <div>
                                                     <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Price starts</p>
-                                                    <p className="text-2xl font-black text-gray-900">₹{service.price.toLocaleString()}</p>
+                                                    <p className="text-2xl font-black text-gray-900">₹{service.price.toLocaleString('en-IN')}</p>
                                                 </div>
                                                 <Button className="px-5 py-4 bg-[#1A0515] hover:bg-[#C06C84] text-white rounded-[15px] text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#1A0515]/10">
                                                     Book Now

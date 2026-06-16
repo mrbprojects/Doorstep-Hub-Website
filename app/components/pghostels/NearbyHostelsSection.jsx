@@ -184,7 +184,7 @@ export function NearbyHostelsSection({ router }) {
                                             <div className="flex items-center justify-between pt-3 border-t border-white/10">
                                                 <div className="flex flex-col">
                                                     <span className="text-[10px] text-white/60 uppercase">Starts at</span>
-                                                    <span className="text-xl font-bold text-white">₹{Number(hostel.startingAt || hostel.defaultPrice || hostel.price || 0).toLocaleString()}/-</span>
+                                                    <span className="text-xl font-bold text-white">₹{Number(hostel.startingAt || hostel.defaultPrice || hostel.price || 0).toLocaleString('en-IN')}/-</span>
                                                 </div>
                                                 <div className="w-10 h-10 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-lg">
                                                     <ChevronRight className="w-5 h-5" />

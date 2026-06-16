@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { QuestionnaireModal } from './QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
 import Image from 'next/image';
+import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
 
 const MOCK_CATEGORIES = [
     {
@@ -618,83 +619,68 @@ export function HomePage() {
     </div>
 </section>
             {/* Explore Categories */}
-            <section id="categories" className="py-18 mt-8 px-4 sm:px-6 lg:px-8 bg-transparent">
-                <div className="max-w-7xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="flex items-center justify-between mb-8"
-                    >
-                        <div>
-                            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#0F172A] mb-2">
-                                Explore <span className="text-[#C06C84]">Categories</span>
-                            </h2>
-                            <p className="text-sm sm:text-xl text-[#64748B]">
-                                Step into different worlds of wellness
-                            </p>
-                        </div>
-                        <motion.button
-                            whileHover={{ x: 5 }}
-                            onClick={() => {
-                                setSelectedCategory(null);
-                                setModalOpen(true);
-                            }}
-                            className="text-[#C06C84] hover:text-[#6C5CE7] flex items-center gap-2 transition-colors font-semibold text-xs sm:text-base"
-                        >
-                            Explore Spa Services
-                            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </motion.button>
-                    </motion.div>
-
-                    <div
-                        ref={categoriesScrollRef}
-                        className="flex overflow-x-auto gap-6 pb-8 scroll-smooth text-[#64748B]"
-                    >
-                        {loadingCategories ? (
-                            // Shimmer skeleton for categories
-                            [1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="flex-shrink-0 w-64 md:w-80 relative aspect-[3/4] rounded-3xl overflow-hidden animate-pulse">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
-                                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                                        <div className="h-8 bg-gray-300 rounded-lg w-12 mb-3" />
-                                        <div className="h-6 bg-gray-300 rounded-lg w-3/4 mb-2" />
-                                        <div className="h-4 bg-gray-200 rounded-lg w-full" />
-                                    </div>
-                                </div>
-                            ))
-                        ) : categories.map((category, index) => (
-                            <motion.div
-                                key={category._id || category.id}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                whileHover={{ scale: 1.05, y: -5 }}
-                                onClick={() => handleCategoryClick(category)}
-                                className="flex-shrink-0 w-64 md:w-80 relative aspect-[3/4] rounded-3xl overflow-hidden cursor-pointer group"
-                            >
-                                <img loading="lazy" decoding="async"
-                                    src={category.image}
-                                    alt={category.name}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
-
-                                {/* White Glass Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#C06C84]/90 via-[#C06C84]/40 to-transparent" />
-
-                                <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-end">
-                                    <div className="text-3xl sm:text-5xl mb-2 sm:mb-3">{category.icon}</div>
-                                    <h4 className="text-lg sm:text-2xl font-bold text-[#0F172A] mb-1 sm:mb-2">{category.name}</h4>
-                                    <p className="text-[#64748B] text-xs sm:text-base line-clamp-2">{category.description}</p>
-                                </div>
-
-                                {/* Hover Glow Effect */}
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 border-2 border-[#C06C84] rounded-3xl" />
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
+            <section id="categories" className="mt-8">
+                <CategorySubcategorySection
+                    categories={categories}
+                    categoriesLoading={loadingCategories}
+                    isLocationReady={true}
+                    onViewAll={() => {
+                        setSelectedCategory(null);
+                        setModalOpen(true);
+                    }}
+                    onOpenCategory={(category) => handleCategoryClick(category)}
+                    onSubcategoryClick={(subCategory) => router.push(`/spa-salon/${subCategory.slug || subCategory._id}`)}
+                    fetchSubcategoriesForCategory={async (category) => {
+                        if ((category.slug || category._id || '').startsWith('mock_')) {
+                            return [
+                                { _id: 'mock_sub_1', name: 'Premium Cut', description: 'Includes wash and styling', slug: 'premium-cut' },
+                                { _id: 'mock_sub_2', name: 'Coloring', description: 'Global and highlights', slug: 'coloring' },
+                                { _id: 'mock_sub_3', name: 'Spa Treatment', description: 'Deep conditioning', slug: 'spa-treatment' },
+                            ];
+                        }
+                        const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
+                        const response = await fetch(`${API_BASE_URL}/professional-services-flow/public/subcategories`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(category.slug ? { categorySlug: category.slug, serviceSlug: SERVICE_SLUG } : { categoryId: category._id }),
+                        });
+                        const data = await response.json();
+                        return data.success && Array.isArray(data.data) ? data.data : [];
+                    }}
+                    theme={{
+                        eyebrow: 'Wellness',
+                        title: 'Explore Categories',
+                        description: 'Step into different worlds of wellness and jump straight into the exact salon or spa service you want.',
+                        viewAllLabel: 'Explore Spa Services',
+                        sectionClass: 'bg-transparent px-4 sm:px-6 lg:px-8',
+                        eyebrowClass: 'text-[#C06C84]',
+                        titleClass: 'text-[#0F172A]',
+                        descriptionClass: 'text-[#64748B]',
+                        viewAllClass: 'text-[#C06C84] hover:text-[#6C5CE7]',
+                        locationBoxClass: 'border border-[#f2dce6] bg-white/90',
+                        locationIconClass: 'text-[#C06C84]/60',
+                        locationTitleClass: 'text-[#0F172A]',
+                        locationButtonClass: 'bg-[#6d1357] text-white hover:bg-[#571046]',
+                        mutedCardClass: 'border border-[#f4dde6] bg-white/80',
+                        categoryCardClass: 'border-[#f3e5eb] bg-white hover:border-[#e7bfd0] hover:bg-gradient-to-r hover:from-[#fff8fb] hover:to-white',
+                        activeCategoryCardClass: 'border-[#e7bfd0] bg-gradient-to-r from-[#fff0f5] via-white to-[#fff6fa] shadow-[0_20px_40px_rgba(192,108,132,0.16)]',
+                        thumbClass: 'border-[#f0e4e9] bg-[#fff8fb]',
+                        activeThumbClass: 'border-[#e7bfd0] bg-white shadow-sm',
+                        categoryTextClass: 'text-[#2f2430]',
+                        activeCategoryTextClass: 'text-[#6d1357]',
+                        categoryAccentTextClass: 'text-[#C06C84]',
+                        countTextClass: 'text-[#8b7c86]',
+                        arrowClass: 'bg-[#faf6f8] text-[#b4a3ad] group-hover:bg-gradient-to-r group-hover:from-[#C06C84] group-hover:to-[#6C5CE7] group-hover:text-white',
+                        activeArrowClass: 'bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white shadow-[0_10px_24px_rgba(192,108,132,0.28)]',
+                        gridCardHeightClass: 'h-[190px]',
+                        gridFallbackClass: 'bg-gradient-to-br from-[#f7dbe6] to-[#eadffd]',
+                        gridOverlayClass: 'bg-gradient-to-t from-[#2d1326]/92 via-[#2d1326]/30 to-transparent',
+                        showMoreClass: 'border-[#e7bfd0] text-[#6d1357] hover:bg-[#fff3f8]',
+                        emptyBoxClass: 'border border-[#f1dde6] bg-white',
+                        emptyTitleClass: 'text-[#332633]',
+                        emptyTextClass: 'text-[#8b7c86]',
+                    }}
+                />
             </section>
 
             {/* Featured Packages */}

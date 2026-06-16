@@ -555,7 +555,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                         </div>
                         <div className="flex items-baseline space-x-1.5">
                             <span className="text-2xl md:text-3xl font-bold text-gray-900 font-bold">
-                                ₹{totalPrice > 0 ? totalPrice.toLocaleString() : serviceData.basePrice.toLocaleString()}
+                                ₹{totalPrice > 0 ? totalPrice.toLocaleString('en-IN') : serviceData.basePrice.toLocaleString('en-IN')}
                             </span>
                             <span className="text-[10px] md:text-sm text-gray-500 font-medium">/total</span>
                         </div>

@@ -704,12 +704,12 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                         <div className="text-sm text-gray-500 mb-1">Booking Amount (Payable Now)</div>
                         <div className="flex items-baseline space-x-2">
                             <span className="text-3xl font-bold text-gray-900">
-                                ₹{hostelData.bookingCost.toLocaleString()}
+                                ₹{hostelData.bookingCost.toLocaleString('en-IN')}
                             </span>
                         </div>
                         <div className="text-xs text-[#037166] font-medium mt-1">
                             {selectedPackage
-                                ? `Total Package: ₹${selectedPackage.price.toLocaleString()} (Pay at Hostel)`
+                                ? `Total Package: ₹${selectedPackage.price.toLocaleString('en-IN')} (Pay at Hostel)`
                                 : 'Select a package to proceed'}
                         </div>
                     </div>

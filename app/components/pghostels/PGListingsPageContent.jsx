@@ -526,7 +526,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
             <div className="mb-8 border-b border-gray-100 pb-6">
                 <div className="flex items-center justify-between mb-4">
                     <h6 className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Monthly Budget</h6>
-                    <span className="text-[11px] font-bold text-[#037166] bg-[#037166]/10 px-2.5 py-1 rounded-full border border-[#037166]/10">₹{priceRange[1].toLocaleString()}</span>
+                    <span className="text-[11px] font-bold text-[#037166] bg-[#037166]/10 px-2.5 py-1 rounded-full border border-[#037166]/10">₹{priceRange[1].toLocaleString('en-IN')}</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mb-6">
@@ -571,8 +571,8 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                     />
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-gray-400">
-                    <span>₹{priceRange[0].toLocaleString()}</span>
-                    <span>₹{priceRange[1].toLocaleString()}</span>
+                    <span>₹{priceRange[0].toLocaleString('en-IN')}</span>
+                    <span>₹{priceRange[1].toLocaleString('en-IN')}</span>
                 </div>
             </div>
 
@@ -762,7 +762,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                 <div className="text-[10px] sm:text-xs text-gray-400 italic uppercase tracking-wider font-bold mb-0.5">Starts From</div>
                                 <div className="flex items-baseline space-x-0.5">
                                     {/* <span className='text-[#037166]'>starts from</span> */}
-                                    <span className="text-xl sm:text-2xl font-black text-gray-900">{listing.monthlyPrice.toLocaleString()}</span>
+                                    <span className="text-xl sm:text-2xl font-black text-gray-900">{listing.monthlyPrice.toLocaleString('en-IN')}</span>
                                     {/* <span className="text-[10px] sm:text-xs text-gray-400">/mo</span> */}
                                 </div>
                             </div>

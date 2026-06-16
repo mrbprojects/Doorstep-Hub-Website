@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { ClipboardList, Calendar, IndianRupee, CheckSquare, Info, Loader2, CheckCircle, X, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
+import { useAuth } from '@/context/AuthContext';
+import { useServiceCart } from '@/context/ServiceCartContext';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 
 const STEPS = [
     {
@@ -38,6 +41,9 @@ const selectCls = `${inputCls} appearance-none cursor-pointer`;
 
 export function BookAppointmentPage() {
     const router = useRouter();
+    const { user, isAuthenticated, loginWithWhatsApp, verifyOtp } = useAuth();
+    const { cartData, fetchCart } = useServiceCart();
+
     const [currentStep, setCurrentStep] = useState(0);
     const [agreed, setAgreed] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -50,6 +56,24 @@ export function BookAppointmentPage() {
         bookingDate: '', bookingTime: '', message: '',
     });
 
+    // OTP state
+    const [otpSent, setOtpSent] = useState(false);
+    const [otpCode, setOtpCode] = useState('');
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [resendTimer, setResendTimer] = useState(0);
+
+    // Fees from GlobalSettingsContext — fetched once at app level, auto-updates when backend adds policy fields
+    const { onlineBookingFee, doorstepInspectionFee, loading: feesLoading } = useGlobalSettings() || {};
+    const platformFee = onlineBookingFee ?? 125;
+    const consultationFee = doorstepInspectionFee ?? 175;
+
+
+    // Phone verification check
+    const cleanPhone = (num) => (num || '').replace(/\D/g, '').slice(-10);
+    const userPhone = cleanPhone(user?.phone || user?.mobile || '');
+    const enteredPhone = cleanPhone(formData.phone);
+    const isPhoneVerified = isAuthenticated && !!userPhone && enteredPhone === userPhone;
+
     // Terms Modal State
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [termsContent, setTermsContent] = useState(null);
@@ -60,6 +84,31 @@ export function BookAppointmentPage() {
     const [categories, setCategories] = useState([]);
     const [citiesLoading, setCitiesLoading] = useState(false);
     const [categoriesLoading, setCategoriesLoading] = useState(false);
+
+
+    // Auto-fill profile details once authenticated
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                firstName: prev.firstName || user.firstName || user.name?.split(' ')[0] || '',
+                lastName: prev.lastName || user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
+                phone: prev.phone || user.phone || user.mobile || '',
+                email: prev.email || user.email || '',
+            }));
+        }
+    }, [user]);
+
+    // Timer logic for Resend OTP
+    useEffect(() => {
+        let interval;
+        if (resendTimer > 0) {
+            interval = setInterval(() => {
+                setResendTimer(prev => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [resendTimer]);
 
     // Fetch cities on mount
     useEffect(() => {
@@ -125,6 +174,55 @@ export function BookAppointmentPage() {
     const isValidPhone = (phone) => /^[6-9]\d{9}$/.test((phone || '').trim());
     const isValidName = (name) => /^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test((name || '').trim());
 
+    // OTP handlers
+    const handleSendOtp = async () => {
+        const phone = formData.phone.trim();
+        if (!isValidPhone(phone)) {
+            toast.error('Please enter a valid 10-digit mobile number starting with 6-9');
+            return;
+        }
+        setOtpLoading(true);
+        try {
+            const data = await loginWithWhatsApp(phone);
+            if (data.success || data.status === 'success') {
+                setOtpSent(true);
+                setResendTimer(30);
+                toast.success('OTP sent to WhatsApp');
+            } else {
+                toast.error(data.message || 'Failed to send OTP');
+            }
+        } catch (error) {
+            console.error('Send OTP error:', error);
+            toast.error('Failed to send OTP');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async () => {
+        if (!/^\d{6}$/.test(otpCode)) {
+            toast.error('Please enter 6-digit OTP');
+            return;
+        }
+        setOtpLoading(true);
+        try {
+            const data = await verifyOtp(formData.phone.trim(), otpCode);
+            if (data.success || data.status === 'success') {
+                toast.success('Phone verified successfully!');
+                setOtpSent(false);
+                setOtpCode('');
+                if (fetchCart) fetchCart();
+            } else {
+                toast.error(data.message || 'Invalid OTP');
+            }
+        } catch (error) {
+            console.error('Verify OTP error:', error);
+            toast.error('Verification failed');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
     // Step validation
     const validateStep = () => {
         switch (currentStep) {
@@ -136,6 +234,7 @@ export function BookAppointmentPage() {
 
                 if (!formData.phone.trim()) { toast.error('Please enter your phone number'); return false; }
                 if (!isValidPhone(formData.phone.trim())) { toast.error('Please enter a valid 10-digit phone number starting with 6-9'); return false; }
+                if (!isPhoneVerified) { toast.error('Please verify your phone number via WhatsApp OTP first'); return false; }
 
                 if (!formData.email.trim()) { toast.error('Please enter your email address'); return false; }
                 if (!isValidEmail(formData.email.trim())) { toast.error('Please enter a valid email address'); return false; }
@@ -199,7 +298,6 @@ export function BookAppointmentPage() {
 
             if (data.success && data.access_key) {
                 toast.success('Redirecting to payment gateway...');
-                // Save booking details so we can show confirmation on return
                 sessionStorage.setItem('crm_pending_booking', JSON.stringify({
                     name: `${formData.firstName} ${formData.lastName}`,
                     city: formData.cityName,
@@ -225,7 +323,6 @@ export function BookAppointmentPage() {
         const status = params.get('status');
         if (status === 'success') {
             toast.success('Payment successful! We will contact you to confirm your appointment.');
-            // Clean URL
             window.history.replaceState({}, '', '/book-appointment');
         } else if (status === 'failure') {
             toast.error('Payment failed or cancelled. Your details are preserved — please try again.');
@@ -256,14 +353,115 @@ export function BookAppointmentPage() {
                                 onChange={e => setFormData({ ...formData, lastName: e.target.value.replace(/[^A-Za-z\s.'-]/g, '').slice(0, 50) })}
                             />
                         </div>
-                        <input
-                            type="tel"
-                            placeholder="Phone Number * (e.g. 8886688666)"
-                            className={inputCls}
-                            value={formData.phone}
-                            maxLength={10}
-                            onChange={e => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                        />
+
+                        {/* Phone field with verified badge */}
+                        <div className="relative">
+                            <input
+                                type="tel"
+                                placeholder="Phone Number * (e.g. 8886688666)"
+                                className={`${inputCls} ${isPhoneVerified ? 'border-green-500 pr-24' : ''}`}
+                                value={formData.phone}
+                                maxLength={10}
+                                onChange={e => {
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                    setFormData({ ...formData, phone: val });
+                                    if (otpSent) setOtpSent(false);
+                                }}
+                            />
+                            {isPhoneVerified && (
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-green-600 font-bold text-xs bg-green-50 px-2.5 py-1.5 rounded-lg border border-green-200 select-none">
+                                    <CheckCircle className="w-3.5 h-3.5" /> Verified
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Inline WhatsApp OTP Section */}
+                        {formData.phone.length === 10 && !isPhoneVerified && (
+                            <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl transition-all">
+                                {!otpSent ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleSendOtp}
+                                        disabled={otpLoading}
+                                        className="w-full py-3 bg-[#037166]/10 text-[#037166] hover:bg-[#037166]/20 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2 border border-[#037166]/20"
+                                    >
+                                        {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify Phone via WhatsApp OTP'}
+                                    </button>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <div className="text-center">
+                                            <p className="text-xs font-semibold text-gray-600">Enter Verification Code</p>
+                                            <p className="text-[10px] text-gray-400 mt-0.5">We&apos;ve sent a 6-digit WhatsApp OTP to +91 {formData.phone}</p>
+                                        </div>
+                                        <div className="flex justify-center gap-2">
+                                            {[0, 1, 2, 3, 4, 5].map((index) => (
+                                                <input
+                                                    key={index}
+                                                    id={`booking-otp-${index}`}
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    maxLength={1}
+                                                    value={otpCode[index] || ''}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(/\D/g, '');
+                                                        const newOtp = otpCode.split('');
+                                                        newOtp[index] = val ? val[val.length - 1] : '';
+                                                        const finalOtp = newOtp.join('').slice(0, 6);
+                                                        setOtpCode(finalOtp);
+                                                        if (val && index < 5) {
+                                                            document.getElementById(`booking-otp-${index + 1}`)?.focus();
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Backspace') {
+                                                            if (otpCode[index]) {
+                                                                const newOtp = otpCode.split('');
+                                                                newOtp[index] = '';
+                                                                setOtpCode(newOtp.join(''));
+                                                            } else if (index > 0) {
+                                                                const newOtp = otpCode.split('');
+                                                                newOtp[index - 1] = '';
+                                                                setOtpCode(newOtp.join(''));
+                                                                document.getElementById(`booking-otp-${index - 1}`)?.focus();
+                                                            }
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    className="w-10 h-12 bg-white border border-gray-200 rounded-xl text-center text-lg font-bold focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleVerifyOtp}
+                                                disabled={otpLoading || otpCode.length !== 6}
+                                                className="flex-1 py-2.5 bg-[#037166] text-white font-bold rounded-xl hover:bg-[#04a99d] disabled:opacity-50 transition-all text-xs"
+                                            >
+                                                {otpLoading ? 'Verifying...' : 'Verify & Login'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setOtpSent(false); setOtpCode(''); }}
+                                                className="px-4 py-2.5 border border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-100 transition-all text-xs"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                        <div className="text-center">
+                                            {resendTimer > 0 ? (
+                                                <span className="text-gray-400 text-[10px]">Resend OTP in {resendTimer}s</span>
+                                            ) : (
+                                                <button type="button" onClick={handleSendOtp} className="font-bold text-[#037166] hover:underline text-[10px]">
+                                                    Resend OTP
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         <input
                             type="email"
                             placeholder="Email Address *"
@@ -327,8 +525,12 @@ export function BookAppointmentPage() {
                         <div className="mt-2 p-4 rounded-xl bg-[#065f46]/5 border border-[#065f46]/20 flex items-start gap-3">
                             <Info className="w-5 h-5 text-[#065f46] flex-shrink-0 mt-0.5" />
                             <div className="text-sm text-gray-600 space-y-1">
-                                <p><span className="font-semibold text-[#065f46]">Online Booking Fee -125/-</span> — paid now via secure payment gateway.</p>
-                                <p><span className="font-semibold text-gray-700">Doorstep Inspection Fee -175/-</span> — collected by our technician at your location.</p>
+                                <p><span className="font-semibold text-[#065f46]">
+                                    Online Booking Fee -{feesLoading ? <span className="inline-block w-8 h-3.5 bg-[#065f46]/20 rounded animate-pulse align-middle" /> : `${platformFee}`}/-
+                                </span> — paid now via secure payment gateway.</p>
+                                <p><span className="font-semibold text-gray-700">
+                                    Doorstep Inspection Fee -{feesLoading ? <span className="inline-block w-8 h-3.5 bg-gray-300/60 rounded animate-pulse align-middle" /> : `${consultationFee}`}/-
+                                </span> — collected by our technician at your location.</p>
                             </div>
                         </div>
                     </div>
@@ -386,7 +588,9 @@ export function BookAppointmentPage() {
                             <div className="divide-y divide-gray-100">
                                 <div className="flex items-start justify-between px-5 py-4 gap-4">
                                     <div>
-                                        <p className="font-medium text-gray-800">Online Booking Fee -125/-</p>
+                                        <p className="font-medium text-gray-800">
+                                            Online Booking Fee -{feesLoading ? <span className="inline-block w-8 h-4 bg-gray-200 rounded animate-pulse align-middle" /> : platformFee}/-
+                                        </p>
                                         <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                                             <Info className="w-3 h-3" /> Charged now · Secure online payment
                                         </p>
@@ -395,7 +599,9 @@ export function BookAppointmentPage() {
                                 </div>
                                 <div className="flex items-start justify-between px-5 py-4 gap-4">
                                     <div>
-                                        <p className="font-medium text-gray-800">Doorstep Inspection Fee -175/-</p>
+                                        <p className="font-medium text-gray-800">
+                                            Doorstep Inspection Fee -{feesLoading ? <span className="inline-block w-8 h-4 bg-gray-200 rounded animate-pulse align-middle" /> : consultationFee}/-
+                                        </p>
                                         <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                                             <Info className="w-3 h-3" /> Collected by technician at your location
                                         </p>
@@ -423,7 +629,7 @@ export function BookAppointmentPage() {
                                 </div>
                             </div>
                             <span className="text-gray-600 text-sm leading-snug">
-                                I agree to the <span onClick={() => setShowTermsModal(true)} className="text-[#065f46] underline cursor-pointer font-bold">Terms & Conditions</span> and authorize Doorstep Hub to collect payment for this booking.
+                                I agree to the <span onClick={() => setShowTermsModal(true)} className="text-[#065f46] underline cursor-pointer font-bold">Terms &amp; Conditions</span> and authorize Doorstep Hub to collect payment for this booking.
                             </span>
                         </label>
                     </div>
@@ -457,17 +663,21 @@ export function BookAppointmentPage() {
                         <div className="rounded-xl border border-[#065f46]/20 bg-[#065f46]/5 px-5 py-4 space-y-2">
                             <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-2">Payment</h3>
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-600">Online Booking Fee -125/-</span>
+                                <span className="text-gray-600">
+                                    Online Booking Fee -{feesLoading ? <span className="inline-block w-8 h-3.5 bg-gray-300 rounded animate-pulse align-middle" /> : platformFee}/-
+                                </span>
                                 <span className="font-semibold text-[#065f46]">Pay via Gateway</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-600">Doorstep Inspection Fee -175/-</span>
+                                <span className="text-gray-600">
+                                    Doorstep Inspection Fee -{feesLoading ? <span className="inline-block w-8 h-3.5 bg-gray-300 rounded animate-pulse align-middle" /> : consultationFee}/-
+                                </span>
                                 <span className="font-semibold text-gray-600">Collected at Doorstep</span>
                             </div>
                         </div>
 
                         <p className="text-xs text-gray-400 leading-relaxed">
-                            By clicking "Pay &amp; Confirm Booking" you will be redirected to the secure Easebuzz payment gateway. Your booking data is preserved and will not be cleared until payment is confirmed.
+                            By clicking &quot;Pay &amp; Confirm Booking&quot; you will be redirected to the secure Easebuzz payment gateway. Your booking data is preserved and will not be cleared until payment is confirmed.
                         </p>
                     </div>
                 );
@@ -570,11 +780,11 @@ export function BookAppointmentPage() {
                                 {index < STEPS.length - 1 && (
                                     <div className={`absolute left-[31px] top-12 w-[2px] h-12 transition-all duration-700 ${isActiveOrCompleted ? 'bg-[#037166]/20' : 'bg-gray-100'}`} />
                                 )}
-                                
+
                                 <div className="absolute left-0 flex items-center">
                                     <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-xl transition-all duration-500 ${
-                                        isActiveOrCompleted 
-                                            ? "bg-white text-[#037166] shadow-[#037166]/10 scale-110" 
+                                        isActiveOrCompleted
+                                            ? "bg-white text-[#037166] shadow-[#037166]/10 scale-110"
                                             : "bg-white text-gray-300 border border-gray-100 opacity-50"
                                     }`}>
                                         <step.icon className={`w-7 h-7 ${isActiveOrCompleted ? 'text-[#037166]' : 'text-gray-300'}`} strokeWidth={isActiveOrCompleted ? 2.5 : 2} />
@@ -590,65 +800,64 @@ export function BookAppointmentPage() {
                 </div>
             </div>
 
-                {/* ── Terms & Conditions Modal ── */}
-                {showTermsModal && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTermsModal(false)} />
-                        <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-                            {/* Modal Header */}
-                            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-[#04a99d]/10 flex items-center justify-center">
-                                        <ScrollText className="w-5 h-5 text-[#04a99d]" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-900">Terms & Conditions</h3>
-                                        <p className="text-xs text-gray-500">Please read carefully before booking</p>
-                                    </div>
+            {/* ── Terms & Conditions Modal ── */}
+            {showTermsModal && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTermsModal(false)} />
+                    <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-[#04a99d]/10 flex items-center justify-center">
+                                    <ScrollText className="w-5 h-5 text-[#04a99d]" />
                                 </div>
-                                <button
-                                    onClick={() => setShowTermsModal(false)}
-                                    className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
-                                >
-                                    <X className="w-5 h-5 text-gray-400" />
-                                </button>
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900">Terms &amp; Conditions</h3>
+                                    <p className="text-xs text-gray-500">Please read carefully before booking</p>
+                                </div>
                             </div>
+                            <button
+                                onClick={() => setShowTermsModal(false)}
+                                className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-400" />
+                            </button>
+                        </div>
 
-                            {/* Modal Content */}
-                            <div className="flex-1 overflow-y-auto p-6 md:p-8">
-                                {termsLoading ? (
-                                    <div className="py-20 flex flex-col items-center justify-center gap-4">
-                                        <Loader2 className="w-10 h-10 text-[#04a99d] animate-spin" />
-                                        <p className="text-gray-500 font-medium">Loading content...</p>
-                                    </div>
-                                ) : termsContent ? (
-                                    <div
-                                        className="prose prose-sm max-w-none text-gray-600"
-                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(termsContent.termsAndConditions) }}
-                                    />
-                                ) : (
-                                    <div className="text-center py-20 text-gray-500">
-                                        Failed to load content. Please try again later.
-                                    </div>
-                                )}
-                            </div>
+                        {/* Modal Content */}
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                            {termsLoading ? (
+                                <div className="py-20 flex flex-col items-center justify-center gap-4">
+                                    <Loader2 className="w-10 h-10 text-[#04a99d] animate-spin" />
+                                    <p className="text-gray-500 font-medium">Loading content...</p>
+                                </div>
+                            ) : termsContent ? (
+                                <div
+                                    className="prose prose-sm max-w-none text-gray-600"
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(termsContent.termsAndConditions) }}
+                                />
+                            ) : (
+                                <div className="text-center py-20 text-gray-500">
+                                    Failed to load content. Please try again later.
+                                </div>
+                            )}
+                        </div>
 
-                            {/* Modal Footer */}
-                            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
-                                <button
-                                    onClick={() => {
-                                        setAgreed(true);
-                                        setShowTermsModal(false);
-                                    }}
-                                    className="px-8 py-3 bg-[#00231f] text-white font-bold rounded-xl hover:bg-[#038f84] transition-all shadow-lg active:scale-95"
-                                >
-                                    I Agree
-                                </button>
-                            </div>
+                        {/* Modal Footer */}
+                        <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                            <button
+                                onClick={() => {
+                                    setAgreed(true);
+                                    setShowTermsModal(false);
+                                }}
+                                className="px-8 py-3 bg-[#00231f] text-white font-bold rounded-xl hover:bg-[#038f84] transition-all shadow-lg active:scale-95"
+                            >
+                                I Agree
+                            </button>
                         </div>
                     </div>
-                )}
+                </div>
+            )}
         </div>
     );
 }
-

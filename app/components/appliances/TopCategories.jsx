@@ -1,307 +1,523 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, MapPin } from 'lucide-react';
+import { ArrowRight, ChevronRight, MapPin } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
+import { fetchCategories, fetchSubcategoriesByCategorySlug } from '@/lib/api';
 
-export function TopCategories({ onViewAll }) {
-  const router = useRouter();
-  const { location } = useLocationContext();
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-  const sectionRef = useRef(null);
-  const scrollRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
+const sectionCopy = {
+  eyebrow: 'Categories',
+  title: 'Top Categories',
+  description:
+    'Discover a wide range of essential home and professional services, carefully categorized to help you find exactly what you need, faster and easier.',
+};
 
-  useEffect(() => {
-    const updateViewport = () => setIsMobile(window.innerWidth < 768);
+function resolveImage(src) {
+  if (!src) return '';
+  if (src.startsWith('http')) return src;
+  return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${src}`;
+}
 
-    updateViewport();
-    window.addEventListener('resize', updateViewport);
-
-    return () => window.removeEventListener('resize', updateViewport);
-  }, []);
-
-  // Continuous auto-scroll effect for mobile only
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!isLoading && categories.length > 0 && container && isMobile) {
-      let animationId;
-      const scroll = () => {
-        if (!isPaused && container) {
-          if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 1) {
-            container.scrollLeft = 0;
-          } else {
-            container.scrollLeft += 1;
-          }
-        }
-        animationId = requestAnimationFrame(scroll);
-      };
-
-      animationId = requestAnimationFrame(scroll);
-      return () => cancelAnimationFrame(animationId);
-    }
-  }, [isLoading, categories, isPaused, isMobile]);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  });
-
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.2], [50, 0]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      if (!location?.lat || !location?.lng) {
-        setIsLoading(false); // Stop loading, wait for location
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const body = {
-          lattitude: location.lat.toString(),
-          longitude: location.lng.toString()
-        };
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
-        }
-
-        const result = await response.json();
-
-        if (result.success && result.data && result.data.length > 0) {
-          const mappedCategories = result.data.map((item) => ({
-            title: item.name,
-            image: `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${item.image}`,
-            _id: item._id,
-            status: item.status,
-            slug: item.slug,
-          }));
-          setCategories(mappedCategories);
-        }
-      } catch (error) {
-        console.error('API Error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, [location?.lat, location?.lng]);
-
-  // Skeleton Shimmer Component
-  const SkeletonCategoryCard = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -12 }}
-      className="group cursor-pointer snap-start shrink-0 md:w-auto"
-    >
-      <div className="relative h-40 w-32 rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] backdrop-blur-sm sm:h-48 sm:w-40 md:h-52 md:w-full xl:h-56">
-        {/* Skeleton Image */}
-        <div className="absolute inset-0 animate-shimmer">
-          <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-        </div>
-
-        {/* Skeleton Content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-6">
-          <div className="relative z-10">
-            <div className="h-8 w-48 mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
-            <div className="h-1 w-16 bg-gradient-to-r from-gray-600 via-gray-500 to-gray-600 rounded-full animate-shimmer" />
-          </div>
-        </div>
-
-        {/* Skeleton Arrow */}
-        <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center animate-shimmer" />
-      </div>
-    </motion.div>
-  );
-
+function CategoryListSkeleton() {
   return (
-    <section ref={sectionRef} className="py-1 relative overflow-hidden">
-      <motion.div style={{ opacity, y }} className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4"
-            >
-              <div className="w-2 h-2 rounded-full bg-[#04a99d] animate-pulse" />
-              <h6 className="text-sm font-medium text-[#04a99d]">POPULAR</h6>
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl sm:text-5xl font-bold mb-4 text-white"
-            >
-              Explore Our Services 
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-white text-lg max-w-2xl"
-            >
-              Browse our most requested services
-            </motion.p>
-          </div>
-
-          <motion.button
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="hidden md:flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#037166]/50 transition-all duration-300 group"
-            onClick={onViewAll}
-          >
-            <span>View All</span>
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
-        </div>
-
-        {/* Horizontal Scrolling Cards */}
+    <div className="space-y-4">
+      {Array.from({ length: 6 }).map((_, index) => (
         <div
-          className="relative"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          <div
-            ref={scrollRef}
-            className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible"
-            style={{ WebkitOverflowScrolling: 'touch' }}
-          >
-            <div className="flex min-w-max gap-4 snap-x snap-mandatory md:grid md:min-w-0 md:grid-cols-4 md:gap-4 md:snap-none xl:grid-cols-8">
-              {isLoading
-                ? Array.from({ length: 8 }).map((_, index) => (
-                  <SkeletonCategoryCard key={`skeleton-${index}`} />
-                ))
-                : categories.length > 0 ? categories.map((category, index) => (
-                  <motion.div
-                    key={category._id || index}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -12 }}
-                    onClick={() => router.push(`/${category.slug}`)}
-                    className="group cursor-pointer snap-start shrink-0 md:w-auto"
-                  >
-                    <div className="relative h-40 w-32 rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] backdrop-blur-sm sm:h-48 sm:w-40 md:h-52 md:w-full xl:h-56">
-                      {/* Image */}
-                      <div className="absolute inset-0">
-                        <img loading="lazy" decoding="async"
-                          src={category.image}
-                          alt={category.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
-                      </div>
-
-                      {/* Hover Glow Effect */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
-                        className="absolute inset-0 bg-gradient-to-t from-[#037166]/40 via-[#037166]/10 to-transparent"
-                      />
-
-                      {/* Glass Card Overlay */}
-                      <div className="absolute inset-0 flex flex-col justify-end p-4">
-                        <div className="relative z-10">
-                          <h4 className="text-sm sm:text-base !text-white font-bold mb-1 transition-colors line-clamp-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
-                            {category.title}
-                          </h4>
-                          <motion.div
-                            initial={{ width: 0 }}
-                            whileHover={{ width: '40px' }}
-                            className="h-1 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Glassmorphism Border on Hover */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
-                        className="absolute inset-0 rounded-2xl border-2 border-[#037166]/50 pointer-events-none"
-                        style={{ boxShadow: '0 0 20px rgba(3, 113, 102, 0.3)' }}
-                      />
-
-                      {/* Floating Arrow */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        whileHover={{ opacity: 1, x: 0 }}
-                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center pointer-events-none"
-                      >
-                        <ChevronRight className="w-4 h-4 text-[#04a99d]" />
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                )) : !location ? (
-                  <div className="w-full py-12 flex flex-col items-center justify-center text-center">
-                    <MapPin className="w-8 h-8 text-[#037166] mb-3 opacity-50" />
-                    <p className="text-gray-500 text-sm mb-4">Set your location to view popular categories</p>
-                    <button
-                      onClick={() => document.querySelector('[data-location-trigger]')?.click()}
-                      className="text-xs font-bold text-[#04a99d] uppercase tracking-wider hover:underline"
-                    >
-                      Select Location
-                    </button>
-                  </div>
-                ) : (
-                  <div className="w-full py-12 text-center text-gray-500">No categories found for this location</div>
-                )
-              }
-            </div>
-          </div>
-
-        </div>
-      </motion.div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { 
-            background-position: -200% 0; 
-          }
-          100% { 
-            background-position: 200% 0; 
-          }
-        }
-        .animate-shimmer {
-          background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
-        }
-        .scrollbar-hide {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
-    </section>
+          key={`list-skeleton-${index}`}
+          className="h-[84px] rounded-[30px] border border-[#eef0f2] bg-white/90 animate-pulse"
+        />
+      ))}
+    </div>
   );
 }
 
+function ServiceGridSkeleton() {
+  return (
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div
+          key={`grid-skeleton-${index}`}
+          className="h-[225px] rounded-[18px] bg-[#dfe6ea] animate-pulse"
+        />
+      ))}
+    </div>
+  );
+}
+
+export function TopCategories({ onViewAll }) {
+  const initialVisibleCount = 15;
+  const router = useRouter();
+  const { location } = useLocationContext();
+  const [categories, setCategories] = useState([]);
+  const [categoryCounts, setCategoryCounts] = useState({});
+  const [activeCategorySlug, setActiveCategorySlug] = useState('');
+  const [showAllSubcategories, setShowAllSubcategories] = useState(true);
+  const [subCategories, setSubCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
+  const [showAllVisibleCards, setShowAllVisibleCards] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCategories = async () => {
+      if (!location?.lat || !location?.lng) {
+        if (isMounted) {
+          setCategories([]);
+          setSubCategories([]);
+          setIsLoadingCategories(false);
+        }
+        return;
+      }
+
+      setIsLoadingCategories(true);
+
+      try {
+        const data = await fetchCategories(location);
+        if (!isMounted) return;
+
+        const mapped = data.map((item) => ({
+          _id: item._id,
+          name: item.name,
+          slug: item.slug,
+          image: resolveImage(item.image),
+        }));
+
+        setCategories(mapped);
+        setActiveCategorySlug((current) => current || mapped[0]?.slug || '');
+        setShowAllSubcategories(true);
+        setShowAllVisibleCards(false);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        if (isMounted) {
+          setCategories([]);
+          setSubCategories([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingCategories(false);
+        }
+      }
+    };
+
+    loadCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [location?.lat, location?.lng]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const preloadCounts = async () => {
+      if (!categories.length || !location?.lat || !location?.lng) return;
+
+      const uncached = categories.filter((category) => categoryCounts[category.slug] === undefined);
+      if (!uncached.length) return;
+
+      const results = await Promise.allSettled(
+        uncached.map((category) =>
+          fetchSubcategoriesByCategorySlug(category.slug, location).then((items) => ({
+            slug: category.slug,
+            count: items.length,
+          }))
+        )
+      );
+
+      if (!isMounted) return;
+
+      setCategoryCounts((prev) => {
+        const next = { ...prev };
+
+        results.forEach((result, index) => {
+          const slug = uncached[index]?.slug;
+          if (!slug) return;
+
+          next[slug] = result.status === 'fulfilled' ? result.value.count : 0;
+        });
+
+        return next;
+      });
+    };
+
+    preloadCounts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [categories, categoryCounts, location]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAllSubcategories = async () => {
+      if (!categories.length || !location?.lat || !location?.lng) {
+        if (isMounted) setSubCategories([]);
+        return;
+      }
+
+      setIsLoadingSubCategories(true);
+
+      try {
+        const results = await Promise.allSettled(
+          categories.map((category) =>
+            fetchSubcategoriesByCategorySlug(category.slug, location).then((items) => ({
+              categorySlug: category.slug,
+              items,
+            }))
+          )
+        );
+
+        if (!isMounted) return;
+
+        const nextCounts = {};
+        const merged = [];
+
+        results.forEach((result) => {
+          if (result.status !== 'fulfilled') return;
+
+          const items = result.value.items || [];
+          nextCounts[result.value.categorySlug] = items.length;
+
+          items.forEach((item) => {
+            merged.push({
+              _id: item._id,
+              name: item.name,
+              slug: item.slug || item._id,
+              image: resolveImage(item.image),
+              description:
+                item.title ||
+                item.description ||
+                'Professional service by verified and experienced technicians',
+              categorySlug: result.value.categorySlug,
+            });
+          });
+        });
+
+        setCategoryCounts((prev) => ({ ...prev, ...nextCounts }));
+        setSubCategories(merged);
+      } catch (error) {
+        console.error('Failed to fetch all subcategories:', error);
+        if (isMounted) setSubCategories([]);
+      } finally {
+        if (isMounted) setIsLoadingSubCategories(false);
+      }
+    };
+
+    const loadSubcategories = async () => {
+      if (!activeCategorySlug) {
+        if (isMounted) setSubCategories([]);
+        return;
+      }
+
+      setIsLoadingSubCategories(true);
+
+      try {
+        const data = await fetchSubcategoriesByCategorySlug(activeCategorySlug, location);
+        if (!isMounted) return;
+
+        const mapped = data.map((item) => ({
+          _id: item._id,
+          name: item.name,
+          slug: item.slug || item._id,
+          image: resolveImage(item.image),
+          description:
+            item.title ||
+            item.description ||
+            'Professional service by verified and experienced technicians',
+        }));
+
+        setSubCategories(mapped);
+        setCategoryCounts((prev) => ({
+          ...prev,
+          [activeCategorySlug]: mapped.length,
+        }));
+      } catch (error) {
+        console.error('Failed to fetch subcategories:', error);
+        if (isMounted) {
+          setSubCategories([]);
+          setCategoryCounts((prev) => ({
+            ...prev,
+            [activeCategorySlug]: 0,
+          }));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingSubCategories(false);
+        }
+      }
+    };
+
+    if (showAllSubcategories) {
+      loadAllSubcategories();
+    } else {
+      loadSubcategories();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeCategorySlug, categories, location, showAllSubcategories]);
+
+  const activeCategory = useMemo(
+    () => categories.find((category) => category.slug === activeCategorySlug) || null,
+    [categories, activeCategorySlug]
+  );
+
+  const handleCategorySelect = (category) => {
+    setActiveCategorySlug(category.slug);
+    setShowAllSubcategories(false);
+    setShowAllVisibleCards(false);
+  };
+
+  const visibleSubCategories = showAllVisibleCards
+    ? subCategories
+    : subCategories.slice(0, initialVisibleCount);
+  const displaySubCategories = showAllSubcategories
+    ? [...visibleSubCategories].sort((firstItem, secondItem) =>
+        (firstItem.name || '').localeCompare(secondItem.name || '', undefined, { sensitivity: 'base' })
+      )
+    : visibleSubCategories;
+
+  return (
+    <section className="relative overflow-hidden bg-[#fbfbfa] py-12 sm:py-16 lg:py-20">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-12 left-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-[#037166]/6 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-56 w-56 rounded-full bg-[#f0b16f]/10 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto mb-10 max-w-3xl text-center sm:mb-14">
+          <div className="mb-3 flex items-center justify-center gap-4 text-[#d38b46]">
+            <span className="h-px w-10 bg-current/40" />
+            <span className="text-sm font-semibold tracking-[0.2em] uppercase !text-[#037166]">{sectionCopy.eyebrow}</span>
+            <span className="h-px w-10 bg-current/40" />
+          </div>
+
+          <h2 className="text-4xl font-bold tracking-tight text-[#0c7b78] sm:text-5xl">
+            {sectionCopy.title}
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-[#6b7280] sm:text-lg">
+            {sectionCopy.description}
+          </p>
+
+          <button
+            type="button"
+            onClick={onViewAll}
+            className="mt-5 inline-flex items-center gap-2 text-lg font-semibold !text-[#037166] transition-colors hover:text-[#c97832]"
+          >
+            View all
+            <ArrowRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        {!location?.lat || !location?.lng ? (
+          <div className="rounded-[32px] border border-[#e8ebed] bg-white/90 px-6 py-14 text-center shadow-sm">
+            <MapPin className="mx-auto mb-4 h-10 w-10 text-[#037166]/50" />
+            <p className="text-lg font-semibold text-[#1f2937]">Set your location to explore services near you</p>
+            <button
+              type="button"
+              onClick={() => document.querySelector('[data-location-trigger]')?.click()}
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#037166] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#025951]"
+            >
+              Select Location
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-8 lg:grid-cols-[330px_minmax(0,1fr)] lg:items-start">
+            <div className="lg:sticky lg:top-24">
+              {isLoadingCategories ? (
+                <CategoryListSkeleton />
+              ) : (
+                <div className="flex gap-4 overflow-x-auto pb-2 lg:block lg:space-y-4 lg:overflow-visible lg:pb-0">
+                  <motion.button
+                    type="button"
+                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setShowAllSubcategories(true);
+                      setShowAllVisibleCards(false);
+                    }}
+                    className={`group mb-4 h-[108px] min-w-[260px] rounded-[30px] border px-5 py-4 text-left transition-all lg:flex lg:w-full lg:min-w-0 lg:items-center lg:justify-between ${
+                      showAllSubcategories
+                        ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
+                        : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
+                        showAllSubcategories ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
+                      }`}>
+                        <span className="text-base font-bold text-[#037166]">All</span>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className={`text-lg font-semibold leading-tight ${showAllSubcategories ? 'text-[#037166]' : 'text-[#1f2937]'}`}>
+                          All Services
+                        </h3>
+                        <p className="mt-1 text-sm text-[#6b7280]">Show every subcategory</p>
+                      </div>
+                    </div>
+                    <div className={`mt-4 flex h-11 w-11 items-center justify-center rounded-full transition-all lg:mt-0 ${
+                      showAllSubcategories
+                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-[0_10px_24px_rgba(3,113,102,0.28)]'
+                        : 'bg-[#fafafa] text-[#9ca3af] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#04a99d] group-hover:text-white'
+                    }`}>
+                      <ArrowRight className="h-5 w-5" />
+                    </div>
+                  </motion.button>
+                  {categories.map((category) => {
+                    const isActive = !showAllSubcategories && category.slug === activeCategorySlug;
+                    const serviceCount = categoryCounts[category.slug];
+
+                    return (
+                      <motion.button
+                        key={category._id || category.slug}
+                        type="button"
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleCategorySelect(category)}
+                        className={`group h-[108px] min-w-[260px] rounded-[30px] border px-5 py-4 text-left transition-all lg:flex lg:w-full lg:min-w-0 lg:items-center lg:justify-between ${
+                          isActive
+                            ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
+                            : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
+                              isActive ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
+                            }`}
+                          >
+                            {category.image ? (
+                              <img
+                                loading="lazy"
+                                decoding="async"
+                                src={category.image}
+                                alt={category.name}
+                                className="h-11 w-11 rounded-xl object-cover"
+                              />
+                            ) : (
+                              <span className="text-lg font-bold text-[#037166]">
+                                {category.name?.charAt(0)}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="min-w-0">
+                            <h3
+                              className={`text-lg font-semibold leading-tight ${
+                                isActive ? 'text-[#037166]' : 'text-[#1f2937]'
+                              }`}
+                            >
+                              {category.name}
+                            </h3>
+                            <p className="mt-1 text-sm text-[#6b7280]">
+                              {typeof serviceCount === 'number'
+                                ? `${serviceCount} Services`
+                                : 'Loading services...'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div
+                          className={`mt-4 flex h-11 w-11 items-center justify-center rounded-full transition-all lg:mt-0 ${
+                            isActive
+                              ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-[0_10px_24px_rgba(3,113,102,0.28)]'
+                              : 'bg-[#fafafa] text-[#9ca3af] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#04a99d] group-hover:text-white'
+                          }`}
+                        >
+                          <ArrowRight className="h-5 w-5" />
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div>
+              {isLoadingCategories || isLoadingSubCategories ? (
+                <ServiceGridSkeleton />
+              ) : subCategories.length > 0 ? (
+                <div>
+                  <div className={`grid gap-4 ${showAllSubcategories ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
+                    {displaySubCategories.map((subCategory, index) => (
+                      <motion.button
+                        key={subCategory._id || subCategory.slug || index}
+                        type="button"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ y: -6 }}
+                        onClick={() => router.push(`/${subCategory.slug}`)}
+                        className={`group relative overflow-hidden rounded-[18px] text-left shadow-[0_12px_30px_rgba(15,23,42,0.12)] ${showAllSubcategories ? 'h-[190px]' : 'h-[225px]'}`}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#d8dee4] to-[#f2f4f7]" />
+                        {subCategory.image ? (
+                          <img
+                            loading="lazy"
+                            decoding="async"
+                            src={subCategory.image}
+                            alt={subCategory.name}
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#0f766e] to-[#1f2937]" />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/92 via-[#111827]/30 to-transparent" />
+                        <div className="absolute inset-x-0 bottom-0">
+                          <div className="w-full rounded-none bg-black/42 px-4 py-3 backdrop-blur-md ring-1 ring-white/12 shadow-[0_10px_25px_rgba(0,0,0,0.18)]">
+                            <h4 className="text-center text-[12px] font-medium leading-snug !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:text-[13px] break-words">
+                              {subCategory.name}
+                            </h4>
+                          </div>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+
+                  {subCategories.length > initialVisibleCount && (
+                    <div className="mt-8 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowAllVisibleCards((current) => !current)}
+                        className="inline-flex items-center gap-2 rounded-full border border-[#d6e5e2] px-5 py-3 text-sm font-semibold text-[#037166] transition hover:bg-[#f6fbfa]"
+                      >
+                        {showAllVisibleCards ? 'Show Less' : `Show More (${subCategories.length})`}
+                        <ChevronRight className={`h-4 w-4 transition-transform ${showAllVisibleCards ? '-rotate-90' : 'rotate-90'}`} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-[28px] border border-[#edf0f2] bg-white px-6 py-14 text-center shadow-sm">
+                  <p className="text-lg font-semibold text-[#1f2937]">
+                    No services found for {activeCategory?.name || 'this category'}
+                  </p>
+                  <p className="mt-2 text-sm text-[#6b7280]">
+                    Try another category or view the full category page.
+                  </p>
+                  {activeCategory?.slug && (
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/${activeCategory.slug}`)}
+                      className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#d6e5e2] px-5 py-3 text-sm font-semibold text-[#037166] transition hover:bg-[#f6fbfa]"
+                    >
+                      Open Category
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

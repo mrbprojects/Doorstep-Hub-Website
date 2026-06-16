@@ -8,6 +8,7 @@ import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 import { useRouter } from 'next/navigation';
 
 export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
@@ -15,10 +16,14 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const { token, isAuthenticated, loading: authLoading } = useAuth();
     const router = useRouter();
 
+    // Fees from GlobalSettingsContext (fetched once at app level)
+    const { onlineBookingFee, doorstepInspectionFee } = useGlobalSettings() || {};
+
     // Calculate final payable amount directly from service-cart/get response
     const baseServiceCost = Number(cartData?.totalServiceCost || 0);
     const gstAmount = Number(cartData?.gstAmount || 0);
-    const consultationFee = Number(cartData?.consultationFee || 0);
+    const consultationFee = doorstepInspectionFee ?? Number(cartData?.consultationFee || 0);
+    const platformFee = onlineBookingFee ?? Number(cartData?.platformFee || 0);
     const bookingCost = Number(cartData?.finalAmount || (baseServiceCost + gstAmount + consultationFee));
 
     const inspectionCost = Number(cartData?.inspectionCost || 0);

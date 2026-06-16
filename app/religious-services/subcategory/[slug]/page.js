@@ -289,7 +289,7 @@ function SubCategoryServicesContent() {
                 <div className="flex items-center justify-between mb-6">
                     <h6 className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Offering Range</h6>
                     <span className="text-[11px] font-bold text-[var(--saffron)] bg-[var(--saffron)]/10 px-2.5 py-1 rounded-full border border-[var(--saffron)]/10">
-                        ₹{mounted ? priceRange[1].toLocaleString() : priceRange[1]}
+                        ₹{mounted ? priceRange[1].toLocaleString('en-IN') : priceRange[1]}
                     </span>
                 </div>
                 <div className="px-1">
@@ -304,8 +304,8 @@ function SubCategoryServicesContent() {
                     />
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-gray-400">
-                    <span>₹{priceRange[0].toLocaleString()}</span>
-                    <span>₹{priceRange[1].toLocaleString()}</span>
+                    <span>₹{priceRange[0].toLocaleString('en-IN')}</span>
+                    <span>₹{priceRange[1].toLocaleString('en-IN')}</span>
                 </div>
             </div>
 
@@ -524,7 +524,7 @@ function SubCategoryServicesContent() {
                                                                 <div className="hidden md:flex flex-col items-end">
                                                                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">From</span>
                                                                     <div className="text-xl font-black text-[var(--saffron)] tracking-tighter leading-none">
-                                                                        ₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}
+                                                                        ₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString('en-IN')}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -548,7 +548,7 @@ function SubCategoryServicesContent() {
                                                                 <div className="flex items-center gap-3">
                                                                      {/* Mobile Price */}
                                                                     <div className="md:hidden text-right">
-                                                                        <span className="text-[14px] font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}</span>
+                                                                        <span className="text-[14px] font-bold text-[var(--saffron)]">₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString('en-IN')}</span>
                                                                     </div>
                                                                     <Button className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white px-4 h-8 rounded text-[11px] font-bold shadow-sm transition-all group/btn">
                                                                         Book Now

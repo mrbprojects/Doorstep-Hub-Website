@@ -314,7 +314,7 @@ function ReligiousCategoryContent() {
                                             <div className="flex flex-col">
                                                 <span className="text-xs text-gray-400">Starts from</span>
                                                 <span className="text-xl font-bold text-[var(--saffron,#FF9933)]">
-                                                    ₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString()}
+                                                    ₹{(service.startingAt || service.BasePrice || service.minFare || 1100).toLocaleString('en-IN')}
                                                 </span>
                                             </div>
                                             <Button

@@ -19,6 +19,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import dynamic from 'next/dynamic';
+import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
 
 const ReligiousQuestionnaireModal = dynamic(() => import('@/components/religious/ReligiousQuestionnaireModal').then(m => m.ReligiousQuestionnaireModal), { ssr: false });
 
@@ -553,84 +554,67 @@ export default function ReligiousServicesPage() {
 
       {/* 2. CORE SERVICE CATEGORIES */}
       <SectionReveal>
-        <section id="sacred-categories" className="py-12 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-3">
-                Sacred Service Categories
-              </h2>
-              <p className="text-lg text-[var(--muted-foreground)]">
-                Choose from our comprehensive range of spiritual services
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {categoriesLoading ? (
-                // Skeleton or Loading
-                <div className="col-span-4 flex items-center justify-center py-20">
-                  <div className="w-10 h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin" />
-                </div>
-              ) : categories.length > 0 ? (
-                categories.map((category, index) => (
-                  <motion.div
-                    key={category._id || index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    onClick={() => {
-                      const target = category.slug || category._id;
-                      if (typeof window !== 'undefined') {
-                        sessionStorage.setItem('religious_category', JSON.stringify({ name: category.name }));
-                      }
-                      router.push(`/religious-services/${target}`);
-                    }}
-                    className="group cursor-pointer"
-                  >
-                    <Card className="h-full border-2 border-transparent hover:border-[var(--saffron)]/30 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      {/* Full image area */}
-                      <div className="relative h-44 overflow-hidden bg-gradient-to-br from-orange-100 to-red-50">
-                        {category.image ? (
-                          <img loading="lazy" decoding="async"
-                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${category.image}`}
-                            alt={category.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                          />
-                        ) : null}
-                        {/* Fallback gradient shown when no image or image fails */}
-                        <div
-                          className={`${category.image ? 'hidden' : 'flex'} absolute inset-0 items-center justify-center bg-gradient-to-br from-orange-500 to-red-600`}
-                        >
-                          <Sparkles className="h-14 w-14 text-white/80" />
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                        {/* Category name overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="text-lg font-bold text-white drop-shadow-lg group-hover:text-[var(--saffron)] transition-colors">
-                            {category.name}
-                          </h3>
-                        </div>
-                      </div>
-                      <CardContent className="p-4">
-                        <p className="text-sm text-[var(--muted-foreground)] mb-3 line-clamp-2">
-                          {category.description || 'Explore our sacred services'}
-                        </p>
-                        <Button variant="ghost" className="text-[var(--saffron)] hover:text-[var(--temple-red)] p-0 h-auto font-medium pointer-events-none text-sm">
-                          View Services →
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              ) : (
-                // Fallback to static if API returns nothing (or show empty state)
-                <div className="col-span-4 text-center">No categories found.</div>
-              )}
-            </div>
-          </div>
-        </section>
+        <div id="sacred-categories">
+          <CategorySubcategorySection
+            categories={categories}
+            categoriesLoading={categoriesLoading}
+            isLocationReady={true}
+            onViewAll={() => router.push('/religious-services/category')}
+            onOpenCategory={(category) => {
+              const target = category.slug || category._id;
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('religious_category', JSON.stringify({ name: category.name }));
+              }
+              router.push(`/religious-services/${target}`);
+            }}
+            onSubcategoryClick={(subCategory) => router.push(`/religious-services/${subCategory.slug || subCategory._id}`)}
+            fetchSubcategoriesForCategory={async (category) => {
+              const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  categorySlug: category.slug,
+                  serviceSlug: 'rituals-and-religious-services',
+                }),
+              });
+              const data = await response.json();
+              return data.success && Array.isArray(data.data) ? data.data : [];
+            }}
+            theme={{
+              eyebrow: 'Sacred',
+              title: 'Sacred Service Categories',
+              description: 'Browse divine categories on the left and open the exact ritual or spiritual service you want on the right.',
+              viewAllLabel: 'View all',
+              sectionClass: 'bg-gradient-to-b from-white via-[var(--soft-cream)] to-[var(--off-white)]',
+              eyebrowClass: 'text-[var(--saffron)]',
+              titleClass: 'text-[var(--deep-charcoal)]',
+              descriptionClass: 'text-[var(--muted-foreground)]',
+              viewAllClass: 'text-[var(--saffron)] hover:text-[var(--temple-red)]',
+              locationBoxClass: 'border border-[var(--saffron)]/20 bg-white/90',
+              locationIconClass: 'text-[var(--saffron)]/60',
+              locationTitleClass: 'text-[var(--deep-charcoal)]',
+              locationButtonClass: 'bg-[var(--saffron)] text-white hover:bg-[var(--temple-red)]',
+              mutedCardClass: 'border border-orange-100 bg-white/90',
+              categoryCardClass: 'border-orange-100 bg-white hover:border-[var(--saffron)]/30 hover:bg-gradient-to-r hover:from-[#fffaf0] hover:to-white',
+              activeCategoryCardClass: 'border-[var(--saffron)]/35 bg-gradient-to-r from-[#fff4df] via-white to-[#fff9ef] shadow-[0_20px_40px_rgba(255,153,51,0.14)]',
+              thumbClass: 'border-orange-100 bg-[#fffaf3]',
+              activeThumbClass: 'border-[var(--saffron)]/30 bg-white shadow-sm',
+              categoryTextClass: 'text-[var(--deep-charcoal)]',
+              activeCategoryTextClass: 'text-[var(--saffron)]',
+              categoryAccentTextClass: 'text-[var(--saffron)]',
+              countTextClass: 'text-[var(--muted-foreground)]',
+              arrowClass: 'bg-[#faf7f2] text-[#b7a89a] group-hover:bg-gradient-to-r group-hover:from-[var(--saffron)] group-hover:to-[var(--temple-red)] group-hover:text-white',
+              activeArrowClass: 'bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white shadow-[0_10px_24px_rgba(255,153,51,0.28)]',
+              gridCardHeightClass: 'h-[190px]',
+              gridFallbackClass: 'bg-gradient-to-br from-[#ffe3bf] to-[#ffd1c2]',
+              gridOverlayClass: 'bg-gradient-to-t from-[rgba(64,24,0,0.92)] via-[rgba(64,24,0,0.3)] to-transparent',
+              showMoreClass: 'border-[var(--saffron)]/25 text-[var(--saffron)] hover:bg-[var(--soft-cream)]',
+              emptyBoxClass: 'border border-orange-100 bg-white',
+              emptyTitleClass: 'text-[var(--deep-charcoal)]',
+              emptyTextClass: 'text-[var(--muted-foreground)]',
+            }}
+          />
+        </div>
       </SectionReveal>
 
       {/* 3. ASTROLOGY & CONSULTATION (FEATURED) */}
@@ -799,7 +783,7 @@ export default function ReligiousServicesPage() {
                         <div className="flex items-center justify-between mt-auto">
                           <div className="flex flex-col">
                             <span className="text-[10px] text-gray-400 italic font-medium">Starting from</span>
-                            <span className="text-xl font-bold text-[var(--saffron)] leading-none">₹{(service.startingAt || service.BasePrice || service.minFare || 1000).toLocaleString()}</span>
+                            <span className="text-xl font-bold text-[var(--saffron)] leading-none">₹{(service.startingAt || service.BasePrice || service.minFare || 1000).toLocaleString('en-IN')}</span>
                           </div>
                           <Button size="sm" className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white h-8 px-4 text-xs font-semibold rounded-lg shadow-sm">
                             Book Now

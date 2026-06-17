@@ -19,6 +19,8 @@ const footerLinks = {
     { name: 'Book Appointment', href: '/book-appointment' },
     { name: 'Download Android App', href: '' },
     { name: 'Download iOS App', href: '' },
+    { name: 'Download Partner Android App', href: '' },
+    { name: 'Download Partner iOS App', href: '' },
   ],
   Moreinfo: [
     { name: 'FAQs', href: '/faqs' },
@@ -173,6 +175,12 @@ export function Footer({ theme = {} }) {
   }
   if (link.name === 'Download iOS App' && globalSettings?.customerIosAppLink) {
     return { ...link, href: globalSettings.customerIosAppLink };
+  }
+  if (link.name === 'Download Partner Android App' && globalSettings?.partnerAndroidAppLink) {
+    return { ...link, href: globalSettings.partnerAndroidAppLink };
+  }
+  if (link.name === 'Download Partner iOS App' && globalSettings?.partnerIosAppLink) {
+    return { ...link, href: globalSettings.partnerIosAppLink };
   }
   return link;
 });
@@ -342,7 +350,7 @@ export function Footer({ theme = {} }) {
         })}
 
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <motion.div
@@ -427,8 +435,8 @@ export function Footer({ theme = {} }) {
           {/* Services Links */}
           {(() => {
             const chunks = [];
-            for (let i = 0; i < dynamicQuickLinks.length; i += 4) {
-              chunks.push(dynamicQuickLinks.slice(i, i + 4));
+            for (let i = 0; i < dynamicQuickLinks.length; i += 5) {
+              chunks.push(dynamicQuickLinks.slice(i, i + 5));
             }
             return chunks.map((chunk, idx) => (
               <motion.div

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, ChevronRight, MapPin } from 'lucide-react';
 
@@ -13,7 +13,7 @@ function resolveImage(src) {
 function CategoryListSkeleton({ mutedCardClass }) {
   return (
     <>
-      <div className="flex gap-3 overflow-x-auto pb-2 lg:hidden">
+      <div className="flex gap-3 overflow-x-auto pb-2 lg:!hidden">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={`mobile-tab-skeleton-${index}`} className={`h-12 min-w-[120px] rounded-full animate-pulse ${mutedCardClass}`} />
         ))}
@@ -29,7 +29,7 @@ function CategoryListSkeleton({ mutedCardClass }) {
 
 function ServiceGridSkeleton({ cardHeightClass }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="shared-cat-grid shared-cat-grid--all">
       {Array.from({ length: 12 }).map((_, index) => (
         <div key={`grid-skeleton-${index}`} className={`${cardHeightClass} rounded-[18px] bg-white/40 animate-pulse`} />
       ))}
@@ -55,6 +55,46 @@ export function CategorySubcategorySection({
   const [subCategories, setSubCategories] = useState([]);
   const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
   const [showAllVisibleCards, setShowAllVisibleCards] = useState(false);
+
+  const categoryListRef = useRef(null);
+  const [offsetY, setOffsetY] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setOffsetY(0);
+      return;
+    }
+    const container = categoryListRef.current;
+    if (!container) {
+      console.log('CategorySubcategorySection: container not found');
+      return;
+    }
+
+    if (showAllSubcategories) {
+      setOffsetY(0);
+      return;
+    }
+
+    const activeButton = container.querySelector(`[data-slug="${activeCategorySlug}"]`);
+
+    if (activeButton) {
+      setOffsetY(activeButton.offsetTop || 0);
+    } else {
+      console.log('CategorySubcategorySection: activeButton not found');
+      setOffsetY(0);
+    }
+  }, [activeCategorySlug, showAllSubcategories, categories, isDesktop, categoriesLoading]);
 
   useEffect(() => {
     if (!categories.length) return;
@@ -216,7 +256,7 @@ export function CategorySubcategorySection({
   };
 
   return (
-    <section className={`relative overflow-hidden py-12 sm:py-16 lg:py-20 ${theme.sectionClass}`}>
+    <section className={`relative overflow-x-hidden py-12 sm:py-16 lg:py-20 ${theme.sectionClass}`}>
       <div className="relative mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-10 max-w-3xl text-center sm:mb-14">
           <div className={`mb-3 flex items-center justify-center gap-4 ${theme.eyebrowClass}`}>
@@ -248,13 +288,13 @@ export function CategorySubcategorySection({
             ) : null}
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-[330px_minmax(0,1fr)] lg:items-start">
-            <div className="lg:sticky lg:top-24">
+          <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start overflow-x-hidden">
+            <div className={`${showAllSubcategories ? 'lg:relative' : 'lg:sticky lg:top-24'} min-w-0`}>
               {categoriesLoading ? (
                 <CategoryListSkeleton mutedCardClass={theme.mutedCardClass} />
               ) : (
                 <>
-                  <div className="flex gap-3 overflow-x-auto pb-2 lg:hidden">
+                  <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden w-full scrollbar-hide">
                     <motion.button
                       type="button"
                       whileTap={{ scale: 0.98 }}
@@ -288,7 +328,7 @@ export function CategorySubcategorySection({
                     })}
                   </div>
 
-                  <div className="hidden gap-4 overflow-x-auto pb-2 lg:block lg:space-y-4 lg:overflow-visible lg:pb-0">
+                  <div ref={categoryListRef} className="hidden lg:block lg:space-y-4 relative">
                   <motion.button
                     type="button"
                     whileHover={{ x: 4 }}
@@ -297,7 +337,7 @@ export function CategorySubcategorySection({
                       setShowAllSubcategories(true);
                       setShowAllVisibleCards(false);
                     }}
-                    className={`group mb-4 h-[108px] min-w-[260px] rounded-[30px] border px-5 py-4 text-left transition-all lg:flex lg:w-full lg:min-w-0 lg:items-center lg:justify-between ${
+                    className={`group h-[108px] min-w-[260px] rounded-[30px] border px-5 py-4 text-left transition-all lg:flex lg:w-full lg:min-w-0 lg:items-center lg:justify-between ${
                       showAllSubcategories ? theme.activeCategoryCardClass : theme.categoryCardClass
                     }`}
                   >
@@ -324,6 +364,7 @@ export function CategorySubcategorySection({
                     return (
                       <motion.button
                         key={key}
+                        data-slug={key}
                         type="button"
                         whileHover={{ x: 4 }}
                         whileTap={{ scale: 0.98 }}
@@ -360,12 +401,15 @@ export function CategorySubcategorySection({
               )}
             </div>
 
-            <div>
+            <div 
+              className="min-w-0"
+              style={isDesktop ? { marginTop: `${offsetY}px`, transition: 'margin-top 0.4s cubic-bezier(0.16, 1, 0.3, 1)' } : {}}
+            >
               {categoriesLoading || isLoadingSubCategories ? (
                 <ServiceGridSkeleton cardHeightClass={theme.gridCardHeightClass || 'h-[190px]'} />
               ) : subCategories.length > 0 ? (
                 <div>
-                  <div className={`grid gap-4 ${showAllSubcategories ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
+                  <div className={showAllSubcategories ? 'shared-cat-grid shared-cat-grid--all' : 'shared-cat-grid shared-cat-grid--filtered'}>
                     {displaySubCategories.map((subCategory, index) => (
                       <motion.button
                         key={subCategory._id || subCategory.slug || index}
@@ -376,7 +420,7 @@ export function CategorySubcategorySection({
                         transition={{ delay: index * 0.04 }}
                         whileHover={{ y: -6 }}
                         onClick={() => onSubcategoryClick?.(subCategory, activeCategory)}
-                        className={`group relative overflow-hidden rounded-[18px] text-left shadow-[0_12px_30px_rgba(15,23,42,0.12)] ${showAllSubcategories ? theme.gridCardHeightClass || 'h-[190px]' : 'h-[225px]'}`}
+                        className="group relative overflow-hidden rounded-[18px] text-left shadow-[0_12px_30px_rgba(15,23,42,0.12)]"
                       >
                         <div className={`absolute inset-0 ${theme.gridFallbackClass}`} />
                         {subCategory.image ? (
@@ -390,8 +434,8 @@ export function CategorySubcategorySection({
                         ) : null}
                         <div className={`absolute inset-0 ${theme.gridOverlayClass}`} />
                         <div className="absolute inset-x-0 bottom-0">
-                          <div className={`w-full bg-black/42 px-4 py-3 backdrop-blur-md ring-1 ring-white/12 shadow-[0_10px_25px_rgba(0,0,0,0.18)] ${theme.labelClass || ''}`}>
-                            <h4 className="text-center text-[12px] font-medium leading-snug !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:text-[13px] break-words">
+                          <div className={`w-full bg-black/42 px-2 sm:px-4 py-2 sm:py-3 backdrop-blur-md ring-1 ring-white/12 shadow-[0_10px_25px_rgba(0,0,0,0.18)] ${theme.labelClass || ''}`}>
+                            <h4 className="text-center text-[11px] sm:text-[12px] md:text-[13px] font-medium leading-snug !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] break-words">
                               {subCategory.name}
                             </h4>
                           </div>

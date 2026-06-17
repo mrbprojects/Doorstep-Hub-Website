@@ -241,16 +241,130 @@ html {
 
 
 
-.hide-scrollbar::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-.hide-scrollbar {
+.hide-scrollbar,
+.scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-/* Premium Glassmorphism Utilities */
+/* Top Categories service card grid – base (mobile-first: 2 columns) */
+.top-categories-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  width: 100%;
+}
+
+/* Default card height on mobile */
+.top-categories-grid > button {
+  height: 150px;
+}
+
+/* ── "All Services" mode: more columns on larger screens ── */
+@media (min-width: 640px) {
+  .top-categories-grid--all {
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .top-categories-grid--all > button {
+    height: 190px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .top-categories-grid--all {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .top-categories-grid--all {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ── Filtered (single category) mode ── */
+@media (min-width: 640px) {
+  .top-categories-grid--filtered {
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .top-categories-grid--filtered > button {
+    height: 225px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .top-categories-grid--filtered {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .top-categories-grid--filtered {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+
+/* ── Shared CategorySubcategorySection grid (Spa/Salon, PG/Hostel, Religious) ── */
+.shared-cat-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  width: 100%;
+}
+
+.shared-cat-grid > button {
+  height: 150px;
+}
+
+/* All Services mode */
+@media (min-width: 640px) {
+  .shared-cat-grid--all {
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .shared-cat-grid--all > button {
+    height: 190px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .shared-cat-grid--all {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .shared-cat-grid--all {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Filtered (single category) mode */
+@media (min-width: 640px) {
+  .shared-cat-grid--filtered {
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .shared-cat-grid--filtered > button {
+    height: 225px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .shared-cat-grid--filtered {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .shared-cat-grid--filtered {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+
 .glass-premium {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px) saturate(180%);

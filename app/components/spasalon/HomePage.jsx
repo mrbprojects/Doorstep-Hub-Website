@@ -375,18 +375,18 @@ export function HomePage() {
     <div className="relative z-10 max-w-[1400px] mx-auto px-5 lg:px-8">
 
         {/* ================= HERO ================= */}
-        <div className="grid lg:grid-cols-[1fr_1.02fr] items-center gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.02fr] items-center gap-8 lg:gap-4">
 
             {/* ================= LEFT SIDE ================= */}
             <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7 }}
-                className="max-w-[620px]"
+                className="max-w-[620px] text-center lg:text-left"
             >
 
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#f2dce6] shadow-md mb-4">
+                <div className="inline-flex max-w-full items-center gap-2 rounded-full bg-white border border-[#f2dce6] shadow-md mb-4 px-3 py-2 sm:px-4 self-center lg:self-start">
                     <Sparkles className="w-4 h-4 text-[#c06c84]" />
 
                     <span className="text-[#111827] text-xs sm:text-sm font-medium">
@@ -395,14 +395,14 @@ export function HomePage() {
                 </div>
 
                 {/* Heading */}
-                <h1 className="text-[2.1rem] sm:text-[2.6rem] xl:text-[3rem] leading-[0.95] font-bold tracking-[-1.2px] text-[#0f172a]">
-                    <span className="block whitespace-nowrap">
+                <h1 className="mx-auto max-w-[10.5ch] text-[2.35rem] leading-[0.96] font-bold tracking-[-1.6px] text-[#0f172a] sm:max-w-none sm:text-[2.6rem] xl:text-[3rem] lg:mx-0">
+                    <span className="block">
                         Style That{" "}
                         <span className="bg-gradient-to-r from-[#c06c84] to-[#c05cff] bg-clip-text text-transparent">
                             Shine.
                         </span>
                     </span>
-                    <span className="block whitespace-nowrap">
+                    <span className="block">
                         Care That Makes Them{" "}
                         <span className="bg-gradient-to-r from-[#c06c84] to-[#c05cff] bg-clip-text text-transparent">
                             Happy.
@@ -411,13 +411,13 @@ export function HomePage() {
                 </h1>
 
                 {/* Description */}
-                <p className="mt-2 text-[14px] sm:text-[15px] leading-[1.55] text-[#64748b] max-w-[500px]">
+                <p className="mx-auto mt-3 max-w-[320px] text-[15px] leading-[1.65] text-[#64748b] sm:max-w-[500px] sm:text-[15px] lg:mx-0">
                     Hair, beauty & grooming experts for you and your pets.
                     At home or nearby centers.
                 </p>
 
                 {/* CTA */}
-                <div className="flex flex-wrap items-center gap-3 mt-5">
+                <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
 
                     <motion.button
                         whileHover={{ scale: 1.03 }}
@@ -426,7 +426,7 @@ export function HomePage() {
                             setSelectedCategory(null);
                             setModalOpen(true);
                         }}
-                        className="h-[56px] px-8 rounded-2xl bg-gradient-to-r from-[#741b5d] to-[#c7378f] text-white font-semibold text-base shadow-[0_15px_40px_rgba(199,55,143,0.25)] flex items-center gap-2"
+                        className="flex h-[56px] w-auto min-w-[260px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#741b5d] to-[#c7378f] px-8 text-base font-semibold text-white shadow-[0_15px_40px_rgba(199,55,143,0.25)]"
                     >
                         Explore Services
                         <ChevronRight className="w-5 h-5" />
@@ -437,7 +437,7 @@ export function HomePage() {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         href="#"
-                        className="h-[43px] px-1 rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
+                        className="flex h-[43px] w-auto items-center justify-center rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] px-1 shadow-xl"
                     >
                         <img loading="lazy" decoding="async"
                             src="/apple2.png"
@@ -451,7 +451,7 @@ export function HomePage() {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         href="#"
-                        className="h-[40px] px-1 rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] flex items-center justify-center shadow-xl"
+                        className="flex h-[40px] w-auto items-center justify-center rounded-3xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] px-1 shadow-xl"
                     >
                         <img loading="lazy" decoding="async"
                             src="/andriod1.png"
@@ -462,7 +462,7 @@ export function HomePage() {
                 </div>
 
                 {/* ================= STATS ================= */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 mt-4">
+                <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-4 sm:gap-x-4 sm:gap-y-2">
 
                     {[
                         {
@@ -490,17 +490,17 @@ export function HomePage() {
                             color: 'from-purple-500 to-pink-400'
                         }
                     ].map((item, i) => (
-                        <div key={i} className="min-w-0">
+                        <div key={i} className="min-w-0 rounded-[24px] bg-white/70 px-3 py-3 shadow-[0_10px_30px_rgba(192,108,132,0.08)] sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none">
 
-                            <div className={`w-[46px] h-[46px] rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg mb-2`}>
+                            <div className={`mx-auto flex h-[42px] w-[42px] items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} text-white shadow-lg mb-2 sm:mx-0 sm:h-[46px] sm:w-[46px]`}>
                                 {item.icon}
                             </div>
 
-                            <h3 className="text-[1.8rem] sm:text-[2rem] leading-none font-bold text-[#0f172a]">
+                            <h3 className="text-[1.7rem] leading-none font-bold text-[#0f172a] sm:text-[2rem]">
                                 {item.value}
                             </h3>
 
-                            <p className="mt-0.5 text-[#64748b] text-[11px] sm:text-xs leading-tight">
+                            <p className="mt-1 text-[11px] leading-tight text-[#64748b] sm:text-xs">
                                 {item.label}
                             </p>
                         </div>
@@ -509,38 +509,36 @@ export function HomePage() {
             </motion.div>
 
             {/* ================= RIGHT SIDE ================= */}
-                    {/* ================= RIGHT SIDE ================= */}
-{/* ================= RIGHT SIDE ================= */}
 <motion.div
   initial={{ opacity: 0, x: 30 }}
   animate={{ opacity: 1, x: 0 }}
   transition={{ duration: 0.7 }}
-  className="relative flex justify-center items-center"
+  className="relative flex items-center justify-center lg:justify-end"
 >
-  <div className="relative w-[600px] lg:w-[640px] h-[430px] lg:h-[470px]">
+  <div className="relative mx-auto h-[260px] w-full max-w-[360px] sm:h-[380px] sm:max-w-[560px] lg:h-[470px] lg:w-[640px]">
 
     {/* Main Generated Right Image */}
     <img loading="lazy" decoding="async"
       src="/right-side-image.png"
       alt="Salon and Pet Grooming"
-      className="w-full h-full object-contain"
+      className="h-full w-full object-contain"
     />
 
     {/* Floating Hair Salon Card */}
     <motion.div initial={false}
       animate={{ y: [0, -8, 0] }}
       transition={{ repeat: Infinity, duration: 4 }}
-      className="absolute top-[24px] right-[6px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3 pointer-events-none"
+      className="absolute left-2 top-2 z-50 flex items-center gap-2 rounded-2xl border border-[#f3dce5] bg-white/95 px-2.5 py-1.5 shadow-2xl backdrop-blur-xl pointer-events-none sm:left-auto sm:right-[6px] sm:top-[24px] sm:gap-3 sm:rounded-3xl sm:px-3.5 sm:py-2.5"
     >
-      <div className="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center text-2xl">
+      <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-pink-100 flex items-center justify-center text-lg sm:text-2xl">
         💇🏻‍♀️
       </div>
 
       <div>
-        <h4 className="text-[#111827] font-semibold text-base leading-none">
+        <h4 className="text-[#111827] font-semibold text-xs sm:text-base leading-none">
           Hair Salon
         </h4>
-        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-xs">
+        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-[10px] sm:text-xs">
           ⭐ 4.8
         </div>
       </div>
@@ -550,17 +548,17 @@ export function HomePage() {
     <motion.div initial={false}
       animate={{ y: [0, 10, 0] }}
       transition={{ repeat: Infinity, duration: 5 }}
-      className="absolute top-[108px] right-[0px] z-50 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#f3dce5] shadow-2xl px-3.5 py-2.5 flex items-center gap-3 pointer-events-none"
+      className="absolute bottom-3 right-2 z-50 flex items-center gap-2 rounded-2xl border border-[#f3dce5] bg-white/95 px-2.5 py-1.5 shadow-2xl backdrop-blur-xl pointer-events-none sm:bottom-auto sm:right-[0px] sm:top-[108px] sm:gap-3 sm:rounded-3xl sm:px-3.5 sm:py-2.5"
     >
-      <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-2xl">
+      <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-orange-100 flex items-center justify-center text-lg sm:text-2xl">
         🐶
       </div>
 
       <div>
-        <h4 className="text-[#111827] font-semibold text-base leading-none">
+        <h4 className="text-[#111827] font-semibold text-xs sm:text-base leading-none">
           Pet Grooming
         </h4>
-        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-xs">
+        <div className="flex items-center gap-1 mt-1 text-yellow-500 text-[10px] sm:text-xs">
           ⭐ 4.7
         </div>
       </div>
@@ -652,7 +650,7 @@ export function HomePage() {
                         title: 'Explore Categories',
                         description: 'Step into different worlds of wellness and jump straight into the exact salon or spa service you want.',
                         viewAllLabel: 'Explore Spa Services',
-                        sectionClass: 'bg-transparent px-4 sm:px-6 lg:px-8',
+                        sectionClass: 'bg-transparent',
                         eyebrowClass: 'text-[#C06C84]',
                         titleClass: 'text-[#0F172A]',
                         descriptionClass: 'text-[#64748B]',

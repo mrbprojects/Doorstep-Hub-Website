@@ -539,7 +539,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
 
           {/* Subtitle */}
           <p
-            className={`text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 mx-auto w-full leading-relaxed text-justify ${isScrollMode ? 'max-w-none px-[155px]' : 'max-w-[1000px] px-3 sm:px-0'}`}
+            className={`text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 mx-auto w-full leading-relaxed text-center ${isScrollMode ? 'max-w-none px-4 sm:px-6 md:px-12 lg:px-[155px]' : 'max-w-[1000px] px-3 sm:px-0'}`}
           >
             Find trusted appliance repair services, spa and salon bookings, PG and hostel accommodations, and religious pooja services all in one place. Enjoy convenient doorstep solutions, verified professionals, easy booking, and reliable support for your everyday needs. Experience hassle-free home and lifestyle services with just a few clicks.
           </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ChevronRight, MapPin } from 'lucide-react';
@@ -35,11 +35,11 @@ function CategoryListSkeleton() {
 
 function ServiceGridSkeleton() {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
       {Array.from({ length: 8 }).map((_, index) => (
         <div
           key={`grid-skeleton-${index}`}
-          className="h-[225px] rounded-[18px] bg-[#dfe6ea] animate-pulse"
+          className="h-[150px] sm:h-[225px] rounded-[18px] bg-[#dfe6ea] animate-pulse"
         />
       ))}
     </div>
@@ -58,6 +58,49 @@ export function TopCategories({ onViewAll }) {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
   const [showAllVisibleCards, setShowAllVisibleCards] = useState(false);
+
+  const categoryListRef = useRef(null);
+  const [offsetY, setOffsetY] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setOffsetY(0);
+      return;
+    }
+    const container = categoryListRef.current;
+    if (!container) return;
+
+    const buttons = container.querySelectorAll('button');
+    if (!buttons || buttons.length === 0) return;
+
+    let activeButton = null;
+    if (showAllSubcategories) {
+      activeButton = buttons[0];
+    } else {
+      activeButton = container.querySelector(`[data-slug="${activeCategorySlug}"]`);
+    }
+
+    if (activeButton) {
+      const parent = container.parentElement;
+      const parentRect = parent ? parent.getBoundingClientRect() : container.getBoundingClientRect();
+      const buttonRect = activeButton.getBoundingClientRect();
+      const relativeTop = buttonRect.top - parentRect.top;
+      setOffsetY(relativeTop);
+    } else {
+      setOffsetY(0);
+    }
+  }, [activeCategorySlug, showAllSubcategories, categories, isDesktop]);
 
   useEffect(() => {
     let isMounted = true;
@@ -283,7 +326,7 @@ export function TopCategories({ onViewAll }) {
     : visibleSubCategories;
 
   return (
-    <section className="relative overflow-hidden bg-[#fbfbfa] py-12 sm:py-16 lg:py-20">
+    <section className="relative bg-[#fbfbfa] py-12 sm:py-16 lg:py-20 overflow-x-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-12 left-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-[#037166]/6 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-56 w-56 rounded-full bg-[#f0b16f]/10 blur-3xl" />
@@ -328,123 +371,158 @@ export function TopCategories({ onViewAll }) {
             </button>
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-[330px_minmax(0,1fr)] lg:items-start">
-            <div className="lg:sticky lg:top-24">
+          <div className="grid gap-5 lg:gap-8 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start overflow-x-hidden">
+            {/* Category filter sidebar — horizontal scroll on mobile, sticky sidebar on desktop */}
+            <div className="lg:sticky lg:top-24 min-w-0">
               {isLoadingCategories ? (
-                <CategoryListSkeleton />
+                <div className="flex gap-3 overflow-x-auto pb-2 lg:hidden">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-[52px] w-32 flex-shrink-0 rounded-full bg-gray-200 animate-pulse" />
+                  ))}
+                </div>
               ) : (
-                <div className="flex gap-4 overflow-x-auto pb-2 lg:block lg:space-y-4 lg:overflow-visible lg:pb-0">
-                  <motion.button
-                    type="button"
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setShowAllSubcategories(true);
-                      setShowAllVisibleCards(false);
-                    }}
-                    className={`group mb-4 h-[108px] min-w-[260px] rounded-[30px] border px-5 py-4 text-left transition-all lg:flex lg:w-full lg:min-w-0 lg:items-center lg:justify-between ${
-                      showAllSubcategories
-                        ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
-                        : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
-                        showAllSubcategories ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
-                      }`}>
-                        <span className="text-base font-bold text-[#037166]">All</span>
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className={`text-lg font-semibold leading-tight ${showAllSubcategories ? 'text-[#037166]' : 'text-[#1f2937]'}`}>
-                          All Services
-                        </h3>
-                        <p className="mt-1 text-sm text-[#6b7280]">Show every subcategory</p>
-                      </div>
-                    </div>
-                    <div className={`mt-4 flex h-11 w-11 items-center justify-center rounded-full transition-all lg:mt-0 ${
-                      showAllSubcategories
-                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-[0_10px_24px_rgba(3,113,102,0.28)]'
-                        : 'bg-[#fafafa] text-[#9ca3af] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#04a99d] group-hover:text-white'
-                    }`}>
-                      <ArrowRight className="h-5 w-5" />
-                    </div>
-                  </motion.button>
-                  {categories.map((category) => {
-                    const isActive = !showAllSubcategories && category.slug === activeCategorySlug;
-                    const serviceCount = categoryCounts[category.slug];
+                /* Mobile: horizontal pill row | Desktop: vertical card list */
+                <>
+                  {/* ── MOBILE pill strip ── */}
+                  <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden scrollbar-hide w-full">
+                    {/* All pill */}
+                    <button
+                      type="button"
+                      onClick={() => { setShowAllSubcategories(true); setShowAllVisibleCards(false); }}
+                      className={`flex-shrink-0 flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${
+                        showAllSubcategories
+                          ? 'border-[#037166] bg-[#037166] text-white shadow-md'
+                          : 'border-[#e2e8f0] bg-white text-[#374151]'
+                      }`}
+                    >
+                      <span className="text-xs font-bold">All</span>
+                      All Services
+                    </button>
+                    {categories.map((category) => {
+                      const isActive = !showAllSubcategories && category.slug === activeCategorySlug;
+                      return (
+                        <button
+                          key={category._id || category.slug}
+                          type="button"
+                          onClick={() => handleCategorySelect(category)}
+                          className={`flex-shrink-0 flex items-center gap-2 rounded-full border px-3.5 py-2.5 text-sm font-semibold transition-all ${
+                            isActive
+                              ? 'border-[#037166] bg-[#037166] text-white shadow-md'
+                              : 'border-[#e2e8f0] bg-white text-[#374151]'
+                          }`}
+                        >
+                          {category.image && (
+                            <img
+                              loading="lazy"
+                              decoding="async"
+                              src={category.image}
+                              alt={category.name}
+                              className="h-5 w-5 rounded-full object-cover flex-shrink-0"
+                            />
+                          )}
+                          <span className="whitespace-nowrap">{category.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                    return (
-                      <motion.button
-                        key={category._id || category.slug}
-                        type="button"
-                        whileHover={{ x: 4 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleCategorySelect(category)}
-                        className={`group h-[108px] min-w-[260px] rounded-[30px] border px-5 py-4 text-left transition-all lg:flex lg:w-full lg:min-w-0 lg:items-center lg:justify-between ${
-                          isActive
-                            ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
-                            : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
-                        }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
-                              isActive ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
-                            }`}
-                          >
-                            {category.image ? (
-                              <img
-                                loading="lazy"
-                                decoding="async"
-                                src={category.image}
-                                alt={category.name}
-                                className="h-11 w-11 rounded-xl object-cover"
-                              />
-                            ) : (
-                              <span className="text-lg font-bold text-[#037166]">
-                                {category.name?.charAt(0)}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="min-w-0">
-                            <h3
-                              className={`text-lg font-semibold leading-tight ${
-                                isActive ? 'text-[#037166]' : 'text-[#1f2937]'
-                              }`}
-                            >
-                              {category.name}
-                            </h3>
-                            <p className="mt-1 text-sm text-[#6b7280]">
-                              {typeof serviceCount === 'number'
-                                ? `${serviceCount} Services`
-                                : 'Loading services...'}
-                            </p>
-                          </div>
+                  {/* ── DESKTOP card list ── */}
+                  <div ref={categoryListRef} className="hidden lg:block lg:space-y-4 relative">
+                    <motion.button
+                      type="button"
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => { setShowAllSubcategories(true); setShowAllVisibleCards(false); }}
+                      className={`group w-full rounded-[30px] border px-5 py-4 text-left transition-all flex items-center justify-between ${
+                        showAllSubcategories
+                          ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
+                          : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
+                          showAllSubcategories ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
+                        }`}>
+                          <span className="text-base font-bold text-[#037166]">All</span>
                         </div>
+                        <div className="min-w-0">
+                          <h3 className={`text-lg font-semibold leading-tight ${showAllSubcategories ? 'text-[#037166]' : 'text-[#1f2937]'}`}>
+                            All Services
+                          </h3>
+                          <p className="mt-1 text-sm text-[#6b7280]">Show every subcategory</p>
+                        </div>
+                      </div>
+                      <div className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
+                        showAllSubcategories
+                          ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-[0_10px_24px_rgba(3,113,102,0.28)]'
+                          : 'bg-[#fafafa] text-[#9ca3af] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#04a99d] group-hover:text-white'
+                      }`}>
+                        <ArrowRight className="h-5 w-5" />
+                      </div>
+                    </motion.button>
 
-                        <div
-                          className={`mt-4 flex h-11 w-11 items-center justify-center rounded-full transition-all lg:mt-0 ${
+                    {categories.map((category) => {
+                      const isActive = !showAllSubcategories && category.slug === activeCategorySlug;
+                      const serviceCount = categoryCounts[category.slug];
+                      return (
+                        <motion.button
+                          key={category._id || category.slug}
+                          data-slug={category.slug}
+                          type="button"
+                          whileHover={{ x: 4 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleCategorySelect(category)}
+                          className={`group w-full rounded-[30px] border px-5 py-4 text-left transition-all flex items-center justify-between ${
+                            isActive
+                              ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
+                              : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
+                              isActive ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
+                            }`}>
+                              {category.image ? (
+                                <img loading="lazy" decoding="async" src={category.image} alt={category.name} className="h-11 w-11 rounded-xl object-cover" />
+                              ) : (
+                                <span className="text-lg font-bold text-[#037166]">{category.name?.charAt(0)}</span>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className={`text-lg font-semibold leading-tight ${isActive ? 'text-[#037166]' : 'text-[#1f2937]'}`}>
+                                {category.name}
+                              </h3>
+                              <p className="mt-1 text-sm text-[#6b7280]">
+                                {typeof serviceCount === 'number' ? `${serviceCount} Services` : 'Loading services...'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
                             isActive
                               ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-[0_10px_24px_rgba(3,113,102,0.28)]'
                               : 'bg-[#fafafa] text-[#9ca3af] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#04a99d] group-hover:text-white'
-                          }`}
-                        >
-                          <ArrowRight className="h-5 w-5" />
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
+                          }`}>
+                            <ArrowRight className="h-5 w-5" />
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </>
               )}
             </div>
 
-            <div>
+            <div
+              className="min-w-0"
+              style={isDesktop ? { marginTop: `${offsetY}px`, transition: 'margin-top 0.4s cubic-bezier(0.16, 1, 0.3, 1)' } : {}}
+            >
               {isLoadingCategories || isLoadingSubCategories ? (
                 <ServiceGridSkeleton />
               ) : subCategories.length > 0 ? (
                 <div>
-                  <div className={`grid gap-4 ${showAllSubcategories ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
+                  <div
+                    className={showAllSubcategories ? 'top-categories-grid top-categories-grid--all' : 'top-categories-grid top-categories-grid--filtered'}
+                  >
                     {displaySubCategories.map((subCategory, index) => (
                       <motion.button
                         key={subCategory._id || subCategory.slug || index}
@@ -455,7 +533,7 @@ export function TopCategories({ onViewAll }) {
                         transition={{ delay: index * 0.05 }}
                         whileHover={{ y: -6 }}
                         onClick={() => router.push(`/${subCategory.slug}`)}
-                        className={`group relative overflow-hidden rounded-[18px] text-left shadow-[0_12px_30px_rgba(15,23,42,0.12)] ${showAllSubcategories ? 'h-[190px]' : 'h-[225px]'}`}
+                        className="group relative overflow-hidden rounded-[18px] text-left shadow-[0_12px_30px_rgba(15,23,42,0.12)]"
                       >
                         <div className="absolute inset-0 bg-gradient-to-br from-[#d8dee4] to-[#f2f4f7]" />
                         {subCategory.image ? (
@@ -471,8 +549,8 @@ export function TopCategories({ onViewAll }) {
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/92 via-[#111827]/30 to-transparent" />
                         <div className="absolute inset-x-0 bottom-0">
-                          <div className="w-full rounded-none bg-black/42 px-4 py-3 backdrop-blur-md ring-1 ring-white/12 shadow-[0_10px_25px_rgba(0,0,0,0.18)]">
-                            <h4 className="text-center text-[12px] font-medium leading-snug !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:text-[13px] break-words">
+                          <div className="w-full rounded-none bg-black/42 px-2 py-2 backdrop-blur-md ring-1 ring-white/12">
+                            <h4 className="text-center text-[11px] font-medium leading-snug !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] break-words">
                               {subCategory.name}
                             </h4>
                           </div>

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Calendar, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Calendar, Star } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 function SkeletonCard() {
@@ -22,6 +22,7 @@ export function BookingServices() {
   const router = useRouter();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeSubcategory, setActiveSubcategory] = useState('all');
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
     religious: 'religious-services',
@@ -80,18 +81,37 @@ export function BookingServices() {
   }, []);
 
 
-  const scrollRef = React.useRef(null);
+  const groupedServices = useMemo(() => {
+    const grouped = services.reduce((accumulator, service) => {
+      const key = service.category || 'General Services';
+      if (!accumulator[key]) accumulator[key] = [];
+      accumulator[key].push(service);
+      return accumulator;
+    }, {});
 
-  const scrollCards = (direction) => {
-    if (!scrollRef.current) return;
-    const firstCard = scrollRef.current.querySelector('[data-booking-card="true"]');
-    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 280;
-    const amount = cardWidth + 16; // card width + gap-4
-    scrollRef.current.scrollBy({
-      left: direction === 'left' ? -amount : amount,
-      behavior: 'smooth',
+    return Object.entries(grouped).map(([name, items]) => ({
+      name,
+      items,
+      image: items[0]?.image || '',
+    }));
+  }, [services]);
+
+  const visibleServices = useMemo(() => {
+    if (activeSubcategory === 'all') return services;
+    return services.filter((service) => service.category === activeSubcategory);
+  }, [activeSubcategory, services]);
+
+  useEffect(() => {
+    if (!groupedServices.length) {
+      setActiveSubcategory('all');
+      return;
+    }
+
+    setActiveSubcategory((current) => {
+      if (current === 'all') return current;
+      return groupedServices.some((group) => group.name === current) ? current : groupedServices[0].name;
     });
-  };
+  }, [groupedServices]);
 
   const handleServiceClick = (service) => {
     const categoryParam = encodeURIComponent(service.category);
@@ -160,117 +180,209 @@ export function BookingServices() {
           </p>
         </motion.div>
 
-        <div className="mb-4 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => scrollCards('left')}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollCards('right')}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
+        <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+          <div className="min-w-0">
+            {loading ? (
+              <>
+                <div className="flex gap-3 overflow-x-auto pb-2 lg:hidden">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="h-12 min-w-[120px] rounded-full border border-[#037166]/20 bg-white/10 animate-pulse" />
+                  ))}
+                </div>
+                <div className="hidden space-y-4 lg:block">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="h-[96px] rounded-[28px] border border-[#037166]/20 bg-white/10 animate-pulse" />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden scrollbar-hide">
+                  <button
+                    type="button"
+                    onClick={() => setActiveSubcategory('all')}
+                    className={`flex h-12 shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition ${
+                      activeSubcategory === 'all'
+                        ? 'border-[#037166] bg-[#037166] text-white'
+                        : 'border-[#037166]/25 bg-white/10 text-[#037166]'
+                    }`}
+                  >
+                    All Services
+                  </button>
+                  {groupedServices.map((group) => (
+                    <button
+                      key={group.name}
+                      type="button"
+                      onClick={() => setActiveSubcategory(group.name)}
+                      className={`flex h-12 shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition ${
+                        activeSubcategory === group.name
+                          ? 'border-[#037166] bg-[#037166] text-white'
+                          : 'border-[#037166]/25 bg-white/10 text-[#037166]'
+                      }`}
+                    >
+                      {group.name}
+                    </button>
+                  ))}
+                </div>
 
-        <div
-          ref={scrollRef}
-          className="flex overflow-x-auto overflow-y-visible gap-4 pt-4 pb-8 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {loading ? (
-            [1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex-shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[15.8%] snap-start">
-                <SkeletonCard />
-              </div>
-            ))
-          ) : (
-            services.map((service, index) => {
-              return (
-                <motion.div
-                  key={service.id}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  data-booking-card="true"
-                  className="group relative flex-shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[15.8%] snap-start flex flex-col cursor-pointer"
-                  onClick={() => handleServiceClick(service)}
-                >
-                  <div className="relative h-[250px] bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl border border-[#037166]/20 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#037166]/20 transition-all duration-300 flex flex-col">
-                    {/* Image - Fixed height */}
-                    <div className="relative h-40 overflow-hidden flex-shrink-0">
-                      <ImageWithFallback
-                        src={service.image}
-                        alt={service.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        style={{ width: '100%', height: '100%' }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-
-                      {/* Status Badge - Top Center */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full z-20 px-3 py-1 bg-[#037166]/90 backdrop-blur-md rounded-b-lg rounded-t-none text-[15px] text-white shadow-lg border border-t-0 border-[#037166]/20 whitespace-nowrap transition-all duration-300 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
-                        <span className="text-[10px] font-ubuntu tracking-wide !text-white block">{service.status}</span>
+                <div className="hidden space-y-4 lg:block">
+                  <button
+                    type="button"
+                    onClick={() => setActiveSubcategory('all')}
+                    className={`group flex h-[96px] w-full items-center justify-between rounded-[28px] border px-5 py-4 text-left transition ${
+                      activeSubcategory === 'all'
+                        ? 'border-[#037166]/45 bg-white text-[#0f172a] shadow-[0_20px_50px_rgba(3,113,102,0.14)]'
+                        : 'border-[#037166]/20 bg-white/10 text-white/80'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${
+                        activeSubcategory === 'all' ? 'border-[#037166]/30 bg-[#037166]/10' : 'border-white/10 bg-white/5'
+                      }`}>
+                        <span className={`text-base font-bold ${activeSubcategory === 'all' ? 'text-[#037166]' : 'text-white'}`}>All</span>
                       </div>
+                      <div>
+                        <h3 className={`text-lg font-semibold ${activeSubcategory === 'all' ? 'text-[#0f172a]' : 'text-white'}`}>All Services</h3>
+                        <p className={`${activeSubcategory === 'all' ? 'text-slate-500' : 'text-white/60'} text-sm`}>Show every service</p>
+                      </div>
+                    </div>
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-full ${
+                      activeSubcategory === 'all' ? 'bg-[#037166] !text-white' : 'bg-white/10 text-white'
+                    }`}>
+                      <ArrowRight className="h-5 w-5 !text-white" />
+                    </div>
+                  </button>
 
-                      {/* Rating Badge - Bottom Left Flush */}
-                      <div className="absolute bottom-0 left-0 z-20">
-                        <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
-                          <Star className="w-4 h-4 fill-white text-white" />
-                          <span className="text-sm font-bold !text-white">{service.rating}</span>
+                  {groupedServices.map((group) => {
+                    const isActive = activeSubcategory === group.name;
+
+                    return (
+                      <button
+                        key={group.name}
+                        type="button"
+                        onClick={() => setActiveSubcategory(group.name)}
+                        className={`group flex h-[96px] w-full items-center justify-between rounded-[28px] border px-5 py-4 text-left transition ${
+                          isActive
+                            ? 'border-[#037166]/45 bg-white text-[#0f172a] shadow-[0_20px_50px_rgba(3,113,102,0.14)]'
+                            : 'border-[#037166]/20 bg-white/10 text-white/80'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${
+                            isActive ? 'border-[#037166]/30 bg-[#037166]/10' : 'border-white/10 bg-white/5'
+                          }`}>
+                            {group.image ? (
+                              <img
+                                loading="lazy"
+                                decoding="async"
+                                src={group.image}
+                                alt={group.name}
+                                className="h-11 w-11 rounded-xl object-cover"
+                              />
+                            ) : (
+                              <span className={`text-base font-bold ${isActive ? 'text-[#037166]' : 'text-white'}`}>
+                                {group.name.charAt(0)}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <h3 className={`text-lg font-semibold ${isActive ? 'text-[#0f172a]' : 'text-white'}`}>{group.name}</h3>
+                            <p className={`${isActive ? 'text-slate-500' : 'text-white/60'} text-sm`}>{group.items.length} Services</p>
+                          </div>
+                        </div>
+                        <div className={`flex h-11 w-11 items-center justify-center rounded-full ${
+                          isActive ? 'bg-[#037166] !text-white' : 'bg-white/10 text-white'
+                        }`}>
+                          <ArrowRight className="h-5 w-5 !text-white" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            {loading ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <SkeletonCard key={index} />
+                ))}
+              </div>
+            ) : visibleServices.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {visibleServices.map((service, index) => (
+                  <motion.div
+                    key={service.id}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.06, duration: 0.45 }}
+                    whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                    className="group relative cursor-pointer"
+                    onClick={() => handleServiceClick(service)}
+                  >
+                    <div className="relative overflow-hidden rounded-3xl border border-[#037166]/20 bg-gradient-to-br from-[#1a1a1a]/80 to-[#0f0f0f]/80 backdrop-blur-xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:shadow-[#037166]/20">
+                      <div className="relative h-48 overflow-hidden">
+                        <ImageWithFallback
+                          src={service.image}
+                          alt={service.title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          style={{ width: '100%', height: '100%' }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent" />
+
+                        <div className="absolute left-0 top-0 z-20 rounded-br-xl bg-[#037166]/90 px-3 py-1.5 text-[10px] font-medium tracking-[0.18em] !text-white">
+                          {service.status}
+                        </div>
+
+                        <div className="absolute bottom-0 left-0 z-20">
+                          <div className="flex items-center gap-1 rounded-tr-xl border-r border-t border-white/10 bg-black/60 px-3 py-1.5 backdrop-blur-md">
+                            <Star className="h-4 w-4 fill-white text-white" />
+                            <span className="text-sm font-bold text-white">{service.rating}</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Book Now Button Badge - Bottom Center */}
-                      <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full z-20 px-6 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-[#025951]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleServiceClick(service);
-                        }}
-                      >
-                        <span className="text-[12px] font-ubuntu tracking-wider !text-white block">Book Now</span>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-4 flex flex-col">
-                      <div className="space-y-1">
-
-                        {/* Category + Rating */}
-                        <div className="flex items-center justify-between">
-
-                          {/* Category */}
-                          <h6 className="text-[10px] text-[#037166] font-medium  tracking-wider">
+                      <div className="space-y-3 p-4">
+                        <div>
+                          <h6 className="text-[10px] font-medium tracking-[0.18em] text-[#58c4b4] uppercase">
                             {service.category}
                           </h6>
+                          <h4
+                            className="mt-1 line-clamp-2 text-base font-semibold leading-tight text-white"
+                            title={service.title}
+                          >
+                            {service.title}
+                          </h4>
                         </div>
 
-                        {/* Title */}
-                        <h4
-                          className="text-[12px] font-medium bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent leading-tight line-clamp-2"
-                          title={service.title}
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleServiceClick(service);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-full bg-[#037166] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#025951] hover:!text-white"
                         >
-                          {service.title}
-                        </h4>
-
+                          Book Now
+                          <ArrowRight className="h-4 w-4 !text-white" />
+                        </button>
                       </div>
+
+                      <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
                     </div>
-
-
-                    {/* Hover glow effect */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
-                  </div>
-                </motion.div>
-              );
-            })
-          )}
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[28px] border border-[#037166]/20 bg-white/10 px-6 py-12 text-center">
+                <p className="text-lg font-semibold text-white">No services found for this subcategory</p>
+                <p className="mt-2 text-sm text-white/60">Try another subcategory to view related services.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

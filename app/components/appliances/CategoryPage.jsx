@@ -325,23 +325,23 @@ export function CategoryPage({ slug, initialData }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center gap-3 mb-6"
+            className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6"
           >
             <button
               onClick={handleBack}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-[#cfe1de] text-[#334155] hover:bg-white hover:border-[#037166]/40 transition-all"
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-[#cfe1de] text-[#334155] hover:bg-white hover:border-[#037166]/40 transition-all text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
 
             {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-[#64748b]">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-[#64748b]">
               <button onClick={handleBack} className="hover:text-white/80 transition-colors">Home</button>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="text-[#334155]">Services</span>
-              <ChevronRight className="w-4 h-4" />
-              <span className="text-[#037166]">{categoryMetadata.categoryName}</span>
+              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="text-[#037166] truncate max-w-[120px] sm:max-w-none">{categoryMetadata.categoryName}</span>
             </div>
           </motion.div>
 
@@ -393,18 +393,18 @@ export function CategoryPage({ slug, initialData }) {
             transition={{ duration: 0.5 }}
             className="mb-12"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
                   {categoryMetadata.categoryName || "Choose Your Service"}
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Select the specific service type you need
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <TrendingUp className="w-4 h-4 text-[#037166]" />
-                {categoryMetadata.totalCount || subCategories.length} services available
+              <div className="flex items-center gap-2 text-sm text-gray-500 self-start sm:self-auto">
+                <TrendingUp className="w-4 h-4 text-[#037166] flex-shrink-0" />
+                <span>{categoryMetadata.totalCount || subCategories.length} services available</span>
               </div>
             </div>
           </motion.div>
@@ -484,7 +484,7 @@ export function CategoryPage({ slug, initialData }) {
                           )}
 
                           {/* Icon/Image */}
-                          <div className="relative z-10 flex-shrink-0 w-24 sm:w-28 md:w-40 bg-white/5">
+                          <div className="relative z-10 flex-shrink-0 w-20 sm:w-28 md:w-40 bg-white/5">
                             {subCategory.image ? (
                               <div className="w-full h-full overflow-hidden">
                                 <img loading="lazy" decoding="async"
@@ -496,7 +496,7 @@ export function CategoryPage({ slug, initialData }) {
                             ) : (
                               <div className="w-full h-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                 <svg
-                                  className="w-10 h-10 md:w-12 md:h-12 text-white"
+                                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -513,22 +513,19 @@ export function CategoryPage({ slug, initialData }) {
                           </div>
 
                           {/* Content */}
-                          <div className="relative z-10 flex-1 min-w-0 p-3 sm:p-4 md:p-6 flex flex-col justify-center bg-white border-l border-[#e2e8f0]">
-                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#037166] mb-1.5 sm:mb-2 md:mb-3 group-hover:text-[#025951] transition-colors line-clamp-1">
+                          <div className="relative z-10 flex-1 min-w-0 p-2.5 sm:p-4 md:p-6 flex flex-col justify-center bg-white border-l border-[#e2e8f0]">
+                            <h3 className="text-sm sm:text-xl md:text-2xl font-bold text-[#037166] mb-1 sm:mb-2 md:mb-3 group-hover:text-[#025951] transition-colors line-clamp-2">
                               {subCategory.name}
                             </h3>
-                            <p className="text-[#037166]/80 text-xs sm:text-sm mb-2 sm:mb-3 md:mb-4 leading-relaxed line-clamp-2">
+                            <p className="hidden sm:block text-[#037166]/80 text-xs sm:text-sm mb-2 sm:mb-3 md:mb-4 leading-relaxed line-clamp-2">
                               {subCategory.title || subCategory.description || "Professional service by verified and experienced technicians"}
                             </p>
 
-                            {/* Price */}
-
-
                             {/* CTA */}
                             <div className="flex items-center justify-between">
-                              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/25 text-[#037166] font-semibold text-xs sm:text-sm hover:bg-[#037166] hover:text-white transition-all">
+                              <div className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/25 text-[#037166] font-semibold text-[10px] sm:text-sm hover:bg-[#037166] hover:text-white transition-all">
                                 View Services
-                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
                               </div>
 
                             </div>
@@ -572,7 +569,7 @@ export function CategoryPage({ slug, initialData }) {
                         Got questions? We've got answers.
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 items-start">
                       {allFaqs.slice(0, 9).map((faq, index) => (
                         <div
                           key={index}
@@ -633,29 +630,29 @@ export function CategoryPage({ slug, initialData }) {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="mt-16 pt-8 border-t border-[#e2ecea]"
               >
-                <div className="bg-gradient-to-r from-[#037166]/10 to-[#04a99d]/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="bg-gradient-to-r from-[#037166]/10 to-[#04a99d]/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5 sm:p-8">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-center md:text-left">
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
                         Need Help Choosing?
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-sm sm:text-base text-gray-600">
                         Our experts can recommend the best service for your needs
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto">
+                    <div className="grid grid-cols-2 gap-3 w-full sm:w-auto">
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 font-semibold hover:bg-white hover:border-[#037166]/40 transition-all text-sm sm:text-base"
+                        className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200 text-gray-900 font-semibold hover:bg-white hover:border-[#037166]/40 transition-all text-xs sm:text-base"
                       >
-                        <TicketCheck className="w-4 h-4 text-[#04a99d]" />
+                        <TicketCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#04a99d] flex-shrink-0" />
                         Raise A Ticket
                       </button>
                       <button
                         onClick={() => setShowAppModal(true)}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all text-sm sm:text-base"
+                        className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all text-xs sm:text-base"
                       >
-                        <Smartphone className="w-4 h-4" />
+                        <Smartphone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                         Track Order
                       </button>
                     </div>

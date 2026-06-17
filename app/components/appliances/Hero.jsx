@@ -6,10 +6,12 @@ import { ArrowRight, Sparkles, Shield, Clock, Search, MapPin } from 'lucide-reac
 import { motion } from 'motion/react';
 import { ServicePreviewCard } from '@/components/appliances/ServicePreviewCard';
 import { useLocationContext } from '@/context/LocationContext';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 
 export function Hero({ onViewServices, onBookService }) {
   const router = useRouter();
   const { location, loading: locationLoading } = useLocationContext();
+  const { globalSettings } = useGlobalSettings() || {};
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -82,10 +84,14 @@ export function Hero({ onViewServices, onBookService }) {
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-[3.8rem] font-bold mb-4 italic text-white">
-            Expert Home Services
-            <br />
-            <span className="text-[#037166]">
+          <h1 className="text-[2.1rem] leading-[1.05] sm:text-5xl lg:text-[3.8rem] font-bold mb-4 italic text-white">
+            <span className="block sm:inline">
+              Expert Home Services
+            </span>
+            <span className="hidden sm:inline">
+              <br />
+            </span>
+            <span className="block text-[#037166]">
               At Your Doorstep
             </span>
           </h1>
@@ -93,8 +99,9 @@ export function Hero({ onViewServices, onBookService }) {
 
           {/* Subheadline */}
           <p className="text-base sm:text-lg text-gray-400 mb-7 leading-relaxed max-w-3xl mx-auto">
-            Professional repair and maintenance services for all your home needs.
-            Book verified experts in minutes.
+Fast and reliable home appliance repair at your doorstep. Get expert service for ACs, TVs, refrigerators, washing machines, geysers, and more. Book trusted technicians in minutes.
+
+
           </p>
 
           {/* CTA Buttons - Separated and Rounded */}
@@ -120,6 +127,44 @@ export function Hero({ onViewServices, onBookService }) {
               <Search className="w-5 h-5 group-hover:translate-x-1 transition-transform text-black" />
             </button>
 
+          </div>
+
+          <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+            <motion.a
+              href={globalSettings?.appStore || '#'}
+              target={globalSettings?.appStore ? '_blank' : undefined}
+              rel={globalSettings?.appStore ? 'noopener noreferrer' : undefined}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex h-[44px] items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] px-3 shadow-xl shadow-[#037166]/20"
+              title="Download on the App Store"
+            >
+              <img
+                loading="lazy"
+                decoding="async"
+                src="/apple2.png"
+                alt="App Store"
+                className="h-11 object-contain !invert !brightness-[3]"
+              />
+            </motion.a>
+
+            <motion.a
+              href={globalSettings?.playStore || '#'}
+              target={globalSettings?.playStore ? '_blank' : undefined}
+              rel={globalSettings?.playStore ? 'noopener noreferrer' : undefined}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex h-[44px] items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] px-3 shadow-xl shadow-[#037166]/20"
+              title="Get it on Google Play"
+            >
+              <img
+                loading="lazy"
+                decoding="async"
+                src="/andriod1.png"
+                alt="Google Play"
+                className="h-11 object-contain !invert !brightness-[3]"
+              />
+            </motion.a>
           </div>
 
           {/* Trust Indicators */}

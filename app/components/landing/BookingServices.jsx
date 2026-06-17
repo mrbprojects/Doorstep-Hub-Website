@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowRight, Calendar, Star } from 'lucide-react';
@@ -23,6 +23,8 @@ export function BookingServices() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeSubcategory, setActiveSubcategory] = useState('all');
+  const [offsetY, setOffsetY] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
     religious: 'religious-services',
@@ -80,6 +82,18 @@ export function BookingServices() {
     fetchData();
   }, []);
 
+  const subcategoryListRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
 
   const groupedServices = useMemo(() => {
     const grouped = services.reduce((accumulator, service) => {
@@ -112,6 +126,22 @@ export function BookingServices() {
       return groupedServices.some((group) => group.name === current) ? current : groupedServices[0].name;
     });
   }, [groupedServices]);
+
+  useEffect(() => {
+    if (!isDesktop || loading) {
+      setOffsetY(0);
+      return;
+    }
+
+    const container = subcategoryListRef.current;
+    if (!container || activeSubcategory === 'all') {
+      setOffsetY(0);
+      return;
+    }
+
+    const activeButton = container.querySelector(`[data-subcategory="${CSS.escape(activeSubcategory)}"]`);
+    setOffsetY(activeButton?.offsetTop || 0);
+  }, [activeSubcategory, isDesktop, loading, groupedServices]);
 
   const handleServiceClick = (service) => {
     const categoryParam = encodeURIComponent(service.category);
@@ -189,7 +219,7 @@ export function BookingServices() {
                     <div key={index} className="h-12 min-w-[120px] rounded-full border border-[#037166]/20 bg-white/10 animate-pulse" />
                   ))}
                 </div>
-                <div className="hidden space-y-4 lg:block">
+                <div ref={subcategoryListRef} className="hidden space-y-4 lg:block">
                   {Array.from({ length: 4 }).map((_, index) => (
                     <div key={index} className="h-[96px] rounded-[28px] border border-[#037166]/20 bg-white/10 animate-pulse" />
                   ))}
@@ -203,7 +233,7 @@ export function BookingServices() {
                     onClick={() => setActiveSubcategory('all')}
                     className={`flex h-12 shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition ${
                       activeSubcategory === 'all'
-                        ? 'border-[#037166] bg-[#037166] text-white'
+                        ? 'border-[#037166] bg-[#037166] !text-white'
                         : 'border-[#037166]/25 bg-white/10 text-[#037166]'
                     }`}
                   >
@@ -216,7 +246,7 @@ export function BookingServices() {
                       onClick={() => setActiveSubcategory(group.name)}
                       className={`flex h-12 shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition ${
                         activeSubcategory === group.name
-                          ? 'border-[#037166] bg-[#037166] text-white'
+                          ? 'border-[#037166] bg-[#037166] !text-white'
                           : 'border-[#037166]/25 bg-white/10 text-[#037166]'
                       }`}
                     >
@@ -259,6 +289,7 @@ export function BookingServices() {
                     return (
                       <button
                         key={group.name}
+                        data-subcategory={group.name}
                         type="button"
                         onClick={() => setActiveSubcategory(group.name)}
                         className={`group flex h-[96px] w-full items-center justify-between rounded-[28px] border px-5 py-4 text-left transition ${
@@ -303,7 +334,10 @@ export function BookingServices() {
             )}
           </div>
 
-          <div className="min-w-0">
+          <div
+            className="min-w-0"
+            style={isDesktop ? { marginTop: `${offsetY}px`, transition: 'margin-top 0.4s cubic-bezier(0.16, 1, 0.3, 1)' } : {}}
+          >
             {loading ? (
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {Array.from({ length: 6 }).map((_, index) => (

@@ -35,7 +35,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                             <X className="w-5 h-5" />
                         </button>
                         <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight">How can we help?</h3>
-                        <p className="text-gray-500 mt-2 font-medium">Select your preferred service type</p>
+                        <p className="text-gray-500 mt-2 font-medium">Select Your Preferred Service Type</p>
                     </div>
 
                     {/* Options */}
@@ -49,8 +49,8 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                                 <ShieldCheck className="w-7 h-7 text-[#037166] group-hover:text-white transition-colors" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">On Demand Doorstep Hub Services</h4>
-                                <p className="text-sm text-gray-500 font-medium">Book certified experts at Doorstep Hub</p>
+                                <h4 className="text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight">On Demand Appliance Repair</h4>
+                                <p className="text-sm text-gray-500 font-medium">Near by local Technicians</p>
                             </div>
                         </button>
 

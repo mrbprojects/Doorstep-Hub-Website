@@ -53,15 +53,16 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         onClose?.();
     }, [onClose, resetModalState]);
 
-    const handleLogout = React.useCallback(() => {
-        const trimmedName = (profileData.name || '').trim();
-        const trimmedEmail = (profileData.email || '').trim();
-        const trimmedPhone = (profileData.phone || '').trim();
-        const hasCompletedRequiredProfile =
-            /^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test(trimmedName) &&
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) &&
-            /^[6-9]\d{9}$/.test(trimmedPhone);
+    const trimmedName = (profileData.name || '').trim();
+    const trimmedEmail = (profileData.email || '').trim();
+    const trimmedPhone = (profileData.phone || '').trim();
+    const hasCompletedRequiredProfile =
+        /^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test(trimmedName) &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) &&
+        /^[6-9]\d{9}$/.test(trimmedPhone);
+    const isProfileEmpty = !trimmedName || !trimmedEmail || !trimmedPhone;
 
+    const handleLogout = React.useCallback(() => {
         // In complete-profile flow, prevent logout until required details are filled.
         if (step === 'profile' && !hasCompletedRequiredProfile) {
             setShowRequiredErrors(true);
@@ -72,7 +73,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         resetModalState();
         logout();
         onClose?.();
-    }, [logout, onClose, profileData.email, profileData.name, profileData.phone, resetModalState, step]);
+    }, [logout, onClose, hasCompletedRequiredProfile, resetModalState, step]);
 
     // Timer logic for Resend OTP
     React.useEffect(() => {
@@ -628,13 +629,15 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                 </motion.button>
                             )}
 
-                            <button
-                                onClick={handleLogout}
-                                className={`w-full py-4 border border-red-500/30 text-red-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-red-500/10 transition-all`}
-                            >
-                                <LogOut className="w-5 h-5" />
-                                Logout
-                            </button>
+                            {!isProfileEmpty && (
+                                <button
+                                    onClick={handleLogout}
+                                    className={`w-full py-4 border border-red-500/30 text-red-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-red-500/10 transition-all`}
+                                >
+                                    <LogOut className="w-5 h-5" />
+                                    Logout
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

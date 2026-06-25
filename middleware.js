@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createSlugRegistry } from './app/lib/slugRegistry';
 import {
     resolveApplianceRepairFlatPath,
     resolveApplianceCategoryCityFlatPath,
@@ -44,40 +45,70 @@ let brandSlugCache = {
     timestamp: 0,
 };
 
-async function getBrandSlugSet() {
+let slugRegistryCache = {
+    registry: null,
+    timestamp: 0,
+};
+
+async function getSlugRegistry() {
     const now = Date.now();
-    if (brandSlugCache.timestamp && now - brandSlugCache.timestamp < CACHE_DURATION) {
-        return brandSlugCache.slugs;
+    if (slugRegistryCache.timestamp && now - slugRegistryCache.timestamp < CACHE_DURATION && slugRegistryCache.registry) {
+        return slugRegistryCache.registry;
     }
 
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-        const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/brands/all_brands', {
-            signal: controller.signal,
-            next: { revalidate: 600 },
-        });
+        const [brandsRes, servicesRes] = await Promise.allSettled([
+            fetch('https://api.doorstephub.com/v1/dhubApi/app/brands/all_brands', {
+                signal: controller.signal,
+                next: { revalidate: 600 },
+            }),
+            fetch('https://api.doorstephub.com/v1/dhubApi/app/authorized-services/all_authorized_services', {
+                signal: controller.signal,
+                next: { revalidate: 600 },
+            }),
+        ]);
 
         clearTimeout(timeoutId);
 
-        if (res.ok) {
-            const data = await res.json();
-            const slugs = new Set();
+        const brandSlugs = [];
+        if (brandsRes.status === 'fulfilled' && brandsRes.value.ok) {
+            const data = await brandsRes.value.json();
             if (data.success && Array.isArray(data.brands)) {
                 data.brands.forEach((brand) => {
                     const slug = String(brand.slug || '').trim().toLowerCase();
-                    if (slug) slugs.add(slug);
+                    if (slug) brandSlugs.push(slug);
                 });
             }
-            brandSlugCache = { slugs, timestamp: now };
-            return slugs;
         }
+
+        const serviceSlugs = [];
+        if (servicesRes.status === 'fulfilled' && servicesRes.value.ok) {
+            const data = await servicesRes.value.json();
+            if (data.success && Array.isArray(data.services)) {
+                data.services.forEach((service) => {
+                    const slug = String(service.slug || '').trim().toLowerCase();
+                    if (slug) serviceSlugs.push(slug);
+                });
+            }
+        }
+
+        const registry = createSlugRegistry({ brandSlugs, serviceSlugs });
+        slugRegistryCache = { registry, timestamp: now };
+        brandSlugCache = { slugs: registry.brandSlugs, timestamp: now };
+        return registry;
     } catch (error) {
-        console.error('Middleware brand slug fetch failed:', error);
+        console.error('Middleware slug registry fetch failed:', error);
     }
 
-    return brandSlugCache.slugs || new Set();
+    return slugRegistryCache.registry || createSlugRegistry();
+}
+
+async function getBrandSlugSet() {
+    const registry = await getSlugRegistry();
+    return registry.brandSlugs;
 }
 
 async function getDynamicSlugs() {
@@ -197,13 +228,14 @@ export async function middleware(request) {
             return NextResponse.rewrite(url);
         }
 
-        const brandSlugs = await getBrandSlugSet();
+        const slugRegistry = await getSlugRegistry();
+        const brandSlugs = slugRegistry.brandSlugs;
 
         if (pathname.startsWith('/service-list/book-now/')) {
             const legacySlug = normalizedPath.replace(/^service-list\/book-now\//, '').split('/')[0];
             const city = request.nextUrl.searchParams.get('city');
             if (legacySlug && city) {
-                const nearbyPath = buildNearbyBookNowPublicPath(legacySlug, city, brandSlugs);
+                const nearbyPath = buildNearbyBookNowPublicPath(legacySlug, city, slugRegistry);
                 if (nearbyPath) {
                     const url = request.nextUrl.clone();
                     url.pathname = nearbyPath;
@@ -213,7 +245,7 @@ export async function middleware(request) {
             }
         }
 
-        const nearbyBookNowRewrite = resolveNearbyBookNowRewrite(normalizedPath, brandSlugs);
+        const nearbyBookNowRewrite = resolveNearbyBookNowRewrite(normalizedPath, slugRegistry);
         if (nearbyBookNowRewrite) {
             const url = request.nextUrl.clone();
             url.pathname = nearbyBookNowRewrite.pathname;
@@ -221,28 +253,28 @@ export async function middleware(request) {
             return NextResponse.rewrite(url);
         }
 
-        const legacyBrandRedirect = resolveLegacySeoBrandRedirect(normalizedPath, brandSlugs);
+        const legacyBrandRedirect = resolveLegacySeoBrandRedirect(normalizedPath, slugRegistry);
         if (legacyBrandRedirect) {
             const url = request.nextUrl.clone();
             url.pathname = legacyBrandRedirect;
             return NextResponse.redirect(url, 308);
         }
 
-        const flatBrandSinglePath = resolveFlatBrandSingleRewritePath(normalizedPath, brandSlugs);
+        const flatBrandSinglePath = resolveFlatBrandSingleRewritePath(normalizedPath, slugRegistry);
         if (flatBrandSinglePath) {
             const url = request.nextUrl.clone();
             url.pathname = flatBrandSinglePath;
             return NextResponse.rewrite(url);
         }
 
-        const flatBrandPath = resolveFlatBrandCityRewritePath(normalizedPath, brandSlugs);
+        const flatBrandPath = resolveFlatBrandCityRewritePath(normalizedPath, slugRegistry);
         if (flatBrandPath) {
             const url = request.nextUrl.clone();
             url.pathname = flatBrandPath;
             return NextResponse.rewrite(url);
         }
 
-        const bookNowRewrite = resolveBookNowCityFlatRewrite(normalizedPath, brandSlugs);
+        const bookNowRewrite = resolveBookNowCityFlatRewrite(normalizedPath, slugRegistry);
         if (bookNowRewrite) {
             const url = request.nextUrl.clone();
             url.pathname = bookNowRewrite.pathname;

@@ -167,18 +167,84 @@ export const FLAT_BRAND_AUTO_CITY = '_location';
 
 const FLAT_BRAND_LISTING_SUFFIX = /-repair-service-center$/i;
 
-export function isFlatBrandListingSlug(brandSlug = '') {
-    const slug = String(brandSlug || '').trim().toLowerCase();
-    if (!slug || !FLAT_BRAND_LISTING_SUFFIX.test(slug)) return false;
-    if (isFlatBrandCenterSlug(slug)) return true;
-    return !/-appliance-repair-service-center$/i.test(slug);
+function normalizeSlugRegistry(registryOrBrandSlugs = null, serviceSlugs = null) {
+    if (registryOrBrandSlugs && typeof registryOrBrandSlugs.isBrandPage === 'function') {
+        return registryOrBrandSlugs;
+    }
+
+    const brandList = registryOrBrandSlugs instanceof Set
+        ? [...registryOrBrandSlugs]
+        : Array.isArray(registryOrBrandSlugs)
+            ? registryOrBrandSlugs
+            : [];
+    const serviceList = serviceSlugs instanceof Set
+        ? [...serviceSlugs]
+        : Array.isArray(serviceSlugs)
+            ? serviceSlugs
+            : [];
+
+    if (!brandList.length && !serviceList.length) {
+        return null;
+    }
+
+    const brandSet = new Set(brandList.map((slug) => String(slug || '').trim().toLowerCase()).filter(Boolean));
+    const serviceSet = new Set(serviceList.map((slug) => String(slug || '').trim().toLowerCase()).filter(Boolean));
+
+    return {
+        brandSlugs: brandSet,
+        serviceSlugs: serviceSet,
+        isBrandPage(slug = '') {
+            const normalized = String(slug || '').trim().toLowerCase();
+            if (!normalized) return false;
+            if (serviceSet.has(normalized)) return false;
+            return brandSet.has(normalized);
+        },
+        hasBrand(slug = '') {
+            return brandSet.has(String(slug || '').trim().toLowerCase());
+        },
+        hasService(slug = '') {
+            return serviceSet.has(String(slug || '').trim().toLowerCase());
+        },
+    };
 }
 
-function isRegisteredFlatBrandSlug(brandSlug = '', brandSlugs = null) {
+/**
+ * Brand landing page slug — uses API registry when available.
+ * Avoid adding new suffix regex rules; add slugs in admin/API instead.
+ */
+export function isBrandPageSlug(brandSlug = '', registryOrBrandSlugs = null, serviceSlugs = null) {
     const slug = String(brandSlug || '').trim().toLowerCase();
     if (!slug) return false;
-    if (isFlatBrandCenterSlug(slug)) return true;
-    if (brandSlugs && brandSlugs.has(slug)) return true;
+
+    const registry = normalizeSlugRegistry(registryOrBrandSlugs, serviceSlugs);
+    if (registry) {
+        return registry.isBrandPage(slug);
+    }
+
+    if (registryOrBrandSlugs instanceof Set && registryOrBrandSlugs.has(slug)) {
+        return true;
+    }
+
+    return false;
+}
+
+export function isFlatBrandListingSlug(brandSlug = '', registryOrBrandSlugs = null, serviceSlugs = null) {
+    return isBrandPageSlug(brandSlug, registryOrBrandSlugs, serviceSlugs);
+}
+
+function isRegisteredFlatBrandSlug(brandSlug = '', registryOrBrandSlugs = null, serviceSlugs = null) {
+    const slug = String(brandSlug || '').trim().toLowerCase();
+    if (!slug) return false;
+
+    const registry = normalizeSlugRegistry(registryOrBrandSlugs, serviceSlugs);
+    if (registry) {
+        return registry.hasBrand(slug);
+    }
+
+    if (registryOrBrandSlugs instanceof Set && registryOrBrandSlugs.has(slug)) {
+        return true;
+    }
+
     return false;
 }
 
@@ -200,23 +266,34 @@ function isValidFlatBrandCityPair(brandSlug = '', citySlug = '', brandSlugs = nu
 
 /**
  * Build the canonical public flat URL for a city+brand service page.
- * Format: /realme-tv-repair-service-center/mumbai
+ * Pass { trusted: true } when slug comes from the brands API (no pattern guessing).
  */
-export function buildFlatBrandCityPublicPath(citySlug, brandSlug) {
+export function buildFlatBrandCityPublicPath(citySlug, brandSlug, options = {}) {
     const city = normalizeCitySlug(citySlug);
     const brand = String(brandSlug || '').trim().toLowerCase();
-    if (!city || !brand || !isFlatBrandListingSlug(brand)) return null;
-    return `/${brand}/${city}`;
+    const opts = typeof options === 'object' ? options : { trusted: !!options };
+    const { trusted = false, registry = null } = opts;
+
+    if (!city || !brand || !isValidCitySlug(city)) return null;
+    if (trusted || isRegisteredFlatBrandSlug(brand, registry)) {
+        return `/${brand}/${city}`;
+    }
+    return null;
 }
 
 /**
  * Build brand-only public URL (city comes from user selection / location).
  * Format: /realme-tv-repair-service-center
  */
-export function buildFlatBrandPublicPath(brandSlug) {
+export function buildFlatBrandPublicPath(brandSlug, options = {}) {
     const brand = String(brandSlug || '').trim().toLowerCase();
-    if (!brand || !isFlatBrandListingSlug(brand)) return null;
-    return `/${brand}`;
+    const opts = typeof options === 'object' ? options : { trusted: !!options };
+    const { trusted = false, registry = null } = opts;
+    if (!brand) return null;
+    if (trusted || isRegisteredFlatBrandSlug(brand, registry)) {
+        return `/${brand}`;
+    }
+    return null;
 }
 
 /**
@@ -287,12 +364,16 @@ export const NEARBY_BOOK_NOW_PREFIX = 'nearby';
 /** Legacy flat slugs: /{serviceSlug}/{citySlug} */
 const BOOK_NOW_FLAT_SERVICE_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 
-export function isNearbyServiceSlug(slug = '', brandSlugs = null) {
+export function isNearbyServiceSlug(slug = '', registryOrBrandSlugs = null, serviceSlugs = null) {
     const s = String(slug || '').trim().toLowerCase();
     if (!BOOK_NOW_FLAT_SERVICE_SLUG_PATTERN.test(s)) return false;
-    if (brandSlugs?.has(s)) return false;
-    if (isFlatBrandCenterSlug(s)) return false;
-    if (isFlatBrandListingSlug(s)) return false;
+
+    const registry = normalizeSlugRegistry(registryOrBrandSlugs, serviceSlugs);
+    if (registry?.hasService(s)) return true;
+    if (registry?.hasBrand(s)) return false;
+    if (registryOrBrandSlugs instanceof Set && registryOrBrandSlugs.has(s)) return false;
+
+    // Unknown slug with valid format: treat as bookable service so new API slugs work without code changes.
     return true;
 }
 
@@ -363,13 +444,18 @@ export function parseNearbyBookNowPath(normalizedPath = '', brandSlugs = null) {
 /**
  * Preferred navigation target for book-now.
  */
-export function resolveBookNowNavigationPath(serviceSlug, citySlug, brandSlugs = null) {
-    const nearby = buildNearbyBookNowPublicPath(serviceSlug, citySlug, brandSlugs);
-    if (nearby) return nearby;
-
-    const service = String(serviceSlug || '').trim();
+export function resolveBookNowNavigationPath(serviceSlug, citySlug, registryOrBrandSlugs = null) {
+    const service = String(serviceSlug || '').trim().toLowerCase();
+    const city = normalizeCitySlug(citySlug);
     if (!service) return '/service-list/book-now';
-    return `/service-list/book-now/${service}`;
+    if (!city || !BOOK_NOW_FLAT_SERVICE_SLUG_PATTERN.test(service)) {
+        return `/service-list/book-now/${service}`;
+    }
+    if (isBrandPageSlug(service, registryOrBrandSlugs)) {
+        return buildFlatBrandCityPublicPath(city, service, { trusted: true, registry: registryOrBrandSlugs })
+            || `/service-list/book-now/${service}`;
+    }
+    return `/${NEARBY_BOOK_NOW_PREFIX}/${service}/${city}`;
 }
 
 /**

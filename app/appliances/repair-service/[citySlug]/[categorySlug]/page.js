@@ -256,9 +256,12 @@ function BrandPageContent() {
                 <button
                   key={brand.name || brand}
                   type="button"
-                  onClick={() => {
-                    const publicPath = buildFlatBrandCityPublicPath(citySlug, bSlug);
-                    router.push(publicPath || `/${citySlug}/${categorySlug}/${bSlug}`);
+                    onClick={() => {
+                    const publicPath = buildFlatBrandCityPublicPath(citySlug, bSlug, { trusted: true });
+                    router.push(
+                      publicPath
+                      || `/appliances/repair-service/${citySlug}/${categorySlug}/${bSlug}`,
+                    );
                   }}
                   className="group relative overflow-hidden rounded-xl border-2 border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#037166]/30 hover:shadow-md sm:rounded-2xl"
                 >

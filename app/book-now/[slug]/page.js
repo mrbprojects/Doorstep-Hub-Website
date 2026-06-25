@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 const BookingModal = dynamic(() => import('@/components/appliances/booking-flow/BookingModal').then(m => m.BookingModal), { ssr: false });
 import { ChevronLeft, Star, Clock, Shield, Award, ThumbsUp, ArrowRight, Loader2, Wrench, CheckCircle2, MapPin } from 'lucide-react';
 import { fetchCities, fetchCategories, fetchAllBrands } from '@/lib/api';
-import { parseBookNowCityFlatPath } from '@/lib/applianceRepairSlugs';
+import { parseBookNowCityFlatPath, parseNearbyBookNowPath } from '@/lib/applianceRepairSlugs';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { motion } from 'motion/react';
@@ -56,10 +56,13 @@ function BookNowPageContent() {
   const pathname = usePathname();
   const slug = params.slug;
   const cityFromPath = useMemo(() => {
-    const parsed = parseBookNowCityFlatPath(String(pathname || '').replace(/^\/+/, ''));
-    return parsed?.citySlug || null;
+    const normalizedPath = String(pathname || '').replace(/^\/+/, '');
+    const nearbyParsed = parseNearbyBookNowPath(normalizedPath);
+    if (nearbyParsed?.citySlug) return nearbyParsed.citySlug;
+    const flatParsed = parseBookNowCityFlatPath(normalizedPath);
+    return flatParsed?.citySlug || null;
   }, [pathname]);
-  const citySlug = searchParams.get('city') || cityFromPath;
+  const citySlug = searchParams.get('city') || params.citySlug || cityFromPath;
 
   const [service, setService] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);

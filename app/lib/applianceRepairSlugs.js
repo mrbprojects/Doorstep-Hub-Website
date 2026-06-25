@@ -281,15 +281,27 @@ export function resolveLegacySeoBrandRedirect(normalizedPath = '', brandSlugs = 
     return `/${brandSlug.toLowerCase()}/${citySlug}`;
 }
 
-/** Public book-now flat slugs: /{serviceSlug}/{citySlug} */
+/** Canonical public book-now URLs: /nearby/{serviceSlug}/{citySlug} */
+export const NEARBY_BOOK_NOW_PREFIX = 'nearby';
+
+/** Legacy flat slugs: /{serviceSlug}/{citySlug} */
 const BOOK_NOW_FLAT_SERVICE_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+
+export function isNearbyServiceSlug(slug = '', brandSlugs = null) {
+    const s = String(slug || '').trim().toLowerCase();
+    if (!BOOK_NOW_FLAT_SERVICE_SLUG_PATTERN.test(s)) return false;
+    if (brandSlugs?.has(s)) return false;
+    if (isFlatBrandCenterSlug(s)) return false;
+    if (isFlatBrandListingSlug(s)) return false;
+    return true;
+}
 
 export function isBookNowFlatServiceSlug(slug = '') {
     const s = String(slug || '').trim().toLowerCase();
-    if (!BOOK_NOW_FLAT_SERVICE_SLUG_PATTERN.test(s)) return false;
-    if (isFlatBrandCenterSlug(s)) return false;
+    if (!isNearbyServiceSlug(s)) return false;
     if (s.startsWith('book-')) return true;
     if (/-near-(you|me)$/i.test(s)) return true;
+    if (/-repair-services?$/i.test(s)) return true;
     if (/-repair-service-center$/i.test(s) && !/-appliance-repair-service-center$/i.test(s)) {
         return true;
     }
@@ -318,29 +330,59 @@ export function parseBookNowCityFlatPath(normalizedPath = '', brandSlugs = null)
 
 /**
  * Build canonical public URL for book-now with city.
- * e.g. /godrej-refrigerator-repair-service-center/hyderabad
+ * e.g. /nearby/blue-star-ac-repair-services/mumbai
  */
-export function buildBookNowCityPublicPath(serviceSlug, citySlug) {
+export function buildNearbyBookNowPublicPath(serviceSlug, citySlug, brandSlugs = null) {
     const service = String(serviceSlug || '').trim().toLowerCase();
     const city = normalizeCitySlug(citySlug);
-    if (!service || !city || !isBookNowFlatServiceSlug(service)) return null;
-    return `/${service}/${city}`;
+    if (!service || !city || !isNearbyServiceSlug(service, brandSlugs)) return null;
+    return `/${NEARBY_BOOK_NOW_PREFIX}/${service}/${city}`;
+}
+
+/** @deprecated Use buildNearbyBookNowPublicPath */
+export function buildBookNowCityPublicPath(serviceSlug, citySlug) {
+    return buildNearbyBookNowPublicPath(serviceSlug, citySlug);
 }
 
 /**
- * Preferred navigation target for book-now (flat URL when possible).
+ * Parse /nearby/{serviceSlug}/{citySlug}
  */
-export function resolveBookNowNavigationPath(serviceSlug, citySlug) {
-    const flat = buildBookNowCityPublicPath(serviceSlug, citySlug);
-    if (flat) return flat;
+export function parseNearbyBookNowPath(normalizedPath = '', brandSlugs = null) {
+    const parts = String(normalizedPath || '').replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+    if (parts.length !== 3 || parts[0] !== NEARBY_BOOK_NOW_PREFIX) return null;
+
+    const [, serviceSlug, citySlug] = parts;
+    if (!isNearbyServiceSlug(serviceSlug, brandSlugs) || !isValidCitySlug(citySlug)) return null;
+
+    return {
+        serviceSlug: serviceSlug.toLowerCase(),
+        citySlug: normalizeCitySlug(citySlug),
+    };
+}
+
+/**
+ * Preferred navigation target for book-now.
+ */
+export function resolveBookNowNavigationPath(serviceSlug, citySlug, brandSlugs = null) {
+    const nearby = buildNearbyBookNowPublicPath(serviceSlug, citySlug, brandSlugs);
+    if (nearby) return nearby;
 
     const service = String(serviceSlug || '').trim();
     if (!service) return '/service-list/book-now';
+    return `/service-list/book-now/${service}`;
+}
 
-    const city = normalizeCitySlug(citySlug);
-    return city
-        ? `/service-list/book-now/${service}?city=${encodeURIComponent(city)}`
-        : `/service-list/book-now/${service}`;
+/**
+ * Rewrite public /nearby/{service}/{city} to internal book-now route.
+ * @returns {{ pathname: string, search: string }|null}
+ */
+export function resolveNearbyBookNowRewrite(normalizedPath = '', brandSlugs = null) {
+    const parsed = parseNearbyBookNowPath(normalizedPath, brandSlugs);
+    if (!parsed) return null;
+    return {
+        pathname: `/book-now/${parsed.serviceSlug}`,
+        search: `?city=${encodeURIComponent(parsed.citySlug)}`,
+    };
 }
 
 /**

@@ -6,7 +6,8 @@ import { X, BadgeCheck, PhoneCall, CheckCircle2, ChevronRight, MapPin, AlertTria
 import { useRouter } from 'next/navigation';
 import { actionTypes } from './data';
 import { useLocation } from '@/hooks/useLocation';
-import { trackBookingCompleted, trackLeadEvent } from '@/lib/leadTracking';
+import { useAuth } from '@/context/AuthContext';
+import { trackBookingCompleted, trackLeadEvent, getLeadUserFields } from '@/lib/leadTracking';
 import { fetchCities, fetchAuthorizedServicesByFilters } from '@/lib/api';
 import { citiesMatchBySlugOrName } from '@/lib/applianceRepairSlugs';
 
@@ -92,6 +93,34 @@ function matchesServiceInCityList(selectedService, cityServices = []) {
   });
 }
 
+function normalizePhone(value) {
+  return String(value || '').replace(/\D/g, '').slice(-10);
+}
+
+function buildCustomerPayload(customerDetails, user, location) {
+  const leadFields = getLeadUserFields(user);
+  const phone = normalizePhone(customerDetails.phone) || leadFields.mobile || '';
+  const customerName = String(customerDetails.customerName || leadFields.customerName || '').trim();
+  const email = String(customerDetails.email || user?.email || '').trim();
+  const address = String(customerDetails.address || location?.address || '').trim();
+  const pincode = String(
+    customerDetails.pincode || location?.postalCode || location?.pincode || '',
+  ).trim();
+  const customerId = user?._id || user?.id;
+
+  return {
+    ...(customerName ? { customerName } : {}),
+    ...(phone ? { phone, mobile: phone } : {}),
+    ...(email ? { email } : {}),
+    ...(address ? { address } : {}),
+    ...(pincode ? { pincode } : {}),
+    ...(location?.area || location?.city
+      ? { location: String(location.area || location.city).trim() }
+      : {}),
+    ...(customerId ? { customerId } : {}),
+  };
+}
+
 async function verifyServiceAvailableInCity(selectedService, displayCity) {
   const embeddedCheck = checkServiceCityFromServiceData(selectedService, displayCity);
   if (embeddedCheck === true) return true;
@@ -153,10 +182,18 @@ export function BookingModal({
   selectedService 
 }) {
   const router = useRouter();
+  const { user } = useAuth();
   const { location } = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAction, setSelectedAction] = useState(actionTypes[0]);
   const [requirement, setRequirement] = useState("");
+  const [customerDetails, setCustomerDetails] = useState({
+    customerName: '',
+    phone: '',
+    email: '',
+    address: '',
+    pincode: '',
+  });
   const [confirmed, setConfirmed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -184,7 +221,9 @@ export function BookingModal({
     !locationMismatch &&
     serviceAvailableInCity === true &&
     !checkingAvailability &&
-    Boolean(displayCity);
+    Boolean(displayCity) &&
+    Boolean(customerDetails.customerName.trim()) &&
+    normalizePhone(customerDetails.phone).length === 10;
 
   const serviceUnavailableMessage = useMemo(() => {
     if (!displayCity?.name) return 'Please select a city to continue.';
@@ -281,8 +320,17 @@ export function BookingModal({
       setSubmitError("");
       setCurrentStep(1);
       setServiceAvailableInCity(null);
+
+      const leadFields = getLeadUserFields(user);
+      setCustomerDetails({
+        customerName: leadFields.customerName || '',
+        phone: leadFields.mobile || '',
+        email: user?.email || '',
+        address: location?.address || '',
+        pincode: location?.postalCode || location?.pincode || '',
+      });
     }
-  }, [isOpen, selectedService]);
+  }, [isOpen, selectedService, user, location]);
 
   const handleConfirmBooking = async () => {
     if (locationMismatch) {
@@ -307,6 +355,18 @@ export function BookingModal({
       setSubmitError("Please provide a description of your requirement.");
       return;
     }
+
+    if (!customerDetails.customerName.trim()) {
+      setSubmitError("Please enter your name.");
+      return;
+    }
+
+    if (normalizePhone(customerDetails.phone).length !== 10) {
+      setSubmitError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    const customerPayload = buildCustomerPayload(customerDetails, user, location);
 
     setIsSubmitting(true);
     setSubmitError("");
@@ -351,7 +411,8 @@ export function BookingModal({
           brandId,
           authorisedServiceId,
           serviceType: selectedAction.toLowerCase(),
-          description: requirement.trim()
+          description: requirement.trim(),
+          ...customerPayload,
         })
       });
 
@@ -371,6 +432,12 @@ export function BookingModal({
         brandName: selectedService?.brandName || '',
         problemName: requirement.trim(),
         serviceType: selectedAction,
+        customerName: customerPayload.customerName,
+        mobile: customerPayload.phone,
+        email: customerPayload.email,
+        city: displayCity?.name || '',
+        area: customerPayload.location || location?.area || '',
+        pincode: customerPayload.pincode,
       });
       trackBookingCompleted(data.bookingId || data.data?._id, { vertical: 'authorised' });
 
@@ -384,6 +451,14 @@ export function BookingModal({
 
   const handleNextStep = () => {
     if (currentStep === 1) {
+      if (!customerDetails.customerName.trim()) {
+        setSubmitError("Please enter your name before proceeding.");
+        return;
+      }
+      if (normalizePhone(customerDetails.phone).length !== 10) {
+        setSubmitError("Please enter a valid 10-digit mobile number.");
+        return;
+      }
       if (!requirement.trim()) {
         setSubmitError("Please describe your problem before proceeding.");
         return;
@@ -391,6 +466,11 @@ export function BookingModal({
       setSubmitError("");
       setCurrentStep(2);
     }
+  };
+
+  const updateCustomerField = (field, value) => {
+    setCustomerDetails((prev) => ({ ...prev, [field]: value }));
+    if (submitError) setSubmitError("");
   };
 
   return (
@@ -462,6 +542,78 @@ export function BookingModal({
                       className="py-6"
                     >
                       <div className="mb-6">
+                        <label className="mb-3 ml-1 block text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+                          Your Details
+                        </label>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <label className="mb-2 ml-1 block text-[9px] font-black uppercase tracking-widest text-gray-400">
+                              Full Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={customerDetails.customerName}
+                              onChange={(event) => updateCustomerField('customerName', event.target.value)}
+                              placeholder="Enter your name"
+                              className="w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-4 py-3.5 text-sm font-bold text-gray-900 outline-none transition-all placeholder-gray-300 focus:border-[#037166]/30 focus:bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 ml-1 block text-[9px] font-black uppercase tracking-widest text-gray-400">
+                              Mobile Number <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="tel"
+                              inputMode="numeric"
+                              maxLength={10}
+                              value={customerDetails.phone}
+                              onChange={(event) => updateCustomerField('phone', event.target.value.replace(/\D/g, '').slice(0, 10))}
+                              placeholder="10-digit mobile number"
+                              className="w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-4 py-3.5 text-sm font-bold text-gray-900 outline-none transition-all placeholder-gray-300 focus:border-[#037166]/30 focus:bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 ml-1 block text-[9px] font-black uppercase tracking-widest text-gray-400">
+                              Email
+                            </label>
+                            <input
+                              type="email"
+                              value={customerDetails.email}
+                              onChange={(event) => updateCustomerField('email', event.target.value)}
+                              placeholder="Email address (optional)"
+                              className="w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-4 py-3.5 text-sm font-bold text-gray-900 outline-none transition-all placeholder-gray-300 focus:border-[#037166]/30 focus:bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 ml-1 block text-[9px] font-black uppercase tracking-widest text-gray-400">
+                              Pincode
+                            </label>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={6}
+                              value={customerDetails.pincode}
+                              onChange={(event) => updateCustomerField('pincode', event.target.value.replace(/\D/g, '').slice(0, 6))}
+                              placeholder="Pincode (optional)"
+                              className="w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-4 py-3.5 text-sm font-bold text-gray-900 outline-none transition-all placeholder-gray-300 focus:border-[#037166]/30 focus:bg-white"
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <label className="mb-2 ml-1 block text-[9px] font-black uppercase tracking-widest text-gray-400">
+                            Address
+                          </label>
+                          <input
+                            type="text"
+                            value={customerDetails.address}
+                            onChange={(event) => updateCustomerField('address', event.target.value)}
+                            placeholder="Service address (optional)"
+                            className="w-full rounded-2xl border-2 border-gray-50 bg-gray-50 px-4 py-3.5 text-sm font-bold text-gray-900 outline-none transition-all placeholder-gray-300 focus:border-[#037166]/30 focus:bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mb-6">
                           <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3 ml-1">Type of Requirement</label>
                           <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
                           {actionTypes.map((type) => (
@@ -498,6 +650,12 @@ export function BookingModal({
                           <p className="mt-2 ml-4 text-[10px] font-black text-red-500 uppercase tracking-widest">Description is required</p>
                         )}
                       </div>
+
+                      {submitError && currentStep === 1 && (
+                        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-black text-red-600">
+                          {submitError}
+                        </div>
+                      )}
                     </motion.div>
                   )}
 
@@ -569,6 +727,22 @@ export function BookingModal({
                           <Summary label="Brand" value={selectedBrand || 'Standard Brand'} />
                           <Summary label="Request Type" value={selectedAction} />
                         </div>
+                        <div className="mt-3 grid gap-3 text-xs sm:text-sm grid-cols-1 sm:grid-cols-2">
+                          <Summary label="Customer Name" value={customerDetails.customerName || '—'} />
+                          <Summary label="Mobile Number" value={customerDetails.phone || '—'} />
+                          {customerDetails.email ? (
+                            <Summary label="Email" value={customerDetails.email} />
+                          ) : null}
+                          {customerDetails.pincode ? (
+                            <Summary label="Pincode" value={customerDetails.pincode} />
+                          ) : null}
+                        </div>
+                        {customerDetails.address ? (
+                          <div className="mt-3 rounded-xl bg-white border border-gray-100 p-4 shadow-sm">
+                            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 mb-2">Service Address</p>
+                            <p className="text-xs font-bold leading-relaxed text-gray-600">{customerDetails.address}</p>
+                          </div>
+                        ) : null}
                         {checkingAvailability && (
                           <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-gray-400">
                             Verifying service availability in {displayCity?.name || 'selected city'}...

@@ -6,6 +6,8 @@ import {
     resolveFlatBrandSingleRewritePath,
     resolveLegacySeoBrandRedirect,
     resolveBookNowCityFlatRewrite,
+    resolveNearbyBookNowRewrite,
+    buildNearbyBookNowPublicPath,
 } from './app/lib/applianceRepairSlugs';
 
 // Fallback slugs to ensure critical routes work even if API is slow or down
@@ -196,6 +198,28 @@ export async function middleware(request) {
         }
 
         const brandSlugs = await getBrandSlugSet();
+
+        if (pathname.startsWith('/service-list/book-now/')) {
+            const legacySlug = normalizedPath.replace(/^service-list\/book-now\//, '').split('/')[0];
+            const city = request.nextUrl.searchParams.get('city');
+            if (legacySlug && city) {
+                const nearbyPath = buildNearbyBookNowPublicPath(legacySlug, city, brandSlugs);
+                if (nearbyPath) {
+                    const url = request.nextUrl.clone();
+                    url.pathname = nearbyPath;
+                    url.search = '';
+                    return NextResponse.redirect(url, 308);
+                }
+            }
+        }
+
+        const nearbyBookNowRewrite = resolveNearbyBookNowRewrite(normalizedPath, brandSlugs);
+        if (nearbyBookNowRewrite) {
+            const url = request.nextUrl.clone();
+            url.pathname = nearbyBookNowRewrite.pathname;
+            url.search = nearbyBookNowRewrite.search;
+            return NextResponse.rewrite(url);
+        }
 
         const legacyBrandRedirect = resolveLegacySeoBrandRedirect(normalizedPath, brandSlugs);
         if (legacyBrandRedirect) {

@@ -18,7 +18,7 @@ export function inferVertical(pathname = '') {
   if (path.includes('/religious-services')) return 'religious';
   if (path.includes('/pghostels')) return 'pghostels';
   if (path.includes('/book-appointment')) return 'crm';
-  if (path.includes('/book-now') || path.includes('/service-list/book-now') || path.includes('/repair-service')) {
+  if (path.includes('/book-now') || path.includes('/service-list/book-now') || path.includes('/nearby/') || path.includes('/repair-service')) {
     return 'authorised';
   }
   const flatBookParts = path.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
@@ -90,7 +90,7 @@ export function getLeadUserFields(user) {
 function isBookingFunnelPath() {
   if (typeof window === 'undefined') return false;
   const path = window.location.pathname || '';
-  return /\/(appliances|services|spa-salon|religious-services|pghostels|book-appointment|book-now|repair-service|service-list)/i.test(
+  return /\/(appliances|services|spa-salon|religious-services|pghostels|book-appointment|book-now|nearby|repair-service|service-list)/i.test(
     path,
   );
 }

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { TrendingUp, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { resolveBookNowNavigationPath } from '@/lib/applianceRepairSlugs';
 
 export function RecentlyBooked({ onServiceClick, onViewAll }) {
   const [services, setServices] = useState([]);
@@ -22,7 +23,12 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
       "position": index + 1,
       "name": service.title,
       "description": service.description,
-      "url": service.slug ? `https://doorstephub.com/service-list/book-now/${service.slug}` : undefined
+      "url": service.slug
+        ? `https://doorstephub.com${resolveBookNowNavigationPath(
+            service.slug,
+            service.citySlug || service.city || 'mumbai',
+          )}`
+        : undefined
     }))
   };
 

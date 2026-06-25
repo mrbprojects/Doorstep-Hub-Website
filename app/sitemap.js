@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
 
-import { buildApplianceRepairCityPublicPath, buildApplianceCategoryCityPublicPath, buildFlatBrandCityPublicPath, buildFlatBrandPublicPath } from '@/lib/applianceRepairSlugs';
+import { buildApplianceRepairCityPublicPath, buildApplianceCategoryCityPublicPath, buildFlatBrandCityPublicPath, buildFlatBrandPublicPath, resolveBookNowNavigationPath } from '@/lib/applianceRepairSlugs';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 const BASE_URL = 'https://doorstephub.com';
@@ -167,7 +167,7 @@ async function getApplianceBookingEntries() {
             if (svcData?.success && Array.isArray(svcData.dhubServices)) {
               svcData.dhubServices.forEach(svc => {
                 if (isValidSlug(svc.slug)) {
-                  entries.push({ url: `${BASE_URL}/service-list/book-now/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
+                  entries.push({ url: `${BASE_URL}${resolveBookNowNavigationPath(svc.slug, 'hyderabad')}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
                 }
               });
             }
@@ -180,7 +180,7 @@ async function getApplianceBookingEntries() {
     if (authData?.success && Array.isArray(authData.services)) {
       authData.services.forEach(svc => {
         if (isValidSlug(svc.slug)) {
-          entries.push({ url: `${BASE_URL}/service-list/book-now/${svc.slug}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
+          entries.push({ url: `${BASE_URL}${resolveBookNowNavigationPath(svc.slug, 'hyderabad')}`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 });
         }
       });
     }

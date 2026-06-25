@@ -31,10 +31,10 @@ export function FloatingActionButtons() {
     ];
 
     // Check if the current path should hide the floating buttons
-    const shouldHide = hideForServices.some(path => pathname.includes(path)) || pathname.includes('book-now');
+    const shouldHide = hideForServices.some(path => pathname.includes(path)) || pathname.includes('book-now') || pathname.includes('/nearby/');
 
     // Hide global Book Now pill on service detail pages (dynamic [slug] routes at root)
-    const isServiceDetailPage = (pathname.split('/').length === 2 && !KNOWN_SECTIONS.some(s => pathname.startsWith(s)) && pathname !== '/') || pathname.includes('book-now');
+    const isServiceDetailPage = (pathname.split('/').length === 2 && !KNOWN_SECTIONS.some(s => pathname.startsWith(s)) && pathname !== '/') || pathname.includes('book-now') || pathname.includes('/nearby/');
 
     // If we should hide for specific services, return null
     if (shouldHide) return null;

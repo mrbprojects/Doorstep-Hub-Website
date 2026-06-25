@@ -1,0 +1,731 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Plus, Minus } from 'lucide-react';
+import { toast } from 'sonner';
+import { useServiceCart } from '@/context/ServiceCartContext';
+import { useAuth } from '@/context/AuthContext';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
+import { useRouter } from 'next/navigation';
+
+export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
+    const { cartData, cartItems, clearCart, addToCart, removeFromCart } = useServiceCart();
+    const { token, isAuthenticated, loading: authLoading } = useAuth();
+    const router = useRouter();
+
+    // Fees from GlobalSettingsContext (fetched once at app level)
+    const { onlineBookingFee, doorstepInspectionFee } = useGlobalSettings() || {};
+
+    // Calculate final payable amount directly from service-cart/get response
+    const baseServiceCost = Number(cartData?.totalServiceCost || 0);
+    const gstAmount = Number(cartData?.gstAmount || 0);
+    const consultationFee = doorstepInspectionFee ?? Number(cartData?.consultationFee || 0);
+    const platformFee = onlineBookingFee ?? Number(cartData?.platformFee || 0);
+    const bookingCost = Number(cartData?.finalAmount || (baseServiceCost + gstAmount + consultationFee));
+
+    const inspectionCost = Number(cartData?.inspectionCost || 0);
+
+    const [bookedDate, setBookedDate] = useState('');
+    const [bookedTime, setBookedTime] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('ONLINE');
+    const [loading, setLoading] = useState(false);
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [technicianPreference, setTechnicianPreference] = useState('any');
+    const [walletBalance, setWalletBalance] = useState(0);
+    const [walletData, setWalletData] = useState(null);
+    const [walletLoading, setWalletLoading] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+
+    // On mount: check if returning from Easebuzz payment gateway
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        if (status === 'success') {
+            setPaymentStatus('success');
+            // Payment confirmed — now safe to clear cart
+            clearCart();
+            sessionStorage.removeItem('pending_booking');
+            toast.success('Payment successful! Booking confirmed.');
+        } else if (status === 'failure') {
+            setPaymentStatus('failure');
+            toast.error('Payment failed. Redirecting to cart for retry...');
+            setTimeout(() => {
+                router.push('/appliances/cart');
+            }, 2000);
+        }
+    }, [router, clearCart]);
+
+    // Fetch Wallet Balance
+    useEffect(() => {
+        const fetchWalletBalance = async () => {
+            if (!token) return;
+            setWalletLoading(true);
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/wallet/balance`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                if (data.success && data.wallet) {
+                    setWalletBalance(data.wallet.currentBalance || 0);
+                    setWalletData(data.wallet);
+                }
+            } catch (error) {
+                console.error('Error fetching wallet balance:', error);
+            } finally {
+                setWalletLoading(false);
+            }
+        };
+
+        if (isAuthenticated) {
+            fetchWalletBalance();
+        }
+    }, [token, isAuthenticated]);
+
+    // Check authentication on mount
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            setShowAuthModal(true);
+        }
+    }, [isAuthenticated, authLoading]);
+
+    // Service window: 9 AM to 9 PM (9:00 to 21:00)
+    const SERVICE_START_HOUR = 9;
+    const SERVICE_END_HOUR = 21;
+    const BUFFER_HOURS = 3;
+
+    // Smart date availability logic
+    const getAvailableDates = () => {
+        const now = new Date();
+        const dates = [];
+        let startDate = new Date(now);
+
+        // Check if today is still available (current time + 3hr buffer < 9 PM)
+        const todayCutoff = new Date();
+        todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0); // 6 PM cutoff
+
+        if (now > todayCutoff) {
+            // Skip today, start from tomorrow
+            startDate.setDate(startDate.getDate() + 1);
+        }
+
+        for (let i = (now > todayCutoff ? 1 : 0); i < 7; i++) {
+            const date = new Date(startDate);
+            date.setDate(date.getDate() + i);
+            dates.push({
+                value: date.toISOString().split('T')[0],
+                label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
+                }),
+            });
+        }
+        return dates;
+    };
+
+    // Smart time slot availability based on selected date
+    const getAvailableTimes = (selectedDateValue) => {
+        const now = new Date();
+        const selectedDate = new Date(selectedDateValue);
+
+        // Time slots (2-hour windows)
+        const allTimeSlots = [
+            { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9, endHour: 11 },
+            { label: '11:00 AM - 01:00 PM', value: '11:00', startHour: 11, endHour: 13 },
+            { label: '01:00 PM - 03:00 PM', value: '13:00', startHour: 13, endHour: 15 },
+            { label: '03:00 PM - 05:00 PM', value: '15:00', startHour: 15, endHour: 17 },
+            { label: '05:00 PM - 07:00 PM', value: '17:00', startHour: 17, endHour: 19 },
+            { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19, endHour: 21 },
+        ];
+
+        // If today and past cutoff time, filter available slots
+        if (selectedDate.toDateString() === now.toDateString()) {
+            const currentHour = now.getHours();
+            const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS; // 6 PM cutoff
+
+            if (currentHour >= cutoffHour) {
+                return []; // No slots available today
+            }
+
+            return allTimeSlots.filter(slot => slot.startHour > currentHour);
+        }
+
+        return allTimeSlots;
+    };
+
+    const availableDates = getAvailableDates();
+    const availableTimesForSelectedDate = getAvailableTimes(bookedDate);
+
+    // Reset time when date changes
+    useEffect(() => {
+        setBookedTime('');
+    }, [bookedDate]);
+
+    const handleUpdateQuantity = async (item, delta) => {
+        const newQuantity = (item.quantity || 1) + delta;
+
+        if (newQuantity < 1) {
+            await removeFromCart(item.itemId);
+            return;
+        }
+
+        const providerId = cartData?.provider?._id;
+        if (!providerId) return;
+
+        await addToCart(
+            providerId,
+            item.itemId,
+            item.itemType,
+            delta,
+            item.parentServiceId,
+            cartData?.providerType || 'regular'
+        );
+    };
+
+    const handleCheckout = async () => {
+        if (!selectedAddress) {
+            toast.error('Please select an address');
+            return;
+        }
+        if (!bookedDate) {
+            toast.error('Please select a date');
+            return;
+        }
+        if (!bookedTime) {
+            toast.error('Please select a time');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const endpoint = paymentMethod === 'ONLINE'
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
+                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    serviceAddressId: selectedAddress._id,
+                    bookedDate,
+                    bookedTime,
+                    paymentMethod,
+                    sourceOfLead: 'website',
+                    surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
+                    furl: `${window.location.protocol}//${window.location.host}/appliances/payment-failed`
+                })
+            });
+
+            const data = await response.json();
+            console.log('💳 Checkout Response:', data);
+
+            if (data.success) {
+                if (paymentMethod === 'ONLINE' && data.access_key) {
+                    // Save pending booking details to sessionStorage before redirect
+                    // DO NOT clear cart here — data must survive the redirect
+                    sessionStorage.setItem('pending_booking', JSON.stringify({
+                        bookedDate,
+                        bookedTime,
+                        address: selectedAddress,
+                        orderId: data.bookingId || data.orderId || null
+                    }));
+
+                    // Redirect to Easebuzz payment gateway with access_key
+                    const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
+                    console.log('🔗 Redirecting to Easebuzz:', easebuzzUrl);
+                    toast.success('Redirecting to payment gateway...');
+                    // Cart will be cleared on return when ?status=success is detected
+                    window.location.href = easebuzzUrl;
+                } else {
+                    // COD or Wallet payment successful
+                    toast.success('Booking created successfully!');
+                    clearCart(); // Clear cart only on successful booking
+                    if (onSuccess) onSuccess(data);
+                }
+            } else {
+                toast.error(data.message || 'Checkout failed');
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            toast.error('Failed to complete checkout');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-screen pt-20 pb-32"
+        >
+            {/* Header */}
+            <section className="sticky top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        onClick={onBack}
+                        className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Address
+                    </motion.button>
+
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
+                    >
+                        <Sparkles className="w-8 h-8 !text-white" />
+                        <span className="text-white"> Confirm Your Booking</span>
+                    </motion.h1>
+                </div>
+
+                {/* Progress Indicator */}
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6">
+                    <BookingSteps
+                        flowType={FLOW_TYPES.SERVICE_CENTER}
+                        currentStep="address"
+                        serviceSlug="appliances"
+                    />
+                </div>
+            </section>
+
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+                    {/* Main Content */}
+                    <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                        {/* Date Selection */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                        >
+                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-[#04a99d]" />
+                                Select Date
+                            </h4>
+                            {availableDates.length === 0 ? (
+                                <p className="text-white/90 text-sm">No dates available at this time</p>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {availableDates.map((date) => (
+                                        <button
+                                            key={date.value}
+                                            onClick={() => setBookedDate(date.value)}
+                                            className={`p-4 rounded-xl font-medium transition-all ${bookedDate === date.value
+                                                ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
+                                                : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
+                                                }`}
+                                        >
+                                            {date.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </motion.div>
+
+                        {/* Time Selection */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                        >
+                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-[#04a99d]" />
+                                Select Time Slot
+                            </h4>
+                            {availableTimesForSelectedDate.length === 0 ? (
+                                <p className="text-white/90 text-sm">
+                                    {bookedDate
+                                        ? 'No time slots available for selected date'
+                                        : 'Please select a date first'
+                                    }
+                                </p>
+                            ) : (
+                                <div className="grid md:grid-cols-2 gap-3">
+                                    {availableTimesForSelectedDate.map((time) => (
+                                        <button
+                                            key={time.value}
+                                            onClick={() => setBookedTime(time.value)}
+                                            className={`p-4 rounded-xl font-medium transition-all ${bookedTime === time.value
+                                                ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
+                                                : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
+                                                }`}
+                                        >
+                                            {time.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </motion.div>
+
+                        {/* Technician Preference */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                        >
+                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <User className="w-5 h-5 text-[#04a99d]" />
+                                Technician Preference (Optional)
+                            </h4>
+                            <div className="grid md:grid-cols-3 gap-3">
+                                {[
+                                    { value: 'any', label: 'Any Available' },
+                                    { value: 'senior', label: 'Senior Technician' },
+                                    { value: 'same', label: 'Same as Last Time' },
+                                ].map((option) => (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => setTechnicianPreference(option.value)}
+                                        className={`p-4 rounded-xl font-medium transition-all ${technicianPreference === option.value
+                                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
+                                            : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
+                                            }`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        {/* Payment Method */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                        >
+                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-[#04a99d]" />
+                                Select Payment Method
+                            </h4>
+
+                            {/* Virtual Wallet Card */}
+                            {paymentMethod === 'WALLET' && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+                                    animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="relative p-7 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] text-white shadow-2xl shadow-[#037166]/40 overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+                                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-24 -mb-24 blur-2xl" />
+
+                                        <div className="relative flex justify-between items-start mb-10">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1.5">
+                                                    <div className="w-2 h-2 rounded-full bg-[#05bfb0] animate-pulse" />
+                                                    <p className="!text-white/70 text-[10px] font-bold uppercase tracking-[0.2em]">DH Active Wallet</p>
+                                                </div>
+                                                <p className="!text-white/60 text-[10px] font-medium uppercase tracking-widest mb-1">Available Balance</p>
+                                                <h3 className="text-4xl font-bold tracking-tight flex items-baseline gap-1">
+                                                    <span className="text-2xl !text-white  opacity-60">₹</span>
+                                                    <span className="!text-white">{Number(walletBalance).toFixed(2)}</span>
+                                                </h3>
+                                            </div>
+                                            <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
+                                                <Wallet className="w-6 h-6 text-white" />
+                                            </div>
+                                        </div>
+
+                                        <div className="relative flex justify-between items-end">
+                                            <div className="space-y-1">
+                                                <p className="!text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
+                                                <p className="!text-white text-sm font-mono tracking-[0.3em] font-medium">
+                                                    {walletData?.walletId ? `**** ${walletData.walletId.split('-').pop()}` : '**** **** 7269'}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-[14px] font-black italic tracking-tighter text-white">DH<span className="text-white/50">PAY</span></span>
+                                                    <div className="flex gap-1 mt-1">
+                                                        <div className="w-4 h-2.5 rounded-sm bg-white/20" />
+                                                        <div className="w-4 h-2.5 rounded-sm bg-white/40" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            <div className="grid md:grid-cols-2 gap-3">
+                                {[
+                                    {
+                                        id: 'WALLET',
+                                        label: 'Wallet Pay',
+                                        icon: Wallet,
+                                        disabled: false,
+                                        tooltip: 'Pay using your DH Wallet balance',
+                                        showBalance: true
+                                    },
+                                    {
+                                        id: 'ONLINE',
+                                        label: 'Online Payment',
+                                        icon: CreditCard,
+                                        disabled: false
+                                    },
+                                ].map((method) => (
+                                    <div key={method.id} className="relative group h-full">
+                                        <button
+                                            onClick={() => !method.disabled && setPaymentMethod(method.id)}
+                                            disabled={method.disabled}
+                                            className={`w-full h-full p-5 rounded-xl flex flex-col items-center justify-center gap-2 transition-all min-h-[140px] ${paymentMethod === method.id
+                                                ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg'
+                                                : method.disabled
+                                                    ? 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed'
+                                                    : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                                                }`}
+                                        >
+                                            <div className={`w-6 h-6 flex items-center justify-center ${paymentMethod === method.id ? '!text-white' : method.disabled ? 'text-white/10' : 'text-[#04a99d]'}`}>
+                                                {method.id === 'wallet' && !walletLoading && walletBalance > 0 ? (
+                                                    <span className="text-sm font-bold">₹{Number(walletBalance).toFixed(2)}</span>
+                                                ) : (
+                                                    <method.icon className="w-6 h-6" />
+                                                )}
+                                            </div>
+
+                                            <h6 className={`text-sm font-medium ${paymentMethod === method.id ? '!text-white' : ''}`}>{method.label}</h6>
+
+                                            {method.id === 'wallet' && (
+                                                <i className="text-[9px] text-white/40 block mt-0.5 leading-tight">
+                                                    Wallet Usable After Service Completion Only
+                                                </i>
+                                            )}
+                                        </button>
+
+                                        {/* Simple Tooltip on Top */}
+                                        {method.disabled && method.tooltip && (
+                                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 px-2 py-1 bg-black/90 text-white text-[12px] rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center">
+                                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/90 rotate-45 border-r border-b border-white/10" />
+                                                {method.tooltip}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        {/* Service Address */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                        >
+                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-[#04a99d]" />
+                                Service Address
+                            </h4>
+                            <div className="p-4 rounded-lg bg-white/5">
+                                <h6 className="text-white font-medium mb-1">{selectedAddress?.name}</h6>
+                                <p className="text-white/80">{selectedAddress?.flat}, {selectedAddress?.area}</p>
+                                <p className="text-white/60">{selectedAddress?.cityName}, {selectedAddress?.postalCode}</p>
+                            </div>
+                        </motion.div>
+                    </div>
+
+                    {/* Summary Sidebar */}
+                    <div className="lg:col-span-1">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="sticky top-48 p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                        >
+                            <h4 className="text-xl font-bold text-white mb-6">Booking Summary</h4>
+
+                            {/* Cart Items */}
+                            <div className="space-y-4 mb-6">
+                                {cartItems.map((item) => (
+                                    <div key={item.itemId} className="flex justify-between text-sm">
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h6 className="text-[#111827] font-bold max-w-[180px] leading-tight">{item.itemName}</h6>
+                                                <span className="text-[#1f2937] font-bold whitespace-nowrap ml-2">₹{item.price}</span>
+                                            </div>
+                                            <p className="text-[#0f766e] text-[10px] font-semibold uppercase tracking-wider mb-2">
+                                                {item.packageName}
+                                            </p>
+
+                                            {/* Quantity Controls */}
+                                            <div className="flex items-center gap-2.5">
+                                                <button
+                                                    onClick={() => handleUpdateQuantity(item, -1)}
+                                                    className="w-7 h-7 rounded-lg bg-white/80 border border-[#d1d5db] flex items-center justify-center text-[#111827] hover:bg-white transition-all active:scale-95"
+                                                >
+                                                    <Minus className="w-3 h-3" />
+                                                </button>
+                                                <span className="text-[#111827] text-sm font-bold w-4 text-center">{item.quantity || 1}</span>
+                                                <button
+                                                    onClick={() => handleUpdateQuantity(item, 1)}
+                                                    className="w-7 h-7 rounded-lg bg-white/80 border border-[#d1d5db] flex items-center justify-center text-[#111827] hover:bg-white transition-all active:scale-95"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="h-px bg-white/10 mb-4" />
+
+                            {/* Pricing Breakdown */}
+                            <div className="space-y-4 mb-6">
+                                {/* Item Subtotal */}
+                                <div className="space-y-2">
+                                        <div className="flex justify-between items-center text-[#374151] text-xs uppercase tracking-wider font-bold">
+                                        <span>Services Subtotal</span>
+                                        <span>₹{baseServiceCost.toFixed(2)}</span>
+                                    </div>
+                                    <div className="h-px bg-white/5" />
+                                </div>
+
+                                {/* Fees & Taxes */}
+                                <div className="space-y-3">
+                                    {gstAmount > 0 && (
+                                        <div className="flex justify-between items-center text-[#374151] text-sm">
+                                            <div className="flex items-center gap-1.5">
+                                                <span>GST</span>
+                                                <span className="text-[10px] bg-black/5 px-1.5 py-0.5 rounded border border-black/10">18%</span>
+                                            </div>
+                                            <span className="text-[#374151] font-semibold">₹{gstAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    {cartData?.platformFee > 0 && (
+                                        <div className="flex justify-between items-center text-[#374151] text-sm">
+                                            <span>Platform Fee</span>
+                                            <span className="text-[#374151] font-semibold">₹{cartData.platformFee.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    {(
+                                        <div className="flex justify-between items-center text-[#374151] text-sm">
+                                            <div className="flex flex-col">
+                                                <span>Platform Fee</span>
+                                                <span className="text-[10px] text-[#04a99d] inline-flex items-center gap-1">
+                                                    <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
+                                                    Non-refundable booking fee
+                                                </span>
+                                            </div>
+                                            <span className="text-[#374151] font-semibold">₹{consultationFee.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-between items-center text-[#374151] text-sm">
+                                        <div className="flex flex-col">
+                                            
+                                            <span>Doorstep Inspection Fee</span>
+                                            <span className="text-[10px] text-[#04a99d] inline-flex items-center gap-1">
+                                                <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
+                                                    Pay at doorstep
+                                            </span>
+                                        </div>
+                                        <span className="text-[#374151] font-semibold">₹{inspectionCost.toFixed(2)}</span>
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-white/10" />
+
+                                {/* Final Total */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-end">
+                                        <div className="flex flex-col">
+                                            <span className="text-[#4b5563] text-xs uppercase font-bold">Grand Total</span>
+                                            <span className="text-[#111827] font-bold text-2xl">₹{bookingCost.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[#04a99d] text-[10px] font-bold uppercase py-1 px-2 bg-[#04a99d]/10 rounded-lg border border-[#04a99d]/20">
+                                                All inclusive
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* <div className="flex items-start gap-2 p-3 rounded-xl bg-[#04a99d]/5 border border-[#04a99d]/10 mt-4">
+                                        <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
+                                        <p className="text-[11px] text-[#4b5563] leading-relaxed">
+                                            We collect the Doorstep Inspection Fee at doorstep.
+                                        </p>
+                                    </div> */}
+                                </div>
+                            </div>
+
+                            {/* Selected Date/Time Preview */}
+                            {bookedDate && bookedTime && (
+                                <div className="p-4 rounded-lg bg-[#037166]/10 border border-[#037166]/20 mb-6">
+                                    <p className="text-[#4b5563] text-sm mb-2">Scheduled for:</p>
+                                    <p className="text-[#1f2937] font-medium">
+                                        {availableDates.find(d => d.value === bookedDate)?.label}
+                                    </p>
+                                    <p className="text-[#1f2937] font-medium">
+                                        {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Confirm Button */}
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleCheckout}
+                                disabled={loading || !bookedDate || !bookedTime}
+                                className={`w-full px-6 py-4 rounded-xl font-medium text-lg transition-all ${loading || !bookedDate || !bookedTime
+                                    ? 'bg-white/20 text-white/60 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:shadow-lg hover:shadow-[#037166]/40'
+                                    }`}
+                            >
+                                {loading ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Processing...
+                                    </div>
+                                ) : (
+                                    `Confirm Booking  ₹${bookingCost.toFixed(2)}`
+                                )}
+                            </motion.button>
+
+                            <p className="text-[#6b7280] text-[10px] text-center mt-4">
+                                By booking, you agree to our Terms & Cancellation Policy.
+                            </p>
+                            <div className="flex items-center justify-center gap-2 text-[10px] text-[#037166] bg-[#037166]/5 p-2.5 rounded-xl border border-[#037166]/10 mt-3">
+                                <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Auth Modal */}
+            <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => {
+                    setShowAuthModal(false);
+                    // Navigate back if user closes without logging in
+                    if (!isAuthenticated) {
+                        onBack();
+                    }
+                }}
+            />
+        </motion.div>
+    );
+}
+

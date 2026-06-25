@@ -1,0 +1,234 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { motion } from 'motion/react';
+import { ArrowLeft, ChevronRight, Sparkles, Flower } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useLocationContext } from '@/context/LocationContext';
+import { isObjectId } from '@/utils/slugHelper';
+
+export default function SpaCategoryPage({ slugOverride = null, initialData = null }) {
+    const router = useRouter();
+    const params = useParams();
+    const slugOrId = slugOverride || params.slug || params.id;
+    const searchParams = useSearchParams();
+    const categoryName = searchParams.get('name') || initialData?.name || 'Category';
+
+    const { location, detectWithIP } = useLocationContext();
+    const [subCategories, setSubCategories] = useState(initialData?.subcategories || []);
+    const [loading, setLoading] = useState(initialData?.subcategories ? false : true);
+
+    useEffect(() => {
+        if (!location) {
+            detectWithIP().catch(err => console.log("Auto detect failed", err));
+        }
+    }, [location]);
+
+    // Fetch Sub-Categories
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!slugOrId) return;
+            // If we already have subcategories from initialData, don't fetch again
+            if (subCategories && subCategories.length > 0) {
+                setLoading(false);
+                return;
+            }
+            setLoading(true);
+            try {
+                // Mock Support
+                if (slugOrId.startsWith('mock_')) {
+                    setSubCategories([
+                        { _id: 'mock_sub_1', name: 'Premium Cut', description: 'Includes wash and styling', image: '', slug: 'premium-cut' },
+                        { _id: 'mock_sub_2', name: 'Coloring', description: 'Global and highlights', image: '', slug: 'coloring' },
+                        { _id: 'mock_sub_3', name: 'Spa Treatment', description: 'Deep conditioning', image: '', slug: 'spa-treatment' },
+                    ]);
+                    setLoading(false);
+                    return;
+                }
+
+                // Determine if slugOrId is an ID or a Slug
+                const isId = isObjectId(slugOrId);
+                const apiParam = isId ? { categoryId: slugOrId } : { categorySlug: slugOrId };
+                const apiPayload = { ...apiParam, serviceSlug: 'spa-salon' };
+
+                const subCatResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/subcategories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(apiPayload)
+                });
+
+                if (subCatResponse.ok) {
+                    const subCatData = await subCatResponse.json();
+                    if (subCatData.success && Array.isArray(subCatData.data)) {
+                        setSubCategories(subCatData.data);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching subcategories:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [location, slugOrId, initialData]);
+
+    const handleSubCategoryClick = (subCat) => {
+        const subSlug = subCat.slug || subCat._id;
+        router.push(`/spa-salon/${subSlug}`);
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 pt-24">
+                <div className="relative pt-32 pb-20 bg-gradient-to-br from-[#C06C84] to-[#6C5CE7]">
+                    <div className="container mx-auto px-4 flex flex-col items-center gap-4">
+                        <div className="h-10 bg-white/20 rounded-full w-40 animate-pulse" />
+                        <div className="h-14 bg-white/20 rounded-xl w-72 animate-pulse" />
+                        <div className="h-6 bg-white/10 rounded-xl w-96 animate-pulse" />
+                    </div>
+                </div>
+                <div className="container mx-auto px-4 -mt-16 pb-24">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div key={i} className="bg-white rounded-[2rem] overflow-hidden shadow-xl animate-pulse">
+                                <div className="h-56 bg-gray-200" />
+                                <div className="p-6 space-y-3">
+                                    <div className="h-5 bg-gray-200 rounded-lg w-3/4" />
+                                    <div className="h-4 bg-gray-100 rounded-lg w-full" />
+                                    <div className="h-4 bg-gray-100 rounded-lg w-2/3" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const schemaData = subCategories.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `${categoryName} Services in ${location?.city || 'Your Area'}`,
+        "description": `Premium ${categoryName} treatments and packages.`,
+        "itemListElement": subCategories.map((sub, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": sub.name,
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/spa-salon/${sub.slug || sub._id}` : ""
+        }))
+    } : null;
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {schemaData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+                />
+            )}
+            <div className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-br from-[#C06C84] to-[#6C5CE7]">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none">
+                    <Flower className="w-64 h-64 text-white" />
+                </div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="flex justify-start mb-6">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white/10 backdrop-blur-md inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white cursor-pointer hover:bg-white/20 transition-colors"
+                            onClick={() => router.push('/spa-salon')}
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span className="text-sm font-medium">Back to Services</span>
+                        </motion.div>
+                    </div>
+
+                    <div className="text-center">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg"
+                        >
+                            {categoryName}
+                        </motion.h1>
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-xl text-white/90 max-w-2xl mx-auto font-light"
+                        >
+                            Premium treatments designed for your relaxation and beauty.
+                        </motion.p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="container mx-auto px-4 -mt-16 pb-24 relative z-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {subCategories.length > 0 ? (
+                        subCategories.map((subCat, index) => (
+                            <motion.div
+                                key={subCat._id}
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                onClick={() => handleSubCategoryClick(subCat)}
+                                className="group cursor-pointer relative"
+                            >
+                                <div className="absolute inset-0 bg-[#C06C84] rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition-opacity top-4"></div>
+                                <div className="bg-white rounded-[2rem] border border-gray-100 relative overflow-hidden h-full shadow-xl hover:-translate-y-2 transition-transform duration-300 flex flex-col justify-between">
+                                    <div className="relative h-56 w-full overflow-hidden rounded-t-[2rem] bg-gray-100">
+                                        {/* Floating Top Rated Badge */}
+                                        <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full text-[#C06C84] text-xs font-bold shadow-md border border-pink-100/30">
+                                            <Sparkles className="w-3.5 h-3.5 fill-[#C06C84]/15" />
+                                            <span>Top Rated</span>
+                                        </div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+                                        {subCat.image ? (
+                                            <img loading="lazy" decoding="async"
+                                                src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
+                                                alt={subCat.name}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-pink-50">
+                                                <Flower className="w-20 h-20 text-[#C06C84]/30" />
+                                            </div>
+                                        )}
+                                        <div className="absolute bottom-4 left-4 right-4 z-20">
+                                            <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-pink-200 transition-colors">
+                                                {subCat.name}
+                                            </h3>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 pt-4 flex flex-col flex-1 justify-between">
+                                        <p className="text-gray-600 line-clamp-2 mb-4 text-sm leading-relaxed text-center">
+                                            {subCat.description || `Experience premium ${subCat.name} services.`}
+                                        </p>
+                                        <div className="flex justify-center mt-2">
+                                            <div className="px-5 py-2 rounded-full bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 group-hover:from-[#b05d75] group-hover:to-[#5a4cdb] group-hover:scale-105 duration-300">
+                                                Explore Services
+                                                <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-20">
+                            <p className="text-gray-500">No services found in this category.</p>
+                            <Button variant="outline" className="mt-4" onClick={() => router.back()}>Go Back</Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

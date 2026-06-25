@@ -1,0 +1,143 @@
+[
+  {
+    "name": "Services by Subcategory (AC - Hyderabad)",
+    "status": 200,
+    "success": true,
+    "data": {
+      "success": true,
+      "message": "Services fetched successfully",
+      "detectedCity": "Hyderabad",
+      "dhubServices": [
+        {
+          "_id": "68ff4537245ce41fc67bbcc0",
+          "name": "Split AC Cooling-Related Issues",
+          "slug": "split-ac-cooling-related-issues",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765562466810-split ac cooling related isses.png",
+          "description": "Split AC not cooling properly? Doorstep Hub provides expert Split AC repair and maintenance services to fix all cooling-related problems, including low refrigerant, compressor issues, blocked airflow, dirty coils, and thermostat faults. Our certified AC technicians deliver same-day, affordable, and reliable doorstep service, ensuring your AC restores efficient, energy-saving, and consistent cooling. We serve homes, offices, and commercial spaces, offering trusted Split AC service near you. Book online with Doorstep Hub for professional, hassle-free Split AC repair and maintenance and enjoy long-lasting, optimal cooling performance.",
+          "rating": "4.3",
+          "totalOrders": 53,
+          "minFare": "125",
+          "totalViews": 199,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "68ff4726245ce41fc67bbcf8",
+          "name": "Split AC Power & Electrical Issues",
+          "slug": "split-ac-power-electrical-issues",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765562409968-preethi (500 x 500 px) (1).jpg",
+          "description": "Split AC not powering on or facing electrical problems? Doorstep Hub provides expert Split AC repair and maintenance services to resolve all power and electrical issues, including tripped circuit breakers, faulty wiring, capacitor failure, fuse issues, and PCB board problems. Our certified AC technicians offer same-day, affordable, and reliable doorstep service, ensuring your AC operates safely and efficiently. We cater to homes, offices, and commercial spaces, restoring your Split AC to optimal performance. Book Split AC electrical repair near you with Doorstep Hub for professional, hassle-free, and trusted AC service backed by 100% customer satisfaction.",
+          "rating": "4.8",
+          "totalOrders": 73,
+          "minFare": "125",
+          "totalViews": 31,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "68ff49005e73e240c4449e6b",
+          "name": "Split AC Airflow & Blower Issues",
+          "slug": "split-ac-airflow-blower-issues",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765562178502-split ac air flow.jpg",
+          "description": "Split AC blowing weak or uneven air? Doorstep Hub provides expert Split AC repair and maintenance services to fix all airflow and blower problems, including clogged filters, fan motor issues, blocked vents, and damaged blowers. Our certified AC technicians ensure optimal air circulation, efficient cooling, and energy-saving performance. We offer same-day, affordable, and reliable doorstep service for homes, offices, and commercial spaces. Trust Doorstep Hub for professional Split AC airflow and blower repair near you, restoring your AC to smooth, consistent, and refreshing cooling. Book online today for hassle-free AC service.",
+          "rating": "4.2",
+          "totalOrders": 92,
+          "minFare": "125",
+          "totalViews": 20,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "68ff4a925e73e240c4449ea1",
+          "name": "Split AC  Water Leakage & Drainage Problems",
+          "slug": "split-ac-water-leakage-drainage-problems",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765562120829-split ac water leakage.jpg",
+          "description": "Split AC leaking water or facing drainage issues? DoorstepHub offers professional Split AC repair and maintenance services to fix all water leakage problems, including clogged drain pipes, damaged drain pans, blocked condensate lines, and improper installation. Our certified AC technicians provide same-day, affordable doorstep service, ensuring your AC operates safely without causing floor or wall damage. We serve homes, offices, and commercial spaces, restoring efficient cooling and proper drainage. Book Split AC water leakage repair near you with Doorstep Hub for reliable, hassle-free, and expert AC service, preventing mold growth and water damage.",
+          "rating": "4.6",
+          "totalOrders": 59,
+          "minFare": "125",
+          "totalViews": 9,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "68ff4d7d5e73e240c4449ed2",
+          "name": "Split AC PCB & Electronic Control Problems",
+          "slug": "split-ac-pcb-electronic-control-problems",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765562043296-preethi (500 x 500 px).jpg",
+          "description": "Split AC PCB or electronic control issues? Doorstep Hub provides expert Split AC repair and maintenance services to fix faulty PCBs, sensor failures, remote control issues, display errors, and circuit board malfunctions. Our certified AC technicians diagnose and repair electronic problems to restore efficient cooling, safe operation, and energy savings. We offer same-day, affordable, and reliable doorstep service for homes, offices, and commercial spaces. Trust Doorstep Hub for professional Split AC PCB and electronic control repair near you, ensuring your AC functions smoothly with long-lasting performance and hassle-free operation.",
+          "rating": "4.6",
+          "totalOrders": 43,
+          "minFare": "125",
+          "totalViews": 7,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "68ff4f3f5e73e240c4449f1b",
+          "name": "Split AC Noise & Vibration Issues",
+          "slug": "split-ac-noise-vibration-issues",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765564020174-preethi (500 x 500 px) (2).jpg",
+          "description": "Split AC making loud noise or vibrating excessively?  Doorstep Hub offers expert Split AC repair and maintenance services to resolve fan noise, compressor vibration, loose panels, rattling, and motor issues. Our certified AC technicians provide same-day, affordable, and reliable doorstep service, ensuring your AC delivers quiet, smooth, and energy-efficient cooling. We serve homes, offices, and commercial spaces, restoring your AC to optimal performance and comfort. Trust Doorstep Hub for professional Split AC noise and vibration repair near you,  preventing further damage and enhancing the lifespan of your AC.",
+          "rating": "4.4",
+          "totalOrders": 50,
+          "minFare": "125",
+          "totalViews": 10,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "68ff51af5e73e240c4449f5a",
+          "name": "Split AC Gas & Refrigerant Problems",
+          "slug": "split-ac-gas-refrigerant-problems",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765561751582-Split ac refrigrent filling.jpg",
+          "description": "Split AC not cooling efficiently? DoorstepHub offers professional Split AC repair and maintenance services for all gas and refrigerant-related issues, including low refrigerant levels, refrigerant leaks, compressor inefficiency, and improper gas charging. Our certified AC technicians provide same-day, affordable, and reliable doorstep service, ensuring your AC restores optimal cooling, energy efficiency, and long-lasting performance. We serve homes, offices, and commercial spaces, addressing all types of refrigerant and gas problems.  Trust Doorstep Hub for expert Split AC gas refilling, leak detection, and maintenance near you, delivering hassle-free, professional AC service and improved cooling comfort.",
+          "rating": "4.5",
+          "totalOrders": 100,
+          "minFare": "125",
+          "totalViews": 4,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "68ff53765e73e240c4449f8c",
+          "name": "Split AC Cleaning & Hygiene Related",
+          "slug": "split-ac-cleaning-hygiene-related",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765561650079-Split AC Cleaning & Hygiene Related.jpg",
+          "description": "Split AC dirty or affecting indoor air quality? Doorstep Hub provides expert Split AC cleaning and hygiene services to remove dust, mold, bacteria, and allergens from filters, coils, blower fans, and ducts. Our certified AC technicians ensure deep cleaning, disinfection, and proper maintenance, improving air quality, cooling efficiency, and energy savings. We offer same-day, affordable, and reliable doorstep service for homes, offices, and commercial spaces. Trust Doorstep Hub for professional Split AC cleaning, sanitization, and maintenance near you, keeping your AC fresh, hygienic, and long-lasting.",
+          "rating": "4.7",
+          "totalOrders": 55,
+          "minFare": "125",
+          "totalViews": 6,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        },
+        {
+          "_id": "69202cef3f54b2149bfe0063",
+          "name": "Split AC Installation & Physical Issues",
+          "slug": "split-ac-installation-physical-issues",
+          "subcategoryName": "Split AC",
+          "mainImage": "uploads/ondemandservice/1765561605553-split ac installation.jpg",
+          "description": "Split AC installation involves mounting the indoor and outdoor units in suitable locations, connecting refrigerant pipes, electrical wiring, and the drainage line, and ensuring the system  operates efficiently.  The indoor unit is fixed on a solid wall with a slight tilt for proper water drainage, while a hole is drilled for passing copper pipes, the drain hose, and cables. The outdoor unit is placed on a flat surface or securely mounted on brackets with enough clearance for ventilation and reduced vibration. Copper refrigerant pipes are connected carefully to avoid kinks or leaks and insulated to prevent condensation. After connecting power and communication cables, the technician vacuum-pumps the refrigerant circuit to remove air and moisture before testing the system.",
+          "rating": "4.4",
+          "totalOrders": 93,
+          "minFare": "125",
+          "totalViews": 85,
+          "inspectionCost": 175,
+          "serviceCharge": 125
+        }
+      ],
+      "nearByServiceCenters": [],
+      "totalServiceCenters": 0,
+      "totalDhubServices": 9
+    }
+  }
+]

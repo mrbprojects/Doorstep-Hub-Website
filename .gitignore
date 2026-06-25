@@ -1,0 +1,82 @@
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Next.js ──────────────────────────────────────────────────────────────────
+.next/
+.next_build/
+/out/
+
+# ─── Production build ─────────────────────────────────────────────────────────
+/build
+/dist
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+/coverage
+
+# ─── Environment variables ────────────────────────────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Build & lint output files ────────────────────────────────────────────────
+build_output.txt
+build_log.txt
+build_check_final.txt
+build_final_cmd.txt
+lint_results.json
+lint_output.txt
+lint_output_v2.txt
+lint_output_v3.txt
+lint_output_v4.txt
+lint_summary.txt
+lint_errors_to_fix.txt
+eslint_output.json
+eslint_res.json
+
+# ─── Scratch / temp API output files ─────────────────────────────────────────
+all_services.json
+api_output.json
+api_response.json
+service_details.json
+service_details_utf8.json
+test-api.js
+replace-anim.js
+routes.txt
+scratch/
+
+# ─── Internal docs (not for repo) ────────────────────────────────────────────
+ARCHITECTURE.md
+MIGRATION_STATUS.md
+PROFESSIONAL_IMPROVEMENTS.md
+PG_Hostel_API_Requirements.md
+
+# ─── OS-specific files ────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# ─── IDE settings ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ─── TypeScript ───────────────────────────────────────────────────────────────
+*.tsbuildinfo

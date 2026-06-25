@@ -1,0 +1,312 @@
+'use client';
+
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { ChevronLeft, Loader2, MapPin, CheckCircle2, HelpCircle, ChevronDown } from 'lucide-react';
+import { fetchAllBrands, fetchCities, fetchCategories } from '@/lib/api';
+import { buildFlatBrandCityPublicPath } from '@/lib/applianceRepairSlugs';
+
+function FaqSection({ faqs, activeIndex, onToggle, cityName, categoryName }) {
+  if (!faqs.length) return null;
+
+  return (
+    <section id="faqs" className="mt-10 scroll-mt-20 sm:mt-14 sm:scroll-mt-24">
+      <div className="rounded-2xl border border-[#e8eeec] bg-gradient-to-b from-[#f7fbf9] to-white p-4 sm:rounded-[28px] sm:p-6 md:p-8">
+        <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#037166]/10 text-[#037166] sm:h-11 sm:w-11 sm:rounded-2xl">
+            <HelpCircle size={20} className="sm:h-[22px] sm:w-[22px]" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg font-black tracking-tight text-gray-900 sm:text-xl md:text-2xl">
+              Frequently Asked Questions
+            </h2>
+            <p className="mt-1 text-xs font-medium text-gray-500 sm:text-sm">
+              {categoryName
+                ? `Quick answers about ${categoryName} repair${cityName ? ` in ${cityName}` : ''}.`
+                : 'Quick answers about appliance repair in your city.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          {faqs.map((faq, index) => {
+            const isOpen = activeIndex === index;
+            return (
+              <div
+                key={`${faq.question || faq.title}-${index}`}
+                className={`h-fit overflow-hidden rounded-xl border transition-all duration-300 sm:rounded-2xl ${
+                  isOpen
+                    ? 'border-[#037166]/30 bg-white shadow-sm shadow-[#037166]/5'
+                    : 'border-[#e8eeec] bg-white/80 hover:border-[#037166]/15'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => onToggle(isOpen ? null : index)}
+                  className="flex w-full items-start justify-between gap-3 px-3.5 py-3.5 text-left sm:gap-4 sm:px-5 sm:py-4"
+                >
+                  <span className="text-xs font-bold leading-snug text-gray-900 sm:text-sm md:text-base">
+                    {faq.question || faq.title}
+                  </span>
+                  <span
+                    className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors sm:h-8 sm:w-8 ${
+                      isOpen ? 'bg-[#037166] text-white' : 'bg-[#037166]/8 text-[#037166]'
+                    }`}
+                  >
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-300 sm:h-[18px] sm:w-[18px] ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </span>
+                </button>
+                {isOpen && (
+                  <div className="border-t border-[#eef3f1] px-3.5 pb-3.5 pt-2.5 text-xs leading-relaxed text-gray-600 sm:px-5 sm:pb-4 sm:pt-3 sm:text-sm">
+                    {faq.answer || faq.description}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StepBar({ step }) {
+  const steps = ['Category', 'Brand', 'Service'];
+  return (
+    <div className="flex items-center gap-0 mb-10">
+      {steps.map((label, i) => {
+        const idx = i + 1;
+        const done = step > idx;
+        const active = step === idx;
+        return (
+          <React.Fragment key={label}>
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300 ${
+                done ? 'bg-[#037166] border-[#037166] text-white' :
+                active ? 'bg-white border-[#037166] text-[#037166]' :
+                'bg-white border-gray-200 text-gray-300'
+              }`}>
+                {done ? <CheckCircle2 size={18} /> : idx}
+              </div>
+              <span className={`text-xs font-black uppercase tracking-widest hidden sm:block transition-colors ${
+                active ? 'text-[#037166]' : done ? 'text-[#037166]/70' : 'text-gray-300'
+              }`}>{label}</span>
+            </div>
+            {i < steps.length - 1 && (
+              <div className={`flex-1 mx-4 h-0.5 transition-all duration-300 ${done ? 'bg-[#037166]' : 'bg-gray-100'}`} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+function BrandPageContent() {
+  const router = useRouter();
+  const params = useParams();
+  const { citySlug, categorySlug } = params;
+
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [faqActiveIndex, setFaqActiveIndex] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const [cities, cats] = await Promise.all([fetchCities(), fetchCategories()]);
+        
+        const cityMatch = cities.find(c => (c.slug || c.name || '').toLowerCase().replace(/\s+/g, '-') === citySlug.toLowerCase());
+        setSelectedCity(cityMatch || { name: citySlug, slug: citySlug });
+
+        const catMatch = cats.find(c => c.slug === categorySlug);
+        setSelectedCategory(catMatch || { name: categorySlug, slug: categorySlug });
+        
+        const catId = catMatch?._id || catMatch?.id || '';
+        const brandData = await fetchAllBrands(catId, '');
+        setBrands(brandData);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [citySlug, categorySlug]);
+
+  const categoryFaqs = useMemo(() => {
+    const merged = [
+      ...(selectedCategory?.faqs || []),
+      ...(selectedCategory?.categoryFaqs || []),
+      ...(selectedCity?.faqs || []),
+    ].filter((faq) => faq && (faq.question || faq.title) && (faq.answer || faq.description));
+
+    const seen = new Set();
+    return merged.filter((faq) => {
+      const key = (faq.question || faq.title || '').trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [selectedCategory, selectedCity]);
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": `${selectedCategory?.name} Repair in ${selectedCity?.name || citySlug}`,
+    "description": `Professional ${selectedCategory?.name} repair and maintenance services in ${selectedCity?.name || citySlug}. Certified technicians for all major brands.`,
+    "areaServed": {
+      "@type": "City",
+      "name": selectedCity?.name || citySlug
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "Doorstep Hub",
+      "url": "https://doorstephub.com"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": `${selectedCategory?.name} Brand Services`,
+      "itemListElement": brands.slice(0, 15).map((brand, index) => ({
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": `${brand.name || brand} ${selectedCategory?.name} Repair in ${selectedCity?.name || citySlug}`,
+          "url": `https://doorstephub.com/${citySlug}/${categorySlug}/${(brand.slug || brand.name || brand).toLowerCase().trim().replace(/\s+/g, '-')}`
+        }
+      }))
+    }
+  };
+
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <Loader2 size={32} className="animate-spin text-[#037166]" />
+    </div>
+  );
+
+  return (
+    <main className="min-h-screen bg-white pb-24 pt-20 sm:pb-10">
+      {/* SEO Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <div className="sticky top-20 z-40 border-b border-gray-100 bg-white/90 shadow-sm backdrop-blur-sm">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 border-gray-100 text-gray-500 hover:text-[#037166] sm:h-10 sm:w-10 sm:rounded-2xl"
+            aria-label="Go back"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div className="flex min-w-0 items-center gap-2 text-xs font-bold text-gray-500 sm:text-sm">
+            <MapPin size={14} className="shrink-0 text-[#037166]" />
+            <span className="truncate text-[#037166]">{selectedCity?.name}</span>
+            <span className="shrink-0 text-gray-300">·</span>
+            <span className="truncate">{selectedCategory?.name}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1400px] px-4 py-3 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+        <div className="mb-4 hidden sm:mb-6 sm:block">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-xs font-black uppercase tracking-wider text-gray-600 transition-all hover:border-[#037166]/30 hover:text-[#037166]"
+          >
+            <ChevronLeft size={14} />
+            Back
+          </button>
+        </div>
+
+        <div className="mb-4 w-full sm:mb-6">
+          <h1 className="w-full px-2 text-center text-lg font-black leading-snug tracking-tight text-gray-900 sm:text-3xl md:text-4xl">
+            {selectedCategory?.title || selectedCategory?.categoryTitle || 'Select Appliance Brand'}
+          </h1>
+          <p className="mt-2 hidden w-full px-2 text-center text-sm font-medium leading-relaxed text-gray-500 sm:block sm:text-base md:text-lg">
+            {selectedCategory?.description ||
+              selectedCategory?.categoryDescription ||
+              `Category: ${selectedCategory?.name || ''}`}
+          </p>
+        </div>
+
+        <div className="mb-4 flex flex-wrap justify-center gap-2 sm:mb-6">
+          <button
+            onClick={() => router.push(`/appliances/repair-service/${citySlug}`)}
+            className="px-4 py-2 rounded-full border border-[#037166]/20 bg-[#037166]/5 text-[#037166] text-xs font-black uppercase tracking-wider"
+          >
+            {selectedCategory?.name}
+          </button>
+        </div>
+
+        {brands.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2.5 min-[400px]:grid-cols-3 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9">
+            {brands.map((brand) => {
+              const bSlug = (brand.slug || brand.name || '').toLowerCase().trim().replace(/\s+/g, '-');
+              const logo = brand.image || brand.logo || brand.brandLogo;
+              return (
+                <button
+                  key={brand.name || brand}
+                  type="button"
+                  onClick={() => {
+                    const publicPath = buildFlatBrandCityPublicPath(citySlug, bSlug);
+                    router.push(publicPath || `/${citySlug}/${categorySlug}/${bSlug}`);
+                  }}
+                  className="group relative overflow-hidden rounded-xl border-2 border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#037166]/30 hover:shadow-md sm:rounded-2xl"
+                >
+                  <div className="flex h-20 items-center justify-center overflow-hidden p-2 sm:h-24 md:h-28">
+                    {logo ? (
+                      <img
+                        loading="lazy"
+                        decoding="async"
+                        src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
+                        alt={brand.name}
+                        className="h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="text-lg font-black text-gray-200 sm:text-xl">
+                        {(brand.name || brand)?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 py-14 text-center sm:rounded-3xl sm:py-20">
+            <p className="text-lg font-bold text-gray-500">No brands found</p>
+            <p className="mt-1 text-sm text-gray-400">
+              There are no brands available under the {selectedCategory?.name} category currently.
+            </p>
+          </div>
+        )}
+
+        <FaqSection
+          faqs={categoryFaqs.slice(0, 9)}
+          activeIndex={faqActiveIndex}
+          onToggle={setFaqActiveIndex}
+          cityName={selectedCity?.name}
+          categoryName={selectedCategory?.name}
+        />
+      </div>
+    </main>
+  );
+}
+
+export default function BrandPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 size={32} className="animate-spin text-[#037166]" /></div>}>
+      <BrandPageContent />
+    </Suspense>
+  );
+}
+

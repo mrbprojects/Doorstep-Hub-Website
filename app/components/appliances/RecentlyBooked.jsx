@@ -1,0 +1,330 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
+import { TrendingUp, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
+
+export function RecentlyBooked({ onServiceClick, onViewAll }) {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const scrollRef = useRef(null);
+
+  // SEO Schema for Recently Booked Services
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Recently Booked Appliance Services",
+    "description": "Trending appliance repair services recently booked by our customers.",
+    "itemListElement": (services || []).slice(0, 10).map((service, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": service.title,
+      "description": service.description,
+      "url": service.slug ? `https://doorstephub.com/service-list/book-now/${service.slug}` : undefined
+    }))
+  };
+
+
+  const scrollCards = (direction) => {
+    if (!scrollRef.current) return;
+    const firstCard = scrollRef.current.querySelector('[data-recent-card="true"]');
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 260;
+    const amount = cardWidth + 16;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
+
+  // Fetch real recently booked services
+  useEffect(() => {
+    const fetchRecentServices = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch recent services');
+        }
+
+        const data = await response.json();
+        if (data.success && data.services) {
+          // Transform API data to match component structure
+          const transformedServices = data.services.slice(0, 20).map(service => ({
+            id: service._id,
+            image: service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400',
+            title: service.serviceName,
+            description: `${service.categoryName} - ${service.subcategoryName}`,
+            price: service.serviceBookingCost, // Default pricing (can be fetched from rate cards if needed)
+            bookings: Math.floor(Math.random() * 200) + 50, // Random bookings for demo
+            categoryName: service.categoryName,
+            subcategoryName: service.subcategoryName,
+            slug: service.slug,
+          }));
+          setServices(transformedServices);
+        } else {
+          throw new Error(data.message || 'No services found');
+        }
+      } catch (err) {
+        console.error('Error fetching recent services:', err);
+        setError('Failed to load recent services');
+        toast.error('Failed to load recent services');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentServices();
+  }, []);
+
+  // Shimmer Skeleton Card (Carousel Item)
+  const ShimmerRecentCard = () => (
+    <div className="w-full">
+      <div className="relative w-full h-[260px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+        {/* Shimmer Badge */}
+        <div className="absolute top-4 left-4 z-20 h-8 w-36 rounded-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+
+        {/* Shimmer Image */}
+        <div className="relative h-36 overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        </div>
+
+        {/* Shimmer Content */}
+        <div className="p-4">
+          {/* Title Shimmer */}
+          <div className="h-6 w-3/4 mb-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+
+          {/* Description Shimmer */}
+          <div className="space-y-2 mb-4">
+            <div className="h-4 w-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+            <div className="h-4 w-2/3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          </div>
+
+          {/* Price & CTA Shimmer */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="h-3 w-10 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+              <div className="h-7 w-16 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+            </div>
+            <div className="h-10 w-24 rounded-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Loading state
+  if (loading) {
+    return (
+      <section className="py-5 relative overflow-hidden">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4">
+              <TrendingUp className="w-3 h-3 text-[#04a99d]" />
+              <h6 className="text-xs font-medium text-[#04a99d]">TRENDING NOW</h6>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-3">Explore Our Recently Booked Services</h2>
+            <p className="text-white/60">See what services your neighbors are booking right now</p>
+          </div>
+
+          <div className="relative">
+            <div className="overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6">
+              <div className="flex min-w-max gap-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <ShimmerRecentCard key={`shimmer-recent-${index}`} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <style jsx>{`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          .animate-shimmer {
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+          }
+          .scrollbar-hide {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error || services.length === 0) {
+    return (
+      <section className="py-20 relative overflow-hidden bg-white">
+      {/* SEO Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+          <div className="text-center py-20">
+            <p className="text-white/60 mb-4">{error || 'No recent bookings available'}</p>
+            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white text-sm hover:bg-white/20 transition-all">
+              Refresh Page
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-1 relative overflow-hidden">
+      {/* SEO Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+
+        {/* Section Header */}
+        <div className="mb-12">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4"
+          >
+            <TrendingUp className="w-3 h-3 text-[#04a99d]" />
+            <h6 className="text-sm font-medium text-[#04a99d]">TRENDING NOW</h6>
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent"
+          >
+            Explore Our Recently Booked Services
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-gray-400 text-lg max-w-2xl"
+          >
+            See what services your neighbors are booking right now
+          </motion.p>
+        </div>
+        <div className="mb-2 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div
+          className="relative"
+        >
+          <div
+            ref={scrollRef}
+            className="overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6 xl:mx-0 xl:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <div className="flex min-w-max gap-4">
+              {services.map((service, index) => (
+                <motion.div
+                  key={service.id || index}
+                  data-recent-card="true"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -6, scale: 1.01 }}
+                  className="group cursor-pointer w-[260px] flex-shrink-0"
+                  onClick={() => onServiceClick?.(service.id, service.categoryName, service.subcategoryName, service.slug)}
+                >
+                  <div className="relative w-full h-[260px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
+                    {/* Booking Badge */}
+
+
+                    {/* Image */}
+                    <div className="relative h-36 overflow-hidden">
+                      <img loading="lazy" decoding="async"
+                        src={service.image}
+                        alt={service.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                      {/* Hover Glow */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
+                        className="absolute inset-0 bg-gradient-to-t from-[#037166]/30 to-transparent"
+                      />
+
+                      {/* Book Now Button Badge - Bottom Center */}
+                      <div
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 px-4 py-1 bg-[#037166] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-[#037166]/20 whitespace-nowrap cursor-pointer transition-all duration-300 opacity-0 group-hover:opacity-100 hover:bg-[#025951]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onServiceClick?.(service.id, service.categoryName, service.subcategoryName, service.slug);
+                        }}
+                      >
+                        <h6 className="text-[12px] font-ubuntu tracking-wider !text-white">Book Now</h6>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4">
+                      <h4 className="text-base font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-2">
+                        {service.title}
+                      </h4>
+                      <p className="text-white/60 text-sm mb-4 line-clamp-2">
+                        {service.description}
+                      </p>
+
+
+                    </div>
+
+                    {/* Glass Border on Hover */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileHover={{ opacity: 1 }}
+                      className="absolute inset-0 rounded-2xl border-2 border-[#037166]/50 pointer-events-none"
+                    />
+                  </div>
+                </motion.div>
+              ))}
+          </div>
+        </div>
+        </div>
+
+        {/* View All CTA */}
+        <div className="text-center mt-12">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg shadow-lg shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all inline-flex items-center gap-3"
+            onClick={onViewAll}
+          >
+            View All Services
+            <ArrowRight className="w-5 h-5" />
+          </motion.button>
+        </div>
+      </div>
+    </section>
+  );
+}
+

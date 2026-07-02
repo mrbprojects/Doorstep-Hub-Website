@@ -27,6 +27,7 @@ const footerLinks = {
     { name: 'Terms of Service', href: '/terms-conditions' },
     { name: 'Privacy Policy', href: '/privacy-policy' },
     { name: 'Refund Policy', href: '/refund-policy' },
+    { name: 'Account Deletion', href: '/deletion-requests' },
     // { name: 'Help Center', href: '/contact-us' },
   ],
 };

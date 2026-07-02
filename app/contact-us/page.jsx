@@ -210,16 +210,16 @@ export default function ContactUsPage() {
         }
     };
 
-    const inputCls = 'w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/50 focus:border-[#037166]/50 transition-all';
+    const inputCls = 'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] transition-all';
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] text-white">
+            <div className="min-h-screen bg-white text-gray-900">
                 <Header />
                 <div className="flex items-center justify-center min-h-[80vh]">
                     <div className="text-center space-y-4">
                         <div className="w-16 h-16 border-4 border-[#037166]/30 border-t-[#037166] rounded-full animate-spin mx-auto" />
-                        <p className="text-gray-400">Loading Contact Info...</p>
+                        <p className="text-gray-500">Loading Contact Info...</p>
                     </div>
                 </div>
                 <Footer />
@@ -228,28 +228,28 @@ export default function ContactUsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white">
+        <div className="min-h-screen bg-white text-gray-900">
             <Header />
 
             <div>
                 {/* ── Hero ── */}
-                <section className="relative pt-36 pb-24 px-6 overflow-hidden">
+                <section className="relative pt-36 pb-24 px-6 overflow-hidden bg-gradient-to-b from-[#037166]/5 to-white">
                     <div className="absolute inset-0 pointer-events-none">
-                        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-[#037166]/12 rounded-full blur-[140px]" />
-                        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#04a99d]/8 rounded-full blur-[120px]" />
+                        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-[#037166]/8 rounded-full blur-[140px]" />
+                        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#04a99d]/6 rounded-full blur-[120px]" />
                     </div>
 
                     <div className="max-w-5xl mx-auto text-center relative z-10">
                         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-                            <span className="inline-block px-4 py-1.5 mb-6 text-sm font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full tracking-wider uppercase">
+                            <span className="inline-block px-4 py-1.5 mb-6 text-sm font-semibold text-[#037166] bg-[#037166]/10 border border-[#037166]/20 rounded-full tracking-wider uppercase">
                                 Contact Us
                             </span>
 
-                            <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight bg-gradient-to-r from-white via-white to-[#04a99d] bg-clip-text text-transparent">
+                            <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight text-gray-900">
                                 Get In Touch
                             </h1>
 
-                            <p className="text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+                            <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
                                 Have a question, feedback, or need support? We're here to help. Reach out through any of the channels below and we'll get back to you promptly.
                             </p>
                         </motion.div>
@@ -257,7 +257,7 @@ export default function ContactUsPage() {
                 </section>
 
                 {/* ── Contact Cards ── */}
-                <section className="py-16 px-6 border-t border-white/5">
+                <section className="py-16 px-6 border-t border-gray-100">
                     <div className="max-w-6xl mx-auto">
                         <div className="grid md:grid-cols-3 gap-6">
                             {contactCards.map((card, i) => (
@@ -266,19 +266,19 @@ export default function ContactUsPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.1 }}
-                                    className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/10 hover:border-[#037166]/40 hover:shadow-lg hover:shadow-[#037166]/10 transition-all"
+                                    className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm hover:border-[#037166]/40 hover:shadow-lg hover:shadow-[#037166]/10 transition-all"
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-[#037166]/10 border border-[#037166]/20 flex items-center justify-center mb-4">
-                                        <card.icon className="w-6 h-6 text-[#04a99d]" />
+                                        <card.icon className="w-6 h-6 text-[#037166]" />
                                     </div>
-                                    <h3 className="text-white font-bold mb-3">{card.title}</h3>
+                                    <h3 className="text-gray-900 font-bold mb-3">{card.title}</h3>
                                     {card.type === 'text' ? (
                                         card.lines.map((line, j) => (
-                                            <p key={j} className="text-gray-400 text-sm leading-relaxed">{line}</p>
+                                            <p key={j} className="text-gray-600 text-sm leading-relaxed">{line}</p>
                                         ))
                                     ) : (
                                         card.lines.map((link, j) => (
-                                            <a key={j} href={link.href} className="text-gray-400 text-sm hover:text-[#04a99d] transition-colors block mb-1">
+                                            <a key={j} href={link.href} className="text-gray-600 text-sm hover:text-[#037166] transition-colors block mb-1">
                                                 {link.label}
                                             </a>
                                         ))
@@ -290,7 +290,7 @@ export default function ContactUsPage() {
                 </section>
 
                 {/* ── Contact Form + Support Info ── */}
-                <section className="py-16 px-6 border-t border-white/5">
+                <section className="py-16 px-6 border-t border-gray-100">
                     <div className="max-w-6xl mx-auto">
                         <div className="grid lg:grid-cols-5 gap-10 items-start">
 
@@ -302,11 +302,11 @@ export default function ContactUsPage() {
                                 className="lg:col-span-2 space-y-6"
                             >
                                 <div>
-                                    <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
+                                    <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#037166] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
                                         Support
                                     </span>
-                                    <h2 className="text-3xl font-bold text-white mb-3">We're Here to Help</h2>
-                                    <p className="text-gray-400 leading-relaxed">
+                                    <h2 className="text-3xl font-bold text-gray-900 mb-3">We're Here to Help</h2>
+                                    <p className="text-gray-600 leading-relaxed">
                                         Our team is available to assist you with any questions or concerns. Fill out the form and we'll respond as quickly as possible.
                                     </p>
                                 </div>
@@ -333,14 +333,14 @@ export default function ContactUsPage() {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.2 + i * 0.1 }}
-                                        className="flex items-start gap-4 p-4 rounded-xl bg-white/3 border border-white/8"
+                                        className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-[#037166]/10 border border-[#037166]/20 flex items-center justify-center flex-shrink-0">
-                                            <item.icon className="w-5 h-5 text-[#04a99d]" />
+                                            <item.icon className="w-5 h-5 text-[#037166]" />
                                         </div>
                                         <div>
-                                            <h4 className="text-white font-semibold text-sm mb-1">{item.title}</h4>
-                                            <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">{item.desc}</p>
+                                            <h4 className="text-gray-900 font-semibold text-sm mb-1">{item.title}</h4>
+                                            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{item.desc}</p>
                                         </div>
                                     </motion.div>
                                 ))}
@@ -353,18 +353,18 @@ export default function ContactUsPage() {
                                 transition={{ duration: 0.6, delay: 0.1 }}
                                 className="lg:col-span-3"
                             >
-                                <div className="p-8 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/10">
+                                <div className="p-8 rounded-2xl bg-white border border-gray-200 shadow-sm">
                                     {submitted ? (
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             className="flex flex-col items-center justify-center py-12 text-center"
                                         >
-                                            <div className="w-20 h-20 rounded-full bg-[#037166]/20 border border-[#037166]/30 flex items-center justify-center mb-6">
-                                                <CheckCircle className="w-10 h-10 text-[#04a99d]" />
+                                            <div className="w-20 h-20 rounded-full bg-[#037166]/10 border border-[#037166]/30 flex items-center justify-center mb-6">
+                                                <CheckCircle className="w-10 h-10 text-[#037166]" />
                                             </div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">Message Sent!</h3>
-                                            <p className="text-gray-400 max-w-sm">Thank you for reaching out. We'll get back to you within 24 hours on business days.</p>
+                                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                                            <p className="text-gray-600 max-w-sm">Thank you for reaching out. We'll get back to you within 24 hours on business days.</p>
                                             <button
                                                 onClick={() => { setSubmitted(false); setFormData({ name: '', email: '', phone: '', subject: '', message: '' }); }}
                                                 className="mt-8 px-6 py-3 bg-[#037166] hover:bg-[#04a99d] text-white font-bold rounded-xl transition-all"
@@ -374,11 +374,11 @@ export default function ContactUsPage() {
                                         </motion.div>
                                     ) : (
                                         <form onSubmit={handleSubmit} className="space-y-4">
-                                            <h3 className="text-xl font-bold text-white mb-6">Raise A Ticket For Support</h3>
+                                            <h3 className="text-xl font-bold text-gray-900 mb-6">Raise A Ticket For Support</h3>
 
                                             <div className="grid sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Full Name *</label>
+                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Full Name *</label>
                                                     <input
                                                         type="text"
                                                         placeholder="Your Name"
@@ -389,7 +389,7 @@ export default function ContactUsPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Email Address *</label>
+                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Email Address *</label>
                                                     <input
                                                         type="email"
                                                         placeholder="Enter Your Valid Email"
@@ -404,7 +404,7 @@ export default function ContactUsPage() {
                                             <div className="grid sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <div className="flex justify-between items-center mb-1.5 ">
-                                                        <label className="block text-xs font-bold text-gray-400  uppercase tracking-wide">Valid WhatsApp Number *</label>
+                                                        <label className="block text-xs font-bold text-gray-600  uppercase tracking-wide">Valid WhatsApp Number *</label>
                                                         {isOtpSent && (
                                                             <button
                                                                 type="button"
@@ -430,16 +430,16 @@ export default function ContactUsPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">I Am A *</label>
+                                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">I Am A *</label>
                                                     <select
                                                         className={`${inputCls} appearance-none cursor-pointer`}
                                                         value={formData.iam}
                                                         onChange={e => setFormData({ ...formData, iam: e.target.value })}
                                                         required
                                                     >
-                                                        <option value="" className="bg-[#1a1a1a]">Select Here</option>
-                                                        <option value="Customer" className="bg-[#1a1a1a]">Customer</option>
-                                                        <option value="Business Owner" className="bg-[#1a1a1a]">Business Owner</option>
+                                                        <option value="">Select Here</option>
+                                                        <option value="Customer">Customer</option>
+                                                        <option value="Business Owner">Business Owner</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -452,7 +452,7 @@ export default function ContactUsPage() {
                                                         exit={{ opacity: 0, height: 0 }}
                                                         className="overflow-hidden space-y-3 mt-4"
                                                     >
-                                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wide">Verification OTP *</label>
+                                                        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide">Verification OTP *</label>
                                                         <div className="flex gap-3 max-w-[280px]">
                                                             {otpValues.map((digit, idx) => (
                                                                 <input
@@ -462,7 +462,7 @@ export default function ContactUsPage() {
                                                                     inputMode="numeric"
                                                                     autoComplete="one-time-code"
                                                                     maxLength={1}
-                                                                    className={`${inputCls} !w-12 !h-12 text-center text-xl font-bold !p-0 focus:ring-[#04a99d]/50 bg-white/10`}
+                                                                    className={`${inputCls} !w-12 !h-12 text-center text-xl font-bold !p-0`}
                                                                     value={digit}
                                                                     onChange={e => handleOtpChange(idx, e.target.value)}
                                                                     onKeyDown={e => handleOtpKeyDown(idx, e)}
@@ -476,7 +476,7 @@ export default function ContactUsPage() {
                                             </AnimatePresence>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Message *</label>
+                                                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Message *</label>
                                                 <textarea
                                                     placeholder="Write your message here..."
                                                     rows={4}
@@ -527,12 +527,12 @@ export default function ContactUsPage() {
                     <section className="py-16 px-6">
                         <div className="max-w-6xl mx-auto">
                             <div className="text-center mb-10">
-                                <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
+                                <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#037166] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
                                     Our Location
                                 </span>
-                                <h2 className="text-3xl font-bold text-white">Find Us Here</h2>
+                                <h2 className="text-3xl font-bold text-gray-900">Find Us Here</h2>
                             </div>
-                            <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#037166]/10 h-80 md:h-[420px]">
+                            <div className="rounded-3xl overflow-hidden border border-gray-200 shadow-xl shadow-[#037166]/10 h-80 md:h-[420px]">
                                 <iframe
                                     src={settings.map}
                                     width="100%"
@@ -550,12 +550,12 @@ export default function ContactUsPage() {
 
                 {/* ── Social Media ── */}
                 {socialLinks.length > 0 && (
-                    <section className="py-16 px-6 border-t border-white/5">
+                    <section className="py-16 px-6 border-t border-gray-100">
                         <div className="max-w-4xl mx-auto text-center">
-                            <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#04a99d] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
+                            <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-[#037166] bg-[#037166]/10 border border-[#037166]/20 rounded-full uppercase tracking-wider">
                                 Follow Us
                             </span>
-                            <h2 className="text-3xl font-bold text-white mb-10">Stay Connected</h2>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-10">Stay Connected</h2>
                             <div className="flex items-center justify-center gap-4 flex-wrap">
                                 {socialLinks.map((social) => (
                                     <motion.a
@@ -565,7 +565,7 @@ export default function ContactUsPage() {
                                         rel="noopener noreferrer"
                                         whileHover={{ y: -4, scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
-                                        className={`flex items-center gap-3 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 text-sm font-medium transition-all ${social.color}`}
+                                        className={`flex items-center gap-3 px-5 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-600 text-sm font-medium transition-all ${social.color}`}
                                     >
                                         <social.icon className="w-5 h-5" />
                                         <span>{social.label}</span>

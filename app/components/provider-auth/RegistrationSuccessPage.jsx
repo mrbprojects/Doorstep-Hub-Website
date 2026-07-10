@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { CheckCircle, Download, X, UserCheck } from 'lucide-react';
+import { CheckCircle, Download, X, UserCheck, LayoutDashboard } from 'lucide-react';
 
 export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
   const [appLinks, setAppLinks] = useState({
@@ -73,13 +74,21 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
         className="text-[#475569] text-[13px] sm:text-sm mb-6 max-w-sm mx-auto leading-relaxed"
       >
         {isNewUser ? (
-          "Thank you for joining our professional network. Please download the Doorstep Hub Partner app to manage your service requests."
+          "Thank you for joining our professional network. Access your partner dashboard on the web or download the Doorstep Hub Partner app."
         ) : (
-          "Welcome back! You are already a registered partner. Please download the Doorstep Hub Partner app to access your profile and bookings."
+          "Welcome back! You are already a registered partner. Open your partner dashboard to manage KYC, subscription, and support."
         )}
       </motion.p>
 
-      {/* MATCHED EXACTLY TO LANDING PAGE APP DOWNLOAD SECTION */}
+      <Link
+        href="/partner/dashboard"
+        className="mb-6 inline-flex items-center justify-center gap-2 w-full max-w-sm px-6 py-3.5 bg-[#037166] text-white font-bold rounded-xl shadow-lg shadow-[#037166]/20 hover:bg-[#025951] transition-all"
+      >
+        <LayoutDashboard className="w-5 h-5" />
+        Open Partner Dashboard
+      </Link>
+
+      {/* App download */}
       <div className="flex flex-wrap justify-center gap-4 w-full px-2">
         <a
           href={appLinks.android}

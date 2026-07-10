@@ -16,6 +16,7 @@ const footerLinks = {
     { name: 'Contact Us', href: '/contact-us' },
     { name: 'Careers', href: '/careers' },
     { name: 'Become a Service Partner', href: '/service-partner' },
+    { name: 'Partner Dashboard', href: '/partner/dashboard' },
     { name: 'Book Appointment', href: '/book-appointment' },
     { name: 'Download Android App', href: '' },
     { name: 'Download iOS App', href: '' },
@@ -27,7 +28,8 @@ const footerLinks = {
     { name: 'Terms of Service', href: '/terms-conditions' },
     { name: 'Privacy Policy', href: '/privacy-policy' },
     { name: 'Refund Policy', href: '/refund-policy' },
-    { name: 'Account Deletion', href: '/deletion-requests' },
+    { name: 'My Account', href: '/account' },
+    { name: 'Account Deletion', href: '/account/deletion' },
     // { name: 'Help Center', href: '/contact-us' },
   ],
 };

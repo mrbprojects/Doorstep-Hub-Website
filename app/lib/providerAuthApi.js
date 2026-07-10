@@ -217,3 +217,156 @@ export async function getZones(token, cityId) {
   });
   return parseList(payload).map(normalizeOption);
 }
+
+export const PROVIDER_SESSION_KEY = "provider_partner_session";
+
+export function getStoredProviderSession() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(PROVIDER_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveStoredProviderSession(data) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PROVIDER_SESSION_KEY, JSON.stringify(data));
+}
+
+export function clearStoredProviderSession() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(PROVIDER_SESSION_KEY);
+}
+
+export function resolveProviderMediaUrl(path = "") {
+  if (!path) return "";
+  if (String(path).startsWith("http")) return path;
+  if (String(path).includes("default_image.jpg")) return "";
+  const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.doorstephub.com";
+  return `${base.replace(/\/$/, "")}/${String(path).replace(/^\//, "")}`;
+}
+
+export async function checkKycStatus(token) {
+  return request("/auth/check-provider-kyc-status", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({}),
+  });
+}
+
+export async function getKyc(token) {
+  return request("/auth/get-kyc", {
+    method: "GET",
+    headers: headers(token, false),
+  });
+}
+
+export async function updateKycDocuments(token, formData) {
+  const response = await fetch(`${BASE_URL}/auth/update-provider-documents`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(getMessage(payload, "KYC upload failed"));
+  return payload;
+}
+
+export async function updateProviderProfile(token, formData) {
+  const response = await fetch(`${BASE_URL}/auth/update-provider-to-register`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(getMessage(payload, "Profile update failed"));
+  return payload;
+}
+
+export async function getSubscriptionPlans(token) {
+  return request("/subscription/plans/getall", {
+    method: "GET",
+    headers: headers(token, false),
+  });
+}
+
+export async function getSubscriptionHistory(token) {
+  return request("/subscription/plans/get-history", {
+    method: "GET",
+    headers: headers(token, false),
+  });
+}
+
+export async function purchaseSubscriptionViaWallet(token, planId) {
+  return request("/subscription-purchase/purchase-via-wallet", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({ planId, plansId: planId }),
+  });
+}
+
+export async function initiateSubscriptionGateway(token, planId) {
+  return request("/subscription-purchase/initiate-via-gateway", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({ planId, plansId: planId }),
+  });
+}
+
+export async function getProviderSupportTickets(token) {
+  return request("/support-ticket/all-tickets", {
+    method: "GET",
+    headers: headers(token, false),
+  });
+}
+
+export async function getProviderSupportTicket(token, ticketId) {
+  return request(`/support-ticket/ticket/${ticketId}`, {
+    method: "GET",
+    headers: headers(token, false),
+  });
+}
+
+export async function createProviderSupportTicket(token, formData) {
+  const response = await fetch(`${BASE_URL}/support-ticket/raiseTicket`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(getMessage(payload, "Failed to create ticket"));
+  return payload;
+}
+
+export async function replyProviderSupportTicket(token, ticketId, message) {
+  return request(`/support-ticket/ticket/${ticketId}/reply`, {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({ message, reply: message }),
+  });
+}
+
+export async function closeProviderSupportTicket(token, ticketId) {
+  return request(`/support-ticket/ticket/${ticketId}/close`, {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({}),
+  });
+}
+
+export async function requestProviderDeleteAccount(token, payload) {
+  return request("/auth/request-delete-account", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getMyProviderCategories(token) {
+  return request("/my/categories", {
+    method: "GET",
+    headers: headers(token, false),
+  });
+}

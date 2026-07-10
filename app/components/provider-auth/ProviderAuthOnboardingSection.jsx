@@ -27,6 +27,7 @@ import { Users,
   ArrowRight,
   BadgeCheck,TrendingUp } from 'lucide-react';
 import { Check } from 'lucide-react';
+import Link from 'next/link';
 
 const SESSION_KEY = 'provider_partner_session';
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
@@ -207,6 +208,7 @@ export function ProviderAuthOnboardingSection() {
 
 return (
   <section
+    id="join-partner"
     className={`relative overflow-hidden bg-[#f8fbfa] transition-all duration-500 ${
       step === 'success' || step === 'profile'
         ? 'py-6'
@@ -243,6 +245,14 @@ return (
                 Register today and join 50,000+ professionals growing their
                 business with Doorstep Hub.
               </p>
+              {token && profile && (
+                <Link
+                  href="/partner/dashboard"
+                  className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-[#037166] text-white font-bold rounded-xl shadow-md hover:bg-[#025951] transition-all"
+                >
+                  Open Partner Dashboard
+                </Link>
+              )}
             </div>
 
             {/* Hero Layout */}
@@ -462,34 +472,32 @@ return (
             {/* Left Side */}
             {step !== 'success' && step !== 'profile' && (
               <div className="lg:col-span-2">
-                <div className="sticky top-10 overflow-hidden rounded-[32px] border border-[#cfe4de] bg-white p-7 shadow-lg">
-                  <div className="mb-8">
-                    <h2 className="text-3xl font-extrabold text-[#0f172a] leading-tight">
-                      Partner <br />
-                      <span className="bg-[#057166] bg-clip-text text-transparent">
-                        Onboarding
-                      </span>
+                <div className="sticky top-24 rounded-3xl border border-[#cfe4de] bg-white shadow-[0_8px_30px_rgba(3,113,102,0.08)]">
+                  <div className="p-6 sm:p-7 border-b border-[#eef5f3]">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] leading-tight">
+                      Partner{' '}
+                      <span className="text-[#037166]">Onboarding</span>
                     </h2>
-
-                    <p className="mt-4 text-[#5b6778] leading-7">
-                      Complete your onboarding process and start receiving
-                      bookings instantly.
+                    <p className="mt-3 text-sm text-[#64748b] leading-relaxed">
+                      Complete verification and start receiving bookings instantly.
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-5">
+                  <div className="p-6 sm:p-7 flex flex-col items-center gap-8">
                     <motion.div
                       layoutId="partner-image"
-                      className="relative mx-auto h-48 w-48 overflow-hidden rounded-[2rem] lg:mx-0 lg:h-56 lg:w-56 lg:shrink-0"
+                      className="relative w-full max-w-[260px] flex items-center justify-center rounded-3xl border border-[#e2ece9] bg-gradient-to-b from-[#f8fafc] to-white p-4 shadow-sm"
                     >
-                      <img loading="lazy" decoding="async"
+                      <img
+                        loading="lazy"
+                        decoding="async"
                         src="/service-partner-phone-image.webp"
-                        alt="Service Partner Phone"
-                        className="h-full w-full object-cover"
+                        alt="Service Partner App"
+                        className="w-full h-auto object-contain object-center rounded-2xl"
                       />
                     </motion.div>
 
-                    <div className="space-y-5 lg:min-w-0 lg:max-w-[260px] lg:flex-1">
+                    <div className="w-full space-y-4">
                       {[
                         { id: 'mobile', label: 'Phone Verification' },
                         { id: 'otp', label: 'Security Check' },
@@ -497,53 +505,38 @@ return (
                         { id: 'success', label: 'Complete' },
                       ].map((s, idx) => {
                         const steps = ['mobile', 'otp', 'register', 'success'];
-
-                        const isCompleted =
-                          steps.indexOf(step) > steps.indexOf(s.id);
-
+                        const isCompleted = steps.indexOf(step) > steps.indexOf(s.id);
                         const isActive = step === s.id;
 
                         return (
-                          <motion.div
+                          <div
                             key={s.id}
-                            animate={{
-                              x: isActive ? 10 : 0,
-                              opacity: isActive || isCompleted ? 1 : 0.45,
-                            }}
-                            className="flex items-center gap-3 lg:gap-4"
+                            className={`flex items-center gap-4 rounded-xl px-3 py-2.5 transition-all ${
+                              isActive ? 'bg-[#037166]/5 border border-[#037166]/15' : 'border border-transparent'
+                            }`}
                           >
                             <div
-                              className={`flex h-12 w-12 min-w-[3rem] aspect-square items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-all ${
                                 isCompleted
-                                  ? 'border-teal-400 bg-teal-400'
+                                  ? 'border-[#04a99d] bg-[#04a99d] text-white'
                                   : isActive
-                                  ? 'border-teal-400 shadow-[0_0_20px_rgba(45,212,191,0.45)]'
-                                  : 'border-[#cbd5e1] text-[#64748b]'
+                                  ? 'border-[#037166] bg-white text-[#037166] shadow-[0_0_0_4px_rgba(3,113,102,0.12)]'
+                                  : 'border-[#e2e8f0] bg-white text-[#94a3b8]'
                               }`}
                             >
-                              {isCompleted ? (
-                                <Check className="h-6 w-6 text-black stroke-[3px]" />
-                              ) : (
-                                <span className="text-sm font-black">
-                                  {idx + 1}
-                                </span>
-                              )}
+                              {isCompleted ? <Check className="h-4 w-4 stroke-[3px]" /> : idx + 1}
                             </div>
-
                             <span
-                              className={`text-xs sm:text-sm font-black uppercase tracking-[0.1em] leading-tight break-words ${
-                                isActive
-                                  ? 'text-[#065f46]'
-                                  : 'text-[#64748b]'
+                              className={`text-xs sm:text-sm font-bold uppercase tracking-wide ${
+                                isActive ? 'text-[#037166]' : isCompleted ? 'text-[#334155]' : 'text-[#94a3b8]'
                               }`}
                             >
                               {s.label}
                             </span>
-                          </motion.div>
+                          </div>
                         );
                       })}
                     </div>
-
                   </div>
                 </div>
               </div>
@@ -557,10 +550,12 @@ return (
                   : 'lg:col-span-3'
               }`}
             >
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] sm:p-8 md:p-10">
-                <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-[#04a99d]/10 blur-[120px]" />
+              <div className="relative overflow-hidden rounded-3xl border border-[#e2ece9] bg-white shadow-[0_8px_30px_rgba(3,113,102,0.08)] min-h-[520px] flex items-center">
+                <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#04a99d]/8 blur-3xl pointer-events-none" />
+                <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-[#037166]/5 blur-3xl pointer-events-none" />
 
-                <AnimatePresence mode="wait">
+                <div className="relative z-10 w-full p-6 sm:p-8 md:p-10">
+                  <AnimatePresence mode="wait">
                   {step === 'mobile' ? (
                     <motion.div
                       key="mobile"
@@ -626,7 +621,8 @@ return (
                       />
                     </motion.div>
                   ) : null}
-                </AnimatePresence>
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           </motion.div>

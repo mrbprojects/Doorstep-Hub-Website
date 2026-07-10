@@ -328,7 +328,14 @@ export function Header({ theme = {}, navItems = [] }) {
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setAuthModalOpen(true)}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    router.push('/account');
+                    setMobileMenuOpen(false);
+                  } else {
+                    setAuthModalOpen(true);
+                  }
+                }}
                 className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all overflow-hidden shadow-md hover:shadow-lg`}
               >
                 {isAuthenticated && user?.image ? (
@@ -422,6 +429,17 @@ export function Header({ theme = {}, navItems = [] }) {
                     )}
                   </div>
                 ))}
+
+                {isAuthenticated && (
+                  <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
+                    <motion.span
+                      className={`block py-3 px-4 ${currentTheme.textMain} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#037166]'} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} rounded-xl transition-all font-semibold text-base cursor-pointer border border-[#037166]/20`}
+                      whileTap={{ x: 10 }}
+                    >
+                      My Account
+                    </motion.span>
+                  </Link>
+                )}
 
               </div>
             </motion.div>

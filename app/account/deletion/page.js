@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, CheckCircle, Loader2, ShieldAlert, Send, Clock } from 'lucide-react';
+import { Trash2, CheckCircle, Loader2, ShieldAlert, Clock, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { sendAccountDeletionOtp, submitAccountDeletionRequest } from '@/lib/accountApi';
@@ -13,6 +13,7 @@ const labelCls = 'block text-xs font-bold text-gray-600 mb-1.5 uppercase trackin
 
 export default function AccountDeletionPage() {
     const { user } = useAuth();
+    const lastOtpMobile = useRef('');
     const [formData, setFormData] = useState({
         name: '',
         userType: 'customer',
@@ -22,9 +23,11 @@ export default function AccountDeletionPage() {
     });
     const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
     const [isOtpSent, setIsOtpSent] = useState(false);
+    const [isOtpVerified, setIsOtpVerified] = useState(false);
     const [sendingOtp, setSendingOtp] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [showVerifyWarning, setShowVerifyWarning] = useState(false);
 
     const otp = otpValues.join('');
 
@@ -39,29 +42,17 @@ export default function AccountDeletionPage() {
         }
     }, [user]);
 
-    const handleOtpChange = (index, value) => {
-        const val = value.replace(/[^0-9]/g, '');
-        const next = [...otpValues];
-        next[index] = val.slice(-1);
-        setOtpValues(next);
-        if (val && index < 5) {
-            document.getElementById(`acc-del-otp-${index + 1}`)?.focus();
-        }
-    };
-
-    const handleOtpKeyDown = (index, e) => {
-        if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
-            document.getElementById(`acc-del-otp-${index - 1}`)?.focus();
-        }
-    };
-
     const triggerSendOtp = async (phone) => {
         if (!phone || phone.length !== 10) return;
         setSendingOtp(true);
+        setShowVerifyWarning(false);
         try {
             const data = await sendAccountDeletionOtp(phone);
             if (data.success) {
                 setIsOtpSent(true);
+                setIsOtpVerified(false);
+                setOtpValues(['', '', '', '', '', '']);
+                lastOtpMobile.current = phone;
                 toast.success('OTP sent to your WhatsApp number');
             } else {
                 toast.error(data.message || 'Failed to send OTP');
@@ -74,12 +65,47 @@ export default function AccountDeletionPage() {
         }
     };
 
+    // Auto-send OTP when mobile is pre-filled from logged-in profile
+    useEffect(() => {
+        const phone = formData.mobileNumber;
+        if (phone.length === 10 && lastOtpMobile.current !== phone && !sendingOtp) {
+            triggerSendOtp(phone);
+        }
+    }, [formData.mobileNumber]);
+
+    const handleOtpChange = (index, value) => {
+        const val = value.replace(/[^0-9]/g, '');
+        const next = [...otpValues];
+        next[index] = val.slice(-1);
+        setOtpValues(next);
+        if (val && index < 5) {
+            document.getElementById(`acc-del-otp-${index + 1}`)?.focus();
+        }
+        if (next.join('').length === 6) {
+            setIsOtpVerified(true);
+            setShowVerifyWarning(false);
+        } else {
+            setIsOtpVerified(false);
+        }
+    };
+
+    const handleOtpKeyDown = (index, e) => {
+        if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+            document.getElementById(`acc-del-otp-${index - 1}`)?.focus();
+        }
+    };
+
     const handleMobileChange = (e) => {
         const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
-        setFormData((prev) => ({ ...prev, mobileNumber: val }));
-        if (val.length === 10 && !isOtpSent) {
-            triggerSendOtp(val);
+        if (val !== formData.mobileNumber) {
+            setIsOtpSent(false);
+            setIsOtpVerified(false);
+            setOtpValues(['', '', '', '', '', '']);
+            if (lastOtpMobile.current !== val) {
+                lastOtpMobile.current = '';
+            }
         }
+        setFormData((prev) => ({ ...prev, mobileNumber: val }));
     };
 
     const handleSubmit = async (e) => {
@@ -87,8 +113,12 @@ export default function AccountDeletionPage() {
 
         if (!formData.name.trim()) return toast.error('Please enter your name');
         if (formData.mobileNumber.length !== 10) return toast.error('Please enter a valid 10-digit mobile number');
-        if (!isOtpSent) return toast.error('Please verify your mobile number first');
-        if (otp.length !== 6) return toast.error('Please enter the 6-digit OTP');
+        if (!isOtpSent || !isOtpVerified || otp.length !== 6) {
+            setShowVerifyWarning(true);
+            toast.error('Please verify your mobile number first');
+            document.getElementById('deletion-otp-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
         if (!formData.reason.trim()) return toast.error('Please provide a reason for deletion');
 
         setSubmitting(true);
@@ -99,6 +129,7 @@ export default function AccountDeletionPage() {
                 toast.success('Your account deletion request has been submitted');
             } else {
                 toast.error(data.message || 'Verification failed. Please check your OTP.');
+                setIsOtpVerified(false);
             }
         } catch (error) {
             console.error('Error submitting request:', error);
@@ -107,6 +138,8 @@ export default function AccountDeletionPage() {
             setSubmitting(false);
         }
     };
+
+    const showOtpSection = formData.mobileNumber.length === 10;
 
     return (
         <div className="space-y-6">
@@ -171,20 +204,36 @@ export default function AccountDeletionPage() {
                             </div>
                             {sendingOtp && (
                                 <p className="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
-                                    <Loader2 className="w-3 h-3 animate-spin" /> Sending OTP...
+                                    <Loader2 className="w-3 h-3 animate-spin" /> Sending OTP to WhatsApp...
                                 </p>
                             )}
                             {isOtpSent && !sendingOtp && (
-                                <button type="button" onClick={() => triggerSendOtp(formData.mobileNumber)} className="text-xs text-[#037166] font-semibold mt-2 hover:underline">
-                                    Resend OTP
+                                <p className="text-xs text-[#037166] font-medium mt-2 flex items-center gap-1.5">
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                    OTP sent to WhatsApp. Enter it below to verify.
+                                </p>
+                            )}
+                            {showOtpSection && !isOtpSent && !sendingOtp && (
+                                <button
+                                    type="button"
+                                    onClick={() => triggerSendOtp(formData.mobileNumber)}
+                                    className="text-xs text-[#037166] font-semibold mt-2 hover:underline"
+                                >
+                                    Send OTP to verify number
                                 </button>
                             )}
                         </div>
 
-                        {isOtpSent && (
-                            <div>
+                        {showOtpSection && (
+                            <div id="deletion-otp-section" className={`rounded-xl border p-4 space-y-3 transition-colors ${
+                                showVerifyWarning && !isOtpVerified
+                                    ? 'border-amber-300 bg-amber-50'
+                                    : isOtpVerified
+                                    ? 'border-green-200 bg-green-50'
+                                    : 'border-gray-200 bg-gray-50'
+                            }`}>
                                 <label className={labelCls}>Enter WhatsApp OTP *</label>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 flex-wrap">
                                     {otpValues.map((digit, index) => (
                                         <input
                                             key={index}
@@ -195,10 +244,30 @@ export default function AccountDeletionPage() {
                                             value={digit}
                                             onChange={(e) => handleOtpChange(index, e.target.value)}
                                             onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                                            className="w-11 h-11 text-center text-lg font-bold rounded-lg bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#037166]/40"
+                                            className="w-11 h-11 text-center text-lg font-bold rounded-lg bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#037166]/40"
                                         />
                                     ))}
                                 </div>
+                                {showVerifyWarning && !isOtpVerified && (
+                                    <p className="text-sm text-amber-700 font-medium">
+                                        Please verify your mobile number first
+                                    </p>
+                                )}
+                                {isOtpVerified && (
+                                    <p className="text-sm text-green-700 font-medium flex items-center gap-1.5">
+                                        <CheckCircle className="w-4 h-4" /> Mobile number verified
+                                    </p>
+                                )}
+                                {isOtpSent && (
+                                    <button
+                                        type="button"
+                                        onClick={() => triggerSendOtp(formData.mobileNumber)}
+                                        disabled={sendingOtp}
+                                        className="text-xs text-[#037166] font-semibold hover:underline disabled:opacity-50"
+                                    >
+                                        Resend OTP
+                                    </button>
+                                )}
                             </div>
                         )}
 

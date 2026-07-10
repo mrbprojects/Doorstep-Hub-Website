@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthModal } from '@/context/AuthModalContext';
@@ -8,9 +8,18 @@ import { useAuthModal } from '@/context/AuthModalContext';
 export function AccountAuthGuard({ children }) {
     const { isAuthenticated, loading } = useAuth();
     const { openAuthModal } = useAuthModal();
+    const hasPromptedLogin = useRef(false);
 
     useEffect(() => {
-        if (!loading && !isAuthenticated) {
+        if (loading) return;
+
+        if (isAuthenticated) {
+            hasPromptedLogin.current = false;
+            return;
+        }
+
+        if (!hasPromptedLogin.current) {
+            hasPromptedLogin.current = true;
             openAuthModal();
         }
     }, [loading, isAuthenticated, openAuthModal]);

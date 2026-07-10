@@ -16,25 +16,121 @@ async function parseResponse(response) {
     return data;
 }
 
+function resolveFirstServiceName(json = {}) {
+    return (
+        json.firstServiceName ||
+        json.subcategoryName ||
+        json.subCategoryName ||
+        json.serviceName ||
+        json.categoryName ||
+        json.service_name ||
+        json.name ||
+        null
+    );
+}
+
+function resolveServiceItemName(service = {}) {
+    return (
+        service.name ||
+        service.serviceName ||
+        service.subcategoryName ||
+        service.categoryName ||
+        service.title ||
+        ''
+    );
+}
+
+function resolveServiceItemImage(service = {}) {
+    return service.image || service.serviceImage || service.logo || service.thumbnail || service.photo || '';
+}
+
+export function parseOrder(json = {}) {
+    const rawServices = Array.isArray(json.services) ? json.services : [];
+    const rootName = resolveFirstServiceName(json);
+    const services =
+        rawServices.length > 0
+            ? rawServices.map((service) => ({
+                  id: service.id || service.serviceId || '',
+                  name: resolveServiceItemName(service),
+                  image: resolveServiceItemImage(service),
+                  price: service.price ?? service.servicePrice ?? 'N/A',
+                  quantity: service.quantity || 1,
+              }))
+            : rootName
+              ? [
+                    {
+                        id: '',
+                        name: rootName,
+                        image: json.firstServiceImage || json.serviceImage || '',
+                        price: 'N/A',
+                        quantity: 1,
+                    },
+                ]
+              : [];
+
+    return {
+        bookingId: String(json.bookingId || json._id || ''),
+        orderId: json.orderId || '',
+        status: json.status || json.orderStatus || 'pending',
+        partnerType: json.partnerType || '',
+        providerName: json.providerName || json.provider?.name || json.provider?.providerName || null,
+        providerPhone: json.providerPhone || json.provider?.phone || null,
+        providerLogo: json.providerLogo || json.provider?.logo || null,
+        mobileNumber: json.mobileNumber || '',
+        bookedDate: json.bookedDate || null,
+        bookedTime: json.bookedTime || null,
+        createdAt: json.createdAt || null,
+        advancePaid: Number(json.advancePaid || 0),
+        pendingAmount: Number(json.pendingAmount || 0),
+        totalAmount: json.payment?.totalAmount ?? json.totalAmount ?? null,
+        services,
+        paymentRequest: json.paymentRequest || null,
+    };
+}
+
+function normalizePagination(pagination = {}, page, limit, totalFallback = 0) {
+    return {
+        total: pagination.totalOrders ?? pagination.total ?? totalFallback,
+        page: pagination.currentPage ?? pagination.page ?? page,
+        limit: pagination.limit ?? limit,
+        totalPages: pagination.totalPages ?? 1,
+        hasNextPage: Boolean(pagination.hasNextPage),
+        hasPrevPage: Boolean(pagination.hasPrevPage),
+    };
+}
+
 export async function fetchMyOrders(token, { page = 1, limit = 10, status } = {}) {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (status) params.set('status', status);
 
     const response = await fetch(`${API_BASE}/app/service-cart/get-my-orders-new?${params}`, {
         headers: bearerHeaders(token, null),
+        cache: 'no-store',
     });
     const data = await parseResponse(response);
+    if (!response.ok || data?.success === false) {
+        throw new Error(data?.message || 'Failed to fetch orders');
+    }
     const payload = data?.data ?? data ?? {};
+    const rawOrders = Array.isArray(payload.orders) ? payload.orders : Array.isArray(data.orders) ? data.orders : [];
+
     return {
-        orders: payload.orders ?? [],
-        pagination: payload.pagination ?? {
-            total: 0,
-            page,
-            limit,
-            totalPages: 1,
-            hasNextPage: false,
-        },
+        orders: rawOrders.map(parseOrder),
+        pagination: normalizePagination(payload.pagination ?? data.pagination, page, limit, rawOrders.length),
     };
+}
+
+export async function fetchOrderDetail(token, bookingId) {
+    const response = await fetch(`${API_BASE}/app/service-cart/get-order-detail-by-booking-id/${bookingId}`, {
+        headers: bearerHeaders(token, null),
+        cache: 'no-store',
+    });
+    const data = await parseResponse(response);
+    if (!response.ok || data?.success === false) {
+        throw new Error(data?.message || 'Failed to fetch order details');
+    }
+    const payload = data?.data ?? data ?? {};
+    return payload.order || payload.booking || payload;
 }
 
 export async function fetchWalletBalance(token) {
@@ -54,9 +150,30 @@ export async function fetchWalletTransactions(token) {
 export async function fetchReferralDetails(token) {
     const response = await fetch(`${API_BASE}/app/referrals/me`, {
         headers: bearerHeaders(token, null),
+        cache: 'no-store',
     });
     const data = await parseResponse(response);
-    return data?.data ?? data;
+    const payload = data?.data ?? data ?? {};
+    const referrals = Array.isArray(payload.referrals) ? payload.referrals : [];
+
+    return {
+        referralCode: payload.referralCode || '',
+        rewardAmount: Number(payload.rewardAmount ?? 99),
+        totalEarnings: Number(payload.totalEarnings ?? 0),
+        totalReferrals: Number(payload.totalReferrals ?? referrals.length ?? 0),
+        canApplyReferral: Boolean(payload.canApplyReferral),
+        referredByCode: payload.referredByCode || '',
+        referrals: referrals.map((item, idx) => ({
+            id: item.id || item._id || `referral-${idx}`,
+            name: item.name || item.referredName || 'Customer',
+            phone: item.phone || item.referredPhone || '',
+            status: item.status || 'Pending',
+            rewardAmount: Number(item.rewardAmount || 0),
+            earnedAmount: Number(item.earnedAmount || 0),
+            appliedAt: item.appliedAt || null,
+            firstQualifiedAt: item.firstQualifiedAt || null,
+        })),
+    };
 }
 
 export async function fetchSupportTickets(token) {

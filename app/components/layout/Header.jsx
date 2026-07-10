@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Menu, X, Search, User, ShoppingCart, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -11,7 +11,7 @@ import { AuthModal } from '../auth/AuthModal';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
-import { useRouter } from 'next/navigation';
+import { getStoredProviderSession } from '@/lib/providerAuthApi';
 
 export function Header({ theme = {}, navItems = [] }) {
   const pathname = usePathname();
@@ -329,6 +329,21 @@ export function Header({ theme = {}, navItems = [] }) {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
+                  if (pathname?.startsWith('/service-partner')) {
+                    const session = getStoredProviderSession();
+                    if (session?.token && session?.profile) {
+                      router.push('/partner/dashboard');
+                    } else {
+                      window.dispatchEvent(new CustomEvent('partner:open-login'));
+                    }
+                    setMobileMenuOpen(false);
+                    return;
+                  }
+                  if (pathname?.startsWith('/partner')) {
+                    router.push('/partner/dashboard');
+                    setMobileMenuOpen(false);
+                    return;
+                  }
                   if (isAuthenticated) {
                     router.push('/account');
                     setMobileMenuOpen(false);
@@ -447,7 +462,9 @@ export function Header({ theme = {}, navItems = [] }) {
         </AnimatePresence>
       </motion.header>
 
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} theme={authModalTheme} />
+      {!pathname?.startsWith('/service-partner') && !pathname?.startsWith('/partner') && (
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} theme={authModalTheme} />
+      )}
     </>
   );
 }

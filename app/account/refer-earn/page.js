@@ -14,6 +14,13 @@ function formatDate(value) {
     return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function getStatusStyle(status = '') {
+    const normalized = String(status).toLowerCase();
+    if (normalized.includes('credited')) return 'bg-green-100 text-green-700';
+    if (normalized.includes('completed')) return 'bg-blue-100 text-blue-700';
+    return 'bg-amber-100 text-amber-700';
+}
+
 export default function ReferEarnPage() {
     const { user, token } = useAuth();
     const [loading, setLoading] = useState(true);
@@ -27,6 +34,7 @@ export default function ReferEarnPage() {
             setData(details);
         } catch (e) {
             console.error('Failed to load referral details:', e);
+            toast.error('Failed to load referral details');
         } finally {
             setLoading(false);
         }
@@ -37,9 +45,13 @@ export default function ReferEarnPage() {
     }, [load]);
 
     const referralCode =
-        (String(data?.referralCode || user?.referalCode || user?.referralCode || user?.phone || '').trim().match(/^[A-Za-z0-9_-]+/)?.[0] || '').toUpperCase();
+        (String(data?.referralCode || user?.referalCode || user?.referralCode || user?.phone || '')
+            .trim()
+            .match(/^[A-Za-z0-9_-]+/)?.[0] || ''
+        ).toUpperCase();
 
     const rewardAmount = Number.isFinite(Number(data?.rewardAmount)) ? Number(data.rewardAmount) : 99;
+    const referrals = Array.isArray(data?.referrals) ? data.referrals : [];
     const inviteLink = `https://doorstephub.com?ref=${referralCode || user?.phone || ''}`;
 
     const shareMessage =
@@ -69,123 +81,132 @@ export default function ReferEarnPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-gray-900">Refer & Earn</h1>
-                    <p className="text-sm text-gray-500 mt-1">Invite friends and earn rewards on their first booking</p>
+                    <h1 className="text-xl font-extrabold text-gray-900">Refer & Earn</h1>
+                    <p className="text-xs text-gray-500 mt-0.5">Invite friends and earn rewards on their first booking</p>
                 </div>
                 <button
                     type="button"
                     onClick={load}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-[#037166] hover:bg-[#037166]/5"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-[#037166] hover:bg-[#037166]/5"
                 >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="w-3.5 h-3.5" />
                     Refresh
                 </button>
             </div>
 
             {loading ? (
-                <div className="flex justify-center py-20">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#037166]" />
+                <div className="flex justify-center py-16">
+                    <Loader2 className="w-7 h-7 animate-spin text-[#037166]" />
                 </div>
             ) : (
-                <>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm"
+                        className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
                     >
-                        <div className="flex items-center gap-3 mb-4">
-                            <Gift className="w-6 h-6 text-[#037166]" />
-                            <h2 className="text-lg font-bold text-gray-900">Your Referral Code</h2>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Gift className="w-4 h-4 text-[#037166]" />
+                            <h2 className="text-sm font-bold text-gray-900">Your Referral Code</h2>
                         </div>
-                        <p className="text-sm text-gray-600 mb-6">
+                        <p className="text-xs text-gray-600 mb-3 leading-relaxed">
                             Share your code. Earn Rs {rewardAmount} after each referred customer completes their first successful booking.
                         </p>
 
-                        <div className="bg-[#037166]/5 border border-[#037166]/20 rounded-2xl p-6 text-center mb-6">
-                            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Referral Code</p>
-                            <p className="text-3xl md:text-4xl font-extrabold text-[#037166] tracking-wider font-mono">
+                        <div className="bg-[#037166]/5 border border-[#037166]/20 rounded-xl p-3 text-center mb-3">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Referral Code</p>
+                            <p className="text-2xl font-extrabold text-[#037166] tracking-wider font-mono">
                                 {referralCode || '---'}
                             </p>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="grid grid-cols-3 gap-2">
                             <button
                                 type="button"
                                 onClick={handleWhatsApp}
-                                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#037166]/30 text-[#037166] font-semibold hover:bg-[#037166]/5 transition-all"
+                                className="inline-flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-[#037166]/30 text-[#037166] text-xs font-semibold hover:bg-[#037166]/5 transition-all"
                             >
-                                <MessageCircle className="w-4 h-4" />
+                                <MessageCircle className="w-3.5 h-3.5" />
                                 WhatsApp
                             </button>
                             <button
                                 type="button"
                                 onClick={handleShare}
-                                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#037166] text-white font-semibold hover:bg-[#025951] transition-all"
+                                className="inline-flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg bg-[#037166] text-white text-xs font-semibold hover:bg-[#025951] transition-all"
                             >
-                                <Share2 className="w-4 h-4" />
-                                Share Link
+                                <Share2 className="w-3.5 h-3.5" />
+                                Share
                             </button>
                             <button
                                 type="button"
                                 onClick={handleCopy}
-                                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+                                className="inline-flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-all"
                             >
-                                <Copy className="w-4 h-4" />
-                                Copy Link
+                                <Copy className="w-3.5 h-3.5" />
+                                Copy
                             </button>
                         </div>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                            <IndianRupee className="w-5 h-5 text-[#037166] mb-3" />
-                            <p className="text-2xl font-extrabold text-gray-900">₹{(data?.totalEarnings ?? 0).toFixed(2)}</p>
-                            <p className="text-sm text-gray-500 mt-1">Total Earnings</p>
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white border border-gray-200 rounded-xl p-3">
+                                <IndianRupee className="w-4 h-4 text-[#037166] mb-1.5" />
+                                <p className="text-lg font-extrabold text-gray-900">₹{Number(data?.totalEarnings ?? 0).toFixed(2)}</p>
+                                <p className="text-[11px] text-gray-500 mt-0.5">Total Earnings</p>
+                            </div>
+                            <div className="bg-white border border-gray-200 rounded-xl p-3">
+                                <Users className="w-4 h-4 text-[#037166] mb-1.5" />
+                                <p className="text-lg font-extrabold text-gray-900">{data?.totalReferrals ?? 0}</p>
+                                <p className="text-[11px] text-gray-500 mt-0.5">Referred Users</p>
+                            </div>
                         </div>
-                        <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                            <Users className="w-5 h-5 text-[#037166] mb-3" />
-                            <p className="text-2xl font-extrabold text-gray-900">{data?.totalReferrals ?? 0}</p>
-                            <p className="text-sm text-gray-500 mt-1">Referred Users</p>
-                        </div>
-                    </div>
 
-                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div className="p-5 border-b border-gray-100">
-                            <h3 className="font-bold text-gray-900">Referral History</h3>
-                        </div>
-                        {!data?.referrals?.length ? (
-                            <div className="p-12 text-center">
-                                <Gift className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                                <p className="font-semibold text-gray-900 mb-1">No referrals yet</p>
-                                <p className="text-sm text-gray-500">Share your code to start earning rewards.</p>
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                <h3 className="text-sm font-bold text-gray-900">Referral History</h3>
+                                <span className="text-[11px] font-semibold text-gray-500">{referrals.length} total</span>
                             </div>
-                        ) : (
-                            <div className="divide-y divide-gray-100">
-                                {data.referrals.map((item) => (
-                                    <div key={item.id} className="p-5">
-                                        <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-                                            <div>
-                                                <p className="font-semibold text-gray-900">{item.name || 'Customer'}</p>
-                                                <p className="text-xs text-gray-500">{item.phone || 'No phone'}</p>
+
+                            {!referrals.length ? (
+                                <div className="px-4 py-8 text-center">
+                                    <Gift className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                    <p className="text-sm font-semibold text-gray-900 mb-0.5">No referrals yet</p>
+                                    <p className="text-xs text-gray-500">Share your code to start earning rewards.</p>
+                                </div>
+                            ) : (
+                                <div className="max-h-[420px] overflow-y-auto divide-y divide-gray-100">
+                                    {referrals.map((item, idx) => (
+                                        <div key={item.id || item._id || idx} className="px-4 py-3">
+                                            <div className="flex items-start justify-between gap-2 mb-1.5">
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-900 truncate">
+                                                        {item.name || 'Customer'}
+                                                    </p>
+                                                    <p className="text-[11px] text-gray-500">{item.phone || 'No phone'}</p>
+                                                </div>
+                                                <span
+                                                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${getStatusStyle(item.status)}`}
+                                                >
+                                                    {item.status || 'Pending'}
+                                                </span>
                                             </div>
-                                            <span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-[#037166]/10 text-[#037166]">
-                                                {item.status}
-                                            </span>
+                                            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-gray-500">
+                                                <span>Reward: ₹{Number(item.rewardAmount || 0).toFixed(2)}</span>
+                                                <span>Earned: ₹{Number(item.earnedAmount || 0).toFixed(2)}</span>
+                                                <span>Joined: {formatDate(item.appliedAt)}</span>
+                                                <span>Qualified: {formatDate(item.firstQualifiedAt)}</span>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                                            <span>Reward: ₹{Number(item.rewardAmount || 0).toFixed(2)}</span>
-                                            <span>Earned: ₹{Number(item.earnedAmount || 0).toFixed(2)}</span>
-                                            <span>Joined: {formatDate(item.appliedAt)}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

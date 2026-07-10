@@ -12,9 +12,13 @@ import {
     Loader2,
     CheckCircle,
     AlertCircle,
+    Phone,
+    Mail,
+    MapPin,
+    Building2,
 } from 'lucide-react';
 import { useProviderAuth } from '@/context/ProviderAuthContext';
-import { checkKycStatus, getSubscriptionHistory, getProviderSupportTickets } from '@/lib/providerAuthApi';
+import { checkKycStatus, getSubscriptionHistory, getProviderSupportTickets, normalizeProviderSupportTickets, isProviderTicketOpen } from '@/lib/providerAuthApi';
 
 const QUICK_LINKS = [
     { href: '/partner/dashboard/kyc', label: 'KYC Verification', icon: ShieldCheck, desc: 'Upload & track documents' },
@@ -58,11 +62,8 @@ export default function PartnerDashboardPage() {
                     ? history.find((h) => String(h.status || '').toLowerCase() === 'active')
                     : null;
 
-                const tickets = ticketsRes?.data || ticketsRes?.tickets || [];
-                const openTickets = (Array.isArray(tickets) ? tickets : []).filter((t) => {
-                    const s = String(t.status || '').toLowerCase();
-                    return !['closed', 'solved', 'resolved'].includes(s);
-                }).length;
+                const tickets = normalizeProviderSupportTickets(ticketsRes);
+                const openTickets = tickets.filter((t) => isProviderTicketOpen(t.status)).length;
 
                 setStats({
                     kycStatus,
@@ -78,6 +79,12 @@ export default function PartnerDashboardPage() {
 
     const kyc = kycBadge(stats.kycStatus);
     const KycIcon = kyc.icon;
+    const fullName = profile?.name || `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim() || 'Partner';
+    const businessName = profile?.businessName || profile?.companyName || '--';
+    const phone = profile?.phone || profile?.mobile || profile?.whatsappNumber || '--';
+    const email = profile?.email || '--';
+    const city = profile?.cityName || profile?.city || '--';
+    const serviceName = profile?.serviceName || profile?.categoryName || '--';
 
     return (
         <div className="space-y-6">
@@ -88,9 +95,57 @@ export default function PartnerDashboardPage() {
             >
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">Partner Dashboard</h1>
                 <p className="text-gray-600 text-sm md:text-base">
-                    Manage KYC, subscription, profile, and support from your vendor portal.
+                    Welcome back, {fullName}. Manage KYC, subscription, profile, and support from your vendor portal.
                 </p>
             </motion.div>
+
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 shadow-sm">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Partner Details</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-start gap-3">
+                        <User className="w-4 h-4 text-[#037166] mt-0.5" />
+                        <div>
+                            <p className="text-xs font-bold uppercase text-gray-500">Name</p>
+                            <p className="font-semibold text-gray-900">{fullName}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <Building2 className="w-4 h-4 text-[#037166] mt-0.5" />
+                        <div>
+                            <p className="text-xs font-bold uppercase text-gray-500">Business</p>
+                            <p className="font-semibold text-gray-900">{businessName}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <Phone className="w-4 h-4 text-[#037166] mt-0.5" />
+                        <div>
+                            <p className="text-xs font-bold uppercase text-gray-500">Phone</p>
+                            <p className="font-semibold text-gray-900">{phone}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <Mail className="w-4 h-4 text-[#037166] mt-0.5" />
+                        <div>
+                            <p className="text-xs font-bold uppercase text-gray-500">Email</p>
+                            <p className="font-semibold text-gray-900 break-all">{email}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <MapPin className="w-4 h-4 text-[#037166] mt-0.5" />
+                        <div>
+                            <p className="text-xs font-bold uppercase text-gray-500">City</p>
+                            <p className="font-semibold text-gray-900">{city}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <ShieldCheck className="w-4 h-4 text-[#037166] mt-0.5" />
+                        <div>
+                            <p className="text-xs font-bold uppercase text-gray-500">Service</p>
+                            <p className="font-semibold text-gray-900">{serviceName}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {loading ? (
                 <div className="flex justify-center py-16">

@@ -315,18 +315,136 @@ export async function initiateSubscriptionGateway(token, planId) {
   });
 }
 
+export function isProviderTicketOpen(status) {
+  const value = String(status || "").toLowerCase();
+  return !["closed", "solved", "resolved"].includes(value);
+}
+
+export function formatProviderTicketStatus(status) {
+  const value = String(status || "pending").toLowerCase();
+  if (value === "in-progress") return "In Progress";
+  if (value === "waiting-provider") return "Awaiting Support";
+  if (value === "waiting-customer") return "Awaiting Reply";
+  if (value === "pending" || value === "open") return "Pending";
+  if (value === "solved" || value === "resolved") return "Resolved";
+  if (value === "closed") return "Closed";
+  return String(status || "Pending");
+}
+
+export function getProviderTicketStatusStyle(status) {
+  const value = String(status || "pending").toLowerCase();
+  if (["closed", "solved", "resolved"].includes(value)) {
+    return "bg-[#037166]/10 text-[#037166]";
+  }
+  if (value === "in-progress") {
+    return "bg-blue-100 text-blue-700";
+  }
+  if (["waiting-provider", "waiting-customer"].includes(value)) {
+    return "bg-purple-100 text-purple-700";
+  }
+  return "bg-amber-100 text-amber-700";
+}
+
+function normalizeProviderSupportTicket(ticket, index = 0) {
+  if (!ticket || typeof ticket !== "object") return null;
+
+  const createdAt = ticket.createdAt || ticket.logCreatedDate || "";
+  const date =
+    ticket.date ||
+    (createdAt
+      ? new Date(createdAt).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+      : "");
+
+  return {
+    _id: String(ticket._id || ticket.id || index),
+    ticketId: ticket.ticketId || ticket._id || "",
+    title: ticket.title || ticket.subject || "Support Request",
+    subject: ticket.subject || ticket.title || "",
+    description: ticket.description || "",
+    status: ticket.status || "pending",
+    priority: ticket.priority || "Medium",
+    department: ticket.department || "",
+    date,
+    time: ticket.time || "",
+    createdAt,
+    logCreatedDate: ticket.logCreatedDate || "",
+    logModifiedDate: ticket.logModifiedDate || "",
+  };
+}
+
+export function normalizeProviderSupportTickets(payload) {
+  const raw = Array.isArray(payload)
+    ? payload
+    : [
+        ...(Array.isArray(payload?.data) ? payload.data : []),
+        ...(Array.isArray(payload?.tickets) ? payload.tickets : []),
+        ...(Array.isArray(payload?.providerRequest) ? payload.providerRequest : []),
+      ];
+
+  const seen = new Set();
+  return raw
+    .map((ticket, index) => normalizeProviderSupportTicket(ticket, index))
+    .filter((ticket) => {
+      if (!ticket?._id || seen.has(ticket._id)) return false;
+      seen.add(ticket._id);
+      return true;
+    });
+}
+
 export async function getProviderSupportTickets(token) {
-  return request("/support-ticket/all-tickets", {
-    method: "GET",
-    headers: headers(token, false),
+  try {
+    const payload = await request("/support-ticket/all-tickets", {
+      method: "GET",
+      headers: headers(token, false),
+    });
+    const tickets = normalizeProviderSupportTickets(payload);
+    if (tickets.length > 0) {
+      return { success: true, data: tickets, message: payload?.message || "" };
+    }
+  } catch (error) {
+    if (error?.status && error.status !== 404) throw error;
+  }
+
+  const legacy = await request("/support/getallmysupport", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({}),
   });
+  return {
+    success: true,
+    data: normalizeProviderSupportTickets(legacy),
+    message: legacy?.message || "",
+  };
 }
 
 export async function getProviderSupportTicket(token, ticketId) {
-  return request(`/support-ticket/ticket/${ticketId}`, {
-    method: "GET",
-    headers: headers(token, false),
-  });
+  try {
+    const payload = await request(`/support-ticket/ticket/${ticketId}`, {
+      method: "GET",
+      headers: headers(token, false),
+    });
+    return payload;
+  } catch (error) {
+    const legacy = await request("/support/getsupportbyid", {
+      method: "POST",
+      headers: headers(token),
+      body: JSON.stringify({ id: ticketId }),
+    });
+    const ticket = legacy?.data || legacy?.ticket;
+    if (!ticket) throw error;
+    return {
+      success: true,
+      data: {
+        ...normalizeProviderSupportTicket(ticket),
+        replies: legacy?.supportTicketChats || ticket.replies || [],
+        messages: legacy?.supportTicketChats || ticket.messages || [],
+      },
+    };
+  }
 }
 
 export async function createProviderSupportTicket(token, formData) {

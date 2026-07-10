@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Phone, ShieldCheck, Mail, User, LogOut, Camera, Chrome, Pencil, ChevronRight, Gift } from 'lucide-react';
+import { X, Phone, ShieldCheck, Mail, User, LogOut, Camera, Chrome, Pencil, ChevronRight, Gift, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
-export function AuthModal({ isOpen, onClose, theme = {} }) {
+export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
+    const router = useRouter();
     const { user, loginWithWhatsApp, verifyOtp, loginWithGoogle, loginWithApple, updateProfile, logout, isAuthenticated } = useAuth();
     const [step, setStep] = useState('login'); // login, otp, profile
     const [mobile, setMobile] = useState('');
@@ -34,12 +36,18 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     const fileInputRef = React.useRef(null);
     const profileToastShown = React.useRef(false);
 
+    const normalizePhone = React.useCallback((value) => {
+        const digits = String(value || '').replace(/\D/g, '');
+        return digits.length >= 10 ? digits.slice(-10) : digits;
+    }, []);
+
     const resetModalState = React.useCallback(() => {
         setStep('login');
         setMobile('');
         setOtp('');
         setLoading(false);
         setIsEditing(false);
+        setProfileData({ name: '', email: '', phone: '' });
         setSelectedFile(null);
         setPreviewImage(null);
         setResendTimer(0);
@@ -49,9 +57,23 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
     }, []);
 
     const handleClose = React.useCallback(() => {
-        resetModalState();
         onClose?.();
-    }, [onClose, resetModalState]);
+    }, [onClose]);
+
+    React.useEffect(() => {
+        if (!isOpen) {
+            resetModalState();
+        }
+    }, [isOpen, resetModalState]);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') handleClose();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [isOpen, handleClose]);
 
     const trimmedName = (profileData.name || '').trim();
     const trimmedEmail = (profileData.email || '').trim();
@@ -60,20 +82,35 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
         /^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test(trimmedName) &&
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) &&
         /^[6-9]\d{9}$/.test(trimmedPhone);
-    const isProfileEmpty = !trimmedName || !trimmedEmail || !trimmedPhone;
 
-    const handleLogout = React.useCallback(() => {
-        // In complete-profile flow, prevent logout until required details are filled.
-        if (step === 'profile' && !hasCompletedRequiredProfile) {
+    const handleLogout = React.useCallback((e) => {
+        e?.preventDefault?.();
+        e?.stopPropagation?.();
+        onClose?.();
+        logout();
+    }, [logout, onClose]);
+
+    const handleContinueToBooking = React.useCallback((e) => {
+        e?.preventDefault?.();
+        e?.stopPropagation?.();
+
+        if (!hasCompletedRequiredProfile && !profileSavedForBooking) {
             setShowRequiredErrors(true);
-            toast.error('Please complete your profile details before logout');
+            setIsEditing(true);
+            toast.error('Please complete your profile to continue booking');
             return;
         }
 
-        resetModalState();
-        logout();
         onClose?.();
-    }, [logout, onClose, hasCompletedRequiredProfile, resetModalState, step]);
+        onContinue?.();
+    }, [hasCompletedRequiredProfile, onClose, onContinue, profileSavedForBooking]);
+
+    const handleGoToDashboard = React.useCallback((e) => {
+        e?.preventDefault?.();
+        e?.stopPropagation?.();
+        onClose?.();
+        router.push('/account');
+    }, [onClose, router]);
 
     // Timer logic for Resend OTP
     React.useEffect(() => {
@@ -92,10 +129,10 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
             setProfileData({
                 name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
                 email: user.email || '',
-                phone: user.phone || user.mobile || ''
+                phone: normalizePhone(user.phone || user.mobile || '')
             });
         }
-    }, [user]);
+    }, [user, normalizePhone]);
 
     // Default Dark Theme (Fallback)
     const defaultTheme = {
@@ -167,7 +204,8 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                     const hasProfile = returnedUser.name || returnedUser.firstName || returnedUser.lastName;
                     setProfileData({
                         name: returnedUser.name || `${returnedUser.firstName || ''} ${returnedUser.lastName || ''}`.trim(),
-                        email: returnedUser.email || ''
+                        email: returnedUser.email || '',
+                        phone: normalizePhone(returnedUser.phone || returnedUser.mobile || mobile),
                     });
                     // Existing user → view mode; new user → edit mode
                     setIsEditing(!hasProfile);
@@ -193,7 +231,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
             setProfileData({
                 name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
                 email: user.email || '',
-                phone: user.phone || user.mobile || ''
+                phone: normalizePhone(user.phone || user.mobile || '')
             });
             if (!hasProfile && !profileSavedForBooking) {
                 setIsEditing(true);
@@ -208,7 +246,7 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 }
             }
         }
-    }, [user, isAuthenticated, step, profileSavedForBooking]);
+    }, [user, isAuthenticated, step, profileSavedForBooking, normalizePhone]);
 
     const handleGoogleLogin = async () => {
         setLoading(true);
@@ -290,14 +328,16 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleClose}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
+                aria-hidden="true"
             />
 
             <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="relative w-full max-w-md overflow-hidden rounded-3xl border border-[#037166] bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 shadow-2xl shadow-[#037166]/10 backdrop-blur-2xl transition-all duration-500"
+                onClick={(e) => e.stopPropagation()}
+                className="relative z-10 w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden rounded-3xl border border-[#037166] bg-gradient-to-r from-[#037166]/20 to-[#025951]/20 shadow-2xl shadow-[#037166]/10 backdrop-blur-2xl transition-all duration-500"
             >
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#037166]/12 via-white/5 to-[#025951]/10" />
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[#037166]/10 blur-2xl" />
@@ -312,12 +352,17 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                                     ? 'Edit Profile'
                                     : 'Your Profile'}
                     </h2>
-                    <button onClick={handleClose} className="p-2 rounded-xl border border-white/35 bg-white/10 transition-colors hover:bg-white/20 text-white opacity-90 hover:opacity-100">
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        aria-label="Close"
+                        className="p-2 rounded-xl border border-white/35 bg-white/10 transition-colors hover:bg-white/20 text-white opacity-90 hover:opacity-100 relative z-20"
+                    >
                         <X className="w-5 h-5 text-white" />
                     </button>
                 </div>
 
-                <div className="relative p-6">
+                <div className="relative flex-1 overflow-y-auto p-6">
                     {!isAuthenticated ? (
                         step === 'login' ? (
                             <div className="space-y-4">
@@ -618,25 +663,36 @@ export function AuthModal({ isOpen, onClose, theme = {} }) {
                             </form>
 
                             {!isEditing && (
-                                <motion.button
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    onClick={handleClose}
-                                    className={`w-full py-4 border border-green-500/30 text-green-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-green-500/10 transition-all`}
-                                >
-                                    Continue to Booking
-                                    <ChevronRight className="w-4 h-4" />
-                                </motion.button>
-                            )}
+                                <div className="relative z-20 flex flex-col gap-3 pt-2">
+                                    {hasCompletedRequiredProfile && (
+                                        <button
+                                            type="button"
+                                            onClick={handleGoToDashboard}
+                                            className="w-full py-4 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold rounded-xl flex items-center justify-center gap-3 hover:opacity-95 shadow-lg shadow-[#037166]/25 transition-all"
+                                        >
+                                            <LayoutDashboard className="w-5 h-5" />
+                                            Go to Dashboard
+                                        </button>
+                                    )}
 
-                            {!isProfileEmpty && (
-                                <button
-                                    onClick={handleLogout}
-                                    className={`w-full py-4 border border-red-500/30 text-red-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-red-500/10 transition-all`}
-                                >
-                                    <LogOut className="w-5 h-5" />
-                                    Logout
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleContinueToBooking}
+                                        className="w-full py-4 border border-green-500/30 text-green-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-green-500/10 transition-all"
+                                    >
+                                        Continue to Booking
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleLogout}
+                                        className="w-full py-4 border border-red-500/30 text-red-500 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-red-500/10 transition-all"
+                                    >
+                                        <LogOut className="w-5 h-5" />
+                                        Logout
+                                    </button>
+                                </div>
                             )}
                         </div>
                     )}

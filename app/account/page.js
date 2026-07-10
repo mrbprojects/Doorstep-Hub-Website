@@ -58,7 +58,7 @@ export default function AccountDashboardPage() {
                 }).length;
 
                 setStats({
-                    bookings: ordersRes?.pagination?.total ?? 0,
+                    bookings: ordersRes?.pagination?.total ?? ordersRes?.orders?.length ?? 0,
                     walletBalance: walletRes?.wallet?.currentBalance ?? 0,
                     referrals: referralRes?.totalReferrals ?? 0,
                     openTickets,

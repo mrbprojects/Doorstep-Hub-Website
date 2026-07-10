@@ -115,10 +115,10 @@ export default function PartnerDeletionPage() {
 
                         <div>
                             <label className="block text-xs font-bold text-gray-600 mb-2 uppercase">Reason *</label>
-                            <div className="space-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {REASONS.map((r) => (
                                     <label key={r} className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50">
-                                        <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="accent-[#037166]" />
+                                        <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="accent-[#037166] shrink-0" />
                                         <span className="text-sm text-gray-800">{r}</span>
                                     </label>
                                 ))}

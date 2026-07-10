@@ -32,11 +32,15 @@ import {
     CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import dynamic from 'next/dynamic';
+import { getStoredProviderSession } from '@/lib/providerAuthApi';
+import { LogIn } from 'lucide-react';
 
 const ProviderAuthOnboardingSection = dynamic(() => import('@/components/provider-auth/ProviderAuthOnboardingSection').then(m => m.ProviderAuthOnboardingSection), { ssr: false });
+const PartnerLoginModal = dynamic(() => import('@/components/partner/PartnerLoginModal').then(m => m.PartnerLoginModal), { ssr: false });
 
 const PartnerBenefits = [
     {
@@ -136,6 +140,8 @@ const PartnerStats = [
 ];
 
 export default function ServicePartnerPage() {
+    const router = useRouter();
+    const [partnerLoginOpen, setPartnerLoginOpen] = useState(false);
     const [appLinks, setAppLinks] = useState({
         android: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
         ios: 'https://apps.apple.com/in/app/doorstep-hub-partner/id6504071357'
@@ -179,6 +185,47 @@ export default function ServicePartnerPage() {
 
         fetchSettings();
     }, []);
+
+    useEffect(() => {
+        const openLogin = () => setPartnerLoginOpen(true);
+        window.addEventListener('partner:open-login', openLogin);
+        return () => window.removeEventListener('partner:open-login', openLogin);
+    }, []);
+
+    const handlePartnerLogin = () => {
+        const session = getStoredProviderSession();
+        if (session?.token && session?.profile) {
+            router.push('/partner/dashboard');
+            return;
+        }
+        setPartnerLoginOpen(true);
+    };
+
+    const renderDownloadActions = (size = 'hero') => {
+        const btnClass =
+            size === 'hero'
+                ? 'flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden'
+                : 'flex items-center justify-center w-40 md:w-44 h-12 md:h-14 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl hover:shadow-[#037166]/35 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden';
+
+        return (
+            <div className="flex flex-wrap items-center gap-3">
+                <a href={appLinks.android} target="_blank" rel="noopener noreferrer" className={btnClass} title="Get it on Google Play">
+                    <img loading="lazy" decoding="async" src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
+                </a>
+                <a href={appLinks.ios} target="_blank" rel="noopener noreferrer" className={btnClass} title="Download on the App Store">
+                    <img loading="lazy" decoding="async" src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
+                </a>
+                <button
+                    type="button"
+                    onClick={handlePartnerLogin}
+                    className="inline-flex items-center justify-center gap-2 px-5 md:px-6 h-12 md:h-14 rounded-full border-2 border-[#037166] bg-white text-[#037166] font-bold text-sm shadow-md hover:bg-[#037166]/5 transition-all"
+                >
+                    <LogIn className="w-4 h-4" />
+                    Partner Login
+                </button>
+            </div>
+        );
+    };
 
     return (
         <div className="relative min-h-screen bg-[#f8fbfa] text-gray-900 overflow-hidden">
@@ -234,26 +281,8 @@ export default function ServicePartnerPage() {
                                     Transform your service business today.
                                 </p>
 
-                                <div className="flex flex-row gap-4 mb-6">
-                                    <a
-                                        href={appLinks.android}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
-                                        title="Get it on Google Play"
-                                    >
-                                        <img loading="lazy" decoding="async" src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
-                                    </a>
-
-                                    <a
-                                        href={appLinks.ios}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-center w-44 md:w-48 h-14 md:h-16 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-xl shadow-[#037166]/20 hover:shadow-2xl hover:shadow-[#037166]/40 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
-                                        title="Download on the App Store"
-                                    >
-                                        <img loading="lazy" decoding="async" src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
-                                    </a>
+                                <div className="mb-6">
+                                    {renderDownloadActions('hero')}
                                 </div>
 
                               
@@ -445,25 +474,7 @@ export default function ServicePartnerPage() {
 
             {/* Download Buttons */}
             <div className="flex flex-row gap-3">
-              <a
-                href={appLinks.android}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center w-40 md:w-44 h-12 md:h-14 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl hover:shadow-[#037166]/35 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
-                title="Get it on Google Play"
-              >
-                <img loading="lazy" decoding="async" src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert" />
-              </a>
-
-              <a
-                href={appLinks.ios}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center w-40 md:w-44 h-12 md:h-14 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl hover:shadow-[#037166]/35 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
-                title="Download on the App Store"
-              >
-                <img loading="lazy" decoding="async" src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert" />
-              </a>
+              {renderDownloadActions('compact')}
             </div>
 
 
@@ -580,6 +591,7 @@ export default function ServicePartnerPage() {
             </div>
 
             <Footer />
+            <PartnerLoginModal isOpen={partnerLoginOpen} onClose={() => setPartnerLoginOpen(false)} />
         </div>
     );
 }

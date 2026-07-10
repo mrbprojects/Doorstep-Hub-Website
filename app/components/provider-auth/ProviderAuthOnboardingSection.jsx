@@ -56,10 +56,31 @@ export function ProviderAuthOnboardingSection() {
       setToken(parsed.token || '');
       setUserId(parsed.userId || '');
       setProfile(parsed.profile || null);
-      // We start at idle as requested, but keep data ready
     } catch {
       localStorage.removeItem(SESSION_KEY);
     }
+  }, []);
+
+  useEffect(() => {
+    const continueRegistration = () => {
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.token) {
+          setPhone(parsed.phone || '');
+          setToken(parsed.token || '');
+          setUserId(parsed.userId || '');
+          setProfile(parsed.profile || null);
+          setStep(parsed.profile ? 'success' : 'register');
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+
+    window.addEventListener('partner:continue-registration', continueRegistration);
+    return () => window.removeEventListener('partner:continue-registration', continueRegistration);
   }, []);
 
   const resetForm = () => {
@@ -99,7 +120,10 @@ export function ProviderAuthOnboardingSection() {
       const nextProfile = await getProviderProfile(authToken, activeUserId);
       persist({ token: authToken, phone: nextPhone, profile: nextProfile, userId: activeUserId });
       setStep('success');
-      toast.success('Registration successful');
+      toast.success('Login successful');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/partner/dashboard';
+      }
       return true;
     } catch (err) {
       persist({ token: authToken, phone: nextPhone, profile: null });
@@ -320,8 +344,7 @@ return (
                   className="relative z-10 flex flex-col items-center"
                 >
                     <div 
-                      className="relative overflow-hidden rounded-[2.4rem] flex items-center justify-center cursor-pointer"
-                      onClick={() => setStep('mobile')}
+                      className="relative overflow-hidden rounded-[2.4rem] flex items-center justify-center"
                     >
                       <img loading="lazy" decoding="async"
                         src="/Join as a service partner.png"
@@ -457,6 +480,15 @@ return (
                 </div>
               ))}
             </div>
+
+            <button
+              type="button"
+              onClick={() => setStep('mobile')}
+              className="mt-6 inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold rounded-xl shadow-lg shadow-[#037166]/20 hover:opacity-95 transition-all"
+            >
+              Register as Partner
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </motion.div>
         ) : (
           <motion.div

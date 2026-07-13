@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck } from 'lucide-react';
+import { getOtpGatewayCopy } from '@/lib/otpGateway';
 
 export function OtpVerificationPage({
     phone,
@@ -12,7 +13,10 @@ export function OtpVerificationPage({
     onBack,
     loading,
     error,
+    otpCopy,
+    otpMessage,
 }) {
+    const copy = otpCopy || getOtpGatewayCopy('whatsapp');
     const inputRefs = useRef([]);
     const digits = otp.split('').concat(Array(6 - otp.length).fill(''));
 
@@ -58,18 +62,17 @@ export function OtpVerificationPage({
                     <ShieldCheck className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-2xl sm:text-[1.65rem] font-extrabold text-[#0f172a] tracking-tight">
-                    Enter OTP Code
+                    {copy.otpScreenTitle}
                 </h2>
                 <p className="text-sm text-[#64748b] mt-2 leading-relaxed">
-                    Code sent to{' '}
-                    <span className="font-bold text-[#037166]">+91 {phone}</span>
+                    {otpMessage || copy.otpScreenSubtitle(phone)}
                 </p>
                 <button
                     type="button"
                     onClick={onBack}
                     className="text-xs text-[#037166] font-semibold mt-2 hover:underline"
                 >
-                    Change mobile number
+                    {copy.changeNumberLabel}
                 </button>
             </div>
 

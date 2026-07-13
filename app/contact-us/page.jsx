@@ -57,7 +57,7 @@ export default function ContactUsPage() {
             const data = await response.json();
             if (data.success) {
                 setIsOtpSent(true);
-                toast.success('OTP sent to your WhatsApp number');
+                toast.success(data.details || data.message || 'OTP has been sent to your mobile number');
             } else {
                 toast.error(data.message || 'Failed to send OTP');
             }
@@ -150,7 +150,7 @@ export default function ContactUsPage() {
             const data = await response.json();
             if (data.success) {
                 setIsOtpSent(true);
-                toast.success('OTP sent to your WhatsApp number');
+                toast.success(data.details || data.message || 'OTP has been sent to your mobile number');
             } else {
                 toast.error(data.message || 'Failed to send OTP');
             }
@@ -470,7 +470,7 @@ export default function ContactUsPage() {
                                                                 />
                                                             ))}
                                                         </div>
-                                                        <p className="text-[10px] text-gray-500 px-1 italic">Please enter the 4-digit code sent to your WhatsApp.</p>
+                                                        <p className="text-[10px] text-gray-500 px-1 italic">Please enter the code sent to your mobile number.</p>
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>

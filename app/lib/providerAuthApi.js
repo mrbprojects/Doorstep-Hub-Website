@@ -223,7 +223,14 @@ export const PROVIDER_SESSION_KEY = "provider_partner_session";
 export function getStoredProviderSession() {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(PROVIDER_SESSION_KEY);
+    let raw = sessionStorage.getItem(PROVIDER_SESSION_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(PROVIDER_SESSION_KEY);
+      if (raw) {
+        sessionStorage.setItem(PROVIDER_SESSION_KEY, raw);
+        localStorage.removeItem(PROVIDER_SESSION_KEY);
+      }
+    }
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -232,11 +239,13 @@ export function getStoredProviderSession() {
 
 export function saveStoredProviderSession(data) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(PROVIDER_SESSION_KEY, JSON.stringify(data));
+  sessionStorage.setItem(PROVIDER_SESSION_KEY, JSON.stringify(data));
+  localStorage.removeItem(PROVIDER_SESSION_KEY);
 }
 
 export function clearStoredProviderSession() {
   if (typeof window === "undefined") return;
+  sessionStorage.removeItem(PROVIDER_SESSION_KEY);
   localStorage.removeItem(PROVIDER_SESSION_KEY);
 }
 

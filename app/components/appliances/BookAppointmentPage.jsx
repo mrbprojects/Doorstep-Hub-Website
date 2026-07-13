@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 import { trackBookingCompleted, trackLeadEvent, trackPaymentStarted, trackPaymentFailed } from '@/lib/leadTracking';
+import { fetchOtpGateway, getOtpGatewayCopy, resolveOtpGateway } from '@/lib/otpGateway';
 
 const STEPS = [
     {
@@ -62,6 +63,18 @@ export function BookAppointmentPage() {
     const [otpCode, setOtpCode] = useState('');
     const [otpLoading, setOtpLoading] = useState(false);
     const [resendTimer, setResendTimer] = useState(0);
+    const [otpCopy, setOtpCopy] = useState(() => getOtpGatewayCopy('whatsapp'));
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            const copy = await fetchOtpGateway();
+            if (mounted) setOtpCopy(copy);
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     // Fees from GlobalSettingsContext — fetched once at app level, auto-updates when backend adds policy fields
     const { onlineBookingFee, doorstepInspectionFee, loading: feesLoading } = useGlobalSettings() || {};
@@ -183,16 +196,19 @@ export function BookAppointmentPage() {
     const handleSendOtp = async () => {
         const phone = formData.phone.trim();
         if (!isValidPhone(phone)) {
-            toast.error('Please enter a valid 10-digit mobile number starting with 6-9');
+            toast.error(otpCopy.invalidMessage);
             return;
         }
         setOtpLoading(true);
         try {
             const data = await loginWithWhatsApp(phone);
             if (data.success || data.status === 'success') {
+                const gateway = resolveOtpGateway(data.gateway || otpCopy.gateway);
+                const copy = getOtpGatewayCopy(gateway);
+                setOtpCopy(copy);
                 setOtpSent(true);
                 setResendTimer(30);
-                toast.success('OTP sent to WhatsApp');
+                toast.success(data.details || data.message || copy.otpSentMessage);
             } else {
                 toast.error(data.message || 'Failed to send OTP');
             }
@@ -239,7 +255,7 @@ export function BookAppointmentPage() {
 
                 if (!formData.phone.trim()) { toast.error('Please enter your phone number'); return false; }
                 if (!isValidPhone(formData.phone.trim())) { toast.error('Please enter a valid 10-digit phone number starting with 6-9'); return false; }
-                if (!isPhoneVerified) { toast.error('Please verify your phone number via WhatsApp OTP first'); return false; }
+                if (!isPhoneVerified) { toast.error(`Please verify your ${otpCopy.gateway === 'custom_sms' ? 'phone' : 'WhatsApp'} number first`); return false; }
 
                 if (!formData.email.trim()) { toast.error('Please enter your email address'); return false; }
                 if (!isValidEmail(formData.email.trim())) { toast.error('Please enter a valid email address'); return false; }
@@ -376,7 +392,7 @@ export function BookAppointmentPage() {
                         <div className="relative">
                             <input
                                 type="tel"
-                                placeholder="Phone Number * (e.g. 8886688666)"
+                                placeholder={`${otpCopy.placeholder} *`}
                                 className={`${inputCls} ${isPhoneVerified ? 'border-green-500 pr-24' : ''}`}
                                 value={formData.phone}
                                 maxLength={10}
@@ -393,7 +409,7 @@ export function BookAppointmentPage() {
                             )}
                         </div>
 
-                        {/* Inline WhatsApp OTP Section */}
+                        {/* Inline OTP Section */}
                         {formData.phone.length === 10 && !isPhoneVerified && (
                             <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl transition-all">
                                 {!otpSent ? (
@@ -403,13 +419,13 @@ export function BookAppointmentPage() {
                                         disabled={otpLoading}
                                         className="w-full py-3 bg-[#037166]/10 text-[#037166] hover:bg-[#037166]/20 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2 border border-[#037166]/20"
                                     >
-                                        {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify Phone via WhatsApp OTP'}
+                                        {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : otpCopy.sendButton}
                                     </button>
                                 ) : (
                                     <div className="space-y-3">
                                         <div className="text-center">
                                             <p className="text-xs font-semibold text-gray-600">Enter Verification Code</p>
-                                            <p className="text-[10px] text-gray-400 mt-0.5">We&apos;ve sent a 6-digit WhatsApp OTP to +91 {formData.phone}</p>
+                                            <p className="text-[10px] text-gray-400 mt-0.5">{otpCopy.otpScreenSubtitle(formData.phone)}</p>
                                         </div>
                                         <div className="flex justify-center gap-2">
                                             {[0, 1, 2, 3, 4, 5].map((index) => (

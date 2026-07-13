@@ -53,7 +53,7 @@ export default function AccountDeletionPage() {
                 setIsOtpVerified(false);
                 setOtpValues(['', '', '', '', '', '']);
                 lastOtpMobile.current = phone;
-                toast.success('OTP sent to your WhatsApp number');
+                toast.success(data.details || data.message || 'OTP has been sent to your mobile number');
             } else {
                 toast.error(data.message || 'Failed to send OTP');
             }

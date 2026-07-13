@@ -9,6 +9,7 @@ import {
     Gift,
     Headphones,
     User,
+    Shield,
     ChevronRight,
     Loader2,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ import {
 
 const QUICK_LINKS = [
     { href: '/account/bookings', label: 'My Bookings', icon: CalendarCheck, desc: 'Track service orders' },
+    { href: '/account/amc', label: 'AMC Plans', icon: Shield, desc: 'Annual maintenance packages' },
     { href: '/account/profile', label: 'Profile', icon: User, desc: 'Update your details' },
     { href: '/account/wallet', label: 'Wallet', icon: Wallet, desc: 'Balance & transactions' },
     { href: '/account/refer-earn', label: 'Refer & Earn', icon: Gift, desc: 'Invite friends & earn' },

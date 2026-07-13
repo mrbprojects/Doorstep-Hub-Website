@@ -65,7 +65,7 @@ export default function DeletionRequestsPage() {
             const data = await response.json();
             if (data.success) {
                 setIsOtpSent(true);
-                toast.success('OTP sent to your WhatsApp number');
+                toast.success(data.details || data.message || 'OTP has been sent to your mobile number');
             } else {
                 toast.error(data.message || 'Failed to send OTP');
             }

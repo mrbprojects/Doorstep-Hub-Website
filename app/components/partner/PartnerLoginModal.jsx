@@ -13,6 +13,7 @@ import {
     sendWhatsAppOtp,
     verifyProviderOtp,
 } from '@/lib/providerAuthApi';
+import { fetchOtpGateway, getOtpGatewayCopy, resolveOtpGateway } from '@/lib/otpGateway';
 
 export function PartnerLoginModal({ isOpen, onClose }) {
     const router = useRouter();
@@ -21,6 +22,8 @@ export function PartnerLoginModal({ isOpen, onClose }) {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState({ mobile: false, otp: false });
     const [error, setError] = useState({ mobile: '', otp: '' });
+    const [otpCopy, setOtpCopy] = useState(() => getOtpGatewayCopy('whatsapp'));
+    const [otpMessage, setOtpMessage] = useState('');
 
     useEffect(() => {
         if (!isOpen) {
@@ -28,7 +31,17 @@ export function PartnerLoginModal({ isOpen, onClose }) {
             setPhone('');
             setOtp('');
             setError({ mobile: '', otp: '' });
+            setOtpMessage('');
+            return;
         }
+        let mounted = true;
+        (async () => {
+            const copy = await fetchOtpGateway();
+            if (mounted) setOtpCopy(copy);
+        })();
+        return () => {
+            mounted = false;
+        };
     }, [isOpen]);
 
     useEffect(() => {
@@ -44,14 +57,19 @@ export function PartnerLoginModal({ isOpen, onClose }) {
         e.preventDefault();
         setError((prev) => ({ ...prev, mobile: '' }));
         if (!/^[6-9]\d{9}$/.test(phone)) {
-            setError((prev) => ({ ...prev, mobile: 'Enter a valid 10-digit mobile number.' }));
+            setError((prev) => ({ ...prev, mobile: otpCopy.invalidMessage }));
             return;
         }
         setLoading((prev) => ({ ...prev, mobile: true }));
         try {
             const response = await sendWhatsAppOtp(phone);
+            const gateway = resolveOtpGateway(response?.gateway || otpCopy.gateway);
+            const copy = getOtpGatewayCopy(gateway);
+            setOtpCopy(copy);
+            const message = response?.details || response?.message || copy.otpSentMessage;
+            setOtpMessage(message);
             setOtp('');
-            toast.success(response?.message || 'OTP sent');
+            toast.success(message);
             setStep('otp');
         } catch (err) {
             setError((prev) => ({ ...prev, mobile: err.message || 'Failed to send OTP' }));
@@ -142,6 +160,7 @@ export function PartnerLoginModal({ isOpen, onClose }) {
                                     onSubmit={handleSendOtp}
                                     loading={loading.mobile}
                                     error={error.mobile}
+                                    otpCopy={otpCopy}
                                 />
                             </motion.div>
                         ) : (
@@ -154,6 +173,8 @@ export function PartnerLoginModal({ isOpen, onClose }) {
                                     onBack={() => setStep('mobile')}
                                     loading={loading.otp}
                                     error={error.otp}
+                                    otpCopy={otpCopy}
+                                    otpMessage={otpMessage}
                                 />
                             </motion.div>
                         )}

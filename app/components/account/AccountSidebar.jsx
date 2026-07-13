@@ -10,6 +10,7 @@ import {
     Trash2,
     Gift,
     Wallet,
+    Shield,
     ChevronRight,
     LogOut,
 } from 'lucide-react';
@@ -18,6 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 const NAV_ITEMS = [
     { href: '/account', label: 'Dashboard', icon: LayoutDashboard, exact: true },
     { href: '/account/bookings', label: 'My Bookings', icon: CalendarCheck },
+    { href: '/account/amc', label: 'AMC Plans', icon: Shield },
     { href: '/account/profile', label: 'Profile', icon: User },
     { href: '/account/wallet', label: 'Wallet', icon: Wallet },
     { href: '/account/refer-earn', label: 'Refer & Earn', icon: Gift },

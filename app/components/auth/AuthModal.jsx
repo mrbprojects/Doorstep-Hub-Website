@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Phone, ShieldCheck, Mail, User, LogOut, Camera, Chrome, Pencil, ChevronRight, Gift, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { fetchOtpGateway, getOtpGatewayCopy, resolveOtpGateway } from '@/lib/otpGateway';
 
 export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
     const router = useRouter();
@@ -14,6 +15,7 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
     const [mobile, setMobile] = useState('');
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
+    const [otpCopy, setOtpCopy] = useState(() => getOtpGatewayCopy('whatsapp'));
 
     // Profile Edit State
     const [isEditing, setIsEditing] = useState(false);
@@ -63,7 +65,16 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
     React.useEffect(() => {
         if (!isOpen) {
             resetModalState();
+            return;
         }
+        let mounted = true;
+        (async () => {
+            const copy = await fetchOtpGateway();
+            if (mounted) setOtpCopy(copy);
+        })();
+        return () => {
+            mounted = false;
+        };
     }, [isOpen, resetModalState]);
 
     React.useEffect(() => {
@@ -160,7 +171,7 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
     const handleSendOtp = async (e) => {
         if (e) e.preventDefault();
         if (!isValidIndianMobile(mobile)) {
-            toast.error('Please enter a valid 10-digit mobile number starting with 6-9');
+            toast.error(otpCopy.invalidMessage);
             return;
         }
 
@@ -168,9 +179,12 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
         try {
             const data = await loginWithWhatsApp(mobile);
             if (data.success || data.status === 'success') {
+                const gateway = resolveOtpGateway(data.gateway || otpCopy.gateway);
+                const copy = getOtpGatewayCopy(gateway);
+                setOtpCopy(copy);
                 if (step !== 'otp') setStep('otp');
                 setResendTimer(30);
-                toast.success('OTP sent to WhatsApp');
+                toast.success(data.details || data.message || copy.otpSentMessage);
             } else {
                 toast.error(data.message || 'Failed to send OTP');
             }
@@ -370,23 +384,26 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-opacity-10 ${t.accent} border border-white/40`}>
                                         <Phone className="w-8 h-8 text-white" />
                                     </div>
-                                    <h3 className={`text-lg font-bold !text-white mb-2`}>Login with WhatsApp</h3>
-                                    <p className={`!text-white opacity-60 text-sm`}>We'll send you a one-time password on WhatsApp</p>
+                                    <h3 className={`text-lg font-bold !text-white mb-2`}>{otpCopy.loginTitle}</h3>
+                                    <p className={`!text-white opacity-60 text-sm`}>{otpCopy.loginSubtitle}</p>
                                 </div>
 
                                 <form onSubmit={handleSendOtp} className="space-y-4">
-                                    <div className="relative">
-                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/90" />
-                                        <input
-                                            type="tel"
-                                            placeholder="Mobile Number"
-                                            value={mobile}
-                                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                            maxLength={10}
-                                            className={`w-full pl-12 pr-4 py-3.5 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none`}
-                                            style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
-                                            required
-                                        />
+                                    <div>
+                                        <label className="block text-xs font-semibold !text-white/80 mb-1.5 pl-1">{otpCopy.label}</label>
+                                        <div className="relative">
+                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/90" />
+                                            <input
+                                                type="tel"
+                                                placeholder={otpCopy.placeholder}
+                                                value={mobile}
+                                                onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                                maxLength={10}
+                                                className={`w-full pl-12 pr-4 py-3.5 ${inputBg} border border-opacity-20 ${borderColor} rounded-xl text-white placeholder:text-white/70 focus:border-opacity-100 transition-all outline-none`}
+                                                style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
+                                                required
+                                            />
+                                        </div>
                                     </div>
                                     <button
                                         type="submit"
@@ -443,7 +460,9 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
                                         <ShieldCheck className="w-8 h-8 text-white" />
                                     </div>
                                     <h3 className={`text-lg font-bold !text-white mb-2`}>Enter Verification Code</h3>
-                                    <p className={`!text-white opacity-60 text-sm`}>Code sent to +91 {mobile}</p>
+                                    <p className={`!text-white opacity-60 text-sm`}>
+                                        {otpCopy.otpScreenSubtitle(mobile)}
+                                    </p>
                                 </div>
 
                                 <form onSubmit={handleVerifyOtp} className="space-y-6">

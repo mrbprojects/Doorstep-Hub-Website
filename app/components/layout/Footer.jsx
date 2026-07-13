@@ -18,6 +18,7 @@ const footerLinks = {
     { name: 'Become a Service Partner', href: '/service-partner' },
     { name: 'Partner Dashboard', href: '/partner/dashboard' },
     { name: 'Book Appointment', href: '/book-appointment' },
+    { name: 'AMC Plans', href: '/amc' },
     { name: 'Download Android App', href: '' },
     { name: 'Download iOS App', href: '' },
     { name: 'Download Partner Android App', href: '' },

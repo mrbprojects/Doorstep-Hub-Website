@@ -2,8 +2,18 @@
 
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Phone } from 'lucide-react';
+import { getOtpGatewayCopy } from '@/lib/otpGateway';
 
-export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, error }) {
+export function MobileNumberPage({
+    phone,
+    onPhoneChange,
+    onSubmit,
+    loading,
+    error,
+    otpCopy,
+}) {
+    const copy = otpCopy || getOtpGatewayCopy('whatsapp');
+
     const handleChange = (e) => {
         const val = e.target.value.replace(/\D/g, '').slice(0, 10);
         onPhoneChange(val);
@@ -21,17 +31,17 @@ export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, erro
                     <Phone className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-2xl sm:text-[1.65rem] font-extrabold text-[#0f172a] tracking-tight">
-                    Enter Mobile Number
+                    Enter {copy.label}
                 </h2>
                 <p className="text-sm text-[#64748b] mt-2 leading-relaxed max-w-xs mx-auto">
-                    We&apos;ll send a 6-digit OTP to your WhatsApp for secure partner login.
+                    {copy.loginSubtitle}
                 </p>
             </div>
 
             <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-5 sm:p-6 space-y-4">
                 <div>
                     <label htmlFor="partner-phone" className="block text-xs font-bold uppercase tracking-wide text-[#475569] mb-2">
-                        Mobile Number
+                        {copy.label}
                     </label>
                     <div className="relative flex items-center">
                         <span className="absolute left-4 text-[#037166] text-sm font-bold select-none">+91</span>
@@ -40,7 +50,7 @@ export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, erro
                             type="tel"
                             inputMode="numeric"
                             autoComplete="tel"
-                            placeholder="9876543210"
+                            placeholder={copy.placeholder}
                             value={phone}
                             onChange={handleChange}
                             maxLength={10}
@@ -48,7 +58,7 @@ export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, erro
                             className="w-full h-12 py-3.5 pl-14 pr-4 rounded-xl border border-[#cbd5e1] bg-white text-[#0f172a] text-lg font-semibold tracking-widest placeholder:text-gray-300 placeholder:font-normal placeholder:tracking-normal focus:border-[#04a99d] focus:ring-2 focus:ring-[#04a99d]/25 outline-none transition-all"
                         />
                     </div>
-                    <p className="text-[11px] text-[#94a3b8] mt-2">Indian mobile number · 10 digits starting with 6–9</p>
+                    <p className="text-[11px] text-[#94a3b8] mt-2">Indian number · 10 digits starting with 6–9</p>
                 </div>
 
                 {error && (
@@ -67,7 +77,7 @@ export function MobileNumberPage({ phone, onPhoneChange, onSubmit, loading, erro
                     ) : (
                         <span className="inline-flex items-center gap-2">
                             <MessageCircle className="w-4 h-4" />
-                            Send OTP on WhatsApp
+                            {copy.sendButton}
                         </span>
                     )}
                 </Button>

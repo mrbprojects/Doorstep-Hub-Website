@@ -11,7 +11,11 @@ import {
   registerProvider,
   sendWhatsAppOtp,
   verifyProviderOtp,
+  getStoredProviderSession,
+  saveStoredProviderSession,
+  clearStoredProviderSession,
 } from '@/lib/providerAuthApi';
+import { fetchOtpGateway, getOtpGatewayCopy, resolveOtpGateway } from '@/lib/otpGateway';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users,
   ShieldCheck,
@@ -29,7 +33,6 @@ import { Users,
 import { Check } from 'lucide-react';
 import Link from 'next/link';
 
-const SESSION_KEY = 'provider_partner_session';
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
 
 function normalizeId(value) {
@@ -46,36 +49,39 @@ export function ProviderAuthOnboardingSection() {
   const [isNewUser, setIsNewUser] = useState(true);
   const [loading, setLoading] = useState({ mobile: false, otp: false, register: false, profile: false });
   const [error, setError] = useState({ mobile: '', otp: '', register: '', profile: '' });
+  const [otpCopy, setOtpCopy] = useState(() => getOtpGatewayCopy('whatsapp'));
+  const [otpMessage, setOtpMessage] = useState('');
 
   useEffect(() => {
-    const saved = localStorage.getItem(SESSION_KEY);
-    if (!saved) return;
-    try {
-      const parsed = JSON.parse(saved);
-      setPhone(parsed.phone || '');
-      setToken(parsed.token || '');
-      setUserId(parsed.userId || '');
-      setProfile(parsed.profile || null);
-    } catch {
-      localStorage.removeItem(SESSION_KEY);
-    }
+    let mounted = true;
+    (async () => {
+      const copy = await fetchOtpGateway();
+      if (mounted) setOtpCopy(copy);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const parsed = getStoredProviderSession();
+    if (!parsed) return;
+    setPhone(parsed.phone || '');
+    setToken(parsed.token || '');
+    setUserId(parsed.userId || '');
+    setProfile(parsed.profile || null);
   }, []);
 
   useEffect(() => {
     const continueRegistration = () => {
-      const saved = localStorage.getItem(SESSION_KEY);
-      if (!saved) return;
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.token) {
-          setPhone(parsed.phone || '');
-          setToken(parsed.token || '');
-          setUserId(parsed.userId || '');
-          setProfile(parsed.profile || null);
-          setStep(parsed.profile ? 'success' : 'register');
-        }
-      } catch {
-        /* ignore */
+      const parsed = getStoredProviderSession();
+      if (!parsed) return;
+      if (parsed.token) {
+        setPhone(parsed.phone || '');
+        setToken(parsed.token || '');
+        setUserId(parsed.userId || '');
+        setProfile(parsed.profile || null);
+        setStep(parsed.profile ? 'success' : 'register');
       }
     };
 
@@ -90,7 +96,7 @@ export function ProviderAuthOnboardingSection() {
     setToken('');
     setUserId('');
     setProfile(null);
-    localStorage.removeItem(SESSION_KEY);
+    clearStoredProviderSession();
   };
 
   useEffect(() => {
@@ -105,7 +111,7 @@ export function ProviderAuthOnboardingSection() {
       userId: next.userId ?? userId,
       profile: next.profile ?? profile,
     };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+    saveStoredProviderSession(data);
     setPhone(data.phone || '');
     setToken(data.token || '');
     setUserId(data.userId || '');
@@ -141,14 +147,19 @@ export function ProviderAuthOnboardingSection() {
     event.preventDefault();
     setError((prev) => ({ ...prev, mobile: '' }));
     if (!/^[6-9]\d{9}$/.test(phone)) {
-      setError((prev) => ({ ...prev, mobile: 'Enter a valid 10-digit mobile number.' }));
+      setError((prev) => ({ ...prev, mobile: otpCopy.invalidMessage }));
       return;
     }
     setLoading((prev) => ({ ...prev, mobile: true }));
     try {
       const response = await sendWhatsAppOtp(phone);
+      const gateway = resolveOtpGateway(response?.gateway || otpCopy.gateway);
+      const copy = getOtpGatewayCopy(gateway);
+      setOtpCopy(copy);
+      const message = response?.details || response?.message || copy.otpSentMessage;
+      setOtpMessage(message);
       setOtp('');
-      toast.success(response?.message || 'OTP sent');
+      toast.success(message);
       setStep('otp');
     } catch (err) {
       setError((prev) => ({ ...prev, mobile: err.message || 'Failed to send OTP' }));
@@ -601,6 +612,7 @@ return (
                         onSubmit={submitPhone}
                         loading={loading.mobile}
                         error={error.mobile}
+                        otpCopy={otpCopy}
                       />
                     </motion.div>
                   ) : null}
@@ -620,6 +632,8 @@ return (
                         onBack={() => setStep('mobile')}
                         loading={loading.otp || loading.profile}
                         error={error.otp}
+                        otpCopy={otpCopy}
+                        otpMessage={otpMessage}
                       />
                     </motion.div>
                   ) : null}

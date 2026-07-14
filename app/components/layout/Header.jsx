@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { getStoredProviderSession } from '@/lib/providerAuthApi';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 
 export function Header({ theme = {}, navItems = [] }) {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export function Header({ theme = {}, navItems = [] }) {
   const { user, isAuthenticated } = useAuth();
   const { cartItems: productCartItems } = useCart();
   const { cartItems: serviceCartItems } = useServiceCart();
+  const { policy: sharedGlobalPolicy } = useGlobalSettings() || {};
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const cartItemsCount = (productCartItems?.length || 0) + (serviceCartItems?.length || 0);
@@ -84,11 +86,15 @@ export function Header({ theme = {}, navItems = [] }) {
           setShowHomeScreen(true);
         }
 
-        // 4. Fetch Global Settings
-        const globalSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
-        const globalSettingsData = await globalSettingsResponse.json();
-        if (globalSettingsData.success && globalSettingsData.policy) {
-          setGlobalSettings(globalSettingsData.policy);
+        // 4. Global settings — reuse shared context when available
+        if (sharedGlobalPolicy) {
+          setGlobalSettings(sharedGlobalPolicy);
+        } else {
+          const globalSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+          const globalSettingsData = await globalSettingsResponse.json();
+          if (globalSettingsData.success && globalSettingsData.policy) {
+            setGlobalSettings(globalSettingsData.policy);
+          }
         }
 
         // Fetch Navbar CMS Items
@@ -128,8 +134,13 @@ export function Header({ theme = {}, navItems = [] }) {
     if (navItems.length === 0) {
       fetchData();
     }
+    // Intentionally once on mount — shared global policy is applied via separate effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (sharedGlobalPolicy) setGlobalSettings(sharedGlobalPolicy);
+  }, [sharedGlobalPolicy]);
   const handleServiceClick = (item) => {
     let serviceData = null;
 
@@ -164,8 +175,9 @@ export function Header({ theme = {}, navItems = [] }) {
     // { name: 'Appliance Services', href: `/${serviceSlugs.appliances}` },
     ...(showHomeScreen ? [
       { name: 'Religious Services', href: `/${serviceSlugs.religious}` },
-      { name: 'Spa Saloon', href: `/${serviceSlugs.spa}` },
-      { name: 'PG Hostels', href: `/${serviceSlugs.pg}` },
+      // Coming soon — Spa / PG kept in nav but blocked on click
+      { name: 'Spa Saloon', href: `/${serviceSlugs.spa}`, comingSoon: true },
+      { name: 'PG Hostels', href: `/${serviceSlugs.pg}`, comingSoon: true },
     ] : []),
     /*
     {
@@ -177,6 +189,18 @@ export function Header({ theme = {}, navItems = [] }) {
     }
     */
   ];
+
+  const isComingSoonNavItem = (item) => {
+    if (item?.comingSoon) return true;
+    const href = String(item?.href || '');
+    return (
+      href.includes('/spa-salon') ||
+      href.includes(`/${serviceSlugs.spa}`) ||
+      href.includes('/pghostels') ||
+      href.includes('/pg-hostel') ||
+      href.includes(`/${serviceSlugs.pg}`)
+    );
+  };
 
   const menuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : apiNavItems);
 
@@ -274,6 +298,18 @@ export function Header({ theme = {}, navItems = [] }) {
                         )}
                       </AnimatePresence>
                     </>
+                  ) : isComingSoonNavItem(item) ? (
+                    // Coming soon — was: <Link href={item.href} onClick={() => handleServiceClick(item)}>
+                    <span
+                      className={`${currentTheme.textMain || 'text-white'} opacity-60 relative group font-medium whitespace-nowrap cursor-not-allowed inline-flex items-center gap-1.5`}
+                      title="Coming Soon"
+                      aria-disabled="true"
+                    >
+                      {item.name}
+                      <span className="rounded-full bg-slate-900/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                        Soon
+                      </span>
+                    </span>
                   ) : (
                     <Link href={item.href} onClick={() => handleServiceClick(item)}>
                       <motion.span
@@ -426,6 +462,18 @@ export function Header({ theme = {}, navItems = [] }) {
                           </Link>
                         ))}
                       </div>
+                    ) : isComingSoonNavItem(item) ? (
+                      // Coming soon — was Link to spa/pg
+                      <span
+                        className={`block py-3 px-4 ${currentTheme.textMain} opacity-60 rounded-xl font-medium text-base cursor-not-allowed flex items-center justify-between`}
+                        title="Coming Soon"
+                        aria-disabled="true"
+                      >
+                        {item.name}
+                        <span className="rounded-full bg-slate-900/70 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                          Soon
+                        </span>
+                      </span>
                     ) : (
                       <Link
                         href={item.href}

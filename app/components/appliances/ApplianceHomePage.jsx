@@ -135,14 +135,15 @@ export function ApplianceHomePage() {
                     onViewAll={() => router.push(`/${serviceSlugs.recentlyBooked}`)}
                 />
                 <DownloadApp />
-                <NearbyStores onViewAll={() => router.push(`/${serviceSlugs.serviceCenter}`)} />
+                {/* parked like customer app — not using service centers */}
+                {/* <NearbyStores onViewAll={() => router.push(`/${serviceSlugs.serviceCenter}`)} />
                 <PopularCenters onStoreClick={(storeSlug, storeId) => {
                     if (storeSlug) {
                         router.push(`/service-list/${storeSlug}`);
                         return;
                     }
                     router.push(`/service-list/${storeId}`);
-                }} />
+                }} /> */}
                 <KnowledgeSpace />
                 <Newsletter />
             </div>

@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
+import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
 
 // ── Map Configuration ──
 const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
@@ -174,6 +175,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             totalOrders: s.totalOrders || 0,
             duration: s.duration || '60 mins',
             subcategoryName: s.subcategoryName,
+            subcategoryId: s.subcategoryId || s.subCategoryId || null,
+            categoryId: s.categoryId || s.bookingCategoryId || null,
             bannerImages: s.banner_images || []
           }));
           setServices(mappedServices);
@@ -1260,14 +1263,31 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             exit={{ y: 100 }}
             className="fixed bottom-0 left-0 right-0 z-[60] p-4 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-xl"
           >
-            <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-              <div>
-                <span className="text-gray-900 font-bold text-lg">{selectedPackages.length} Selected</span>
-                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Total: ₹{services.filter(s => selectedPackages.includes(s.id)).reduce((acc, curr) => acc + curr.price, 0)}</p>
+            <div className="max-w-[1400px] mx-auto space-y-3">
+              {(() => {
+                const selectedId = selectedPackages[selectedPackages.length - 1];
+                const svc = services.find((s) => s.id === selectedId);
+                return (
+                  <AmcServiceCoverage
+                    serviceId={selectedId}
+                    categoryId={svc?.categoryId || centerData?.categoryId || centerData?.bookingCategoryId}
+                    subcategoryId={
+                      svc?.subcategoryId ||
+                      (selectedSubcategoryId !== 'all' ? selectedSubcategoryId : null)
+                    }
+                    compact
+                  />
+                );
+              })()}
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-gray-900 font-bold text-lg">{selectedPackages.length} Selected</span>
+                  <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Total: ₹{services.filter(s => selectedPackages.includes(s.id)).reduce((acc, curr) => acc + curr.price, 0)}</p>
+                </div>
+                <button onClick={handleContinueBooking} className="px-8 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold transition-all flex items-center gap-2 shadow-lg shadow-[#037166]/20 hover:shadow-[#037166]/35">
+                  Continue Booking <ArrowLeft className="w-4 h-4 rotate-180" />
+                </button>
               </div>
-              <button onClick={handleContinueBooking} className="px-8 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold transition-all flex items-center gap-2 shadow-lg shadow-[#037166]/20 hover:shadow-[#037166]/35">
-                Continue Booking <ArrowLeft className="w-4 h-4 rotate-180" />
-              </button>
             </div>
           </motion.div>
         )}

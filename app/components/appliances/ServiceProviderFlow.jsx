@@ -232,13 +232,14 @@ export default function ServiceProviderFlow({ serviceType = null }) {
           />
           <PromoBanner />
           <DownloadApp />
-          <NearbyStores
+          {/* parked like customer app — not using service centers */}
+          {/* <NearbyStores
             onStoreClick={handleStoreClick}
             onViewAll={handleViewAllStores}
           />
           <PopularCenters
             onStoreClick={handleStoreClick}
-          />
+          /> */}
           <KnowledgeSpace />
           <Newsletter />
         </>

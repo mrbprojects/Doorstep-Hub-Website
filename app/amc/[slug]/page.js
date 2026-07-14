@@ -12,7 +12,12 @@ import {
   Lock,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { fetchAmcPlanBySlug, formatInr, initiateAmcPayment } from '@/lib/amcApi';
+import {
+  fetchAmcPlanBySlug,
+  fetchMyAmcPurchases,
+  formatInr,
+  initiateAmcPayment,
+} from '@/lib/amcApi';
 
 const emptyForm = {
   name: '',
@@ -28,7 +33,7 @@ const fieldClass =
 export default function AmcPlanDetailPage() {
   const params = useParams();
   const slug = params?.slug;
-  const { user, token, isAuthenticated } = useAuth();
+  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
 
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,6 +42,12 @@ export default function AmcPlanDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState({ type: '', text: '' });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [activePurchase, setActivePurchase] = useState(null);
+
+  const userId = user?._id || user?.id || null;
+  const phone = String(user?.phone || user?.mobile || '')
+    .replace(/\D/g, '')
+    .slice(-10);
 
   useEffect(() => {
     if (!slug) return;
@@ -60,12 +71,45 @@ export default function AmcPlanDetailPage() {
   }, [slug]);
 
   useEffect(() => {
+    if (authLoading) return undefined;
+    if (isAuthenticated && !userId && !phone) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      if (!isAuthenticated || !plan?._id || (!userId && !phone)) {
+        if (!cancelled) setActivePurchase(null);
+        return;
+      }
+      const mine = await fetchMyAmcPurchases({ userId, phone, token });
+      const match = (mine.active || []).find(
+        (p) => String(p.amcPlanId) === String(plan._id)
+      );
+      if (!cancelled) setActivePurchase(match || null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, isAuthenticated, plan?._id, userId, phone, token]);
+
+  useEffect(() => {
     if (!user) return;
     setForm((prev) => ({
       ...prev,
-      name: prev.name || user.name || '',
-      phone: prev.phone || user.phone || user.mobile || '',
+      name: prev.name || user.name || user.fullName || '',
+      phone:
+        prev.phone ||
+        String(user.phone || user.mobile || '')
+          .replace(/\D/g, '')
+          .slice(-10) ||
+        '',
       email: prev.email || user.email || '',
+      city:
+        prev.city ||
+        user.city ||
+        user.cityName ||
+        user.address?.cityName ||
+        user.address?.city ||
+        '',
     }));
   }, [user]);
 
@@ -80,14 +124,24 @@ export default function AmcPlanDetailPage() {
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === 'phone' ? value.replace(/\D/g, '').slice(0, 10) : value,
+    }));
   };
 
   const onActivate = async (e) => {
     e.preventDefault();
     setSubmitMsg({ type: '', text: '' });
-    if (!form.name.trim() || !form.phone.trim()) {
-      setSubmitMsg({ type: 'error', text: 'Name and phone are required.' });
+    const name = form.name.trim();
+    const phoneDigits = String(form.phone || '').replace(/\D/g, '').slice(-10);
+    if (!name || phoneDigits.length !== 10) {
+      setSubmitMsg({
+        type: 'error',
+        text: !name
+          ? 'Name is required.'
+          : 'Enter a valid 10-digit phone number for the person using this AMC.',
+      });
       return;
     }
     if (!acceptedTerms) {
@@ -103,8 +157,8 @@ export default function AmcPlanDetailPage() {
         {
           planId: plan?._id,
           slug: plan?.slug,
-          name: form.name.trim(),
-          phone: form.phone.trim(),
+          name,
+          phone: phoneDigits,
           email: form.email.trim(),
           city: form.city.trim(),
           message: form.message.trim(),
@@ -184,12 +238,29 @@ export default function AmcPlanDetailPage() {
             </p>
             <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
               <div className="max-w-2xl">
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#0f2f2b] leading-[1.05]">
-                  {plan.name}
-                </h1>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#0f2f2b] leading-[1.05]">
+                    {plan.name}
+                  </h1>
+                  {activePurchase ? (
+                    <span className="inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+                      Active
+                    </span>
+                  ) : null}
+                </div>
                 {plan.description ? (
                   <p className="mt-4 text-base md:text-lg text-[#3d5f59] leading-relaxed max-w-xl">
                     {plan.description}
+                  </p>
+                ) : null}
+                {activePurchase?.expireDate ? (
+                  <p className="mt-3 text-sm font-semibold text-emerald-700">
+                    Your plan is active · valid till{' '}
+                    {new Date(activePurchase.expireDate).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
                   </p>
                 ) : null}
               </div>
@@ -310,11 +381,56 @@ export default function AmcPlanDetailPage() {
             className="lg:sticky lg:top-24"
           >
             <div className="flex max-h-[calc(100vh-7rem)] flex-col overflow-hidden rounded-2xl border border-[#cfe8e3] bg-white shadow-[0_20px_50px_-36px_rgba(3,113,102,0.55)]">
+              {activePurchase ? (
+                <>
+                  <div className="shrink-0 bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-3.5 text-white">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
+                      Your plan
+                    </p>
+                    <p className="mt-0.5 text-lg font-bold">Active</p>
+                  </div>
+                  <div className="space-y-3 px-5 py-5">
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                      You already availed this AMC
+                      {activePurchase.expireDate
+                        ? ` · valid till ${new Date(activePurchase.expireDate).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}`
+                        : ''}
+                      .
+                    </p>
+                    <ul className="space-y-2">
+                      {(activePurchase.entitlements || []).map((e) => (
+                        <li
+                          key={e.title}
+                          className="flex items-start justify-between gap-3 text-sm text-slate-700"
+                        >
+                          <span className="font-medium">{e.title}</span>
+                          <span className="shrink-0 text-xs font-semibold text-emerald-700">
+                            {e.unlimited
+                              ? 'Unlimited'
+                              : `${e.remainingQty ?? 0}/${e.totalQty ?? 0} left`}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/account/amc"
+                      className="inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                    >
+                      Go to my AMC
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
               <div className="shrink-0 bg-gradient-to-br from-[#037166] to-[#025951] px-5 py-3.5 text-white">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
-                      Activate now
+                      Book Now
                     </p>
                     <p className="mt-0.5 text-sm text-white/85 truncate max-w-[220px]">
                       {plan.name}
@@ -329,11 +445,19 @@ export default function AmcPlanDetailPage() {
                 className="flex min-h-0 flex-1 flex-col"
               >
                 <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-5 py-4">
-                  {!isAuthenticated ? (
-                    <p className="text-[11px] leading-snug text-[#7a5a12] bg-[#fff8e8] border border-[#f0e0b8] rounded-md px-2.5 py-2">
-                      Log in before paying so this AMC is saved to your account.
+                  {isAuthenticated ? (
+                    <p className="text-[11px] leading-snug text-[#025951] bg-[#e8f6f3] border border-[#b7d4ce] rounded-md px-2.5 py-2">
+                      Details are filled from your login. You can edit them if this AMC is for someone else.
                     </p>
-                  ) : null}
+                  ) : (
+                    <p className="text-[11px] leading-snug text-[#7a5a12] bg-[#fff8e8] border border-[#f0e0b8] rounded-md px-2.5 py-2">
+                      Log in to save this AMC to your account. You can still enter details for the person using the plan.
+                    </p>
+                  )}
+
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3d5f59]">
+                    Customer details for this AMC
+                  </p>
 
                   <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                     <label className="block sm:col-span-2">
@@ -346,6 +470,7 @@ export default function AmcPlanDetailPage() {
                         onChange={onChange}
                         className={fieldClass}
                         autoComplete="name"
+                        placeholder="Who will use this AMC?"
                       />
                     </label>
                     <label className="block sm:col-span-2">
@@ -358,6 +483,9 @@ export default function AmcPlanDetailPage() {
                         onChange={onChange}
                         className={fieldClass}
                         autoComplete="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        placeholder="10-digit mobile"
                       />
                     </label>
                     <label className="block">
@@ -425,7 +553,7 @@ export default function AmcPlanDetailPage() {
                   >
                     {submitting
                       ? 'Redirecting…'
-                      : `Activate AMC · ${formatInr(offer)}`}
+                      : `Book Now · ${formatInr(offer)}`}
                   </button>
                   <p className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-[#7a9a94]">
                     <Lock className="w-3 h-3" />
@@ -433,6 +561,8 @@ export default function AmcPlanDetailPage() {
                   </p>
                 </div>
               </form>
+                </>
+              )}
             </div>
           </motion.aside>
         </div>

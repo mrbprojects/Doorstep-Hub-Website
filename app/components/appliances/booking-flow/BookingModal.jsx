@@ -10,6 +10,8 @@ import { useAuth } from '@/context/AuthContext';
 import { trackBookingCompleted, trackLeadEvent, getLeadUserFields } from '@/lib/leadTracking';
 import { fetchCities, fetchAuthorizedServicesByFilters } from '@/lib/api';
 import { citiesMatchBySlugOrName } from '@/lib/applianceRepairSlugs';
+import { useAmcEligibility } from '@/hooks/useAmcEligibility';
+import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
 
 function resolveBookingEntityId(value) {
   if (value == null || value === '') return null;
@@ -202,6 +204,21 @@ export function BookingModal({
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [serviceAvailableInCity, setServiceAvailableInCity] = useState(null);
+
+  const bookingServiceId = selectedService?._id || selectedService?.id;
+  const bookingCategoryId = resolveCategoryIdForBooking(selectedCategory, selectedService);
+  const bookingSubcategoryId =
+    selectedService?.subcategoryId ||
+    selectedService?.subCategoryId ||
+    selectedService?.bookingSubcategoryId ||
+    null;
+
+  const { eligibility: amcEligibility } = useAmcEligibility({
+    serviceId: bookingServiceId,
+    categoryId: bookingCategoryId,
+    subcategoryId: bookingSubcategoryId,
+    enabled: isOpen && !confirmed,
+  });
 
   const locationMismatch = useMemo(() => {
     if (!displayCity || !location?.city) return null;
@@ -534,6 +551,12 @@ export function BookingModal({
                 </motion.div>
               ) : (
                 <>
+                  {amcEligibility?.amcApplicable || amcEligibility?.limitExhausted ? (
+                    <div className="pt-5 pb-1">
+                      <AmcCoverageBanner eligibility={amcEligibility} />
+                    </div>
+                  ) : null}
+
                   {/* STEP 1: REQUIREMENTS */}
                   {currentStep === 1 && (
                     <motion.div 

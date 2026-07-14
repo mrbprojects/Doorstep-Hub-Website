@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
@@ -10,6 +10,12 @@ import { useServiceCart } from '@/context/ServiceCartContext';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 import { generateIdempotencyKey, formatDateTimeWithTimezone, validatePrice } from '@/utils/security';
 import { inferVertical, trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
+import { useAmcEligibility } from '@/hooks/useAmcEligibility';
+import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'https://api.doorstephub.com/v1/dhubApi';
 
 export function BookingConfirmationPage({
   address,
@@ -93,11 +99,41 @@ export function BookingConfirmationPage({
   const cartItems = (directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || []);
 
   // Use the platform fees once per booking (not summed per item)
-  const bookingCost = cartItems.length > 0 ? (cartItems[0].bookingCost || 0) : 0;
-  const inspectionCost = cartItems.length > 0 ? (cartItems[0].inspectionCost || 0) : 0;
+  const rawBookingCost = cartItems.length > 0 ? Number(cartItems[0].bookingCost || 0) : 0;
+  const inspectionCost = cartItems.length > 0 ? Number(cartItems[0].inspectionCost || 0) : 0;
 
+  const amcServiceId = useMemo(() => {
+    if (typeof window === 'undefined') return cartItems[0]?.serviceId || cartItems[0]?.id || cartItems[0]?._id || '';
+    return (
+      localStorage.getItem('last_service_id') ||
+      cartItems[0]?.serviceId ||
+      cartItems[0]?.productId ||
+      cartItems[0]?.id ||
+      cartItems[0]?._id ||
+      ''
+    );
+  }, [cartItems]);
+
+  const amcCategoryId = cartItems[0]?.categoryId || cartItems[0]?.bookingCategoryId || null;
+  const amcSubcategoryId = cartItems[0]?.subcategoryId || cartItems[0]?.subCategoryId || null;
+
+  const { eligibility: amcEligibility, amcApplicable } = useAmcEligibility({
+    serviceId: amcServiceId,
+    categoryId: amcCategoryId,
+    subcategoryId: amcSubcategoryId,
+    enabled: Boolean(amcServiceId) && isAuthenticated,
+  });
+
+  const amcApplies = amcApplicable && paymentMethod === 'amc';
+  const bookingCost = amcApplies ? 0 : rawBookingCost;
   const total = bookingCost;
   const tax = 0;
+
+  useEffect(() => {
+    if (!amcApplicable && paymentMethod === 'amc') {
+      setPaymentMethod('online');
+    }
+  }, [amcApplicable, paymentMethod]);
 
   // Service window: 9 AM to 9 PM (9:00 to 21:00)
   const SERVICE_START_HOUR = 9;
@@ -296,9 +332,46 @@ export function BookingConfirmationPage({
       // Save address to sessionStorage for Thank You page redirect/persistence
       sessionStorage.setItem('selected_address', JSON.stringify(address));
 
-      if (paymentMethod === 'COD' || paymentMethod === 'wallet') {
+      if (paymentMethod === 'amc') {
+        if (!amcApplicable) {
+          throw new Error('This service is not covered under your active AMC.');
+        }
+        const response = await fetch(`${API_BASE}/app/provider-flow/BookService`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'X-Idempotency-Key': idempotencyKeyRef.current,
+          },
+          body: JSON.stringify({
+            ...bookingData,
+            amount: 0,
+            totalAmount: '0',
+            paymentMethod: 'AMC',
+            useAmc: true,
+            amcPurchaseId: amcEligibility?.purchaseId || undefined,
+          }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          toast.success('AMC booking confirmed — no payment needed.');
+          trackBookingCompleted(data.bookingId || data?.data?.booking?._id, {
+            vertical: inferVertical(),
+          });
+          cleanup();
+          const selectedDateLabel = availableDates.find(d => d.value === selectedDate)?.label || selectedDate;
+          const selectedTimeLabel = availableTimesForSelectedDate.find(t => t.value === selectedTime)?.label || selectedTime;
+          onConfirmBooking({
+            bookingId: data.bookingId || data?.data?.booking?._id,
+            bookedDate: selectedDateLabel,
+            bookedTime: selectedTimeLabel,
+          });
+        } else {
+          throw new Error(data.message || 'AMC booking failed');
+        }
+      } else if (paymentMethod === 'COD' || paymentMethod === 'wallet') {
         // Use provider-flow/BookService for both COD and wallet
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/provider-flow/BookService', {
+        const response = await fetch(`${API_BASE}/app/provider-flow/BookService`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -307,10 +380,7 @@ export function BookingConfirmationPage({
           },
           body: JSON.stringify({
             ...bookingData,
-            /* PREVIOUS BODY (WITHOUT EXPLICIT AMOUNT):
-            paymentMethod: paymentMethod === 'COD' ? 'COD' : 'wallet'
-            */
-            amount: priceValidation.value, // New explicit field per on-demand spec
+            amount: priceValidation.value,
             paymentMethod: paymentMethod === 'COD' ? 'COD' : 'wallet'
           })
         });
@@ -337,8 +407,11 @@ export function BookingConfirmationPage({
           throw new Error(data.message || 'Booking failed');
         }
       } else if (paymentMethod === 'online') {
+        if (Number(priceValidation.value) <= 0) {
+          throw new Error('Payable amount is ₹0. Choose “Use AMC cover” to book without payment gateway.');
+        }
         // Online payment uses separate payment gateway endpoint
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/initiate-service-booking-payment', {
+        const response = await fetch(`${API_BASE}/app/applience-repairs-website/initiate-service-booking-payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -552,11 +625,44 @@ export function BookingConfirmationPage({
               </h4>
               <p className="text-xs text-gray-500 mb-4">Select your preferred payment method</p>
 
-
+              {(amcApplicable || amcEligibility?.limitExhausted) && (
+                <div className="mb-4">
+                  <AmcCoverageBanner
+                    eligibility={amcEligibility}
+                    compact
+                    className="!mb-0"
+                  />
+                </div>
+              )}
 
               <div className="grid gap-3">
+                {amcApplicable && (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('amc')}
+                    className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'amc'
+                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                        : 'bg-white text-[#334155] border-gray-300 hover:bg-gray-50'
+                      }`}
+                  >
+                    <Shield className={`w-6 h-6 ${paymentMethod === 'amc' ? 'text-white' : 'text-[#037166]'}`} />
+                    <div className="text-left flex-1">
+                      <p className={`font-semibold ${paymentMethod === 'amc' ? '!text-white' : 'text-[#334155]'}`}>
+                        Use AMC cover
+                      </p>
+                      <p className={`text-xs ${paymentMethod === 'amc' ? '!text-white/90' : 'text-gray-500'}`}>
+                        {amcEligibility?.benefitTitle
+                          ? `${amcEligibility.benefitTitle} · ₹0 · no payment gateway`
+                          : '₹0 booking fee · confirmed without payment gateway'}
+                      </p>
+                    </div>
+                    {paymentMethod === 'amc' && <CheckCircle className="w-5 h-5 ml-auto" />}
+                  </button>
+                )}
+
                 {/* Online Payment */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('online')}
                   className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'online'
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
@@ -688,24 +794,56 @@ export function BookingConfirmationPage({
                   <div className="flex flex-col">
                     <span>Platform Fee</span>
                     <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
-                      <CreditCard className="w-3 h-3" /> pay online now
+                      <CreditCard className="w-3 h-3" />
+                      {amcApplies ? 'covered by AMC' : 'pay online now'}
                     </span>
                   </div>
-                  <span className="font-bold text-[#0f172a]">₹{bookingCost}</span>
+                  <span className="font-bold text-[#0f172a]">
+                    {amcApplies ? (
+                      <>
+                        <span className="line-through text-gray-400 font-medium mr-1">₹{rawBookingCost}</span>
+                        ₹0
+                      </>
+                    ) : (
+                      <>₹{bookingCost}</>
+                    )}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-start text-[#334155] text-sm">
                   <div className="flex flex-col">
                     <span>Inspection Fee</span>
                     <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
-                      <MapPin className="w-3 h-3" /> pay at doorstep
+                      <MapPin className="w-3 h-3" />
+                      {amcApplies ? 'covered by AMC' : 'pay at doorstep'}
                     </span>
                   </div>
-                  <span className="font-bold text-[#0f172a]">₹{inspectionCost}</span>
+                  <span className="font-bold text-[#0f172a]">
+                    {amcApplies ? (
+                      <>
+                        <span className="line-through text-gray-400 font-medium mr-1">₹{inspectionCost}</span>
+                        ₹0
+                      </>
+                    ) : (
+                      <>₹{inspectionCost}</>
+                    )}
+                  </span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#f1faf8] border border-[#cde9e4] text-[10px] text-[#475569] leading-relaxed">
-                  <p>Only the <span className="text-[#04a99d] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.</p>
+                  {amcApplies ? (
+                    <p>
+                      AMC cover selected — booking fee is ₹0 (no payment gateway). Spare parts may be extra as per plan terms.
+                    </p>
+                  ) : amcApplicable ? (
+                    <p>
+                      AMC is available for this service. Choose <span className="text-[#04a99d] font-bold">Use AMC cover</span> for ₹0, or pay normally.
+                    </p>
+                  ) : (
+                    <p>
+                      Only the <span className="text-[#04a99d] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -748,6 +886,8 @@ export function BookingConfirmationPage({
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Confirming...
                   </div>
+                ) : amcApplies ? (
+                  'Confirm AMC booking (no payment)'
                 ) : (
                   'Confirm Booking'
                 )}

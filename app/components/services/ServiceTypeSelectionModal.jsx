@@ -54,8 +54,8 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                             </div>
                         </button>
 
-                        {/* Service Center Option */}
-                        <button
+                        {/* Service Center Option — parked like customer app — not using service centers */}
+                        {/* <button
                             onClick={() => onSelect('center')}
                             className="group relative flex items-center gap-4 p-4 rounded-2xl bg-[#1a1a1a] border border-[#333] hover:border-blue-500 hover:bg-blue-500/10 transition-all duration-300 text-left"
                         >
@@ -66,7 +66,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
                                 <h4 className="font-bold text-white group-hover:text-blue-400 transition-colors">Nearby Service Centers</h4>
                                 <p className="text-sm text-gray-400 group-hover:text-gray-300">Find nearby authorized service centers</p>
                             </div>
-                        </button>
+                        </button> */}
                     </div>
 
                     {/* Footer */}

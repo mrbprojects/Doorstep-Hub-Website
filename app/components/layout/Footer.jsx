@@ -6,8 +6,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocationContext } from '@/context/LocationContext';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 
 const footerLinks = {
 
@@ -43,11 +44,118 @@ const socialLinks = [
   { icon: Youtube, href: '', label: 'YouTube' },
 ];
 
+/** Session-level cache so Footer does not re-hit subcategory APIs on remount / location bumps */
+let footerDataCache = null;
+let footerDataPromise = null;
+
+async function loadFooterCatalog(lat, lng) {
+  if (footerDataCache) return footerDataCache;
+  if (footerDataPromise) return footerDataPromise;
+
+  footerDataPromise = (async () => {
+    const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lattitude: lat || '17.3850',
+        longitude: lng || '78.4866',
+      }),
+    });
+    const catData = await catResponse.json();
+
+    let serviceGroups = [];
+    if (catData.success && Array.isArray(catData.data)) {
+      serviceGroups = await Promise.all(
+        catData.data.map(async (category) => {
+          try {
+            const subResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slug: category.slug }),
+              }
+            );
+            const subData = await subResponse.json();
+            return {
+              id: category._id,
+              name: category.name,
+              slug: category.slug,
+              subcategories:
+                subData.success && Array.isArray(subData.data) ? subData.data : [],
+            };
+          } catch (err) {
+            console.error(`Error fetching subcategories for ${category.name}:`, err);
+            return {
+              id: category._id,
+              name: category.name,
+              slug: category.slug,
+              subcategories: [],
+            };
+          }
+        })
+      );
+    }
+
+    let professionalServices = [];
+    try {
+      const profResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/professional-services-catalog`,
+        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+      );
+      const profData = await profResponse.json();
+      if (profData.success && Array.isArray(profData.data)) {
+        professionalServices = profData.data;
+      }
+    } catch {
+      /* ignore */
+    }
+
+    let appliancesSlug = 'appliances';
+    try {
+      const slugRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
+      );
+      const slugData = await slugRes.json();
+      if (slugData.success && slugData.data?.home) {
+        appliancesSlug = slugData.data.home;
+      }
+    } catch {
+      /* use default */
+    }
+
+    let showHomeScreen = false;
+    try {
+      const screenSettingsResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`
+      );
+      const screenSettingsData = await screenSettingsResponse.json();
+      showHomeScreen = !!(screenSettingsData.success && screenSettingsData.data?.homescreen);
+    } catch {
+      /* ignore */
+    }
+
+    footerDataCache = {
+      serviceGroups,
+      professionalServices,
+      appliancesSlug,
+      showHomeScreen,
+    };
+    return footerDataCache;
+  })().finally(() => {
+    footerDataPromise = null;
+  });
+
+  return footerDataPromise;
+}
+
 // Hardcoded additionalServices removed as it's now dynamic
 
 export function Footer({ theme = {} }) {
   const router = useRouter();
   const { location } = useLocationContext();
+  const { policy: globalPolicy } = useGlobalSettings() || {};
+  const fetchedRef = useRef(false);
 
   // Default footer theme
   const defaultTheme = {
@@ -91,87 +199,44 @@ export function Footer({ theme = {} }) {
   const [hoveredSocial, setHoveredSocial] = useState(null);
 
   useEffect(() => {
-    const fetchFooterData = async () => {
+    if (globalPolicy) setGlobalSettings(globalPolicy);
+  }, [globalPolicy]);
+
+  useEffect(() => {
+    if (fetchedRef.current && footerDataCache) {
+      const cached = footerDataCache;
+      setServiceGroups(cached.serviceGroups);
+      setProfessionalServices(cached.professionalServices);
+      setServiceSlugs((prev) => ({ ...prev, appliances: cached.appliancesSlug }));
+      setShowHomeScreen(cached.showHomeScreen);
+      setIsLoading(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    fetchedRef.current = true;
+
+    (async () => {
       try {
-        // Step 1: Fetch Appliance Categories
-        const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lattitude: location?.lat || '17.3850',
-            longitude: location?.lng || '78.4866'
-          })
-        });
-        const catData = await catResponse.json();
-
-        if (catData.success && Array.isArray(catData.data)) {
-          const groups = await Promise.all(catData.data.map(async (category) => {
-            try {
-              const subResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ slug: category.slug })
-              });
-              const subData = await subResponse.json();
-              return {
-                id: category._id,
-                name: category.name,
-                slug: category.slug, // Added slug
-                subcategories: subData.success && Array.isArray(subData.data) ? subData.data : []
-              };
-            } catch (err) {
-              console.error(`Error fetching subcategories for ${category.name}:`, err);
-              return { id: category._id, name: category.name, slug: category.slug, subcategories: [] };
-            }
-          }));
-          setServiceGroups(groups);
-        }
-
-        // Step 2: Fetch Professional Services Catalog
-        const profResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/professional-services-catalog`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const profData = await profResponse.json();
-
-        if (profData.success && Array.isArray(profData.data)) {
-          setProfessionalServices(profData.data);
-        }
-
-        // Step 3: Fetch Global Settings
-        const globalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const globalData = await globalResponse.json();
-        if (globalData.success && globalData.policy) {
-          setGlobalSettings(globalData.policy);
-        }
-
-        // Step 4: Fetch Service Slugs (only appliance ID is supported by this endpoint)
-        try {
-          const slugRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
-          const slugData = await slugRes.json();
-          if (slugData.success && slugData.data?.home) {
-            setServiceSlugs(prev => ({ ...prev, appliances: slugData.data.home }));
-          }
-        } catch (e) { /* use default slug */ }
-
-        // Step 5: Fetch Screen Settings
-        const screenSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`);
-        const screenSettingsData = await screenSettingsResponse.json();
-        const isHomeEnabled = screenSettingsData.success && screenSettingsData.data?.homescreen;
-        setShowHomeScreen(isHomeEnabled);
-
+        const data = await loadFooterCatalog(location?.lat, location?.lng);
+        if (cancelled || !data) return;
+        setServiceGroups(data.serviceGroups);
+        setProfessionalServices(data.professionalServices);
+        setServiceSlugs((prev) => ({ ...prev, appliances: data.appliancesSlug }));
+        setShowHomeScreen(data.showHomeScreen);
       } catch (error) {
         console.error('Error fetching footer data:', error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
-    };
+    })();
 
-    fetchFooterData();
-  }, [location?.lat, location?.lng]);
+    return () => {
+      cancelled = true;
+    };
+    // Fetch once per session — footer catalog does not need to re-run on every GPS update
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
  const dynamicQuickLinks = footerLinks.Quicklinks.map(link => {
   if (link.name === 'Download Android App' && globalSettings?.customerAndroidAppLink) {

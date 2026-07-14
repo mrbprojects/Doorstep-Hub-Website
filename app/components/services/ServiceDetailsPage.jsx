@@ -7,6 +7,7 @@ import { ArrowLeft, Star, Clock, Shield, CheckCircle, Award, ThumbsUp, ChevronLe
 import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
 import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
+import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -194,6 +195,19 @@ export function ServiceDetailsPage({
   }
 
   const { storeData, provider_rate_cards = [], serviceImages = [], customerRatings = [] } = serviceDetails;
+
+  const amcServiceId = storeData.id || storeData._id || serviceId || null;
+  const amcCategoryId =
+    storeData.categoryId?._id ||
+    storeData.categoryId ||
+    storeData.bookingCategoryId ||
+    null;
+  const amcSubcategoryId =
+    subCategoryId ||
+    storeData.subCategoryId?._id ||
+    storeData.subCategoryId ||
+    storeData.subcategoryId ||
+    null;
 
   // Prepare images list (banner + service images)
   // FIXED CODE:
@@ -700,6 +714,15 @@ export function ServiceDetailsPage({
                 </motion.div>
               )}
 
+              <div className="mt-6">
+                <AmcServiceCoverage
+                  serviceId={amcServiceId}
+                  categoryId={amcCategoryId}
+                  subcategoryId={amcSubcategoryId}
+                  compact
+                />
+              </div>
+
               {/* Booking Button in Hero */}
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -736,6 +759,9 @@ export function ServiceDetailsPage({
                       price: cleanPrice,
                       bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
                       inspectionCost: storeData.inspectionCost || 0,
+                      categoryId: amcCategoryId || undefined,
+                      subcategoryId: amcSubcategoryId || undefined,
+                      subCategoryId: amcSubcategoryId || undefined,
                       quantity: 1
                     };
                   });

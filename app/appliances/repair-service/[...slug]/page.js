@@ -6,6 +6,7 @@ import { BookingModal } from '@/components/appliances/booking-flow/BookingModal'
 import { ChevronLeft, ChevronRight, Wrench, Cpu, MapPin, CheckCircle2, Search, Loader2, Monitor, Tv, Wind, Waves, Droplets, Flame, Microwave, Snowflake, Star, Clock, Shield, Award, ThumbsUp, ArrowRight } from 'lucide-react';
 import { fetchCategories, fetchAllBrands, fetchServicesByBrand, fetchAuthorizedServices, fetchCities } from '@/lib/api';
 import { resolveBookNowNavigationPath } from '@/lib/applianceRepairSlugs';
+import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
 
 // ─── Step indicator ─────────────────────────────────────────────────────────
 function StepBar({ step }) {
@@ -255,7 +256,7 @@ function ServiceStep({ services, onSelect, loading }) {
 }
 
 // ─── Service Detail Step ─────────────────────────────────────────────────────
-function ServiceDetailStep({ service, onBook, loading }) {
+function ServiceDetailStep({ service, category, onBook, loading }) {
   if (loading || !service) return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="h-64 rounded-3xl bg-gray-100 animate-pulse" />
@@ -286,9 +287,16 @@ function ServiceDetailStep({ service, onBook, loading }) {
             </div>
             
             <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4">{service.serviceName}</h2>
-            <p className="text-gray-500 leading-relaxed mb-8">
+            <p className="text-gray-500 leading-relaxed mb-6">
               {service.description || `Professional ${service.serviceName?.toLowerCase()} at your doorstep. We provide high-quality repair and maintenance services with genuine spare parts and expert technicians.`}
             </p>
+
+            <AmcServiceCoverage
+              serviceId={service._id || service.id}
+              categoryId={category?._id || category?.id || service.bookingCategoryId}
+              subcategoryId={service.subcategoryId || service.subCategoryId || service.bookingSubcategoryId}
+              className="mb-6"
+            />
 
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 border border-gray-100">
@@ -616,6 +624,7 @@ function SelectServiceCatchAllContent() {
           {step === 4 && (
             <ServiceDetailStep
                service={selectedService}
+               category={selectedCategory}
                onBook={handleBookNow}
                loading={svcLoading}
             />

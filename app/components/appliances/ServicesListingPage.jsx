@@ -654,7 +654,6 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       >
                         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full md:h-[185px]">
                           <div className="flex flex-col md:flex-row h-full">
-                            {/* Image */}
                             <div className="relative w-full md:w-44 h-36 md:h-full overflow-hidden flex-shrink-0">
                               <img loading="lazy" decoding="async"
                                 src={center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
@@ -663,13 +662,11 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                               />
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a1a1a]/60" />
 
-                              {/* Open Badge */}
                               <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-[11px] font-semibold">
                                 Open Now
                               </div>
                             </div>
 
-                            {/* Content */}
                             <div className="flex-1 p-3 md:p-3.5 flex flex-col justify-between min-w-0">
                               <h4 className="text-base md:text-lg leading-tight font-bold text-gray-900 mb-1 group-hover:text-[#037166] transition-colors line-clamp-2 break-words">
                                 {center.business_name || center.name}
@@ -679,7 +676,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                 {center.address}
                               </p>
 
-                              <div className="flex flex-wrap items-center gap-2 mb-2.5">
+                              <div className="flex flex-wrap items-center gap-1 mb-2.5">
                                 <div className="flex items-center gap-1">
                                   <Star className="w-3.5 h-3.5 fill-[#04a99d] text-[#04a99d]" />
                                   <span className="text-gray-900 font-semibold text-sm">{center.rating}</span>

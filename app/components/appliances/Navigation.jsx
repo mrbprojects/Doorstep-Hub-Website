@@ -79,7 +79,8 @@ export function Navigation() {
   const links = [
     { name: 'Home', href: '/' },
     { name: 'Popular Services', href: '/appliances' },
-    { name: 'Nearby Service Centers', href: '/nearby' },
+    // parked like customer app — not using service centers
+    // { name: 'Nearby Service Centers', href: '/nearby' },
     { name: 'Sell Old Things', href: '/selloldthings' }
   ];
 

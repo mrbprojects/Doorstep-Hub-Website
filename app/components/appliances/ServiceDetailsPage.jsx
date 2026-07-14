@@ -10,6 +10,8 @@ import { useLocationContext } from '@/context/LocationContext';
 import { useAuth } from '@/context/AuthContext';
 import DOMPurify from 'dompurify';
 import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
+import { useAmcEligibility } from '@/hooks/useAmcEligibility';
+import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -247,6 +249,30 @@ export function ServiceDetailsPage({
     }
   }, [loading, serviceDetails, router]);
 
+  const amcServiceId =
+    serviceDetails?.storeData?._id ||
+    serviceDetails?.storeData?.id ||
+    serviceId ||
+    null;
+  const amcCategoryId =
+    serviceDetails?.storeData?.categoryId?._id ||
+    serviceDetails?.storeData?.categoryId ||
+    serviceDetails?.storeData?.bookingCategoryId ||
+    null;
+  const amcSubcategoryId =
+    subCategoryId ||
+    serviceDetails?.storeData?.subCategoryId?._id ||
+    serviceDetails?.storeData?.subCategoryId ||
+    serviceDetails?.storeData?.subcategoryId ||
+    null;
+
+  const { loading: amcLoading, eligibility: amcEligibility } = useAmcEligibility({
+    serviceId: amcServiceId,
+    categoryId: amcCategoryId,
+    subcategoryId: amcSubcategoryId,
+    enabled: Boolean(amcServiceId),
+  });
+
   // Prepare images list (banner + service images)
   const images = serviceDetails?.storeData ? [
     serviceDetails.storeData.bannerImage ? `https://api.doorstephub.com/${serviceDetails.storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
@@ -480,9 +506,14 @@ export function ServiceDetailsPage({
 
 
       {/* ── MOBILE: Sticky bottom Book-Now bar (hidden on lg+) ─────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden px-4 pb-4 pt-2"
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden px-4 pb-4 pt-2 space-y-2"
         style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.98) 60%, rgba(255,255,255,0))' }}
       >
+        <AmcCoverageBanner
+          eligibility={amcEligibility}
+          loading={amcLoading}
+          compact
+        />
         <button
           onClick={handleBookNow}
           className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-base shadow-2xl shadow-[#037166]/40 flex items-center justify-center gap-2 active:scale-95 transition-transform"
@@ -892,7 +923,11 @@ export function ServiceDetailsPage({
               </div>
 
               {/* Desktop Book Now button (hidden on mobile — use sticky bar) */}
-              <div className="hidden lg:block">
+              <div className="hidden lg:block space-y-3">
+                <AmcCoverageBanner
+                  eligibility={amcEligibility}
+                  loading={amcLoading}
+                />
                 <motion.button
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}

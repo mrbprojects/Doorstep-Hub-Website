@@ -236,8 +236,8 @@ export default function AmcPlanDetailPage() {
             <p className="mt-8 text-[11px] font-bold tracking-[0.22em] uppercase text-[#037166]">
               DoorstepHub AMC
             </p>
-            <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
-              <div className="max-w-2xl">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr_240px] lg:grid-cols-[1fr_320px] gap-6 items-center">
+              <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#0f2f2b] leading-[1.05]">
                     {plan.name}
@@ -249,12 +249,12 @@ export default function AmcPlanDetailPage() {
                   ) : null}
                 </div>
                 {plan.description ? (
-                  <p className="mt-4 text-base md:text-lg text-[#3d5f59] leading-relaxed max-w-xl">
+                  <p className="text-base md:text-lg text-[#3d5f59] leading-relaxed max-w-xl">
                     {plan.description}
                   </p>
                 ) : null}
                 {activePurchase?.expireDate ? (
-                  <p className="mt-3 text-sm font-semibold text-emerald-700">
+                  <p className="text-sm font-semibold text-emerald-700">
                     Your plan is active · valid till{' '}
                     {new Date(activePurchase.expireDate).toLocaleDateString('en-IN', {
                       day: 'numeric',
@@ -263,31 +263,44 @@ export default function AmcPlanDetailPage() {
                     })}
                   </p>
                 ) : null}
+
+                <div className="flex flex-wrap items-end gap-6 pt-2">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5f8f89]">
+                      Activation price
+                    </p>
+                    <div className="mt-1 flex items-end gap-3">
+                      <span className="text-3xl md:text-4xl font-bold text-[#037166] tracking-tight">
+                        {formatInr(offer)}
+                      </span>
+                      {mrp > offer ? (
+                        <span className="pb-1.5 text-lg text-[#8aa8a3] line-through">
+                          {formatInr(mrp)}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  {save > 0 ? (
+                    <div className="pb-0.5">
+                      <p className="text-sm font-semibold text-[#0f7a4d]">
+                        You save {formatInr(save)}
+                      </p>
+                    </div>
+                  ) : null}
+                  <div className="pb-1 text-sm text-[#5f8f89] flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5" />
+                    <span>Valid {plan.validityDays || 365} days</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="text-left md:text-right">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5f8f89]">
-                  Activation price
-                </p>
-                <div className="mt-1 flex items-end gap-3 md:justify-end">
-                  <span className="text-4xl md:text-5xl font-bold text-[#037166] tracking-tight">
-                    {formatInr(offer)}
-                  </span>
-                  {mrp > offer ? (
-                    <span className="pb-1.5 text-lg text-[#8aa8a3] line-through">
-                      {formatInr(mrp)}
-                    </span>
-                  ) : null}
-                </div>
-                {save > 0 ? (
-                  <p className="mt-1 text-sm font-semibold text-[#0f7a4d]">
-                    You save {formatInr(save)}
-                  </p>
-                ) : null}
-                <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-[#5f8f89]">
-                  <CalendarDays className="w-3.5 h-3.5" />
-                  Valid {plan.validityDays || 365} days from activation
-                </p>
+              {/* Showcase Image */}
+              <div className="w-full h-48 md:h-56 rounded-2xl overflow-hidden relative border border-[#cfe8e3] bg-white shadow-sm flex-shrink-0">
+                <img
+                  src={plan.image ? (plan.image.startsWith('http') ? plan.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${plan.image}`) : 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'}
+                  alt={plan.name}
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           </motion.div>

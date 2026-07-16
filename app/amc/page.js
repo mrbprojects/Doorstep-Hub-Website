@@ -104,7 +104,7 @@ export default function AmcPlansPage() {
           <div className="py-16 text-center text-slate-500">No AMC plans available yet.</div>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan, idx) => {
             const mrp = Number(plan.mrp ?? plan.price ?? 0);
             const offer = Number(plan.offerPrice || 0);
@@ -120,86 +120,97 @@ export default function AmcPlansPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.08, duration: 0.4 }}
-                className={`relative rounded-3xl bg-white/90 p-6 md:p-8 shadow-[0_20px_60px_-40px_rgba(3,113,102,0.45)] ${
+                className={`relative rounded-3xl bg-white/90 overflow-hidden shadow-[0_20px_60px_-40px_rgba(3,113,102,0.45)] flex flex-col ${
                   isActive
                     ? 'border-2 border-emerald-500 ring-1 ring-emerald-200'
                     : 'border border-[#cfe8e3]'
                 }`}
               >
                 {isActive ? (
-                  <span className="absolute top-5 right-5 inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                  <span className="absolute top-5 right-5 inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white z-10">
                     Active
                   </span>
                 ) : plan.badge ? (
-                  <span className="absolute top-5 right-5 inline-flex items-center gap-1 rounded-full bg-[#037166] px-3 py-1 text-xs font-semibold text-white">
+                  <span className="absolute top-5 right-5 inline-flex items-center gap-1 rounded-full bg-[#037166] px-3 py-1 text-xs font-semibold text-white z-10">
                     <Sparkles className="w-3.5 h-3.5" />
                     {plan.badge}
                   </span>
                 ) : null}
 
-                <h2 className="text-2xl font-bold text-slate-900 pr-24">{plan.name}</h2>
-                {plan.tagline || plan.description ? (
-                  <p className="mt-2 text-slate-600 line-clamp-2">
-                    {plan.tagline || plan.description}
-                  </p>
-                ) : null}
-
-                {isActive && purchase?.expireDate ? (
-                  <p className="mt-2 text-sm font-semibold text-emerald-700">
-                    Valid till {formatDate(purchase.expireDate)}
-                  </p>
-                ) : null}
-
-                <div className="mt-5 flex items-end gap-3">
-                  <span className="text-3xl font-bold text-[#037166]">{formatInr(offer)}</span>
-                  {mrp > offer ? (
-                    <span className="pb-1 text-slate-400 line-through">{formatInr(mrp)}</span>
-                  ) : null}
+                {/* Banner Image */}
+                <div className="w-full h-44 bg-slate-50 relative border-b border-[#cfe8e3] flex-shrink-0">
+                  <img
+                    src={plan.image ? (plan.image.startsWith('http') ? plan.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${plan.image}`) : 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'}
+                    alt={plan.name}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-                {save > 0 ? (
-                  <p className="mt-1 text-sm font-medium text-emerald-700">You save {formatInr(save)}</p>
-                ) : null}
-                <p className="mt-1 text-sm text-slate-500">
-                  Validity: {plan.validityDays || 365} days
-                </p>
 
-                <ul className="mt-6 space-y-2.5">
-                  {(isActive && purchase?.entitlements?.length
-                    ? purchase.entitlements
-                    : plan.benefits || []
-                  )
-                    .slice(0, 6)
-                    .map((b) => (
-                      <li key={b._id || b.key || b.title} className="flex gap-2 text-sm text-slate-700">
-                        <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#04a99d]" />
-                        <span>
-                          <span className="font-medium">{b.title}</span>
-                          {b.unlimited
-                            ? ' — Unlimited'
-                            : isActive && b.remainingQty != null && b.totalQty != null
-                              ? ` — ${b.remainingQty}/${b.totalQty} left`
-                              : b.quantityPerYear || b.quantity
-                                ? ` — ${b.quantityPerYear || b.quantity} included`
-                                : ''}
-                        </span>
-                      </li>
-                    ))}
-                </ul>
+                <div className="p-5 md:p-6 flex-grow flex flex-col">
+                  <h2 className="text-xl font-bold text-slate-900 line-clamp-1">{plan.name}</h2>
+                  {plan.tagline || plan.description ? (
+                    <p className="mt-2 text-sm text-slate-500 line-clamp-2">
+                      {plan.tagline || plan.description}
+                    </p>
+                  ) : null}
 
-                {plan.notes ? (
-                  <p className="mt-4 text-xs text-slate-500">{plan.notes}</p>
-                ) : null}
+                  {isActive && purchase?.expireDate ? (
+                    <p className="mt-2 text-sm font-semibold text-emerald-700">
+                      Valid till {formatDate(purchase.expireDate)}
+                    </p>
+                  ) : null}
 
-                <Link
-                  href={`/amc/${plan.slug}`}
-                  className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
-                    isActive
-                      ? 'bg-emerald-600 hover:bg-emerald-700'
-                      : 'bg-[#037166] hover:bg-[#025951]'
-                  }`}
-                >
-                  {isActive ? 'View active plan' : 'View details & enquire'}
-                </Link>
+                  <div className="mt-5 flex items-end gap-3">
+                    <span className="text-3xl font-bold text-[#037166]">{formatInr(offer)}</span>
+                    {mrp > offer ? (
+                      <span className="pb-1 text-slate-400 line-through">{formatInr(mrp)}</span>
+                    ) : null}
+                  </div>
+                  {save > 0 ? (
+                    <p className="mt-1 text-sm font-medium text-emerald-700">You save {formatInr(save)}</p>
+                  ) : null}
+                  <p className="mt-1 text-sm text-slate-500">
+                    Validity: {plan.validityDays || 365} days
+                  </p>
+
+                  <ul className="mt-6 space-y-2.5 flex-grow">
+                    {(isActive && purchase?.entitlements?.length
+                      ? purchase.entitlements
+                      : plan.benefits || []
+                    )
+                      .slice(0, 6)
+                      .map((b) => (
+                        <li key={b._id || b.key || b.title} className="flex gap-2 text-sm text-slate-700">
+                          <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#04a99d]" />
+                          <span>
+                            <span className="font-medium">{b.title}</span>
+                            {b.unlimited
+                              ? ' — Unlimited'
+                              : isActive && b.remainingQty != null && b.totalQty != null
+                                ? ` — ${b.remainingQty}/${b.totalQty} left`
+                                : b.quantityPerYear || b.quantity
+                                  ? ` — ${b.quantityPerYear || b.quantity} included`
+                                  : ''}
+                          </span>
+                        </li>
+                      ))}
+                  </ul>
+
+                  {plan.notes ? (
+                    <p className="mt-4 text-xs text-slate-500">{plan.notes}</p>
+                  ) : null}
+
+                  <Link
+                    href={`/amc/${plan.slug}`}
+                    className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                      isActive
+                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                        : 'bg-[#037166] hover:bg-[#025951]'
+                    }`}
+                  >
+                    {isActive ? 'View active plan' : 'View details & enquire'}
+                  </Link>
+                </div>
               </motion.article>
             );
           })}

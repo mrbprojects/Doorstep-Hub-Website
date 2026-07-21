@@ -11,6 +11,7 @@ import {
     Trash2,
     LogOut,
     ChevronRight,
+    Gift,
 } from 'lucide-react';
 import { useProviderAuth } from '@/context/ProviderAuthContext';
 
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
     { href: '/partner/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
     { href: '/partner/dashboard/kyc', label: 'KYC', icon: ShieldCheck },
     { href: '/partner/dashboard/subscription', label: 'Subscription', icon: CreditCard },
+    { href: '/partner/dashboard/amc-referral', label: 'AMC Referral & Earn', icon: Gift },
     { href: '/partner/dashboard/profile', label: 'My Profile', icon: User },
     { href: '/partner/dashboard/support', label: 'Vendor Support', icon: Headphones },
     { href: '/partner/dashboard/deletion', label: 'Account Deletion', icon: Trash2 },

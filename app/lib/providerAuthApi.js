@@ -497,3 +497,37 @@ export async function getMyProviderCategories(token) {
     headers: headers(token, false),
   });
 }
+
+export async function getAmcReferralConfig(token) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.doorstephub.com/v1/dhubApi";
+  const response = await fetch(`${baseUrl}/app/amc-referral/config`, {
+    method: "GET",
+    headers: headers(token, false),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload?.message || "Failed to load AMC referral config");
+  return payload;
+}
+
+export async function sendAmcReferral(token, customerId) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.doorstephub.com/v1/dhubApi";
+  const response = await fetch(`${baseUrl}/app/amc-referral/send`, {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({ customerId }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload?.message || "Failed to send AMC referral");
+  return payload;
+}
+
+export async function getMyAmcReferrals(token) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.doorstephub.com/v1/dhubApi";
+  const response = await fetch(`${baseUrl}/app/amc-referral/my-referrals`, {
+    method: "GET",
+    headers: headers(token, false),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload?.message || "Failed to load referrals list");
+  return payload;
+}

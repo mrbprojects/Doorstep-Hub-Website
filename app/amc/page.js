@@ -33,6 +33,20 @@ export default function AmcPlansPage() {
     .slice(-10);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref') || params.get('referralCode');
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+
+      if (isMobile && ref) {
+        // Attempt to launch the installed Doorstep Hub Customer App directly to AMC plans
+        const appDeepLink = `doorstephub://amc?ref=${encodeURIComponent(ref)}`;
+        window.location.href = appDeepLink;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     if (authLoading) return undefined;
     if (isAuthenticated && !userId && !phone) return undefined;
 

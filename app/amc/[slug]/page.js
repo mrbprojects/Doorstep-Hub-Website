@@ -43,6 +43,8 @@ export default function AmcPlanDetailPage() {
   const [submitMsg, setSubmitMsg] = useState({ type: '', text: '' });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [activePurchase, setActivePurchase] = useState(null);
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [userAnswers, setUserAnswers] = useState({});
 
   const userId = user?._id || user?.id || null;
   const phone = String(user?.phone || user?.mobile || '')
@@ -122,6 +124,28 @@ export default function AmcPlanDetailPage() {
     );
   }, [plan]);
 
+  const effectiveQuestions = useMemo(() => {
+    if (Array.isArray(plan?.questions) && plan.questions.length > 0) {
+      return plan.questions;
+    }
+    return [
+      {
+        _id: 'default_q1',
+        questionText: 'What type / model is your appliance or machine?',
+        options: ['Top Load / Single Door', 'Front Load / Double Door', 'Semi-Automatic / Side-by-Side', 'Fully Automatic / Inverter'],
+        allowOther: true,
+        required: true,
+      },
+      {
+        _id: 'default_q2',
+        questionText: 'What is the brand / make of your appliance?',
+        options: ['LG', 'Samsung', 'Whirlpool', 'Godrej'],
+        allowOther: true,
+        required: true,
+      },
+    ];
+  }, [plan?.questions]);
+
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -130,8 +154,8 @@ export default function AmcPlanDetailPage() {
     }));
   };
 
-  const onActivate = async (e) => {
-    e.preventDefault();
+  const onActivate = async (e, passedAnswers) => {
+    if (e) e.preventDefault();
     setSubmitMsg({ type: '', text: '' });
     const name = form.name.trim();
     const phoneDigits = String(form.phone || '').replace(/\D/g, '').slice(-10);
@@ -151,6 +175,13 @@ export default function AmcPlanDetailPage() {
       });
       return;
     }
+
+    const questions = effectiveQuestions;
+    if (questions.length > 0 && !passedAnswers) {
+      setShowQuestionnaire(true);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const json = await initiateAmcPayment(
@@ -163,6 +194,7 @@ export default function AmcPlanDetailPage() {
           city: form.city.trim(),
           message: form.message.trim(),
           userId: user?._id || user?.id || undefined,
+          answers: passedAnswers || [],
         },
         token
       );
@@ -186,6 +218,37 @@ export default function AmcPlanDetailPage() {
       });
       setSubmitting(false);
     }
+  };
+
+  const handleQuestionnaireSubmit = () => {
+    const questions = effectiveQuestions;
+    const formattedAnswers = [];
+
+    for (let idx = 0; idx < questions.length; idx++) {
+      const q = questions[idx];
+      const ans = userAnswers[idx];
+      const sel = ans?.selectedOption || '';
+      const custom = (ans?.customAnswer || '').trim();
+
+      if (!sel) {
+        alert(`Please answer Question ${idx + 1}: "${q.questionText}"`);
+        return;
+      }
+      if (sel === 'Other' && !custom) {
+        alert(`Please specify custom details for Question ${idx + 1}`);
+        return;
+      }
+
+      formattedAnswers.push({
+        questionId: q._id,
+        questionText: q.questionText,
+        selectedOption: sel,
+        customAnswer: sel === 'Other' ? custom : '',
+      });
+    }
+
+    setShowQuestionnaire(false);
+    onActivate(null, formattedAnswers);
   };
 
   if (loading) {
@@ -535,22 +598,27 @@ export default function AmcPlanDetailPage() {
                     </p>
                   ) : null}
 
-                  <label className="flex items-start gap-2 cursor-pointer select-none pt-0.5">
+                  <label className={`flex items-start gap-2 cursor-pointer select-none p-2 rounded-lg transition ${submitMsg.type === 'error' && !acceptedTerms ? 'bg-red-50 border border-red-300' : ''}`}>
                     <input
                       type="checkbox"
                       checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
-                      className="mt-0.5 h-3.5 w-3.5 rounded border-[#b7d4ce] text-[#037166] focus:ring-[#037166]"
+                      onChange={(e) => {
+                        setAcceptedTerms(e.target.checked);
+                        if (e.target.checked && submitMsg.text.includes('Terms')) {
+                          setSubmitMsg({ type: '', text: '' });
+                        }
+                      }}
+                      className="mt-0.5 h-4 w-4 rounded border-[#b7d4ce] text-[#037166] focus:ring-[#037166]"
                     />
                     <span className="text-[12px] leading-snug text-[#3d5f59]">
-                      I agree to the Terms &amp; Conditions for this AMC plan.
+                      I agree to the <span className="font-bold underline text-[#037166]">Terms &amp; Conditions</span> for this AMC plan <span className="text-red-500 font-bold">*</span>
                     </span>
                   </label>
 
                   {submitMsg.text ? (
                     <p
-                      className={`text-xs ${
-                        submitMsg.type === 'success' ? 'text-emerald-700' : 'text-red-600'
+                      className={`text-xs font-semibold p-2.5 rounded-lg ${
+                        submitMsg.type === 'success' ? 'text-emerald-700 bg-emerald-50' : 'text-red-600 bg-red-50 border border-red-200'
                       }`}
                     >
                       {submitMsg.text}
@@ -561,7 +629,7 @@ export default function AmcPlanDetailPage() {
                 <div className="shrink-0 border-t border-[#e8f1ef] bg-white px-5 py-3">
                   <button
                     type="submit"
-                    disabled={submitting || !acceptedTerms}
+                    disabled={submitting}
                     className="w-full rounded-lg bg-[#037166] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#025951] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting
@@ -580,6 +648,101 @@ export default function AmcPlanDetailPage() {
           </motion.aside>
         </div>
       </div>
+
+      {showQuestionnaire && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Plan Questionnaire</h3>
+                <p className="text-xs text-slate-500 mt-1">Please answer to help us customize your AMC service</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuestionnaire(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-5 pr-1">
+              {effectiveQuestions.map((q, idx) => {
+                const currentAns = userAnswers[idx] || { selectedOption: '', customAnswer: '' };
+                const opts = [...(q.options || []).filter(Boolean), 'Other'];
+
+                return (
+                  <div key={q._id || idx} className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                    <p className="font-bold text-slate-900 text-sm mb-3">
+                      {idx + 1}. {q.questionText}
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {opts.map((opt) => {
+                        const isSelected = currentAns.selectedOption === opt;
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() =>
+                              setUserAnswers((prev) => ({
+                                ...prev,
+                                [idx]: { ...prev[idx], selectedOption: opt },
+                              }))
+                            }
+                            className={`flex items-center gap-2.5 rounded-lg border p-2.5 text-left text-xs font-semibold transition ${
+                              isSelected
+                                ? 'border-[#037166] bg-[#037166]/10 text-[#037166]'
+                                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                            }`}
+                          >
+                            <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-[#037166] bg-[#037166]' : 'border-slate-300'}`}>
+                              {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                            </div>
+                            <span>{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {currentAns.selectedOption === 'Other' && (
+                      <input
+                        type="text"
+                        placeholder="Please specify custom details..."
+                        value={currentAns.customAnswer}
+                        onChange={(e) =>
+                          setUserAnswers((prev) => ({
+                            ...prev,
+                            [idx]: { ...prev[idx], customAnswer: e.target.value },
+                          }))
+                        }
+                        className="mt-3 w-full rounded-lg border border-[#037166] bg-white px-3 py-2 text-xs text-slate-900 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#037166]/20"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-slate-100 pt-4 mt-4 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowQuestionnaire(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleQuestionnaireSubmit}
+                className="rounded-xl bg-[#037166] px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-[#025c53]"
+              >
+                Submit &amp; Proceed to Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

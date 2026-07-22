@@ -46,6 +46,21 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
+  openGraph: {
+    title: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
+    description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.',
+    url: 'https://doorstephub.com',
+    siteName: 'Doorstep Hub',
+    images: [
+      {
+        url: 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png',
+        width: 1200,
+        height: 630,
+        alt: 'Doorstep Hub Services',
+      },
+    ],
+    type: 'website',
+  },
   other: {
     copyright: 'https://doorstephub.com/',
     contact: '+91 8886688666',

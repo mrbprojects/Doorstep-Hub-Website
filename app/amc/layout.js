@@ -2,11 +2,11 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export const metadata = {
-  title: 'Annual Maintenance Care (AMC) Plans | Doorstep Hub',
-  description: 'Subscribe to Annual Maintenance Care (AMC) for your home appliances & electronics. Get covered doorstep service visits at ₹0 fee.',
+  title: 'Doorstep Hub AMC Plans for Home Appliances & Electronics',
+  description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub AMC plans. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
   openGraph: {
-    title: 'Doorstep Hub Annual Maintenance Care (AMC)',
-    description: 'Subscribe to Annual Maintenance Care for your home appliances. Get covered doorstep service visits at ₹0 fee.',
+    title: 'Doorstep Hub AMC Plans for Home Appliances & Electronics',
+    description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub AMC plans. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
     url: 'https://doorstephub.com/amc',
     siteName: 'Doorstep Hub',
     images: [
@@ -21,8 +21,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Doorstep Hub Annual Maintenance Care (AMC)',
-    description: 'Subscribe to Annual Maintenance Care for your home appliances. Get covered doorstep service visits at ₹0 fee.',
+    title: 'Doorstep Hub AMC Plans for Home Appliances & Electronics',
+    description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub AMC plans. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
     images: ['https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png'],
   },
 };

@@ -27,6 +27,15 @@ function getFallbackMetadata(path) {
         keywords: ['home services', 'doorstep repair', 'appliance repair', 'spa home services', 'pandits online', 'pg hostels']
     };
 
+    // AMC Services Fallback
+    if (normalizedPath.startsWith('/amc')) {
+        return {
+            title: 'Doorstep Hub AMC Plans for Home Appliances & Electronics',
+            description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub AMC plans. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
+            keywords: ['amc', 'annual maintenance contract', 'doorstep hub amc', 'appliance amc']
+        };
+    }
+
     // 1. Spa & Salon Services
     if (normalizedPath.startsWith('/spa-salon/')) {
         const subPath = normalizedPath.replace('/spa-salon/', '');
@@ -208,6 +217,10 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
     const keywordsRaw = seoData?.keywords || defaultFallback?.keywords || generatedFallback.keywords;
     const keywords = Array.isArray(keywordsRaw) ? keywordsRaw.join(', ') : String(keywordsRaw || '');
 
+    const imageUrl = (cleanPath.startsWith('/amc') || seoData?.image)
+        ? (seoData?.image || 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png')
+        : 'https://doorstephub.com/d-hub-logo.png';
+
     return {
         title,
         description,
@@ -222,10 +235,10 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             siteName: 'Doorstep Hub',
             images: [
                 {
-                    url: 'https://doorstephub.com/d-hub-logo.png',
-                    width: 512,
-                    height: 512,
-                    alt: 'Doorstep Hub Logo',
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: title,
                 },
             ],
             locale: 'en_IN',
@@ -235,7 +248,7 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             card: 'summary_large_image',
             title,
             description,
-            images: ['https://doorstephub.com/d-hub-logo.png'],
+            images: [imageUrl],
         },
         robots: {
             index: true,

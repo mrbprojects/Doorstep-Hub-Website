@@ -427,10 +427,10 @@ export function Footer({ theme = {} }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              {/* Logo + About side by side */}
-              <div className="flex flex-col sm:flex-row items-start gap-3 mb-6">
-                {/* Logo - increased size */}
-                <div className="relative w-36 h-20 flex-shrink-0 overflow-hidden">
+              {/* Logo + About text stacked below */}
+              <div className="flex flex-col items-start gap-3 mb-6">
+                {/* Logo */}
+                <div className="relative w-36 h-16 flex-shrink-0 overflow-hidden">
                   <Image
                     src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
                     alt={globalSettings?.applicationName || "Doorstep Hub"}
@@ -440,8 +440,8 @@ export function Footer({ theme = {} }) {
                     onClick={() => router.push('/')}
                   />
                 </div>
-                {/* About text */}
-                <p className={`${t.textMuted} leading-relaxed max-w-sm text-sm text-justify`}>
+                {/* About text below logo */}
+                <p className={`${t.textMuted} leading-relaxed max-w-sm text-sm`}>
                   {globalSettings?.aboutus
                     ? globalSettings.aboutus.trim().replace(/^<p>/i, '').replace(/<\/p>$/i, '').trim()
                     : "Your trusted partner for all home service needs. Connecting you with verified professionals for quick, reliable, and affordable solutions."}

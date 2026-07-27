@@ -19,7 +19,7 @@ function slugToTitle(slug) {
 // Generates highly optimized fallback tags for different business verticals
 function getFallbackMetadata(path) {
     const normalizedPath = path.toLowerCase().replace(/\/$/, '');
-    
+
     // Default site fallback
     const defaultMeta = {
         title: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
@@ -30,8 +30,8 @@ function getFallbackMetadata(path) {
     // AMC Services Fallback
     if (normalizedPath.startsWith('/amc')) {
         return {
-            title: 'Doorstep Hub AMC Plans for Home Appliances & Electronics',
-            description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub AMC plans. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
+            title: 'Doorstep Hub Book AMC Services for Home Appliances & Electronics',
+            description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub Book AMC Services. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
             keywords: ['amc', 'annual maintenance contract', 'doorstep hub amc', 'appliance amc']
         };
     }
@@ -156,7 +156,7 @@ function getFallbackMetadata(path) {
 export async function getSEOMetadata(rawPath, defaultFallback = null) {
     const cleanPath = (rawPath || '/').split('?')[0].replace(/\/$/, '') || '/';
     const canonicalUrl = `${BASE_URL}${cleanPath === '/' ? '' : cleanPath}`;
-    
+
     let seoData = null;
 
     try {
@@ -206,12 +206,12 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
 
     // Determine fallback values
     const generatedFallback = getFallbackMetadata(cleanPath);
-    const title = seoData?.title && seoData.title !== 'Doorstep Hub | One-Stop Home & Lifestyle Services in India' 
-        ? seoData.title 
+    const title = seoData?.title && seoData.title !== 'Doorstep Hub | One-Stop Home & Lifestyle Services in India'
+        ? seoData.title
         : (defaultFallback?.title || generatedFallback.title);
-        
+
     const description = seoData?.description && seoData.description !== 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.'
-        ? seoData.description 
+        ? seoData.description
         : (defaultFallback?.description || generatedFallback.description);
 
     const keywordsRaw = seoData?.keywords || defaultFallback?.keywords || generatedFallback.keywords;

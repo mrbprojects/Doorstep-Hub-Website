@@ -267,7 +267,7 @@ export default function AmcPlanDetailPage() {
       <main className="min-h-[70vh] flex flex-col items-center justify-center gap-4 px-4 bg-[#f3faf8]">
         <p className="text-red-600 text-center max-w-md">{error || 'Plan not found'}</p>
         <Link href="/amc" className="text-[#037166] font-semibold underline underline-offset-4">
-          Back to AMC plans
+          Back to Book AMC Services
         </Link>
       </main>
     );
@@ -293,7 +293,7 @@ export default function AmcPlanDetailPage() {
               className="inline-flex items-center gap-2 text-sm font-medium text-[#025951]/80 hover:text-[#037166] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              All AMC plans
+              All Book AMC Services
             </Link>
 
             <p className="mt-8 text-[11px] font-bold tracking-[0.22em] uppercase text-[#037166]">
@@ -470,10 +470,10 @@ export default function AmcPlanDetailPage() {
                       You already availed this AMC
                       {activePurchase.expireDate
                         ? ` · valid till ${new Date(activePurchase.expireDate).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}`
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}`
                         : ''}
                       .
                     </p>
@@ -502,146 +502,145 @@ export default function AmcPlanDetailPage() {
                 </>
               ) : (
                 <>
-              <div className="shrink-0 bg-gradient-to-br from-[#037166] to-[#025951] px-5 py-3.5 text-white">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
-                      Book Now
-                    </p>
-                    <p className="mt-0.5 text-sm text-white/85 truncate max-w-[220px]">
-                      {plan.name}
-                    </p>
-                  </div>
-                  <p className="text-2xl font-bold tracking-tight">{formatInr(offer)}</p>
-                </div>
-              </div>
-
-              <form
-                onSubmit={onActivate}
-                className="flex min-h-0 flex-1 flex-col"
-              >
-                <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-5 py-4">
-                  {isAuthenticated ? (
-                    <p className="text-[11px] leading-snug text-[#025951] bg-[#e8f6f3] border border-[#b7d4ce] rounded-md px-2.5 py-2">
-                      Details are filled from your login. You can edit them if this AMC is for someone else.
-                    </p>
-                  ) : (
-                    <p className="text-[11px] leading-snug text-[#7a5a12] bg-[#fff8e8] border border-[#f0e0b8] rounded-md px-2.5 py-2">
-                      Log in to save this AMC to your account. You can still enter details for the person using the plan.
-                    </p>
-                  )}
-
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3d5f59]">
-                    Customer details for this AMC
-                  </p>
-
-                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                    <label className="block sm:col-span-2">
-                      <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
-                        Full name *
-                      </span>
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={onChange}
-                        className={fieldClass}
-                        autoComplete="name"
-                        placeholder="Who will use this AMC?"
-                      />
-                    </label>
-                    <label className="block sm:col-span-2">
-                      <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
-                        Phone *
-                      </span>
-                      <input
-                        name="phone"
-                        value={form.phone}
-                        onChange={onChange}
-                        className={fieldClass}
-                        autoComplete="tel"
-                        inputMode="numeric"
-                        maxLength={10}
-                        placeholder="10-digit mobile"
-                      />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
-                        Email
-                      </span>
-                      <input
-                        name="email"
-                        type="email"
-                        value={form.email}
-                        onChange={onChange}
-                        className={fieldClass}
-                        autoComplete="email"
-                      />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
-                        City
-                      </span>
-                      <input
-                        name="city"
-                        value={form.city}
-                        onChange={onChange}
-                        className={fieldClass}
-                        autoComplete="address-level2"
-                      />
-                    </label>
+                  <div className="shrink-0 bg-gradient-to-br from-[#037166] to-[#025951] px-5 py-3.5 text-white">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
+                          Book Now
+                        </p>
+                        <p className="mt-0.5 text-sm text-white/85 truncate max-w-[220px]">
+                          {plan.name}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-bold tracking-tight">{formatInr(offer)}</p>
+                    </div>
                   </div>
 
-                  {plan.notes ? (
-                    <p className="text-[11px] text-[#5f8f89] leading-snug">
-                      <span className="font-semibold text-[#3d5f59]">Note: </span>
-                      {plan.notes}
-                    </p>
-                  ) : null}
-
-                  <label className={`flex items-start gap-2 cursor-pointer select-none p-2 rounded-lg transition ${submitMsg.type === 'error' && !acceptedTerms ? 'bg-red-50 border border-red-300' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={acceptedTerms}
-                      onChange={(e) => {
-                        setAcceptedTerms(e.target.checked);
-                        if (e.target.checked && submitMsg.text.includes('Terms')) {
-                          setSubmitMsg({ type: '', text: '' });
-                        }
-                      }}
-                      className="mt-0.5 h-4 w-4 rounded border-[#b7d4ce] text-[#037166] focus:ring-[#037166]"
-                    />
-                    <span className="text-[12px] leading-snug text-[#3d5f59]">
-                      I agree to the <span className="font-bold underline text-[#037166]">Terms &amp; Conditions</span> for this AMC plan <span className="text-red-500 font-bold">*</span>
-                    </span>
-                  </label>
-
-                  {submitMsg.text ? (
-                    <p
-                      className={`text-xs font-semibold p-2.5 rounded-lg ${
-                        submitMsg.type === 'success' ? 'text-emerald-700 bg-emerald-50' : 'text-red-600 bg-red-50 border border-red-200'
-                      }`}
-                    >
-                      {submitMsg.text}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="shrink-0 border-t border-[#e8f1ef] bg-white px-5 py-3">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full rounded-lg bg-[#037166] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#025951] disabled:opacity-50 disabled:cursor-not-allowed"
+                  <form
+                    onSubmit={onActivate}
+                    className="flex min-h-0 flex-1 flex-col"
                   >
-                    {submitting
-                      ? 'Redirecting…'
-                      : `Book Now · ${formatInr(offer)}`}
-                  </button>
-                  <p className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-[#7a9a94]">
-                    <Lock className="w-3 h-3" />
-                    Secure payment via Easebuzz
-                  </p>
-                </div>
-              </form>
+                    <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-5 py-4">
+                      {isAuthenticated ? (
+                        <p className="text-[11px] leading-snug text-[#025951] bg-[#e8f6f3] border border-[#b7d4ce] rounded-md px-2.5 py-2">
+                          Details are filled from your login. You can edit them if this AMC is for someone else.
+                        </p>
+                      ) : (
+                        <p className="text-[11px] leading-snug text-[#7a5a12] bg-[#fff8e8] border border-[#f0e0b8] rounded-md px-2.5 py-2">
+                          Log in to save this AMC to your account. You can still enter details for the person using the plan.
+                        </p>
+                      )}
+
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3d5f59]">
+                        Customer details for this AMC
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                        <label className="block sm:col-span-2">
+                          <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
+                            Full name *
+                          </span>
+                          <input
+                            name="name"
+                            value={form.name}
+                            onChange={onChange}
+                            className={fieldClass}
+                            autoComplete="name"
+                            placeholder="Who will use this AMC?"
+                          />
+                        </label>
+                        <label className="block sm:col-span-2">
+                          <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
+                            Phone *
+                          </span>
+                          <input
+                            name="phone"
+                            value={form.phone}
+                            onChange={onChange}
+                            className={fieldClass}
+                            autoComplete="tel"
+                            inputMode="numeric"
+                            maxLength={10}
+                            placeholder="10-digit mobile"
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
+                            Email
+                          </span>
+                          <input
+                            name="email"
+                            type="email"
+                            value={form.email}
+                            onChange={onChange}
+                            className={fieldClass}
+                            autoComplete="email"
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="mb-1 block text-[11px] font-semibold text-[#3d5f59]">
+                            City
+                          </span>
+                          <input
+                            name="city"
+                            value={form.city}
+                            onChange={onChange}
+                            className={fieldClass}
+                            autoComplete="address-level2"
+                          />
+                        </label>
+                      </div>
+
+                      {plan.notes ? (
+                        <p className="text-[11px] text-[#5f8f89] leading-snug">
+                          <span className="font-semibold text-[#3d5f59]">Note: </span>
+                          {plan.notes}
+                        </p>
+                      ) : null}
+
+                      <label className={`flex items-start gap-2 cursor-pointer select-none p-2 rounded-lg transition ${submitMsg.type === 'error' && !acceptedTerms ? 'bg-red-50 border border-red-300' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={acceptedTerms}
+                          onChange={(e) => {
+                            setAcceptedTerms(e.target.checked);
+                            if (e.target.checked && submitMsg.text.includes('Terms')) {
+                              setSubmitMsg({ type: '', text: '' });
+                            }
+                          }}
+                          className="mt-0.5 h-4 w-4 rounded border-[#b7d4ce] text-[#037166] focus:ring-[#037166]"
+                        />
+                        <span className="text-[12px] leading-snug text-[#3d5f59]">
+                          I agree to the <span className="font-bold underline text-[#037166]">Terms &amp; Conditions</span> for this AMC plan <span className="text-red-500 font-bold">*</span>
+                        </span>
+                      </label>
+
+                      {submitMsg.text ? (
+                        <p
+                          className={`text-xs font-semibold p-2.5 rounded-lg ${submitMsg.type === 'success' ? 'text-emerald-700 bg-emerald-50' : 'text-red-600 bg-red-50 border border-red-200'
+                            }`}
+                        >
+                          {submitMsg.text}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="shrink-0 border-t border-[#e8f1ef] bg-white px-5 py-3">
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="w-full rounded-lg bg-[#037166] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#025951] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {submitting
+                          ? 'Redirecting…'
+                          : `Book Now · ${formatInr(offer)}`}
+                      </button>
+                      <p className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-[#7a9a94]">
+                        <Lock className="w-3 h-3" />
+                        Secure payment via Easebuzz
+                      </p>
+                    </div>
+                  </form>
                 </>
               )}
             </div>
@@ -690,11 +689,10 @@ export default function AmcPlanDetailPage() {
                                 [idx]: { ...prev[idx], selectedOption: opt },
                               }))
                             }
-                            className={`flex items-center gap-2.5 rounded-lg border p-2.5 text-left text-xs font-semibold transition ${
-                              isSelected
+                            className={`flex items-center gap-2.5 rounded-lg border p-2.5 text-left text-xs font-semibold transition ${isSelected
                                 ? 'border-[#037166] bg-[#037166]/10 text-[#037166]'
                                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                            }`}
+                              }`}
                           >
                             <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-[#037166] bg-[#037166]' : 'border-slate-300'}`}>
                               {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}

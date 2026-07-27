@@ -19,7 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 const NAV_ITEMS = [
     { href: '/account', label: 'Dashboard', icon: LayoutDashboard, exact: true },
     { href: '/account/bookings', label: 'My Bookings', icon: CalendarCheck },
-    { href: '/account/amc', label: 'AMC Plans', icon: Shield },
+    { href: '/account/amc', label: 'Book AMC Services', icon: Shield },
     { href: '/account/profile', label: 'Profile', icon: User },
     { href: '/account/wallet', label: 'Wallet', icon: Wallet },
     { href: '/account/refer-earn', label: 'Refer & Earn', icon: Gift },
@@ -68,11 +68,10 @@ export function AccountSidebar({ onNavigate }) {
                                 key={item.href}
                                 href={item.href}
                                 onClick={onNavigate}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                    active
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${active
                                         ? 'bg-[#037166] text-white shadow-md shadow-[#037166]/20'
                                         : 'text-gray-700 hover:bg-[#037166]/5 hover:text-[#037166]'
-                                }`}
+                                    }`}
                             >
                                 <Icon className="w-4 h-4 shrink-0" />
                                 <span className="flex-1">{item.label}</span>

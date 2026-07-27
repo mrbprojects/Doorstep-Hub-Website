@@ -63,7 +63,7 @@ function PaymentResultInner() {
             </Link>
           )}
           <Link href="/amc" className="text-sm font-medium text-[#037166] underline">
-            Browse AMC plans
+            Browse Book AMC Services
           </Link>
         </div>
       </div>

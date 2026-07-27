@@ -19,7 +19,7 @@ const footerLinks = {
     { name: 'Become a Service Partner', href: '/service-partner' },
     { name: 'Partner Dashboard', href: '/partner/dashboard' },
     { name: 'Book Appointment', href: '/book-appointment' },
-    { name: 'AMC Plans', href: '/amc' },
+    { name: 'Book AMC Services', href: '/amc' },
     { name: 'Download Android App', href: '' },
     { name: 'Download iOS App', href: '' },
     { name: 'Download Partner Android App', href: '' },
@@ -238,21 +238,21 @@ export function Footer({ theme = {} }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
- const dynamicQuickLinks = footerLinks.Quicklinks.map(link => {
-  if (link.name === 'Download Android App' && globalSettings?.customerAndroidAppLink) {
-    return { ...link, href: globalSettings.customerAndroidAppLink };
-  }
-  if (link.name === 'Download iOS App' && globalSettings?.customerIosAppLink) {
-    return { ...link, href: globalSettings.customerIosAppLink };
-  }
-  if (link.name === 'Download Partner Android App' && globalSettings?.partnerAndroidAppLink) {
-    return { ...link, href: globalSettings.partnerAndroidAppLink };
-  }
-  if (link.name === 'Download Partner iOS App' && globalSettings?.partnerIosAppLink) {
-    return { ...link, href: globalSettings.partnerIosAppLink };
-  }
-  return link;
-});
+  const dynamicQuickLinks = footerLinks.Quicklinks.map(link => {
+    if (link.name === 'Download Android App' && globalSettings?.customerAndroidAppLink) {
+      return { ...link, href: globalSettings.customerAndroidAppLink };
+    }
+    if (link.name === 'Download iOS App' && globalSettings?.customerIosAppLink) {
+      return { ...link, href: globalSettings.customerIosAppLink };
+    }
+    if (link.name === 'Download Partner Android App' && globalSettings?.partnerAndroidAppLink) {
+      return { ...link, href: globalSettings.partnerAndroidAppLink };
+    }
+    if (link.name === 'Download Partner iOS App' && globalSettings?.partnerIosAppLink) {
+      return { ...link, href: globalSettings.partnerIosAppLink };
+    }
+    return link;
+  });
 
   const dynamicSocialLinks = socialLinks.map(social => {
     const socialLabel = (social.label || '').toLowerCase();
@@ -377,7 +377,7 @@ export function Footer({ theme = {} }) {
                 viewport={{ once: true }}
                 className="space-y-6 transition-all duration-500"
               >
-                <Link 
+                <Link
                   href={getProfessionalServiceHomeLink(serviceName)}
                   className={`text-xl font-bold mb-6 bg-gradient-to-r ${t.headingGradient} bg-clip-text text-transparent w-fit block ${t.textLinkHover}`}
                 >
@@ -501,54 +501,50 @@ export function Footer({ theme = {} }) {
             </ul>
           </motion.div> */}
 
-          {/* Services Links */}
-          {(() => {
-            const chunks = [];
-            for (let i = 0; i < dynamicQuickLinks.length; i += 5) {
-              chunks.push(dynamicQuickLinks.slice(i, i + 5));
-            }
-            return chunks.map((chunk, idx) => (
-              <motion.div
-                key={`quick-links-${idx}`}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 + (idx * 0.1) }}
-              >
-                <h4 className={`${t.textMain} font-bold mb-4 whitespace-nowrap`}>
-                  {idx === 0 ? 'Quick Links' : '\u00A0'}
-                </h4>
-                <ul className="space-y-3">
-                  {chunk.map((link) => (
-                    <li key={link.name}>
-                      <a
-                        href={link.href}
-                        target={link.href?.startsWith('http') ? "_blank" : undefined}
-                        rel={link.href?.startsWith('http') ? "noopener noreferrer" : undefined}
-                        className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block whitespace-nowrap`}
-                      >
-                        {link.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ));
-          })()}
-
+          {/* Quick Links Column */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 + (Math.ceil(dynamicQuickLinks.length / 4) * 0.1) }}
+            transition={{ delay: 0.2 }}
           >
-            <h4 className={`${t.textMain} font-bold mb-4`}>More Info</h4>
+            <h4 className={`${t.textMain} font-bold mb-4 whitespace-nowrap`}>Quick Links</h4>
+            <ul className="space-y-3">
+              {[
+                { name: 'About Us', href: '/about-us' },
+                { name: 'Contact Us', href: '/contact-us' },
+                { name: 'Careers', href: '/careers' },
+                { name: 'Become a Service Partner', href: '/service-partner' },
+                { name: 'Partner Dashboard', href: '/partner/dashboard' },
+                { name: 'Book Appointment', href: '/book-appointment' },
+                { name: 'Book AMC Services', href: '/amc' },
+              ].map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block whitespace-nowrap`}
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* More Info Column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <h4 className={`${t.textMain} font-bold mb-4 whitespace-nowrap`}>More Info</h4>
             <ul className="space-y-3">
               {footerLinks.Moreinfo.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block`}
+                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block whitespace-nowrap`}
                   >
                     {link.name}
                   </a>
@@ -558,12 +554,36 @@ export function Footer({ theme = {} }) {
                 <li>
                   <a
                     href="/appliance-repair-services"
-                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block`}
+                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block whitespace-nowrap`}
                   >
                     All Services
                   </a>
                 </li>
               )}
+            </ul>
+          </motion.div>
+
+          {/* Download Apps Column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
+            <h4 className={`${t.textMain} font-bold mb-4 whitespace-nowrap`}>Download Apps</h4>
+            <ul className="space-y-3">
+              {dynamicQuickLinks.filter(l => l.name.startsWith('Download')).map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href || '#'}
+                    target={link.href?.startsWith('http') ? "_blank" : undefined}
+                    rel={link.href?.startsWith('http') ? "noopener noreferrer" : undefined}
+                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block whitespace-nowrap`}
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
             </ul>
           </motion.div>
         </div>
@@ -589,41 +609,41 @@ export function Footer({ theme = {} }) {
           >
             {dynamicSocialLinks.map((social, index) => (
 
-              social.href && ( 
-              <div key={social.label} className="relative group">
-                <AnimatePresence>
-                  {hoveredSocial === social.label && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                      className={`absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-3 py-1.5 ${t.tooltipBg} border rounded-lg ${t.tooltipText} text-xs font-medium whitespace-nowrap shadow-xl flex flex-col items-center z-50 pointer-events-none`}
-                    >
-                      {social.label}
-                      {/* Tooltip Arrow/Tail */}
-                      <div className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 ${t.tooltipBg} border-r border-b rotate-45`} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <motion.a
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  onMouseEnter={() => setHoveredSocial(social.label)}
-                  onMouseLeave={() => setHoveredSocial(null)}
-                  whileHover={{ scale: 1.1, y: -3 }}
-                  whileTap={{ scale: 0.9 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`w-10 h-10 rounded-full ${t.socialBg} ${t.socialBorder} border flex items-center justify-center ${t.textMuted} hover:text-white transition-all`}
-                  style={{ "--hover-from": t.accentColor }}
-                >
-                  <social.icon className="w-5 h-5" />
-                </motion.a>
-              </div>
+              social.href && (
+                <div key={social.label} className="relative group">
+                  <AnimatePresence>
+                    {hoveredSocial === social.label && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                        className={`absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-3 py-1.5 ${t.tooltipBg} border rounded-lg ${t.tooltipText} text-xs font-medium whitespace-nowrap shadow-xl flex flex-col items-center z-50 pointer-events-none`}
+                      >
+                        {social.label}
+                        {/* Tooltip Arrow/Tail */}
+                        <div className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 ${t.tooltipBg} border-r border-b rotate-45`} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <motion.a
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    onMouseEnter={() => setHoveredSocial(social.label)}
+                    onMouseLeave={() => setHoveredSocial(null)}
+                    whileHover={{ scale: 1.1, y: -3 }}
+                    whileTap={{ scale: 0.9 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`w-10 h-10 rounded-full ${t.socialBg} ${t.socialBorder} border flex items-center justify-center ${t.textMuted} hover:bg-[#037166] hover:text-white hover:border-[#037166] transition-all shadow-sm hover:shadow-md`}
+                    style={{ "--hover-from": t.accentColor }}
+                  >
+                    <social.icon className="w-5 h-5" />
+                  </motion.a>
+                </div>
               )
             ))}
           </motion.div>

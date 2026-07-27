@@ -39,7 +39,7 @@ export default function AmcPlansPage() {
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
 
       if (isMobile && ref) {
-        // Attempt to launch the installed Doorstep Hub Customer App directly to AMC plans
+        // Attempt to launch the installed Doorstep Hub Customer App directly to Book AMC Services
         const appDeepLink = `doorstephub://amc?ref=${encodeURIComponent(ref)}`;
         window.location.href = appDeepLink;
       }
@@ -64,7 +64,7 @@ export default function AmcPlansPage() {
           setMyActive(active);
         }
       } catch (e) {
-        if (!cancelled) setError(e?.message || 'Failed to load AMC plans');
+        if (!cancelled) setError(e?.message || 'Failed to load Book AMC Services');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -109,13 +109,13 @@ export default function AmcPlansPage() {
 
       <section className="max-w-6xl mx-auto px-4 pb-20">
         {loading && (
-          <div className="py-20 text-center text-[#037166] font-medium">Loading AMC plans…</div>
+          <div className="py-20 text-center text-[#037166] font-medium">Loading Book AMC Services…</div>
         )}
         {!loading && error && (
           <div className="py-16 text-center text-red-600 max-w-xl mx-auto">{error}</div>
         )}
         {!loading && !error && plans.length === 0 && (
-          <div className="py-16 text-center text-slate-500">No AMC plans available yet.</div>
+          <div className="py-16 text-center text-slate-500">No Book AMC Services available yet.</div>
         )}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -134,11 +134,10 @@ export default function AmcPlansPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.08, duration: 0.4 }}
-                className={`relative rounded-3xl bg-white/90 overflow-hidden shadow-[0_20px_60px_-40px_rgba(3,113,102,0.45)] flex flex-col ${
-                  isActive
-                    ? 'border-2 border-emerald-500 ring-1 ring-emerald-200'
-                    : 'border border-[#cfe8e3]'
-                }`}
+                className={`relative rounded-3xl bg-white/90 overflow-hidden shadow-[0_20px_60px_-40px_rgba(3,113,102,0.45)] flex flex-col ${isActive
+                  ? 'border-2 border-emerald-500 ring-1 ring-emerald-200'
+                  : 'border border-[#cfe8e3]'
+                  }`}
               >
                 {isActive ? (
                   <span className="absolute top-5 right-5 inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white z-10">
@@ -216,13 +215,12 @@ export default function AmcPlansPage() {
 
                   <Link
                     href={`/amc/${plan.slug}`}
-                    className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
-                      isActive
-                        ? 'bg-emerald-600 hover:bg-emerald-700'
-                        : 'bg-[#037166] hover:bg-[#025951]'
-                    }`}
+                    className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${isActive
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : 'bg-[#037166] hover:bg-[#025951]'
+                      }`}
                   >
-                    {isActive ? 'View active plan' : 'View details & enquire'}
+                    {isActive ? 'See Details' : 'View details & enquire'}
                   </Link>
                 </div>
               </motion.article>

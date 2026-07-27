@@ -25,7 +25,7 @@ export async function fetchAmcPlans() {
   if (!API_BASE) throw new Error('API base URL is not configured');
   const res = await fetch(`${API_BASE}/app/amc/plans`, { cache: 'no-store' });
   const json = await parseJsonResponse(res);
-  if (!json?.success) throw new Error(json?.message || 'Failed to load AMC plans');
+  if (!json?.success) throw new Error(json?.message || 'Failed to load Book AMC Services');
   return Array.isArray(json.plans) ? json.plans : Array.isArray(json.data) ? json.data : [];
 }
 

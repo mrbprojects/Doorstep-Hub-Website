@@ -53,7 +53,7 @@ export default function AccountAmcPage() {
           setError('');
         }
       } catch (e) {
-        if (!cancelled) setError(e?.message || 'Failed to load AMC plans');
+        if (!cancelled) setError(e?.message || 'Failed to load Book AMC Services');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -85,7 +85,7 @@ export default function AccountAmcPage() {
             <Shield className="w-5 h-5 text-[#037166]" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-1">AMC Plans</h1>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-1">Book AMC Services</h1>
             <p className="text-gray-600 text-sm md:text-base">
               {hasAnyActive
                 ? 'Your active AMC is highlighted below. Browse other plans anytime.'
@@ -118,7 +118,7 @@ export default function AccountAmcPage() {
         <div className="bg-white border border-red-100 rounded-2xl p-6 text-red-600 text-sm">{error}</div>
       ) : plans.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
-          No AMC plans available yet.
+          No Book AMC Services available yet.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -133,11 +133,10 @@ export default function AccountAmcPage() {
               <Link
                 key={plan._id || plan.slug}
                 href={`/amc/${plan.slug}`}
-                className={`relative bg-white rounded-2xl overflow-hidden transition-all flex flex-col ${
-                  isActive
-                    ? 'border-2 border-emerald-500 shadow-md shadow-emerald-100/80 ring-1 ring-emerald-200'
-                    : 'border border-gray-200 hover:border-[#037166]/30 hover:shadow-md'
-                }`}
+                className={`relative bg-white rounded-2xl overflow-hidden transition-all flex flex-col ${isActive
+                  ? 'border-2 border-emerald-500 shadow-md shadow-emerald-100/80 ring-1 ring-emerald-200'
+                  : 'border border-gray-200 hover:border-[#037166]/30 hover:shadow-md'
+                  }`}
               >
                 {isActive ? (
                   <span className="absolute right-4 top-4 inline-flex items-center rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white z-10">
@@ -207,11 +206,10 @@ export default function AccountAmcPage() {
                   </ul>
 
                   <p
-                    className={`mt-4 text-sm font-semibold ${
-                      isActive ? 'text-emerald-700' : 'text-[#037166]'
-                    }`}
+                    className={`mt-4 text-sm font-semibold ${isActive ? 'text-emerald-700' : 'text-[#037166]'
+                      }`}
                   >
-                    {isActive ? 'View active plan →' : 'View details →'}
+                    {isActive ? 'See Details →' : 'View details →'}
                   </p>
                 </div>
               </Link>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, DollarSign, Filter, X, Zap, RotateCcw, ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
+import DOMPurify from 'dompurify';
 
 export function ServicesListingPage({ category, subCategory, subCategoryId, childCategoryId, slug }) {
   const router = useRouter();
@@ -363,10 +364,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               <span className="text-white font-medium">{pageTitle}</span>
             </div>
 
-            <h1 className="text-3xl md:text-xl font-bold !text-white mb-2">
+            <h1 className="text-3xl md:text-3xl font-bold !text-white mb-2" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
               {activeSubcatData?.title || activeSubcatData?.name || customTitle || pageTitle}
             </h1>
-            <p className="!text-white/90">
+            <p className="!text-white/90" style={{ color: 'rgba(255, 255, 255, 0.9)', WebkitTextFillColor: 'rgba(255, 255, 255, 0.9)' }}>
               {activeSubcatData?.description || customDescription || (categoryName ? `${categoryName} • Professional Services` : 'Professional Services')}
             </p>
           </motion.div>
@@ -400,7 +401,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               <button
                 onClick={() => setActiveTab('services')}
                 className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'services'
-                    ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                    ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
                   }`}
               >
@@ -409,7 +410,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               <button
                 onClick={() => setActiveTab('centers')}
                 className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'centers'
-                    ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                    ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
                   }`}
               >
@@ -600,12 +601,19 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             <h4 className="text-[14px] font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-2">
                               {service.name}
                             </h4>
-                            <p className="text-white/60 text-[11px] mb-4 line-clamp-2">{stripHtml(service.description)}</p>
+                            <div
+                              className="text-white/80 text-[11px] mb-4 line-clamp-2 rich-text-content"
+                              dangerouslySetInnerHTML={{
+                                __html: typeof window !== 'undefined' ? DOMPurify.sanitize(service.description || '', {
+                                  ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style']
+                                }) : service.description || '',
+                              }}
+                            />
 
                             {/* CTA Button */}
                             <button
                               onClick={() => router.push(`/${service.slug}`)}
-                              className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
+                              className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#e89117] to-[#00796B] text-white font-medium hover:shadow-lg hover:shadow-[#00796B]/30 transition-all"
                             >
                               Book Now
                             </button>
@@ -682,12 +690,16 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                   <span className="text-gray-900 font-semibold text-sm">{center.rating}</span>
                                   <span className="text-gray-600 text-xs">({center.totalOrders} orders)</span>
                                 </div>
-                                {(center.distance || center.distanceInKm || center.distanceKm) && (
-                                  <div className="flex items-center gap-1 text-gray-600 text-xs md:text-sm">
-                                    <MapPin className="w-3.5 h-3.5 text-gray-500" />
-                                    {parseFloat(center.distance || center.distanceInKm || center.distanceKm).toFixed(1)} km away
-                                  </div>
-                                )}
+                                {(() => {
+                                  const distVal = center.distance || center.distanceInKm || center.distanceKm;
+                                  const parsedDist = parseFloat(distVal);
+                                  return !isNaN(parsedDist) && parsedDist > 0 ? (
+                                    <div className="flex items-center gap-1 text-gray-600 text-xs md:text-sm">
+                                      <MapPin className="w-3.5 h-3.5 text-gray-500" />
+                                      {parsedDist.toFixed(1)} km away
+                                    </div>
+                                  ) : null;
+                                })()}
                               </div>
 
                               <button
@@ -695,7 +707,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                   e.stopPropagation();
                                   router.push(`/service-list/${center.slug || center._id}`);
                                 }}
-                                className="w-fit px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-xs font-semibold hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
+                                className="w-fit px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#e89117] to-[#00796B] text-white text-xs font-semibold hover:shadow-lg hover:shadow-[#00796B]/30 transition-all"
                               >
                                 Book Service
                               </button>

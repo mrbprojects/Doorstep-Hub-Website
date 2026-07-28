@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { sendAccountDeletionOtp, submitAccountDeletionRequest } from '@/lib/accountApi';
 
 const inputCls =
-    'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] transition-all';
+    'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-[#123F4A] text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] transition-all';
 const labelCls = 'block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide';
 
 export default function AccountDeletionPage() {
@@ -225,13 +225,12 @@ export default function AccountDeletionPage() {
                         </div>
 
                         {showOtpSection && (
-                            <div id="deletion-otp-section" className={`rounded-xl border p-4 space-y-3 transition-colors ${
-                                showVerifyWarning && !isOtpVerified
+                            <div id="deletion-otp-section" className={`rounded-xl border p-4 space-y-3 transition-colors ${showVerifyWarning && !isOtpVerified
                                     ? 'border-amber-300 bg-amber-50'
                                     : isOtpVerified
-                                    ? 'border-green-200 bg-green-50'
-                                    : 'border-gray-200 bg-gray-50'
-                            }`}>
+                                        ? 'border-green-200 bg-green-50'
+                                        : 'border-gray-200 bg-gray-50'
+                                }`}>
                                 <label className={labelCls}>Enter WhatsApp OTP *</label>
                                 <div className="flex gap-2 flex-wrap">
                                     {otpValues.map((digit, index) => (
@@ -244,7 +243,7 @@ export default function AccountDeletionPage() {
                                             value={digit}
                                             onChange={(e) => handleOtpChange(index, e.target.value)}
                                             onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                                            className="w-11 h-11 text-center text-lg font-bold rounded-lg bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#037166]/40"
+                                            className="w-11 h-11 text-center text-lg font-bold rounded-lg bg-white border border-[#123F4A] focus:outline-none focus:ring-2 focus:ring-[#037166]/40"
                                         />
                                     ))}
                                 </div>

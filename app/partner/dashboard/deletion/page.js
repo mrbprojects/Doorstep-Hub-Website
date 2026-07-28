@@ -127,7 +127,7 @@ export default function PartnerDeletionPage() {
 
                         <div>
                             <label className="block text-xs font-bold text-gray-600 mb-2 uppercase">Additional Comments</label>
-                            <textarea rows={4} className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 text-sm resize-none" placeholder="Optional details..." value={comment} onChange={(e) => setComment(e.target.value)} />
+                            <textarea rows={4} className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-[#123F4A] text-sm resize-none" placeholder="Optional details..." value={comment} onChange={(e) => setComment(e.target.value)} />
                         </div>
 
                         <button type="submit" disabled={loading} className="w-full py-4 bg-gradient-to-r from-red-600 to-red-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">

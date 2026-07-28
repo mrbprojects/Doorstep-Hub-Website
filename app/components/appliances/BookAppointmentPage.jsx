@@ -658,7 +658,7 @@ export function BookAppointmentPage() {
                                     onChange={e => setAgreed(e.target.checked)}
                                     className="sr-only"
                                 />
-                                <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${agreed ? 'bg-[#065f46] border-[#065f46]' : 'border-gray-300 group-hover:border-[#065f46]'}`}>
+                                <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${agreed ? 'bg-[#065f46] border-[#065f46]' : 'border-[#123F4A] group-hover:border-[#065f46]'}`}>
                                     {agreed && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                                 </div>
                             </div>
@@ -816,11 +816,10 @@ export function BookAppointmentPage() {
                                 )}
 
                                 <div className="absolute left-0 flex items-center">
-                                    <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-xl transition-all duration-500 ${
-                                        isActiveOrCompleted
+                                    <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-xl transition-all duration-500 ${isActiveOrCompleted
                                             ? "bg-white text-[#037166] shadow-[#037166]/10 scale-110"
                                             : "bg-white text-gray-300 border border-gray-100 opacity-50"
-                                    }`}>
+                                        }`}>
                                         <step.icon className={`w-7 h-7 ${isActiveOrCompleted ? 'text-[#037166]' : 'text-gray-300'}`} strokeWidth={isActiveOrCompleted ? 2.5 : 2} />
                                     </div>
                                 </div>

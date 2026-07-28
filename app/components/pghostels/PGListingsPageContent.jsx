@@ -159,7 +159,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
 
     const mapApiResponseToListing = (item) => {
         if (!item) return null;
-        
+
         const str = (val, fallback = '') => {
             if (!val) return fallback;
             if (typeof val === 'string') return val.trim() || fallback;
@@ -264,7 +264,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
         const fetchListings = async () => {
             setLoading(true);
             try {
-                let lat = searchParams.get('lat') || "17.4483"; 
+                let lat = searchParams.get('lat') || "17.4483";
                 let lng = searchParams.get('lng') || "78.3915";
 
                 if (lng && lng.includes(' ')) lng = lng.split(' ')[0];
@@ -464,11 +464,10 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                         if (cat.slug) updateFilter('categorySlug', cat.slug);
                                     }
                                 }}
-                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
-                                    expandedCategory === (cat.slug || cat._id) || (cat.slug || cat._id) === (searchParams.get('categorySlug') || searchParams.get('categoryId'))
-                                    ? 'bg-[#037166]/10 text-[#037166] font-bold border border-[#037166]/20 shadow-sm' 
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-[#037166] border border-transparent'
-                                }`}
+                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${expandedCategory === (cat.slug || cat._id) || (cat.slug || cat._id) === (searchParams.get('categorySlug') || searchParams.get('categoryId'))
+                                        ? 'bg-[#037166]/10 text-[#037166] font-bold border border-[#037166]/20 shadow-sm'
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-[#037166] border border-transparent'
+                                    }`}
                             >
                                 <span className="truncate">{cat.name}</span>
                                 {expandedCategory === cat._id ? (
@@ -499,11 +498,10 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                                         currentParams.set('categoryName', cat.name);
                                                         router.push(`${pathname}?${currentParams.toString()}`);
                                                     }}
-                                                    className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${
-                                                        (searchParams.get('subcategorySlug') || searchParams.get('subcategoryId')) === (sub.slug || sub._id)
-                                                        ? 'bg-[#037166] text-white shadow-md shadow-[#037166]/20'
-                                                        : 'text-gray-500 hover:text-[#037166] hover:bg-[#037166]/5'
-                                                    }`}
+                                                    className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all truncate ${(searchParams.get('subcategorySlug') || searchParams.get('subcategoryId')) === (sub.slug || sub._id)
+                                                            ? 'bg-[#037166] text-white shadow-md shadow-[#037166]/20'
+                                                            : 'text-gray-500 hover:text-[#037166] hover:bg-[#037166]/5'
+                                                        }`}
                                                 >
                                                     {sub.name}
                                                 </button>
@@ -543,11 +541,10 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                 updateFilter('budget', isSelected ? '' : opt.value);
                                 if (!isSelected) setPriceRange(opt.range);
                             }}
-                            className={`px-2 py-2.5 rounded-xl text-[10px] font-bold text-center border-2 transition-all ${
-                                searchParams.get('budget') === opt.value
-                                ? 'bg-[#037166] text-white border-[#037166] shadow-md'
-                                : 'bg-white border-gray-50 text-gray-500 hover:border-[#037166]/20'
-                            }`}
+                            className={`px-2 py-2.5 rounded-xl text-[10px] font-bold text-center border-2 transition-all ${searchParams.get('budget') === opt.value
+                                    ? 'bg-[#037166] text-white border-[#037166] shadow-md'
+                                    : 'bg-white border-gray-50 text-gray-500 hover:border-[#037166]/20'
+                                }`}
                         >
                             {opt.label}
                         </button>
@@ -583,11 +580,10 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                         <button
                             key={rating}
                             onClick={() => setMinRating(rating === minRating ? 0 : rating)}
-                            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl transition-all border-2 ${
-                                minRating === rating
-                                ? 'bg-[#037166] border-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                                : 'bg-white border-gray-100 text-gray-500 hover:border-[#037166]/20 hover:text-[#037166]'
-                            }`}
+                            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl transition-all border-2 ${minRating === rating
+                                    ? 'bg-[#037166] border-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                                    : 'bg-white border-gray-100 text-gray-500 hover:border-[#037166]/20 hover:text-[#037166]'
+                                }`}
                         >
                             <Star className={`w-3.5 h-3.5 ${minRating === rating ? 'fill-white text-white' : 'fill-[#F59E0B] text-[#F59E0B]'}`} />
                             <span className="text-xs font-black">{rating}+</span>
@@ -608,11 +604,10 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                         <button
                             key={opt.value}
                             onClick={() => updateFilter('roomType', opt.value === searchParams.get('roomType') ? '' : opt.value)}
-                            className={`text-left px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${
-                                searchParams.get('roomType') === opt.value
-                                ? 'bg-[#037166] border-[#037166] text-white shadow-sm'
-                                : 'bg-white border-gray-50 text-gray-600 hover:border-[#037166]/20'
-                            }`}
+                            className={`text-left px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${searchParams.get('roomType') === opt.value
+                                    ? 'bg-[#037166] border-[#037166] text-white shadow-sm'
+                                    : 'bg-white border-gray-50 text-gray-600 hover:border-[#037166]/20'
+                                }`}
                         >
                             {opt.label}
                         </button>
@@ -620,7 +615,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                 </div>
             </div>
 
-            <button 
+            <button
                 className="w-full mt-4 bg-white border border-gray-200 text-gray-400 hover:text-[#037166] hover:border-[#037166]/30 h-11 text-[11px] font-black rounded-xl gap-2 transition-all flex items-center justify-center shadow-sm"
                 onClick={() => {
                     setPriceRange([0, 50000]);
@@ -812,7 +807,7 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
                 />
             )}
-            <div className="bg-[#E2E6E6]/80 border-b border-gray-300 pt-16 sm:pt-20 pb-10 sm:pb-12 relative overflow-hidden">
+            <div className="bg-[#E2E6E6]/80 border-b border-[#123F4A] pt-16 sm:pt-20 pb-10 sm:pb-12 relative overflow-hidden">
                 <div className="absolute inset-0 bg-grid-gray-200/50 [mask-image:linear-gradient(0deg,white,transparent)]" />
                 <div className="max-w-7xl mx-auto px-4 relative z-10">
                     <button

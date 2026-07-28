@@ -20,7 +20,7 @@ const RELATED_OPTIONS = [
 ];
 
 const inputCls =
-    'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] transition-all';
+    'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-[#123F4A] text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] transition-all';
 const labelCls = 'block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide';
 
 export default function CreateSupportTicketPage() {
@@ -127,7 +127,7 @@ export default function CreateSupportTicketPage() {
 
                         <div className="hidden md:block">
                             <label className={labelCls}>Attachment (optional)</label>
-                            <label className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gray-50 border border-dashed border-gray-300 cursor-pointer hover:border-[#037166]/40 transition-all min-h-[52px]">
+                            <label className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gray-50 border border-dashed border-[#123F4A] cursor-pointer hover:border-[#037166]/40 transition-all min-h-[52px]">
                                 <Upload className="w-4 h-4 text-[#037166] shrink-0" />
                                 <span className="text-sm text-gray-600 truncate">
                                     {attachment ? attachment.name : 'Upload image or PDF'}
@@ -157,7 +157,7 @@ export default function CreateSupportTicketPage() {
 
                         <div className="md:hidden">
                             <label className={labelCls}>Attachment (optional)</label>
-                            <label className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gray-50 border border-dashed border-gray-300 cursor-pointer hover:border-[#037166]/40 transition-all">
+                            <label className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gray-50 border border-dashed border-[#123F4A] cursor-pointer hover:border-[#037166]/40 transition-all">
                                 <Upload className="w-4 h-4 text-[#037166]" />
                                 <span className="text-sm text-gray-600 truncate">
                                     {attachment ? attachment.name : 'Upload image or PDF'}

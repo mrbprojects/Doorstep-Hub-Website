@@ -191,7 +191,7 @@ export default function PartnerSupportDetailPage() {
                 <form onSubmit={handleReply} className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
                     <textarea
                         rows={3}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 text-sm resize-none"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-[#123F4A] text-sm resize-none"
                         placeholder="Type your reply..."
                         value={reply}
                         onChange={(e) => setReply(e.target.value)}

@@ -176,7 +176,7 @@ export function AddressPage({
         const updates = {};
         if (!prev.name) updates.name = user.name || '';
         if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-        
+
         if (Object.keys(updates).length > 0) {
           return { ...prev, ...updates };
         }
@@ -780,7 +780,7 @@ export function AddressPage({
                           placeholder="Full Name"
                           value={newAddress.name}
                           onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
+                          className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
                         />
                         <p className="text-[10px] text-gray-500 px-1 italic">Recipient name for service reference</p>
                       </div>
@@ -789,7 +789,7 @@ export function AddressPage({
                           placeholder="Phone Number"
                           value={newAddress.phone}
                           onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
+                          className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
                         />
                         <p className="text-[10px] text-gray-500 px-1 italic">Contact number for this address</p>
                       </div>
@@ -800,7 +800,7 @@ export function AddressPage({
                         placeholder="Flat / Plot / House No."
                         value={newAddress.flat}
                         onChange={(e) => setNewAddress({ ...newAddress, flat: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all pr-32"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all pr-32"
                       />
                       <button
                         onClick={handleAutoDetect}
@@ -822,7 +822,7 @@ export function AddressPage({
                       placeholder="Area / Locality"
                       value={newAddress.area}
                       onChange={(e) => setNewAddress({ ...newAddress, area: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
+                      className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
                     />
 
                     <div className="grid md:grid-cols-3 gap-4">
@@ -830,19 +830,19 @@ export function AddressPage({
                         placeholder="City"
                         value={newAddress.cityName}
                         onChange={(e) => setNewAddress({ ...newAddress, cityName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
                       />
                       <input
                         placeholder="State"
                         value={newAddress.stateName}
                         onChange={(e) => setNewAddress({ ...newAddress, stateName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
                       />
                       <input
                         placeholder="Postal Code"
                         value={newAddress.postalCode}
                         onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 text-[#0f172a] focus:border-[#037166] transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
                       />
                     </div>
 
@@ -860,7 +860,7 @@ export function AddressPage({
                     <div className="flex gap-3 pt-4">
                       <button
                         onClick={() => setShowAddForm(false)}
-                        className="flex-1 px-6 py-3 rounded-lg border border-gray-300 text-[#334155] hover:bg-gray-50 transition-all"
+                        className="flex-1 px-6 py-3 rounded-lg border border-[#123F4A] text-[#334155] hover:bg-gray-50 transition-all"
                       >
                         Cancel
                       </button>

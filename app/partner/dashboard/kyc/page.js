@@ -13,14 +13,14 @@ import {
 } from '@/lib/providerAuthApi';
 
 const inputCls =
-    'w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166]';
+    'w-full px-4 py-3 rounded-xl bg-gray-50 border border-[#123F4A] text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166]';
 const labelCls = 'block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide';
 
 function DocUpload({ label, name, preview, onChange }) {
     return (
         <div>
             <label className={labelCls}>{label}</label>
-            <label className="block border border-dashed border-gray-300 rounded-xl p-4 cursor-pointer hover:border-[#037166]/40 transition-all bg-gray-50">
+            <label className="block border border-dashed border-[#123F4A] rounded-xl p-4 cursor-pointer hover:border-[#037166]/40 transition-all bg-gray-50">
                 {preview ? (
                     <img src={preview} alt={label} className="w-full h-32 object-contain rounded-lg mb-2" />
                 ) : (

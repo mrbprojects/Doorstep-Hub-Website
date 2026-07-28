@@ -531,8 +531,47 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   );
 
 
-  if (!loading && !centerData) {
-    return <div className="appliance-detail-page min-h-screen bg-white" />;
+  if (loading) {
+    return (
+      <div className="appliance-detail-page min-h-screen pt-24 pb-20 bg-gray-50/30">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back button skeleton */}
+          <div className="h-9 w-20 bg-gray-200 rounded-full animate-pulse mb-6" />
+          {/* Hero skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-[4.5fr_3.8fr_1.7fr] gap-6 mb-8">
+            <div className="h-[250px] rounded-2xl bg-gray-200 animate-pulse" />
+            <div className="h-[250px] rounded-2xl bg-gray-100 animate-pulse" />
+            <div className="h-[250px] rounded-2xl bg-gray-100 animate-pulse" />
+          </div>
+          {/* Content skeleton */}
+          <div className="grid lg:grid-cols-[1fr_360px] gap-8">
+            <div className="space-y-4">
+              <div className="h-10 w-2/3 bg-gray-200 rounded-xl animate-pulse" />
+              <div className="h-4 w-full bg-gray-100 rounded animate-pulse" />
+              <div className="h-4 w-4/5 bg-gray-100 rounded animate-pulse" />
+              {[1,2,3].map(i => (
+                <div key={i} className="h-28 rounded-2xl bg-gray-100 animate-pulse" />
+              ))}
+            </div>
+            <div className="space-y-4">
+              <div className="h-48 rounded-2xl bg-gray-100 animate-pulse" />
+              <div className="h-14 rounded-2xl bg-gray-200 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!centerData) {
+    return (
+      <div className="appliance-detail-page min-h-screen pt-24 pb-20 bg-gray-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 text-lg font-medium">Service center not found.</p>
+          <button onClick={() => router.back()} className="mt-4 px-6 py-2 rounded-full bg-[#037166] text-white font-semibold text-sm hover:bg-[#04a99d] transition-colors">Go Back</button>
+        </div>
+      </div>
+    );
   }
 
   // Generate Schema.org JSON-LD for Local SEO
@@ -688,44 +727,44 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     </span>
                   </div>
 
-                     <div className="flex items-center justify-center gap-3 mt-1">
-                  <a
-                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
-                    title="Get it on Google Play"
-                  >
-                    <img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
-                  </a>
-                  <a
-                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
-                    title="Download on the App Store"
-                  >
-                    <img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
-                  </a>
-                  <a
-                    href={whatsappLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center w-[56px] h-[56px] rounded-full bg-[#25D366] hover:bg-[#20bd5a] transition-all border border-[#1da851]/40 shadow-sm"
-                    title="Chat on WhatsApp"
-                    aria-label="Chat on WhatsApp"
-                  >
-                    <img loading="lazy" decoding="async"
-                      src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                      alt="WhatsApp"
-                      className="w-7 h-7"
-                    />
-                  </a>
-                </div>
+                  <div className="flex items-center justify-center gap-3 mt-1">
+                    <a
+                      href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
+                      title="Get it on Google Play"
+                    >
+                      <img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
+                    </a>
+                    <a
+                      href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
+                      title="Download on the App Store"
+                    >
+                      <img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
+                    </a>
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-[56px] h-[56px] rounded-full bg-[#25D366] hover:bg-[#20bd5a] transition-all border border-[#1da851]/40 shadow-sm"
+                      title="Chat on WhatsApp"
+                      aria-label="Chat on WhatsApp"
+                    >
+                      <img loading="lazy" decoding="async"
+                        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                        alt="WhatsApp"
+                        className="w-7 h-7"
+                      />
+                    </a>
+                  </div>
                 </div>
               </div>
 
-            
+
             </div>
 
             {/* CARD 3: STORE TIMINGS CARD */}
@@ -837,8 +876,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             key={id}
                             onClick={() => handleSubcategoryTabChange(id)}
                             className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${selectedSubcategoryId === id
-                                ? 'bg-[#037166] text-white border-[#037166] shadow-md shadow-[#037166]/20'
-                                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                              ? 'bg-[#037166] text-white border-[#037166] shadow-md shadow-[#037166]/20'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-[#123F4A]'
                               }`}
                           >
                             {subcat.name}
@@ -875,10 +914,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                         {service.image && (
                           <div className="relative w-full sm:w-[30%] h-36 sm:h-auto sm:self-stretch overflow-hidden bg-white">
                             <img loading="lazy" decoding="async"
-                               src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
-                               alt={service.name}
-                               className="w-full h-full object-cover"
-                             />
+                              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
+                              alt={service.name}
+                              className="w-full h-full object-cover"
+                            />
                             {/* Rating Badge */}
                             {service.rating && (
                               <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-white shadow-sm border border-gray-100 flex items-center gap-1">
@@ -1145,11 +1184,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     {faqs.map((faq, index) => (
                       <div
                         key={index}
-                        className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                          faqActiveIndex === index
+                        className={`border rounded-2xl overflow-hidden transition-all duration-300 ${faqActiveIndex === index
                             ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
                             : 'bg-white border-gray-150 hover:border-[#cbd5e1]'
-                        }`}
+                          }`}
                       >
                         <button
                           onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
@@ -1160,9 +1198,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                           </span>
                           <span className="text-[#037166] flex-shrink-0">
                             <svg
-                              className={`w-5 h-5 transition-transform duration-300 ${
-                                faqActiveIndex === index ? 'rotate-180' : ''
-                              }`}
+                              className={`w-5 h-5 transition-transform duration-300 ${faqActiveIndex === index ? 'rotate-180' : ''
+                                }`}
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"

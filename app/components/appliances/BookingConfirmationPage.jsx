@@ -226,7 +226,7 @@ export function BookingConfirmationPage({
       if (pendingDate && dates.some(d => d.value === pendingDate)) {
         setSelectedDate(pendingDate);
         if (pendingTime) {
-           setSelectedTime(pendingTime);
+          setSelectedTime(pendingTime);
         }
       } else {
         const todayValue = dates[0].value;
@@ -522,7 +522,7 @@ export function BookingConfirmationPage({
               animate={{ opacity: 1, y: 0 }}
               className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+              <h4 className="text-3xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-[#04a99d]" />
                 Select Date
               </h4>
@@ -536,7 +536,7 @@ export function BookingConfirmationPage({
                       onClick={() => setSelectedDate(date.value)}
                       className={`p-4 rounded-xl font-medium transition-all ${selectedDate === date.value
                         ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-gray-300'
+                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-[#123F4A]'
                         }`}
                     >
                       {date.label}
@@ -572,7 +572,7 @@ export function BookingConfirmationPage({
                       onClick={() => setSelectedTime(time.value)}
                       className={`p-4 rounded-xl font-medium transition-all ${selectedTime === time.value
                         ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-gray-300'
+                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-[#123F4A]'
                         }`}
                     >
                       {time.label}
@@ -604,7 +604,7 @@ export function BookingConfirmationPage({
                     onClick={() => setTechnicianPreference(option.value)}
                     className={`p-4 rounded-xl font-medium transition-all ${technicianPreference === option.value
                       ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                      : 'bg-white text-[#334155] hover:bg-gray-50 border border-gray-300'
+                      : 'bg-white text-[#334155] hover:bg-gray-50 border border-[#123F4A]'
                       }`}
                   >
                     {option.label}
@@ -641,8 +641,8 @@ export function BookingConfirmationPage({
                     type="button"
                     onClick={() => setPaymentMethod('amc')}
                     className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'amc'
-                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                        : 'bg-white text-[#334155] border-gray-300 hover:bg-gray-50'
+                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                      : 'bg-white text-[#334155] border-[#123F4A] hover:bg-gray-50'
                       }`}
                   >
                     <Shield className={`w-6 h-6 ${paymentMethod === 'amc' ? 'text-white' : 'text-[#037166]'}`} />
@@ -665,8 +665,8 @@ export function BookingConfirmationPage({
                   type="button"
                   onClick={() => setPaymentMethod('online')}
                   className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'online'
-                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                      : 'bg-white text-[#334155] border-gray-300 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                    : 'bg-white text-[#334155] border-[#123F4A] hover:bg-gray-50'
                     }`}
                 >
                   <CreditCard className={`w-6 h-6 ${paymentMethod === 'online' ? 'text-white' : 'text-[#037166]'}`} />
@@ -683,8 +683,8 @@ export function BookingConfirmationPage({
                 <button
                   onClick={() => setPaymentMethod('wallet')}
                   className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'wallet'
-                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                      : 'bg-white text-[#334155] border-gray-300 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
+                    : 'bg-white text-[#334155] border-[#123F4A] hover:bg-gray-50'
                     }`}
                 >
                   <div className="w-6 h-6 flex items-center justify-center">
@@ -697,7 +697,7 @@ export function BookingConfirmationPage({
                         <div className="flex items-center gap-1.5">
                           <span className={`text-[10px] ${paymentMethod === 'wallet' ? 'text-white/90' : 'text-gray-500'}`}>Available Balance:</span>
                           <span className={`text-sm font-black tracking-tight px-2.5 py-0.5 rounded-md border shadow-sm ${paymentMethod === 'wallet'
-                              ? 'bg-white/20 border-white/30 text-white shadow-black/20'
+                            ? 'bg-white/20 border-white/30 text-white shadow-black/20'
                             : 'bg-[#ecf7f5] border-[#a8d8d0] text-[#037166] shadow-black/5'
                             }`}>
                             ₹{Number(walletBalance || 0).toFixed(2)}
@@ -710,8 +710,8 @@ export function BookingConfirmationPage({
                     </p>
                     {/* Referral Information Section */}
                     <div className={`mt-4 p-3 rounded-xl flex gap-3 transition-all ${paymentMethod === 'wallet'
-                        ? 'bg-white/10 border border-white/20'
-                        : 'bg-[#f1faf8] border border-[#cde9e4]'
+                      ? 'bg-white/10 border border-white/20'
+                      : 'bg-[#f1faf8] border border-[#cde9e4]'
                       }`}>
                       <div className={`p-1.5 rounded-lg h-fit ${paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/10'
                         }`}>
@@ -764,14 +764,14 @@ export function BookingConfirmationPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="sticky top-40 p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+              className="sticky top-40 p-5 sm:p-6 rounded-2xl bg-white border border-[#123F4A] shadow-sm"
             >
               <h4 className="text-2xl font-bold text-[#0f172a] mb-4">Booking Summary</h4>
 
               {/* Selected Services Info - No Prices Shown */}
               <div className="space-y-4 mb-6">
                 {cartItems.map((item, idx) => (
-                  <div key={item.id || item._id || idx} className="p-3 rounded-xl bg-[#f8fcfb] border border-[#d8ece8]">
+                  <div key={item.id || item._id || idx} className="p-3 rounded-xl bg-[#f8fcfb] border border-[#123F4A]">
                     <h6 className="text-[#0f172a] font-bold leading-tight mb-1">{item.serviceName || 'Professional Service'}</h6>
                     <div className="flex flex-col gap-1">
                       <p className="text-[#04a99d] text-[10px] font-bold uppercase tracking-widest bg-[#037166]/10 px-2 py-0.5 rounded w-fit">
@@ -793,9 +793,9 @@ export function BookingConfirmationPage({
                 <div className="flex justify-between items-start text-[#334155] text-sm">
                   <div className="flex flex-col">
                     <span>Platform Fee</span>
-                    <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
+                    <span className="text-[#123F4A] text-[14px] font-medium flex items-center gap-1">
                       <CreditCard className="w-3 h-3" />
-                      {amcApplies ? 'covered by AMC' : 'pay online now'}
+                      {amcApplies ? 'covered by AMC' : 'Pay Online Now'}
                     </span>
                   </div>
                   <span className="font-bold text-[#0f172a]">
@@ -813,9 +813,9 @@ export function BookingConfirmationPage({
                 <div className="flex justify-between items-start text-[#334155] text-sm">
                   <div className="flex flex-col">
                     <span>Inspection Fee</span>
-                    <span className="text-[#04a99d] text-[10px] font-medium flex items-center gap-1">
+                    <span className="text-[#123F4A] text-[14px] font-medium flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
-                      {amcApplies ? 'covered by AMC' : 'pay at doorstep'}
+                      {amcApplies ? 'covered by AMC' : 'Pay At Doorstep'}
                     </span>
                   </div>
                   <span className="font-bold text-[#0f172a]">
@@ -878,7 +878,7 @@ export function BookingConfirmationPage({
                 disabled={isConfirming || !selectedDate || !selectedTime}
                 className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all ${isConfirming || !selectedDate || !selectedTime
                   ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-xl shadow-[#037166]/30'
+                  : 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-xl shadow-[#037166]/30'
                   }`}
               >
                 {isConfirming ? (

@@ -93,8 +93,8 @@ export function BookingSteps({
                                 onClick={() => handleStepClick(step)}
                                 disabled={!isClickable}
                                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${status === 'completed' || status === 'active'
-                                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d]'
-                                        : 'bg-white/10'
+                                        ? 'bg-[#D6A21D] shadow-md shadow-[#D6A21D]/30'
+                                        : 'bg-white/15'
                                     } ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'
                                     }`}
                             >
@@ -102,13 +102,13 @@ export function BookingSteps({
                                     <CheckCircle className="w-5 h-5 text-white" />
                                 ) : (
                                     <div
-                                        className={`w-3 h-3 rounded-full ${status === 'active' ? 'bg-white' : 'bg-white/30'
+                                        className={`w-3 h-3 rounded-full ${status === 'active' ? 'bg-white' : 'bg-white/40'
                                             }`}
                                     />
                                 )}
                             </button>
                             <span
-                                className={`text-sm font-medium hidden sm:inline transition-colors ${status === 'active' ? 'text-white' : 'text-white/70'
+                                className={`text-sm font-medium hidden sm:inline transition-colors ${status === 'active' ? 'text-white font-bold' : 'text-white/80'
                                     } ${isClickable ? 'hover:text-white cursor-pointer' : ''}`}
                                 onClick={() => isClickable && handleStepClick(step)}
                             >
@@ -117,9 +117,9 @@ export function BookingSteps({
                         </div>
                         {index < steps.length - 1 && (
                             <div
-                                className={`h-0.5 flex-1 transition-colors ${steps[index + 1] && getStepStatus(steps[index + 1].id) !== 'pending'
-                                        ? 'bg-[#037166]'
-                                        : 'bg-white/10'
+                                className={`h-[2px] flex-1 transition-colors ${status === 'completed' || (steps[index + 1] && getStepStatus(steps[index + 1].id) !== 'pending')
+                                        ? 'bg-[#D6A21D]'
+                                        : 'bg-white/20'
                                     }`}
                             />
                         )}

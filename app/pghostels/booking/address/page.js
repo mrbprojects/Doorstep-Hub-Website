@@ -197,7 +197,7 @@ function PGAddressContent() {
                 const updates = {};
                 if (!prev.name) updates.name = user.name || '';
                 if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-                
+
                 if (Object.keys(updates).length > 0) {
                     return { ...prev, ...updates };
                 }
@@ -399,7 +399,7 @@ function PGAddressContent() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {addresses.length === 0 && !loading && (
-                            <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-xl">
+                            <div className="text-center py-10 border-2 border-dashed border-[#123F4A] rounded-xl">
                                 <p className="text-gray-500">No addresses found. Add one below.</p>
                             </div>
                         )}
@@ -469,7 +469,7 @@ function PGAddressContent() {
                             // Auto-trigger detection
                             setTimeout(() => handleDetectLocation(), 100);
                         }}
-                        className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-500 hover:border-[#037166] hover:text-[#037166] transition-colors"
+                        className="w-full mt-6 py-4 border-2 border-dashed border-[#123F4A] rounded-2xl flex items-center justify-center text-gray-500 hover:border-[#037166] hover:text-[#037166] transition-colors"
                     >
                         <Plus className="w-5 h-5 mr-2" /> Add New Address
                     </motion.button>
@@ -546,16 +546,16 @@ function PGAddressContent() {
 
                                     <div className="grid md:grid-cols-3 gap-4">
                                         <div className="relative">
-                                            <Input 
-                                                className="text-black" 
-                                                placeholder="City" 
-                                                value={newAddress.cityName} 
-                                                onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} 
+                                            <Input
+                                                className="text-black"
+                                                placeholder="City"
+                                                value={newAddress.cityName}
+                                                onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })}
                                             />
                                             {isSearchingCity && (
                                                 <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[#037166]" />
                                             )}
-                                            
+
                                             {/* Suggestions Dropdown */}
                                             {citySuggestions.length > 0 && (
                                                 <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">

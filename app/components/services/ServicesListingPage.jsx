@@ -32,9 +32,11 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
     return (
       <div
-        className="service-listing-rich-text text-white/60 text-[11px] mb-4 line-clamp-2"
+        className="rich-text-content text-white/80 text-[11px] mb-4 line-clamp-2"
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(description),
+          __html: typeof window !== 'undefined' ? DOMPurify.sanitize(description, {
+            ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style']
+          }) : description,
         }}
       />
     );
@@ -222,11 +224,6 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   };
 
 
-  // Local filtering as fallback/additional layer
-  const filteredServices = services.filter(s => (s.rating || 0) >= minRating);
-  const filteredCenters = centers.filter(c => (c.rating || 0) >= minRating);
-
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -259,7 +256,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-white/50 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold !text-white mb-2" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
               {subCategory}
             </h1>
             <p className="text-white/80">{category} • Professional Services</p>
@@ -272,7 +269,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             <button
               onClick={() => setActiveTab('services')}
               className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'services'
-                ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
                 }`}
             >
@@ -281,7 +278,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
             <button
               onClick={() => setActiveTab('centers')}
               className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'centers'
-                ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
+                ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
                 }`}
             >
@@ -547,7 +544,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             {/* CTA Button */}
                             <button
                               onClick={() => router.push(`/appliances/detail/${service._id}?category=${encodeURIComponent(category)}&subCategory=${encodeURIComponent(subCategory)}`)}
-                              className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
+                              className="w-full mt-auto px-4 py-3 rounded-lg bg-gradient-to-r from-[#e89117] to-[#00796B] text-white font-medium hover:shadow-lg hover:shadow-[#00796B]/30 transition-all"
                             >
                               Book Now
                             </button>
@@ -643,12 +640,16 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                   <span className="text-white font-medium">{center.rating}</span>
                                   <span className="text-white/40 text-sm">({center.totalOrders} orders)</span>
                                 </div>
-                                {(center.distance || center.distanceInKm || center.distanceKm) && (
-                                  <div className="flex items-center gap-1 text-white/60 text-sm">
-                                    <MapPin className="w-4 h-4" />
-                                    {parseFloat(center.distance || center.distanceInKm || center.distanceKm).toFixed(1)} km away
-                                  </div>
-                                )}
+                                {(() => {
+                                  const distVal = center.distance || center.distanceInKm || center.distanceKm;
+                                  const parsedDist = parseFloat(distVal);
+                                  return !isNaN(parsedDist) && parsedDist > 0 ? (
+                                    <div className="flex items-center gap-1 text-white/60 text-sm">
+                                      <MapPin className="w-4 h-4" />
+                                      {parsedDist.toFixed(1)} km away
+                                    </div>
+                                  ) : null;
+                                })()}
                                 {/* <div className="text-white/60 text-sm">
                                   Min Fare: ₹{center.minFare}
                                 </div> */}
@@ -664,7 +665,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                   e.stopPropagation();
                                   router.push(`/service-list/${center.slug || center._id}?serviceId=${subCategoryId}`);
                                 }}
-                                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all"
+                                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#e89117] to-[#00796B] text-white font-medium hover:shadow-lg hover:shadow-[#00796B]/30 transition-all"
                               >
                                 Book Service
                               </button>

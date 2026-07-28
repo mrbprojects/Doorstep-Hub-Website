@@ -28,15 +28,27 @@ export function ArticleViewPage({ slug }) {
                     const foundArticle = data.data.find(item => item.slug === slug);
 
                     if (foundArticle) {
+                        const rawDate = foundArticle.createdAt || foundArticle.created_at || foundArticle.date || foundArticle.updatedAt;
+                        let formattedDate = 'Recently Updated';
+                        if (rawDate) {
+                            const parsedDate = new Date(rawDate);
+                            if (!isNaN(parsedDate.getTime())) {
+                                formattedDate = parsedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                            }
+                        }
+
+                        // Prioritize full rich text content saved from CKEditor
+                        const fullContent = foundArticle.content || foundArticle.description || foundArticle.summary || 'No content available.';
+
                         setArticle({
                             id: foundArticle._id,
                             title: foundArticle.title,
                             category: foundArticle.subcategoryId?.name || foundArticle.categoryId?.name || 'General',
-                            readTime: `${foundArticle.readTime} min read`,
+                            readTime: foundArticle.readTime ? `${foundArticle.readTime} min read` : '3 min read',
                             image: foundArticle.coverImage?.url ? encodeURI(`https://api.doorstephub.com${foundArticle.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
-                            content: foundArticle.summary || foundArticle.content || 'No content available.',
-                            author: foundArticle.author || 'Doorstep Hub', // Assuming author field exists or default
-                            date: new Date(foundArticle.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                            content: fullContent,
+                            author: foundArticle.author || 'Doorstep Hub',
+                            date: formattedDate,
                             tags: foundArticle.tags || []
                         });
 
@@ -121,77 +133,78 @@ export function ArticleViewPage({ slug }) {
             {/* Reading Progress Bar - Could be added later */}
 
             {/* Hero Section */}
-            <div className="relative h-[65vh] min-h-[500px] w-full bg-gray-900">
-                <div className="absolute inset-0">
-                    <ImageWithFallback
-                        src={article.image}
-                        alt={article.title}
-                        className="w-full h-full object-cover opacity-60"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                </div>
-
-                <div className="absolute inset-0 flex flex-col justify-end pb-16">
-                    <div className="max-w-5xl mx-auto w-full px-6 lg:px-8">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
+            <div className="relative py-12 lg:py-16 w-full bg-gradient-to-r from-[#123F4A] via-[#0f343d] to-[#037166] text-white">
+                <div className="max-w-7xl mx-auto w-full px-6 lg:px-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="lg:max-w-4xl"
+                    >
+                        <Link
+                            href="/"
+                            className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-6 group bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 w-fit text-sm"
                         >
-                            <Link
-                                href="/"
-                                className="inline-flex items-center gap-2 text-white/90 hover:text-[#037166] transition-colors mb-8 group"
-                            >
-                                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                                <span className="font-medium">Back to Home</span>
-                            </Link>
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                            <span className="font-medium">Back to Home</span>
+                        </Link>
 
-                            <div className="flex flex-wrap items-center gap-4 mb-6">
-                                <span className="px-4 py-1.5 bg-[#037166] text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-lg shadow-[#037166]/20">
-                                    {article.category}
+                        <div className="flex flex-wrap items-center gap-4 mb-4">
+                            <span className="px-4 py-1.5 bg-white/20 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-full border border-white/30">
+                                {article.category}
+                            </span>
+                            <div className="flex items-center gap-4 text-sm text-white/90 font-medium">
+                                <span className="flex items-center gap-1.5">
+                                    <Clock className="w-4 h-4 text-emerald-300" />
+                                    {article.readTime}
                                 </span>
-                                <div className="flex items-center gap-4 text-sm text-white/80 font-medium">
-                                    <span className="flex items-center gap-1.5">
-                                        <Clock className="w-4 h-4" />
-                                        {article.readTime}
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <Calendar className="w-4 h-4" />
-                                        {article.date}
-                                    </span>
-                                </div>
+                                <span className="flex items-center gap-1.5">
+                                    <Calendar className="w-4 h-4 text-emerald-300" />
+                                    {article.date}
+                                </span>
                             </div>
+                        </div>
 
-                            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
-                                {article.title}
-                            </h1>
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+                            {article.title}
+                        </h1>
 
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                                    <User className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-widest text-white/60">Written by</p>
-                                    <p className="text-lg font-bold text-white leading-tight">{article.author}</p>
-                                </div>
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                                <User className="w-5 h-5 text-white" />
                             </div>
-                        </motion.div>
-                    </div>
+                            <div>
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">Written by</p>
+                                <p className="text-base font-bold text-white leading-tight">{article.author}</p>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             </div>
 
             {/* Content Section */}
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 grid grid-cols-1 lg:grid-cols-12 gap-16">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
 
                 {/* Main Content */}
                 <div className="lg:col-span-8">
+                    {/* Featured Article Cover Image — Clear & Fit to Card */}
+                    {article.image && (
+                        <div className="mb-10 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-md bg-slate-50">
+                            <ImageWithFallback
+                                src={article.image}
+                                alt={article.title}
+                                className="w-full h-auto max-h-[460px] object-cover transition-transform duration-500 hover:scale-[1.01]"
+                            />
+                        </div>
+                    )}
+
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.6 }}
-                        className="prose prose-lg max-w-none prose-slate prose-headings:text-gray-900 prose-p:text-gray-600 prose-strong:text-gray-900 prose-a:text-[#037166] prose-img:rounded-3xl"
+                        className="article-ck-content"
                     >
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
+                        <div dangerouslySetInnerHTML={{ __html: typeof window !== 'undefined' ? DOMPurify.sanitize(article.content, { ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style'] }) : article.content }} />
                     </motion.div>
 
                     {/* Share Section */}

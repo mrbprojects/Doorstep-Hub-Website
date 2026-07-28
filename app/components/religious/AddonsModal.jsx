@@ -111,7 +111,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
                                     {error}
                                 </div>
                             ) : addons.length === 0 ? (
-                                <div className="text-center py-12 text-gray-500 bg-[var(--off-white)] rounded-2xl flex flex-col items-center border border-dashed border-gray-300">
+                                <div className="text-center py-12 text-gray-500 bg-[var(--off-white)] rounded-2xl flex flex-col items-center border border-dashed border-[#123F4A]">
                                     <Flower2 className="w-12 h-12 text-gray-300 mb-4" />
                                     <p className="font-medium">No add-ons available for this service.</p>
                                     <p className="text-sm">You can proceed with the standard booking.</p>

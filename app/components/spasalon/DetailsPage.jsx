@@ -320,7 +320,7 @@ export function DetailsPage() {
                                                         </div>
                                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 ${isSelected
                                                             ? 'border-[#C06C84] bg-[#C06C84]'
-                                                            : 'border-gray-300'
+                                                            : 'border-[#123F4A]'
                                                             }`}>
                                                             {isSelected && (
                                                                 <Check className="w-3 h-3 text-white" />
@@ -339,11 +339,10 @@ export function DetailsPage() {
                                                                 e.stopPropagation();
                                                                 togglePackage(pkg);
                                                             }}
-                                                            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                                                isSelected
+                                                            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${isSelected
                                                                     ? 'bg-red-50 text-red-500 border border-red-200 hover:bg-red-500 hover:text-white'
                                                                     : 'bg-[#6d1357] text-white border border-[#6d1357] hover:bg-[#8d1d72]'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {isSelected ? 'Remove' : 'Add'}
                                                         </button>
@@ -429,26 +428,26 @@ export function DetailsPage() {
                 animate={{ y: 0 }}
                 className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl z-50"
             >
-              <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-  {selectedPackages.length > 0 && (
-    <div className="flex flex-col min-w-0">
-      <span className="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wider">
-        Selected Service
-      </span>
+                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+                    {selectedPackages.length > 0 && (
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wider">
+                                Selected Service
+                            </span>
 
-      {/* Package Name */}
-      <span className="text-gray-900 font-bold text-sm md:text-lg truncate max-w-[150px] md:max-w-md">
-        {selectedPackages.length === 1
-          ? selectedPackages[0].name
-          : `${selectedPackages.length} Services`}
-      </span>
+                            {/* Package Name */}
+                            <span className="text-gray-900 font-bold text-sm md:text-lg truncate max-w-[150px] md:max-w-md">
+                                {selectedPackages.length === 1
+                                    ? selectedPackages[0].name
+                                    : `${selectedPackages.length} Services`}
+                            </span>
 
-      {/* Price */}
-      <span className="text-[#6d1357] font-extrabold text-lg md:text-2xl mt-1">
-        ₹{selectedPackages.reduce((sum, pkg) => sum + Number(pkg.price || 0), 0)}
-      </span>
-    </div>
-  )}
+                            {/* Price */}
+                            <span className="text-[#6d1357] font-extrabold text-lg md:text-2xl mt-1">
+                                ₹{selectedPackages.reduce((sum, pkg) => sum + Number(pkg.price || 0), 0)}
+                            </span>
+                        </div>
+                    )}
                     <button
                         onClick={() => {
                             if (selectedPackages.length === 0) {

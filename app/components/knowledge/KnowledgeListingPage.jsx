@@ -23,18 +23,29 @@ export function KnowledgeListingPage() {
                 const data = await response.json();
 
                 if (data.success && data.data) {
-                    const mappedArticles = data.data.map(item => ({
-                        id: item._id,
-                        title: item.title,
-                        category: item.subcategoryId?.name || item.categoryId?.name || item.serviceId?.name || 'General',
-                        readTime: `${item.readTime} min read`,
-                        image: item.coverImage?.url ? encodeURI(`https://api.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
-                        summary: item.summary || item.description?.substring(0, 100) + '...',
-                        author: item.author || 'Doorstep Hub', // Assuming author exists or fallback
-                        date: new Date(item.createdAt).toLocaleDateString(),
-                        slug: item.slug,
-                        isTrending: item.isTrending
-                    }));
+                    const mappedArticles = data.data.map(item => {
+                        const rawDate = item.createdAt || item.created_at || item.date || item.updatedAt;
+                        let formattedDate = 'Recently Updated';
+                        if (rawDate) {
+                            const parsedDate = new Date(rawDate);
+                            if (!isNaN(parsedDate.getTime())) {
+                                formattedDate = parsedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                            }
+                        }
+
+                        return {
+                            id: item._id,
+                            title: item.title,
+                            category: item.subcategoryId?.name || item.categoryId?.name || item.serviceId?.name || 'General',
+                            readTime: item.readTime ? `${item.readTime} min read` : '3 min read',
+                            image: item.coverImage?.url ? encodeURI(`https://api.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
+                            summary: item.summary || item.description?.substring(0, 100) + '...',
+                            author: item.author || 'Doorstep Hub',
+                            date: formattedDate,
+                            slug: item.slug,
+                            isTrending: item.isTrending
+                        };
+                    });
                     setArticles(mappedArticles);
 
                     // Extract unique categories dynamically if needed

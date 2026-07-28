@@ -2,15 +2,15 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { 
-    Gift, 
-    Share2, 
-    TrendingUp, 
-    Users, 
-    Clock, 
-    CheckCircle2, 
-    XCircle, 
-    Loader2, 
+import {
+    Gift,
+    Share2,
+    TrendingUp,
+    Users,
+    Clock,
+    CheckCircle2,
+    XCircle,
+    Loader2,
     AlertTriangle,
     Send,
     Search,
@@ -119,15 +119,15 @@ export default function PartnerAmcReferralPage() {
     const filteredReferrals = useMemo(() => {
         if (!searchQuery.trim()) return referrals;
         const query = searchQuery.toLowerCase();
-        return referrals.filter(r => 
+        return referrals.filter(r =>
             (r.referralCode || '').toLowerCase().includes(query) ||
             (r.customerPhone || '').toLowerCase().includes(query) ||
             (r.customerName || '').toLowerCase().includes(query)
         );
     }, [referrals, searchQuery]);
 
-    const commissionDisplay = config.commissionType === 'percentage' 
-        ? `${config.commissionValue}%` 
+    const commissionDisplay = config.commissionType === 'percentage'
+        ? `${config.commissionValue}%`
         : `₹${config.commissionValue}`;
 
     return (
@@ -157,13 +157,13 @@ export default function PartnerAmcReferralPage() {
                     {/* Program Inactive Warning Alert */}
                     {!config.isActive && (
                         <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
-                          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-                          <div>
-                            <p className="font-bold text-red-900 text-sm">AMC Referral Program is Currently Inactive</p>
-                            <p className="text-red-700 text-xs mt-1">
-                              The administrator has temporarily paused the referral feature. You cannot send new referrals at this time, but you can track your existing referrals.
-                            </p>
-                          </div>
+                            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
+                            <div>
+                                <p className="font-bold text-red-900 text-sm">AMC Referral Program is Currently Inactive</p>
+                                <p className="text-red-700 text-xs mt-1">
+                                    The administrator has temporarily paused the referral feature. You cannot send new referrals at this time, but you can track your existing referrals.
+                                </p>
+                            </div>
                         </div>
                     )}
 
@@ -239,7 +239,7 @@ export default function PartnerAmcReferralPage() {
                                             placeholder="Enter 10-digit number"
                                             value={customerPhone}
                                             onChange={(e) => setCustomerPhone(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] disabled:opacity-50"
+                                            className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-[#123F4A] text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] disabled:opacity-50"
                                         />
                                     </div>
 
@@ -265,14 +265,14 @@ export default function PartnerAmcReferralPage() {
                             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <h3 className="text-lg font-bold text-gray-900">Referral Tracking</h3>
-                                    
+
                                     <div className="relative">
                                         <input
                                             type="text"
                                             placeholder="Search code or phone..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-9 pr-4 py-2 rounded-xl bg-gray-50 border border-gray-300 text-xs focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] w-full sm:w-60"
+                                            className="pl-9 pr-4 py-2 rounded-xl bg-gray-50 border border-[#123F4A] text-xs focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] w-full sm:w-60"
                                         />
                                         <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
                                     </div>
@@ -319,13 +319,12 @@ export default function PartnerAmcReferralPage() {
                                                             ₹{row.commissionEarned || 0}
                                                         </td>
                                                         <td className="py-3 px-2">
-                                                            <span className={`px-2 py-0.5 rounded-full font-bold text-[9px] uppercase ${
-                                                                row.status === 'converted' 
-                                                                    ? 'bg-green-100 text-green-700' 
+                                                            <span className={`px-2 py-0.5 rounded-full font-bold text-[9px] uppercase ${row.status === 'converted'
+                                                                    ? 'bg-green-100 text-green-700'
                                                                     : row.status === 'pending'
-                                                                    ? 'bg-amber-100 text-amber-700'
-                                                                    : 'bg-red-100 text-red-700'
-                                                            }`}>
+                                                                        ? 'bg-amber-100 text-amber-700'
+                                                                        : 'bg-red-100 text-red-700'
+                                                                }`}>
                                                                 {row.status}
                                                             </span>
                                                         </td>

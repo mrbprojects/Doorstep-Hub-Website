@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { isObjectId } from '@/utils/slugHelper';
-import { ArrowLeft, Home,CheckCircle, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Home, CheckCircle, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { trackLeadEvent } from '@/lib/leadTracking';
 import { useAuth } from '@/context/AuthContext';
@@ -132,7 +132,7 @@ function SpaAddressContent() {
                 const updates = {};
                 if (!prev.name) updates.name = user.name || '';
                 if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-                
+
                 if (Object.keys(updates).length > 0) {
                     return { ...prev, ...updates };
                 }
@@ -472,7 +472,7 @@ function SpaAddressContent() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {addresses.length === 0 && !loading && (
-                            <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-xl">
+                            <div className="text-center py-10 border-2 border-dashed border-[#123F4A] rounded-xl">
                                 <p className="text-gray-500">No addresses found. Add one below.</p>
                             </div>
                         )}
@@ -528,7 +528,7 @@ function SpaAddressContent() {
                             // Auto-trigger detection
                             setTimeout(() => handleDetectLocation(), 100);
                         }}
-                        className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-black hover:border-[#6D1357] hover:text-[#6D1357] transition-colors"
+                        className="w-full mt-6 py-4 border-2 border-dashed border-[#123F4A] rounded-2xl flex items-center justify-center text-black hover:border-[#6D1357] hover:text-[#6D1357] transition-colors"
                     >
                         <Plus className="w-5 h-5 mr-2" /> Add New Address
                     </motion.button>
@@ -627,11 +627,11 @@ function SpaAddressContent() {
                                         {/* City, State, Pincode — auto-filled from GPS */}
                                         <div className="grid md:grid-cols-3 gap-4">
                                             <div className="relative">
-                                                <Input 
-                                                    className="text-black" 
-                                                    placeholder="City" 
-                                                    value={newAddress.cityName} 
-                                                    onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} 
+                                                <Input
+                                                    className="text-black"
+                                                    placeholder="City"
+                                                    value={newAddress.cityName}
+                                                    onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })}
                                                 />
                                                 {isSearchingCity && (
                                                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[#6D1357]" />

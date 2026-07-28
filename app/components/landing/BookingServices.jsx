@@ -392,17 +392,19 @@ export function BookingServices() {
                           </h4>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleServiceClick(service);
-                          }}
-                          className="inline-flex items-center gap-2 rounded-full bg-[#037166] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#025951] hover:!text-white"
-                        >
-                          Book Now
-                          <ArrowRight className="h-4 w-4 !text-white" />
-                        </button>
+                        <div className="flex justify-end pt-2">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleServiceClick(service);
+                            }}
+                            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#e89117] to-[#00796B] hover:opacity-90 px-4 py-2 text-sm font-semibold !text-white transition shadow-md hover:shadow-lg hover:scale-105"
+                          >
+                            Book Now
+                            <ArrowRight className="h-4 w-4 !text-white" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-[#037166]/0 via-[#037166]/20 to-[#037166]/0 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />

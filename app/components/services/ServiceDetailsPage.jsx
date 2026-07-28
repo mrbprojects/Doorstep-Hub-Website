@@ -218,14 +218,16 @@ export function ServiceDetailsPage({
 
   const renderDescription = (htmlContent) => {
     if (!htmlContent) {
-      return <p className="text-white/80 text-lg leading-relaxed">No description available.</p>;
+      return <p className="text-gray-600 text-sm leading-relaxed">No description available.</p>;
     }
 
     return (
       <div
-        className={`rich-text-content ${isExpanded ? '' : 'rich-text-content--collapsed'}`}
+        className={`rich-text-content article-ck-content text-sm text-gray-700 leading-relaxed ${isExpanded ? '' : 'line-clamp-6'}`}
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(htmlContent),
+          __html: typeof window !== 'undefined' ? DOMPurify.sanitize(htmlContent, {
+            ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style']
+          }) : htmlContent,
         }}
       />
     );

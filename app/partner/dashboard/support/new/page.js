@@ -18,7 +18,7 @@ const RELATED_OPTIONS = [
     { label: 'General Support', value: 'Provider Support' },
 ];
 
-const inputCls = 'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40';
+const inputCls = 'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-[#123F4A] text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40';
 const labelCls = 'block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide';
 
 export default function PartnerCreateSupportPage() {
@@ -82,7 +82,7 @@ export default function PartnerCreateSupportPage() {
                 <div><label className={labelCls}>Description *</label><textarea rows={5} className={`${inputCls} resize-none`} value={description} onChange={(e) => setDescription(e.target.value)} required /></div>
                 <div>
                     <label className={labelCls}>Attachment *</label>
-                    <label className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gray-50 border border-dashed border-gray-300 cursor-pointer">
+                    <label className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gray-50 border border-dashed border-[#123F4A] cursor-pointer">
                         <Upload className="w-4 h-4 text-[#037166]" />
                         <span className="text-sm text-gray-600 truncate">{attachment ? attachment.name : 'Upload image or PDF'}</span>
                         <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => setAttachment(e.target.files?.[0] || null)} />

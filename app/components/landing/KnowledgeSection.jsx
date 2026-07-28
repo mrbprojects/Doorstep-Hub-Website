@@ -133,72 +133,68 @@ export function KnowledgeSection() {
         </motion.div>
 
         {/* Articles Grid */}
-        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-12 md:mx-0 md:px-0 md:overflow-visible">
-          <div className="flex min-w-max gap-6 md:min-w-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {loading
-            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : articles.map((article, index) => (
+            ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+            : articles.slice(0, 4).map((article, index) => (
               <motion.div
                 key={article.id || index}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`group w-[280px] shrink-0 md:w-auto ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
+                className={`group ${article.isDummy ? 'cursor-not-allowed grayscale-[0.5] opacity-80' : ''}`}
               >
                 <Link href={article.isDummy ? '#' : `/knowledge/${article.slug}`}>
                   <motion.div
-                    whileHover={article.isDummy ? {} : { y: -8 }}
-                    className={`relative h-full overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-[#037166]/10 transition-all duration-500 ${article.isDummy ? 'pointer-events-none' : ''}`}
+                    whileHover={article.isDummy ? {} : { y: -6 }}
+                    className={`relative h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md hover:shadow-xl hover:border-[#037166]/30 transition-all duration-300 ${article.isDummy ? 'pointer-events-none' : ''}`}
                   >
                     {/* Trending Badge */}
                     {article.trending && (
-                      <div className="absolute top-4 right-4 z-20 flex items-center space-x-1.5 rounded-full bg-[#037166] px-3 py-1.5 shadow-lg border border-white/20">
+                      <div className="absolute top-3 right-3 z-20 flex items-center space-x-1.5 rounded-md bg-[#037166] px-3 py-1 shadow-md">
                         <TrendingUp className="w-3.5 h-3.5 text-white" />
-                        <h6 className="text-[10px] font-black text-white uppercase tracking-wider">Trending</h6>
+                        <h6 className="text-[10px] font-bold text-white uppercase tracking-wider">Trending</h6>
                       </div>
                     )}
 
                     {/* Image */}
-                    <div className="relative h-44 overflow-hidden bg-gray-50">
+                    <div className="relative h-48 w-full overflow-hidden bg-gray-100">
                       <ImageWithFallback
                         src={article.image}
                         alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       
-                      {/* Removed all dark overlays */}
-                      
                       {/* Category Badge */}
-                      <div className="absolute bottom-4 left-4 rounded-full bg-[#037166] px-4 py-1.5 shadow-xl border border-white/10">
-                        <h6 className="text-[10px] font-black text-white uppercase tracking-widest">
+                      <div className="absolute bottom-3 left-3 rounded-md bg-[#037166] px-3 py-1 shadow-sm">
+                        <h6 className="text-[10px] font-bold text-white uppercase tracking-wider">
                           {article.category}
                         </h6>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-6">
-                      <h4 className="mb-3 line-clamp-2 text-gray-900 text-lg font-black leading-tight group-hover:text-[#037166] transition-colors">
+                    <div className="p-5">
+                      <h4 className="mb-2 line-clamp-2 text-gray-900 text-base font-bold leading-snug group-hover:text-[#037166] transition-colors">
                         {article.title}
                       </h4>
-                      <p className="mb-4 line-clamp-2 text-sm text-gray-500 font-medium leading-relaxed">
+                      <p className="mb-4 line-clamp-2 text-xs text-gray-500 font-normal leading-relaxed">
                         {article.summary}
                       </p>
 
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                        <div className="flex items-center space-x-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <div className="flex items-center space-x-1.5 text-xs text-gray-500 font-semibold">
                           <Clock className="h-3.5 w-3.5 text-[#037166]" />
                           <span>{article.readTime}</span>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#037166] group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#037166] group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   </motion.div>
                 </Link>
               </motion.div>
             ))}
-          </div>
         </div>
 
         <motion.div

@@ -108,7 +108,7 @@ async function getSlugRegistry() {
 
 async function getBrandSlugSet() {
     const registry = await getSlugRegistry();
-    return registry.brandSlugs;
+    return registry?.brandSlugs instanceof Set ? registry.brandSlugs : new Set();
 }
 
 async function getDynamicSlugs() {
@@ -228,8 +228,8 @@ export async function middleware(request) {
             return NextResponse.rewrite(url);
         }
 
-        const slugRegistry = await getSlugRegistry();
-        const brandSlugs = slugRegistry.brandSlugs;
+        const slugRegistry = (await getSlugRegistry()) || createSlugRegistry();
+        const brandSlugs = slugRegistry?.brandSlugs instanceof Set ? slugRegistry.brandSlugs : new Set();
 
         if (pathname.startsWith('/service-list/book-now/')) {
             const legacySlug = normalizedPath.replace(/^service-list\/book-now\//, '').split('/')[0];

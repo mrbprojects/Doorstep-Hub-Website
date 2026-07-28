@@ -54,7 +54,7 @@ export default function FAQPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-6 py-12 lg:py-20">
+        <div className="max-w-4xl mx-auto px-6 py-12 lg:py-20 bg-white text-gray-900">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -65,10 +65,10 @@ export default function FAQPage() {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#037166]/10 border border-[#037166]/20 mb-4">
                         <HelpCircle className="w-8 h-8 text-[#037166]" />
                     </div>
-                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-white to-[#037166] bg-clip-text text-transparent">
+                    <h1 className="text-4xl lg:text-5xl font-extrabold text-[#123F4A]">
                         Frequently Asked Questions
                     </h1>
-                    <p className="text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-gray-600 max-w-2xl mx-auto text-base">
                         Find answers to common questions about Doorstep Hub services, bookings, and more.
                     </p>
                 </div>
@@ -88,10 +88,10 @@ export default function FAQPage() {
                             }}
                             className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border ${activeTab === tab.id
                                 ? 'bg-[#037166] text-white border-[#037166] shadow-lg shadow-[#037166]/20'
-                                : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:border-white/10'
+                                : 'bg-slate-100 text-gray-700 border-slate-200 hover:bg-slate-200 hover:border-slate-300'
                                 }`}
                         >
-                            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'}`} />
+                            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : 'text-gray-600'}`} />
                             {tab.label}
                         </button>
                     ))}
@@ -101,7 +101,7 @@ export default function FAQPage() {
                 {loading ? (
                     <div className="space-y-4">
                         {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="h-16 w-full bg-white/5 rounded-2xl animate-pulse"></div>
+                            <div key={i} className="h-16 w-full bg-slate-100 rounded-2xl animate-pulse"></div>
                         ))}
                     </div>
                 ) : error ? (
@@ -116,7 +116,7 @@ export default function FAQPage() {
                     </div>
                 ) : faqs.length === 0 ? (
                     <div className="text-center py-10">
-                        <p className="text-gray-400 italic">No questions found for this category.</p>
+                        <p className="text-gray-500 italic">No questions found for this category.</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -125,17 +125,17 @@ export default function FAQPage() {
                                 key={faq._id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
+                                transition={{ delay: index * 0.05 }}
                                 className={`border rounded-2xl overflow-hidden transition-all duration-300 ${activeIndex === index
-                                    ? 'bg-white/5 border-[#037166]/50 shadow-lg shadow-[#037166]/5'
-                                    : 'bg-transparent border-white/10 hover:border-white/20'
+                                    ? 'bg-slate-50 border-[#037166]/40 shadow-sm'
+                                    : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
                                     }`}
                             >
                                 <button
                                     onClick={() => toggleAccordion(index)}
                                     className="w-full px-6 py-5 flex items-center justify-between text-left gap-4"
                                 >
-                                    <span className="text-lg font-medium text-white/90">
+                                    <span className="text-lg font-semibold text-gray-900">
                                         {faq.question}
                                     </span>
                                     <ChevronDown
@@ -152,7 +152,7 @@ export default function FAQPage() {
                                             exit={{ height: 0, opacity: 0 }}
                                             transition={{ duration: 0.3 }}
                                         >
-                                            <div className="px-6 pb-6 text-gray-400 leading-relaxed border-t border-white/5 pt-4">
+                                            <div className="px-6 pb-6 text-gray-700 leading-relaxed border-t border-slate-100 pt-4 text-base">
                                                 {faq.answer}
                                             </div>
                                         </motion.div>
@@ -164,18 +164,16 @@ export default function FAQPage() {
                 )}
 
                 {/* Support Section */}
-                <div className="mt-16 p-8 rounded-3xl bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border border-[#037166]/20 text-center relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#037166]/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-[#037166]/20 transition-colors"></div>
-
+                <div className="mt-16 p-8 rounded-3xl bg-slate-50 border border-slate-200 text-center relative overflow-hidden shadow-sm">
                     <MessageSquare className="w-10 h-10 text-[#037166] mx-auto mb-4" />
-                    <h3 className="text-2xl !text-white font-bold mb-2">Still have questions?</h3>
-                    <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                    <h3 className="text-2xl text-gray-900 font-bold mb-2">Still have questions?</h3>
+                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
                         Can't find the answer you're looking for? Please chat with our friendly team.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <a
                             href={`mailto:${globalSettings?.email || "help@doorstephub.com"}`}
-                            className="px-8 py-3 bg-[#037166] hover:bg-[#04a99d] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#037166]/20"
+                            className="px-8 py-3 bg-[#037166] hover:bg-[#04a99d] text-white font-bold rounded-xl transition-all shadow-md shadow-[#037166]/20"
                         >
                             {globalSettings?.email2 || "Email Support"}
                         </a>

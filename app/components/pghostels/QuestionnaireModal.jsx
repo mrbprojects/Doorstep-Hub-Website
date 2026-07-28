@@ -326,7 +326,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                                 <button
                                     onClick={handleBack}
                                     disabled={currentStep === 0}
-                                    className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                                    className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-[#123F4A] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                     <span>Back</span>

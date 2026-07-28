@@ -69,7 +69,7 @@ export function FloatingActionButtons() {
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="bg-[#037166] text-white px-6 py-3 rounded-full font-semibold shadow-[0_4px_14px_rgba(3,113,102,0.4)] hover:bg-[#025951] transition-all flex items-center justify-center whitespace-nowrap"
+                            className="bg-gradient-to-r from-[#e89117] to-[#00796B] text-white px-6 py-3 rounded-full font-semibold shadow-[0_4px_14px_rgba(3,113,102,0.4)] hover:bg-[#025951] transition-all flex items-center justify-center whitespace-nowrap"
                         >
                             Book Appointment
                         </motion.button>

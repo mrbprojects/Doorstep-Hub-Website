@@ -3,7 +3,7 @@ import { Footer } from '@/components/layout/Footer';
 
 export default function LegalLayout({ children }) {
     return (
-        <div className="bg-[#0a0a0a] min-h-screen">
+        <div className="bg-white text-gray-900 min-h-screen">
             <Header />
             <main className="pt-24 min-h-[calc(100vh-400px)]">
                 {children}

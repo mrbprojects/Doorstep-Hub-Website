@@ -137,9 +137,8 @@ export default function SupportTicketDetailPage() {
                         <p className="text-xs font-bold font-mono text-[#037166] mb-1">{ticket.ticketId}</p>
                         <h1 className="text-xl font-extrabold text-gray-900">{ticket.title}</h1>
                     </div>
-                    <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
-                        closed ? 'bg-[#037166]/10 text-[#037166]' : 'bg-amber-100 text-amber-700'
-                    }`}>
+                    <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${closed ? 'bg-[#037166]/10 text-[#037166]' : 'bg-amber-100 text-amber-700'
+                        }`}>
                         {ticket.status}
                     </span>
                 </div>
@@ -205,7 +204,7 @@ export default function SupportTicketDetailPage() {
                     <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide">Add Reply</label>
                     <textarea
                         rows={3}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 resize-none"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-[#123F4A] text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 resize-none"
                         placeholder="Type your message..."
                         value={reply}
                         onChange={(e) => setReply(e.target.value)}

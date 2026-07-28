@@ -191,7 +191,7 @@ function ReligiousAddressContent() {
                 const updates = {};
                 if (!prev.name) updates.name = user.name || '';
                 if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-                
+
                 if (Object.keys(updates).length > 0) {
                     return { ...prev, ...updates };
                 }
@@ -422,7 +422,7 @@ function ReligiousAddressContent() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {addresses.length === 0 && !loading && (
-                            <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-xl">
+                            <div className="text-center py-10 border-2 border-dashed border-[#123F4A] rounded-xl">
                                 <p className="text-gray-500">No addresses found. Add one below.</p>
                             </div>
                         )}
@@ -478,7 +478,7 @@ function ReligiousAddressContent() {
                             setShowAddForm(true);
                             setTimeout(() => handleDetectLocation(), 100);
                         }}
-                        className="w-full mt-6 py-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-500 hover:border-[var(--saffron)] hover:text-[var(--saffron)] transition-colors"
+                        className="w-full mt-6 py-4 border-2 border-dashed border-[#123F4A] rounded-2xl flex items-center justify-center text-gray-500 hover:border-[var(--saffron)] hover:text-[var(--saffron)] transition-colors"
                     >
                         <Plus className="w-5 h-5 mr-2" /> Add New Address
                     </motion.button>
@@ -555,11 +555,11 @@ function ReligiousAddressContent() {
 
                                     <div className="grid md:grid-cols-3 gap-4">
                                         <div className="relative">
-                                            <Input 
-                                                className="text-black" 
-                                                placeholder="City" 
-                                                value={newAddress.cityName} 
-                                                onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })} 
+                                            <Input
+                                                className="text-black"
+                                                placeholder="City"
+                                                value={newAddress.cityName}
+                                                onChange={e => setNewAddress({ ...newAddress, cityName: e.target.value })}
                                             />
                                             {isSearchingCity && (
                                                 <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[var(--saffron)]" />

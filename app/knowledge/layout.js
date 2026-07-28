@@ -18,7 +18,7 @@ export default function KnowledgeLayout({ children }) {
     return (
         <div className="min-h-screen">
             <Header theme={knowledgeTheme} />
-            <main>{children}</main>
+            <main className="pt-20 lg:pt-24">{children}</main>
             <Footer />
         </div>
     );

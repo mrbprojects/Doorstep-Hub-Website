@@ -376,14 +376,16 @@ export function ServiceDetailsPage({
 
   const renderDescription = (htmlContent) => {
     if (!htmlContent) {
-      return <p className="text-white/80 text-sm leading-relaxed">No description available.</p>;
+      return <p className="text-gray-600 text-sm leading-relaxed">No description available.</p>;
     }
 
     return (
       <div
-        className={`rich-text-content rich-text-content--compact ${isExpanded ? '' : 'rich-text-content--collapsed-sm'}`}
+        className={`rich-text-content article-ck-content text-sm text-gray-700 leading-relaxed ${isExpanded ? '' : 'line-clamp-6'}`}
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(htmlContent),
+          __html: typeof window !== 'undefined' ? DOMPurify.sanitize(htmlContent, {
+            ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style']
+          }) : htmlContent,
         }}
       />
     );
@@ -933,7 +935,7 @@ export function ServiceDetailsPage({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                   onClick={handleBookNow}
-                  className="w-full px-4 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"
+                  className="w-full px-4 py-3 rounded-full bg-gradient-to-r from-[#e89117] to-[#00796B] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"
                 >
                   Book Now
                   <ArrowRight className="w-2 h-5 group-hover:translate-x-1 transition-transform" />

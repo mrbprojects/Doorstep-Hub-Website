@@ -260,7 +260,12 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             card: 'summary_large_image',
             title,
             description,
-            images: [imageUrl],
+            images: [
+                {
+                    url: imageUrl,
+                    alt: title
+                }
+            ],
         },
         robots: {
             index: true,

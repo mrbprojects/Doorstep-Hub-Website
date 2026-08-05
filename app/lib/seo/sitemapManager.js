@@ -47,14 +47,17 @@ export function buildUrlSetXML(urlEntries) {
         const changefreq = entry.changeFrequency || 'weekly';
         const priority = entry.priority !== undefined ? entry.priority : 0.7;
 
+        const imagesList = Array.isArray(entry.images) ? entry.images : (entry.image ? [entry.image] : []);
+        const imageXmlBlocks = imagesList.map(imgUrl => `
+        <image:image>
+            <image:loc>${escapeXml(imgUrl)}</image:loc>
+        </image:image>`).join('');
+
         return `    <url>
         <loc>${escapeXml(entry.url)}</loc>
         <lastmod>${lastmod}</lastmod>
         <changefreq>${changefreq}</changefreq>
-        <priority>${priority}</priority>${entry.image ? `
-        <image:image>
-            <image:loc>${escapeXml(entry.image)}</image:loc>
-        </image:image>` : ''}
+        <priority>${priority}</priority>${imageXmlBlocks}
     </url>`;
     }).join('\n');
 

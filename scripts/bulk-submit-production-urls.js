@@ -115,19 +115,17 @@ async function bulkProcessAllUrls() {
         console.error('Error fetching brands:', e.message);
     }
 
-    // 6. Dynamic Authorized Combinations (City x Category x Brand)
+    // 6. Dynamic City/Category/Brand Combinations
     try {
-        const [citiesData, categoriesData, brandsData, authData] = await Promise.all([
+        const [citiesData, categoriesData, brandsData] = await Promise.all([
             fetchAPI('/app/cities/cities_list', null, 'GET'),
             fetchAPI('/app/applience-repairs-website/getallcategorys', { lattitude: '17.3850', longitude: '78.4867' }),
-            fetchAPI('/app/brands/all_brands', null, 'GET'),
-            fetchAPI('/app/authorized-services/all_authorized_services', null, 'GET')
+            fetchAPI('/app/brands/all_brands', null, 'GET')
         ]);
 
         const cities = citiesData?.cities || [];
         const categories = categoriesData?.data || [];
         const brands = brandsData?.brands || [];
-        const authServices = authData?.services || [];
 
         let combosCount = 0;
         cities.forEach(c => {
@@ -157,6 +155,47 @@ async function bulkProcessAllUrls() {
         console.log(`[6] Dynamic City/Category/Brand Combinations Generated: ${combosCount}`);
     } catch (e) {
         console.error('Error generating combinations:', e.message);
+    }
+
+    // 7. PG Hostels, Spa/Salon, and Religious Verticals
+    try {
+        const pgPaths = [
+            '/pghostels', '/pg-hostel', '/pghostels/listings/boys-pg', '/pghostels/listings/girls-pg', '/pghostels/listings/coliving'
+        ];
+        pgPaths.forEach(path => {
+            const url = `${BASE_URL}${path}`;
+            allUrls.add(url);
+            registerUrlEntry({ url, entityType: 'PGHOSTEL', entityId: path, indexable: true, sitemapGroup: 'pghostels' });
+        });
+
+        const pgData = await fetchAPI('/app/products/featured_pg_hostels', null, 'GET');
+        const hostels = (pgData?.success && Array.isArray(pgData.hostels)) ? pgData.hostels : [];
+        hostels.forEach(h => {
+            const slug = h.slug || h.hostelSlug || h._id;
+            if (slug) {
+                const url = `${BASE_URL}/pghostels/${slug}`;
+                allUrls.add(url);
+                registerUrlEntry({ url, entityType: 'PGHOSTEL_DETAIL', entityId: slug, indexable: true, sitemapGroup: 'pghostels' });
+            }
+        });
+
+        const spaPaths = ['/spa-salon', '/spa-salon/packages'];
+        spaPaths.forEach(path => {
+            const url = `${BASE_URL}${path}`;
+            allUrls.add(url);
+            registerUrlEntry({ url, entityType: 'SPASALON', entityId: path, indexable: true, sitemapGroup: 'spa-salon' });
+        });
+
+        const religiousPaths = ['/religious-services', '/religious', '/religious-services/all-services', '/religious-services/category'];
+        religiousPaths.forEach(path => {
+            const url = `${BASE_URL}${path}`;
+            allUrls.add(url);
+            registerUrlEntry({ url, entityType: 'RELIGIOUS', entityId: path, indexable: true, sitemapGroup: 'religious' });
+        });
+
+        console.log(`[7] PG Hostels, Spa & Religious Pages Collected: ${pgPaths.length + hostels.length + spaPaths.length + religiousPaths.length}`);
+    } catch (e) {
+        console.error('Error fetching vertical pages:', e.message);
     }
 
     const totalCollected = Array.from(allUrls);

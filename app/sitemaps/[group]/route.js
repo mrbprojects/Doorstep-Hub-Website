@@ -80,6 +80,32 @@ export async function GET(request, { params }) {
                 }).filter(e => e.url);
                 break;
 
+            case 'pghostels':
+                entries = [
+                    { url: `${BASE_URL}/pghostels`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+                    { url: `${BASE_URL}/pg-hostel`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 }
+                ];
+                break;
+
+            case 'spa-salon':
+                entries = [
+                    { url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 }
+                ];
+                break;
+
+            case 'religious':
+                entries = [
+                    { url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+                    { url: `${BASE_URL}/religious`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 }
+                ];
+                break;
+
+            case 'amc':
+                entries = [
+                    { url: `${BASE_URL}/amc`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 }
+                ];
+                break;
+
             case 'images':
                 const imgData = await fetchAPI('/app/applience-repairs-website/all-services', null, 'GET');
                 const imgServices = (imgData?.success && Array.isArray(imgData.data)) ? imgData.data : [];

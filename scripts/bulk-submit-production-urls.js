@@ -179,21 +179,39 @@ async function bulkProcessAllUrls() {
             }
         });
 
-        const spaPaths = ['/spa-salon', '/spa-salon/packages'];
+        const spaPaths = [
+            '/spa-salon', '/spa-salon/packages',
+            '/spa-salon/category/facial-spa', '/spa-salon/category/hair-care',
+            '/spa-salon/category/body-massage', '/spa-salon/category/manicure-pedicure',
+            '/spa-salon/detail/glow-facial', '/spa-salon/detail/hair-spa', '/spa-salon/detail/swedish-massage'
+        ];
         spaPaths.forEach(path => {
             const url = `${BASE_URL}${path}`;
             allUrls.add(url);
             registerUrlEntry({ url, entityType: 'SPASALON', entityId: path, indexable: true, sitemapGroup: 'spa-salon' });
         });
 
-        const religiousPaths = ['/religious-services', '/religious', '/religious-services/all-services', '/religious-services/category'];
+        const religiousPaths = [
+            '/religious-services', '/religious', '/religious-services/all-services', '/religious-services/category',
+            '/religious-services/category/griha-pravesh', '/religious-services/category/satyanarayan-puja',
+            '/religious-services/category/ganesh-puja', '/religious-services/service/lakshmi-puja', '/religious-services/service/rudrabhishekam'
+        ];
         religiousPaths.forEach(path => {
             const url = `${BASE_URL}${path}`;
             allUrls.add(url);
             registerUrlEntry({ url, entityType: 'RELIGIOUS', entityId: path, indexable: true, sitemapGroup: 'religious' });
         });
 
-        console.log(`[7] PG Hostels, Spa & Religious Pages Collected: ${pgPaths.length + hostels.length + spaPaths.length + religiousPaths.length}`);
+        const amcPaths = [
+            '/amc', '/amc/ac-maintenance-plan', '/amc/home-appliances-amc'
+        ];
+        amcPaths.forEach(path => {
+            const url = `${BASE_URL}${path}`;
+            allUrls.add(url);
+            registerUrlEntry({ url, entityType: 'AMC', entityId: path, indexable: true, sitemapGroup: 'amc' });
+        });
+
+        console.log(`[7] PG Hostels, Spa, Religious & AMC Pages Collected: ${pgPaths.length + hostels.length + spaPaths.length + religiousPaths.length + amcPaths.length}`);
     } catch (e) {
         console.error('Error fetching vertical pages:', e.message);
     }

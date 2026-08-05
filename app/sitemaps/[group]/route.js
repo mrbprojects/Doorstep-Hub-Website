@@ -86,7 +86,9 @@ export async function GET(request, { params }) {
                     { url: `${BASE_URL}/pg-hostel`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
                     { url: `${BASE_URL}/pghostels/listings/boys-pg`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
                     { url: `${BASE_URL}/pghostels/listings/girls-pg`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-                    { url: `${BASE_URL}/pghostels/listings/coliving`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 }
+                    { url: `${BASE_URL}/pghostels/listings/coliving`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+                    { url: `${BASE_URL}/pghostels/listings/single-room`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+                    { url: `${BASE_URL}/pghostels/listings/double-sharing`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 }
                 ];
                 try {
                     const pgData = await fetchAPI('/app/products/featured_pg_hostels', null, 'GET');
@@ -114,7 +116,14 @@ export async function GET(request, { params }) {
             case 'spa-salon':
                 entries = [
                     { url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-                    { url: `${BASE_URL}/spa-salon/packages`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 }
+                    { url: `${BASE_URL}/spa-salon/packages`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/spa-salon/category/facial-spa`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/spa-salon/category/hair-care`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/spa-salon/category/body-massage`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/spa-salon/category/manicure-pedicure`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/spa-salon/detail/glow-facial`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+                    { url: `${BASE_URL}/spa-salon/detail/hair-spa`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+                    { url: `${BASE_URL}/spa-salon/detail/swedish-massage`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 }
                 ];
                 break;
 
@@ -123,13 +132,20 @@ export async function GET(request, { params }) {
                     { url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
                     { url: `${BASE_URL}/religious`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
                     { url: `${BASE_URL}/religious-services/all-services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-                    { url: `${BASE_URL}/religious-services/category`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 }
+                    { url: `${BASE_URL}/religious-services/category`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/religious-services/category/griha-pravesh`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/religious-services/category/satyanarayan-puja`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/religious-services/category/ganesh-puja`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/religious-services/service/lakshmi-puja`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+                    { url: `${BASE_URL}/religious-services/service/rudrabhishekam`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 }
                 ];
                 break;
 
             case 'amc':
                 entries = [
-                    { url: `${BASE_URL}/amc`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 }
+                    { url: `${BASE_URL}/amc`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/amc/ac-maintenance-plan`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/amc/home-appliances-amc`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 }
                 ];
                 break;
 

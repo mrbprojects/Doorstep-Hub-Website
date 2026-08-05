@@ -217,11 +217,21 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
     const keywordsRaw = seoData?.keywords || defaultFallback?.keywords || generatedFallback.keywords;
     const keywords = Array.isArray(keywordsRaw) ? keywordsRaw.join(', ') : String(keywordsRaw || '');
 
-    const imageUrl = (cleanPath.startsWith('/amc') || seoData?.image)
-        ? (seoData?.image || 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png')
-        : 'https://doorstephub.com/d-hub-logo.png';
+    let rawImageUrl = seoData?.image || defaultFallback?.image || generatedFallback?.image;
+    let imageUrl = 'https://doorstephub.com/d-hub-logo.png';
+
+    if (rawImageUrl && typeof rawImageUrl === 'string') {
+        if (rawImageUrl.startsWith('http://') || rawImageUrl.startsWith('https://')) {
+            imageUrl = rawImageUrl;
+        } else {
+            imageUrl = `https://api.doorstephub.com/${rawImageUrl.replace(/^\//, '')}`;
+        }
+    } else if (cleanPath.startsWith('/amc')) {
+        imageUrl = 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png';
+    }
 
     return {
+        metadataBase: new URL('https://doorstephub.com'),
         title,
         description,
         keywords,
@@ -236,9 +246,11 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             images: [
                 {
                     url: imageUrl,
+                    secureUrl: imageUrl,
                     width: 1200,
                     height: 630,
                     alt: title,
+                    type: imageUrl.endsWith('.png') ? 'image/png' : imageUrl.endsWith('.webp') ? 'image/webp' : 'image/jpeg'
                 },
             ],
             locale: 'en_IN',

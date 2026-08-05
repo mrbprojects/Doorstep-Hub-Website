@@ -150,19 +150,99 @@ export async function GET(request, { params }) {
                 break;
 
             case 'images':
-                const imgData = await fetchAPI('/app/applience-repairs-website/all-services', null, 'GET');
-                const imgServices = (imgData?.success && Array.isArray(imgData.data)) ? imgData.data : [];
-                entries = imgServices.map(s => {
+                // Collect images across ALL dynamic verticals & static pages
+                const [svcRes, cityRes, catRes, brandRes, pgRes] = await Promise.all([
+                    fetchAPI('/app/applience-repairs-website/all-services', null, 'GET'),
+                    fetchAPI('/app/cities/cities_list', null, 'GET'),
+                    fetchAPI('/app/applience-repairs-website/getallcategorys', { lattitude: '17.3850', longitude: '78.4867' }),
+                    fetchAPI('/app/brands/all_brands', null, 'GET'),
+                    fetchAPI('/app/products/featured_pg_hostels', null, 'GET')
+                ]);
+
+                // 1. Services
+                const svcList = (svcRes?.success && Array.isArray(svcRes.data)) ? svcRes.data : [];
+                svcList.forEach(s => {
                     const slug = s.slug || (s.name ? s.name.toLowerCase().replace(/\s+/g, '-') : '');
-                    const imageUrl = s.image ? (s.image.startsWith('http') ? s.image : `https://api.doorstephub.com/${s.image.replace(/^\//, '')}`) : null;
-                    return {
-                        url: `${BASE_URL}/${slug}`,
-                        lastModified: new Date(),
-                        changeFrequency: 'weekly',
-                        priority: 0.8,
-                        image: imageUrl
-                    };
-                }).filter(e => e.url && e.image);
+                    if (slug) {
+                        const imageUrl = s.image ? (s.image.startsWith('http') ? s.image : `https://api.doorstephub.com/${s.image.replace(/^\//, '')}`) : `${BASE_URL}/d-hub-logo.png`;
+                        entries.push({
+                            url: `${BASE_URL}/${slug}`,
+                            lastModified: new Date(),
+                            changeFrequency: 'weekly',
+                            priority: 0.8,
+                            image: imageUrl
+                        });
+                    }
+                });
+
+                // 2. City Pages
+                const cityList = (cityRes?.success && Array.isArray(cityRes.cities)) ? cityRes.cities : [];
+                cityList.forEach(c => {
+                    const slug = (c.slug || c.name || '').toLowerCase().replace(/\s+/g, '-');
+                    if (slug) {
+                        entries.push({
+                            url: `${BASE_URL}/appliances/repair-service/${slug}`,
+                            lastModified: new Date(),
+                            changeFrequency: 'weekly',
+                            priority: 0.8,
+                            image: `${BASE_URL}/${c.name || 'Hyderabad'}.png`
+                        });
+                    }
+                });
+
+                // 3. Category Pages
+                const categoryList = (catRes?.success && Array.isArray(catRes.data)) ? catRes.data : [];
+                categoryList.forEach(cat => {
+                    const slug = cat.slug || (cat.name ? cat.name.toLowerCase().replace(/\s+/g, '-') : '');
+                    if (slug) {
+                        const img = cat.image ? (cat.image.startsWith('http') ? cat.image : `https://api.doorstephub.com/${cat.image.replace(/^\//, '')}`) : `${BASE_URL}/electric-appliance.png`;
+                        entries.push({
+                            url: `${BASE_URL}/appliances/${slug}`,
+                            lastModified: new Date(),
+                            changeFrequency: 'weekly',
+                            priority: 0.8,
+                            image: img
+                        });
+                    }
+                });
+
+                // 4. Brand Pages
+                const brandList = (brandRes?.success && Array.isArray(brandRes.brands)) ? brandRes.brands : [];
+                brandList.forEach(b => {
+                    const slug = b.slug || (b.name ? b.name.toLowerCase().replace(/\s+/g, '-') : '');
+                    if (slug) {
+                        const img = b.logo ? (b.logo.startsWith('http') ? b.logo : `https://api.doorstephub.com/${b.logo.replace(/^\//, '')}`) : `${BASE_URL}/d-hub-logo.png`;
+                        entries.push({
+                            url: `${BASE_URL}/appliances/brand/${slug}`,
+                            lastModified: new Date(),
+                            changeFrequency: 'monthly',
+                            priority: 0.7,
+                            image: img
+                        });
+                    }
+                });
+
+                // 5. PG Hostels
+                const hostelList = (pgRes?.success && Array.isArray(pgRes.hostels)) ? pgRes.hostels : [];
+                hostelList.forEach(h => {
+                    const slug = h.slug || h.hostelSlug || h._id;
+                    if (slug) {
+                        const img = h.image ? (h.image.startsWith('http') ? h.image : `https://api.doorstephub.com/${h.image.replace(/^\//, '')}`) : `${BASE_URL}/pghostels.png`;
+                        entries.push({
+                            url: `${BASE_URL}/pghostels/${slug}`,
+                            lastModified: new Date(),
+                            changeFrequency: 'weekly',
+                            priority: 0.8,
+                            image: img
+                        });
+                    }
+                });
+
+                // 6. Static / Main Verticals
+                entries.push({ url: `${BASE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0, image: `${BASE_URL}/d-hub-logo.png` });
+                entries.push({ url: `${BASE_URL}/amc`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8, image: `https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png` });
+                entries.push({ url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9, image: `${BASE_URL}/spa-pet-hero.png` });
+                entries.push({ url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9, image: `${BASE_URL}/d-hub-logo.png` });
                 break;
 
             case 'services':

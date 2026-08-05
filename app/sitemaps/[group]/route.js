@@ -83,20 +83,47 @@ export async function GET(request, { params }) {
             case 'pghostels':
                 entries = [
                     { url: `${BASE_URL}/pghostels`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-                    { url: `${BASE_URL}/pg-hostel`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 }
+                    { url: `${BASE_URL}/pg-hostel`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+                    { url: `${BASE_URL}/pghostels/listings/boys-pg`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+                    { url: `${BASE_URL}/pghostels/listings/girls-pg`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+                    { url: `${BASE_URL}/pghostels/listings/coliving`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 }
                 ];
+                try {
+                    const pgData = await fetchAPI('/app/products/featured_pg_hostels', null, 'GET');
+                    const hostels = (pgData?.success && Array.isArray(pgData.hostels)) ? pgData.hostels : [];
+                    hostels.forEach(h => {
+                        const slug = h.slug || h.hostelSlug || h._id;
+                        if (slug) {
+                            entries.push({
+                                url: `${BASE_URL}/pghostels/${slug}`,
+                                lastModified: new Date(),
+                                changeFrequency: 'weekly',
+                                priority: 0.8
+                            });
+                            entries.push({
+                                url: `${BASE_URL}/pghostels/hostel-detail/${slug}`,
+                                lastModified: new Date(),
+                                changeFrequency: 'weekly',
+                                priority: 0.7
+                            });
+                        }
+                    });
+                } catch (e) {}
                 break;
 
             case 'spa-salon':
                 entries = [
-                    { url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 }
+                    { url: `${BASE_URL}/spa-salon`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+                    { url: `${BASE_URL}/spa-salon/packages`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 }
                 ];
                 break;
 
             case 'religious':
                 entries = [
                     { url: `${BASE_URL}/religious-services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-                    { url: `${BASE_URL}/religious`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 }
+                    { url: `${BASE_URL}/religious`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+                    { url: `${BASE_URL}/religious-services/all-services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+                    { url: `${BASE_URL}/religious-services/category`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 }
                 ];
                 break;
 

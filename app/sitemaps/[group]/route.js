@@ -80,6 +80,22 @@ export async function GET(request, { params }) {
                 }).filter(e => e.url);
                 break;
 
+            case 'images':
+                const imgData = await fetchAPI('/app/applience-repairs-website/all-services', null, 'GET');
+                const imgServices = (imgData?.success && Array.isArray(imgData.data)) ? imgData.data : [];
+                entries = imgServices.map(s => {
+                    const slug = s.slug || (s.name ? s.name.toLowerCase().replace(/\s+/g, '-') : '');
+                    const imageUrl = s.image ? (s.image.startsWith('http') ? s.image : `https://api.doorstephub.com/${s.image.replace(/^\//, '')}`) : null;
+                    return {
+                        url: `${BASE_URL}/${slug}`,
+                        lastModified: new Date(),
+                        changeFrequency: 'weekly',
+                        priority: 0.8,
+                        image: imageUrl
+                    };
+                }).filter(e => e.url && e.image);
+                break;
+
             case 'services':
             default:
                 const serviceData = await fetchAPI('/app/applience-repairs-website/all-services', null, 'GET');

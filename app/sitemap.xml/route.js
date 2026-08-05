@@ -14,7 +14,8 @@ export async function GET() {
         'pghostels',
         'spa-salon',
         'religious',
-        'amc'
+        'amc',
+        'images'
     ];
 
     const xml = buildSitemapIndexXML(sitemapGroups);

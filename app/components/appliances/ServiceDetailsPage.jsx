@@ -308,6 +308,23 @@ export function ServiceDetailsPage({
     return () => clearInterval(interval);
   }, [rateCardModal.isOpen, rateCardModal.images.length]);
 
+  const getMetaDescription = () => {
+    const store = serviceDetails?.storeData || {};
+    // Check root seo object and storeData for Admin Panel SEO Description (NO FALLBACKS)
+    const text =
+      serviceDetails?.seo?.description ||
+      store.seoDescription ||
+      serviceDetails?.seoDescription ||
+      store.seo_description ||
+      serviceDetails?.seo_description ||
+      serviceDetails?.seoData?.seoDescription ||
+      serviceDetails?.seoSettings?.seoDescription ||
+      '';
+    if (!text || typeof text !== 'string') return null;
+    const cleanText = text.replace(/<[^>]*>?/gm, '').trim();
+    return cleanText || null;
+  };
+
   if (loading) {
     return (
       <div className="appliance-detail-page min-h-screen pt-20 pb-24 bg-white">
@@ -379,13 +396,19 @@ export function ServiceDetailsPage({
       return <p className="text-gray-600 text-sm leading-relaxed">No description available.</p>;
     }
 
+    // Strip leading empty paragraphs or break tags often created by editors
+    let cleaned = String(htmlContent)
+      .replace(/^(<p[^>]*>(&nbsp;|\s|<br\s*\/?>)*<\/p>\s*)+/gi, '')
+      .replace(/^(<br\s*\/?>\s*)+/gi, '')
+      .trim();
+
     return (
       <div
-        className={`rich-text-content article-ck-content text-sm text-gray-700 leading-relaxed ${isExpanded ? '' : 'line-clamp-6'}`}
+        className={`rich-text-content article-ck-content text-sm text-gray-700 leading-relaxed [&_p]:mt-0 [&_p]:mb-3 ${isExpanded ? '' : 'line-clamp-6'}`}
         dangerouslySetInnerHTML={{
-          __html: typeof window !== 'undefined' ? DOMPurify.sanitize(htmlContent, {
+          __html: typeof window !== 'undefined' ? DOMPurify.sanitize(cleaned, {
             ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style']
-          }) : htmlContent,
+          }) : cleaned,
         }}
       />
     );
@@ -497,7 +520,7 @@ export function ServiceDetailsPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="appliance-detail-page min-h-screen pt-20 pb-24 lg:pb-0 bg-white"
+      className="appliance-detail-page min-h-screen pt-24 sm:pt-28 pb-12 bg-white"
     >
       {schemaData && (
         <script
@@ -526,25 +549,12 @@ export function ServiceDetailsPage({
       </div>
 
       {/* ── HERO SECTION ────────────────────────────────────────────────────── */}
-      <section className="relative py-4 sm:py-6 lg:py-12">
+      <section className="relative py-3 sm:py-4 lg:py-6">
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* Back + Breadcrumb row */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col items-start gap-2 sm:gap-3 mb-4"
-          >
-            <div className="w-full min-w-0 overflow-hidden order-1">
-              <div className="text-gray-500 text-[10px] sm:text-xs flex items-center gap-1 sm:gap-1.5 whitespace-nowrap overflow-x-auto scrollbar-hide">
-                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); router.push(c ? `/${c}` : '/'); }} className="hover:text-[#04a99d] transition-colors shrink-0">{category}</button>
-                <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <button onClick={() => { const p = new URLSearchParams(window.location.search); const c = p.get('categorySlug'); const s = p.get('subCategorySlug'); if (c && s) router.push(`/${c}/${s}`); else if (c) router.push(`/${c}`); else router.push('/'); }} className="hover:text-[#04a99d] transition-colors shrink-0">{subCategory}</button>
-                <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <span className="text-gray-400 truncate">{storeData?.title || storeData?.name}</span>
-              </div>
-            </div>
+          {/* Back Button */}
+          <div className="mb-2">
             <button
               onClick={() => {
                 if (onBack) {
@@ -558,25 +568,43 @@ export function ServiceDetailsPage({
                 if (catSlug) { router.push(`/${catSlug}`); return; }
                 router.back();
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/85 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 text-gray-900 hover:bg-white transition-all text-xs sm:text-sm font-bold shrink-0 shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
+          </div>
+
+          {/* Top Center-Aligned Header: H1 Title & SEO Description */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-center max-w-4xl mx-auto mb-6 px-2 space-y-2"
+          >
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight truncate text-center">
+              {storeData.title || storeData.name}
+            </h1>
+
+            {getMetaDescription() && (
+              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed max-w-3xl mx-auto font-medium text-center line-clamp-2">
+                {getMetaDescription()}
+              </p>
+            )}
           </motion.div>
 
           {/* ── Desktop 2-col grid ─────────────────────────────────────────────── */}
-          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-start">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-5 items-start">
 
-            {/* LEFT col: Gallery + Tabs */}
-            <div className="order-2 lg:order-none space-y-4 sm:space-y-6 lg:space-y-8">
+            {/* LEFT col: Image Gallery + Highlights Card */}
+            <div className="order-1 lg:order-none space-y-3.5 sm:space-y-4">
 
               {/* Image Gallery */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="w-full">
-                <div className="relative rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200">
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="w-full">
+                <div className="relative rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm">
                   <div
                     className="relative w-full overflow-hidden"
-                    style={{ aspectRatio: '16/7' }}
+                    style={{ aspectRatio: '16/8' }}
                     onClick={() => { setSelectedImageIndex(currentImageIndex); setIsLightboxOpen(true); }}
                   >
                     <img loading="lazy" decoding="async"
@@ -587,31 +615,31 @@ export function ServiceDetailsPage({
                     />
                     {/* Dots indicator on mobile */}
                     {images.length > 1 && (
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 lg:hidden">
+                      <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1 lg:hidden">
                         {images.map((_, i) => (
-                          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentImageIndex ? 'bg-[#04a99d] w-4' : 'bg-white/40'}`} />
+                          <div key={i} className={`h-1 rounded-full transition-all ${i === currentImageIndex ? 'bg-[#04a99d] w-3.5' : 'bg-white/50 w-1'}`} />
                         ))}
                       </div>
                     )}
                     {images.length > 1 && (
                       <>
-                        <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-all flex items-center justify-center">
-                          <ChevronLeft className="w-5 h-5 text-white" />
+                        <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-all flex items-center justify-center">
+                          <ChevronLeft className="w-4 h-4 text-white" />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-all flex items-center justify-center">
-                          <ChevronRight className="w-5 h-5 text-white" />
+                        <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-all flex items-center justify-center">
+                          <ChevronRight className="w-4 h-4 text-white" />
                         </button>
                       </>
                     )}
                   </div>
                   {/* Thumbnails — hidden on mobile, shown on md+ */}
                   {images.length > 1 && (
-                    <div className="hidden md:flex gap-2 p-3 overflow-x-auto">
+                    <div className="hidden md:flex gap-2 p-2.5 overflow-x-auto bg-slate-50/50 border-t border-slate-100">
                       {images.map((img, idx) => (
                         <button
                           key={idx}
                           onClick={() => { setCurrentImageIndex(idx); setSelectedImageIndex(idx); setIsLightboxOpen(true); }}
-                          className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-md sm:rounded-lg overflow-hidden transition-all flex-shrink-0 ${currentImageIndex === idx ? 'ring-2 ring-[#037166] scale-105' : 'opacity-60 hover:opacity-100'}`}
+                          className={`relative w-11 h-11 sm:w-13 sm:h-13 rounded-lg overflow-hidden transition-all flex-shrink-0 ${currentImageIndex === idx ? 'ring-2 ring-[#037166] scale-105' : 'opacity-60 hover:opacity-100'}`}
                         >
                           <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </button>
@@ -621,10 +649,50 @@ export function ServiceDetailsPage({
                 </div>
               </motion.div>
 
-              {/* Tabbed Content */}
-              <div className="bg-[#1a1a1a]/60 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden">
-                {/* Tab bar */}
-                <div className="flex gap-2 p-2 border-b border-white/10 overflow-x-auto scrollbar-hide">
+              {/* Service Highlights & Quick Details Card */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-5 shadow-sm space-y-3">
+                {/* About Service Detailed Description */}
+                <div>
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-1">About Service Overview</h3>
+                  <div className="text-gray-600 text-xs leading-relaxed">
+                    {renderDescription(storeData.description)}
+                  </div>
+                  {storeData.description?.length > 125 && (
+                    <button onClick={() => setIsExpanded(!isExpanded)} className="text-[#04a99d] font-bold mt-1.5 text-[11px] hover:underline focus:outline-none block">
+                      {isExpanded ? 'Read Less' : 'Read More'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Service Highlights — 2-col compact grid */}
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                  {[
+                    { icon: Shield, text: 'Verified & Insured' },
+                    { icon: Award, text: '30-90 Day Warranty' },
+                    { icon: Clock, text: 'Same-Day Service' },
+                    { icon: ThumbsUp, text: 'Satisfaction Guaranteed' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200/80">
+                      <div className="w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: `${accentColor}30` }}>
+                        <item.icon className="w-3 h-3" style={{ color: accentColor }} />
+                      </div>
+                      <span className="text-gray-700 text-[10px] font-medium truncate">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT col: Sticky Tabbed Container + AMC Banner & Book Appointment CTA */}
+            <motion.div
+              initial={{ opacity: 0, x: 15 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+              className="order-2 lg:order-none lg:sticky lg:top-24 space-y-3"
+            >
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                {/* Tab Navigation Bar */}
+                <div className="flex gap-1.5 p-1.5 border-b border-slate-100 bg-slate-50 overflow-x-auto scrollbar-hide">
                   {(() => {
                     const faqs = storeData?.faqs || serviceDetails?.faqs || [];
                     const tabsList = ['About Service', 'Working Images', 'Ratings'];
@@ -635,9 +703,9 @@ export function ServiceDetailsPage({
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 min-w-max px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
-                          ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-lg shadow-[#037166]/30'
-                          : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
+                        className={`flex-1 min-w-max px-3 py-2 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === tab
+                          ? 'bg-gradient-to-r from-[#04a99d] to-[#037166] text-white shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-slate-200/50'
                           }`}
                       >
                         {tab}
@@ -646,16 +714,17 @@ export function ServiceDetailsPage({
                   })()}
                 </div>
 
-                <div className="p-3 sm:p-6">
+                <div className="p-3.5 sm:p-4.5">
                   <AnimatePresence mode="wait">
-                    {/* About Service Tab */}
+                    {/* About Service Tab — Displays Rate Cards */}
                     {(activeTab === 'About Service' || activeTab === 'services') && (
-                      <motion.div key="services" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                        <div className="mb-4">
-                          <h3 className="text-lg font-bold text-gray-900 mb-0.5">About Service</h3>
-                          <p className="text-gray-500 text-xs italic">Approximate service rates (Select a service to proceed)</p>
+                      <motion.div key="services" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+                        <div className="mb-3">
+                          <h3 className="text-base font-extrabold text-gray-900 mb-0.5">Select Service / Rate Cards</h3>
+                          <p className="text-gray-500 text-[11px] italic">Select rate cards below to book appointment</p>
                         </div>
-                        <div className="grid gap-2 pb-4">
+
+                        <div className="grid gap-2 pb-1 max-h-[440px] overflow-y-auto pr-1 custom-scrollbar">
                           {provider_rate_cards.map((card, index) => {
                             const isSelected = selectedCards.some(c => {
                               const getCardKey = (item) => {
@@ -670,23 +739,23 @@ export function ServiceDetailsPage({
                               <div
                                 key={card.id || card._id || index}
                                 onClick={() => toggleRateCard(card)}
-                                className={`p-2 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${isSelected
-                                    ? 'bg-white border-2 border-[#037166] shadow-none ring-0'
-                                    : 'bg-white border-slate-200 hover:border-[#037166]/50 shadow-none'
+                                className={`p-2.5 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${isSelected
+                                    ? 'bg-emerald-50/50 border-2 border-[#037166] shadow-sm'
+                                    : 'bg-white border-slate-200 hover:border-[#037166]/40 shadow-none'
                                   }`}
                               >
-                                <div className="flex gap-2.5 sm:gap-3 items-center">
-                                  {/* Selection Indicator (Left-aligned Checkbox style) */}
-                                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${isSelected
-                                      ? 'bg-[#037166] border-[#037166] shadow-[0_0_10px_rgba(3,113,102,0.5)]'
-                                      : 'border-slate-300 group-hover:border-[#037166]/60'
+                                <div className="flex gap-2 sm:gap-2.5 items-center">
+                                  {/* Checkbox indicator */}
+                                  <div className={`w-4.5 h-4.5 rounded flex items-center justify-center transition-all flex-shrink-0 ${isSelected
+                                      ? 'bg-[#037166] border-[#037166] shadow-sm'
+                                      : 'border border-slate-300 group-hover:border-[#037166]/60'
                                     }`}>
-                                    <Check className={`w-3.5 h-3.5 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={4} />
+                                    <Check className={`w-3 h-3 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={3.5} />
                                   </div>
 
                                   {/* Rate Card Thumbnail */}
                                   {card.image && (
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/20">
+                                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-100">
                                       <img loading="lazy" decoding="async"
                                         src={`https://api.doorstephub.com/${card.image}`}
                                         alt={card.title}
@@ -699,16 +768,16 @@ export function ServiceDetailsPage({
                                   <div className="flex-1 flex flex-col justify-between min-w-0">
                                     <div className="flex items-start justify-between gap-2">
                                       <div className="min-w-0 flex-1">
-                                        <h6 className={`text-xs sm:text-sm font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#04a99d]' : 'text-gray-900 group-hover:text-[#04a99d]'}`}>{card.title}</h6>
+                                        <h6 className={`text-xs font-bold transition-colors leading-snug mb-0.5 truncate sm:whitespace-normal ${isSelected ? 'text-[#037166]' : 'text-gray-900 group-hover:text-[#037166]'}`}>{card.title}</h6>
                                         {card.reason && (
                                           <p className="text-gray-500 text-[10px] leading-relaxed line-clamp-1">{card.reason}</p>
                                         )}
                                       </div>
 
-                                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                        <span className="text-[#04a99d] font-bold text-sm sm:text-base whitespace-nowrap"><span className='italic font-normal text-[9px] text-gray-500'>Starts from </span>₹{card.price}</span>
+                                      <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                                        <span className="text-[#037166] font-black text-xs sm:text-sm whitespace-nowrap"><span className='italic font-normal text-[9px] text-gray-500'>Starts from </span>₹{card.price}</span>
 
-                                        {/* See More Button - Below Price */}
+                                        {/* View Images Button */}
                                         {card.banner_images?.length > 0 && (
                                           <button
                                             onClick={(e) => {
@@ -720,10 +789,10 @@ export function ServiceDetailsPage({
                                                 title: card.title
                                               });
                                             }}
-                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#037166]/10 text-[#04a99d] hover:bg-[#037166]/20 transition-all text-[9px] font-bold border border-[#037166]/20"
+                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#037166]/10 text-[#037166] hover:bg-[#037166]/20 transition-all text-[9px] font-bold border border-[#037166]/20"
                                           >
                                             <span className="hidden xs:inline">View </span>Images
-                                            <ArrowRight className="w-3 h-3" />
+                                            <ArrowRight className="w-2.5 h-2.5" />
                                           </button>
                                         )}
                                       </div>
@@ -739,131 +808,87 @@ export function ServiceDetailsPage({
 
                     {/* Working Images Tab */}
                     {activeTab === 'Working Images' && (
-                      <motion.div key="Working Images" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Working Images</h3>
+                      <motion.div key="Working Images" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+                        <h3 className="text-base font-bold text-gray-900 mb-3">Working Images</h3>
                         {serviceImages.length > 0 ? (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {serviceImages.map((img, idx) => (
                               <div
                                 key={idx}
                                 onClick={() => { setSelectedImageIndex(idx + 1); setIsLightboxOpen(true); }}
-                                className="aspect-square rounded-xl overflow-hidden group cursor-pointer relative border border-white/10"
+                                className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative border border-slate-200"
                               >
-                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} alt={`Working Images ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} alt={`Working Images ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" decoding="async" />
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No working images available</div>
+                          <div className="text-center py-8 text-gray-500 bg-slate-50 rounded-lg border border-slate-200 border-dashed text-xs">No working images available</div>
                         )}
                       </motion.div>
                     )}
 
                     {/* Ratings Tab */}
                     {(activeTab === 'Ratings' || activeTab === 'reviews') && (
-                      <motion.div key="reviews" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Ratings</h3>
+                      <motion.div key="reviews" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+                        <h3 className="text-base font-bold text-gray-900 mb-3">Ratings & Customer Reviews</h3>
                         {customerRatings.length > 0 ? (
-                          <div className="space-y-3">
+                          <div className="space-y-2.5">
                             {customerRatings.slice(0, visibleReviews).map((review, idx) => (
-                              <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-[#037166]/30 transition-all">
-                                <div className="flex items-start gap-3">
-                                  <div className="w-9 h-9 rounded-full bg-[#037166] flex items-center justify-center font-bold text-white flex-shrink-0 text-sm">{review.name.charAt(0)}</div>
+                              <div key={idx} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div className="flex items-start gap-2.5">
+                                  <div className="w-7 h-7 rounded-full bg-[#037166] flex items-center justify-center font-bold text-white flex-shrink-0 text-xs">{review.name.charAt(0)}</div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <h5 className="text-gray-900 font-bold text-sm truncate">{review.name}</h5>
-                                      <span className="text-gray-500 text-[10px] flex-shrink-0 ml-2">{new Date(review.date).toLocaleDateString()}</span>
+                                    <div className="flex items-center justify-between mb-0.5">
+                                      <h5 className="text-gray-900 font-bold text-xs truncate">{review.name}</h5>
+                                      <span className="text-gray-500 text-[9px] ml-2">{new Date(review.date).toLocaleDateString()}</span>
                                     </div>
-                                    <div className="flex items-center gap-0.5 mb-2">
+                                    <div className="flex items-center gap-0.5 mb-1">
                                       {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-[#fbbf24] text-[#fbbf24]' : 'text-white/20'}`} />
+                                        <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-[#fbbf24] text-[#fbbf24]' : 'text-slate-300'}`} />
                                       ))}
                                     </div>
-                                    <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                                    <p className="text-gray-600 text-xs leading-snug">{review.comment}</p>
                                   </div>
                                 </div>
                               </div>
                             ))}
                             {customerRatings.length > visibleReviews && (
-                              <div className="flex justify-center mt-4">
-                                <button onClick={() => setVisibleReviews(prev => prev + 4)} className="px-6 py-2.5 bg-white hover:bg-slate-50 text-gray-900 text-sm font-semibold rounded-xl transition-colors border border-slate-200">Show More</button>
+                              <div className="flex justify-center mt-3">
+                                <button onClick={() => setVisibleReviews(prev => prev + 4)} className="px-4 py-1.5 bg-white hover:bg-slate-50 text-gray-900 text-xs font-semibold rounded-lg border border-slate-200">Show More</button>
                               </div>
                             )}
                           </div>
                         ) : (
-                          <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No reviews available yet</div>
+                          <div className="text-center py-8 text-gray-500 bg-slate-50 rounded-lg border border-slate-200 border-dashed text-xs">No reviews available yet</div>
                         )}
                       </motion.div>
                     )}
 
                     {/* FAQs Tab */}
                     {activeTab === 'FAQs' && (
-                      <motion.div
-                        key="FAQs"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
+                      <motion.div key="FAQs" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+                        <h3 className="text-base font-bold text-gray-900 mb-3">Frequently Asked Questions</h3>
                         {(() => {
                           const faqs = storeData?.faqs || serviceDetails?.faqs || [];
                           return faqs.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {faqs.map((faq, index) => (
-                                <div
-                                  key={index}
-                                  className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                                    faqActiveIndex === index
-                                      ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
-                                      : 'bg-white border-slate-200 hover:border-[#037166]/30'
-                                  }`}
-                                >
-                                  <button
-                                    onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
-                                    className="w-full px-5 py-4 flex items-center justify-between text-left gap-4"
-                                  >
-                                    <span className="text-sm font-bold text-gray-900">
-                                      {faq.question || faq.title}
-                                    </span>
-                                    <span className="text-[#037166] flex-shrink-0">
-                                      <svg
-                                        className={`w-4 h-4 transition-transform duration-300 ${
-                                          faqActiveIndex === index ? 'rotate-180' : ''
-                                        }`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M19 9l-7 7-7-7"
-                                        />
-                                      </svg>
-                                    </span>
+                                <div key={index} className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                                  <button onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)} className="w-full px-3 py-2.5 flex items-center justify-between text-left gap-2 text-xs font-bold text-gray-900">
+                                    <span>{faq.question || faq.title}</span>
+                                    <ChevronRight className={`w-3.5 h-3.5 text-[#037166] transition-transform ${faqActiveIndex === index ? 'rotate-90' : ''}`} />
                                   </button>
-                                  <AnimatePresence initial={false}>
-                                    {faqActiveIndex === index && (
-                                      <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                      >
-                                        <div className="px-5 pb-4 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-slate-100 pt-3">
-                                          {faq.answer || faq.description}
-                                        </div>
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
+                                  {faqActiveIndex === index && (
+                                    <div className="px-3 pb-2.5 text-[11px] text-gray-600 border-t border-slate-100 pt-1.5 leading-relaxed">
+                                      {faq.answer || faq.description}
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-10 text-white/50 bg-white/5 rounded-xl border border-white/10 border-dashed text-sm">No FAQs available yet</div>
+                            <div className="text-center py-8 text-gray-500 bg-slate-50 rounded-lg border border-slate-200 border-dashed text-xs">No FAQs available yet</div>
                           );
                         })()}
                       </motion.div>
@@ -871,126 +896,46 @@ export function ServiceDetailsPage({
                   </AnimatePresence>
                 </div>
               </div>
-            </div>
 
-            {/* RIGHT col / MOBILE TOP: Service Info */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="order-1 lg:order-none lg:sticky lg:top-24 space-y-4"
-            >
-              {/* Title + Rating */}
-              <div>
-                <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-1.5 sm:mb-2 break-words">
-                  {storeData.title || storeData.name}
-                </h1>
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
-                    <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                    <span className="text-gray-900 font-bold text-sm">{storeData.avgRating}</span>
-                    <span className="text-gray-500 text-[10px] sm:text-xs">({storeData.totalRatings})</span>
-                  </div>
-                  <div className="px-3 py-1.5 rounded-full bg-white/80 border border-slate-200 text-gray-600 text-xs flex-shrink-0">
-                    {storeData.totalOrders}+ Orders
-                  </div>
-                </div>
-              </div>
+              <AmcCoverageBanner
+                eligibility={amcEligibility}
+                loading={amcLoading}
+              />
 
-              {/* Description */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4">
-                {renderDescription(storeData.description)}
-                {storeData.description?.length > 125 && (
-                  <button onClick={() => setIsExpanded(!isExpanded)} className="text-[#04a99d] font-bold mt-2 text-sm hover:underline focus:outline-none">
-                    {isExpanded ? 'Read Less' : 'Read More'}
-                  </button>
-                )}
-              </div>
-
-              {/* Service Highlights — 2-col compact grid */}
-              <div className="grid grid-cols-2 gap-2.5">
-                {[
-                  { icon: Shield, text: 'Verified & Insured' },
-                  { icon: Award, text: '30-90 Day Warranty' },
-                  { icon: Clock, text: 'Same-Day Service' },
-                  { icon: ThumbsUp, text: 'Satisfaction Guaranteed' },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/10 min-w-0">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: `${accentColor}40` }}>
-                      <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: accentColor }} />
-                    </div>
-                    <span className="text-gray-700 text-[10px] sm:text-xs font-medium leading-tight truncate">{item.text}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Desktop Book Now button (hidden on mobile — use sticky bar) */}
-              <div className="hidden lg:block space-y-3">
-                <AmcCoverageBanner
-                  eligibility={amcEligibility}
-                  loading={amcLoading}
-                />
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  onClick={handleBookNow}
-                  className="w-full px-4 py-3 rounded-full bg-gradient-to-r from-[#e89117] to-[#00796B] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#037166]/40 transition-all flex items-center justify-center gap-3 group"
-                >
-                  Book Now
-                  <ArrowRight className="w-2 h-5 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-              </div>
-
-              {/* FAQs — only when API returns faqs */}
-              {(() => {
-                const faqs = storeData?.faqs || serviceDetails?.faqs || [];
-                if (!faqs.length) return null;
-                return (
-                  <div className="border border-slate-200 rounded-2xl overflow-hidden">
-                    <h3 className="text-sm font-bold text-gray-900 px-4 pt-4 pb-2">Frequently Asked Questions</h3>
-                    <div className="divide-y divide-slate-100">
-                      {faqs.map((faq, index) => (
-                        <div key={index} className="overflow-hidden">
-                          <button
-                            onClick={() => setFaqActiveIndex(faqActiveIndex === index ? null : index)}
-                            className="w-full px-4 py-3 flex items-center justify-between text-left gap-3 hover:bg-slate-50 transition-colors"
-                          >
-                            <span className="text-xs sm:text-sm font-semibold text-gray-800">
-                              {faq.question || faq.title}
-                            </span>
-                            <svg
-                              className={`w-4 h-4 flex-shrink-0 text-[#037166] transition-transform duration-300 ${
-                                faqActiveIndex === index ? 'rotate-180' : ''
-                              }`}
-                              fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
-                          <AnimatePresence initial={false}>
-                            {faqActiveIndex === index && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.25 }}
-                              >
-                                <div className="px-4 pb-3 text-xs text-gray-600 leading-relaxed border-t border-slate-100 pt-2">
-                                  {faq.answer || faq.description}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-
+              {/* Book Appointment CTA Button */}
+              <motion.button
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                onClick={handleBookNow}
+                className="w-full px-5 py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 group focus:outline-none"
+              >
+                Book Appointment
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </motion.button>
             </motion.div>
           </div>
+        </div>
+
+        {/* Mobile Fixed Sticky Bottom CTA Bar */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2.5 shadow-2xl flex items-center justify-between gap-3">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
+              {selectedCards.length > 0 ? `${selectedCards.length} Selected` : storeData.title || storeData.name}
+            </span>
+            <span className="text-sm font-black text-[#037166]">
+              {selectedCards.length > 0
+                ? `₹${selectedCards.reduce((sum, card) => sum + (Number(card.price) || 0), 0)}`
+                : 'Select Service Rate Cards'}
+            </span>
+          </div>
+          <button
+            onClick={handleBookNow}
+            className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-extrabold text-xs uppercase tracking-wider shadow-md active:scale-95 flex items-center gap-1.5"
+          >
+            Book Appointment
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       </section>
 

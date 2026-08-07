@@ -63,8 +63,8 @@ export function FloatingActionButtons() {
             {/* Bottom-right: Book Appointment (desktop) + Book Now pill (mobile) */}
             <div className="fixed bottom-6 right-4 sm:right-6 z-50 flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:gap-4">
 
-                {/* Book Appointment Button - Desktop only, hidden on booking page */}
-                {!isBookingPage && (
+                {/* Book Appointment Button - Desktop only, hidden on booking page and service detail pages */}
+                {!isBookingPage && !isServiceDetailPage && (
                     <Link href="/book-appointment" className="hidden sm:block">
                         <motion.button
                             whileHover={{ scale: 1.05 }}

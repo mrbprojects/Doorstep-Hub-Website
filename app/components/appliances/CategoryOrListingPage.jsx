@@ -104,18 +104,40 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                     }
                 }
 
-                // 2. Try to fetch as a Category first
-                const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ slug: slug })
-                });
+                // 2. Try to fetch as a Category first (handling flat SEO URLs like /water-purifier-repair-service-center-kakinada)
+                let candidateSlugs = [slug];
+                let detectedCityName = null;
 
-                const catData = await catResponse.json();
-                if (catData.success && Array.isArray(catData.data) && catData.data.length > 0 && catData.data.length < 20) {
-                    setCategoryData(catData);
-                    setViewType('category');
-                    return;
+                if (slug.includes('-service-center-')) {
+                    const [catPart, cityPart] = slug.split('-service-center-');
+                    if (cityPart) {
+                        detectedCityName = cityPart.charAt(0).toUpperCase() + cityPart.slice(1).replace(/-/g, ' ');
+                    }
+                    candidateSlugs = [
+                        `${catPart}-services`,
+                        catPart,
+                        slug
+                    ];
+                }
+
+                for (const candidate of candidateSlugs) {
+                    try {
+                        const catResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ slug: candidate })
+                        });
+
+                        const catData = await catResponse.json();
+                        if (catData.success && Array.isArray(catData.data) && catData.data.length > 0) {
+                            setCategoryData({
+                                ...catData,
+                                detectedCity: detectedCityName || catData.detectedCity
+                            });
+                            setViewType('category');
+                            return;
+                        }
+                    } catch (e) { /* try next candidate */ }
                 }
 
                 // 3. Resolve root-level appliance service center slugs.

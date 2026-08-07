@@ -2,6 +2,7 @@
   "name": "DoorstepHub",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -73,6 +74,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seo:reconcile-urls": "node scripts/reconcile-urls.js",
+    "seo:validate-sitemaps": "node scripts/validate-sitemaps.js",
+    "seo:audit-url-counts": "node scripts/audit-url-counts.js",
+    "seo:audit-images": "node scripts/audit-images.js",
+    "test": "node --test tests/seo.test.js",
+    "test:seo": "node --test tests/seo.test.js"
   }
 }
+

@@ -100,9 +100,10 @@ export default function PartnerSubscriptionPage() {
         setPurchasing(planId);
         try {
             const res = await initiateSubscriptionGateway(token, planId);
-            const url = res?.paymentUrl || res?.data?.paymentUrl || res?.redirectUrl || res?.data?.redirectUrl;
-            if (url) {
-                window.location.href = url;
+            const accessKey = res?.access_key || res?.accessKey || res?.data?.access_key;
+            if (accessKey) {
+                const paymentUrl = `https://pay.easebuzz.in/v2/pay/${accessKey}`;
+                window.location.href = paymentUrl;
             } else {
                 toast.error(res?.message || 'Could not initiate payment');
             }

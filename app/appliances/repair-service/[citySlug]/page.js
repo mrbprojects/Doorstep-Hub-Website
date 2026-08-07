@@ -17,6 +17,8 @@ import {
   Smartphone,
   ChevronDown,
   HelpCircle,
+  Laptop,
+  Printer,
 } from 'lucide-react';
 import { fetchCategories, fetchCities, fetchServiceBanners, fetchApplianceServiceBanners } from '@/lib/api';
 import { buildApplianceCategoryCityPublicPath } from '@/lib/applianceRepairSlugs';
@@ -44,20 +46,46 @@ const CATEGORY_ICONS = {
   oven: Microwave,
   'water-purifier': Droplets,
   microwave: Microwave,
+  laptop: Laptop,
+  printer: Printer,
+  mobile: Smartphone,
+
+  // Full repair slugs mapping
+  'ac-repair': Snowflake,
+  'computer-repair': Monitor,
+  'tv-repair': Tv,
+  'television-repair': Tv,
+  'washing-machine-repair': Waves,
+  'refrigerator-repair': Snowflake,
+  'geyser-repair': Flame,
+  'oven-repair': Microwave,
+  'microwave-oven-repair': Microwave,
+  'microwave-repair': Microwave,
+  'water-purifier-repair': Droplets,
+  'ro-repair': Droplets,
+  'laptop-repair': Laptop,
+  'printer-repair': Printer,
+  'mobile-repair': Smartphone,
+  'dishwasher-repair': Waves,
 };
 
 function CategoryIconBadge({ slug }) {
-  const Icon = CATEGORY_ICONS[slug] || Wrench;
+  const cleanSlug = String(slug || '')
+    .toLowerCase()
+    .replace(/-services$/, '')
+    .replace(/-service$/, '')
+    .trim();
+  const Icon = CATEGORY_ICONS[cleanSlug] || CATEGORY_ICONS[slug] || Wrench;
   return (
-    <div className="absolute -bottom-3 left-1/2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-[#037166] text-white shadow-md sm:-bottom-5 sm:h-10 sm:w-10 sm:border-[3px]">
-      <Icon size={15} strokeWidth={2.2} className="sm:h-[18px] sm:w-[18px]" />
+    <div className="absolute -bottom-2.5 left-1/2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-[#037166] text-white shadow-md sm:-bottom-4 sm:h-10 sm:w-10 sm:border-[3px] group-hover:bg-[#04a99d] group-hover:scale-110 transition-all duration-300 ease-out">
+      <Icon size={15} strokeWidth={2.2} className="sm:h-[18px] sm:w-[18px] group-hover:rotate-12 transition-transform duration-300 ease-out" />
     </div>
   );
 }
 
 function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onActiveBannerChange }) {
   return (
-    <section className="relative z-10 w-full bg-[#f0f0f0] pt-20">
+    <section className="relative z-10 w-full bg-[#eef2f1] pt-28 sm:pt-32 pb-2">
       <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <div
           className={`relative overflow-hidden rounded-2xl bg-[#071018] sm:rounded-[20px] ${
@@ -346,8 +374,8 @@ function CategoryPageContent() {
 
       {/* Categories — sits below hero so banner stays fully visible */}
       <div className="relative z-20 mx-auto max-w-[1400px] px-0 sm:px-4 lg:px-8">
-        <div className="rounded-t-[26px] bg-white px-3 py-5 shadow-xl shadow-black/5 sm:px-6 sm:py-7 md:px-8 md:py-8">
-          <div className="mb-5 sm:mb-6">
+        <div className="rounded-t-[26px] bg-white px-3 py-3 shadow-xl shadow-black/5 sm:px-6 sm:py-4 md:px-8 md:py-5">
+          <div className="mb-3 sm:mb-4">
             <h1 className="px-2 text-center text-lg font-black tracking-tight text-gray-900 sm:text-2xl md:text-3xl">
               {pageTitle}
             </h1>
@@ -381,7 +409,7 @@ function CategoryPageContent() {
             </span>
           </div> */}
 
-          <div className="grid grid-cols-2 gap-x-2 gap-y-7 pt-10 min-[400px]:grid-cols-3 min-[400px]:gap-x-2.5 sm:gap-x-3 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-5 pt-6 min-[400px]:grid-cols-3 sm:gap-x-4 sm:gap-y-6 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
             {filtered.map((cat) => (
               <button
                 key={cat.slug}
@@ -390,29 +418,29 @@ function CategoryPageContent() {
                   const publicPath = buildApplianceCategoryCityPublicPath(cat.slug, citySlug);
                   router.push(publicPath || `/appliances/repair-service/${citySlug}/${cat.slug}`);
                 }}
-                className="group w-full text-left"
+                className="group w-full text-left focus:outline-none"
               >
-                <div className="relative mx-auto mb-6 w-full max-w-[200px] sm:mb-7">
-                  <div className="overflow-hidden rounded-[16px] bg-[#f3f6f5] shadow-md ring-1 ring-black/5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lg sm:rounded-[22px]">
-                    <div className="aspect-[4/5] w-full overflow-hidden">
+                <div className="relative mx-auto mb-4 w-full max-w-[180px] sm:mb-5">
+                  <div className="overflow-hidden rounded-[16px] bg-[#f3f6f5] shadow-md ring-1 ring-black/5 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-xl group-hover:ring-[#037166]/25 sm:rounded-[22px]">
+                    <div className="aspect-square w-full overflow-hidden">
                       {cat.image ? (
                         <img
                           loading="lazy"
                           decoding="async"
                           src={cat.image}
                           alt={cat.name}
-                          className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
+                          className="h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-[#eef3f1]">
-                          <Wrench size={32} className="text-[#037166]/30" />
+                          <Wrench size={32} className="text-[#037166]/30 group-hover:rotate-12 transition-transform duration-300 ease-out" />
                         </div>
                       )}
                     </div>
                   </div>
                   <CategoryIconBadge slug={cat.slug} />
                 </div>
-                <p className="px-0.5 text-center text-[20px] font-bold leading-snug text-gray-800 min-[400px]:text-xs sm:text-sm md:text-[15px]">
+                <p className="px-0.5 text-center text-xs font-black leading-snug text-gray-800 sm:text-sm group-hover:text-[#037166] transition-colors duration-300 ease-out">
                   {cat.name}
                 </p>
                 {cat.description ? (
@@ -424,18 +452,18 @@ function CategoryPageContent() {
             ))}
 
             <div className="group w-full text-left">
-              <div className="relative mx-auto mb-6 w-full max-w-[200px] sm:mb-7">
-                <div className="flex aspect-[4/5] flex-col items-center justify-center rounded-[16px] bg-gradient-to-b from-[#e8f5f2] to-[#dff0ec] px-2 py-3 shadow-md ring-1 ring-[#037166]/10 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lg sm:rounded-[22px] sm:px-3 sm:py-4">
-                  <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#037166] shadow-sm sm:mb-2.5 sm:h-12 sm:w-12 sm:rounded-2xl">
-                    <Smartphone size={20} strokeWidth={1.8} className="sm:h-6 sm:w-6" />
+              <div className="relative mx-auto mb-4 w-full max-w-[180px] sm:mb-5">
+                <div className="flex aspect-square flex-col items-center justify-center rounded-[16px] bg-gradient-to-b from-[#e8f5f2] to-[#dff0ec] px-1.5 py-2 shadow-md ring-1 ring-[#037166]/10 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lg sm:rounded-[22px] sm:px-2.5 sm:py-3">
+                  <div className="mb-1 flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#037166] shadow-sm sm:mb-1.5 sm:h-10 sm:w-10 sm:rounded-xl">
+                    <Smartphone size={16} strokeWidth={1.8} className="sm:h-5 sm:w-5" />
                   </div>
-                  <p className="text-center text-[10px] font-black leading-tight text-[#037166] min-[400px]:text-[11px] sm:text-xs">
-                    Download Our Apps
+                  <p className="text-center text-[8px] font-black leading-tight text-[#037166] sm:text-[10px]">
+                    Download Apps
                   </p>
-                  <p className="mt-1 px-1 text-center text-[9px] font-medium leading-snug text-[#037166]/70 min-[400px]:text-[10px] sm:text-[11px]">
-                    Book faster on iOS and Android
+                  <p className="mt-0.5 hidden px-1 text-center text-[8px] font-medium leading-snug text-[#037166]/70 sm:block sm:text-[9px]">
+                    Book faster on mobile
                   </p>
-                  <div className="mt-2 flex w-full max-w-[148px] flex-col gap-2 sm:mt-2.5 sm:max-w-[160px]">
+                  <div className="mt-1 flex w-full max-w-[110px] flex-col gap-1 sm:mt-1.5 sm:max-w-[130px]">
                     <a
                       href={appLinks.android}
                       target="_blank"
@@ -471,7 +499,7 @@ function CategoryPageContent() {
                   </div>
                 </div>
               </div>
-              <p className="text-center text-[11px] font-bold leading-snug text-[#037166] min-[400px]:text-xs sm:text-sm">
+              <p className="text-center text-xs font-black leading-snug text-[#037166] sm:text-sm">
                 Get the App
               </p>
             </div>

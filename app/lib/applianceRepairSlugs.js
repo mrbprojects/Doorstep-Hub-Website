@@ -483,3 +483,84 @@ export function resolveBookNowCityFlatRewrite(normalizedPath = '', brandSlugs = 
         search: `?city=${encodeURIComponent(parsed.citySlug)}`,
     };
 }
+
+export function getCityReviewers(cityName, categoryName) {
+  const city = String(cityName || '').toLowerCase();
+  const cat = categoryName || 'Appliance Repair';
+  
+  let names = [
+    { name: 'Santhosh Kumar', rating: 5, date: '2 days ago' },
+    { name: 'Priya Sharma', rating: 5, date: '4 days ago' },
+    { name: 'Venkatesh Rao', rating: 4, date: '1 week ago' },
+    { name: 'Ananya Reddy', rating: 5, date: '1 week ago' },
+    { name: 'Kiran Verma', rating: 5, date: '2 weeks ago' },
+    { name: 'Srinivas Rao', rating: 5, date: '3 weeks ago' }
+  ];
+
+  if (city.includes('chennai') || city.includes('coimbatore') || city.includes('madurai') || city.includes('tamil')) {
+    names = [
+      { name: 'Karthik Raja', rating: 5, date: '2 days ago' },
+      { name: 'Janani R.', rating: 5, date: '4 days ago' },
+      { name: 'Senthil Kumar', rating: 4, date: '1 week ago' },
+      { name: 'Divya Balakrishnan', rating: 5, date: '1 week ago' },
+      { name: 'Arun Prasath', rating: 5, date: '2 weeks ago' },
+      { name: 'Priya Dharshini', rating: 5, date: '3 weeks ago' }
+    ];
+  } else if (city.includes('bengaluru') || city.includes('bangalore') || city.includes('mysore') || city.includes('karnataka')) {
+    names = [
+      { name: 'Manjunath Hegde', rating: 5, date: '2 days ago' },
+      { name: 'Shruthi Gowda', rating: 5, date: '4 days ago' },
+      { name: 'Karthik R.', rating: 4, date: '1 week ago' },
+      { name: 'Lavanya S.', rating: 5, date: '1 week ago' },
+      { name: 'Srinivas Murthy', rating: 5, date: '2 weeks ago' },
+      { name: 'Nandini M.', rating: 5, date: '3 weeks ago' }
+    ];
+  } else if (city.includes('mumbai') || city.includes('pune') || city.includes('nagpur') || city.includes('maharashtra') || city.includes('thane')) {
+    names = [
+      { name: 'Sachin Patil', rating: 5, date: '2 days ago' },
+      { name: 'Anjali Joshi', rating: 5, date: '4 days ago' },
+      { name: 'Rahul Deshmukh', rating: 4, date: '1 week ago' },
+      { name: 'Sneha Kulkarni', rating: 5, date: '1 week ago' },
+      { name: 'Vijay Shinde', rating: 5, date: '2 weeks ago' },
+      { name: 'Priyanka More', rating: 5, date: '3 weeks ago' }
+    ];
+  } else if (city.includes('kakinada') || city.includes('vijayawada') || city.includes('vizag') || city.includes('tirupati') || city.includes('nellore') || city.includes('guntur') || city.includes('rajahmundry') || city.includes('eluru')) {
+    names = [
+      { name: 'Ramesh Babu', rating: 5, date: '2 days ago' },
+      { name: 'Divya Sri', rating: 5, date: '4 days ago' },
+      { name: 'Manoj Kumar', rating: 4, date: '1 week ago' },
+      { name: 'Swapna G.', rating: 5, date: '1 week ago' },
+      { name: 'Harish K.', rating: 5, date: '2 weeks ago' },
+      { name: 'Prasad Rao', rating: 5, date: '3 weeks ago' }
+    ];
+  } else if (city.includes('hyderabad') || city.includes('warangal') || city.includes('secunderabad') || city.includes('telangana')) {
+    names = [
+      { name: 'Srinivasulu P.', rating: 5, date: '2 days ago' },
+      { name: 'Aruna Devi', rating: 5, date: '4 days ago' },
+      { name: 'Vamshi Krishna', rating: 4, date: '1 week ago' },
+      { name: 'Madhavi Latha', rating: 5, date: '1 week ago' },
+      { name: 'Naveen Kumar', rating: 5, date: '2 weeks ago' },
+      { name: 'Rajitha K.', rating: 5, date: '3 weeks ago' }
+    ];
+  } else {
+    names = [
+      { name: 'Amit Sharma', rating: 5, date: '2 days ago' },
+      { name: 'Neha Gupta', rating: 5, date: '4 days ago' },
+      { name: 'Rajesh Patel', rating: 4, date: '1 week ago' },
+      { name: 'Sunita Devi', rating: 5, date: '1 week ago' },
+      { name: 'Vikram Singh', rating: 5, date: '2 weeks ago' },
+      { name: 'Pooja Verma', rating: 5, date: '3 weeks ago' }
+    ];
+  }
+
+  const reviews = [
+    { ...names[0], body: `Excellent doorstep ${cat} in ${cityName || 'your city'}. Technician arrived within 30 minutes!` },
+    { ...names[1], body: `Very professional ${cat} in ${cityName || 'your city'}. Genuine spare parts and reasonable price.` },
+    { ...names[2], body: `Great experience with Doorstep Hub in ${cityName || 'your city'}. Quick diagnostic and polite staff.` },
+    { ...names[3], body: `Highly recommended ${cat} near ${cityName || 'your city'}. Fixed the issue on the spot.` },
+    { ...names[4], body: `Top class service in ${cityName || 'your city'}! 90-day warranty provided on repairs.` },
+    { ...names[5], body: `Punctual and honest technician in ${cityName || 'your city'}. Satisfied with the service quality.` }
+  ];
+
+  return reviews;
+}

@@ -192,7 +192,7 @@ function BookNowPageContent() {
     <div className="min-h-screen bg-white">
       <Header theme={appliancesTheme} />
       
-      <main className="w-full px-6 lg:px-8 py-12">
+      <main className="w-full px-6 lg:px-8 pt-24 sm:pt-28 pb-12">
         {schemaData && (
           <script
             type="application/ld+json"
@@ -201,79 +201,59 @@ function BookNowPageContent() {
         )}
         <div className="w-full">
 
-          {/* Back button */}
-          <button 
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-sm font-black text-gray-400 hover:text-[#037166] transition-colors mb-8 group"
-          >
-            <ChevronLeft size={18} className="transition-transform group-hover:-translate-x-1" />
-            GO BACK
-          </button>
-          <div className="mb-6">
+          <div className="mb-4">
             <button
               onClick={() => router.back()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-xs font-black uppercase tracking-wider text-gray-600 hover:text-[#037166] hover:border-[#037166]/30 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-xs font-black uppercase tracking-wider text-gray-600 hover:text-[#037166] hover:border-[#037166]/30 transition-all focus:outline-none"
             >
               <ChevronLeft size={14} />
               Back
             </button>
           </div>
 
-        <div className="flex flex-col lg:flex-row gap-10 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
           {/* ── LEFT SECTION: IMAGE (STICKY) ── */}
-          <div className="w-full lg:w-[42%] lg:sticky lg:top-24">
+          <div className="w-full lg:w-[35%] lg:sticky lg:top-28">
             <div 
-              className="relative aspect-[1/1] w-full group overflow-hidden rounded-3xl bg-gray-50 border border-gray-100"
+              className="relative aspect-[4/3] w-full group overflow-hidden rounded-2xl bg-gray-50 border border-gray-100"
             >
               {service.image ? (
                 <div className="relative w-full h-full z-10">
                   <img loading="lazy" decoding="async" 
                     src={imageUrl} 
                     alt={service.serviceName} 
-                    className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-700 group-hover:scale-105" 
+                    className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105" 
                   />
                 </div>
               ) : (
-                <Wrench size={80} className="text-gray-200" />
+                <Wrench size={48} className="text-gray-200" />
               )}
               
               {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-transparent group-hover:bg-[#037166]/5 transition-colors z-20 rounded-3xl border border-transparent group-hover:border-[#037166]/20" />
+              <div className="absolute inset-0 bg-transparent group-hover:bg-[#037166]/5 transition-colors z-20 rounded-2xl border border-transparent group-hover:border-[#037166]/20" />
 
               {/* Decorative background circle */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#037166]/5 rounded-full blur-3xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-[#037166]/5 rounded-full blur-3xl" />
             </div>
           </div>
 
           {/* ── RIGHT SECTION: CONTENT ── */}
-          <div className="w-full lg:w-[58%]">
-            <div className="py-2 pb-32 lg:pb-20 flex flex-col">
-              {/*
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <span className="px-3 py-1 rounded-full bg-[#037166]/10 text-[#037166] text-[10px] font-black uppercase tracking-[0.2em]">
-                  Authorized Service
-                </span>
-                <div className="flex items-center gap-1.5 text-amber-400 bg-amber-50 px-3 py-1 rounded-full border border-amber-100">
-                  <Star size={14} fill="currentColor" />
-                  <span className="text-xs font-black text-amber-600">{service.avgRating}</span>
-                </div>
-              </div>
-              */}
-
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-[1.1] mb-8 tracking-tight">
+          <div className="w-full lg:w-[65%]">
+            <div className="py-1 flex flex-col">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 leading-snug tracking-tight mb-3">
                 {service.serviceName}
               </h1>
 
-              <div className="mb-8">
-                <div className={`relative prose prose-sm sm:prose-base lg:prose-lg text-gray-600 leading-relaxed max-w-none text-justify prose-headings:font-black prose-headings:text-gray-900 prose-p:mb-6 prose-p:text-justify overflow-hidden transition-all duration-300 ${showFullDescription ? 'max-h-none' : 'max-h-[42vh] pb-10'}`}>
+              <div className="mb-4">
+                <div className={`relative prose prose-xs sm:prose-sm text-gray-600 leading-relaxed max-w-none text-justify prose-p:mb-4 overflow-hidden transition-all duration-300 ${showFullDescription ? 'max-h-none' : 'max-h-[30vh] pb-6'}`}>
                   <div dangerouslySetInnerHTML={{ __html: service.description }} />
                   {!showFullDescription && (
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white via-white/90 to-transparent" />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white via-white/90 to-transparent" />
                   )}
                   {!showFullDescription && (
                     <button
                       onClick={() => setShowFullDescription(true)}
-                      className="absolute bottom-0 right-0 text-sm font-black uppercase tracking-wider text-[#037166] hover:text-[#04a99d] transition-colors"
+                      className="absolute bottom-0 right-0 text-xs font-black uppercase tracking-wider text-[#037166] hover:text-[#04a99d] transition-colors focus:outline-none"
                     >
                       ...View More
                     </button>
@@ -282,20 +262,20 @@ function BookNowPageContent() {
                 {showFullDescription && (
                   <button
                     onClick={() => setShowFullDescription(false)}
-                    className="mt-4 mb-28 lg:mb-0 ml-auto block text-sm font-black uppercase tracking-wider text-[#037166] hover:text-[#04a99d] transition-colors"
+                    className="mt-2 ml-auto block text-xs font-black uppercase tracking-wider text-[#037166] hover:text-[#04a99d] transition-colors focus:outline-none"
                   >
                     View Less
                   </button>
                 )}
               </div>
 
-              <div className="mt-auto pt-12 sticky bottom-0 lg:bottom-10 flex justify-center z-40">
+              <div className="mt-4 flex justify-start z-40">
                 <button
                   onClick={() => setModalOpen(true)}
-                  className="w-full sm:w-auto px-12 py-5 sm:py-6 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-black text-sm sm:text-base uppercase tracking-[0.25em] shadow-[0_25px_60px_-15px_rgba(3,113,102,0.4)] hover:shadow-[0_25px_60px_-10px_rgba(3,113,102,0.6)] hover:-translate-y-1 transition-all active:scale-[0.98] flex items-center justify-center gap-4 group"
+                  className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_12px_24px_-5px_rgba(3,113,102,0.3)] hover:shadow-[0_18px_36px_-5px_rgba(3,113,102,0.45)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3 group"
                 >
                   BOOK SERVICE NOW
-                  <ArrowRight size={22} className="transition-transform group-hover:translate-x-2" />
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                 </button>
               </div>
             </div>

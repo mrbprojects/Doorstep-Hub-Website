@@ -280,3 +280,21 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
         },
     };
 }
+
+/**
+ * Generates JSON-LD schema microdata for schema.org/ImageObject
+ */
+export function generateImageObjectSchema({ url, title, caption, width = 1200, height = 630 }) {
+    if (!url) return null;
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'ImageObject',
+        'contentUrl': url,
+        'url': url,
+        'name': title || 'Doorstep Hub Service Image',
+        'description': caption || title || 'Doorstep Hub Home & Appliance Service Image',
+        'width': width,
+        'height': height
+    };
+}
+

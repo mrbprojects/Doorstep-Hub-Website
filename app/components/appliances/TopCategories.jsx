@@ -9,7 +9,7 @@ import { fetchCategories, fetchSubcategoriesByCategorySlug } from '@/lib/api';
 
 const sectionCopy = {
   eyebrow: 'Categories',
-  title: 'Top Categories',
+  title: 'On-Demand Services',
   description:
     'Discover a wide range of essential home and professional services, carefully categorized to help you find exactly what you need, faster and easier.',
 };

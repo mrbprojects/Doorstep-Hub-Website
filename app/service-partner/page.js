@@ -406,6 +406,8 @@ export default function ServicePartnerPage() {
 
                 <ProviderAuthOnboardingSection />
 
+                <SubscriptionPlansSection />
+
                 {/* How It Works — Download App CTA */}
                <section id="app-download" className="relative min-h-[82vh] lg:min-h-[86vh] flex items-center overflow-hidden py-8 lg:py-10">
       {/* Architectural World Background */}
@@ -813,5 +815,165 @@ function FeatureCard({ no, title, desc, icon: Icon, iconBg, corner }) {
         {desc}
       </p>
     </article>
+  );
+}
+
+function SubscriptionPlansSection() {
+  const plans = [
+    {
+      badge: '★ BASIC PLAN',
+      title: 'Pay & Get Access',
+      price: '₹699',
+      period: '30 Days',
+      tagline: 'Quick access to local customer business enquiries.',
+      headerBg: 'from-slate-800 to-[#025951]',
+      glowColor: 'group-hover:shadow-emerald-500/10',
+      highlights: [
+        'Direct customer enquiries',
+        'Call verified business enquiries',
+        'Profile visibility on D-Hub app',
+        'Manage your own service rate cards',
+        'Pay ₹75 /- and get customer details',
+        'Grow enquiries and business reach',
+      ],
+      color: 'border-slate-100 hover:border-emerald-500/30',
+      buttonStyle: 'bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200'
+    },
+    {
+      badge: '🔥 MOST POPULAR',
+      title: 'On-Demand Access',
+      price: '₹3,650',
+      period: '365 Days',
+      tagline: 'One annual subscription. Unlimited service access.',
+      headerBg: 'from-[#037166] to-[#04a99d]',
+      glowColor: 'group-hover:shadow-teal-500/25',
+      highlights: [
+        'On-demand access for full year',
+        'All service categories included',
+        'List your local service center',
+        'Full service & team management',
+        '24–48 hours quick settlements',
+        'Fully verified customer leads',
+        'Priority partner support channel',
+      ],
+      color: 'border-[#037166] md:scale-105 shadow-xl shadow-[#037166]/10 z-10 hover:border-[#04a99d]',
+      buttonStyle: 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:opacity-95 shadow-md shadow-[#037166]/20'
+    },
+    {
+      badge: '👑 PREMIUM ACCESS',
+      title: 'Premium Business Access',
+      price: '₹6,999',
+      period: '365 Days',
+      tagline: 'Maximum exposure and estimation-ready leads.',
+      headerBg: 'from-amber-600 to-yellow-500',
+      glowColor: 'group-hover:shadow-amber-500/25',
+      highlights: [
+        'Estimation-ready business leads',
+        'Verified customer enquiries',
+        'Recommended profile visibility top spot',
+        'Add & manage unlimited team members',
+        'Offer customized promo codes/discounts',
+        'Premium analytics & insights dashboard',
+      ],
+      color: 'border-amber-100 hover:border-amber-500/40',
+      buttonStyle: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:opacity-95 shadow-md shadow-amber-500/20'
+    }
+  ];
+
+  const handlePlanSelection = (planTitle) => {
+    if (typeof window !== 'undefined') {
+      const session = getStoredProviderSession();
+      if (session?.token && session?.profile) {
+        window.location.href = '/partner/dashboard/subscription';
+      } else {
+        localStorage.setItem('pending_subscription_plan', planTitle);
+        window.dispatchEvent(new CustomEvent('partner:open-login'));
+      }
+    }
+  };
+
+  return (
+    <section className="py-24 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
+      {/* Background patterns */}
+      <div className="absolute inset-0 pointer-events-none opacity-40">
+        <div className="absolute top-1/4 left-10 w-96 h-96 bg-[#037166]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-10 w-[30rem] h-[30rem] bg-amber-500/5 rounded-full blur-[150px]" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+        <div className="text-center mb-20">
+          <span className="text-[#037166] text-xs sm:text-sm font-black tracking-[0.3em] uppercase">
+            Become a Partner
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mt-3 mb-4 leading-tight tracking-tight">
+            Flexible <span className="bg-gradient-to-r from-[#037166] via-[#04a99d] to-[#10b981] bg-clip-text text-transparent">Subscription Plans</span>
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-slate-500 max-w-2xl mx-auto font-medium">
+            Choose a plan that fits your business model. Upgrade, downgrade, or cancel anytime.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 items-stretch max-w-6xl mx-auto">
+          {plans.map((plan, index) => (
+            <div
+              key={index}
+              className={`group bg-white border rounded-[36px] overflow-hidden flex flex-col justify-between transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl ${plan.color} ${plan.glowColor}`}
+            >
+              {/* Card Header Banner */}
+              <div className={`bg-gradient-to-br ${plan.headerBg} p-8 text-white relative overflow-hidden`}>
+                {/* Decorative background shape */}
+                <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                
+                <span className="text-[10px] font-black tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                  {plan.badge}
+                </span>
+                <h3 className="text-2xl font-black mt-4 mb-2">{plan.title}</h3>
+                <p className="text-white/80 text-xs font-medium leading-relaxed">{plan.tagline}</p>
+              </div>
+
+              {/* Card Body */}
+              <div className="p-8 flex-1 flex flex-col justify-between">
+                <div>
+                  {/* Pricing block */}
+                  <div className="mb-8">
+                    <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-1">
+                      Subscription Fee
+                    </span>
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-black text-gray-900">{plan.price}</span>
+                      <span className="text-gray-500 font-bold ml-1 text-sm">/ {plan.period}</span>
+                    </div>
+                  </div>
+
+                  <div className="w-full h-px bg-slate-100 mb-6" />
+
+                  {/* Highlights */}
+                  <ul className="space-y-4 mb-8">
+                    {plan.highlights.map((highlight, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 mt-0.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        </div>
+                        <span className="text-xs sm:text-sm text-slate-600 font-semibold leading-snug">
+                          {highlight}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handlePlanSelection(plan.title)}
+                  className={`w-full py-4 rounded-2xl text-sm font-bold transition-all text-center tracking-wider active:scale-98 ${plan.buttonStyle}`}
+                >
+                  Get Started Now
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

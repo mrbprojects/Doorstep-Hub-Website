@@ -256,7 +256,7 @@ function ServicePageContent() {
   );
 
   return (
-    <div className="min-h-screen bg-white pb-24 pt-20 sm:pb-10">
+    <div className="min-h-screen bg-white pb-12 pt-24 sm:pt-28 sm:pb-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
@@ -286,28 +286,17 @@ function ServicePageContent() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1400px] px-4 py-3 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-        <div className="mb-4 hidden sm:mb-6 sm:block">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-xs font-black uppercase tracking-wider text-gray-600 transition-all hover:border-[#037166]/30 hover:text-[#037166]"
-          >
-            <ChevronLeft size={14} />
-            Back
-          </button>
-        </div>
-        
-        <div className="mb-4 w-full sm:mb-6">
+      <div className="mx-auto max-w-[1400px] px-4 pt-2 pb-5 sm:px-6 sm:pt-3 sm:pb-7 lg:px-8">
+        <div className="mb-3 w-full sm:mb-4">
           <h1 className="w-full px-2 text-center text-lg font-black leading-snug tracking-tight text-gray-900 sm:text-3xl md:text-4xl">
             {pageTitle}
           </h1>
-          <p className="mt-2 hidden w-full px-2 text-center text-sm font-medium leading-relaxed text-gray-500 sm:block sm:text-base md:text-lg">
+          <p className="mt-2 hidden w-full max-w-6xl mx-auto px-4 text-center text-xs sm:text-sm font-medium leading-relaxed text-gray-500 sm:block">
             {pageDescription}
           </p>
         </div>
 
-        <div className="mb-4 flex flex-wrap justify-center gap-2 sm:mb-6">
+        <div className="mb-5 flex flex-wrap justify-center gap-2 sm:mb-6">
           <button
             type="button"
             onClick={() => router.push(`/appliances/repair-service/${resolvedCitySlug}`)}
@@ -333,55 +322,55 @@ function ServicePageContent() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
           {services.map(service => {
             const sSlug = service.slug || service._id;
             return (
               <button
                 key={service._id || service.serviceName}
                 onClick={() => router.push(resolveBookNowNavigationPath(sSlug, resolvedCitySlug))}
-                className="group relative rounded-3xl border-2 border-gray-100 bg-white overflow-hidden text-left transition-all duration-300 hover:-translate-y-1 hover:border-[#037166]/30 hover:shadow-2xl shadow-lg"
+                className="group relative rounded-2xl border-2 border-gray-100 bg-white overflow-hidden text-left transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#037166]/30 hover:shadow-2xl shadow-md focus:outline-none"
               >
-                <div className="flex h-[150px]">
+                <div className="flex h-[120px] sm:h-[130px] md:h-[135px]">
                   {/* Image section - Touching Top, Left, Bottom */}
-                  <div className="w-32 sm:w-36 flex-shrink-0 h-full overflow-hidden bg-gray-50 border-r border-gray-100">
+                  <div className="w-24 sm:w-28 md:w-32 flex-shrink-0 h-full overflow-hidden bg-gray-50 border-r border-gray-100">
                     {service.image ? (
                       <img loading="lazy" decoding="async"
                         src={`https://api.doorstephub.com/${service.image}`}
                         alt={service.serviceName}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Wrench size={32} className="text-gray-200" />
+                        <Wrench size={24} className="text-gray-200" />
                       </div>
                     )}
                   </div>
 
                   {/* Content section */}
-                  <div className="flex-1 p-5 sm:p-6 flex flex-col justify-center relative min-w-0">
-                    <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 p-3.5 sm:p-5 flex flex-col justify-center relative min-w-0">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-lg sm:text-xl font-black text-gray-900 group-hover:text-[#037166] transition-colors tracking-tight leading-tight truncate">
+                        <h3 className="text-base sm:text-lg font-black text-gray-900 group-hover:text-[#037166] transition-colors duration-300 ease-out tracking-tight leading-tight truncate">
                           {service.serviceName}
                         </h3>
                       </div>
-                      <div className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 group-hover:bg-[#037166] group-hover:text-white transition-all shadow-sm">
-                        <ChevronRight size={18} />
+                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 group-hover:bg-[#037166] group-hover:text-white transition-all duration-300 ease-out shadow-sm group-hover:scale-110">
+                        <ChevronRight size={16} />
                       </div>
                     </div>
                     
-                    <p className="mt-2 text-xs text-gray-400 font-medium line-clamp-2 leading-relaxed">
+                    <p className="mt-1 text-[11px] text-gray-400 font-medium line-clamp-2 leading-relaxed">
                       Professional doorstep {service.serviceName?.toLowerCase()} with expert technician visit, genuine spares, and transparent pricing.
                     </p>
 
-                    <div className="mt-4 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-2">
                        <div className="flex items-center gap-1 text-amber-400">
-                         <Star size={12} fill="currentColor" />
-                         <span className="text-[10px] font-black text-gray-900">4.9</span>
+                         <Star size={10} fill="currentColor" />
+                         <span className="text-[9px] font-black text-gray-900">4.9</span>
                        </div>
-                       <div className="h-1 w-1 rounded-full bg-gray-200" />
-                       <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Available Now</span>
+                       <div className="h-0.5 w-0.5 rounded-full bg-gray-200" />
+                       <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Available Now</span>
                     </div>
                   </div>
                 </div>

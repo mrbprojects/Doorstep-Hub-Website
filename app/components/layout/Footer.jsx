@@ -135,11 +135,26 @@ async function loadFooterCatalog(lat, lng) {
       /* ignore */
     }
 
+    let citiesList = [];
+    try {
+      const citiesResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cities/cities_list`,
+        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+      );
+      const citiesData = await citiesResponse.json();
+      if (citiesData.success && Array.isArray(citiesData.cities)) {
+        citiesList = citiesData.cities;
+      }
+    } catch {
+      /* ignore */
+    }
+
     footerDataCache = {
       serviceGroups,
       professionalServices,
       appliancesSlug,
       showHomeScreen,
+      citiesList,
     };
     return footerDataCache;
   })().finally(() => {
@@ -187,6 +202,7 @@ export function Footer({ theme = {} }) {
 
   const [serviceGroups, setServiceGroups] = useState([]);
   const [professionalServices, setProfessionalServices] = useState([]);
+  const [cities, setCities] = useState([]);
   const [globalSettings, setGlobalSettings] = useState(null);
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliances',
@@ -207,6 +223,7 @@ export function Footer({ theme = {} }) {
       const cached = footerDataCache;
       setServiceGroups(cached.serviceGroups);
       setProfessionalServices(cached.professionalServices);
+      setCities(cached.citiesList || []);
       setServiceSlugs((prev) => ({ ...prev, appliances: cached.appliancesSlug }));
       setShowHomeScreen(cached.showHomeScreen);
       setIsLoading(false);
@@ -222,6 +239,7 @@ export function Footer({ theme = {} }) {
         if (cancelled || !data) return;
         setServiceGroups(data.serviceGroups);
         setProfessionalServices(data.professionalServices);
+        setCities(data.citiesList || []);
         setServiceSlugs((prev) => ({ ...prev, appliances: data.appliancesSlug }));
         setShowHomeScreen(data.showHomeScreen);
       } catch (error) {
@@ -417,6 +435,77 @@ export function Footer({ theme = {} }) {
             </div>
           );
         })}
+
+        {/* Services in Popular Cities Dynamic SEO Link Grid */}
+        {!isLoading && cities.length > 0 && (
+          <div className="mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <h3 className={`text-xl font-bold mb-6 bg-gradient-to-r ${t.headingGradient} bg-clip-text text-transparent w-fit`}>
+                Services in Popular Cities
+              </h3>
+              <div className="text-sm leading-8 text-gray-400">
+                {cities.map((cityObj, cityIdx) => {
+                  const cityName = cityObj.name || '';
+                  const citySlug = (cityObj.slug || cityName).toLowerCase().replace(/\s+/g, '-');
+                  if (!citySlug) return null;
+
+                  return (
+                    <span key={cityObj._id || citySlug} className="inline mr-1">
+                      {/* Main City Landing Link */}
+                      <Link
+                        href={`/appliances-repair-service-center-${citySlug}`}
+                        className={`${t.groupNameColor} font-bold ${t.textLinkHover} transition-colors whitespace-nowrap mr-2`}
+                      >
+                        {cityName}:
+                      </Link>
+
+                      {/* Dynamic Category x City Links for ALL Categories in Database */}
+                      <span className="inline">
+                        {serviceGroups.map((cat, catIdx) => {
+                          let catSlugPart = (cat.slug || cat.name || '').toLowerCase().trim();
+                          if (catSlugPart.endsWith('-services')) {
+                            catSlugPart = catSlugPart.slice(0, -'-services'.length);
+                          }
+                          if (!catSlugPart) return null;
+
+                          const catDisplayName = cat.name
+                            ? (cat.name.toLowerCase().includes('repair') || cat.name.toLowerCase().includes('service')
+                              ? cat.name
+                              : `${cat.name} Repair`)
+                            : 'Service';
+
+                          return (
+                            <span key={cat.id || cat.slug || catIdx} className="inline">
+                              <Link
+                                href={`/${catSlugPart}-service-center-${citySlug}`}
+                                className={`${t.textLink} ${t.textLinkHover} transition-colors`}
+                              >
+                                {catDisplayName} in {cityName}
+                              </Link>
+                              {catIdx < serviceGroups.length - 1 && (
+                                <span className={`mx-2 ${t.dividerColor}`}>|</span>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </span>
+
+                      {/* Separator between cities */}
+                      {cityIdx < cities.length - 1 && (
+                        <span className="mx-4 opacity-50" style={{ color: t.accentColor }}>||</span>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        )}
 
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">

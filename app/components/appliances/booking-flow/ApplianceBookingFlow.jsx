@@ -67,7 +67,18 @@ export function ApplianceBookingFlow() {
   const handleSelectCity = (city) => {
     setSelectedCity(city);
     const slug = city.slug || city.name?.toLowerCase().replace(/\s+/g, '-');
-    const publicPath = buildApplianceRepairCityPublicPath(slug);
+    let publicPath = buildApplianceRepairCityPublicPath(slug);
+
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      const match = pathname.match(/^\/([a-z0-9-]+)-service-center-[a-z0-9-]+$/i);
+      if (match && match[1]) {
+        const catPart = match[1];
+        if (catPart !== 'appliances-repair') {
+          publicPath = `/${catPart}-service-center-${slug}`;
+        }
+      }
+    }
 
     if (city.domain && slug) {
       const base = city.domain.endsWith('/') ? city.domain.slice(0, -1) : city.domain;

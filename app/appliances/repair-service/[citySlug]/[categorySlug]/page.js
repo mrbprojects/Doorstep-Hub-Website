@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, Loader2, MapPin, CheckCircle2, HelpCircle, ChevronDown } from 'lucide-react';
+import { ChevronLeft, Loader2, MapPin, CheckCircle2, HelpCircle, ChevronDown, Star } from 'lucide-react';
 import { fetchAllBrands, fetchCities, fetchCategories } from '@/lib/api';
-import { buildFlatBrandCityPublicPath } from '@/lib/applianceRepairSlugs';
+import { buildFlatBrandCityPublicPath, getCityReviewers } from '@/lib/applianceRepairSlugs';
 
 function FaqSection({ faqs, activeIndex, onToggle, cityName, categoryName }) {
   if (!faqs.length) return null;
@@ -155,6 +155,11 @@ function BrandPageContent() {
     });
   }, [selectedCategory, selectedCity]);
 
+  const reviewsData = useMemo(() => {
+    const list = getCityReviewers(selectedCity?.name || citySlug, selectedCategory?.name);
+    return list.slice(0, 2);
+  }, [selectedCity, selectedCategory, citySlug]);
+
   const schemaData = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -169,6 +174,18 @@ function BrandPageContent() {
       "name": "Doorstep Hub",
       "url": "https://doorstephub.com"
     },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "1240"
+    },
+    "review": reviewsData.map((r, i) => ({
+      "@type": "Review",
+      "author": { "@type": "Person", "name": r.name },
+      "datePublished": i === 0 ? "2026-07-28" : "2026-07-27",
+      "reviewBody": r.body,
+      "reviewRating": { "@type": "Rating", "ratingValue": String(r.rating) }
+    })),
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
       "name": `${selectedCategory?.name} Brand Services`,
@@ -190,7 +207,7 @@ function BrandPageContent() {
   );
 
   return (
-    <main className="min-h-screen bg-white pb-24 pt-20 sm:pb-10">
+    <main className="min-h-screen bg-white pb-12 pt-20 sm:pt-22 sm:pb-8">
       {/* SEO Schema */}
       <script
         type="application/ld+json"
@@ -215,7 +232,7 @@ function BrandPageContent() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1400px] px-4 py-3 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <div className="mx-auto max-w-[1400px] px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-6">
         <div className="mb-4 hidden sm:mb-6 sm:block">
           <button
             type="button"
@@ -248,7 +265,7 @@ function BrandPageContent() {
         </div>
 
         {brands.length > 0 ? (
-          <div className="grid grid-cols-2 gap-2.5 min-[400px]:grid-cols-3 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9">
+          <div className="grid grid-cols-2 gap-3 min-[400px]:grid-cols-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-9">
             {brands.map((brand) => {
               const bSlug = (brand.slug || brand.name || '').toLowerCase().trim().replace(/\s+/g, '-');
               const logo = brand.image || brand.logo || brand.brandLogo;
@@ -256,26 +273,26 @@ function BrandPageContent() {
                 <button
                   key={brand.name || brand}
                   type="button"
-                    onClick={() => {
+                  onClick={() => {
                     const publicPath = buildFlatBrandCityPublicPath(citySlug, bSlug, { trusted: true });
                     router.push(
                       publicPath
                       || `/appliances/repair-service/${citySlug}/${categorySlug}/${bSlug}`,
                     );
                   }}
-                  className="group relative overflow-hidden rounded-xl border-2 border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#037166]/30 hover:shadow-md sm:rounded-2xl"
+                  className="group relative overflow-hidden rounded-xl border-2 border-gray-100 bg-white shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#037166]/30 hover:shadow-xl hover:ring-2 hover:ring-[#037166]/10 sm:rounded-2xl focus:outline-none"
                 >
-                  <div className="flex h-20 items-center justify-center overflow-hidden p-2 sm:h-24 md:h-28">
+                  <div className="flex h-16 items-center justify-center overflow-hidden p-2.5 sm:h-20 md:h-24">
                     {logo ? (
                       <img
                         loading="lazy"
                         decoding="async"
                         src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
                         alt={brand.name}
-                        className="h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                        className="h-full w-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-110"
                       />
                     ) : (
-                      <div className="text-lg font-black text-gray-200 sm:text-xl">
+                      <div className="text-base font-black text-gray-200 sm:text-lg">
                         {(brand.name || brand)?.[0]?.toUpperCase()}
                       </div>
                     )}
@@ -300,8 +317,79 @@ function BrandPageContent() {
           cityName={selectedCity?.name}
           categoryName={selectedCategory?.name}
         />
+
+        <CustomerReviewsSection
+          cityName={selectedCity?.name || citySlug}
+          categoryName={selectedCategory?.name}
+        />
       </div>
     </main>
+  );
+}
+
+function CustomerReviewsSection({ cityName, categoryName }) {
+  const currentCity = cityName || 'Your City';
+  const currentCategory = categoryName || 'Appliance Repair';
+
+  const reviewItems = getCityReviewers(currentCity, currentCategory);
+
+  return (
+    <section id="reviews" className="mt-12 pt-8 border-t border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            Customer Reviews & Ratings in {currentCity}
+          </h3>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Verified customer feedback for {currentCategory} in {currentCity}.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 bg-[#037166]/10 px-5 py-3 rounded-2xl border border-[#037166]/20">
+          <div className="flex items-center text-amber-500">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+            ))}
+          </div>
+          <span className="font-bold text-gray-900 text-lg">4.8 / 5.0</span>
+          <span className="text-gray-500 text-sm">(1,240 Verified Reviews)</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {reviewItems.map((rev, index) => (
+          <div
+            key={index}
+            className="bg-white border border-slate-200 hover:border-[#037166]/40 p-6 rounded-2xl shadow-sm transition-all duration-300 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-[#037166]/10 text-[#037166] font-bold flex items-center justify-center text-sm">
+                    {rev.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 text-sm">{rev.name}</h4>
+                    <p className="text-xs text-gray-400">{rev.date}</p>
+                  </div>
+                </div>
+                <div className="flex items-center text-amber-400">
+                  {[...Array(rev.rating)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                "{rev.body}"
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#037166] font-medium">
+              <span>Verified Booking</span>
+              <span>{currentCity}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

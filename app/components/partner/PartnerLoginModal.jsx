@@ -102,7 +102,13 @@ export function PartnerLoginModal({ isOpen, onClose }) {
 
             if (profile) {
                 toast.success('Partner login successful');
-                router.push('/partner/dashboard');
+                const pendingSub = localStorage.getItem('pending_subscription_plan');
+                if (pendingSub) {
+                    localStorage.removeItem('pending_subscription_plan');
+                    router.push('/partner/dashboard/subscription');
+                } else {
+                    router.push('/partner/dashboard');
+                }
                 return;
             }
 

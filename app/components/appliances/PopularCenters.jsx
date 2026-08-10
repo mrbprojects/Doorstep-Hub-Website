@@ -73,10 +73,10 @@ export function PopularCenters({ onStoreClick }) {
             image: center.banner_image
               ? `https://api.doorstephub.com/${center.banner_image}`
               : center.logo
-              ? `https://api.doorstephub.com/${center.logo}`
-              : center.image
-                ? `https://api.doorstephub.com/${center.image}`
-                : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80',
+                ? `https://api.doorstephub.com/${center.logo}`
+                : center.image
+                  ? `https://api.doorstephub.com/${center.image}`
+                  : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80',
             name: center.name,
             location: center.cityName && center.stateName ? `${center.cityName}, ${center.stateName}` : (center.address || 'Unknown Location'),
             rating: typeof center.rating === 'string' ? parseFloat(center.rating) : (center.rating || 0),
@@ -130,12 +130,12 @@ export function PopularCenters({ onStoreClick }) {
   if (loading) {
     return (
       <section className="relative pt-14 pb-6 overflow-hidden bg-white">
-      {/* SEO Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-      />
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+        {/* SEO Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
           <div className="mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4">
               <Award className="w-3 h-3 text-[#04a99d]" />
@@ -220,85 +220,85 @@ export function PopularCenters({ onStoreClick }) {
 
         {/* Cards Scroller */}
         <div className="relative px-6 lg:px-8">
-            <div ref={scrollRef} className="flex overflow-x-auto gap-5 scroll-smooth snap-x snap-mandatory pb-1 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {centers.map((center, index) => (
-                <motion.div
-                  key={center.id || index}
-                  data-popular-center-card="true"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="flex-shrink-0 w-[85%] sm:w-[48%] md:w-[31%] lg:w-[23%] xl:w-[18.4%] snap-start group cursor-pointer"
-                >
-                  <div className="relative h-full rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-300">
-                    {/* Popular Badge */}
-                    {center.popular && (
-                      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] shadow-lg">
-                        <TrendingUp className="w-3 h-3 text-white" />
-                        <h6 className="text-xs font-medium !text-white">Most Popular</h6>
-                      </div>
-                    )}
-
-                    {/* Image */}
-                    <div className="relative h-40 xl:h-36 overflow-hidden bg-[#0a0a0a]">
-                      <img loading="lazy" decoding="async"
-                        src={center.image}
-                        alt={center.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80';
-                        }}
-                      />
-                      {/* Rating Badge - Bottom Left Flush */}
-                      <div className="absolute bottom-0 left-0 z-20">
-                        <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10 text-white">
-                          <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
-                          <span className="text-sm font-bold">{center.rating}</span>
-                        </div>
-                      </div>
+          <div ref={scrollRef} className="flex overflow-x-auto gap-5 scroll-smooth snap-x snap-mandatory pb-1 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {centers.map((center, index) => (
+              <motion.div
+                key={center.id || index}
+                data-popular-center-card="true"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="flex-shrink-0 w-[85%] sm:w-[48%] md:w-[31%] lg:w-[23%] xl:w-[18.4%] snap-start group cursor-pointer"
+              >
+                <div className="relative h-full rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-300">
+                  {/* Popular Badge */}
+                  {center.popular && (
+                    <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] shadow-lg">
+                      <TrendingUp className="w-3 h-3 text-white" />
+                      <h6 className="text-xs font-medium !text-white">Most Popular</h6>
                     </div>
+                  )}
 
-                    {/* Content */}
-                    <div className="p-4">
-                      <h4 className="text-base font-bold text-gray-900 mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-1">
-                        {center.name}
-                      </h4>
-                      <p className="text-gray-500 text-xs mb-3 flex items-center gap-1 line-clamp-1">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
-                        {center.location}
-                      </p>
-
-                      {/* Speciality Badge */}
-                      <div className="inline-block px-3 py-1 rounded-lg bg-[#037166]/20 border border-[#037166]/30 mb-4 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                        <h6 className="text-[11px] font-medium text-[#04a99d] line-clamp-1">{center.speciality}</h6>
-                      </div>
-
-                      {/* Rating & CTA */}
-                      <div className="flex items-center justify-between">
-                        <motion.button
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="px-3 py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-xs shadow-lg shadow-[#037166]/30 group-hover:shadow-[#037166]/50 transition-all flex items-center gap-1.5"
-                          onClick={() => onStoreClick?.(center.slug)}
-                        >
-                          View Store
-                          <ArrowRight className="w-4 h-4" />
-                        </motion.button>
-                      </div>
-                    </div>
-
-                    {/* Glass Border on Hover */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      className="absolute inset-0 rounded-2xl border-2 border-[#037166]/50 pointer-events-none"
+                  {/* Image */}
+                  <div className="relative h-40 xl:h-36 overflow-hidden bg-[#0a0a0a]">
+                    <img loading="lazy" decoding="async"
+                      src={center.image}
+                      alt={center.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80';
+                      }}
                     />
+                    {/* Rating Badge - Bottom Left Flush */}
+                    <div className="absolute bottom-0 left-0 z-20">
+                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10 text-white">
+                        <Star className="w-4 h-4 fill-[#04a99d] text-[#04a99d]" />
+                        <span className="text-sm font-bold">{center.rating}</span>
+                      </div>
+                    </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+
+                  {/* Content */}
+                  <div className="p-4">
+                    <h4 className="text-base font-bold text-gray-900 mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-1">
+                      {center.name}
+                    </h4>
+                    <p className="text-gray-500 text-xs mb-3 flex items-center gap-1 line-clamp-1">
+                      <MapPin className="w-3 h-3 flex-shrink-0" />
+                      {center.location}
+                    </p>
+
+                    {/* Speciality Badge */}
+                    <div className="inline-block px-3 py-1 rounded-lg bg-[#037166]/20 border border-[#037166]/30 mb-4 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                      <h6 className="text-[11px] font-medium text-[#04a99d] line-clamp-1">{center.speciality}</h6>
+                    </div>
+
+                    {/* Rating & CTA */}
+                    <div className="flex items-center justify-between">
+                      <motion.button
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="px-3 py-2 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium text-xs shadow-lg shadow-[#037166]/30 group-hover:shadow-[#037166]/50 transition-all flex items-center gap-1.5"
+                        onClick={() => onStoreClick?.(center.slug)}
+                      >
+                        View Store
+                        <ArrowRight className="w-4 h-4" />
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  {/* Glass Border on Hover */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileHover={{ opacity: 1 }}
+                    className="absolute inset-0 rounded-2xl border-2 border-[#037166]/50 pointer-events-none"
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

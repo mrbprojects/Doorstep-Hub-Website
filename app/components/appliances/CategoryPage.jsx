@@ -94,8 +94,14 @@ export function CategoryPage({ slug, initialData }) {
   const theme = defaultTheme;
 
   const handleSubCategoryClick = (subCategory) => {
-    const subCategorySlug = subCategory.slug || subCategory._id;
-    router.push(`/${subCategorySlug}`);
+    const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
+    const subCategorySlug = subCategory.slug || generateSlug(subCategory.name) || subCategory._id;
+    const catSlug = categoryMetadata.slug || slug;
+    if (catSlug) {
+      router.push(`/${catSlug}/${subCategorySlug}`);
+    } else {
+      router.push(`/${subCategorySlug}`);
+    }
   };
 
   const handleBack = () => {

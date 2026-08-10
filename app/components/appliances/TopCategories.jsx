@@ -321,8 +321,8 @@ export function TopCategories({ onViewAll }) {
     : subCategories.slice(0, initialVisibleCount);
   const displaySubCategories = showAllSubcategories
     ? [...visibleSubCategories].sort((firstItem, secondItem) =>
-        (firstItem.name || '').localeCompare(secondItem.name || '', undefined, { sensitivity: 'base' })
-      )
+      (firstItem.name || '').localeCompare(secondItem.name || '', undefined, { sensitivity: 'base' })
+    )
     : visibleSubCategories;
 
   return (
@@ -389,11 +389,10 @@ export function TopCategories({ onViewAll }) {
                     <button
                       type="button"
                       onClick={() => { setShowAllSubcategories(true); setShowAllVisibleCards(false); }}
-                      className={`flex-shrink-0 flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${
-                        showAllSubcategories
+                      className={`flex-shrink-0 flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${showAllSubcategories
                           ? 'border-[#037166] bg-[#037166] text-white shadow-md'
                           : 'border-[#e2e8f0] bg-white text-[#374151]'
-                      }`}
+                        }`}
                     >
                       <span className="text-xs font-bold">All</span>
                       All Services
@@ -405,11 +404,10 @@ export function TopCategories({ onViewAll }) {
                           key={category._id || category.slug}
                           type="button"
                           onClick={() => handleCategorySelect(category)}
-                          className={`flex-shrink-0 flex items-center gap-2 rounded-full border px-3.5 py-2.5 text-sm font-semibold transition-all ${
-                            isActive
+                          className={`flex-shrink-0 flex items-center gap-2 rounded-full border px-3.5 py-2.5 text-sm font-semibold transition-all ${isActive
                               ? 'border-[#037166] bg-[#037166] text-white shadow-md'
                               : 'border-[#e2e8f0] bg-white text-[#374151]'
-                          }`}
+                            }`}
                         >
                           {category.image && (
                             <img
@@ -433,16 +431,14 @@ export function TopCategories({ onViewAll }) {
                       whileHover={{ x: 4 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => { setShowAllSubcategories(true); setShowAllVisibleCards(false); }}
-                      className={`group w-full rounded-[30px] border px-5 py-4 text-left transition-all flex items-center justify-between ${
-                        showAllSubcategories
+                      className={`group w-full rounded-[30px] border px-5 py-4 text-left transition-all flex items-center justify-between ${showAllSubcategories
                           ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
                           : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
-                          showAllSubcategories ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
-                        }`}>
+                        <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${showAllSubcategories ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
+                          }`}>
                           <span className="text-base font-bold text-[#037166]">All</span>
                         </div>
                         <div className="min-w-0">
@@ -452,11 +448,10 @@ export function TopCategories({ onViewAll }) {
                           <p className="mt-1 text-sm text-[#6b7280]">Show every subcategory</p>
                         </div>
                       </div>
-                      <div className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
-                        showAllSubcategories
+                      <div className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${showAllSubcategories
                           ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-[0_10px_24px_rgba(3,113,102,0.28)]'
                           : 'bg-[#fafafa] text-[#9ca3af] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#04a99d] group-hover:text-white'
-                      }`}>
+                        }`}>
                         <ArrowRight className="h-5 w-5" />
                       </div>
                     </motion.button>
@@ -472,16 +467,14 @@ export function TopCategories({ onViewAll }) {
                           whileHover={{ x: 4 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleCategorySelect(category)}
-                          className={`group w-full rounded-[30px] border px-5 py-4 text-left transition-all flex items-center justify-between ${
-                            isActive
+                          className={`group w-full rounded-[30px] border px-5 py-4 text-left transition-all flex items-center justify-between ${isActive
                               ? 'border-[#b7ddd8] bg-gradient-to-r from-[#eefaf8] via-white to-[#f3fffd] shadow-[0_20px_40px_rgba(3,113,102,0.14)]'
                               : 'border-[#eef0f2] bg-white hover:border-[#b7ddd8] hover:bg-gradient-to-r hover:from-[#f4fffd] hover:to-white'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-4">
-                            <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${
-                              isActive ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
-                            }`}>
+                            <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${isActive ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
+                              }`}>
                               {category.image ? (
                                 <img loading="lazy" decoding="async" src={category.image} alt={category.name} className="h-11 w-11 rounded-xl object-cover" />
                               ) : (
@@ -497,11 +490,10 @@ export function TopCategories({ onViewAll }) {
                               </p>
                             </div>
                           </div>
-                          <div className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
-                            isActive
+                          <div className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${isActive
                               ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-[0_10px_24px_rgba(3,113,102,0.28)]'
                               : 'bg-[#fafafa] text-[#9ca3af] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#04a99d] group-hover:text-white'
-                          }`}>
+                            }`}>
                             <ArrowRight className="h-5 w-5" />
                           </div>
                         </motion.button>

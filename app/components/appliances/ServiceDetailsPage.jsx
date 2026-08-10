@@ -740,15 +740,15 @@ export function ServiceDetailsPage({
                                 key={card.id || card._id || index}
                                 onClick={() => toggleRateCard(card)}
                                 className={`p-2.5 rounded-xl border transition-all group overflow-hidden cursor-pointer relative ${isSelected
-                                    ? 'bg-emerald-50/50 border-2 border-[#037166] shadow-sm'
-                                    : 'bg-white border-slate-200 hover:border-[#037166]/40 shadow-none'
+                                  ? 'bg-emerald-50/50 border-2 border-[#037166] shadow-sm'
+                                  : 'bg-white border-slate-200 hover:border-[#037166]/40 shadow-none'
                                   }`}
                               >
                                 <div className="flex gap-2 sm:gap-2.5 items-center">
                                   {/* Checkbox indicator */}
                                   <div className={`w-4.5 h-4.5 rounded flex items-center justify-center transition-all flex-shrink-0 ${isSelected
-                                      ? 'bg-[#037166] border-[#037166] shadow-sm'
-                                      : 'border border-slate-300 group-hover:border-[#037166]/60'
+                                    ? 'bg-[#037166] border-[#037166] shadow-sm'
+                                    : 'border border-slate-300 group-hover:border-[#037166]/60'
                                     }`}>
                                     <Check className={`w-3 h-3 text-white transition-transform ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} strokeWidth={3.5} />
                                   </div>

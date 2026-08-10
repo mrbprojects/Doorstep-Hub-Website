@@ -581,7 +581,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       <div key={i} className="relative rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/10 animate-pulse md:h-[220px] flex flex-col md:flex-row">
                         {/* Image Placeholder */}
                         <div className="w-full md:w-72 h-48 md:h-full bg-white/10 flex-shrink-0" />
-                        
+
                         {/* Content Placeholder */}
                         <div className="flex-1 p-6 flex flex-col justify-between">
                           <div>

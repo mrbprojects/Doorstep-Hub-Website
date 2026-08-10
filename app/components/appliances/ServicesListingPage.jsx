@@ -401,8 +401,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               <button
                 onClick={() => setActiveTab('services')}
                 className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'services'
-                    ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
+                  ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
                   }`}
               >
                 All Services
@@ -410,8 +410,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               <button
                 onClick={() => setActiveTab('centers')}
                 className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === 'centers'
-                    ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
+                  ? 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-lg shadow-[#00796B]/30'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-slate-100'
                   }`}
               >
                 Nearby Centers
@@ -751,8 +751,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       <div
                         key={index}
                         className={`border rounded-2xl overflow-hidden transition-all duration-300 ${faqActiveIndex === index
-                            ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
-                            : 'bg-white border-[#e2e8f0] hover:border-[#cbd5e1]'
+                          ? 'bg-white border-[#037166]/50 shadow-md shadow-[#037166]/5'
+                          : 'bg-white border-[#e2e8f0] hover:border-[#cbd5e1]'
                           }`}
                       >
                         <button
@@ -800,92 +800,92 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
               ) : null;
             })()}
 
-              {/* Customer Reviews & Ratings UI Section */}
-              {(() => {
-                let currentCity = location?.city;
-                if (!currentCity && typeof window !== 'undefined') {
-                  const match = window.location.pathname.match(/-service-center-(.+)$/) || window.location.pathname.match(/\/nearby\/[^\/]+\/(.+)$/);
-                  if (match && match[1]) {
-                    const raw = match[1].split('/')[0];
-                    currentCity = raw.charAt(0).toUpperCase() + raw.slice(1).replace(/-/g, ' ');
-                  }
+            {/* Customer Reviews & Ratings UI Section */}
+            {(() => {
+              let currentCity = location?.city;
+              if (!currentCity && typeof window !== 'undefined') {
+                const match = window.location.pathname.match(/-service-center-(.+)$/) || window.location.pathname.match(/\/nearby\/[^\/]+\/(.+)$/);
+                if (match && match[1]) {
+                  const raw = match[1].split('/')[0];
+                  currentCity = raw.charAt(0).toUpperCase() + raw.slice(1).replace(/-/g, ' ');
                 }
-                if (!currentCity) currentCity = 'Your City';
+              }
+              if (!currentCity) currentCity = 'Your City';
 
-                const currentService = activeSubcatData?.name || (typeof customTitle !== 'undefined' ? customTitle : '') || (typeof pageTitle !== 'undefined' ? pageTitle : '') || 'Appliance Repair';
-                const reviewItems = [
-                  { name: 'Santhosh Kumar', rating: 5, date: '2 days ago', body: `Excellent doorstep ${currentService} service in ${currentCity}. Technician arrived within 30 minutes!` },
-                  { name: 'Priya Sharma', rating: 5, date: '4 days ago', body: `Very professional ${currentService} service in ${currentCity}. Genuine spare parts and reasonable price.` },
-                  { name: 'Venkatesh Rao', rating: 4, date: '1 week ago', body: `Great experience with Doorstep Hub in ${currentCity}. Quick diagnostic and polite staff.` },
-                  { name: 'Ananya Reddy', rating: 5, date: '1 week ago', body: `Highly recommended ${currentService} near ${currentCity}. Fixed the issue on the spot.` },
-                  { name: 'Kiran Verma', rating: 5, date: '2 weeks ago', body: `Top class service in ${currentCity}! 90-day warranty provided on repairs.` },
-                  { name: 'Srinivas Rao', rating: 5, date: '3 weeks ago', body: `Punctual and honest technician in ${currentCity}. Satisfied with the service quality.` },
-                ];
+              const currentService = activeSubcatData?.name || (typeof customTitle !== 'undefined' ? customTitle : '') || (typeof pageTitle !== 'undefined' ? pageTitle : '') || 'Appliance Repair';
+              const reviewItems = [
+                { name: 'Santhosh Kumar', rating: 5, date: '2 days ago', body: `Excellent doorstep ${currentService} service in ${currentCity}. Technician arrived within 30 minutes!` },
+                { name: 'Priya Sharma', rating: 5, date: '4 days ago', body: `Very professional ${currentService} service in ${currentCity}. Genuine spare parts and reasonable price.` },
+                { name: 'Venkatesh Rao', rating: 4, date: '1 week ago', body: `Great experience with Doorstep Hub in ${currentCity}. Quick diagnostic and polite staff.` },
+                { name: 'Ananya Reddy', rating: 5, date: '1 week ago', body: `Highly recommended ${currentService} near ${currentCity}. Fixed the issue on the spot.` },
+                { name: 'Kiran Verma', rating: 5, date: '2 weeks ago', body: `Top class service in ${currentCity}! 90-day warranty provided on repairs.` },
+                { name: 'Srinivas Rao', rating: 5, date: '3 weeks ago', body: `Punctual and honest technician in ${currentCity}. Satisfied with the service quality.` },
+              ];
 
-                return (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="mt-16 pt-8 border-t border-slate-200"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                          Customer Reviews & Ratings in {currentCity}
-                        </h3>
-                        <p className="text-gray-600">
-                          Verified customer feedback for {currentService} in {currentCity}.
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 bg-[#037166]/10 px-5 py-3 rounded-2xl border border-[#037166]/20">
-                        <div className="flex items-center text-amber-500">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
-                          ))}
-                        </div>
-                        <span className="font-bold text-gray-900 text-lg">4.8 / 5.0</span>
-                        <span className="text-gray-500 text-sm">(1,240 Verified Reviews)</span>
-                      </div>
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="mt-16 pt-8 border-t border-slate-200"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        Customer Reviews & Ratings in {currentCity}
+                      </h3>
+                      <p className="text-gray-600">
+                        Verified customer feedback for {currentService} in {currentCity}.
+                      </p>
                     </div>
+                    <div className="flex items-center gap-3 bg-[#037166]/10 px-5 py-3 rounded-2xl border border-[#037166]/20">
+                      <div className="flex items-center text-amber-500">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <span className="font-bold text-gray-900 text-lg">4.8 / 5.0</span>
+                      <span className="text-gray-500 text-sm">(1,240 Verified Reviews)</span>
+                    </div>
+                  </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {reviewItems.map((rev, index) => (
-                        <div
-                          key={index}
-                          className="bg-white border border-slate-200 hover:border-[#037166]/40 p-6 rounded-2xl shadow-sm transition-all duration-300 flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2">
-                                <div className="w-9 h-9 rounded-full bg-[#037166]/10 text-[#037166] font-bold flex items-center justify-center text-sm">
-                                  {rev.name.charAt(0)}
-                                </div>
-                                <div>
-                                  <h4 className="font-bold text-gray-900 text-sm">{rev.name}</h4>
-                                  <p className="text-xs text-gray-400">{rev.date}</p>
-                                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {reviewItems.map((rev, index) => (
+                      <div
+                        key={index}
+                        className="bg-white border border-slate-200 hover:border-[#037166]/40 p-6 rounded-2xl shadow-sm transition-all duration-300 flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-9 h-9 rounded-full bg-[#037166]/10 text-[#037166] font-bold flex items-center justify-center text-sm">
+                                {rev.name.charAt(0)}
                               </div>
-                              <div className="flex items-center text-amber-400">
-                                {[...Array(rev.rating)].map((_, i) => (
-                                  <Star key={i} className="w-4 h-4 fill-amber-400" />
-                                ))}
+                              <div>
+                                <h4 className="font-bold text-gray-900 text-sm">{rev.name}</h4>
+                                <p className="text-xs text-gray-400">{rev.date}</p>
                               </div>
                             </div>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                              "{rev.body}"
-                            </p>
+                            <div className="flex items-center text-amber-400">
+                              {[...Array(rev.rating)].map((_, i) => (
+                                <Star key={i} className="w-4 h-4 fill-amber-400" />
+                              ))}
+                            </div>
                           </div>
-                          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#037166] font-medium">
-                            <span>Verified Booking</span>
-                            <span>{currentCity}</span>
-                          </div>
+                          <p className="text-gray-600 text-sm leading-relaxed">
+                            "{rev.body}"
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                );
-              })()}
+                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#037166] font-medium">
+                          <span>Verified Booking</span>
+                          <span>{currentCity}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })()}
           </div>
         </div>
       </div>

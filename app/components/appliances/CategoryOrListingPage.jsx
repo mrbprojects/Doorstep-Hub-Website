@@ -130,6 +130,22 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
 
                         const catData = await catResponse.json();
                         if (catData.success && Array.isArray(catData.data) && catData.data.length > 0) {
+                            const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
+                            const matchedSubCat = catData.data.find(sub =>
+                                sub.slug === slug || sub._id === slug || generateSlug(sub.name) === slug
+                            );
+
+                            if (matchedSubCat && catData.categorySlug && catData.categorySlug !== slug) {
+                                setCategoryData({
+                                    categoryName: catData.categoryName || catData.categorySlug,
+                                    categorySlug: catData.categorySlug,
+                                    subCategoryName: matchedSubCat.name,
+                                    subCategoryId: matchedSubCat._id
+                                });
+                                setViewType('listing');
+                                return;
+                            }
+
                             setCategoryData({
                                 ...catData,
                                 detectedCity: detectedCityName || catData.detectedCity
@@ -156,7 +172,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                 if (centersData.success && Array.isArray(centersData.nearByServiceCenters)) {
                     const generateSlug = (name) => name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
                     const matchedCenter = centersData.nearByServiceCenters.find(center =>
-                        center.slug === slug || 
+                        center.slug === slug ||
                         center._id === slug ||
                         generateSlug(center.business_name || center.name) === slug
                     );

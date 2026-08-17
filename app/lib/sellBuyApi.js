@@ -181,3 +181,16 @@ export const fetchSystemSettings = async () => {
     return {};
   }
 };
+
+export const fetchSliders = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/sell-buy/get-slider`, { cache: 'no-store' });
+    const data = await res.json();
+    if (data.error === false && Array.isArray(data.data)) return data.data;
+    if (data.success && Array.isArray(data.data)) return data.data;
+    return [];
+  } catch (err) {
+    console.error('Error fetching hero sliders:', err);
+    return [];
+  }
+};

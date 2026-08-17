@@ -480,18 +480,6 @@ export function CategoryPage({ category, categoryId }) {
                       </motion.div>
                     ))}
                   </div>
-
-                          {/* Hover glow border */}
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
-                            className="absolute inset-0 rounded-xl border-2 border-[#037166] pointer-events-none"
-                            style={{ boxShadow: '0 0 15px rgba(3, 113, 102, 0.5)' }}
-                          />
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
                 </motion.div>
               )}
 

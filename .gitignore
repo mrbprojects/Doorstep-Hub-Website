@@ -105,6 +105,7 @@ desktop.ini
 !.env.example
 !.env*.example
 # Large backup files
+# Keep generated website archives out of Git history.
 website-backup.zip
 *.zip
 *.tar.gz

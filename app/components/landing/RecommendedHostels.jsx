@@ -52,13 +52,56 @@ export function RecommendedHostels() {
               displayedAmenities = ['Verified Property', '24/7 Security', 'High-Speed WiFi', 'Modern Amenities'];
             }
 
+            const cleanAmenityText = (text) => {
+              if (!text) return '';
+              let str = String(text).trim().replace(/\s*\([^)]*\)/g, '');
+              const mappings = {
+                'Sleeping & Room Facilities': 'Sleeping Facilities',
+                'Bunk beds or single beds': 'Bunk Beds',
+                'Bunk beds with mattresses': 'Bunk Beds',
+                'Mattress + pillows': 'Mattress & Pillows',
+                'Bed linens': 'Bed Linens',
+                'Fully furnished rooms': 'Fully Furnished',
+                'Comfortable beds with mattress': 'Comfortable Beds',
+                'Individual wardrobe / locker': 'Individual Locker',
+                'Individual wardrobe': 'Individual Wardrobe',
+                'Study table and chair': 'Study Table & Chair',
+                'Study table & chair': 'Study Table & Chair',
+                'Shared charging points': 'Charging Points',
+                'Personal reading light & power outlet': 'Reading Light',
+                'Lockable storage lockers': 'Lockable Lockers',
+                'Shared bathroom facilities': 'Shared Bathroom',
+                'Curtains or privacy partitions': 'Privacy Curtains',
+              };
+              if (mappings[str]) return mappings[str];
+              if (str.length > 20) {
+                const words = str.split(' ');
+                if (words.length > 2) return words.slice(0, 2).join(' ');
+              }
+              return str;
+            };
+
+            const getCityFromHostel = (h) => {
+              if (typeof h.cityName === 'string' && h.cityName.trim()) return h.cityName.trim();
+              if (typeof h.cityName === 'object' && h.cityName?.cityName) return h.cityName.cityName;
+              if (typeof h.city === 'string' && h.city.trim()) return h.city.trim();
+              if (typeof h.addressCityName === 'string' && h.addressCityName.trim()) return h.addressCityName.trim();
+              if (h.address && typeof h.address === 'string') {
+                const parts = h.address.split(',').map(s => s.trim()).filter(Boolean);
+                const filtered = parts.filter(p => !/^\d{5,6}$|india|telangana|andhra|karnataka|maharashtra/i.test(p));
+                if (filtered.length > 0) return filtered[filtered.length - 1];
+              }
+              return 'Hyderabad';
+            };
+
             return {
               id: hostel._id,
               slug: hostel.slug || hostel.hostelSlug,
               name: hostel.hostelName || `${hostel.firstName} ${hostel.lastName}`,
               tagline: hostel.bio || "Premium living space for your comfort and safety.",
+              location: getCityFromHostel(hostel),
               image: hostel.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image}` : 'https://images.unsplash.com/photo-1743116591552-9ff5e8c1ad31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwYmVkcm9vbSUyMGhvc3RlbHxlbnwxfHx8fDE3NjgwMjY3NDh8MA&ixlib=rb-4.1.0&q=80&w=1080',
-              amenities: displayedAmenities.slice(0, 3),
+              amenities: displayedAmenities.slice(0, 4).map(cleanAmenityText),
               price: hostel.startingAt || hostel.serviceBookingCost || 0,
             };
           });
@@ -246,12 +289,12 @@ export function RecommendedHostels() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#ff6b35]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
+          {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#ff6b35]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Heart className="w-4 h-4 text-[#ff6b35]" />
             <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent font-medium">
               Warm Comfort World
             </h6>
-          </div>
+          </div> */}
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent">
@@ -308,96 +351,73 @@ export function RecommendedHostels() {
                 className={`group w-[240px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
                 onClick={() => handleHostelClick(hostel)}
               >
-                {/* Trust-Focused Card */}
-                <div className="relative h-full flex flex-col bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] border-2 border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl">
-
-                  {/* Trust Score Circle - Static, commented out as requested */}
-                  {/* <motion.div
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="absolute top-6 right-6 z-20 w-20 h-20"
+                {/* Premium PG-style Card */}
+                <motion.div
+                  transition={{ type: 'spring', stiffness: 300 }}
+                  className="relative h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-[#037166]/30 rounded-3xl overflow-hidden shadow-2xl"
+                  style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <svg className="w-full h-full -rotate-90">
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="35"
-                      stroke="#1a1a1a"
-                      strokeWidth="6"
-                      fill="none"
-                    />
-                    <motion.circle
-                      cx="40"
-                      cy="40"
-                      r="35"
-                      stroke="#037166"
-                      strokeWidth="6"
-                      fill="none"
-                      strokeDasharray={220}
-                      initial={{ strokeDashoffset: 220 }}
-                      whileInView={{ strokeDashoffset: 220 - (220 * (hostel.trustScore || 0)) / 100 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.5, delay: index * 0.3 }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-xl font-bold text-white">{hostel.trustScore}</div>
-                    <h6 className="text-xs text-[#037166]">Trust</h6>
+                  {/* Type Badge — same as Premium PG */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 px-8 py-1 bg-[#037166]/90 backdrop-blur-md rounded-full rounded-t-none border border-t-0 border-[#037166]/30 shadow-lg whitespace-nowrap">
+                    <span className="text-xs font-intro !text-white tracking-wider block">
+                      Hostel
+                    </span>
                   </div>
-                </motion.div> */}
 
                   {/* Image */}
                   <div className="relative h-36 overflow-hidden">
-                    <ImageWithFallback
-                      src={hostel.image}
-                      alt={hostel.name}
-                      className="w-full h-full  object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
+                    <motion.div transition={{ duration: 0.6 }}>
+                      <ImageWithFallback
+                        src={hostel.image}
+                        alt={hostel.name}
+                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+                      />
+                    </motion.div>
 
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.1)_1px,transparent_1px)] bg-[size:20px_20px] opacity-30" />
 
-
-                    {/* Schedule Visit Button Badge - Bottom Center */}
+                    {/* Schedule Visit Hover Badge */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div
-                        className="px-6 py-1 bg-[#297A70] backdrop-blur-md rounded-t-lg rounded-b-none text-white shadow-lg border border-b-0 border-gray-600/20 whitespace-nowrap cursor-pointer transition-all"
-                      >
+                      <div className="px-6 py-1 bg-[#297A70] backdrop-blur-md rounded-t-lg text-white shadow-lg border border-b-0 border-gray-600/20 whitespace-nowrap">
                         <span className="text-[12px] font-ubuntu font-bold tracking-wider !text-white block">Schedule Your Space</span>
                       </div>
                     </div>
-
-                    {/* Price Badge - Dynamic */}
-
-
-                    {/* Heart Icon */}
-                    {/* <motion.button
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="absolute top-6 left-6 w-12 h-12 bg-[#1a1a1a]/80 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center group/heart"
-                  >
-                    <Heart className="w-6 h-6 text-[#ff6b35] group-hover/heart:fill-[#ff6b35] transition-all" />
-                  </motion.button> */}
                   </div>
 
                   {/* Content */}
-                  <div className="flex flex-1 flex-col p-4">
-                    <div className="mb-2">
-                      <h4 className="mb-1 line-clamp-1 bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-base font-bold text-transparent">
-                        {hostel.name}
-                      </h4>
-                      {/* <p className="text-gray-400 italic text-sm line-clamp-2">{hostel.tagline}</p> */}
+                  <div className="p-4">
+                    <h4 className="mb-2 h-12 line-clamp-2 bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-base font-bold text-transparent">
+                      {hostel.name}
+                    </h4>
+
+                    {/* Location row */}
+                    <div className="mb-3 space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">Location</span>
+                        <span className="text-white font-intro text-right flex-1 ml-4">
+                          {hostel.location || 'Hyderabad'}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Stats - Static, commented out as requested */}
-                    {/* <div className="flex items-center space-x-6 mb-6">
-                    <div className="flex items-center space-x-2">
-                      <Star className="w-5 h-5 text-[#037166] fill-[#037166]" />
-                      <span className="text-lg font-semibold text-white">{hostel.rating}</span>
+                    {/* Price + Book Now row */}
+                    <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-[#037166]/20 p-2 opacity-80">
+                      <div>
+                        <h6 className="text-[10px] text-gray-400 mb-0.5 font-intro">Starting from</h6>
+                        <div className="text-xs font-bold text-[#037166] font-intro">
+                          {hostel.price ? `₹${hostel.price}/month` : 'Contact Us'}
+                        </div>
+                      </div>
+                      <div>
+                        <motion.button
+                          className="cursor-pointer whitespace-nowrap rounded-full bg-[#297A70] px-2 py-1.5 text-[10px] font-semibold shadow-lg"
+                        >
+                          <span className="!text-white">Book Now</span>
+                        </motion.button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Users className="w-5 h-5 text-[#037166]" />
-                      <span className="text-sm text-gray-400">{hostel.residents} residents</span>
-                    </div>
-                  </div> */}
 
                     {/* Amenities */}
                     <div className="mb-4 grid grid-cols-2 gap-2">
@@ -412,19 +432,17 @@ export function RecommendedHostels() {
                             transition={{ delay: index * 0.1 + idx * 0.05 }}
                             className="flex items-center space-x-2 rounded-lg bg-[#1a1a1a]/50 p-2"
                           >
-                            <Icon className="h-3.5 w-3.5 text-[#037166]" />
-                            <span className="line-clamp-1 text-[11px] text-gray-300">{amenity}</span>
+                            <Icon className="h-3.5 w-3.5 text-[#037166] shrink-0" />
+                            <span className="text-[11px] text-gray-300 leading-tight break-words">{amenity}</span>
                           </motion.div>
                         );
                       })}
                     </div>
-
-
                   </div>
 
-                  {/* Warm Glow Effect */}
-                  <div className="absolute -inset-1 bg-gradient-to-br from-[#037166]/20 via-[#ff6b35]/10 to-transparent opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 -z-10" />
-                </div>
+                  {/* Hover Glow */}
+                  <div className="absolute -inset-1 bg-gradient-to-br from-[#037166]/20 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10" />
+                </motion.div>
               </motion.div>
             ))
           )}

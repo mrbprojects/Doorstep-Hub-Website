@@ -315,7 +315,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--off-white)] pb-32 pt-24 md:pt-28">
+        <div className="min-h-screen bg-[var(--off-white)] pb-36 pt-20 md:pt-28">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
@@ -333,61 +333,107 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                             router.back();
                         }
                     }}
-                    className="absolute -left-2 sm:left-0 top-2 sm:top-3 z-[80] w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors border border-gray-200"
+                    className="inline-flex items-center gap-2 px-4 py-2 mb-4 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-[var(--saffron)] transition-all text-xs sm:text-sm font-bold shadow-sm"
                 >
-                    <ArrowLeft className="w-5 h-5 text-[var(--deep-charcoal)]" />
+                    <ArrowLeft className="w-4 h-4" />
+                    Back
                 </motion.button>
-                <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-[1.7fr_1.4fr_290px] gap-5 items-stretch">
-                    <div className="h-[250px] rounded-2xl overflow-hidden border border-[var(--saffron)]/30"><img src={serviceData.mainImage || serviceData.logo} alt={serviceData.name} loading="eager" decoding="sync" fetchpriority="high" className="w-full h-full object-cover" /></div>
-                    <div className="h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl">
-                        <h1 className="text-2xl font-bold text-[var(--deep-charcoal)]">{serviceData.name}</h1>
-                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-600"><MapPin className="w-4 h-4 text-[var(--saffron)]" />{serviceData.location}</div>
-                        <div className="flex items-center gap-1 mt-2"><Star className="w-4 h-4 fill-[var(--saffron)] text-[var(--saffron)]" /><span className="font-bold">{serviceData.rating}</span><span className="text-xs text-gray-500">Starts from ₹{serviceData.basePrice}</span></div>
-                        <div className="flex items-center gap-3 mt-5">
-                            <a href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/andriod1.png" alt="Google Play" loading="lazy" decoding="async" className="h-[60px] w-auto object-contain" /></a>
-                            <a href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40"><img src="/apple2.png" alt="App Store" loading="lazy" decoding="async" className="h-[60px] w-auto object-contain" /></a>
+
+                {/* Hero 3 Cards Section */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.6fr_1.4fr_250px] gap-4 sm:gap-5 items-stretch mb-6 sm:mb-8">
+                    {/* CARD 1: BANNER IMAGE */}
+                    <div className="relative w-full h-28 sm:h-44 lg:h-[230px] rounded-2xl overflow-hidden border border-[var(--saffron)]/30 shadow-lg bg-white flex items-center justify-center">
+                        <img src={serviceData.mainImage || serviceData.logo} alt={serviceData.name} loading="eager" decoding="sync" fetchpriority="high" className="w-full h-full object-cover" />
+                    </div>
+
+                    {/* CARD 2: STORE INFO */}
+                    <div className="relative h-auto lg:h-[230px] bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
+                        <div>
+                            <h1 className="text-lg sm:text-xl font-extrabold text-[var(--deep-charcoal)] leading-tight">{serviceData.name}</h1>
+                            <div className="flex items-center gap-1.5 mt-1.5 text-xs text-gray-600">
+                                <MapPin className="w-3.5 h-3.5 text-[var(--saffron)] shrink-0" />
+                                <span className="line-clamp-2">{serviceData.location}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-2">
+                                <Star className="w-3.5 h-3.5 fill-[var(--saffron)] text-[var(--saffron)] shrink-0" />
+                                <span className="font-bold text-xs sm:text-sm text-gray-900">{serviceData.rating}</span>
+                                <span className="text-[11px] text-gray-500 ml-1">Starts from ₹{serviceData.basePrice}</span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-2.5 mt-3">
+                                <a href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-24 sm:w-28 md:w-32 h-9 sm:h-10 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5" title="Get it on Google Play">
+                                    <img src="/andriod1.png" alt="Google Play" loading="lazy" decoding="async" className="h-full w-auto object-contain" />
+                                </a>
+                                <a href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-24 sm:w-28 md:w-32 h-9 sm:h-10 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5" title="Download on the App Store">
+                                    <img src="/apple2.png" alt="App Store" loading="lazy" decoding="async" className="h-full w-auto object-contain" />
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    <div className="h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+
+                    {/* CARD 3: PUJA BOOKING HOURS */}
+                    <div className="relative h-auto lg:h-[230px] bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
                         <div>
-                            <div className="flex items-center gap-2.5 mb-4 pb-2.5 border-b border-gray-100">
-                                <div className="w-9 h-9 rounded-xl bg-[var(--saffron)]/10 flex items-center justify-center"><Clock className="w-5 h-5 text-[var(--saffron)]" /></div>
-                                <div><h3 className="text-sm font-bold text-gray-900">Puja Booking Hours</h3><span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span></div>
+                            <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-gray-100">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[var(--saffron)]/10 flex items-center justify-center shrink-0">
+                                    <Clock className="w-4 h-4 text-[var(--saffron)]" />
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 leading-tight truncate">Puja Booking Hours</h3>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="relative flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="space-y-2 text-xs">
-                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Monday - Saturday</span><span className="text-gray-800 font-extrabold">06:00 AM - 09:00 PM</span></div>
-                                <div><span className="text-gray-400 text-[10px] font-bold uppercase block">Sunday</span><span className="text-gray-800 font-extrabold">06:00 AM - 10:00 PM</span></div>
+                            <div className="space-y-1.5 text-xs">
+                                <div>
+                                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Monday - Saturday</span>
+                                    <span className="text-gray-800 font-extrabold text-xs sm:text-sm block">06:00 AM - 09:00 PM</span>
+                                </div>
+                                <div>
+                                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Sunday</span>
+                                    <span className="text-gray-800 font-extrabold text-xs sm:text-sm block">06:00 AM - 10:00 PM</span>
+                                </div>
                             </div>
                         </div>
-                        <span className="inline-flex w-44 flex-col rounded-xl px-4 py-2 text-white bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)]"><span className="text-[10px] font-bold tracking-wide">Available For</span><span className="text-md font-extrabold">Same-day Ritual Booking</span></span>
+                        <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-center">
+                            <span className="inline-flex w-auto max-w-[210px] flex-col items-center justify-center rounded-full px-4 py-1.5 text-white bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-center shadow-md">
+                                <span className="text-[9px] font-bold tracking-wider uppercase text-white/90">Available For</span>
+                                <span className="text-xs font-extrabold whitespace-nowrap">Same-day Ritual Booking</span>
+                            </span>
+                        </div>
                     </div>
                 </motion.div>
             </div>
 
-            {/* Tabs */}
-            <div className="max-w-7xl mx-auto px-4 mt-8">
+            {/* Tabs Navigation */}
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-6 mt-6 sm:mt-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <div className="sticky top-20 z-40 bg-[var(--off-white)]/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 p-2">
-                        <TabsList className="bg-transparent w-full h-14 grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="sticky top-16 sm:top-20 z-40 bg-[var(--off-white)]/90 backdrop-blur-xl rounded-2xl shadow-md border border-gray-200 p-1.5 sm:p-2">
+                        <TabsList className="bg-transparent w-full flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
                             <TabsTrigger
                                 value="portfolio"
-                                className="h-full py-0 px-4 text-gray-600 font-semibold leading-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center"
+                                className="py-2 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center shadow-sm"
                             >
-                                <Flower2 className="w-4 h-4 mr-2" />
+                                <Flower2 className="w-4 h-4 mr-1.5 shrink-0" />
                                 Spiritual Rate Cards
                             </TabsTrigger>
                             <TabsTrigger
                                 value="reviews"
-                                className="h-full py-0 px-4 text-gray-600 font-semibold leading-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center"
+                                className="py-2 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center shadow-sm"
                             >
-                                <MessageSquare className="w-4 h-4 mr-2" />
+                                <MessageSquare className="w-4 h-4 mr-1.5 shrink-0" />
                                 Ratings
                             </TabsTrigger>
                             <TabsTrigger
                                 value="about"
-                                className="h-full py-0 px-4 text-gray-600 font-semibold leading-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center"
+                                className="py-2 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center shadow-sm"
                             >
-                                <MapPin className="w-4 h-4 mr-2" />
+                                <MapPin className="w-4 h-4 mr-1.5 shrink-0" />
                                 Shortly Aboutus
                             </TabsTrigger>
                         </TabsList>
@@ -529,27 +575,26 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                 animate={{ y: 0 }}
                 className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl z-50"
             >
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-4">
                     <div>
-                        <div className="text-xs text-gray-500 mb-1">Total Quote</div>
-                        <div className="flex items-baseline space-x-2">
-                            <span className="text-3xl font-bold text-[var(--deep-charcoal)]">
+                        <div className="text-[10px] sm:text-xs text-gray-500 font-medium mb-0.5">Total Quote</div>
+                        <div className="flex items-baseline space-x-1 sm:space-x-2">
+                            <span className="text-2xl sm:text-3xl font-extrabold text-[var(--deep-charcoal)]">
                                 {selectedPackage
                                     ? `₹${selectedPackage.price.toLocaleString('en-IN')}`
                                     : `₹${serviceData.basePrice.toLocaleString('en-IN')}`}
                             </span>
-                            <span className="text-sm text-gray-500"> </span>
                         </div>
                     </div>
 
                     <button
                         onClick={handleContinueToBook}
                         disabled={isCheckingAddons}
-                        className="px-12 py-4 bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white rounded-2xl font-bold text-lg hover:shadow-xl flex items-center gap-2 hover:shadow-[var(--saffron)]/40 transition-all transform hover:scale-105 disabled:opacity-75 disabled:scale-100 disabled:cursor-not-allowed"
+                        className="px-6 sm:px-12 py-2.5 sm:py-3.5 bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white rounded-full font-bold text-sm sm:text-lg hover:shadow-xl flex items-center gap-2 hover:shadow-[var(--saffron)]/40 transition-all transform active:scale-95 disabled:opacity-75 disabled:scale-100 disabled:cursor-not-allowed shadow-md"
                     >
                         {isCheckingAddons ? (
                             <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                                 <span>Verifying...</span>
                             </>
                         ) : (

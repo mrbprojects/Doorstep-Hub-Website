@@ -81,6 +81,34 @@ export function RecommendedSpaSalon() {
               displayedAmenities = ['Premium Services', 'Expert Therapists', 'Relaxation Lounge', 'Hygienic Environment'];
             }
 
+            const cleanAmenityText = (text) => {
+              if (!text) return '';
+              let str = String(text).trim().replace(/\s*\([^)]*\)/g, '');
+              const mappings = {
+                'Steam room or sauna': 'Steam Room',
+                'Steam room': 'Steam Room',
+                'Sauna': 'Sauna',
+                'Hot towel service': 'Hot Towel',
+                'Relaxation lounges': 'Relaxation Lounge',
+                'Complimentary beverages': 'Beverages',
+                'Robes & slippers': 'Robes & Slippers',
+                'Lockers & secure storage': 'Secure Lockers',
+                'Lockers & secure storage for personal items': 'Secure Lockers',
+                'Haircut': 'Haircut',
+                'Hair Coloring': 'Hair Color',
+                'Styling': 'Styling',
+                'Facial': 'Facial',
+                'Massage': 'Massage',
+                'Premium Products': 'Premium Products',
+              };
+              if (mappings[str]) return mappings[str];
+              if (str.length > 20) {
+                const words = str.split(' ');
+                if (words.length > 2) return words.slice(0, 2).join(' ');
+              }
+              return str;
+            };
+
             return {
               id: store._id,
               slug: store.slug,
@@ -91,7 +119,7 @@ export function RecommendedSpaSalon() {
               price: store.startingAt ? `₹${store.startingAt}` : '$$',
               image: store.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.image}` : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBzcGElMjB0cmVhdG1lbnR8ZW58MXx8fHwxNzY3OTU0MDk4fDA&ixlib=rb-4.1.0&q=80&w=1080',
               badge: index === 0 ? 'Top Rated' : 'Trending',
-              highlights: displayedAmenities,
+              highlights: displayedAmenities.slice(0, 4).map(cleanAmenityText),
               description: store.bio,
               isDummy: false
             };
@@ -267,12 +295,12 @@ export function RecommendedSpaSalon() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#d4af37]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
+          {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#d4af37]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             < Crown className="w-4 h-4 text-[#d4af37]" />
             <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-transparent font-medium">
               Luxury Glow World
             </h6>
-          </div>
+          </div> */}
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-transparent">
@@ -386,9 +414,9 @@ export function RecommendedSpaSalon() {
                       {place.highlights.map((highlight, idx) => {
                         const Icon = amenityIcons[highlight] || Sparkles;
                         return (
-                          <div key={idx} className="flex h-[36px] items-center space-x-1.5 rounded-lg border border-[#037166]/10 bg-[#1a1a1a]/50 px-2 py-1.5">
+                          <div key={idx} className="flex min-h-[36px] items-center space-x-1.5 rounded-lg border border-[#037166]/10 bg-[#1a1a1a]/50 px-2 py-1.5">
                             <Icon className="h-3 w-3 shrink-0 text-[#d4af37]" />
-                            <span className="line-clamp-1 text-[9px] text-gray-300">{highlight}</span>
+                            <span className="text-[9px] text-gray-300 leading-tight break-words">{highlight}</span>
                           </div>
                         );
                       })}

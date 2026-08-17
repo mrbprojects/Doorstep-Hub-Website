@@ -51,6 +51,17 @@ function CategorySkeleton() {
   );
 }
 
+const getCleanSubcategoryDescription = (sub) => {
+  if (sub?.title && !sub.title.toLowerCase().includes('near me')) return sub.title;
+  if (!sub?.description) return "Professional service by verified and experienced technicians";
+  const cleanText = String(sub.description).replace(/<[^>]*>?/gm, '').trim();
+  const isKeywordDump = cleanText.toLowerCase().includes('near me') || (cleanText.match(/,/g) || []).length > 3;
+  if (isKeywordDump) {
+    return `Professional ${sub.name || 'repair'} services by verified doorstep technicians.`;
+  }
+  return cleanText || "Professional service by verified and experienced technicians";
+};
+
 export function CategoryPage({ category, categoryId }) {
   const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -401,61 +412,32 @@ export function CategoryPage({ category, categoryId }) {
                     <h3 className="text-lg font-semibold text-white">Most Popular</h3>
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {subCategories.map((subCategory, index) => (
                       <motion.div
                         key={subCategory._id || `featured-${index}`}
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-                        whileHover={{ y: -8 }}
+                        transition={{ duration: 0.5, delay: 0.1 * index }}
+                        whileHover={{ y: -6 }}
                         onHoverStart={() => setHoveredIndex(index)}
                         onHoverEnd={() => setHoveredIndex(null)}
                         onClick={() => handleSubCategoryClick(subCategory)}
-                        className="group cursor-pointer relative h-full"
+                        className="group cursor-pointer relative h-40 sm:h-44 md:h-48 w-full"
                       >
-                        <div className="relative h-full rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border-2 border-white/10 hover:border-[#037166]/50 backdrop-blur-sm transition-all duration-300 overflow-hidden flex items-stretch">
-                          {/* Popular Badge */}
-
-
-                          {/* Background glow on hover */}
-                          <AnimatePresence>
-                            {hoveredIndex === index && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10"
-                              />
-                            )}
-                          </AnimatePresence>
-
-                          {/* Image Background if available (low opacity) */}
-                          {subCategory.image && (
-                            <div className="absolute inset-0 z-0">
+                        <div className="relative w-full h-full rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/60 transition-all duration-300 overflow-hidden flex items-stretch shadow-sm hover:shadow-md">
+                          {/* Left Side: Fixed Image Container */}
+                          <div className="relative w-28 sm:w-36 md:w-40 shrink-0 h-full overflow-hidden bg-white/5">
+                            {subCategory.image ? (
                               <img loading="lazy" decoding="async"
                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
                                 alt={subCategory.name}
-                                className="w-fit h-fit object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent" />
-                            </div>
-                          )}
-
-                          {/* Icon/Image */}
-                          <div className="relative z-10 flex-shrink-0 w-28 md:w-40 bg-white/5">
-                            {subCategory.image ? (
-                              <div className="w-full h-full overflow-hidden">
-                                <img loading="lazy" decoding="async"
-                                  src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
-                                  alt={subCategory.name}
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                              </div>
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                              <div className="w-full h-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center">
                                 <svg
-                                  className="w-10 h-10 md:w-12 md:h-12 text-white"
+                                  className="w-10 h-10 text-white/80"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -469,29 +451,35 @@ export function CategoryPage({ category, categoryId }) {
                                 </svg>
                               </div>
                             )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-[#037166] text-white text-[10px] font-extrabold shadow-sm uppercase tracking-wider">
+                              Popular
+                            </span>
                           </div>
 
-                          {/* Content */}
-                          <div className="relative z-10 flex-1 min-w-0 p-4 md:p-6 flex flex-col justify-center">
-                            <h4 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-[#04a99d] transition-colors truncate">
-                              {subCategory.name}
-                            </h4>
-                            <p className="text-white/60 text-sm mb-3 md:mb-4 leading-relaxed line-clamp-2">
-                              Professional service by verified and experienced technicians
-                            </p>
+                          {/* Right Side: Content Container */}
+                          <div className="p-3.5 sm:p-4 flex-1 min-w-0 flex flex-col justify-between h-full bg-[#1a1a1a]">
+                            <div>
+                              <h3 className="text-sm sm:text-base font-extrabold text-white mb-1 group-hover:text-[#04a99d] transition-colors line-clamp-1">
+                                {subCategory.name}
+                              </h3>
+                              <p className="text-white/60 text-xs line-clamp-2 leading-relaxed">
+                                {getCleanSubcategoryDescription(subCategory)}
+                              </p>
+                            </div>
 
-                            {/* Price */}
-
-
-                            {/* CTA */}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-[#04a99d] font-semibold text-sm">
+                            {/* Footer CTA */}
+                            <div className="pt-2 border-t border-white/10 flex items-center justify-between mt-auto">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#037166]/20 text-[#04a99d] font-bold text-[11px] sm:text-xs group-hover:bg-[#037166] group-hover:text-white transition-all">
                                 View Services
-                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </div>
-
+                                <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                              </span>
                             </div>
                           </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
 
                           {/* Hover glow border */}
                           <motion.div

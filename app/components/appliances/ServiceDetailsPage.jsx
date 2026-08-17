@@ -520,7 +520,7 @@ export function ServiceDetailsPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="appliance-detail-page min-h-screen pt-24 sm:pt-28 pb-12 bg-white"
+      className="appliance-detail-page min-h-screen pt-24 sm:pt-28 pb-28 lg:pb-12 bg-white"
     >
       {schemaData && (
         <script
@@ -529,24 +529,6 @@ export function ServiceDetailsPage({
         />
       )}
 
-
-      {/* ── MOBILE: Sticky bottom Book-Now bar (hidden on lg+) ─────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden px-4 pb-4 pt-2 space-y-2"
-        style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.98) 60%, rgba(255,255,255,0))' }}
-      >
-        <AmcCoverageBanner
-          eligibility={amcEligibility}
-          loading={amcLoading}
-          compact
-        />
-        <button
-          onClick={handleBookNow}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-base shadow-2xl shadow-[#037166]/40 flex items-center justify-center gap-2 active:scale-95 transition-transform"
-        >
-          Book Now
-          <ArrowRight className="w-5 h-5" />
-        </button>
-      </div>
 
       {/* ── HERO SECTION ────────────────────────────────────────────────────── */}
       <section className="relative py-3 sm:py-4 lg:py-6">
@@ -582,7 +564,7 @@ export function ServiceDetailsPage({
             transition={{ delay: 0.1 }}
             className="text-center max-w-4xl mx-auto mb-6 px-2 space-y-2"
           >
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight truncate text-center">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight text-center leading-snug sm:leading-tight">
               {storeData.title || storeData.name}
             </h1>
 
@@ -918,23 +900,23 @@ export function ServiceDetailsPage({
         </div>
 
         {/* Mobile Fixed Sticky Bottom CTA Bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2.5 shadow-2xl flex items-center justify-between gap-3">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
-              {selectedCards.length > 0 ? `${selectedCards.length} Selected` : storeData.title || storeData.name}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] flex items-center justify-between gap-3">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider truncate">
+              {selectedCards.length > 0 ? `${selectedCards.length} Service${selectedCards.length > 1 ? 's' : ''} Selected` : 'Select Rate Cards'}
             </span>
-            <span className="text-sm font-black text-[#037166]">
+            <span className="text-sm sm:text-base font-black text-[#037166]">
               {selectedCards.length > 0
                 ? `₹${selectedCards.reduce((sum, card) => sum + (Number(card.price) || 0), 0)}`
-                : 'Select Service Rate Cards'}
+                : 'Choose Service'}
             </span>
           </div>
           <button
             onClick={handleBookNow}
-            className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-extrabold text-xs uppercase tracking-wider shadow-md active:scale-95 flex items-center gap-1.5"
+            className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider shadow-md active:scale-95 flex items-center gap-1.5 shrink-0"
           >
             Book Appointment
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </section>
@@ -962,56 +944,61 @@ export function ServiceDetailsPage({
         ];
 
         return (
-          <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
+            <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-3.5 sm:gap-4">
+                <div className="max-w-xl">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
                     Customer Reviews & Ratings in {currentCity}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     Verified customer feedback for {currentService} in {currentCity}.
                   </p>
                 </div>
-                <div className="flex items-center gap-3 bg-[#037166]/10 px-5 py-3 rounded-2xl border border-[#037166]/20">
-                  <div className="flex items-center text-amber-500">
+                <div className="hidden sm:inline-flex flex-wrap items-center gap-2 sm:gap-2.5 bg-emerald-50/80 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border border-[#037166]/20 self-start sm:self-auto shrink-0 shadow-sm">
+                  <div className="flex items-center gap-0.5 text-amber-400 shrink-0">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <Star key={i} className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <span className="font-bold text-gray-900 text-lg">4.8 / 5.0</span>
-                  <span className="text-gray-500 text-sm">(1,240 Verified Reviews)</span>
+                  <span className="font-black text-gray-900 text-xs sm:text-sm whitespace-nowrap">
+                    4.8<span className="text-gray-400 font-medium text-[10px] sm:text-xs">/5.0</span>
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-slate-300 shrink-0 hidden xs:inline-block" />
+                  <span className="text-gray-600 font-semibold text-xs sm:text-sm whitespace-nowrap">
+                    1,240 Verified Reviews
+                  </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {reviewItems.map((rev, index) => (
                   <div
                     key={index}
-                    className="bg-white border border-slate-200 hover:border-[#037166]/40 p-6 rounded-2xl shadow-sm transition-all duration-300 flex flex-col justify-between"
+                    className="bg-white border border-slate-200 hover:border-[#037166]/40 p-4 sm:p-6 rounded-2xl shadow-sm transition-all duration-300 flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-9 h-9 rounded-full bg-[#037166]/10 text-[#037166] font-bold flex items-center justify-center text-sm">
+                          <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-full bg-[#037166]/10 text-[#037166] font-bold flex items-center justify-center text-xs sm:text-sm shrink-0">
                             {rev.name.charAt(0)}
                           </div>
                           <div>
-                            <h4 className="font-bold text-gray-900 text-sm">{rev.name}</h4>
-                            <p className="text-xs text-gray-400">{rev.date}</p>
+                            <h4 className="font-bold text-gray-900 text-xs sm:text-sm">{rev.name}</h4>
+                            <p className="text-[10px] sm:text-xs text-gray-400">{rev.date}</p>
                           </div>
                         </div>
-                        <div className="flex items-center text-amber-400">
+                        <div className="flex items-center text-amber-400 shrink-0">
                           {[...Array(rev.rating)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-amber-400" />
+                            <Star key={i} className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-amber-400" />
                           ))}
                         </div>
                       </div>
-                      <p className="text-gray-600 text-sm leading-relaxed">
+                      <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                         "{rev.body}"
                       </p>
                     </div>
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#037166] font-medium">
+                    <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#037166] font-medium">
                       <span>Verified Booking</span>
                       <span>{currentCity}</span>
                     </div>
@@ -1028,8 +1015,8 @@ export function ServiceDetailsPage({
         <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 border-t border-white/5">
           <div className="flex items-center justify-between mb-6 lg:mb-8">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Related Services</h2>
-              <p className="text-white/60 text-sm">Other popular services in {subCategory}</p>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1.5 sm:mb-2">Related Services</h2>
+              <p className="text-gray-600 text-xs sm:text-sm">Other popular services in {subCategory}</p>
             </div>
             <button
               onClick={() => {

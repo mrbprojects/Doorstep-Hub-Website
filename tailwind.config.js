@@ -21,15 +21,29 @@ module.exports = {
     'xl:grid-cols-6',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: '1rem',
+        sm: '1.5rem',
+        lg: '2rem',
+      },
+      screens: {
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1400px',
+      },
+    },
     extend: {
-
       fontFamily: {
         comfortaa: ['Comfortaa', 'cursive'],
         intro: ['Poppins', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
-
-        ubuntu: ['var(--font-ubuntu)', 'sans-serif'], // since you're already using this
+        ubuntu: ['var(--font-ubuntu)', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         shimmer: {

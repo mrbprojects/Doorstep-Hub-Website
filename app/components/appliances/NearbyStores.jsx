@@ -262,7 +262,7 @@ export function NearbyServiceCenters({ onViewAll }) {
           <div className="inline-flex items-center space-x-2 px-3 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-4 md:mb-6 mx-auto">
             <Navigation className="w-4 h-4 text-[#037166]" />
             <h6 className="text-xs md:text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">
-              Live Location Services
+              Nearby Service Provider Locations
             </h6>
           </div>
 

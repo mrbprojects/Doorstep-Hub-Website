@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
 
 
 :root {
@@ -817,15 +826,21 @@ h1 p {
   color: #123F4A;
 }
 
-/* Allow h1 elements with white text utility classes or inside dark headers to render in White (#FFFFFF) */
+/* Allow h1 elements with white text utility classes to render in White (#FFFFFF) */
 h1[class*="text-white"],
 h1[class*="!text-white"],
 h1.text-white,
-h1.\!text-white,
-.bg-gradient-to-r h1,
-[class*="bg-gradient"] h1 {
+h1.\!text-white {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Ensure text-slate-900, text-black, and custom color classes on h1 respect their color */
+h1[class*="text-slate"],
+h1[class*="text-black"],
+h1[class*="text-gray"],
+h1[class*="text-zinc"] {
+  -webkit-text-fill-color: initial;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

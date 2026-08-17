@@ -97,18 +97,59 @@ export function PremiumPGHostels() {
               displayedAmenities = ['Fully Furnished', '24/7 Security', 'High-Speed WiFi', 'Power Backup'];
             }
 
+            const cleanAmenityText = (text) => {
+              if (!text) return '';
+              let str = String(text).trim().replace(/\s*\([^)]*\)/g, '');
+              const mappings = {
+                'Sleeping & Room Facilities': 'Sleeping Facilities',
+                'Bunk beds or single beds': 'Bunk Beds',
+                'Bunk beds with mattresses': 'Bunk Beds',
+                'Mattress + pillows': 'Mattress & Pillows',
+                'Bed linens': 'Bed Linens',
+                'Fully furnished rooms': 'Fully Furnished',
+                'Comfortable beds with mattress': 'Comfortable Beds',
+                'Individual wardrobe / locker': 'Individual Locker',
+                'Individual wardrobe': 'Individual Wardrobe',
+                'Study table and chair': 'Study Table & Chair',
+                'Study table & chair': 'Study Table & Chair',
+                'Shared charging points': 'Charging Points',
+                'Personal reading light & power outlet': 'Reading Light',
+                'Lockable storage lockers': 'Lockable Lockers',
+                'Shared bathroom facilities': 'Shared Bathroom',
+                'Curtains or privacy partitions': 'Privacy Curtains',
+              };
+              if (mappings[str]) return mappings[str];
+              if (str.length > 20) {
+                const words = str.split(' ');
+                if (words.length > 2) return words.slice(0, 2).join(' ');
+              }
+              return str;
+            };
+
+            const getCityFromHostel = (h) => {
+              if (typeof h.cityName === 'string' && h.cityName.trim()) return h.cityName.trim();
+              if (typeof h.cityName === 'object' && h.cityName?.cityName) return h.cityName.cityName;
+              if (typeof h.city === 'string' && h.city.trim()) return h.city.trim();
+              if (typeof h.addressCityName === 'string' && h.addressCityName.trim()) return h.addressCityName.trim();
+              if (h.address && typeof h.address === 'string') {
+                const parts = h.address.split(',').map(s => s.trim()).filter(Boolean);
+                const filtered = parts.filter(p => !/^\d{5,6}$|india|telangana|andhra|karnataka|maharashtra/i.test(p));
+                if (filtered.length > 0) return filtered[filtered.length - 1];
+              }
+              return 'Hyderabad';
+            };
+
             return {
               id: hostel._id,
               slug: hostel.slug || hostel.hostelSlug,
               name: hostel.hostelName || `${hostel.firstName} ${hostel.lastName}`,
               type: 'Premium PG',
-              // location: hostel.cityName || 'Hyderabad Area',
-              location: hostel.address || 'Hyderabad Area',
+              location: getCityFromHostel(hostel),
               price: `₹${hostel.startingAt}/month`,
               occupancy: 'Single/Double',
               image: hostel.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image}` : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3Njc5NTMwMzR8MA&ixlib=rb-4.1.0&q=80&w=1080',
               description: hostel.bio,
-              amenities: displayedAmenities,
+              amenities: displayedAmenities.map(cleanAmenityText),
               isDummy: false
             };
           });
@@ -240,10 +281,10 @@ export function PremiumPGHostels() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#ff6b35]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
+          {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#ff6b35]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Building2 className="w-4 h-4 text-[#037166]" />
             <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent font-medium">Modern Architectural World</h6>
-          </div>
+          </div> */}
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent">
@@ -360,12 +401,8 @@ export function PremiumPGHostels() {
                     <div className="mb-3 space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-gray-400">Location</span>
-                        <span className="text-white font-intro text-right flex-1 ml-4 line-clamp-1">{hostel.location}</span>
+                        <span className="text-white font-intro text-right flex-1 ml-4">{hostel.location}</span>
                       </div>
-                      {/* <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Occupancy</span>
-                        <span className="text-white font-intro text-right flex-1 ml-4">{hostel.occupancy}</span>
-                      </div> */}
                     </div>
 
                     {/* Price - Disabled interaction */}
@@ -381,8 +418,6 @@ export function PremiumPGHostels() {
                         </div>
                       </div>
 
-
-
                       {/* Right: Book Now - Disabled */}
                       <div>
                         <motion.button
@@ -395,7 +430,6 @@ export function PremiumPGHostels() {
                       </div>
 
                     </div>
-
 
                     {/* Amenities */}
                     <div className="mb-4 grid grid-cols-2 gap-2">
@@ -410,8 +444,8 @@ export function PremiumPGHostels() {
                             transition={{ delay: index * 0.1 + idx * 0.05 }}
                             className="flex items-center space-x-2 rounded-lg bg-[#1a1a1a]/50 p-2"
                           >
-                            <Icon className="h-3.5 w-3.5 text-[#037166]" />
-                            <span className="line-clamp-1 text-[11px] text-gray-300">{amenity}</span>
+                            <Icon className="h-3.5 w-3.5 text-[#037166] shrink-0" />
+                            <span className="text-[11px] text-gray-300 leading-tight break-words">{amenity}</span>
                           </motion.div>
                         );
                       })}

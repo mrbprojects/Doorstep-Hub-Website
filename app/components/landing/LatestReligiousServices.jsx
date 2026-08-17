@@ -73,12 +73,46 @@ export function LatestReligiousServices() {
               displayedAmenities = ['Vedic Rituals', 'Pooja Samagri', 'Mantra Chanting', 'Prasadam Distribution'];
             }
 
+            const cleanAmenityText = (text) => {
+              if (!text) return '';
+              let str = String(text).trim().replace(/\s*\([^)]*\)/g, '');
+              const mappings = {
+                'Experienced Vedic Pandit': 'Vedic Pandit',
+                'Certified Priest': 'Vedic Priest',
+                'Pooja materials provided': 'Pooja Samagri',
+                'Prasadam Distribution': 'Prasadam',
+                'Prasadam provided': 'Prasadam',
+                'Havan kundam setup': 'Havan Setup',
+                'Pure Ghee & Herbs': 'Ghee & Herbs',
+                'Vedic Procedures': 'Vedic Rituals',
+              };
+              if (mappings[str]) return mappings[str];
+              if (str.length > 20) {
+                const words = str.split(' ');
+                if (words.length > 2) return words.slice(0, 2).join(' ');
+              }
+              return str;
+            };
+
+            const getCityFromService = (s) => {
+              if (typeof s.cityName === 'string' && s.cityName.trim()) return s.cityName.trim();
+              if (typeof s.cityName === 'object' && s.cityName?.cityName) return s.cityName.cityName;
+              if (typeof s.city === 'string' && s.city.trim()) return s.city.trim();
+              if (typeof s.addressCityName === 'string' && s.addressCityName.trim()) return s.addressCityName.trim();
+              if (s.address && typeof s.address === 'string') {
+                const parts = s.address.split(',').map(item => item.trim()).filter(Boolean);
+                const filtered = parts.filter(p => !/^\d{5,6}$|india|telangana|andhra|karnataka|maharashtra/i.test(p));
+                if (filtered.length > 0) return filtered[filtered.length - 1];
+              }
+              return 'Hyderabad';
+            };
+
             return {
               id: service._id,
               slug: service.slug || service.serviceSlug,
               name: service.serviceName || `${service.firstName} ${service.lastName}`,
-              location: service.cityName || service.address || 'Hyderabad',
-              amenities: displayedAmenities,
+              location: getCityFromService(service),
+              amenities: displayedAmenities.slice(0, 4).map(cleanAmenityText),
               attendees: 90,
               image: service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1712999533944-9200e6b20e27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZW1wbGUlMjBzcGlyaXR1YWwlMjByZWxpZ2lvdXN8ZW58MXx8fHwxNzY4MDI2NzQ2fDA&ixlib=rb-4.1.0&q=80&w=1080',
               bio: service.bio
@@ -223,12 +257,12 @@ export function LatestReligiousServices() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#9b59b6]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
+          {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#9b59b6]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Church className="w-4 h-4 text-[#9b59b6]" />
             <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-transparent font-medium">
               Spiritual World
             </h6>
-          </div>
+          </div> */}
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-transparent">
@@ -340,8 +374,8 @@ export function LatestReligiousServices() {
                       const Icon = amenityIcons[amenity] || Flame;
                       return (
                         <div key={idx} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg border border-[#037166]/10">
-                          <Icon className="w-3 h-3 text-[#9b59b6]" />
-                          <span className="text-[10px] text-gray-300 line-clamp-1">{amenity}</span>
+                          <Icon className="w-3 h-3 text-[#9b59b6] shrink-0" />
+                          <span className="text-[10px] text-gray-300 leading-tight break-words">{amenity}</span>
                         </div>
                       );
                     })}

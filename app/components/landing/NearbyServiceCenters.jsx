@@ -398,7 +398,7 @@ export function NearbyServiceCenters() {
         >
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Navigation className="w-4 h-4 text-[#037166]" />
-            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Live Location Services</h6>
+            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Nearby Service Provider Locations</h6>
           </div>
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">

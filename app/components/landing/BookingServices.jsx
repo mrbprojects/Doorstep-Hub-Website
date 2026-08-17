@@ -194,10 +194,10 @@ export function BookingServices() {
           transition={{ duration: 0.6 }}
           className="text-center mb-6"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-1 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-2">
+          {/* <div className="inline-flex items-center space-x-2 px-4 py-1 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-2">
             <Calendar className="w-4 h-4 text-[#037166]" />
             <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Futuristic Service Partners</h6>
-          </div>
+          </div> */}
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">

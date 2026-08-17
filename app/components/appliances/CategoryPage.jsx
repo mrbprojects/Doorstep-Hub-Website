@@ -52,6 +52,17 @@ function CategorySkeleton() {
   );
 }
 
+const getCleanSubcategoryDescription = (sub) => {
+  if (sub?.title && !sub.title.toLowerCase().includes('near me')) return sub.title;
+  if (!sub?.description) return "Professional service by verified and experienced technicians";
+  const cleanText = String(sub.description).replace(/<[^>]*>?/gm, '').trim();
+  const isKeywordDump = cleanText.toLowerCase().includes('near me') || (cleanText.match(/,/g) || []).length > 3;
+  if (isKeywordDump) {
+    return `Professional ${sub.name || 'repair'} services by verified doorstep technicians.`;
+  }
+  return cleanText || "Professional service by verified and experienced technicians";
+};
+
 export function CategoryPage({ slug, initialData }) {
   const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -449,61 +460,32 @@ export function CategoryPage({ slug, initialData }) {
                     <h3 className="text-lg font-semibold text-gray-900">Most Popular</h3>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {subCategories.map((subCategory, index) => (
                       <motion.div
                         key={subCategory._id || `featured-${index}`}
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-                        whileHover={{ y: -8 }}
+                        transition={{ duration: 0.5, delay: 0.1 * index }}
+                        whileHover={{ y: -6 }}
                         onHoverStart={() => setHoveredIndex(index)}
                         onHoverEnd={() => setHoveredIndex(null)}
                         onClick={() => handleSubCategoryClick(subCategory)}
-                        className="group cursor-pointer relative h-full"
+                        className="group cursor-pointer relative h-40 sm:h-44 md:h-48 w-full"
                       >
-                        <div className="relative h-full rounded-xl bg-white border-2 border-[#d8e5e2] hover:border-[#037166]/50 backdrop-blur-sm transition-all duration-300 overflow-hidden flex items-stretch shadow-sm hover:shadow-md">
-                          {/* Popular Badge */}
-
-
-                          {/* Background glow on hover */}
-                          <AnimatePresence>
-                            {hoveredIndex === index && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className="absolute inset-0 bg-gradient-to-br from-[#037166]/20 to-[#04a99d]/10"
-                              />
-                            )}
-                          </AnimatePresence>
-
-                          {/* Image Background if available (low opacity) */}
-                          {subCategory.image && (
-                            <div className="absolute inset-0 z-0">
+                        <div className="relative w-full h-full rounded-2xl bg-white border border-slate-200 hover:border-[#037166]/60 transition-all duration-300 overflow-hidden flex items-stretch shadow-sm hover:shadow-md">
+                          {/* Left Side: Fixed Image Container */}
+                          <div className="relative w-28 sm:w-36 md:w-40 shrink-0 h-full overflow-hidden bg-slate-100">
+                            {subCategory.image ? (
                               <img loading="lazy" decoding="async"
                                 src={`https://api.doorstephub.com/${subCategory.image}`}
                                 alt={subCategory.name}
-                                className="w-fit h-fit object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
-                            </div>
-                          )}
-
-                          {/* Icon/Image */}
-                          <div className="relative z-10 flex-shrink-0 w-20 sm:w-28 md:w-40 bg-white/5">
-                            {subCategory.image ? (
-                              <div className="w-full h-full overflow-hidden">
-                                <img loading="lazy" decoding="async"
-                                  src={`https://api.doorstephub.com/${subCategory.image}`}
-                                  alt={subCategory.name}
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                              </div>
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                              <div className="w-full h-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center">
                                 <svg
-                                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white"
+                                  className="w-10 h-10 text-white/80"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -517,34 +499,31 @@ export function CategoryPage({ slug, initialData }) {
                                 </svg>
                               </div>
                             )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[10px] font-extrabold text-[#037166] shadow-sm uppercase tracking-wider">
+                              Popular
+                            </span>
                           </div>
 
-                          {/* Content */}
-                          <div className="relative z-10 flex-1 min-w-0 p-2.5 sm:p-4 md:p-6 flex flex-col justify-center bg-white border-l border-[#e2e8f0]">
-                            <h3 className="text-sm sm:text-xl md:text-2xl font-bold text-[#037166] mb-1 sm:mb-2 md:mb-3 group-hover:text-[#025951] transition-colors line-clamp-2">
-                              {subCategory.name}
-                            </h3>
-                            <p className="hidden sm:block text-[#037166]/80 text-xs sm:text-sm mb-2 sm:mb-3 md:mb-4 leading-relaxed line-clamp-2">
-                              {subCategory.title || subCategory.description || "Professional service by verified and experienced technicians"}
-                            </p>
+                          {/* Right Side: Content Container */}
+                          <div className="p-3.5 sm:p-4 flex-1 min-w-0 flex flex-col justify-between h-full bg-white">
+                            <div>
+                              <h3 className="text-sm sm:text-base font-extrabold text-gray-900 mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">
+                                {subCategory.name}
+                              </h3>
+                              <p className="text-gray-600 text-xs line-clamp-2 leading-relaxed">
+                                {getCleanSubcategoryDescription(subCategory)}
+                              </p>
+                            </div>
 
-                            {/* CTA */}
-                            <div className="flex items-center justify-between">
-                              <div className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/25 text-[#037166] font-semibold text-[10px] sm:text-sm hover:bg-[#037166] hover:text-white transition-all">
+                            {/* Footer CTA */}
+                            <div className="pt-2 border-t border-slate-100 flex items-center justify-between mt-auto">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#037166]/10 text-[#037166] font-bold text-[11px] sm:text-xs group-hover:bg-[#037166] group-hover:text-white transition-all">
                                 View Services
-                                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-                              </div>
-
+                                <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                              </span>
                             </div>
                           </div>
-
-                          {/* Hover glow border */}
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
-                            className="absolute inset-0 rounded-xl border-2 border-[#037166] pointer-events-none"
-                            style={{ boxShadow: '0 0 15px rgba(3, 113, 102, 0.5)' }}
-                          />
                         </div>
                       </motion.div>
                     ))}
@@ -638,23 +617,28 @@ export function CategoryPage({ slug, initialData }) {
       {/* Customer Reviews & Ratings Standalone Section */}
       <section className="py-12 bg-slate-50 border-t border-slate-200">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-3.5 sm:gap-4">
+            <div className="max-w-xl">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5 sm:mb-2">
                 Customer Reviews & Ratings in {categoryMetadata?.detectedCity || 'Kakinada'}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-xs sm:text-sm">
                 Verified customer feedback for {categoryMetadata?.categoryName || 'Water Purifier Repair Services'} in {categoryMetadata?.detectedCity || 'Kakinada'}.
               </p>
             </div>
-            <div className="flex items-center gap-3 bg-[#037166]/10 px-5 py-3 rounded-2xl border border-[#037166]/20">
-              <div className="flex items-center text-amber-500">
+            <div className="hidden sm:inline-flex flex-wrap items-center gap-2 sm:gap-2.5 bg-emerald-50/80 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border border-[#037166]/20 self-start sm:self-auto shrink-0 shadow-sm">
+              <div className="flex items-center gap-0.5 text-amber-400 shrink-0">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                  <Star key={i} className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <span className="font-bold text-gray-900 text-lg">4.8 / 5.0</span>
-              <span className="text-gray-500 text-sm">(1,240 Verified Reviews)</span>
+              <span className="font-black text-gray-900 text-xs sm:text-sm whitespace-nowrap">
+                4.8<span className="text-gray-400 font-medium text-[10px] sm:text-xs">/5.0</span>
+              </span>
+              <span className="w-1 h-1 rounded-full bg-slate-300 shrink-0 hidden xs:inline-block" />
+              <span className="text-gray-600 font-semibold text-xs sm:text-sm whitespace-nowrap">
+                1,240 Verified Reviews
+              </span>
             </div>
           </div>
 

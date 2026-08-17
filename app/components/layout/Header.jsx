@@ -114,17 +114,22 @@ export function Header({ theme = {}, navItems = [] }) {
             });
 
           let finalNavItems = [];
-          if (visibleItems.length > 4) {
-            finalNavItems = visibleItems.slice(0, 4);
+          const hasSellBuy = visibleItems.some(i => i.href === '/sell-buy' || i.name === 'Sell & Buy');
+          const mergedItems = hasSellBuy ? visibleItems : [{ name: 'Sell & Buy', href: '/sell-buy' }, ...visibleItems];
+
+          if (mergedItems.length > 5) {
+            finalNavItems = mergedItems.slice(0, 5);
             finalNavItems.push({
               name: 'More',
-              dropdown: visibleItems.slice(4)
+              dropdown: mergedItems.slice(5)
             });
           } else {
-            finalNavItems = visibleItems;
+            finalNavItems = mergedItems;
           }
 
           setApiNavItems(finalNavItems);
+        } else {
+          setApiNavItems([{ name: 'Sell & Buy', href: '/sell-buy' }]);
         }
       } catch (error) {
         console.error("Failed to fetch nav data:", error);
@@ -193,7 +198,10 @@ export function Header({ theme = {}, navItems = [] }) {
   const isComingSoonNavItem = (item) => {
     if (item?.comingSoon) return true;
     const href = String(item?.href || '');
+    const name = String(item?.name || '');
     return (
+      href.includes('/sell-buy') ||
+      name === 'Sell & Buy' ||
       href.includes('/spa-salon') ||
       href.includes(`/${serviceSlugs.spa}`) ||
       href.includes('/pghostels') ||

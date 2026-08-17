@@ -61,6 +61,7 @@ eslint_*.json
 tmp/
 temp/
 scratch/
+.git-rewrite/
 *.tmp
 *.temp
 all_services.json
@@ -103,3 +104,7 @@ desktop.ini
 *.local
 !.env.example
 !.env*.example
+# Large backup files
+website-backup.zip
+*.zip
+*.tar.gz

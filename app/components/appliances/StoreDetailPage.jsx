@@ -609,7 +609,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="appliance-detail-page min-h-screen pt-24 pb-20 bg-gray-50/30"
+      className="appliance-detail-page min-h-screen pt-24 pb-28 lg:pb-20 bg-gray-50/30"
     >
       {schemaData && (
         <script
@@ -637,12 +637,12 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative mb-8"
+          className="relative mb-6 sm:mb-8"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-[4.5fr_3.8fr_1.7fr] gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[4.5fr_3.8fr_250px] gap-4 sm:gap-5">
 
             {/* CARD 1: BANNER IMAGE CARD */}
-            <div className="relative h-[250px] rounded-2xl border border-gray-100 shadow-xl overflow-hidden bg-white flex items-center justify-center">
+            <div className="relative w-full h-28 sm:h-44 lg:h-[230px] rounded-2xl border border-gray-100 shadow-lg overflow-hidden bg-white flex items-center justify-center">
               {bannerImage ? (
                 <img
                   src={bannerImage}
@@ -660,11 +660,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             </div>
 
             {/* CARD 2: STORE INFO CARD */}
-            <div className="relative h-[250px] bg-white border border-gray-100 rounded-none p-5 shadow-xl flex flex-col justify-between">
+            <div className="relative h-auto lg:h-[230px] bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-start sm:items-center gap-3 mb-3">
                   <div className="relative flex-shrink-0">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white flex items-center justify-center">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white flex items-center justify-center">
                       {(center.logo || center.image) ? (
                         <img loading="lazy" decoding="async"
                           src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${(center.logo || center.image).startsWith('/') ? (center.logo || center.image).slice(1) : (center.logo || center.image)}`}
@@ -676,22 +676,22 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                          <Store className="w-8 h-8 text-[#037166]/10" />
+                          <Store className="w-7 h-7 text-[#037166]/20" />
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight mb-1 truncate">
                       {center.title || center.business_name || `${center.firstName || ''} ${center.lastName || ''}`}
                     </h1>
                     {center.description && (
-                      <p className="text-gray-500 text-xs sm:text-sm mb-1.5 leading-relaxed">
+                      <p className="text-gray-500 text-xs sm:text-sm mb-1.5 leading-relaxed line-clamp-2">
                         {center.description}
                       </p>
                     )}
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                       <div className="flex items-center gap-1">
                         <Star className="w-3.5 h-3.5 fill-[#037166] text-[#037166]" />
                         <span className="text-gray-900 font-bold text-xs sm:text-sm">{(center.avgRating || center.rating)?.toFixed(1) || '4.5'}</span>
@@ -727,55 +727,53 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-center gap-3 mt-1">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-2.5 mt-3">
                     <a
                       href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
+                      className="flex items-center justify-center w-24 sm:w-28 md:w-32 h-9 sm:h-10 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5"
                       title="Get it on Google Play"
                     >
-                      <img src="/andriod1.png" alt="Google Play" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
+                      <img src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain" loading="lazy" decoding="async" />
                     </a>
                     <a
                       href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center w-[160px] h-[56px] rounded-3xl bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/40 shadow-sm overflow-hidden"
+                      className="flex items-center justify-center w-24 sm:w-28 md:w-32 h-9 sm:h-10 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5"
                       title="Download on the App Store"
                     >
-                      <img src="/apple2.png" alt="App Store" className="h-[60px] w-auto object-contain" loading="lazy" decoding="async" />
+                      <img src="/apple2.png" alt="App Store" className="h-full w-auto object-contain" loading="lazy" decoding="async" />
                     </a>
                     <a
                       href={whatsappLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center w-[56px] h-[56px] rounded-full bg-[#25D366] hover:bg-[#20bd5a] transition-all border border-[#1da851]/40 shadow-sm"
+                      className="flex items-center justify-center w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#25D366] hover:bg-[#20bd5a] transition-all border border-[#1da851]/40 shadow-sm shrink-0"
                       title="Chat on WhatsApp"
                       aria-label="Chat on WhatsApp"
                     >
                       <img loading="lazy" decoding="async"
                         src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
                         alt="WhatsApp"
-                        className="w-7 h-7"
+                        className="w-4 sm:w-5 h-4 sm:h-5"
                       />
                     </a>
                   </div>
                 </div>
               </div>
-
-
             </div>
 
             {/* CARD 3: STORE TIMINGS CARD */}
-            <div className="relative h-[250px] bg-white border border-gray-100 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+            <div className="relative h-auto lg:h-[230px] bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-2.5 mb-4 pb-2.5 border-b border-gray-100">
-                  <div className="w-9 h-9 rounded-xl bg-[#037166]/10 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-[#037166]" />
+                <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-gray-100">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4 text-[#037166]" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-900 leading-tight">Working Hours</h3>
+                  <div className="min-w-0">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 leading-tight truncate">Working Hours</h3>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -786,7 +784,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 text-xs">
                   <div>
                     <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Monday - Saturday</span>
                     <span className="text-gray-800 text-xs sm:text-sm font-extrabold block">
@@ -806,10 +804,10 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-center">
-                <span className="inline-flex w-44 flex-col items-start justify-center rounded-xl px-6 py-2 text-white bg-gradient-to-r from-[#00907f] to-[#007367] shadow-md shadow-[#007367]/30 leading-tight text-left">
-                  <span className="text-[10px] font-bold  tracking-wide">Available For</span>
-                  <span className="text-md font-extrabold">24/7 Booking</span>
+              <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-center">
+                <span className="inline-flex w-auto max-w-[210px] flex-col items-center justify-center rounded-full px-4 py-1.5 text-white bg-gradient-to-r from-[#00907f] to-[#007367] text-center shadow-md">
+                  <span className="text-[9px] font-bold tracking-wider uppercase text-white/90">Available For</span>
+                  <span className="text-xs font-extrabold whitespace-nowrap">24/7 Booking</span>
                 </span>
               </div>
             </div>
@@ -818,9 +816,9 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         </motion.div>
 
         {/* Sticky Tab Navigation */}
-        <div className="sticky top-20 z-40 mb-8 bg-[#DEF2EF]/65 backdrop-blur-xl border-y border-[#9ecbc3]/30 -mx-6 px-6 lg:-mx-8 lg:px-8">
+        <div className="sticky top-16 sm:top-20 z-40 mb-6 sm:mb-8 bg-[#DEF2EF]/90 backdrop-blur-xl border-y border-[#9ecbc3]/40 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="max-w-[1400px] mx-auto">
-            <div className="flex gap-2 overflow-x-auto py-2">
+            <div className="flex gap-2 overflow-x-auto py-2 scrollbar-hide">
               {(() => {
                 const faqs = centerData?.faqs || center?.faqs || [];
                 const tabsList = ['Service Rates', 'About', 'Working Images', 'Location', 'Reviews'];
@@ -831,8 +829,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`relative px-6 py-2 rounded-full text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
-                      ? 'bg-[#037166] text-white shadow-lg shadow-[#037166]/20'
+                    className={`relative px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold capitalize transition-all whitespace-nowrap ${activeTab === tab
+                      ? 'bg-[#037166] text-white shadow-md shadow-[#037166]/20'
                       : 'text-gray-600 hover:text-[#037166] hover:bg-[#037166]/10'
                       }`}
                   >

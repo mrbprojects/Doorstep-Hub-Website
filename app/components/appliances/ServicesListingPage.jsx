@@ -829,23 +829,28 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                   transition={{ duration: 0.6 }}
                   className="mt-16 pt-8 border-t border-slate-200"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-3.5 sm:gap-4">
+                    <div className="max-w-xl">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5 sm:mb-2">
                         Customer Reviews & Ratings in {currentCity}
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 text-xs sm:text-sm">
                         Verified customer feedback for {currentService} in {currentCity}.
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 bg-[#037166]/10 px-5 py-3 rounded-2xl border border-[#037166]/20">
-                      <div className="flex items-center text-amber-500">
+                    <div className="hidden sm:inline-flex flex-wrap items-center gap-2 sm:gap-2.5 bg-emerald-50/80 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border border-[#037166]/20 self-start sm:self-auto shrink-0 shadow-sm">
+                      <div className="flex items-center gap-0.5 text-amber-400 shrink-0">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                          <Star key={i} className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-amber-400 text-amber-400" />
                         ))}
                       </div>
-                      <span className="font-bold text-gray-900 text-lg">4.8 / 5.0</span>
-                      <span className="text-gray-500 text-sm">(1,240 Verified Reviews)</span>
+                      <span className="font-black text-gray-900 text-xs sm:text-sm whitespace-nowrap">
+                        4.8<span className="text-gray-400 font-medium text-[10px] sm:text-xs">/5.0</span>
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-slate-300 shrink-0 hidden xs:inline-block" />
+                      <span className="text-gray-600 font-semibold text-xs sm:text-sm whitespace-nowrap">
+                        1,240 Verified Reviews
+                      </span>
                     </div>
                   </div>
 

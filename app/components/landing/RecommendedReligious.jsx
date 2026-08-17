@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Compass, Star, Clock, Heart, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Compass, Star, Clock, Heart, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function RecommendedReligious() {
@@ -72,16 +72,50 @@ export function RecommendedReligious() {
               displayedAmenities = ['Vedic Rituals', 'Pooja Samagri', 'Mantra Chanting', 'Prasadam Distribution'];
             }
 
+            const cleanAmenityText = (text) => {
+              if (!text) return '';
+              let str = String(text).trim().replace(/\s*\([^)]*\)/g, '');
+              const mappings = {
+                'Experienced Vedic Pandit': 'Vedic Pandit',
+                'Certified Priest': 'Vedic Priest',
+                'Pooja materials provided': 'Pooja Samagri',
+                'Prasadam Distribution': 'Prasadam',
+                'Prasadam provided': 'Prasadam',
+                'Havan kundam setup': 'Havan Setup',
+                'Pure Ghee & Herbs': 'Ghee & Herbs',
+                'Vedic Procedures': 'Vedic Rituals',
+              };
+              if (mappings[str]) return mappings[str];
+              if (str.length > 20) {
+                const words = str.split(' ');
+                if (words.length > 2) return words.slice(0, 2).join(' ');
+              }
+              return str;
+            };
+
+            const getCityFromService = (s) => {
+              if (typeof s.cityName === 'string' && s.cityName.trim()) return s.cityName.trim();
+              if (typeof s.cityName === 'object' && s.cityName?.cityName) return s.cityName.cityName;
+              if (typeof s.city === 'string' && s.city.trim()) return s.city.trim();
+              if (typeof s.addressCityName === 'string' && s.addressCityName.trim()) return s.addressCityName.trim();
+              if (s.address && typeof s.address === 'string') {
+                const parts = s.address.split(',').map(item => item.trim()).filter(Boolean);
+                const filtered = parts.filter(p => !/^\d{5,6}$|india|telangana|andhra|karnataka|maharashtra/i.test(p));
+                if (filtered.length > 0) return filtered[filtered.length - 1];
+              }
+              return 'Hyderabad';
+            };
+
             return {
               id: service._id,
               slug: service.slug || service.serviceSlug,
-              title: service.serviceName,
-              providerName: `${service.firstName} ${service.lastName}`,
+              title: service.serviceName || `${service.firstName || ''} ${service.lastName || ''}`.trim(),
+              providerName: `${service.firstName || ''} ${service.lastName || ''}`.trim(),
               description: service.bio,
-              rating: 5.0,
-              image: service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : '/placeholder-religious.jpg',
-              address: service.address || service.cityName,
-              amenities: displayedAmenities
+              rating: 4.8,
+              image: service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1712999533944-9200e6b20e27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZW1wbGUlMjBzcGlyaXR1YWwlMjByZWxpZ2lvdXN8ZW58MXx8fHwxNzY4MDI2NzQ2fDA&ixlib=rb-4.1.0&q=80&w=1080',
+              address: getCityFromService(service),
+              amenities: displayedAmenities.slice(0, 4).map(cleanAmenityText)
             };
           });
           setJourneys(mappedJourneys);
@@ -218,12 +252,12 @@ export function RecommendedReligious() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 mt-10 bg-gradient-to-r from-[#037166]/10 via-[#9b59b6]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
+          {/* <div className="inline-flex items-center space-x-2 px-4 py-2 mt-10 bg-gradient-to-r from-[#037166]/10 via-[#9b59b6]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Compass className="w-4 h-4 text-[#9b59b6]" />
             <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-transparent font-medium">
               Guided Spiritual Journey
             </h6>
-          </div>
+          </div> */}
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-transparent">
@@ -261,71 +295,75 @@ export function RecommendedReligious() {
               className={`group w-[240px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
               onClick={() => handleServiceClick(journey)}
             >
-              {/* Journey Card */}
-              <div className="relative h-full overflow-hidden rounded-2xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] shadow-2xl">
+              {/* Spiritual Card */}
+              <div className="relative h-full bg-gradient-to-br from-[#1a1a1a]/70 to-[#1a0f1a]/70 backdrop-blur-xl border border-[#037166]/20 rounded-2xl overflow-hidden shadow-2xl">
+                {/* Bell Icon */}
+                <motion.div initial={false}
+                  whileHover={{ rotate: [0, -15, 15, -15, 0] }}
+                  className="absolute top-4 right-4 z-20 h-10 w-10 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full flex items-center justify-center pointer-events-none"
+                >
+                  <Bell className="w-5 h-5 text-[#9b59b6]" />
+                </motion.div>
+
                 {/* Image */}
                 <div className="relative h-40 overflow-hidden">
-                  <ImageWithFallback
-                    src={journey.image}
-                    alt={journey.title}
-                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
-                  />
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <ImageWithFallback
+                      src={journey.image}
+                      alt={journey.title}
+                      className="bg-gradient-to-r from-white via-[#9b59b6] to-white bg-clip-text text-transparent w-full h-full object-cover"
+                    />
+                  </motion.div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
-
-
+                  {/* Divine Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
 
                   {/* Rating Badge - Bottom Left Flush */}
                   <div className="absolute bottom-0 left-0 z-20">
-                    <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border border-white/10">
-                      <Star className="w-4 h-4 text-white fill-white" />
-                      <span className="text-sm font-bold !text-white block">{journey.rating}</span>
+                    <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">
+                      <Star className="w-4 h-4 fill-white text-white" />
+                      <span className="text-sm font-bold !text-white">{journey.rating || '4.8'}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex h-[160px] flex-col justify-between p-4">
-                  {/* Title & Description */}
-                  <div className="mb-4">
-                    <h4 className="line-clamp-1 bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-base font-bold text-transparent">
-                      {journey.title}
-                    </h4>
-                    <h6 className="text-[#9b59b6] text-xs font-medium mb-2 uppercase tracking-wider">{journey.providerName}</h6>
-                    {/* <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 mb-4">{journey.description}</p> */}
+                <div className="p-4">
+                  <h4 className="text-lg font-bold mb-3 bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-transparent">
+                    {journey.title}
+                  </h4>
 
-                    {/* Amenities Grid */}
-                    <div className="mb-2 grid grid-cols-2 gap-2">
-                      {journey.amenities.slice(0, 4).map((amenity, idx) => {
-                        const Icon = amenityIcons[amenity] || Flame;
-                        return (
-                          <div key={idx} className="flex items-center space-x-2 rounded-lg border border-[#037166]/10 bg-[#1a1a1a]/50 p-2">
-                            <Icon className="w-3 h-3 text-[#9b59b6]" />
-                            <span className="text-[10px] text-gray-300 line-clamp-1">{amenity}</span>
-                          </div>
-                        );
-                      })}
+                  {/* Details */}
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center space-x-2 text-xs">
+                      <MapPin className="w-3.5 h-3.5 text-[#037166]" />
+                      <span className="text-gray-300 font-normal">{journey.address || 'Hyderabad'}</span>
                     </div>
                   </div>
 
-                  {/* Participants */}
-                  {/* <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-sm text-gray-400">
-                      <div className="flex -space-x-2">
-                        {[...Array(3)].map((_, i) => (
-                          <div
-                            key={i}
-                            className="w-8 h-8 bg-gradient-to-br from-[#037166] to-[#9b59b6] rounded-full border-2 border-[#1a1a1a]"
-                          />
-                        ))}
-                      </div>
-                      <span>{journey.participants}+ joined</span>
-                    </div>
-                  </div> */}
+                  {/* Amenities Grid */}
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    {journey.amenities.slice(0, 4).map((amenity, idx) => {
+                      const Icon = amenityIcons[amenity] || Flame;
+                      return (
+                        <div key={idx} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg border border-[#037166]/10">
+                          <Icon className="w-3 h-3 text-[#9b59b6] shrink-0" />
+                          <span className="text-[10px] text-gray-300 leading-tight break-words">{amenity}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Spiritual Glow */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#037166]/20 via-[#9b59b6]/20 to-[#037166]/20 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-700 -z-10" />
+                {/* Divine Glow Effect */}
+                <motion.div initial={false}
+                  animate={{ opacity: [0, 0.5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className="absolute -inset-1 bg-gradient-to-r from-[#037166]/20 via-[#9b59b6]/20 to-[#037166]/20 blur-xl -z-10 pointer-events-none"
+                />
               </div>
             </motion.div>
           ))}

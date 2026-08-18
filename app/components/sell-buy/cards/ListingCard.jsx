@@ -1,7 +1,11 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { MapPin, Heart } from 'lucide-react';
 import { getImageUrl } from '@/lib/sellBuyApi';
+import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 function formatTimeAgo(dateStr) {
   if (!dateStr) return '';
@@ -18,10 +22,12 @@ function formatTimeAgo(dateStr) {
 }
 
 export function ListingCard({ listing }) {
+  const { user, token: authContextToken } = useAuth() || {};
+  
   if (!listing) return null;
 
   const {
-    slug,
+    slug, _id, id,
     title, name,
     price,
     image, coverImage, images, gallery_images,
@@ -30,6 +36,10 @@ export function ListingCard({ listing }) {
     is_liked,
     created_at, createdAt,
   } = listing;
+
+  const listingId = _id || id;
+  const [liked, setLiked] = useState(is_liked || false);
+  const [loading, setLoading] = useState(false);
 
   const displayTitle = title || name || 'Untitled Item';
   const displayImage = coverImage || image || images?.[0] || gallery_images?.[0]?.image;
@@ -42,13 +52,82 @@ export function ListingCard({ listing }) {
   const timeAgo = formatTimeAgo(createdAt || created_at);
   const featured = isFeatured || is_feature;
 
+  const handleToggleFavorite = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let activeUser = user;
+    if (!activeUser && typeof window !== 'undefined') {
+       const stored = localStorage.getItem('user_details') || localStorage.getItem('user');
+       if (stored) {
+         try { activeUser = JSON.parse(stored); } catch(err) {}
+       }
+    }
+
+    if (!activeUser) {
+      toast.error('Please login to add to wishlist');
+      return;
+    }
+
+    if (loading) return;
+    setLoading(true);
+
+    // Optimistic update
+    const prevLiked = liked;
+    setLiked(!prevLiked);
+
+    try {
+      const currentToken = authContextToken || localStorage.getItem('auth_token') || '';
+      const userId = activeUser._id || activeUser.id;
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/sell-buy/listings/${listingId}/favorite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await res.json();
+      if (data.success || data.error === false) {
+        setLiked(data.data?.isFavorite);
+        if (data.data?.isFavorite) {
+          toast.success('Added to wishlist');
+        } else {
+          toast.success('Removed from wishlist');
+        }
+      } else {
+        // Revert on failure
+        setLiked(prevLiked);
+        toast.error(data.message || 'Failed to update wishlist');
+      }
+    } catch (err) {
+      console.error(err);
+      // Revert on failure
+      setLiked(prevLiked);
+      toast.error('Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Link
       href={`/sell-buy/ad/${slug}`}
-      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col"
+      className={`group bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col ${
+        featured 
+          ? 'border-[1.5px] border-amber-400 shadow-sm shadow-amber-100/50 relative' 
+          : 'border border-gray-200'
+      }`}
     >
+      {/* Subtle background glow for featured */}
+      {featured && (
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-50/30 to-transparent pointer-events-none z-0" />
+      )}
+
       {/* Image */}
-      <div className="relative aspect-square w-full bg-gray-100 overflow-hidden">
+      <div className="relative aspect-square w-full bg-gray-100 overflow-hidden z-10">
         {displayImage ? (
           <img
             src={getImageUrl(displayImage)}
@@ -65,7 +144,7 @@ export function ListingCard({ listing }) {
 
         {/* Featured Badge */}
         {featured && (
-          <div className="absolute top-0 left-0 bg-[#00b2ca] text-white text-xs font-semibold px-2.5 py-1 rounded-br-lg flex items-center gap-1">
+          <div className="absolute top-0 left-0 bg-[#037166] text-white text-xs font-semibold px-2.5 py-1 rounded-br-lg flex items-center gap-1">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
@@ -76,10 +155,11 @@ export function ListingCard({ listing }) {
         {/* Heart Button */}
         <button
           type="button"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-[#00b2ca] hover:text-red-500 transition-colors"
+          onClick={handleToggleFavorite}
+          disabled={loading}
+          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-[#037166] hover:text-red-500 transition-colors disabled:opacity-50"
         >
-          <Heart className={`w-4 h-4 ${is_liked ? 'fill-red-500 text-red-500' : ''}`} />
+          <Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : ''} ${loading ? 'animate-pulse' : ''}`} />
         </button>
 
         {/* Time overlay bottom-right */}

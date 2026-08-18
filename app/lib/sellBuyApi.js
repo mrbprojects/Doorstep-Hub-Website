@@ -2,12 +2,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephu
 const IMAGE_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com';
 
 export const getImageUrl = (path) => {
-  if (!path) return '/uploads/thumbn_ph_image/default_image.jpg';
+  if (!path) return 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
   if (path.startsWith('blob:') || path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
+    return path.replace(/([^:]\/)\/+/g, '$1');
   }
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${IMAGE_BASE}${cleanPath}`;
+  const cleanPath = path.replace(/^\/+/, '');
+  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
+  return `${base}/${cleanPath}`;
 };
 
 /**
@@ -172,9 +173,23 @@ export const toggleFavorite = async (listingId, userId) => {
 
 export const fetchSystemSettings = async () => {
   try {
-    const res = await fetch(`${API_BASE}/sell-buy/get-system-settings`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/app/get_global_settings`, { cache: 'no-store' });
     const data = await res.json();
-    if (data.error === false && data.data) return data.data;
+    if (data.success && data.policy) {
+      const p = data.policy;
+      return {
+        ...p,
+        company_email: p.email,
+        company_phone: p.phone,
+        company_address: p.address,
+        about_us: data.websiteAboutus?.largeDescription || data.websiteAboutus?.description || p.aboutus || '',
+        facebook_link: p.facebook,
+        instagram_link: p.instagram,
+        youtube_link: p.youtube,
+        twitter_link: p.twitter,
+        place_api_key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyBNVn5j-M6F4VHkaOluoOcVY3K5r2-NlPk"
+      };
+    }
     return {};
   } catch (err) {
     console.error('Error fetching system settings:', err);
@@ -192,5 +207,134 @@ export const fetchSliders = async () => {
   } catch (err) {
     console.error('Error fetching hero sliders:', err);
     return [];
+  }
+};
+
+export const submitSellerVerification = async (payload) => {
+  try {
+    const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData;
+    const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
+    const body = isFormData ? payload : JSON.stringify(payload);
+
+    const res = await fetch(`${API_BASE}/sell-buy/verification`, {
+      method: 'POST',
+      headers,
+      body,
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error submitting seller verification:', err);
+    return { success: false, message: err.message };
+  }
+};
+
+export const fetchSellerVerificationStatus = async (userId) => {
+  try {
+    const res = await fetch(`${API_BASE}/sell-buy/verification-status?userId=${userId}`, { cache: 'no-store' });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error('Error fetching seller verification status:', err);
+    return { success: false };
+  }
+};
+
+// ── Chat & Messaging API ───────────────────────────────────────────────────
+export const getOrCreateConversation = async (buyerId, listingId) => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/sell-buy/conversations`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ buyerId, listingId }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error init conversation:', err);
+    return { success: false };
+  }
+};
+
+export const fetchConversations = async (userId) => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`${API_BASE}/sell-buy/conversations?userId=${userId || ''}`, { headers, cache: 'no-store' });
+    const data = await res.json();
+    return data.success && Array.isArray(data.data) ? data.data : [];
+  } catch (err) {
+    console.error('Error fetching conversations:', err);
+    return [];
+  }
+};
+
+export const fetchMessages = async (conversationId) => {
+  try {
+    if (!conversationId) return [];
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`${API_BASE}/sell-buy/conversations/${conversationId}/messages`, { headers, cache: 'no-store' });
+    const data = await res.json();
+    return data.success && Array.isArray(data.data) ? data.data : [];
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    return [];
+  }
+};
+
+export const sendChatMessageApi = async ({ conversationId, text, senderId }) => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/sell-buy/messages`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ conversationId, text, senderId }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error sending chat message:', err);
+    return { success: false, message: err.message };
+  }
+};
+
+// ─── Sell-Buy Policies (T&C + Privacy) ───────────────────────────────────────
+
+export const fetchSellBuyPolicies = async () => {
+  try {
+    const res = await fetch(
+      `${API_BASE}/admin/policyBundle/sell-buy`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.success && data.policy) return data.policy;
+    return null;
+  } catch (err) {
+    console.error('Error fetching sell-buy policies:', err);
+    return null;
+  }
+};
+
+export const getOrCreateConversationApi = async ({ listingId, buyerId }) => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/sell-buy/conversations`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ listingId, buyerId }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getOrCreateConversation:', err);
+    return { success: false };
   }
 };

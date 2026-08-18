@@ -50,11 +50,13 @@
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
+    "react-easy-crop": "^6.2.3",
     "react-hook-form": "^7.55.0",
     "react-resizable-panels": "^2.1.7",
     "react-slick": "^0.31.0",
     "recharts": "^2.15.2",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.3",
     "sonner": "^2.0.3",
     "tailwind-merge": "*",
     "vaul": "^1.1.2"
@@ -83,4 +85,3 @@
     "test:seo": "node --test tests/seo.test.js"
   }
 }
-

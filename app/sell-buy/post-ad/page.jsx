@@ -15,7 +15,12 @@ import {
   ArrowLeft,
   Sparkles,
   Grid,
+  Loader2,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { SubcategoryIcon } from '@/components/sell-buy/SubcategoryIcon';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from '@/lib/cropImage';
 
 export default function PostAdPage() {
   const router = useRouter();
@@ -23,10 +28,20 @@ export default function PostAdPage() {
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  // Cropper state
+  const [imagesToCrop, setImagesToCrop] = useState([]);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   const [formData, setFormData] = useState({
     categoryId: '',
     categoryName: '',
+    subcategoryId: '',
+    subcategoryName: '',
     title: '',
     description: '',
     price: '',
@@ -44,10 +59,15 @@ export default function PostAdPage() {
         const list = parentCats.length > 0 ? parentCats : cats;
         setCategories(list);
         if (!formData.categoryId) {
+          const firstCat = list[0];
+          const firstCatId = String(firstCat?.id || firstCat?._id || '');
+          const firstSubcats = firstCat?.subcategories || [];
           setFormData((prev) => ({
             ...prev,
-            categoryId: String(list[0]?.id || list[0]?._id || ''),
-            categoryName: list[0]?.name || '',
+            categoryId: firstCatId,
+            categoryName: firstCat?.name || '',
+            subcategoryId: firstSubcats.length > 0 ? String(firstSubcats[0]?.id || firstSubcats[0]?._id || '') : '',
+            subcategoryName: firstSubcats.length > 0 ? firstSubcats[0]?.name || '' : '',
           }));
         }
       }
@@ -58,9 +78,115 @@ export default function PostAdPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    setGpsLoading(true);
+    toast.info('Detecting your location…');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const geo = await res.json();
+          const addr = geo.address || {};
+
+          const localArea =
+            addr.suburb || addr.neighbourhood || addr.quarter ||
+            addr.village || addr.town || addr.county || '';
+          const city =
+            addr.city || addr.town || addr.village || addr.county || 'Hyderabad';
+
+          setFormData((prev) => ({
+            ...prev,
+            city: city || prev.city,
+            area: localArea || prev.area,
+          }));
+
+          toast.success('Location detected successfully!');
+        } catch (err) {
+          console.error(err);
+          toast.error('Could not fetch address details. Please fill manually.');
+        } finally {
+          setGpsLoading(false);
+        }
+      },
+      (err) => {
+        setGpsLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error('Location permission denied. Please allow access in your browser.');
+        } else {
+          toast.error('Failed to detect location. Please fill manually.');
+        }
+      }
+    );
+  };
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || []);
-    setSelectedFiles(files);
+    if (files.length === 0) return;
+    
+    // Setup for sequential cropping
+    const newImagesToCrop = files.map(file => ({
+      url: URL.createObjectURL(file),
+      file: file
+    }));
+    
+    setImagesToCrop(newImagesToCrop);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    
+    // clear input
+    e.target.value = null;
+  };
+
+  const onCropComplete = (croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleCropConfirm = async () => {
+    if (!imagesToCrop.length || !croppedAreaPixels) return;
+    
+    try {
+      setIsCropping(true);
+      const currentImage = imagesToCrop[0];
+      const croppedBlob = await getCroppedImg(currentImage.url, croppedAreaPixels);
+      
+      const croppedFile = new File([croppedBlob], currentImage.file.name, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      });
+      
+      setSelectedFiles(prev => {
+        const updated = [...prev, croppedFile];
+        // max 10 images
+        return updated.slice(0, 10);
+      });
+      
+      const remainingImages = imagesToCrop.slice(1);
+      setImagesToCrop(remainingImages);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to crop image');
+    } finally {
+      setIsCropping(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    const remainingImages = imagesToCrop.slice(1);
+    setImagesToCrop(remainingImages);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
   };
 
   const handlePublish = async (e) => {
@@ -72,6 +198,12 @@ export default function PostAdPage() {
       fd.append('name', formData.title || 'Untitled Item');
       fd.append('description', formData.description || '');
       fd.append('category_id', formData.categoryId || '');
+      fd.append('categoryId', formData.categoryId || '');
+      if (formData.subcategoryId) {
+        fd.append('subcategory_id', formData.subcategoryId);
+        fd.append('subcategoryId', formData.subcategoryId);
+        fd.append('sub_category_id', formData.subcategoryId);
+      }
       fd.append('price', String(Number(formData.price) || 0));
       fd.append('condition', formData.condition);
       fd.append('city', formData.city);
@@ -127,13 +259,13 @@ export default function PostAdPage() {
                     isDone
                       ? 'bg-emerald-500 text-white'
                       : isActive
-                      ? 'bg-[#00b2ca] text-white'
+                      ? 'bg-[#037166] text-white'
                       : 'bg-slate-100 text-slate-400'
                   }`}
                 >
                   {isDone ? <CheckCircle2 className="w-4 h-4" /> : stepNum}
                 </div>
-                <span className={`hidden sm:inline ${isActive ? 'text-[#00b2ca] font-extrabold' : ''}`}>
+                <span className={`hidden sm:inline ${isActive ? 'text-[#037166] font-extrabold' : ''}`}>
                   {stName}
                 </span>
               </div>
@@ -152,21 +284,27 @@ export default function PostAdPage() {
               {categories.length === 0 && (
                 <div className="text-center py-8 text-slate-400 text-xs font-medium">Loading categories...</div>
               )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                 {categories.map((cat) => {
                   const catId = String(cat.id || cat._id || '');
                   const isSelected = formData.categoryId === catId;
+                  const subcats = cat.subcategories || [];
                   return (
                     <button
                       key={catId}
                       type="button"
                       onClick={() => {
-                        handleChange('categoryId', catId);
-                        handleChange('categoryName', cat.name);
+                        setFormData((prev) => ({
+                          ...prev,
+                          categoryId: catId,
+                          categoryName: cat.name,
+                          subcategoryId: subcats.length > 0 ? String(subcats[0]?.id || subcats[0]?._id || '') : '',
+                          subcategoryName: subcats.length > 0 ? subcats[0]?.name || '' : '',
+                        }));
                       }}
                       className={`flex flex-col items-center p-5 rounded-2xl border text-center transition-all ${
                         isSelected
-                          ? 'border-[#00b2ca] bg-[#00b2ca]/5 text-[#00b2ca] ring-2 ring-[#00b2ca]/20'
+                          ? 'border-[#037166] bg-[#037166]/5 text-[#037166] ring-2 ring-[#037166]/20 font-bold'
                           : 'border-slate-200 hover:border-slate-300 text-slate-700'
                       }`}
                     >
@@ -181,11 +319,65 @@ export default function PostAdPage() {
                 })}
               </div>
 
+              {/* Dynamic Subcategories Selection */}
+              {(() => {
+                const activeCategory = categories.find(
+                  (c) => String(c.id || c._id) === String(formData.categoryId)
+                );
+                const subcats = activeCategory?.subcategories || [];
+                if (subcats.length === 0) return null;
+
+                return (
+                  <div className="space-y-3 pt-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800">
+                        Select Subcategory for <span className="text-[#037166]">{formData.categoryName}</span>:
+                      </label>
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {subcats.length} subcategories available
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {subcats.map((sub) => {
+                        const subId = String(sub.id || sub._id || '');
+                        const isSubSelected = formData.subcategoryId === subId;
+                        return (
+                          <button
+                            key={subId}
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                subcategoryId: subId,
+                                subcategoryName: sub.name,
+                              }));
+                            }}
+                            className={`text-xs px-4 py-2.5 rounded-xl border font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                              isSubSelected
+                                ? 'bg-[#037166] text-white border-[#037166] shadow-md ring-2 ring-[#037166]/20'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'
+                            }`}
+                          >
+                            <SubcategoryIcon
+                              icon={sub.icon}
+                              name={sub.name}
+                              className={`w-4 h-4 flex-shrink-0 ${isSubSelected ? 'text-white' : 'text-[#037166]'}`}
+                            />
+                            <span>{sub.name}</span>
+                            {isSubSelected && <CheckCircle2 className="w-4 h-4 text-emerald-200 ml-1" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="flex justify-end pt-4">
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="bg-[#00b2ca] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#0097ac] flex items-center gap-2"
+                  className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Continue to Details <ArrowRight className="w-4 h-4" />
                 </button>
@@ -197,7 +389,7 @@ export default function PostAdPage() {
           {step === 2 && (
             <div className="space-y-6">
               <h2 className="text-lg font-black text-slate-900 border-b border-slate-100 pb-3">
-                Step 2: Advertisement Details ({formData.categoryName})
+                Step 2: Advertisement Details ({formData.categoryName}{formData.subcategoryName ? ` > ${formData.subcategoryName}` : ''})
               </h2>
 
               <div>
@@ -207,7 +399,7 @@ export default function PostAdPage() {
                   placeholder="e.g. iPhone 13 128GB Blue - Like New Condition"
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-[#00b2ca] focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-[#037166] focus:outline-none"
                 />
               </div>
 
@@ -261,7 +453,7 @@ export default function PostAdPage() {
                 <button
                   type="button"
                   onClick={() => setStep(3)}
-                  className="bg-[#00b2ca] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#0097ac] flex items-center gap-2"
+                  className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Next: Add Photos <ArrowRight className="w-4 h-4" />
                 </button>
@@ -277,8 +469,8 @@ export default function PostAdPage() {
               </h2>
               <p className="text-xs text-slate-500">Upload up to 10 photos. Clear images attract 3x more buyers!</p>
 
-              <label className="block border-2 border-dashed border-slate-300 hover:border-[#00b2ca] rounded-2xl p-8 text-center bg-slate-50/50 cursor-pointer transition-colors">
-                <Upload className="w-10 h-10 text-[#00b2ca] mx-auto mb-3" />
+              <label className="block border-2 border-dashed border-slate-300 hover:border-[#037166] rounded-2xl p-8 text-center bg-slate-50/50 cursor-pointer transition-colors">
+                <Upload className="w-10 h-10 text-[#037166] mx-auto mb-3" />
                 <p className="text-xs font-bold text-slate-700">Click to browse or drag & drop images</p>
                 <p className="text-[11px] text-slate-400 mt-1">Supports JPG, PNG, WEBP up to 10MB each (max 10 images)</p>
                 <input
@@ -289,7 +481,7 @@ export default function PostAdPage() {
                   onChange={handleFileChange}
                 />
                 {selectedFiles.length > 0 && (
-                  <p className="text-xs font-bold text-[#00b2ca] mt-3">{selectedFiles.length} image{selectedFiles.length > 1 ? 's' : ''} selected</p>
+                  <p className="text-xs font-bold text-[#037166] mt-3">{selectedFiles.length} image{selectedFiles.length > 1 ? 's' : ''} selected</p>
                 )}
               </label>
 
@@ -304,7 +496,7 @@ export default function PostAdPage() {
                 <button
                   type="button"
                   onClick={() => setStep(4)}
-                  className="bg-[#00b2ca] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#0097ac] flex items-center gap-2"
+                  className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Next: Location <ArrowRight className="w-4 h-4" />
                 </button>
@@ -315,9 +507,20 @@ export default function PostAdPage() {
           {/* STEP 4: LOCATION */}
           {step === 4 && (
             <div className="space-y-6">
-              <h2 className="text-lg font-black text-slate-900 border-b border-slate-100 pb-3">
-                Step 4: Location
-              </h2>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h2 className="text-lg font-black text-slate-900">
+                  Step 4: Location
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleDetectLocation}
+                  disabled={gpsLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#037166]/10 text-[#037166] rounded-lg text-xs font-bold hover:bg-[#037166]/20 transition-colors disabled:opacity-50"
+                >
+                  {gpsLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MapPin className="w-3.5 h-3.5" />}
+                  Detect my location
+                </button>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -352,7 +555,7 @@ export default function PostAdPage() {
                 <button
                   type="button"
                   onClick={() => setStep(5)}
-                  className="bg-[#00b2ca] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#0097ac] flex items-center gap-2"
+                  className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Next: Contact <ArrowRight className="w-4 h-4" />
                 </button>
@@ -389,7 +592,7 @@ export default function PostAdPage() {
                 <button
                   type="button"
                   onClick={() => setStep(6)}
-                  className="bg-[#00b2ca] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#0097ac] flex items-center gap-2"
+                  className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Preview & Publish <ArrowRight className="w-4 h-4" />
                 </button>
@@ -407,12 +610,12 @@ export default function PostAdPage() {
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[10px] font-bold uppercase bg-cyan-100 text-[#00b2ca] px-2 py-0.5 rounded">
-                      {formData.categoryName}
+                    <span className="text-[10px] font-bold uppercase bg-cyan-100 text-[#037166] px-2 py-0.5 rounded">
+                      {formData.categoryName}{formData.subcategoryName ? ` • ${formData.subcategoryName}` : ''}
                     </span>
                     <h3 className="text-base font-bold text-slate-900 mt-1">{formData.title || 'Untitled Item'}</h3>
                   </div>
-                  <span className="text-xl font-black text-[#00b2ca]">
+                  <span className="text-xl font-black text-[#037166]">
                     ₹{formData.price ? Number(formData.price).toLocaleString('en-IN') : '0'}
                   </span>
                 </div>
@@ -453,6 +656,72 @@ export default function PostAdPage() {
           )}
         </div>
       </main>
+
+      {/* Cropper Modal */}
+      {imagesToCrop.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col h-[80vh]">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white z-10">
+              <div>
+                <h3 className="text-sm font-black text-slate-900">Crop Your Image</h3>
+                <p className="text-xs text-slate-500">
+                  {imagesToCrop.length} image{imagesToCrop.length > 1 ? 's' : ''} remaining to crop
+                </p>
+              </div>
+              <button
+                onClick={handleCropCancel}
+                className="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Skip / Cancel
+              </button>
+            </div>
+
+            <div className="relative flex-1 w-full bg-slate-100">
+              <Cropper
+                image={imagesToCrop[0].url}
+                crop={crop}
+                zoom={zoom}
+                aspect={4 / 3}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+
+            <div className="p-5 bg-white border-t border-slate-100 z-10 flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-bold text-slate-500">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(e.target.value)}
+                  className="w-full accent-[#037166]"
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleCropCancel}
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCropConfirm}
+                  disabled={isCropping}
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-[#037166] hover:bg-[#025951] transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isCropping ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  Crop & Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SellBuyFooter />
     </div>

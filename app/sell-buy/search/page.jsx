@@ -42,12 +42,12 @@ function SearchResultsContent() {
         {/* Page Header */}
         <div className="border-b border-slate-200 pb-6">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-2">
-            <Link href="/sell-buy" className="hover:text-[#00b2ca]">Home</Link>
+            <Link href="/sell-buy" className="hover:text-[#037166]">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="text-slate-900 font-bold">Search Results</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-black text-[#0f172a] flex items-center gap-3">
-            <Search className="w-8 h-8 text-[#00b2ca]" />
+            <Search className="w-8 h-8 text-[#037166]" />
             <span>Search Results for &ldquo;{query}&rdquo;</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -77,7 +77,7 @@ function SearchResultsContent() {
             </p>
             <Link
               href="/sell-buy/categories"
-              className="inline-block bg-[#00b2ca] text-white font-bold text-xs px-6 py-2.5 rounded-xl hover:bg-[#0097ac] transition-colors"
+              className="inline-block bg-[#037166] text-white font-bold text-xs px-6 py-2.5 rounded-xl hover:bg-[#025951] transition-colors"
             >
               Browse All Categories
             </Link>

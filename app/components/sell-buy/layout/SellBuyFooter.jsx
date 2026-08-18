@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -16,8 +16,32 @@ import {
   Youtube,
   Twitter
 } from 'lucide-react';
+import { fetchSellBuyCategories, fetchSystemSettings } from '@/lib/sellBuyApi';
 
 export function SellBuyFooter() {
+  const [categories, setCategories] = useState([]);
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetchSellBuyCategories().then(cats => {
+      if (cats && cats.length > 0) {
+        setCategories(cats);
+      }
+    });
+    fetchSystemSettings().then(setSettings);
+  }, []);
+
+  const displayCategories = categories.slice(0, 6);
+
+  const email = settings?.company_email || 'support@dhub.com';
+  const phone = settings?.company_phone || '+91 88866 88666';
+  const address = settings?.company_address || 'Bangalore, Karnataka, India';
+  
+  const facebook = settings?.facebook_link || '#';
+  const instagram = settings?.instagram_link || '#';
+  const youtube = settings?.youtube_link || '#';
+  const twitter = settings?.twitter_link || '#';
+
   return (
     <footer className="bg-white border-t border-slate-200 text-slate-600 font-sans">
       {/* 4 Feature Pills Row */}
@@ -25,7 +49,7 @@ export function SellBuyFooter() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#00b2ca]/10 text-[#00b2ca] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-[#037166]/10 text-[#037166] flex items-center justify-center flex-shrink-0">
                 <Tag className="w-5 h-5" />
               </div>
               <div>
@@ -35,7 +59,7 @@ export function SellBuyFooter() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#00b2ca]/10 text-[#00b2ca] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-[#037166]/10 text-[#037166] flex items-center justify-center flex-shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
@@ -45,7 +69,7 @@ export function SellBuyFooter() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#00b2ca]/10 text-[#00b2ca] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-[#037166]/10 text-[#037166] flex items-center justify-center flex-shrink-0">
                 <Lock className="w-5 h-5" />
               </div>
               <div>
@@ -55,7 +79,7 @@ export function SellBuyFooter() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#00b2ca]/10 text-[#00b2ca] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-[#037166]/10 text-[#037166] flex items-center justify-center flex-shrink-0">
                 <Zap className="w-5 h-5" />
               </div>
               <div>
@@ -79,10 +103,10 @@ export function SellBuyFooter() {
               D-Hub is your trusted local marketplace to buy, sell and connect with people around you. Simple, safe & smart.
             </p>
             <div className="flex items-center gap-3 text-slate-400">
-              <a href="#" className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Facebook className="w-3.5 h-3.5" /></a>
-              <a href="#" className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Instagram className="w-3.5 h-3.5" /></a>
-              <a href="#" className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Youtube className="w-3.5 h-3.5" /></a>
-              <a href="#" className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Twitter className="w-3.5 h-3.5" /></a>
+              <a href={facebook} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Facebook className="w-3.5 h-3.5" /></a>
+              <a href={instagram} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Instagram className="w-3.5 h-3.5" /></a>
+              <a href={youtube} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Youtube className="w-3.5 h-3.5" /></a>
+              <a href={twitter} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#037166] hover:text-white transition-colors"><Twitter className="w-3.5 h-3.5" /></a>
             </div>
           </div>
 
@@ -91,11 +115,13 @@ export function SellBuyFooter() {
             <h4 className="text-xs font-bold text-slate-900 mb-4">Explore</h4>
             <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
               <li><Link href="/sell-buy/categories" className="hover:text-[#037166] transition-colors">All Categories</Link></li>
-              <li><Link href="/sell-buy/category/cars-bikes" className="hover:text-[#037166] transition-colors">Cars & Bikes</Link></li>
-              <li><Link href="/sell-buy/category/mobiles-tablets" className="hover:text-[#037166] transition-colors">Mobiles & Tablets</Link></li>
-              <li><Link href="/sell-buy/category/electronics-appliances" className="hover:text-[#037166] transition-colors">Electronics</Link></li>
-              <li><Link href="/sell-buy/category/property" className="hover:text-[#037166] transition-colors">Property</Link></li>
-              <li><Link href="/sell-buy/category/jobs-services" className="hover:text-[#037166] transition-colors">Jobs</Link></li>
+              {displayCategories.map(cat => (
+                <li key={cat.slug || cat._id}>
+                  <Link href={`/sell-buy/category/${cat.slug}`} className="hover:text-[#037166] transition-colors">
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -117,10 +143,10 @@ export function SellBuyFooter() {
             <h4 className="text-xs font-bold text-slate-900 mb-4">Company</h4>
             <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
               <li><Link href="/sell-buy/about" className="hover:text-[#037166] transition-colors">About Us</Link></li>
-              <li><Link href="/contact-us" className="hover:text-[#037166] transition-colors">Contact Us</Link></li>
+              <li><Link href="/sell-buy/contact-us" className="hover:text-[#037166] transition-colors">Contact Us</Link></li>
               <li><Link href="/sell-buy/help" className="hover:text-[#037166] transition-colors">How it Works</Link></li>
               <li><Link href="/sell-buy/terms" className="hover:text-[#037166] transition-colors">Terms & Conditions</Link></li>
-              <li><Link href="/privacy-policy" className="hover:text-[#037166] transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/sell-buy/privacy-policy" className="hover:text-[#037166] transition-colors">Privacy Policy</Link></li>
               <li><Link href="/sell-buy/safety" className="hover:text-[#037166] transition-colors">Safety Tips</Link></li>
             </ul>
           </div>
@@ -130,15 +156,15 @@ export function SellBuyFooter() {
             <h4 className="text-xs font-bold text-slate-900 mb-4">Connect with Us</h4>
             <div className="flex items-center gap-2 text-xs text-slate-600">
               <Mail className="w-4 h-4 text-[#037166]" />
-              <span>support@dhub.com</span>
+              <span>{email}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-600">
               <PhoneCall className="w-4 h-4 text-[#037166]" />
-              <span>+91 88866 88666</span>
+              <span>{phone}</span>
             </div>
             <div className="flex items-start gap-2 text-xs text-slate-600">
               <MapPin className="w-4 h-4 text-[#037166] flex-shrink-0 mt-0.5" />
-              <span>Bangalore, Karnataka, India</span>
+              <span>{address}</span>
             </div>
           </div>
         </div>

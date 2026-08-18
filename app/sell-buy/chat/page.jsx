@@ -1,166 +1,404 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
-import { Search, Send, Image as ImageIcon, ShieldCheck, DollarSign, ArrowLeft } from 'lucide-react';
-
-const SAMPLE_CONVERSATIONS = [
-  {
-    id: 'conv_1',
-    sellerName: 'Rakesh Verma',
-    listingTitle: 'Maruti Suzuki Swift VXI 2022',
-    price: 545000,
-    lastMessage: 'Is the price negotiable?',
-    time: '10:45 AM',
-    unread: 2,
-    image: '/uploads/thumbn_ph_image/default_image.jpg',
-  },
-  {
-    id: 'conv_2',
-    sellerName: 'Priya Sharma',
-    listingTitle: 'iPhone 13 128GB Blue',
-    price: 38999,
-    lastMessage: 'Yes, available for inspection today',
-    time: 'Yesterday',
-    unread: 0,
-    image: '/uploads/thumbn_ph_image/default_image.jpg',
-  },
-];
+import { Search, Send, ShieldCheck, MapPin, Loader2, MessageSquare } from 'lucide-react';
+import {
+  fetchConversations,
+  fetchMessages,
+  sendChatMessageApi,
+  getImageUrl,
+  getOrCreateConversation,
+} from '@/lib/sellBuyApi';
+import { getSocket, joinConversationRoom, leaveConversationRoom } from '@/lib/socket';
+import { useAuth } from '@/context/AuthContext';
 
 export default function MarketplaceChatPage() {
-  const [activeConv, setActiveConv] = useState(SAMPLE_CONVERSATIONS[0]);
-  const [inputText, setInputText] = useState('');
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'seller', text: 'Hello! Thanks for reaching out about the Maruti Swift.', time: '10:40 AM' },
-    { id: 2, sender: 'me', text: 'Hi! Is the car still available in Gachibowli?', time: '10:42 AM' },
-    { id: 3, sender: 'seller', text: 'Yes, it is available for inspection today.', time: '10:45 AM' },
-  ]);
+  const searchParams = useSearchParams();
+  const sellerIdParam = searchParams.get('sellerId');
+  const listingIdParam = searchParams.get('listingId');
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), sender: 'me', text: inputText.trim(), time: 'Just now' },
-    ]);
-    setInputText('');
+  const [conversations, setConversations] = useState([]);
+  const [activeConv, setActiveConv] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentUserId, setCurrentUserId] = useState('');
+
+  const messagesEndRef = useRef(null);
+
+  const { user } = useAuth() || {};
+
+  // Initialize Current User ID
+  useEffect(() => {
+    let activeUser = user;
+    if (!activeUser && typeof window !== 'undefined') {
+      const userStr = localStorage.getItem('user_details') || localStorage.getItem('user');
+      if (userStr) {
+        try { activeUser = JSON.parse(userStr); } catch (e) {}
+      }
+    }
+    
+    if (activeUser) {
+      const uid = activeUser._id || activeUser.id || '';
+      setCurrentUserId(String(uid));
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Load Conversations
+  useEffect(() => {
+    loadConversations();
+  }, [currentUserId, sellerIdParam, listingIdParam]);
+
+  const loadConversations = async () => {
+    if (!currentUserId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    let convs = await fetchConversations(currentUserId);
+    
+    const sessionActiveConvId = sessionStorage.getItem('activeConvId');
+    const sessionActiveConvDataStr = sessionStorage.getItem('activeConvData');
+    
+    if (sessionActiveConvId) {
+      let existingConv = convs.find(c => String(c._id) === String(sessionActiveConvId));
+      
+      if (!existingConv && sessionActiveConvDataStr) {
+        try {
+          const parsedData = JSON.parse(sessionActiveConvDataStr);
+          if (parsedData._id) {
+            existingConv = parsedData;
+            convs = [existingConv, ...convs];
+          }
+        } catch(e) {}
+      }
+
+      if (existingConv) {
+        setActiveConv(existingConv);
+      } else if (convs && convs.length > 0) {
+        setActiveConv(convs[0]);
+      }
+      sessionStorage.removeItem('activeConvId');
+      sessionStorage.removeItem('activeConvData');
+    } else if (listingIdParam) {
+      let existingConv = convs.find(c => String(c.listingId?._id || c.listingId) === String(listingIdParam));
+      if (!existingConv) {
+        const initRes = await getOrCreateConversation(currentUserId, listingIdParam);
+        if (initRes.success && initRes.data) {
+          existingConv = initRes.data;
+          convs = [existingConv, ...convs];
+        }
+      }
+      if (existingConv) {
+        setActiveConv(existingConv);
+      }
+    } else if (convs && convs.length > 0 && !activeConv) {
+      setActiveConv(convs[0]);
+    }
+    
+    setConversations(convs);
+    setLoading(false);
   };
+
+  // Load Messages when Active Conversation changes & setup Socket
+  useEffect(() => {
+    if (!activeConv?._id) return;
+
+    const convId = activeConv._id;
+
+    // Load initial message history
+    fetchMessages(convId).then((msgs) => {
+      setMessages(msgs);
+      scrollToBottom();
+    });
+
+    // Join Socket Room for this conversation
+    joinConversationRoom(convId);
+
+    // Setup Socket.IO listener for real-time incoming messages
+    const socket = getSocket();
+    if (socket) {
+      const handleNewMessage = (newMsg) => {
+        if (String(newMsg.conversationId) === String(convId)) {
+          setMessages((prev) => {
+            // Avoid duplicate message if already added
+            if (prev.some((m) => String(m._id) === String(newMsg._id))) return prev;
+            return [...prev, newMsg];
+          });
+          scrollToBottom();
+        }
+      };
+
+      const handleChatNotification = (data) => {
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (String(c._id) === String(data.conversationId)) {
+              return {
+                ...c,
+                lastMessage: data.lastMessage,
+                lastMessageAt: data.lastMessageAt || new Date().toISOString(),
+              };
+            }
+            return c;
+          })
+        );
+      };
+
+      socket.on('newMessage', handleNewMessage);
+      socket.on('chatNotification', handleChatNotification);
+
+      return () => {
+        socket.off('newMessage', handleNewMessage);
+        socket.off('chatNotification', handleChatNotification);
+        leaveConversationRoom(convId);
+      };
+    }
+  }, [activeConv?._id]);
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim() || !activeConv?._id || sending) return;
+
+    const textToSend = inputText.trim();
+    setInputText('');
+    setSending(true);
+
+    // Optimistic Message Append
+    const tempId = `temp_${Date.now()}`;
+    const optimisticMsg = {
+      _id: tempId,
+      conversationId: activeConv._id,
+      senderId: currentUserId,
+      text: textToSend,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimisticMsg]);
+    scrollToBottom();
+
+    // Call REST API (which also emits Socket event to recipient)
+    const res = await sendChatMessageApi({
+      conversationId: activeConv._id,
+      text: textToSend,
+      senderId: currentUserId,
+    });
+
+    if (res?.success && res.data) {
+      // Replace optimistic message with saved DB message
+      setMessages((prev) =>
+        prev.map((m) => (m._id === tempId ? res.data : m))
+      );
+    }
+    setSending(false);
+  };
+
+  // Helper to extract opposite party (other user in conversation)
+  const getOtherUser = (conv) => {
+    if (!conv) return { name: 'Marketplace Seller', image: '' };
+    const isMeBuyer = String(conv.buyerId?._id || conv.buyerId) === String(currentUserId);
+    const other = isMeBuyer ? conv.sellerId : conv.buyerId;
+    return {
+      name: typeof other === 'object' ? other?.name || 'Seller' : 'Seller',
+      profilePic: typeof other === 'object' ? other?.profilePic : '',
+    };
+  };
+
+  // Filter conversations search
+  const filteredConvs = conversations.filter((c) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    const other = getOtherUser(c);
+    const title = c.listingId?.title || '';
+    return other.name.toLowerCase().includes(q) || title.toLowerCase().includes(q);
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <SellBuyHeader />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex flex-col">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden min-h-[600px]">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden min-h-[620px]">
+          
           {/* Sidebar Conversations */}
-          <div className="lg:col-span-4 border-r border-slate-200 flex flex-col">
+          <div className="lg:col-span-4 border-r border-slate-200 flex flex-col bg-white">
             <div className="p-4 border-b border-slate-100">
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-3">Marketplace Messages</h2>
+              <h2 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Marketplace Messages</h2>
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search chats or listings..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-3 text-xs font-medium focus:ring-2 focus:ring-[#037166] focus:outline-none"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md py-2 pl-9 pr-3 text-xs font-medium focus:ring-2 focus:ring-[#037166] focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
-              {SAMPLE_CONVERSATIONS.map((conv) => (
-                <button
-                  key={conv.id}
-                  onClick={() => setActiveConv(conv)}
-                  className={`w-full text-left p-4 flex items-center gap-3 transition-colors ${
-                    activeConv?.id === conv.id ? 'bg-[#037166]/5 border-l-4 border-[#037166]' : 'hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="relative w-12 h-12 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
-                    <Image src={conv.image} alt={conv.listingTitle} fill className="object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-900 truncate">{conv.sellerName}</span>
-                      <span className="text-[10px] text-slate-400">{conv.time}</span>
-                    </div>
-                    <p className="text-[11px] font-semibold text-[#037166] truncate">{conv.listingTitle}</p>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">{conv.lastMessage}</p>
-                  </div>
-                </button>
-              ))}
+              {loading ? (
+                <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#037166]" />
+                  <span className="text-xs font-medium">Loading conversations...</span>
+                </div>
+              ) : filteredConvs.length === 0 ? (
+                <div className="p-8 text-center text-slate-400">
+                  <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
+                  <p className="text-xs font-bold text-slate-600">No conversations yet</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Chat messages with sellers will appear here</p>
+                </div>
+              ) : (
+                filteredConvs.map((conv) => {
+                  const otherUser = getOtherUser(conv);
+                  const isSelected = activeConv?._id === conv._id;
+                  const listing = conv.listingId || {};
+                  const coverImg = listing.coverImage || listing.images?.[0];
+
+                  return (
+                    <button
+                      key={conv._id}
+                      onClick={() => setActiveConv(conv)}
+                      className={`w-full text-left p-4 flex items-center gap-3 transition-colors ${
+                        isSelected ? 'bg-[#037166]/5 border-l-4 border-[#037166]' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="relative w-11 h-11 rounded-md bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
+                        <img
+                          src={getImageUrl(coverImg)}
+                          alt={listing.title || 'Listing'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900 truncate">{otherUser.name}</span>
+                          <span className="text-[10px] text-slate-400">
+                            {conv.lastMessageAt
+                              ? new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              : ''}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-semibold text-[#037166] truncate">{listing.title || 'Advertisement'}</p>
+                        <p className="text-xs text-slate-500 truncate mt-0.5">{conv.lastMessage || 'Start conversation...'}</p>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
 
           {/* Main Chat Window */}
           <div className="lg:col-span-8 flex flex-col bg-slate-50/50">
-            {/* Active Header */}
-            {activeConv && (
-              <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
-                    <Image src={activeConv.image} alt={activeConv.listingTitle} fill className="object-cover" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-xs font-black text-slate-900">{activeConv.sellerName}</h3>
-                      <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+            {activeConv ? (
+              <>
+                {/* Active Header */}
+                <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-md bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
+                      <img
+                        src={getImageUrl(activeConv.listingId?.coverImage || activeConv.listingId?.images?.[0])}
+                        alt="Listing"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <p className="text-[11px] font-semibold text-[#037166]">{activeConv.listingTitle} — ₹{activeConv.price.toLocaleString('en-IN')}</p>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-xs font-black text-slate-900">{getOtherUser(activeConv).name}</h3>
+                        <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+                      </div>
+                      <p className="text-[11px] font-semibold text-[#037166]">
+                        {activeConv.listingId?.title} — ₹{Number(activeConv.listingId?.price || 0).toLocaleString('en-IN')}
+                      </p>
+                    </div>
                   </div>
+
+                  {activeConv.listingId?.slug && (
+                    <Link
+                      href={`/sell-buy/categories`}
+                      className="bg-[#037166]/10 text-[#037166] text-xs font-bold px-3 py-1.5 rounded-md hover:bg-[#037166]/20 transition-colors"
+                    >
+                      View Listing
+                    </Link>
+                  )}
                 </div>
 
-                <Link
-                  href="/sell-buy/categories"
-                  className="bg-[#037166]/10 text-[#037166] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#037166]/20 transition-colors"
-                >
-                  View Listing
-                </Link>
+                {/* Messages Timeline */}
+                <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                  {messages.length === 0 ? (
+                    <div className="py-12 text-center text-slate-400">
+                      <p className="text-xs font-medium">No messages yet. Send a message to start chatting!</p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => {
+                      const isMe = String(msg.senderId?._id || msg.senderId) === String(currentUserId);
+                      const timeStr = msg.createdAt
+                        ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : 'Just now';
+
+                      return (
+                        <div
+                          key={msg._id}
+                          className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[75%] p-3 rounded-md text-xs leading-relaxed shadow-xs ${
+                              isMe
+                                ? 'bg-[#037166] text-white rounded-br-none'
+                                : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap">{msg.text}</p>
+                            <span className={`text-[9px] block mt-1 text-right ${isMe ? 'text-emerald-200' : 'text-slate-400'}`}>
+                              {timeStr}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Message Composer */}
+                <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Type your message..."
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-md py-2.5 px-4 text-xs font-medium focus:ring-2 focus:ring-[#037166] focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={sending || !inputText.trim()}
+                    className="bg-[#037166] hover:bg-[#025951] disabled:opacity-50 text-white p-2.5 rounded-md shadow-xs transition-all flex items-center justify-center"
+                  >
+                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
+                <MessageSquare className="w-12 h-12 mb-3 text-slate-300" />
+                <h3 className="text-sm font-bold text-slate-700">Select a conversation</h3>
+                <p className="text-xs text-slate-400 mt-1">Pick a chat from the left panel to communicate with buyers or sellers.</p>
               </div>
             )}
-
-            {/* Timeline */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[75%] p-3.5 rounded-2xl text-xs leading-relaxed shadow-sm ${
-                      msg.sender === 'me'
-                        ? 'bg-[#037166] text-white rounded-br-none'
-                        : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
-                    }`}
-                  >
-                    <p>{msg.text}</p>
-                    <span className={`text-[10px] block mt-1 text-right ${msg.sender === 'me' ? 'text-emerald-200' : 'text-slate-400'}`}>
-                      {msg.time}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Message Composer */}
-            <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Type your message to seller..."
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-xs font-medium focus:ring-2 focus:ring-[#037166] focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-[#037166] hover:bg-[#025951] text-white p-2.5 rounded-xl shadow-sm transition-all"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
           </div>
+
         </div>
       </main>
 

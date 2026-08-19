@@ -287,7 +287,7 @@ function BrandPageContent() {
                       <img
                         loading="lazy"
                         decoding="async"
-                        src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
+                        src={logo.startsWith('http') ? logo : `https://devapis.doorstephub.com/${logo}`}
                         alt={brand.name}
                         className="h-full w-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-110"
                       />

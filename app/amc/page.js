@@ -153,7 +153,7 @@ export default function AmcPlansPage() {
                 {/* Banner Image */}
                 <div className="w-full h-44 bg-slate-50 relative border-b border-[#cfe8e3] flex-shrink-0">
                   <img
-                    src={plan.image ? (plan.image.startsWith('http') ? plan.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${plan.image}`) : 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'}
+                    src={plan.image ? (plan.image.startsWith('http') ? plan.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com'}/${plan.image}`) : 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'}
                     alt={plan.name}
                     className="w-full h-full object-contain"
                   />

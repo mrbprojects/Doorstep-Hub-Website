@@ -11,7 +11,7 @@ export const metadata = {
     siteName: 'Doorstep Hub',
     images: [
       {
-        url: 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png',
+        url: 'https://devapis.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png',
         width: 1200,
         height: 630,
         alt: 'Doorstep Hub AMC Service',
@@ -23,7 +23,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Doorstep Hub Book AMC Services for Home Appliances & Electronics',
     description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub Book AMC Services. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
-    images: ['https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png'],
+    images: ['https://devapis.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png'],
   },
 };
 

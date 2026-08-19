@@ -3,7 +3,7 @@
  * Avoid adding new hardcoded slug patterns; register slugs from the backend instead.
  */
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 
 export function createSlugRegistry({ brandSlugs = [], serviceSlugs = [] } = {}) {
     const brands = new Set(

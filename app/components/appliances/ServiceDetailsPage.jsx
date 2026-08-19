@@ -87,7 +87,7 @@ export function ServiceDetailsPage({
         let response;
         if (serviceSlug) {
           // Priority: Call API directly with slug
-          response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${serviceSlug}`, {
+          response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${serviceSlug}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({}),
@@ -95,7 +95,7 @@ export function ServiceDetailsPage({
 
           // If direct slug call fails, try resolution fallback
           if (!response.ok) {
-            const allRes = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
+            const allRes = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
             const allData = await allRes.json();
 
             if (allData.success && Array.isArray(allData.data)) {
@@ -113,7 +113,7 @@ export function ServiceDetailsPage({
               }
 
               if (matchedId) {
-                response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${matchedId}`, {
+                response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${matchedId}`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({}),
@@ -122,7 +122,7 @@ export function ServiceDetailsPage({
             }
           }
         } else if (serviceId) {
-          response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${serviceId}`, {
+          response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${serviceId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({}),
@@ -138,7 +138,7 @@ export function ServiceDetailsPage({
           // Auto-enrich URL if metadata is missing
           if (!category || !subCategory || !subCategoryId) {
             try {
-              const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
+              const res = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
               const allServicesData = await res.json();
               if (allServicesData.success && Array.isArray(allServicesData.data)) {
                 let foundCat = '';
@@ -216,7 +216,7 @@ export function ServiceDetailsPage({
 
       setLoadingRelated(true);
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory', {
+        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -275,8 +275,8 @@ export function ServiceDetailsPage({
 
   // Prepare images list (banner + service images)
   const images = serviceDetails?.storeData ? [
-    serviceDetails.storeData.bannerImage ? `https://api.doorstephub.com/${serviceDetails.storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
-    ...(serviceDetails.serviceImages || []).map(img => `https://api.doorstephub.com/${img}`)
+    serviceDetails.storeData.bannerImage ? `https://devapis.doorstephub.com/${serviceDetails.storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
+    ...(serviceDetails.serviceImages || []).map(img => `https://devapis.doorstephub.com/${img}`)
   ].filter(Boolean) : []; // Remove any null/undefined images
 
   // Auto-scroll for Main Image Gallery & Lightbox
@@ -739,7 +739,7 @@ export function ServiceDetailsPage({
                                   {card.image && (
                                     <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-100">
                                       <img loading="lazy" decoding="async"
-                                        src={`https://api.doorstephub.com/${card.image}`}
+                                        src={`https://devapis.doorstephub.com/${card.image}`}
                                         alt={card.title}
                                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                         onError={(e) => { e.target.style.display = 'none'; }}
@@ -1045,7 +1045,7 @@ export function ServiceDetailsPage({
               >
                 <div className="relative h-40 overflow-hidden">
                   <img loading="lazy" decoding="async"
-                    src={service.mainImage ? `https://api.doorstephub.com/${service.mainImage}` : '/placeholder-service.jpg'}
+                    src={service.mainImage ? `https://devapis.doorstephub.com/${service.mainImage}` : '/placeholder-service.jpg'}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -1159,7 +1159,7 @@ export function ServiceDetailsPage({
 
               <div className="relative aspect-square md:aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black/20">
                 <img loading="lazy" decoding="async"
-                  src={`https://api.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
+                  src={`https://devapis.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
                   alt={rateCardModal.title}
                   className="w-full h-full object-contain"
                 />

@@ -1,5 +1,5 @@
 // API configuration and utilities
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi';
 const SERVICES_ENDPOINT = '/app/applience-repairs-website/all-services';
 
 /** Same service id as customer app BookService / category banner */
@@ -8,7 +8,7 @@ export const HOME_APPLIANCE_SERVICE_ID = '683daaa8f261c1548bdf7442';
 export function resolveMediaUrl(path = '') {
     if (!path) return '';
     if (String(path).startsWith('http')) return path;
-    const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com';
+    const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com';
     return `${base.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`;
 }
 
@@ -181,7 +181,7 @@ export function imageLoader({ src }) {
     if (src.startsWith('http')) {
         return src;
     }
-    return `https://api.doorstephub.com/${src}`;
+    return `https://devapis.doorstephub.com/${src}`;
 }
 
 /**

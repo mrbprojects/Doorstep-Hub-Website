@@ -419,7 +419,7 @@ export function BookingModal({
         );
       }
 
-      const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/autherised-booking/add_autherised_booking', {
+      const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/autherised-booking/add_autherised_booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

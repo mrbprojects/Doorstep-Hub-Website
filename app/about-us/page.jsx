@@ -18,7 +18,7 @@ export default function AboutUsPage() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
+                const res = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/get_global_settings');
                 const data = await res.json();
                 if (data.success) {
                     if (data.policy) setSettings(data.policy);

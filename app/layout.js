@@ -53,7 +53,7 @@ export const metadata = {
     siteName: 'Doorstep Hub',
     images: [
       {
-        url: 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png',
+        url: 'https://devapis.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png',
         width: 1200,
         height: 630,
         alt: 'Doorstep Hub Services',
@@ -91,8 +91,8 @@ export default function RootLayout({ children }) {
         */}
 
         {/* Doorstep Hub API — preconnect so data-fetch RTTs are already resolved */}
-        <link rel="preconnect" href="https://api.doorstephub.com" />
-        <link rel="dns-prefetch" href="https://api.doorstephub.com" />
+        <link rel="preconnect" href="https://devapis.doorstephub.com" />
+        <link rel="dns-prefetch" href="https://devapis.doorstephub.com" />
 
         {/* Google Maps JS — preconnect cuts TLS handshake out of the main thread */}
         <link rel="preconnect" href="https://maps.googleapis.com" />

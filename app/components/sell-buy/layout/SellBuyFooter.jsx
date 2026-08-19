@@ -117,7 +117,7 @@ export function SellBuyFooter() {
               <li><Link href="/sell-buy/categories" className="hover:text-[#037166] transition-colors">All Categories</Link></li>
               {displayCategories.map(cat => (
                 <li key={cat.slug || cat._id}>
-                  <Link href={`/sell-buy/category/${cat.slug}`} className="hover:text-[#037166] transition-colors">
+                  <Link href={`/sell-buy/${cat.slug}`} className="hover:text-[#037166] transition-colors">
                     {cat.name}
                   </Link>
                 </li>

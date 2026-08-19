@@ -8,7 +8,7 @@ import { registerUrlEntry } from '../app/lib/seo/urlRegistry.js';
 import { submitToIndexNow } from '../app/lib/seo/indexnow.js';
 
 const BASE_URL = 'https://doorstephub.com';
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 
 async function fetchAPI(endpoint, body = null, method = 'POST') {
     try {

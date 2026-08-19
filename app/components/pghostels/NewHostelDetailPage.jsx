@@ -101,7 +101,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                         image: store.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${store.image}` : 'https://images.unsplash.com/photo-1617430690223-3e165b390e25?fit=max&fm=jpg&w=1080',
                         images: data.serviceImages && data.serviceImages.length > 0
                             ? data.serviceImages.map(img => img.startsWith('/')
-                                ? `https://api.doorstephub.com${img}`
+                                ? `https://devapis.doorstephub.com${img}`
                                 : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`)
                             : ['https://images.unsplash.com/photo-1617430690223-3e165b390e25?fit=max&fm=jpg&w=1080'],
 

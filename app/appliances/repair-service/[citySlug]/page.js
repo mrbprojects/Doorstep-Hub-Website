@@ -210,7 +210,7 @@ function CategoryPageContent() {
   useEffect(() => {
     (async () => {
       try {
-        const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi';
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi';
         const res = await fetch(`${base}/app/get_global_settings`);
         const data = await res.json();
         if (data.success && data.policy) {
@@ -265,7 +265,7 @@ function CategoryPageContent() {
             image: c.image
               ? c.image.startsWith('http')
                 ? c.image
-                : `https://api.doorstephub.com/${c.image.replace(/^\//, '')}`
+                : `https://devapis.doorstephub.com/${c.image.replace(/^\//, '')}`
               : null,
           })),
         );

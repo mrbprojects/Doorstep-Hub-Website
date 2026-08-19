@@ -1,13 +1,13 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi';
-const IMAGE_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi';
+const IMAGE_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com';
 
 export const getImageUrl = (path) => {
-  if (!path) return 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+  if (!path) return 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
   if (path.startsWith('blob:') || path.startsWith('http://') || path.startsWith('https://')) {
     return path.replace(/([^:]\/)\/+/g, '$1');
   }
   const cleanPath = path.replace(/^\/+/, '');
-  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
+  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com').replace(/\/+$/, '');
   return `${base}/${cleanPath}`;
 };
 
@@ -235,6 +235,17 @@ export const fetchSellerVerificationStatus = async (userId) => {
     return data;
   } catch (err) {
     console.error('Error fetching seller verification status:', err);
+    return { success: false };
+  }
+};
+
+export const fetchSellerProfile = async (slug) => {
+  try {
+    const res = await fetch(`${API_BASE}/sell-buy/seller/${slug}`, { cache: 'no-store' });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error('Error fetching seller profile:', err);
     return { success: false };
   }
 };

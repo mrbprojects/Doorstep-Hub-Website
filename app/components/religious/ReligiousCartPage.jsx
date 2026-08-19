@@ -126,7 +126,7 @@ export function ReligiousCartPage({
                                             {/* Image - Compact */}
                                             <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 border border-orange-50 shadow-sm group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
                                                 <img loading="lazy" decoding="async"
-                                                    src={item.itemImage ? `https://api.doorstephub.com/${item.itemImage}` : `https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg`}
+                                                    src={item.itemImage ? `https://devapis.doorstephub.com/${item.itemImage}` : `https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg`}
                                                     alt={item.itemName}
                                                     className="w-full h-full object-cover"
                                                 />

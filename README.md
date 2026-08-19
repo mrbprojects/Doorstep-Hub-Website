@@ -26,7 +26,7 @@ A comprehensive service marketplace platform built with Next.js 14, featuring mu
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.doorstephub.com/v1/dhubApi
+NEXT_PUBLIC_API_BASE_URL=https://devapis.doorstephub.com/v1/dhubApi
 NEXT_PUBLIC_API_ALL_SERVICES_ENDPOINT=/app/applience-repairs-website/all-services
 ```
 

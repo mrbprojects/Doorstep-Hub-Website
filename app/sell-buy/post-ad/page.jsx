@@ -189,6 +189,53 @@ export default function PostAdPage() {
     setZoom(1);
   };
 
+  const handleNext = (currentStep) => {
+    if (currentStep === 1) {
+      if (!formData.categoryId) {
+        toast.error('Please select a category.');
+        return;
+      }
+      setStep(2);
+    } else if (currentStep === 2) {
+      if (!formData.title || formData.title.trim().length < 5) {
+        toast.error('Please enter a valid title (min 5 characters).');
+        return;
+      }
+      if (!formData.description || formData.description.trim().length < 10) {
+        toast.error('Please enter a more detailed description (min 10 characters).');
+        return;
+      }
+      if (!formData.price || isNaN(formData.price) || Number(formData.price) <= 0) {
+        toast.error('Please enter a valid price greater than 0.');
+        return;
+      }
+      setStep(3);
+    } else if (currentStep === 3) {
+      if (selectedFiles.length === 0) {
+        toast.error('Please upload at least one image of the item.');
+        return;
+      }
+      setStep(4);
+    } else if (currentStep === 4) {
+      if (!formData.city || formData.city.trim().length === 0) {
+        toast.error('Please enter your city.');
+        return;
+      }
+      if (!formData.area || formData.area.trim().length === 0) {
+        toast.error('Please enter your area or locality.');
+        return;
+      }
+      setStep(5);
+    } else if (currentStep === 5) {
+      if (!formData.phone || formData.phone.trim().length < 10) {
+        toast.error('Please enter a valid phone number.');
+        return;
+      }
+      setStep(6);
+    }
+  };
+
+
   const handlePublish = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -220,12 +267,26 @@ export default function PostAdPage() {
       });
 
       const data = await res.json();
+      if (res.status === 403 || data?.kycStatus) {
+        const kycStatus = data?.kycStatus || 'NOT_SUBMITTED';
+        const msg =
+          kycStatus === 'SUBMITTED' || kycStatus === 'UNDER_REVIEW'
+            ? 'Your KYC is still under Admin review. You can post ads once Admin approves your verification.'
+            : 'Seller Verification Required! Submit your KYC documents and wait for Admin approval before posting ads.';
+        toast.error(msg, { duration: 5000 });
+        router.push('/sell-buy/dashboard?kyc=open');
+        return;
+      }
+
       if ((data.error === false || data.success) && data.data?.slug) {
+        toast.success('Ad submitted successfully! It will go live once reviewed.');
         router.push(`/sell-buy/ad/${data.data.slug}`);
       } else {
+        toast.error(data.message || 'Failed to post advertisement');
         router.push('/sell-buy');
       }
     } catch (err) {
+      toast.error('An error occurred while posting your ad.');
       router.push('/sell-buy');
     } finally {
       setSubmitting(false);
@@ -376,7 +437,7 @@ export default function PostAdPage() {
               <div className="flex justify-end pt-4">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => handleNext(1)}
                   className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Continue to Details <ArrowRight className="w-4 h-4" />
@@ -452,7 +513,7 @@ export default function PostAdPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep(3)}
+                  onClick={() => handleNext(2)}
                   className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Next: Add Photos <ArrowRight className="w-4 h-4" />
@@ -495,7 +556,7 @@ export default function PostAdPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep(4)}
+                  onClick={() => handleNext(3)}
                   className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Next: Location <ArrowRight className="w-4 h-4" />
@@ -554,7 +615,7 @@ export default function PostAdPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep(5)}
+                  onClick={() => handleNext(4)}
                   className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Next: Contact <ArrowRight className="w-4 h-4" />
@@ -591,7 +652,7 @@ export default function PostAdPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep(6)}
+                  onClick={() => handleNext(5)}
                   className="bg-[#037166] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#025951] flex items-center gap-2"
                 >
                   Preview & Publish <ArrowRight className="w-4 h-4" />
@@ -727,3 +788,4 @@ export default function PostAdPage() {
     </div>
   );
 }
+

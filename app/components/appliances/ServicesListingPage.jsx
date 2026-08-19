@@ -49,7 +49,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     const fetchSubcatDetails = async () => {
       if (!category) return;
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug: category })
@@ -110,7 +110,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
       setLoading(true);
       try {
-        let apiUrl = 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory';
+        let apiUrl = 'https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory';
         let body = {
           lattitude: location.lat,
           longitude: location.lng,
@@ -119,7 +119,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         if (slug) {
           body.slug = slug;
         } else if (childCategoryId) {
-          apiUrl = 'https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_childcategory';
+          apiUrl = 'https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_childcategory';
           body.childcategoryId = childCategoryId;
         } else {
           body.subcategoryId = subCategoryId;
@@ -198,7 +198,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
       setLoadingCategories(true);
       try {
-        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
+        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -230,7 +230,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     fetchedCatsRef.current.add(catId);
     setLoadingSubcats(prev => ({ ...prev, [catId]: true }));
     try {
-      const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+      const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug: catSlug })
@@ -581,7 +581,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           {/* Image */}
                           <div className="relative h-48 overflow-hidden">
                             <img loading="lazy" decoding="async"
-                              src={service.mainImage ? `https://api.doorstephub.com/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'} // Fallback image
+                              src={service.mainImage ? `https://devapis.doorstephub.com/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'} // Fallback image
                               alt={service.name}
                               className="w-full h-full object-cover transition-transform duration-700"
                             />
@@ -664,7 +664,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           <div className="flex flex-col md:flex-row h-full">
                             <div className="relative w-full md:w-44 h-36 md:h-full overflow-hidden flex-shrink-0">
                               <img loading="lazy" decoding="async"
-                                src={center.logo ? `https://api.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
+                                src={center.logo ? `https://devapis.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                 alt={center.name}
                                 className="w-full h-full object-contain bg-white transition-transform duration-700 group-hover:scale-105"
                               />

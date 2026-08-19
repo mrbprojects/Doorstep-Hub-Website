@@ -95,7 +95,7 @@ function BookNowPageContent() {
         }
 
         // Fetch Service
-        const response = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/authorized-services/authorized_service/${slug}`, {
+        const response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/authorized-services/authorized_service/${slug}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -162,7 +162,7 @@ function BookNowPageContent() {
       "@type": "Country",
       "name": "India"
     },
-    "image": service.image ? `https://api.doorstephub.com/${service.image}` : undefined,
+    "image": service.image ? `https://devapis.doorstephub.com/${service.image}` : undefined,
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": service.avgRating || "4.9",
@@ -186,7 +186,7 @@ function BookNowPageContent() {
     </div>
   );
 
-  const imageUrl = service.image?.startsWith('http') ? service.image : `https://api.doorstephub.com/${service.image}`;
+  const imageUrl = service.image?.startsWith('http') ? service.image : `https://devapis.doorstephub.com/${service.image}`;
 
   return (
     <div className="min-h-screen bg-white">

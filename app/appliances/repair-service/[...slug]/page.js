@@ -167,7 +167,7 @@ function BrandStep({ brands, selected, onSelect, loading }) {
                   <img loading="lazy" decoding="async"
                     src={(brand.image || brand.logo || brand.brandLogo).startsWith('http') 
                       ? (brand.image || brand.logo || brand.brandLogo) 
-                      : `https://api.doorstephub.com/${brand.image || brand.logo || brand.brandLogo}`}
+                      : `https://devapis.doorstephub.com/${brand.image || brand.logo || brand.brandLogo}`}
                     alt={brand.name}
                     className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
                   />
@@ -219,7 +219,7 @@ function ServiceStep({ services, onSelect, loading }) {
             <div className="w-44 flex-shrink-0 h-full bg-gray-50 overflow-hidden">
               {service.image ? (
                 <img loading="lazy" decoding="async"
-                  src={`https://api.doorstephub.com/${service.image}`}
+                  src={`https://devapis.doorstephub.com/${service.image}`}
                   alt={service.serviceName}
                   className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110"
                 />
@@ -270,7 +270,7 @@ function ServiceDetailStep({ service, category, onBook, loading }) {
         <div className="grid md:grid-cols-2">
           <div className="h-64 md:h-auto bg-gray-50 overflow-hidden flex items-center justify-center p-8">
             {service.image ? (
-              <img loading="lazy" decoding="async" src={`https://api.doorstephub.com/${service.image}`} alt={service.serviceName} className="max-h-full max-w-full object-contain" />
+              <img loading="lazy" decoding="async" src={`https://devapis.doorstephub.com/${service.image}`} alt={service.serviceName} className="max-h-full max-w-full object-contain" />
             ) : (
               <Wrench size={64} className="text-gray-200" />
             )}
@@ -407,7 +407,7 @@ function SelectServiceCatchAllContent() {
         if (catData.status === 'fulfilled') {
           const mappedCats = catData.value.map(c => ({
             ...c,
-            image: c.image ? `https://api.doorstephub.com/${c.image}` : null,
+            image: c.image ? `https://devapis.doorstephub.com/${c.image}` : null,
           }));
           setCategories(mappedCats);
 

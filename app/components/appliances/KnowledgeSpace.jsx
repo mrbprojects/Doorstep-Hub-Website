@@ -65,7 +65,7 @@ export function KnowledgeSpace() {
             title: item.title,
             category: item.subcategoryId?.name || item.categoryId?.name || item.serviceId?.name || 'General',
             readTime: `${item.readTime} min read`,
-            image: item.coverImage?.url ? encodeURI(`https://api.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
+            image: item.coverImage?.url ? encodeURI(`https://devapis.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
             trending: item.isTrending,
             summary: item.summary,
             slug: item.slug,

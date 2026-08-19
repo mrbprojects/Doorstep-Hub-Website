@@ -1,5 +1,5 @@
 // Server-side SEO metadata fetching and generation utilities
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 const BASE_URL = 'https://doorstephub.com';
 
 // Helper to capitalize words from a slug (e.g., ac-repair -> AC Repair)
@@ -224,10 +224,10 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
         if (rawImageUrl.startsWith('http://') || rawImageUrl.startsWith('https://')) {
             imageUrl = rawImageUrl;
         } else {
-            imageUrl = `https://api.doorstephub.com/${rawImageUrl.replace(/^\//, '')}`;
+            imageUrl = `https://devapis.doorstephub.com/${rawImageUrl.replace(/^\//, '')}`;
         }
     } else if (cleanPath.startsWith('/amc')) {
-        imageUrl = 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png';
+        imageUrl = 'https://devapis.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png';
     }
 
     return {

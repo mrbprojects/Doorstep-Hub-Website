@@ -3,7 +3,7 @@ import { registerUrlEntry, markLegacyRedirect } from './urlRegistry.js';
 import { getStaticSitemapEntries, SITEMAP_CHUNK_SIZE } from './sitemapManager.js';
 
 const BASE_URL = 'https://doorstephub.com';
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 
 async function fetchAPI(endpoint, body = null, method = 'POST', attempts = 3) {
     for (let i = 1; i <= attempts; i++) {
@@ -328,8 +328,8 @@ export async function getFullSitemapInventory() {
         if (slug) {
             const url = buildCanonicalUrl('MAIN_SERVICE', { slug });
             const imgs = [];
-            if (s.image) imgs.push(s.image.startsWith('http') ? s.image : `https://api.doorstephub.com/${s.image.replace(/^\//, '')}`);
-            if (s.bannerImage) imgs.push(s.bannerImage.startsWith('http') ? s.bannerImage : `https://api.doorstephub.com/${s.bannerImage.replace(/^\//, '')}`);
+            if (s.image) imgs.push(s.image.startsWith('http') ? s.image : `https://devapis.doorstephub.com/${s.image.replace(/^\//, '')}`);
+            if (s.bannerImage) imgs.push(s.bannerImage.startsWith('http') ? s.bannerImage : `https://devapis.doorstephub.com/${s.bannerImage.replace(/^\//, '')}`);
             imgs.push(`${BASE_URL}/d-hub-logo.png`);
             inventory['images'].push({ url, priority: 0.8, changeFrequency: 'weekly', lastModified: new Date(), images: imgs });
         }

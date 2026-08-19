@@ -120,6 +120,11 @@ export default function MarketplaceDashboardPage() {
           if (parsed?.status) setKycData((prev) => ({ ...prev, ...parsed }));
         } catch (e) {}
       }
+
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get('kyc') === 'open') {
+        setIsKycModalOpen(true);
+      }
     }
   }, [token, user]);
 

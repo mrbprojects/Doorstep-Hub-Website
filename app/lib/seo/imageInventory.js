@@ -9,13 +9,13 @@ import { buildCanonicalUrl } from './canonicalManager.js';
 import { SITEMAP_CHUNK_SIZE } from './sitemapManager.js';
 
 const BASE_URL = 'https://doorstephub.com';
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 
 function normalizeImageUrl(url) {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
     if (url.startsWith('/')) return `${BASE_URL}${url}`;
-    return `https://api.doorstephub.com/uploads/${url}`;
+    return `https://devapis.doorstephub.com/uploads/${url}`;
 }
 
 function detectImageFormat(url) {

@@ -61,11 +61,11 @@ async function getSlugRegistry() {
         const timeoutId = setTimeout(() => controller.abort(), 2500);
 
         const [brandsRes, servicesRes] = await Promise.allSettled([
-            fetch('https://api.doorstephub.com/v1/dhubApi/app/brands/all_brands', {
+            fetch('https://devapis.doorstephub.com/v1/dhubApi/app/brands/all_brands', {
                 signal: controller.signal,
                 next: { revalidate: 600 },
             }),
-            fetch('https://api.doorstephub.com/v1/dhubApi/app/authorized-services/all_authorized_services', {
+            fetch('https://devapis.doorstephub.com/v1/dhubApi/app/authorized-services/all_authorized_services', {
                 signal: controller.signal,
                 next: { revalidate: 600 },
             }),
@@ -132,7 +132,7 @@ async function getDynamicSlugs() {
         const results = await Promise.allSettled(
             serviceIds.map(async (service) => {
                 try {
-                    const res = await fetch(`https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${service.id}`, {
+                    const res = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${service.id}`, {
                         signal: controller.signal,
                         next: { revalidate: 600 } // Cache at fetch level too
                     });

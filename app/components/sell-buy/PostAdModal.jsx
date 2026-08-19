@@ -341,6 +341,10 @@ export function PostAdModal({ isOpen, onClose }) {
             : 'Seller Verification Required! Submit your KYC documents and wait for Admin approval before posting ads.';
         toast.error(msg, { duration: 5000 });
         setSubmitting(false);
+        onClose();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/sell-buy/dashboard?kyc=open';
+        }
         return;
       }
       // ────────────────────────────────────────────────────────────────────────

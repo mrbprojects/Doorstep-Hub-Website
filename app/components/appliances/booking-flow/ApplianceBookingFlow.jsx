@@ -38,7 +38,7 @@ export function ApplianceBookingFlow() {
           centers: c.serviceCenterCount || 0,
           area: c.state_name || "Service Area",
           icon: c.image 
-            ? (c.image.startsWith('http') ? c.image : `https://api.doorstephub.com${c.image}`)
+            ? (c.image.startsWith('http') ? c.image : `https://devapis.doorstephub.com${c.image}`)
             : null,
           id: c._id,
           lat: c.latitude,

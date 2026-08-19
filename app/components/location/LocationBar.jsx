@@ -53,7 +53,7 @@ export function LocationBar({ theme = {} }) {
                         id: c._id,
                         name: c.name,
                         icon: c.image
-                            ? (c.image.startsWith('http') ? c.image : `https://api.doorstephub.com${c.image}`)
+                            ? (c.image.startsWith('http') ? c.image : `https://devapis.doorstephub.com${c.image}`)
                             : (CITY_ICONS[c.name] || null),
                     }));
                     setAvailableCities(mapped);

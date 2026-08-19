@@ -1,4 +1,4 @@
-const BASE_URL = "https://api.doorstephub.com/v1/dhubApi/service-provider";
+const BASE_URL = "https://devapis.doorstephub.com/v1/dhubApi/service-provider";
 
 function headers(token, json = true) {
   const nextHeaders = {};
@@ -253,7 +253,7 @@ export function resolveProviderMediaUrl(path = "") {
   if (!path) return "";
   if (String(path).startsWith("http")) return path;
   if (String(path).includes("default_image.jpg")) return "";
-  const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.doorstephub.com";
+  const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://devapis.doorstephub.com";
   return `${base.replace(/\/$/, "")}/${String(path).replace(/^\//, "")}`;
 }
 
@@ -499,7 +499,7 @@ export async function getMyProviderCategories(token) {
 }
 
 export async function getAmcReferralConfig(token) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.doorstephub.com/v1/dhubApi";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://devapis.doorstephub.com/v1/dhubApi";
   const response = await fetch(`${baseUrl}/app/amc-referral/config`, {
     method: "GET",
     headers: headers(token, false),
@@ -510,7 +510,7 @@ export async function getAmcReferralConfig(token) {
 }
 
 export async function sendAmcReferral(token, customerId) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.doorstephub.com/v1/dhubApi";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://devapis.doorstephub.com/v1/dhubApi";
   const response = await fetch(`${baseUrl}/app/amc-referral/send`, {
     method: "POST",
     headers: headers(token),
@@ -522,7 +522,7 @@ export async function sendAmcReferral(token, customerId) {
 }
 
 export async function getMyAmcReferrals(token) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.doorstephub.com/v1/dhubApi";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://devapis.doorstephub.com/v1/dhubApi";
   const response = await fetch(`${baseUrl}/app/amc-referral/my-referrals`, {
     method: "GET",
     headers: headers(token, false),

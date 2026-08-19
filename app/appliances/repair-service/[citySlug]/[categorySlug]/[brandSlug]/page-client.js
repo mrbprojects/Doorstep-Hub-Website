@@ -336,7 +336,7 @@ function ServicePageContent() {
                   <div className="w-24 sm:w-28 md:w-32 flex-shrink-0 h-full overflow-hidden bg-gray-50 border-r border-gray-100">
                     {service.image ? (
                       <img loading="lazy" decoding="async"
-                        src={`https://api.doorstephub.com/${service.image}`}
+                        src={`https://devapis.doorstephub.com/${service.image}`}
                         alt={service.serviceName}
                         className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                       />

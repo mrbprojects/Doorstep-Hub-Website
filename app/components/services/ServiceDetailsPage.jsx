@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
 import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
 import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
+import { API_BASE_URL } from '@/config/env';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -109,7 +110,7 @@ export function ServiceDetailsPage({
           // Auto-enrich URL if category or subCategory is missing
           if (!category || !subCategory) {
             try {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
+              const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/all-services`);
               const allServicesData = await res.json();
               if (allServicesData.success && Array.isArray(allServicesData.data)) {
                 let foundCat = '';

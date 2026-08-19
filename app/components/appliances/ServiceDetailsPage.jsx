@@ -12,6 +12,7 @@ import DOMPurify from 'dompurify';
 import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
+import { API_BASE_URL } from '@/config/env';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -87,7 +88,7 @@ export function ServiceDetailsPage({
         let response;
         if (serviceSlug) {
           // Priority: Call API directly with slug
-          response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${serviceSlug}`, {
+          response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/dhub_service_details/${serviceSlug}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({}),
@@ -95,7 +96,7 @@ export function ServiceDetailsPage({
 
           // If direct slug call fails, try resolution fallback
           if (!response.ok) {
-            const allRes = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
+            const allRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/all-services`);
             const allData = await allRes.json();
 
             if (allData.success && Array.isArray(allData.data)) {
@@ -113,7 +114,7 @@ export function ServiceDetailsPage({
               }
 
               if (matchedId) {
-                response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${matchedId}`, {
+                response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/dhub_service_details/${matchedId}`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({}),
@@ -122,7 +123,7 @@ export function ServiceDetailsPage({
             }
           }
         } else if (serviceId) {
-          response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/dhub_service_details/${serviceId}`, {
+          response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/dhub_service_details/${serviceId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({}),
@@ -138,7 +139,7 @@ export function ServiceDetailsPage({
           // Auto-enrich URL if metadata is missing
           if (!category || !subCategory || !subCategoryId) {
             try {
-              const res = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/all-services');
+              const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/all-services`);
               const allServicesData = await res.json();
               if (allServicesData.success && Array.isArray(allServicesData.data)) {
                 let foundCat = '';

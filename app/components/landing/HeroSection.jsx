@@ -286,6 +286,7 @@ import { motion } from 'motion/react';
 import { Sparkles, Download, Zap, Shield, Star, ChevronRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/config/env';
 
 /* ---------- IMAGE LOADER ---------- */
 const imageLoader = ({ src }) => {
@@ -299,6 +300,14 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
   const router = useRouter();
 
   const handleServiceClick = (service) => {
+    const upperName = (service?.name || '').toUpperCase();
+
+    // Redirect to Sell & Buy module
+    if (upperName.includes('SELL') || upperName.includes('BUY')) {
+      router.push('/sell-buy');
+      return;
+    }
+
     localStorage.setItem('selectedService', JSON.stringify({
       id: service._id,
       name: service.name,
@@ -307,7 +316,6 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     }));
 
     let slug = service.name ? service.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : service._id;
-    const upperName = service.name ? service.name.toUpperCase() : '';
     if (upperName.includes('APPLIANCE')) slug = serviceSlugs.appliances;
     else if (upperName.includes('RELIGIOUS')) slug = serviceSlugs.religious;
     else if (upperName.includes('PG')) slug = serviceSlugs.pg;
@@ -316,47 +324,64 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     router.push(`/${slug}`);
   };
 
-  const getServiceTheme = (name) => {
+  const getServiceTheme = (service) => {
+    const name = typeof service === 'string' ? service : service?.name;
     const n = (name || '').toUpperCase();
+    const customDesc = service?.description || service?.subTitle || service?.shortDescription;
+
     if (n.includes('APPLIANCE')) return {
       bg: 'bg-[#E7F3F2]',
       from: 'from-[#E7F3F2]',
+      gradient: 'from-[#E7F3F2] via-[#E7F3F2]/90 to-transparent',
       text: 'text-[#064E44]',
       sub: 'text-[#00796B]',
       btn: 'bg-[#00796B]',
-      desc: 'Quick & Reliable\nAppliance Repair'
+      desc: customDesc || 'Quick & Reliable\nAppliance Repair'
     };
     if (n.includes('PG') || n.includes('HOSTEL')) return {
       bg: 'bg-[#EBF5FF]',
       from: 'from-[#EBF5FF]',
+      gradient: 'from-[#EBF5FF] via-[#EBF5FF]/90 to-transparent',
       text: 'text-[#01579B]',
       sub: 'text-[#0288D1]',
       btn: 'bg-[#0288D1]',
-      desc: 'Comfortable\nStays for You'
+      desc: customDesc || 'Comfortable\nStays for You'
     };
     if (n.includes('RELIGIOUS')) return {
       bg: 'bg-[#FFF6E9]',
       from: 'from-[#FFF6E9]',
+      gradient: 'from-[#FFF6E9] via-[#FFF6E9]/90 to-transparent',
       text: 'text-[#7D3F1B]',
       sub: 'text-[#8E5A3C]',
       btn: 'bg-[#F57C00]',
-      desc: 'Puja, Pandit\n& More Services'
+      desc: customDesc || 'Puja, Pandit\n& More Services'
     };
     if (n.includes('SPA') || n.includes('SALON')) return {
       bg: 'bg-[#FFF0F5]',
       from: 'from-[#FFF0F5]',
+      gradient: 'from-[#FFF0F5] via-[#FFF0F5]/90 to-transparent',
       text: 'text-[#880E4F]',
       sub: 'text-[#C2185B]',
       btn: 'bg-[#C2185B]',
-      desc: 'Relax, Refresh & Rejuvenate'
+      desc: customDesc || 'Relax, Refresh\n& Rejuvenate'
+    };
+    if (n.includes('SELL') || n.includes('BUY')) return {
+      bg: 'bg-[#FFF8E7]',
+      from: 'from-[#FFF8E7]',
+      gradient: 'from-[#FFF8E7] via-[#FFF8E7]/90 to-transparent',
+      text: 'text-[#8D5B00]',
+      sub: 'text-[#B47400]',
+      btn: 'bg-[#E69500]',
+      desc: customDesc || 'Buy & Sell Verified\nGoods & Products'
     };
     return {
       bg: 'bg-[#F5F5F5]',
       from: 'from-[#F5F5F5]',
+      gradient: 'from-[#F5F5F5] via-[#F5F5F5]/90 to-transparent',
       text: 'text-[#212121]',
       sub: 'text-[#616161]',
       btn: 'bg-[#424242]',
-      desc: 'Professional Services'
+      desc: customDesc || 'Trusted Quality\nServices for You'
     };
   };
 
@@ -376,28 +401,20 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
 
   // Helper to render a single card
   const renderCard = (service, index, keyPrefix = '') => {
-    const theme = getServiceTheme(service.name);
+    const theme = getServiceTheme(service);
     return (
       <motion.div
-        key={`${keyPrefix}${service._id}`}
+        key={`${keyPrefix}${service._id || index}`}
         initial={isScrollMode ? false : { opacity: 0, scale: 0.9 }}
         animate={isScrollMode ? false : { opacity: 1, scale: 1 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ y: isScrollMode ? 0 : -5 }}
+        whileHover={{ y: isScrollMode ? 0 : -4 }}
         onClick={() => handleServiceClick(service)}
-        className={`relative overflow-hidden rounded-[20px] cursor-pointer flex-shrink-0 ${isScrollMode ? 'w-[180px] sm:w-[310px]' : 'w-full'} h-[90px] sm:h-[150px] shadow-sm group ${theme.bg}`}
+        className={`relative overflow-hidden rounded-[20px] cursor-pointer flex-shrink-0 ${
+          isScrollMode ? 'w-[190px] sm:w-[310px]' : 'w-full'
+        } h-[95px] sm:h-[150px] shadow-sm group ${theme.bg} border border-black/5 hover:shadow-md transition-all`}
       >
-        {/* Text block on left */}
-        <div className="absolute top-3 sm:top-6 left-3 sm:left-6 w-[55%] z-10 pointer-events-none text-left">
-          <p className={`text-[11px] sm:text-[16px] font-bold leading-tight mb-1 sm:mb-2 ${theme.text}`}>
-            {service.name}
-          </p>
-          <p className={`mt-1 text-[9px] sm:text-[13px] leading-tight font-medium opacity-80 whitespace-pre-line ${theme.sub}`}>
-            {theme.desc}
-          </p>
-        </div>
-
-        {/* Image block */}
+        {/* Image background block */}
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
             <Image
@@ -406,12 +423,30 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
               alt={service.name}
               fill
               priority={index < 4}
-              className="object-cover object-right transition-transform duration-500"
+              className="object-cover object-right transition-transform duration-500 group-hover:scale-105"
             />
           </div>
         </div>
 
+        {/* Soft Left Gradient Scrim to guarantee high contrast and readability on all backgrounds */}
+        <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} w-[70%] sm:w-[60%] z-[1] pointer-events-none`} />
 
+        {/* Text block and Arrow Button on left */}
+        <div className="absolute inset-y-0 left-0 p-3 sm:p-5 w-[65%] sm:w-[58%] z-10 pointer-events-none flex flex-col justify-between text-left">
+          <div>
+            <h3 className={`text-[11px] sm:text-[16px] font-extrabold leading-tight mb-0.5 sm:mb-1 ${theme.text}`}>
+              {service.name}
+            </h3>
+            <p className={`text-[8.5px] sm:text-[11px] md:text-[12px] font-semibold leading-tight whitespace-pre-line ${theme.sub}`}>
+              {theme.desc}
+            </p>
+          </div>
+
+          {/* Action Arrow Button */}
+          <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white ${theme.btn} shadow-sm group-hover:scale-110 transition-transform duration-200`}>
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
+          </div>
+        </div>
       </motion.div>
     );
   };
@@ -472,7 +507,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
     const fetchSlugs = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
+          `${API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`
         );
         const data = await res.json();
         if (data.success && data.data?.home) {
@@ -593,9 +628,7 @@ export function HeroSection() {
         setLoading(true);
         setError(null);
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
-          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${process.env.NEXT_PUBLIC_API_ALL_SERVICES_ENDPOINT}`
-          : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`;
+        const apiUrl = `${API_BASE_URL}/app/applience-repairs-website/all-services`;
 
         const response = await fetch(apiUrl, {
           method: 'GET',

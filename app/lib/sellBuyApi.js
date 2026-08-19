@@ -160,6 +160,22 @@ export const toggleFavorite = async (listingId, userId) => {
   }
 };
 
+export const updateSellBuyListing = async (id, payload, token = '') => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}/sell-buy/listings/${id}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error updating sell-buy listing:', err);
+    return { success: false, message: err.message };
+  }
+};
+
 // ─── System Settings ─────────────────────────────────────────────────────────
 
 export const fetchSystemSettings = async () => {

@@ -818,67 +818,111 @@ function FeatureCard({ no, title, desc, icon: Icon, iconBg, corner }) {
   );
 }
 
+// Color themes applied by index for up to 6 plans from the API
+const PLAN_THEMES = [
+  {
+    headerBg: 'from-slate-800 to-[#025951]',
+    glowColor: 'group-hover:shadow-emerald-500/10',
+    color: 'border-slate-100 hover:border-emerald-500/30',
+    buttonStyle: 'bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200',
+  },
+  {
+    headerBg: 'from-[#037166] to-[#04a99d]',
+    glowColor: 'group-hover:shadow-teal-500/25',
+    color: 'border-[#037166] md:scale-105 shadow-xl shadow-[#037166]/10 z-10 hover:border-[#04a99d]',
+    buttonStyle: 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:opacity-95 shadow-md shadow-[#037166]/20',
+  },
+  {
+    headerBg: 'from-amber-600 to-yellow-500',
+    glowColor: 'group-hover:shadow-amber-500/25',
+    color: 'border-amber-100 hover:border-amber-500/40',
+    buttonStyle: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:opacity-95 shadow-md shadow-amber-500/20',
+  },
+  {
+    headerBg: 'from-violet-700 to-purple-500',
+    glowColor: 'group-hover:shadow-purple-500/25',
+    color: 'border-violet-100 hover:border-purple-400/40',
+    buttonStyle: 'bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:opacity-95 shadow-md shadow-violet-500/20',
+  },
+  {
+    headerBg: 'from-rose-600 to-pink-500',
+    glowColor: 'group-hover:shadow-rose-500/25',
+    color: 'border-rose-100 hover:border-rose-400/40',
+    buttonStyle: 'bg-gradient-to-r from-rose-500 to-pink-500 text-white hover:opacity-95 shadow-md shadow-rose-500/20',
+  },
+  {
+    headerBg: 'from-sky-700 to-cyan-500',
+    glowColor: 'group-hover:shadow-sky-500/25',
+    color: 'border-sky-100 hover:border-sky-400/40',
+    buttonStyle: 'bg-gradient-to-r from-sky-600 to-cyan-500 text-white hover:opacity-95 shadow-md shadow-sky-500/20',
+  },
+];
+
+function PlanSkeleton() {
+  return (
+    <div className="bg-white border border-slate-100 rounded-[36px] overflow-hidden flex flex-col animate-pulse">
+      <div className="h-36 bg-slate-200" />
+      <div className="p-8 flex-1 flex flex-col gap-5">
+        <div className="h-4 w-24 bg-slate-200 rounded" />
+        <div className="h-10 w-36 bg-slate-200 rounded" />
+        <div className="h-px w-full bg-slate-100" />
+        <div className="space-y-3">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full bg-slate-200 shrink-0" />
+              <div className="h-3 bg-slate-200 rounded flex-1" />
+            </div>
+          ))}
+        </div>
+        <div className="h-12 bg-slate-200 rounded-2xl mt-auto" />
+      </div>
+    </div>
+  );
+}
+
 function SubscriptionPlansSection() {
-  const plans = [
-    {
-      badge: '★ BASIC PLAN',
-      title: 'Pay & Get Access',
-      price: '₹699',
-      period: '30 Days',
-      tagline: 'Quick access to local customer business enquiries.',
-      headerBg: 'from-slate-800 to-[#025951]',
-      glowColor: 'group-hover:shadow-emerald-500/10',
-      highlights: [
-        'Direct customer enquiries',
-        'Call verified business enquiries',
-        'Profile visibility on D-Hub app',
-        'Manage your own service rate cards',
-        'Pay ₹75 /- and get customer details',
-        'Grow enquiries and business reach',
-      ],
-      color: 'border-slate-100 hover:border-emerald-500/30',
-      buttonStyle: 'bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200'
-    },
-    {
-      badge: '🔥 MOST POPULAR',
-      title: 'On-Demand Access',
-      price: '₹3,650',
-      period: '365 Days',
-      tagline: 'One annual subscription. Unlimited service access.',
-      headerBg: 'from-[#037166] to-[#04a99d]',
-      glowColor: 'group-hover:shadow-teal-500/25',
-      highlights: [
-        'On-demand access for full year',
-        'All service categories included',
-        'List your local service center',
-        'Full service & team management',
-        '24–48 hours quick settlements',
-        'Fully verified customer leads',
-        'Priority partner support channel',
-      ],
-      color: 'border-[#037166] md:scale-105 shadow-xl shadow-[#037166]/10 z-10 hover:border-[#04a99d]',
-      buttonStyle: 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:opacity-95 shadow-md shadow-[#037166]/20'
-    },
-    {
-      badge: '👑 PREMIUM ACCESS',
-      title: 'Premium Business Access',
-      price: '₹6,999',
-      period: '365 Days',
-      tagline: 'Maximum exposure and estimation-ready leads.',
-      headerBg: 'from-amber-600 to-yellow-500',
-      glowColor: 'group-hover:shadow-amber-500/25',
-      highlights: [
-        'Estimation-ready business leads',
-        'Verified customer enquiries',
-        'Recommended profile visibility top spot',
-        'Add & manage unlimited team members',
-        'Offer customized promo codes/discounts',
-        'Premium analytics & insights dashboard',
-      ],
-      color: 'border-amber-100 hover:border-amber-500/40',
-      buttonStyle: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:opacity-95 shadow-md shadow-amber-500/20'
-    }
-  ];
+  const [apiPlans, setApiPlans] = useState([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+        const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/get_subscription_plans`);
+        const data = await res.json();
+        if (data.success && data.data && data.data.length > 0) {
+          setApiPlans(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch subscription plans:', err);
+      } finally {
+        setPlansLoading(false);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  // Map API plans to display format
+  const plans = apiPlans.map((plan, index) => {
+    const theme = PLAN_THEMES[index % PLAN_THEMES.length];
+    const features = (plan.availableFeatures || []).map(f =>
+      typeof f === 'string' ? f : (f?.name || f?.availableFeatures || JSON.stringify(f))
+    ).filter(Boolean);
+    const price = plan.price ? `₹${Number(plan.price).toLocaleString('en-IN')}` : 'Free';
+    const validDays = plan.validDays || plan.planValidityDays;
+    const period = validDays === 'unlimited' ? 'Unlimited' : validDays ? `${validDays} Days` : 'Plan';
+    const badge = index === 0 ? '★ BASIC PLAN' : index === 1 ? '🔥 MOST POPULAR' : index === apiPlans.length - 1 ? '👑 PREMIUM ACCESS' : `PLAN ${index + 1}`;
+
+    return {
+      badge,
+      title: plan.name || 'Subscription Plan',
+      price,
+      period,
+      tagline: plan.description || '',
+      highlights: features,
+      ...theme,
+    };
+  });
 
   const handlePlanSelection = (planTitle) => {
     if (typeof window !== 'undefined') {
@@ -913,67 +957,93 @@ function SubscriptionPlansSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 items-stretch max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              className={`group bg-white border rounded-[36px] overflow-hidden flex flex-col justify-between transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl ${plan.color} ${plan.glowColor}`}
-            >
-              {/* Card Header Banner */}
-              <div className={`bg-gradient-to-br ${plan.headerBg} p-8 text-white relative overflow-hidden`}>
-                {/* Decorative background shape */}
-                <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                
-                <span className="text-[10px] font-black tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                  {plan.badge}
-                </span>
-                <h3 className="text-2xl font-black mt-4 mb-2">{plan.title}</h3>
-                <p className="text-white/80 text-xs font-medium leading-relaxed">{plan.tagline}</p>
-              </div>
+        <div className={`grid grid-cols-1 gap-6 lg:gap-8 items-stretch mx-auto ${
+          plans.length === 1 ? 'max-w-sm md:grid-cols-1' :
+          plans.length === 2 ? 'max-w-3xl md:grid-cols-2' :
+          plans.length >= 4 ? 'max-w-7xl md:grid-cols-2 xl:grid-cols-4' :
+          'max-w-5xl md:grid-cols-3'
+        }`}>
+          {plansLoading ? (
+            [1, 2, 3].map(i => <PlanSkeleton key={i} />)
+          ) : plans.length === 0 ? (
+            <div className="col-span-3 text-center py-20 text-slate-400 font-semibold">
+              No subscription plans available at the moment.
+            </div>
+          ) : (
+            plans.map((plan, index) => (
+              <div
+                key={index}
+                className={`group bg-white rounded-3xl overflow-hidden flex flex-col border transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${plan.color} ${plan.glowColor}`}
+              >
+                {/* ── Card Header ── */}
+                <div className={`bg-gradient-to-br ${plan.headerBg} px-6 pt-6 pb-8 text-white relative overflow-hidden`}>
+                  {/* Decorative glow orbs */}
+                  <div className="absolute -right-8 -top-8 w-28 h-28 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute -left-6 -bottom-6 w-20 h-20 bg-white/5 rounded-full blur-xl pointer-events-none" />
 
-              {/* Card Body */}
-              <div className="p-8 flex-1 flex flex-col justify-between">
-                <div>
-                  {/* Pricing block */}
-                  <div className="mb-8">
-                    <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-1">
+                  {/* Badge pill */}
+                  <span className="relative z-10 inline-block text-[9px] font-black tracking-widest uppercase bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mb-4">
+                    {plan.badge}
+                  </span>
+
+                  {/* Plan Name — no description here */}
+                  <h3 className="relative z-10 text-xl font-black text-white leading-snug">
+                    {plan.title}
+                  </h3>
+                </div>
+
+                {/* ── Card Body ── */}
+                <div className="px-6 pt-5 pb-6 flex-1 flex flex-col gap-4">
+
+                  {/* Tagline chip — short, 2-line max */}
+                  {plan.tagline ? (
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2 border-l-2 border-[#037166]/40 pl-3">
+                      {plan.tagline}
+                    </p>
+                  ) : null}
+
+                  {/* Pricing */}
+                  <div className="pt-1">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">
                       Subscription Fee
                     </span>
-                    <div className="flex items-baseline">
-                      <span className="text-4xl font-black text-gray-900">{plan.price}</span>
-                      <span className="text-gray-500 font-bold ml-1 text-sm">/ {plan.period}</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-slate-900">{plan.price}</span>
+                      <span className="text-slate-400 font-bold text-xs">/ {plan.period}</span>
                     </div>
                   </div>
 
-                  <div className="w-full h-px bg-slate-100 mb-6" />
+                  <div className="w-full h-px bg-slate-100" />
 
-                  {/* Highlights */}
-                  <ul className="space-y-4 mb-8">
-                    {plan.highlights.map((highlight, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 mt-0.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        </div>
-                        <span className="text-xs sm:text-sm text-slate-600 font-semibold leading-snug">
-                          {highlight}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Features */}
+                  {plan.highlights.length > 0 && (
+                    <ul className="space-y-2.5 flex-1">
+                      {plan.highlights.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5">
+                          <div className="w-4 h-4 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 mt-0.5">
+                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                          </div>
+                          <span className="text-xs text-slate-600 font-medium leading-snug">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* CTA Button */}
+                  <button
+                    type="button"
+                    onClick={() => handlePlanSelection(plan.title)}
+                    className={`mt-2 w-full py-3 rounded-2xl text-sm font-bold transition-all text-center tracking-wide ${plan.buttonStyle}`}
+                  >
+                    Get Started →
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => handlePlanSelection(plan.title)}
-                  className={`w-full py-4 rounded-2xl text-sm font-bold transition-all text-center tracking-wider active:scale-98 ${plan.buttonStyle}`}
-                >
-                  Get Started Now
-                </button>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </section>
   );
 }
+

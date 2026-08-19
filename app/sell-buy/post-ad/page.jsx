@@ -416,7 +416,7 @@ export default function PostAdPage() {
                         {subcats.length} subcategories available
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 sm:gap-4 pt-1">
                       {subcats.map((sub) => {
                         const subId = String(sub.id || sub._id || '');
                         const isSubSelected = formData.subcategoryId === subId;
@@ -431,19 +431,52 @@ export default function PostAdPage() {
                                 subcategoryName: sub.name,
                               }));
                             }}
-                            className={`text-xs px-4 py-2.5 rounded-xl border font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                              isSubSelected
-                                ? 'bg-[#037166] text-white border-[#037166] shadow-md ring-2 ring-[#037166]/20'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'
-                            }`}
+                            className="flex flex-col items-center gap-2 group transition-all cursor-pointer text-center focus:outline-none"
                           >
-                            <SubcategoryIcon
-                              icon={sub.icon}
-                              name={sub.name}
-                              className={`w-4 h-4 flex-shrink-0 ${isSubSelected ? 'text-white' : 'text-[#037166]'}`}
-                            />
-                            <span>{sub.name}</span>
-                            {isSubSelected && <CheckCircle2 className="w-4 h-4 text-emerald-200 ml-1" />}
+                            {/* Round Circle Icon Container */}
+                            <div
+                              className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                isSubSelected
+                                  ? 'bg-gradient-to-br from-[#037166] to-[#04a99d] text-white ring-4 ring-[#037166]/20 shadow-lg scale-105'
+                                  : 'bg-slate-50 hover:bg-slate-100 border border-slate-200/90 text-slate-600 hover:border-[#037166]/40 hover:text-[#037166] shadow-xs'
+                              }`}
+                            >
+                              {sub.image ? (
+                                <img
+                                  src={getImageUrl(sub.image)}
+                                  alt={sub.name}
+                                  className={`w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full transition-transform ${
+                                    isSubSelected ? 'brightness-110' : 'group-hover:scale-110'
+                                  }`}
+                                />
+                              ) : (
+                                <SubcategoryIcon
+                                  icon={sub.icon}
+                                  name={sub.name}
+                                  className={`w-6 h-6 sm:w-7 sm:h-7 transition-transform ${
+                                    isSubSelected ? 'text-white scale-110' : 'text-[#037166] group-hover:scale-110'
+                                  }`}
+                                />
+                              )}
+
+                              {/* Selection Checkmark Badge */}
+                              {isSubSelected && (
+                                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md ring-2 ring-white">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Title Label underneath */}
+                            <span
+                              className={`text-[11px] sm:text-xs leading-tight line-clamp-2 max-w-[85px] sm:max-w-[95px] transition-colors ${
+                                isSubSelected
+                                  ? 'text-[#037166] font-extrabold'
+                                  : 'text-slate-700 font-medium group-hover:text-[#037166]'
+                              }`}
+                            >
+                              {sub.name}
+                            </span>
                           </button>
                         );
                       })}

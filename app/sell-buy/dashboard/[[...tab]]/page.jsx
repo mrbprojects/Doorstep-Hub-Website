@@ -13,6 +13,7 @@ import {
   getImageUrl,
   submitSellerVerification,
   fetchSellerVerificationStatus,
+  updateSellBuyListing,
 } from '@/lib/sellBuyApi';
 import {
   Tag,
@@ -38,6 +39,9 @@ import {
   Check,
   Trash2,
   Image as ImageIcon,
+  Star,
+  Sparkles,
+  ThumbsUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -206,8 +210,110 @@ export default function MarketplaceDashboardPage() {
     loadUserListings();
   }, [isAuthenticated, currentUserId]);
 
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
+  const [soldModalOpen, setSoldModalOpen] = useState(false);
+  const [selectedSoldItem, setSelectedSoldItem] = useState(null);
+  const [soldRating, setSoldRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [soldPlatform, setSoldPlatform] = useState('doorstephub');
+  const [soldComment, setSoldComment] = useState('');
+  const [isSubmittingSold, setIsSubmittingSold] = useState(false);
+
+  const handleOpenSoldModal = (item) => {
+    setSelectedSoldItem(item);
+    setSoldRating(5); // Default to 5 stars
+    setHoverRating(0);
+    setSoldPlatform('doorstephub');
+    setSoldComment('');
+    setSoldModalOpen(true);
+  };
+
+  const handleConfirmSoldModal = async (e) => {
+    if (e) e.preventDefault();
+    if (!selectedSoldItem) return;
+
+    if (soldRating < 4) {
+      toast.error('Minimum 4-star rating is required to complete feedback submission.');
+      return;
+    }
+
+    const listingId = selectedSoldItem._id || selectedSoldItem.id;
+    try {
+      setIsSubmittingSold(true);
+      const res = await updateSellBuyListing(
+        listingId,
+        {
+          status: 'SOLD_OUT',
+          sellerRating: soldRating,
+          soldPlatform,
+          soldFeedback: soldComment,
+          userId: currentUserId,
+        },
+        authToken
+      );
+
+      if (res.success || res.error === false || res.data) {
+        setUserListings((prev) =>
+          prev.map((l) =>
+            (l._id || l.id) === listingId ? { ...l, status: 'SOLD_OUT' } : l
+          )
+        );
+        toast.success('🎉 Congratulations on your sale! Ad marked as Sold Out and feedback saved.');
+        setSoldModalOpen(false);
+        setSelectedSoldItem(null);
+      } else {
+        toast.error(res.message || 'Failed to update ad status');
+      }
+    } catch (err) {
+      console.error('Error marking ad as sold:', err);
+      toast.error('Failed to update listing status');
+    } finally {
+      setIsSubmittingSold(false);
+    }
+  };
+
+  const handleToggleListingStatus = async (item, newStatus) => {
+    const listingId = item._id || item.id;
+    if (!listingId) return;
+
+    if (newStatus === 'SOLD_OUT') {
+      handleOpenSoldModal(item);
+      return;
+    }
+
+    try {
+      setUpdatingStatusId(listingId);
+      const res = await updateSellBuyListing(
+        listingId,
+        { status: newStatus, userId: currentUserId },
+        authToken
+      );
+
+      if (res.success || res.error === false || res.data) {
+        setUserListings((prev) =>
+          prev.map((l) =>
+            (l._id || l.id) === listingId ? { ...l, status: newStatus } : l
+          )
+        );
+        if (newStatus === 'ACTIVE') {
+          toast.success('Ad activated! It is now live on DoorstepHub marketplace.');
+        } else {
+          toast.success(`Status updated to ${newStatus}`);
+        }
+      } else {
+        toast.error(res.message || 'Failed to update ad status');
+      }
+    } catch (err) {
+      console.error('Error updating listing status:', err);
+      toast.error('Failed to update listing status');
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
   // Analytics Stats calculated strictly from real user listings & state (NO hardcoded fallbacks!)
   const activeAdsCount = userListings.filter((item) => (item.status || 'ACTIVE').toUpperCase() === 'ACTIVE').length;
+  const soldAdsCount = userListings.filter((item) => (item.status || '').toUpperCase() === 'SOLD_OUT' || (item.status || '').toUpperCase() === 'SOLD').length;
   const pendingAdsCount = userListings.filter((item) => (item.status || '').toUpperCase() === 'PENDING_REVIEW').length;
   const totalViews = userListings.reduce((acc, item) => acc + Number(item.viewsCount || item.views || 0), 0);
 
@@ -411,10 +517,10 @@ export default function MarketplaceDashboardPage() {
 
   const STATS = [
     { label: 'Active Ads', count: activeAdsCount, icon: Tag, color: 'bg-[#037166]/10 text-[#037166]' },
+    { label: 'Sold Out', count: soldAdsCount, icon: CheckCircle, color: 'bg-orange-50 text-orange-600' },
     { label: 'Pending Review', count: pendingAdsCount, icon: Clock, color: 'bg-amber-50 text-amber-600' },
     { label: 'Total Views', count: totalViews, icon: Eye, color: 'bg-blue-50 text-blue-600' },
     { label: 'Saved Favorites', count: savedFavorites.length, icon: Heart, color: 'bg-rose-50 text-rose-600' },
-    { label: 'Unread Messages', count: unreadChatsCount, icon: MessageSquare, color: 'bg-purple-50 text-purple-600' },
     {
       label: 'KYC Verification',
       status: kycStatusLabel,
@@ -613,22 +719,47 @@ export default function MarketplaceDashboardPage() {
                 ) : userListings.length > 0 ? (
                   <div className="divide-y divide-slate-100">
                     {userListings.map((item) => {
-                      const isPending = (item.status || '').toUpperCase() === 'PENDING_REVIEW';
+                      const rawStatus = (item.status || 'ACTIVE').toUpperCase();
+                      const isPending = rawStatus === 'PENDING_REVIEW' || rawStatus === 'UNDER_REVIEW';
+                      const isSold = rawStatus === 'SOLD_OUT' || rawStatus === 'SOLD';
+                      const isActive = rawStatus === 'ACTIVE';
+                      const itemId = item._id || item.id || item.slug;
+                      const isBusy = updatingStatusId === (item._id || item.id);
+
                       return (
-                        <div key={item._id || item.id || item.slug} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div key={itemId} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 last:border-0">
                           <div className="flex items-center gap-4">
-                            <img
-                              src={getImageUrl(item.images?.[0] || item.coverImage || item.image)}
-                              alt={item.title || item.name}
-                              className="w-16 h-16 object-cover rounded-lg border border-slate-200 shrink-0"
-                            />
+                            <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shrink-0">
+                              <img
+                                src={getImageUrl(item.images?.[0] || item.coverImage || item.image)}
+                                alt={item.title || item.name}
+                                className={`w-full h-full object-cover ${isSold ? 'grayscale opacity-70' : ''}`}
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                                }}
+                              />
+                              {isSold && (
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                  <span className="text-[9px] font-black text-white uppercase tracking-wider bg-red-600 px-1.5 py-0.5 rounded shadow">
+                                    SOLD
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                             <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <h4 className="font-bold text-sm text-slate-900">{item.title || item.name}</h4>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="font-bold text-sm text-slate-900 line-clamp-1">{item.title || item.name}</h4>
                                 <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
-                                  isPending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-[#037166]'
+                                  isPending
+                                    ? 'bg-amber-100 text-amber-700'
+                                    : isSold
+                                    ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                                    : isActive
+                                    ? 'bg-emerald-100 text-[#037166]'
+                                    : 'bg-slate-100 text-slate-600'
                                 }`}>
-                                  {isPending ? 'Under Review' : 'Active'}
+                                  {isPending ? 'Under Review' : isSold ? 'Sold Out' : isActive ? 'Active' : 'Inactive'}
                                 </span>
                               </div>
                               <p className="text-xs text-slate-500">
@@ -637,10 +768,38 @@ export default function MarketplaceDashboardPage() {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {/* Mark as Sold button (OLX Style) */}
+                            {isActive && (
+                              <button
+                                type="button"
+                                disabled={isBusy}
+                                onClick={() => handleToggleListingStatus(item, 'SOLD_OUT')}
+                                title="Mark as Sold Out (Hides from public search)"
+                                className="text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 px-3 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer"
+                              >
+                                {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5 text-orange-600" />}
+                                <span>Mark as Sold</span>
+                              </button>
+                            )}
+
+                            {/* Mark as Active button (OLX Style) */}
+                            {isSold && (
+                              <button
+                                type="button"
+                                disabled={isBusy}
+                                onClick={() => handleToggleListingStatus(item, 'ACTIVE')}
+                                title="Mark as Active (Makes live on marketplace)"
+                                className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer"
+                              >
+                                {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />}
+                                <span>Mark as Active</span>
+                              </button>
+                            )}
+
                             <Link
                               href={`/sell-buy/ad/${item.slug}`}
-                              className="text-xs font-bold text-[#037166] hover:bg-[#037166]/10 px-3 py-2 rounded-md transition-colors inline-flex items-center gap-1"
+                              className="text-xs font-bold text-[#037166] hover:bg-[#037166]/10 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 border border-slate-200"
                             >
                               View Ad <ExternalLink className="w-3.5 h-3.5" />
                             </Link>
@@ -904,6 +1063,174 @@ export default function MarketplaceDashboardPage() {
                 >
                   {submittingKyc ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                   <span>Submit Verification to Admin</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MARK AS SOLD QUESTIONNAIRE & RATING MODAL ── */}
+      {soldModalOpen && selectedSoldItem && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+          <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl">
+
+            {/* ─── Top accent bar + illustration ─── */}
+            <div className="relative bg-gradient-to-br from-[#037166] via-emerald-600 to-teal-500 px-6 pt-8 pb-14 text-white text-center overflow-hidden">
+              {/* decorative circles */}
+              <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10" />
+              <div className="absolute -bottom-10 -left-8 w-40 h-40 rounded-full bg-white/10" />
+
+              <button
+                type="button"
+                onClick={() => setSoldModalOpen(false)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white/80 hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Trophy icon */}
+              <div className="mx-auto mb-3 w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center shadow-lg shadow-black/10">
+                <span className="text-3xl">🏆</span>
+              </div>
+              <h2 className="text-lg font-black tracking-tight">Congratulations!</h2>
+              <p className="text-sm text-white/80 mt-1">Tell us about your sale</p>
+            </div>
+
+            {/* ─── Item pill — overlapping the header ─── */}
+            <div className="-mt-7 mx-5 relative z-10 bg-white border border-slate-200 rounded-2xl shadow-lg p-3 flex items-center gap-3">
+              <img
+                src={getImageUrl(selectedSoldItem.images?.[0] || selectedSoldItem.coverImage || selectedSoldItem.image)}
+                alt={selectedSoldItem.title || selectedSoldItem.name}
+                className="w-12 h-12 object-cover rounded-xl border border-slate-100 shrink-0"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-extrabold text-slate-900 truncate">{selectedSoldItem.title || selectedSoldItem.name}</p>
+                <p className="text-xs text-[#037166] font-bold">₹{Number(selectedSoldItem.price || 0).toLocaleString()}</p>
+              </div>
+              <span className="shrink-0 text-[10px] font-black uppercase tracking-widest bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full border border-orange-200">
+                Sold
+              </span>
+            </div>
+
+            {/* ─── Form body ─── */}
+            <form onSubmit={handleConfirmSoldModal} className="px-5 pt-5 pb-6 space-y-6">
+
+              {/* STAR RATING */}
+              <div className="text-center space-y-3">
+                <div>
+                  <p className="text-sm font-extrabold text-slate-900">How was your experience?</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Tap a star to rate <span className="text-rose-500 font-bold">(min. 4 stars)</span></p>
+                </div>
+
+                {/* Stars row */}
+                <div className="flex items-center justify-center gap-1.5">
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const active = (hoverRating || soldRating) >= star;
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setSoldRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="transition-transform hover:scale-110 active:scale-95 cursor-pointer p-0.5"
+                      >
+                        <Star
+                          className={`w-10 h-10 transition-all duration-150 ${
+                            active
+                              ? 'text-amber-400 fill-amber-400 drop-shadow-[0_2px_6px_rgba(251,191,36,0.6)]'
+                              : 'text-slate-200 fill-slate-200'
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Rating label */}
+                <div className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
+                  soldRating < 4
+                    ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                    : soldRating === 5
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                    : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                }`}>
+                  {soldRating < 4 ? (
+                    <><AlertCircle className="w-3.5 h-3.5" /> Minimum 4 stars required</>
+                  ) : soldRating === 5 ? (
+                    <>⭐ Excellent! We love that!</>
+                  ) : (
+                    <><Check className="w-3.5 h-3.5" /> Great experience!</>
+                  )}
+                </div>
+              </div>
+
+              {/* DIVIDER */}
+              <div className="border-t border-slate-100" />
+
+              {/* WHERE DID YOU SELL */}
+              <div className="space-y-2.5">
+                <p className="text-xs font-extrabold text-slate-800">Where did you find the buyer?</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'doorstephub', icon: '🏪', label: 'DoorstepHub' },
+                    { id: 'whatsapp',    icon: '💬', label: 'WhatsApp' },
+                    { id: 'offline',     icon: '🤝', label: 'Offline' },
+                  ].map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSoldPlatform(p.id)}
+                      className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+                        soldPlatform === p.id
+                          ? 'border-[#037166] bg-[#037166]/5 text-[#037166]'
+                          : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xl">{p.icon}</span>
+                      <span className="text-[10px] font-extrabold leading-tight">{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* FEEDBACK */}
+              <div className="space-y-2">
+                <p className="text-xs font-extrabold text-slate-800">Any feedback? <span className="font-normal text-slate-400">(Optional)</span></p>
+                <textarea
+                  rows={2}
+                  value={soldComment}
+                  onChange={(e) => setSoldComment(e.target.value)}
+                  placeholder="How did DoorstepHub help you sell faster?"
+                  className="w-full text-xs p-3.5 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#037166]/30 focus:border-[#037166]/50 bg-slate-50 focus:bg-white resize-none placeholder:text-slate-400 transition-all"
+                />
+              </div>
+
+              {/* CTA BUTTONS */}
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setSoldModalOpen(false)}
+                  className="flex-1 py-3 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={soldRating < 4 || isSubmittingSold}
+                  className="flex-2 min-w-0 flex-[2] flex items-center justify-center gap-2 py-3 px-5 text-xs font-extrabold text-white bg-gradient-to-r from-[#037166] to-emerald-500 hover:from-[#025951] hover:to-emerald-600 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]"
+                >
+                  {isSubmittingSold ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  Confirm Sale
                 </button>
               </div>
             </form>

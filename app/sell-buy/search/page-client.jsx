@@ -5,19 +5,25 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
-import { ListingCard } from '@/components/sell-buy/cards/ListingCard';
+import { ListingCard, ListingGridSkeleton } from '@/components/sell-buy/cards/ListingCard';
 import { fetchSellBuyListings } from '@/lib/sellBuyApi';
-import { Search, ChevronRight, Filter } from 'lucide-react';
+import { Search, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
-  const query = searchParams?.get('query') || searchParams?.get('search') || '';
+  const query = searchParams.get('q') || '';
 
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadSearch() {
+      if (!query) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
         const res = await fetchSellBuyListings({ search: query });
@@ -25,7 +31,7 @@ function SearchResultsContent() {
           setListings(res.listings);
         }
       } catch (err) {
-        console.error('Error fetching search listings:', err);
+        console.error('Error searching listings:', err);
       } finally {
         setIsLoading(false);
       }
@@ -51,15 +57,17 @@ function SearchResultsContent() {
             <span>Search Results for &ldquo;{query}&rdquo;</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Found {listings.length} item{listings.length === 1 ? '' : 's'} matching your search
+            {isLoading ? (
+              <span className="inline-block w-32 h-4 bg-slate-200 animate-pulse rounded" />
+            ) : (
+              `Found ${listings.length} item${listings.length === 1 ? '' : 's'} matching your search`
+            )}
           </p>
         </div>
 
         {/* Listings Grid */}
         {isLoading ? (
-          <div className="text-center py-20 text-slate-500 font-semibold">
-            Loading search results...
-          </div>
+          <ListingGridSkeleton count={8} />
         ) : listings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {listings.map((item) => (

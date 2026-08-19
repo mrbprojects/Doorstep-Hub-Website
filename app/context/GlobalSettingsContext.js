@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/config/env';
 
 // ─── Default fee fallbacks (used until the backend adds these fields to policy) ───
 // Backend field names to watch for: onlineBookingFee, doorstepInspectionFee
@@ -17,7 +18,7 @@ export function GlobalSettingsProvider({ children }) {
         const fetchSettings = async () => {
             try {
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`
+                    `${API_BASE_URL}/app/get_global_settings`
                 );
                 const data = await res.json();
                 if (data.success && data.policy) {

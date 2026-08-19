@@ -51,6 +51,8 @@ export function ListingCard({ listing }) {
     : 'Contact for Price';
   const timeAgo = formatTimeAgo(createdAt || created_at);
   const featured = isFeatured || is_feature;
+  const rawStatus = (listing.status || '').toUpperCase();
+  const isSold = rawStatus === 'SOLD_OUT' || rawStatus === 'SOLD';
 
   const handleToggleFavorite = async (e) => {
     e.preventDefault();
@@ -166,8 +168,17 @@ export function ListingCard({ listing }) {
           <Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : ''} ${loading ? 'animate-pulse' : ''}`} />
         </button>
 
+        {/* Sold Out Overlay (OLX Style) */}
+        {isSold && (
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px] flex items-center justify-center z-20 pointer-events-none">
+            <span className="bg-red-600 text-white font-black text-xs px-2.5 py-1 rounded shadow-lg uppercase tracking-wider">
+              SOLD OUT
+            </span>
+          </div>
+        )}
+
         {/* Time overlay bottom-right */}
-        {timeAgo && (
+        {timeAgo && !isSold && (
           <div className="absolute bottom-2 right-2 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded">
             {timeAgo}
           </div>
@@ -195,3 +206,6 @@ export function ListingCard({ listing }) {
     </Link>
   );
 }
+
+export { ListingCardSkeleton, ListingGridSkeleton } from './ListingCardSkeleton';
+

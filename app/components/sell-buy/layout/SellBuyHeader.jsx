@@ -186,36 +186,32 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm font-sans">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4 py-3">
+        <div className="flex items-center gap-3 sm:gap-4 py-2.5 sm:py-3">
           {/* Dynamic DoorstepHub Logo from System Settings */}
-          <Link href="/sell-buy" className="flex-shrink-0 flex items-center gap-3">
-            <div className="relative w-36 sm:w-44 h-10">
-              <Image
-                src={logoUrl}
-                alt="DoorstepHub Logo"
-                fill
-                className="object-contain object-left"
-                priority
-                unoptimized
-              />
-            </div>
+          <Link href="/" className="flex-shrink-0 flex items-center">
+            <img
+              src={logoUrl}
+              alt="DoorstepHub Logo"
+              className="h-11 sm:h-13 md:h-14 w-auto max-w-[180px] object-contain object-left block"
+              loading="eager"
+            />
           </Link>
 
           {/* Search Form & Dynamic Live Search Popover Container */}
-          <div className="relative flex-1 max-w-2xl">
-            <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-[#037166]">
+          <div className="relative flex-1 max-w-lg ml-5 lg:max-w-3xl">
+            <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-[#037166] shadow-sm">
               <select
                 value={selectedCat}
                 onChange={(e) => setSelectedCat(e.target.value)}
-                className="bg-gray-50 text-sm font-medium text-gray-700 px-3 py-2.5 border-r border-gray-300 focus:outline-none cursor-pointer"
+                className="bg-gray-50 text-sm font-semibold text-gray-700 px-3 py-2.5 border-r border-gray-300 focus:outline-none cursor-pointer"
               >
                 <option value="">All Categories</option>
                 {displayCategories.map((c) => (
                   <option key={c._id || c.id || c.slug} value={c.slug}>{c.name}</option>
                 ))}
               </select>
-              <div className="flex-1 flex items-center gap-2 px-3">
-                <Search className="w-4 h-4 text-gray-400 shrink-0" />
+              <div className="flex-1 flex items-center gap-3.5 px-3.5">
+                <Search className="w-5 h-5 text-gray-400 shrink-0" />
                 <input
                   type="text"
                   placeholder="Search for cars, mobiles, property, electronics..."
@@ -230,12 +226,12 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
                     onClick={() => { setSearchQuery(''); setSearchPopoverOpen(false); }}
                     className="text-gray-400 hover:text-gray-600 p-1"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
-              <button type="submit" className="bg-[#037166] hover:bg-[#025850] text-white px-5 py-2.5 transition-colors font-bold text-sm">
-                <Search className="w-5 h-5" />
+              <button type="submit" className="bg-[#037166] hover:bg-[#025850] text-white px-5 py-2.5 transition-colors font-bold text-sm flex items-center justify-center">
+                <Search className="w-5 h-5 stroke-[2.5]" />
               </button>
             </form>
 
@@ -345,11 +341,11 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
               <button
                 type="button"
                 onClick={() => setLocationMenuOpen(!locationMenuOpen)}
-                className="hidden md:flex items-center gap-2 bg-slate-50 hover:bg-[#037166]/10 border border-slate-200 hover:border-[#037166] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 transition-all cursor-pointer shadow-xs group"
+                className="hidden md:flex items-center gap-2 bg-slate-50 hover:bg-[#037166]/10 border border-slate-200 hover:border-[#037166] rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 transition-all cursor-pointer shadow-xs group"
               >
-                <MapPin className="w-4 h-4 text-[#037166] shrink-0" />
-                <span className="truncate max-w-[110px]">{userLocation || 'Add Location'}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#037166] transition-transform" />
+                <MapPin className="w-[18px] h-[18px] text-[#037166] shrink-0" />
+                <span className="truncate max-w-[120px]">{userLocation || 'Add Location'}</span>
+                <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-[#037166] transition-transform" />
               </button>
 
               {locationMenuOpen && (
@@ -447,7 +443,7 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
               className="bg-[#037166] hover:bg-[#025850] text-white font-bold text-sm px-4 py-2.5 rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap shadow-sm"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>+ Post a Ad</span>
+              <span>Post a Ad</span>
             </button>
 
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-1.5">

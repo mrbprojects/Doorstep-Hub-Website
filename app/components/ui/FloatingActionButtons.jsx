@@ -27,7 +27,8 @@ export function FloatingActionButtons() {
         '/religious-services',
         '/religious',
         '/services',
-        '/professional-services'
+        '/professional-services',
+        '/sell-buy'
     ];
 
     // Check if the current path should hide the floating buttons

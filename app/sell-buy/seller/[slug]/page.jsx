@@ -5,7 +5,9 @@ import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
 // Helper to fetch seller profile server-side for metadata
 async function getSellerProfile(slug) {
   try {
-    const res = await fetch(`${API_BASE_URL}/sell-buy/seller/${slug}`, { next: { revalidate: 60 } });
+    const idMatch = String(slug).match(/([0-9a-fA-F]{24})$/);
+    const queryId = idMatch ? idMatch[1] : slug;
+    const res = await fetch(`${API_BASE_URL}/sell-buy/sellers/${queryId}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.success ? json.data : null;

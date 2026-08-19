@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
-import { ListingCard } from '@/components/sell-buy/cards/ListingCard';
+import { ListingCard, ListingGridSkeleton } from '@/components/sell-buy/cards/ListingCard';
 import { fetchSellBuyListings } from '@/lib/sellBuyApi';
 import { Grid, ChevronRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
@@ -51,15 +51,17 @@ export default function CategoryClient({ slug }) {
             <span>{categoryName}</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Found {listings.length} item{listings.length === 1 ? '' : 's'} in this category
+            {isLoading ? (
+              <span className="inline-block w-32 h-4 bg-slate-200 animate-pulse rounded" />
+            ) : (
+              `Found ${listings.length} item${listings.length === 1 ? '' : 's'} in this category`
+            )}
           </p>
         </div>
 
         {/* Listings Grid */}
         {isLoading ? (
-          <div className="text-center py-20 text-slate-500 font-semibold">
-            Loading {categoryName} items...
-          </div>
+          <ListingGridSkeleton count={8} />
         ) : listings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {listings.map((item) => (

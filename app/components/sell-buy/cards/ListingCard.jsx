@@ -133,6 +133,10 @@ export function ListingCard({ listing }) {
             src={getImageUrl(displayImage)}
             alt={displayTitle}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">

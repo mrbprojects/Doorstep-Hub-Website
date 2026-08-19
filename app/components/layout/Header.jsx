@@ -200,8 +200,6 @@ export function Header({ theme = {}, navItems = [] }) {
     const href = String(item?.href || '');
     const name = String(item?.name || '');
     return (
-      href.includes('/sell-buy') ||
-      name === 'Sell & Buy' ||
       href.includes('/spa-salon') ||
       href.includes(`/${serviceSlugs.spa}`) ||
       href.includes('/pghostels') ||

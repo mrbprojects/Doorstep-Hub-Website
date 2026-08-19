@@ -241,7 +241,21 @@ export default function PostAdPage() {
     setSubmitting(true);
 
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : '';
+      const userStr = typeof window !== 'undefined' ? (localStorage.getItem('user_details') || localStorage.getItem('user')) : '';
+      let userId = '';
+      let userEmail = '';
+      if (userStr) {
+        try {
+          const parsedUser = JSON.parse(userStr);
+          userId = parsedUser?._id || parsedUser?.id || '';
+          userEmail = parsedUser?.email || '';
+        } catch (e) {}
+      }
+
       const fd = new FormData();
+      if (userId) fd.append('user_id', userId);
+      if (userEmail) fd.append('email', userEmail);
       fd.append('name', formData.title || 'Untitled Item');
       fd.append('description', formData.description || '');
       fd.append('category_id', formData.categoryId || '');
@@ -261,29 +275,33 @@ export default function PostAdPage() {
         fd.append('gallery_images', file);
       });
 
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/sell-buy/add-item`, {
         method: 'POST',
+        headers,
         body: fd,
       });
 
       const data = await res.json();
       if (res.status === 403 || data?.kycStatus) {
         const kycStatus = data?.kycStatus || 'NOT_SUBMITTED';
-        const msg =
-          kycStatus === 'SUBMITTED' || kycStatus === 'UNDER_REVIEW'
-            ? 'Your KYC is still under Admin review. You can post ads once Admin approves your verification.'
-            : 'Seller Verification Required! Submit your KYC documents and wait for Admin approval before posting ads.';
-        toast.error(msg, { duration: 5000 });
-        router.push('/sell-buy/dashboard?kyc=open');
+        if (kycStatus === 'SUBMITTED' || kycStatus === 'UNDER_REVIEW') {
+          toast.info('Your account is under review. Once approved, we will let you know via email.', { duration: 6000 });
+          router.push('/sell-buy/dashboard');
+        } else {
+          toast.error('Seller Verification Required! Please submit your KYC documents to post ads.', { duration: 5000 });
+          router.push('/sell-buy/dashboard?kyc=open');
+        }
         return;
       }
 
-      if ((data.error === false || data.success) && data.data?.slug) {
-        toast.success('Ad submitted successfully! It will go live once reviewed.');
-        router.push(`/sell-buy/ad/${data.data.slug}`);
+      if ((data.error === false || data.success)) {
+        toast.success('Ad submitted for review! We will notify you once it goes live.');
+        router.push('/sell-buy');
       } else {
         toast.error(data.message || 'Failed to post advertisement');
-        router.push('/sell-buy');
       }
     } catch (err) {
       toast.error('An error occurred while posting your ad.');

@@ -17,6 +17,7 @@ import {
   getImageUrl,
 } from '@/lib/sellBuyApi';
 import { ChevronLeft, ChevronRight, MapPin, Search, Plus, Globe, Menu, ShoppingBag, Sparkles, Tag, ShieldCheck, Grid, Loader2, SearchX, X, ArrowRight, Navigation, ChevronDown, Check } from 'lucide-react';
+import { toast } from 'sonner';
 
 // ─── DUAL PROMOTIONAL BANNER SECTION (MATCHING CHOTA BETA REFERENCE) ──────────
 function DualBannerSection({ sliders, onPostAdClick }) {

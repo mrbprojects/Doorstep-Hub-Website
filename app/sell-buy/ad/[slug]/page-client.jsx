@@ -213,6 +213,10 @@ export default function AdDetailPage() {
                   src={getImageUrl(listing.images?.[activeImageIndex])}
                   alt={listing.title}
                   className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                  }}
                 />
               </div>
 
@@ -227,7 +231,15 @@ export default function AdDetailPage() {
                         activeImageIndex === idx ? 'border-white ring-2 ring-white/30' : 'border-transparent opacity-50 hover:opacity-100'
                       }`}
                     >
-                      <img src={getImageUrl(img)} alt={`Thumbnail ${idx+1}`} className="w-full h-full object-cover" />
+                      <img
+                        src={getImageUrl(img)}
+                        alt={`Thumbnail ${idx+1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                        }}
+                      />
                     </button>
                   ))}
                 </div>

@@ -335,23 +335,29 @@ export function PostAdModal({ isOpen, onClose }) {
       // ── KYC BLOCK RESPONSE ──────────────────────────────────────────────────
       if (res.status === 403 || data?.kycStatus) {
         const kycStatus = data?.kycStatus || 'NOT_SUBMITTED';
-        const msg =
-          kycStatus === 'SUBMITTED' || kycStatus === 'UNDER_REVIEW'
-            ? 'Your KYC is still under Admin review. You can post ads once Admin approves your verification.'
-            : 'Seller Verification Required! Submit your KYC documents and wait for Admin approval before posting ads.';
-        toast.error(msg, { duration: 5000 });
         setSubmitting(false);
         onClose();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/sell-buy/dashboard?kyc=open';
+        if (kycStatus === 'SUBMITTED' || kycStatus === 'UNDER_REVIEW') {
+          toast.info('Your account is under review. Once approved, we will let you know via email.', { duration: 6000 });
+          if (typeof window !== 'undefined') {
+            window.location.href = '/sell-buy/dashboard';
+          }
+        } else {
+          toast.error('Seller Verification Required! Please submit your KYC documents to post ads.', { duration: 5000 });
+          if (typeof window !== 'undefined') {
+            window.location.href = '/sell-buy/dashboard?kyc=open';
+          }
         }
         return;
       }
       // ────────────────────────────────────────────────────────────────────────
 
       if (data.error === false || data.success) {
-        setSubmittedSuccess(true);
-        toast.success('Ad submitted successfully! It will go live once reviewed.');
+        toast.success('Ad submitted for review! We will notify you once it goes live.');
+        onClose();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/sell-buy';
+        }
       } else {
         toast.error(data.message || 'Failed to post advertisement');
       }

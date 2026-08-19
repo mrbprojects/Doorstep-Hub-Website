@@ -123,7 +123,32 @@ export default function MarketplaceDashboardPage() {
 
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams.get('kyc') === 'open') {
-        setIsKycModalOpen(true);
+        // Clean the ?kyc=open from URL immediately so refresh doesn't re-open it
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+
+        // Only open the KYC form if the user hasn't submitted yet
+        let cachedStatus = 'NOT_SUBMITTED';
+        const kycStr2 = localStorage.getItem('seller_kyc_data');
+        if (kycStr2) {
+          try {
+            const parsed2 = JSON.parse(kycStr2);
+            cachedStatus = parsed2?.status || 'NOT_SUBMITTED';
+          } catch (e) {}
+        }
+        if (cachedStatus === 'NOT_SUBMITTED' || cachedStatus === 'REJECTED') {
+          setIsKycModalOpen(true);
+        } else {
+          // Already submitted or approved — just show a toast
+          if (cachedStatus === 'SUBMITTED' || cachedStatus === 'UNDER_REVIEW') {
+            setTimeout(() => {
+              // toast is called after mount; dynamically importing to avoid SSR issues
+              import('sonner').then(({ toast }) => {
+                toast.info('Your account is under review. Once approved, we will let you know via email.', { duration: 6000 });
+              });
+            }, 500);
+          }
+        }
       }
     }
   }, [token, user]);

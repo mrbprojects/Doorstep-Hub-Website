@@ -7,6 +7,7 @@ import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
 import { ListingCard } from '@/components/sell-buy/cards/ListingCard';
 import { fetchSellBuyListings } from '@/lib/sellBuyApi';
 import { Grid, ChevronRight, Search } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function CategoryClient({ slug }) {
   const [listings, setListings] = useState([]);

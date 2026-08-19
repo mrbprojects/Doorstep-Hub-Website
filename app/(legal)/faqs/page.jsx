@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { HelpCircle, ChevronDown, MessageSquare, User, Briefcase } from 'lucide-react';
+import { API_BASE_URL } from '@/config/env';
 
 export default function FAQPage() {
     const [activeTab, setActiveTab] = useState('customer app');
@@ -16,7 +17,7 @@ export default function FAQPage() {
         const fetchFAQs = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/faqs?applicationType=${encodeURIComponent(activeTab)}`);
+                const response = await fetch(`${API_BASE_URL}/app/products/faqs?applicationType=${encodeURIComponent(activeTab)}`);
                 const data = await response.json();
                 if (data.success) {
                     setFaqs(data.data);
@@ -37,7 +38,7 @@ export default function FAQPage() {
     useEffect(() => {
         const fetchGlobalSettings = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
+                const response = await fetch(`${API_BASE_URL}/app/get_global_settings`);
                 const data = await response.json();
                 if (data.success && data.policy) {
                     setGlobalSettings(data.policy);

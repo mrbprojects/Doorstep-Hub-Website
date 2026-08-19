@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchSellBuyCategories, getImageUrl } from '@/lib/sellBuyApi';
+import { API_BASE_URL, GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_SCRIPT_URL } from '@/config/env';
 import {
   CheckCircle2,
   Upload,
@@ -122,7 +123,7 @@ export function PostAdModal({ isOpen, onClose }) {
         if (!existing) {
           const script = document.createElement('script');
           script.id = 'gmaps-script';
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
+          script.src = GOOGLE_MAPS_SCRIPT_URL;
           script.async = true;
           document.head.appendChild(script);
         }
@@ -213,7 +214,7 @@ export function PostAdModal({ isOpen, onClose }) {
       async (position) => {
         const { latitude, longitude } = position.coords;
         try {
-          const GMAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+          const GMAPS_KEY = GOOGLE_MAPS_API_KEY;
           const res = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GMAPS_KEY}&language=en`
           );
@@ -324,7 +325,7 @@ export function PostAdModal({ isOpen, onClose }) {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/sell-buy/add-item`, {
+      const res = await fetch(`${API_BASE_URL}/sell-buy/add-item`, {
         method: 'POST',
         headers,
         body: fd,

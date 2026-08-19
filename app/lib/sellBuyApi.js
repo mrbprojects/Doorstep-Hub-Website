@@ -1,15 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi';
-const IMAGE_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com';
+import { API_BASE_URL as API_BASE, IMAGE_BASE_URL as IMAGE_BASE, getImageUrl, GOOGLE_MAPS_API_KEY } from '@/config/env';
 
-export const getImageUrl = (path) => {
-  if (!path) return 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
-  if (path.startsWith('blob:') || path.startsWith('http://') || path.startsWith('https://')) {
-    return path.replace(/([^:]\/)\/+/g, '$1');
-  }
-  const cleanPath = path.replace(/^\/+/, '');
-  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
-  return `${base}/${cleanPath}`;
-};
+export { getImageUrl, API_BASE, IMAGE_BASE };
 
 /**
  * Normalize category response from either:
@@ -187,7 +178,7 @@ export const fetchSystemSettings = async () => {
         instagram_link: p.instagram,
         youtube_link: p.youtube,
         twitter_link: p.twitter,
-        place_api_key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyBNVn5j-M6F4VHkaOluoOcVY3K5r2-NlPk"
+        place_api_key: GOOGLE_MAPS_API_KEY || ''
       };
     }
     return {};

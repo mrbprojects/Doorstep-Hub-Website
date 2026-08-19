@@ -18,6 +18,7 @@ import {
   formatInr,
   initiateAmcPayment,
 } from '@/lib/amcApi';
+import { getImageUrl } from '@/config/env';
 
 const emptyForm = {
   name: '',
@@ -360,7 +361,7 @@ export default function AmcPlanDetailPage() {
               {/* Showcase Image */}
               <div className="w-full h-48 md:h-56 rounded-2xl overflow-hidden relative border border-[#cfe8e3] bg-white shadow-sm flex-shrink-0">
                 <img
-                  src={plan.image ? (plan.image.startsWith('http') ? plan.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com'}/${plan.image}`) : 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'}
+                  src={getImageUrl(plan.image)}
                   alt={plan.name}
                   className="w-full h-full object-contain"
                 />

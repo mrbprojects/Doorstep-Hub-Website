@@ -1,10 +1,10 @@
 import AdDetailClient from './page-client';
 import { getSEOMetadata } from '@/lib/seo';
+import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
 
 // Helper to fetch ad details server-side for metadata
 async function getListingDetails(slug) {
   try {
-    const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
     const res = await fetch(`${API_BASE_URL}/sell-buy/listings/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
@@ -27,15 +27,7 @@ export async function generateMetadata({ params }) {
   if (listing?.subcategoryId?.name) keywords += keywords ? `, ${listing.subcategoryId.name}` : `${listing.subcategoryId.name}`;
 
   let rawImageUrl = listing?.coverImage || (listing?.images && listing.images.length > 0 ? listing.images[0] : null);
-  const IMAGE_BASE = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com').replace(/\/+$/, '');
-  let fullImageUrl = null;
-  if (rawImageUrl) {
-    if (rawImageUrl.startsWith('http://') || rawImageUrl.startsWith('https://')) {
-      fullImageUrl = rawImageUrl;
-    } else {
-      fullImageUrl = `${IMAGE_BASE}/${rawImageUrl.replace(/^\//, '')}`;
-    }
-  }
+  let fullImageUrl = rawImageUrl ? getImageUrl(rawImageUrl) : null;
 
   const metadata = await getSEOMetadata(`/sell-buy/ad/${slug}`, {
     title,

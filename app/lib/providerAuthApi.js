@@ -1,4 +1,6 @@
-const BASE_URL = "https://devapis.doorstephub.com/v1/dhubApi/service-provider";
+import { API_BASE_URL } from '@/config/env';
+
+const BASE_URL = `${API_BASE_URL}/service-provider`;
 
 function headers(token, json = true) {
   const nextHeaders = {};

@@ -9,10 +9,14 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useLocationContext } from '@/context/LocationContext';
 import { useGlobalSettings } from '@/context/GlobalSettingsContext';
+import { API_BASE_URL } from '@/config/env';
 
 const footerLinks = {
 
   Quicklinks: [
+    { name: 'Sell & Buy Marketplace', href: '/sell-buy' },
+    { name: 'Browse Categories', href: '/sell-buy/categories' },
+    { name: 'Post Free Ad', href: '/sell-buy/post-ad' },
     { name: 'About Us', href: '/about-us' },
     { name: 'Contact Us', href: '/contact-us' },
     { name: 'Careers', href: '/careers' },
@@ -138,7 +142,7 @@ async function loadFooterCatalog(lat, lng) {
     let citiesList = [];
     try {
       const citiesResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cities/cities_list`,
+        `${API_BASE_URL}/app/cities/cities_list`,
         { method: 'GET', headers: { 'Content-Type': 'application/json' } }
       );
       const citiesData = await citiesResponse.json();
@@ -149,9 +153,24 @@ async function loadFooterCatalog(lat, lng) {
       /* ignore */
     }
 
+    let sellBuyGroups = [];
+    try {
+      const sbResponse = await fetch(`${API_BASE_URL}/sell-buy/get-categories`);
+      const sbData = await sbResponse.json();
+      if (sbData.error === false && sbData.data) {
+        const inner = sbData.data;
+        sellBuyGroups = Array.isArray(inner.data) ? inner.data : (Array.isArray(inner) ? inner : []);
+      } else if (sbData.success && Array.isArray(sbData.data)) {
+        sellBuyGroups = sbData.data;
+      }
+    } catch (sbErr) {
+      console.error('Error fetching sell-buy categories in footer:', sbErr);
+    }
+
     footerDataCache = {
       serviceGroups,
       professionalServices,
+      sellBuyGroups,
       appliancesSlug,
       showHomeScreen,
       citiesList,
@@ -202,6 +221,7 @@ export function Footer({ theme = {} }) {
 
   const [serviceGroups, setServiceGroups] = useState([]);
   const [professionalServices, setProfessionalServices] = useState([]);
+  const [sellBuyGroups, setSellBuyGroups] = useState([]);
   const [cities, setCities] = useState([]);
   const [globalSettings, setGlobalSettings] = useState(null);
   const [serviceSlugs, setServiceSlugs] = useState({
@@ -223,6 +243,7 @@ export function Footer({ theme = {} }) {
       const cached = footerDataCache;
       setServiceGroups(cached.serviceGroups);
       setProfessionalServices(cached.professionalServices);
+      setSellBuyGroups(cached.sellBuyGroups || []);
       setCities(cached.citiesList || []);
       setServiceSlugs((prev) => ({ ...prev, appliances: cached.appliancesSlug }));
       setShowHomeScreen(cached.showHomeScreen);
@@ -239,6 +260,7 @@ export function Footer({ theme = {} }) {
         if (cancelled || !data) return;
         setServiceGroups(data.serviceGroups);
         setProfessionalServices(data.professionalServices);
+        setSellBuyGroups(data.sellBuyGroups || []);
         setCities(data.citiesList || []);
         setServiceSlugs((prev) => ({ ...prev, appliances: data.appliancesSlug }));
         setShowHomeScreen(data.showHomeScreen);
@@ -435,6 +457,61 @@ export function Footer({ theme = {} }) {
             </div>
           );
         })}
+
+        {/* Sell & Buy Marketplace Categories & Subcategories */}
+        {!isLoading && sellBuyGroups && sellBuyGroups.length > 0 && (
+          <div className="mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <Link
+                href="/sell-buy"
+                className={`text-xl font-bold mb-6 bg-gradient-to-r ${t.headingGradient} bg-clip-text text-transparent w-fit block ${t.textLinkHover}`}
+              >
+                Sell &amp; Buy Marketplace
+              </Link>
+              <div className="text-sm leading-8 text-gray-400">
+                {sellBuyGroups.map((group, groupIdx) => {
+                  const subList = Array.isArray(group.subcategories) ? group.subcategories : (Array.isArray(group.sub_categories) ? group.sub_categories : []);
+                  return (
+                    <span key={group._id || group.id || group.slug} className="inline mr-1">
+                      {/* Category Name */}
+                      <Link
+                        href={`/sell-buy/${group.slug}`}
+                        className={`${t.groupNameColor} font-bold ${t.textLinkHover} transition-colors whitespace-nowrap mr-2`}
+                      >
+                        {group.name || group.category_name}:
+                      </Link>
+
+                      {/* Subcategories */}
+                      {subList.map((sub, idx) => (
+                        <span key={sub._id || sub.id || sub.slug} className="inline">
+                          <Link
+                            href={`/sell-buy/${group.slug}?sub=${sub.slug}`}
+                            className={`${t.textLink} ${t.textLinkHover} transition-colors`}
+                          >
+                            {sub.name || sub.category_name}
+                          </Link>
+                          {idx < subList.length - 1 && (
+                            <span className={`mx-2 ${t.dividerColor}`}>|</span>
+                          )}
+                        </span>
+                      ))}
+
+                      {/* Separator between Groups */}
+                      {groupIdx < sellBuyGroups.length - 1 && (
+                        <span className="mx-4 opacity-50" style={{ color: t.accentColor }}>||</span>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        )}
 
         {/* Services in Popular Cities Dynamic SEO Link Grid */}
         {!isLoading && cities.length > 0 && (

@@ -5,6 +5,8 @@
  * Following Swiggy/Airbnb production patterns
  */
 
+import { GOOGLE_MAPS_API_KEY } from '@/config/env';
+
 export const LOCATION_CONFIG = {
     // localStorage key for persisting location data
     STORAGE_KEY: 'user_location_data',
@@ -25,7 +27,7 @@ export const LOCATION_CONFIG = {
     DEFAULT_COUNTRY: 'IN',
 
     // Google Maps API key from environment
-    GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    GOOGLE_MAPS_API_KEY: GOOGLE_MAPS_API_KEY,
 
     // Location sources for tracking
     SOURCES: {

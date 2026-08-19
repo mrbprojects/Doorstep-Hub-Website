@@ -9,6 +9,7 @@ import {
 import Image from 'next/image';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { API_BASE_URL } from '@/config/env';
 
 export default function AboutUsPage() {
     const [settings, setSettings] = useState(null);       // data.policy
@@ -18,7 +19,7 @@ export default function AboutUsPage() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const res = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/get_global_settings');
+                const res = await fetch(`${API_BASE_URL}/app/get_global_settings`);
                 const data = await res.json();
                 if (data.success) {
                     if (data.policy) setSettings(data.policy);

@@ -1,8 +1,4 @@
-/**
- * Public AMC API helpers for the website.
- */
-
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+import { API_BASE_URL as API_BASE } from '@/config/env';
 
 async function parseJsonResponse(res) {
   const contentType = res.headers.get('content-type') || '';

@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi';
+import { API_BASE_URL as API_BASE } from '@/config/env';
 
 function bearerHeaders(token, contentType = 'application/json') {
     const headers = { Authorization: `Bearer ${token}` };

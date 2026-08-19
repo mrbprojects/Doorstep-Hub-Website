@@ -1,16 +1,11 @@
-// API configuration and utilities
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi';
+import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl as resolveMediaUrl } from '@/config/env';
+
 const SERVICES_ENDPOINT = '/app/applience-repairs-website/all-services';
 
 /** Same service id as customer app BookService / category banner */
 export const HOME_APPLIANCE_SERVICE_ID = '683daaa8f261c1548bdf7442';
 
-export function resolveMediaUrl(path = '') {
-    if (!path) return '';
-    if (String(path).startsWith('http')) return path;
-    const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com';
-    return `${base.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`;
-}
+export { resolveMediaUrl };
 
 const DEFAULT_BANNER_PATH = 'default_image.jpg';
 

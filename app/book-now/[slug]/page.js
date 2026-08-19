@@ -9,6 +9,7 @@ import { fetchCities, fetchCategories, fetchAllBrands } from '@/lib/api';
 import { parseBookNowCityFlatPath, parseNearbyBookNowPath } from '@/lib/applianceRepairSlugs';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { API_BASE_URL, getImageUrl } from '@/config/env';
 import { motion } from 'motion/react';
 
 const appliancesTheme = {
@@ -95,7 +96,7 @@ function BookNowPageContent() {
         }
 
         // Fetch Service
-        const response = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/authorized-services/authorized_service/${slug}`, {
+        const response = await fetch(`${API_BASE_URL}/app/authorized-services/authorized_service/${slug}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -162,7 +163,7 @@ function BookNowPageContent() {
       "@type": "Country",
       "name": "India"
     },
-    "image": service.image ? `https://devapis.doorstephub.com/${service.image}` : undefined,
+    "image": service.image ? getImageUrl(service.image) : undefined,
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": service.avgRating || "4.9",

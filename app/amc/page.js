@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { CheckCircle2, Shield, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { fetchAmcPlans, fetchMyAmcPurchases, formatInr } from '@/lib/amcApi';
+import { getImageUrl } from '@/config/env';
 
 function formatDate(value) {
   if (!value) return null;
@@ -153,7 +154,7 @@ export default function AmcPlansPage() {
                 {/* Banner Image */}
                 <div className="w-full h-44 bg-slate-50 relative border-b border-[#cfe8e3] flex-shrink-0">
                   <img
-                    src={plan.image ? (plan.image.startsWith('http') ? plan.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com'}/${plan.image}`) : 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'}
+                    src={getImageUrl(plan.image)}
                     alt={plan.name}
                     className="w-full h-full object-contain"
                   />

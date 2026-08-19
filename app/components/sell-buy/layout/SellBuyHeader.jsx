@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { fetchSystemSettings, getImageUrl, fetchSellBuyListings, fetchSellBuyCategories } from '@/lib/sellBuyApi';
+import { GOOGLE_MAPS_API_KEY } from '@/config/env';
 import { ChevronLeft, ChevronRight, MapPin, Search, Plus, Globe, Menu, ShoppingBag, Sparkles, Tag, ShieldCheck, Grid, Loader2, SearchX, X, ArrowRight, Navigation, ChevronDown, Check } from 'lucide-react';
 import { PostAdModal } from '@/components/sell-buy/PostAdModal';
 
@@ -71,7 +72,7 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
-          const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || systemSettings?.place_api_key || 'AIzaSyBNVn5j-M6F4VHkaOluoOcVY3K5r2-NlPk';
+          const key = GOOGLE_MAPS_API_KEY || systemSettings?.place_api_key || '';
           
           let detectedCity = '';
 

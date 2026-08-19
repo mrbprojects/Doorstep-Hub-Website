@@ -1,6 +1,4 @@
-// Server-side SEO metadata fetching and generation utilities
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
-const BASE_URL = 'https://doorstephub.com';
+import { API_BASE_URL, IMAGE_BASE_URL, SITE_URL as BASE_URL, getImageUrl } from '@/config/env';
 
 // Helper to capitalize words from a slug (e.g., ac-repair -> AC Repair)
 function slugToTitle(slug) {
@@ -218,20 +216,16 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
     const keywords = Array.isArray(keywordsRaw) ? keywordsRaw.join(', ') : String(keywordsRaw || '');
 
     let rawImageUrl = seoData?.image || defaultFallback?.image || generatedFallback?.image;
-    let imageUrl = 'https://doorstephub.com/d-hub-logo.png';
+    let imageUrl = `${BASE_URL}/d-hub-logo.png`;
 
     if (rawImageUrl && typeof rawImageUrl === 'string') {
-        if (rawImageUrl.startsWith('http://') || rawImageUrl.startsWith('https://')) {
-            imageUrl = rawImageUrl;
-        } else {
-            imageUrl = `https://api.doorstephub.com/${rawImageUrl.replace(/^\//, '')}`;
-        }
+        imageUrl = getImageUrl(rawImageUrl);
     } else if (cleanPath.startsWith('/amc')) {
-        imageUrl = 'https://api.doorstephub.com/uploads/Doorstep-Hub-AMC-Service.png';
+        imageUrl = getImageUrl('/uploads/Doorstep-Hub-AMC-Service.png');
     }
 
     return {
-        metadataBase: new URL('https://doorstephub.com'),
+        metadataBase: new URL(BASE_URL),
         title,
         description,
         keywords,

@@ -41,6 +41,23 @@ function getAbsoluteImageUrl(image) {
     return `${IMAGE_BASE_URL}/${image.replace(/^\/+/, '')}`;
 }
 
+function getEntityImages(entity = {}) {
+    const candidates = [
+        entity.image,
+        entity.bannerImage,
+        entity.banner_image,
+        entity.thumbnail,
+        entity.thumbnailImage,
+        entity.categoryImage,
+        entity.subcategoryImage,
+        entity.brandImage,
+        entity.logo,
+        entity.icon,
+        entity.cityImage
+    ];
+    return [...new Set(candidates.map(getAbsoluteImageUrl).filter(Boolean))];
+}
+
 async function fetchAllActiveSellBuyListings() {
     const limit = 100;
     const firstPage = await fetchAPI(`/sell-buy/listings?limit=${limit}&page=1`, null, 'GET');
@@ -154,7 +171,7 @@ export async function getFullSitemapInventory() {
         const slug = s.slug || (s.name ? s.name.toLowerCase().replace(/\s+/g, '-') : '');
         if (slug) {
             const canonicalUrl = buildCanonicalUrl('MAIN_SERVICE', { slug });
-            const images = [...new Set([s.image, s.bannerImage].map(getAbsoluteImageUrl).filter(Boolean))];
+            const images = getEntityImages(s);
             const entry = { url: canonicalUrl, priority: 0.9, changeFrequency: 'weekly', lastModified: s.updatedAt || new Date(), images };
             inventory['services'].push(entry);
             registerUrlEntry({
@@ -176,7 +193,7 @@ export async function getFullSitemapInventory() {
             const canonicalUrl = buildCanonicalUrl('CITY', { citySlug });
             const legacyUrl = `${BASE_URL}/appliances/repair-service/${citySlug}`;
 
-            inventory['cities'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: new Date() });
+            inventory['cities'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: c.updatedAt || new Date(), images: getEntityImages(c) });
             registerUrlEntry({
                 url: canonicalUrl,
                 entityType: 'CITY',
@@ -195,7 +212,7 @@ export async function getFullSitemapInventory() {
         const catSlug = cat.slug || (cat.name ? cat.name.toLowerCase().replace(/\s+/g, '-') : '');
         if (catSlug) {
             const canonicalUrl = buildCanonicalUrl('CATEGORY', { catSlug });
-            inventory['categories'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: new Date() });
+            inventory['categories'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: cat.updatedAt || new Date(), images: getEntityImages(cat) });
             registerUrlEntry({
                 url: canonicalUrl,
                 entityType: 'CATEGORY',
@@ -241,7 +258,7 @@ export async function getFullSitemapInventory() {
             const canonicalUrl = buildCanonicalUrl('BRAND', { brandSlug });
             const legacyUrl = `${BASE_URL}/appliances/brand/${brandSlug}`;
 
-            inventory['brands'].push({ url: canonicalUrl, priority: 0.7, changeFrequency: 'monthly', lastModified: new Date() });
+            inventory['brands'].push({ url: canonicalUrl, priority: 0.7, changeFrequency: 'monthly', lastModified: b.updatedAt || new Date(), images: getEntityImages(b) });
             registerUrlEntry({
                 url: canonicalUrl,
                 entityType: 'BRAND',
@@ -267,7 +284,7 @@ export async function getFullSitemapInventory() {
             const canonicalUrl = buildCanonicalUrl('CATEGORY_CITY', { categorySlug: catSlug, citySlug });
             const legacyUrl = `${BASE_URL}/appliances/repair-service/${citySlug}/${catSlug}`;
 
-            inventory['city-categories'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: new Date() });
+            inventory['city-categories'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: cat.updatedAt || new Date(), images: getEntityImages(cat) });
             registerUrlEntry({
                 url: canonicalUrl,
                 entityType: 'CATEGORY_CITY',
@@ -293,7 +310,7 @@ export async function getFullSitemapInventory() {
             const canonicalUrl = buildCanonicalUrl('BRAND_CITY', { brandSlug, citySlug });
             const legacyUrl1 = `${BASE_URL}/${citySlug}/${brandSlug}`;
 
-            inventory['city-brands'].push({ url: canonicalUrl, priority: 0.7, changeFrequency: 'monthly', lastModified: new Date() });
+            inventory['city-brands'].push({ url: canonicalUrl, priority: 0.7, changeFrequency: 'monthly', lastModified: b.updatedAt || new Date(), images: getEntityImages(b) });
             registerUrlEntry({
                 url: canonicalUrl,
                 entityType: 'BRAND_CITY',
@@ -319,7 +336,7 @@ export async function getFullSitemapInventory() {
             const canonicalUrl = buildCanonicalUrl('CITY_SERVICE', { serviceSlug, citySlug });
             const legacyUrl = `${BASE_URL}/service-list/book-now/${serviceSlug}?city=${citySlug}`;
 
-            inventory['city-services'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: new Date() });
+            inventory['city-services'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: s.updatedAt || new Date(), images: getEntityImages(s) });
             registerUrlEntry({
                 url: canonicalUrl,
                 entityType: 'CITY_SERVICE',
@@ -349,7 +366,7 @@ export async function getFullSitemapInventory() {
         const slug = h.slug || h.hostelSlug || h._id;
         if (slug) {
             const canonicalUrl = buildCanonicalUrl('PGHOSTEL', { slug });
-            inventory['pghostels'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: new Date() });
+            inventory['pghostels'].push({ url: canonicalUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: h.updatedAt || new Date(), images: getEntityImages(h) });
             registerUrlEntry({ url: canonicalUrl, entityType: 'PGHOSTEL', entityId: slug, indexable: true, sitemapGroup: 'pghostels', priority: 0.8, changeFrequency: 'weekly' });
         }
     });
@@ -371,7 +388,7 @@ export async function getFullSitemapInventory() {
         const slug = s.slug || s._id;
         if (slug) {
             const canonicalUrl = buildCanonicalUrl('SPASALON', { slug });
-            inventory['spa-salon'].push({ url: canonicalUrl, priority: 0.7, changeFrequency: 'weekly', lastModified: new Date() });
+            inventory['spa-salon'].push({ url: canonicalUrl, priority: 0.7, changeFrequency: 'weekly', lastModified: s.updatedAt || new Date(), images: getEntityImages(s) });
             registerUrlEntry({ url: canonicalUrl, entityType: 'SPASALON', entityId: slug, indexable: true, sitemapGroup: 'spa-salon', priority: 0.7, changeFrequency: 'weekly' });
         }
     });
@@ -417,20 +434,20 @@ export async function getFullSitemapInventory() {
         if (!route) return;
 
         const rootUrl = `${BASE_URL}${route.root}`;
-        inventory['professional-categories'].push({ url: rootUrl, priority: 0.9, changeFrequency: 'weekly', lastModified: service.updatedAt || new Date(), images: [getAbsoluteImageUrl(service.image)].filter(Boolean) });
+        inventory['professional-categories'].push({ url: rootUrl, priority: 0.9, changeFrequency: 'weekly', lastModified: service.updatedAt || new Date(), images: getEntityImages(service) });
 
         (node.categories || []).forEach(categoryNode => {
             const category = categoryNode?.category || {};
             const categorySlug = category.slug || (category.name ? category.name.toLowerCase().replace(/\s+/g, '-') : '');
             if (!categorySlug) return;
             const categoryUrl = `${BASE_URL}${route.category}/${encodeURIComponent(categorySlug)}`;
-            inventory['professional-categories'].push({ url: categoryUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: category.updatedAt || new Date(), images: [getAbsoluteImageUrl(category.image || category.icon)].filter(Boolean) });
+            inventory['professional-categories'].push({ url: categoryUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: category.updatedAt || new Date(), images: getEntityImages(category) });
 
             (categoryNode.subcategories || []).forEach(subcategory => {
                 const subcategorySlug = subcategory?.slug || (subcategory?.name ? subcategory.name.toLowerCase().replace(/\s+/g, '-') : '');
                 if (!subcategorySlug) return;
                 const subcategoryUrl = `${BASE_URL}${route.subcategory}/${encodeURIComponent(subcategorySlug)}`;
-                inventory['professional-subcategories'].push({ url: subcategoryUrl, priority: 0.7, changeFrequency: 'weekly', lastModified: subcategory.updatedAt || new Date(), images: [getAbsoluteImageUrl(subcategory.image || subcategory.subcategoryIcon || subcategory.icon)].filter(Boolean) });
+                inventory['professional-subcategories'].push({ url: subcategoryUrl, priority: 0.7, changeFrequency: 'weekly', lastModified: subcategory.updatedAt || new Date(), images: getEntityImages(subcategory) });
             });
         });
     });
@@ -456,13 +473,13 @@ export async function getFullSitemapInventory() {
         const slug = category.slug || (category.name ? category.name.toLowerCase().replace(/\s+/g, '-') : '');
         if (!slug) return;
         const url = `${BASE_URL}/sell-buy/${slug}`;
-        const categoryImage = getAbsoluteImageUrl(category.image || category.icon);
+        const categoryImages = getEntityImages(category);
         inventory['sell-buy'].push({
             url,
             priority: 0.7,
             changeFrequency: 'weekly',
             lastModified: category.updatedAt || new Date(),
-            images: categoryImage ? [categoryImage] : []
+            images: categoryImages
         });
         registerUrlEntry({ url, entityType: 'SELL_BUY_CATEGORY', entityId: category._id || slug, indexable: true, sitemapGroup: 'sell-buy', priority: 0.7, changeFrequency: 'weekly' });
     });
@@ -487,19 +504,6 @@ export async function getFullSitemapInventory() {
             images
         });
         registerUrlEntry({ url, entityType: 'SELL_BUY_LISTING', entityId: listing._id || listing.slug, indexable: true, sitemapGroup: 'sell-buy', priority: 0.7, changeFrequency: 'daily' });
-    });
-
-    // 14. Images Sitemap Group
-    services.forEach(s => {
-        const slug = s.slug || (s.name ? s.name.toLowerCase().replace(/\s+/g, '-') : '');
-        if (slug) {
-            const url = buildCanonicalUrl('MAIN_SERVICE', { slug });
-            const imgs = [];
-            if (s.image) imgs.push(s.image.startsWith('http') ? s.image : `https://devapis.doorstephub.com/${s.image.replace(/^\//, '')}`);
-            if (s.bannerImage) imgs.push(s.bannerImage.startsWith('http') ? s.bannerImage : `https://devapis.doorstephub.com/${s.bannerImage.replace(/^\//, '')}`);
-            imgs.push(`${BASE_URL}/d-hub-logo.png`);
-            inventory['images'].push({ url, priority: 0.8, changeFrequency: 'weekly', lastModified: new Date(), images: imgs });
-        }
     });
 
     // Deduplicate entries globally across all urlset groups (excluding images group)

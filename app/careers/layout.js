@@ -1,13 +1,9 @@
+import { getSEOMetadata } from '@/lib/seo';
 
-export const metadata = {
-    title: 'Careers | DoorstepHub',
-    description: 'Join our team and help us revolutionize home services. View open positions and apply today.',
-};
+export async function generateMetadata() {
+    return await getSEOMetadata('/careers');
+}
 
 export default function CareersLayout({ children }) {
-    return (
-        <>
-            {children}
-        </>
-    );
+    return children;
 }

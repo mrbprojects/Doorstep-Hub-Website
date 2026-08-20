@@ -27,6 +27,18 @@ node_modules/
 /cypress/videos/
 /cypress/screenshots/
 
+# Local ad-hoc test scripts and generated test artifacts
+# Keep the committed tests/ directory available to Git.
+/test-*.js
+/test_*.js
+/test-*.mjs
+/test_*.mjs
+/test-*.json
+/test_*.json
+/test-output/
+/test-artifacts/
+/playwright/.cache/
+
 # ─── Environment variables / secrets ──────────────────────────────────────────
 .env
 .env.*

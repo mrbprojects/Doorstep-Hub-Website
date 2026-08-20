@@ -169,8 +169,8 @@ export async function getCompleteImageInventory(providedInventory = null) {
                 pageImages.push({
                     loc: pageUrl,
                     imageLoc: `${BASE_URL}/brands/${brandSlug}-logo.webp`,
-                    title: `${brandName} Authorized Appliance Service Logo`,
-                    caption: `Authorized ${brandName} Repair Service Center`,
+                    title: `${brandName} Appliance Service Logo`,
+                    caption: `${brandName} Repair Service Center`,
                     alt: `${brandName} Logo`,
                     width: 512,
                     height: 512,

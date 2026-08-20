@@ -99,13 +99,28 @@ export const KNOWN_BRANDS = [
 
 export function getBrandAsset(text) {
     if (!text) return null;
-    const lower = String(text).toLowerCase().replace(/_/g, '-');
+    const lower = String(text).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const tokens = lower.split(/\s+/);
+
     for (const b of KNOWN_BRANDS) {
-        if (lower.startsWith(b.slug) || lower.includes(`${b.slug}-`) || lower.includes(`-${b.slug}`) || lower.includes(b.name.toLowerCase())) {
-            return {
-                name: b.name,
-                image: `${IMAGE_BASE_URL}/${b.image}`
-            };
+        const slugClean = b.slug.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const nameClean = b.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+        // Exact match of multi-word brand name or slug in text
+        if (lower === slugClean || lower === nameClean) {
+            return { name: b.name, image: `${IMAGE_BASE_URL}/${b.image}` };
+        }
+
+        // Check if multi-word brand is included as phrase
+        if (slugClean.includes(' ') || nameClean.includes(' ')) {
+            if (lower.includes(slugClean) || lower.includes(nameClean)) {
+                return { name: b.name, image: `${IMAGE_BASE_URL}/${b.image}` };
+            }
+        }
+
+        // For single-word brands (including short ones like mi, hp, lg, tcl, daikin, sony), check token match
+        if (tokens.includes(slugClean) || tokens.includes(nameClean)) {
+            return { name: b.name, image: `${IMAGE_BASE_URL}/${b.image}` };
         }
     }
     return null;
@@ -174,11 +189,18 @@ export function getApplianceCategoryAsset(text) {
  * Evaluates candidate images in priority order and returns a valid absolute 1200x630 Open Graph image.
  */
 export function getSocialPreviewImage(data = {}, extra = {}) {
+    const contextPath = extra?.path || data?.path || '';
+    const contextText = `${contextPath} ${data?.title || ''} ${data?.name || ''} ${data?.categoryName || ''} ${extra?.alt || ''}`;
+
+    const brandAsset = getBrandAsset(contextText);
+    const catAsset = getApplianceCategoryAsset(contextText);
+    const cityAsset = getCityAsset(contextText);
+
     const candidates = [
         // 1. Explicit Direct Overrides
         extra?.image,
 
-        // 2. Featured / Banner Images
+        // 2. Featured / Banner Images from data
         data?.featuredImage,
         data?.featured_image,
         data?.bannerImage,
@@ -186,7 +208,7 @@ export function getSocialPreviewImage(data = {}, extra = {}) {
         Array.isArray(data?.banner_images) ? data.banner_images[0] : null,
         data?.banner,
 
-        // 3. Main Image / Cover Image
+        // 3. Main Image / Cover Image from data
         data?.mainImage,
         data?.main_image,
         data?.coverImage,
@@ -215,6 +237,11 @@ export function getSocialPreviewImage(data = {}, extra = {}) {
         // 7. Child Services Images from extraData
         Array.isArray(extra?.services) && extra.services[0]?.image ? extra.services[0].image : null,
         Array.isArray(extra?.services) && Array.isArray(extra.services[0]?.banner_images) ? extra.services[0].banner_images[0] : null,
+
+        // 8. Brand / Category / City context assets
+        catAsset?.image,
+        brandAsset?.image,
+        cityAsset?.image,
     ];
 
     for (const candidate of candidates) {
@@ -238,7 +265,7 @@ export function getSocialPreviewImage(data = {}, extra = {}) {
         secureUrl: fallbackUrl,
         width: 1200,
         height: 630,
-        alt: data?.title || 'Doorstep Hub | Home & Appliance Services',
+        alt: data?.title || extra?.alt || 'Doorstep Hub | Home & Appliance Services',
         type: 'image/png'
     };
 }
@@ -314,10 +341,16 @@ export function getFallbackMetadata(path) {
         const parts = normalizedPath.replace('/nearby/', '').split('/');
         const serviceSlug = parts[0] || '';
         const citySlug = parts[1] || '';
-        const rawServiceName = slugToTitle(serviceSlug.replace(/-(?:book-doorstep-service-today|book-now).*$/i, ''));
+        const cleanedSlug = serviceSlug
+            .replace(/-(?:book-doorstep-service-today|repair-service-today|service-today|book-now).*$/i, '');
+        const brandAsset = getBrandAsset(serviceSlug);
+        // If the slug ends with the brand slug again (e.g. blue-star-...-blue-star), strip it
+        const finalSlug = brandAsset?.name && cleanedSlug.toLowerCase().endsWith(`-${brandAsset.name.toLowerCase().replace(/\s+/g, '-')}`)
+            ? cleanedSlug.slice(0, -(brandAsset.name.length + 1))
+            : cleanedSlug;
+        const rawServiceName = slugToTitle(finalSlug);
         const cityAsset = getCityAsset(citySlug);
         const cityName = cityAsset?.name || slugToTitle(citySlug);
-        const brandAsset = getBrandAsset(serviceSlug);
         const catAsset = getApplianceCategoryAsset(serviceSlug);
 
         const title = cityName
@@ -369,11 +402,11 @@ export function getFallbackMetadata(path) {
         };
     }
 
-    // 8. Brand Repair Route (e.g. /godrej-appliance-repair-service-center/vizag, /vizag/godrej-appliance-repair-service-center)
+    // 8. Brand Repair Route (e.g. /godrej-appliance-repair-service-center/vizag, /dell-service-repair-center/vizag)
     const flatBrandRegex =
-        /^\/([a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?repair-service-center)\/([a-z0-9]+(?:-[a-z0-9]+)*)$/i;
+        /^\/([a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?(?:service-repair|repair-service|service|repair)-center)\/([a-z0-9]+(?:-[a-z0-9]+)*)$/i;
     const flatBrandLegacyRegex =
-        /^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/([a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?repair-service-center)$/i;
+        /^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/([a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?(?:service-repair|repair-service|service|repair)-center)$/i;
 
     if (flatBrandRegex.test(normalizedPath) || flatBrandLegacyRegex.test(normalizedPath)) {
         const isLegacy = flatBrandLegacyRegex.test(normalizedPath);
@@ -383,7 +416,7 @@ export function getFallbackMetadata(path) {
 
         // Clean out duplicate keywords from brand slug
         const cleanBrandSlug = rawBrandPart
-            .replace(/-(?:appliance-)?repair-service-center$/i, '')
+            .replace(/-(?:appliance-)?(?:service-repair|repair-service|service|repair)-center$/i, '')
             .replace(/-services?$/i, '');
         const brandAsset = getBrandAsset(cleanBrandSlug);
         const brand = brandAsset?.name || slugToTitle(cleanBrandSlug);
@@ -392,8 +425,8 @@ export function getFallbackMetadata(path) {
         const city = cityAsset?.name || slugToTitle(rawCityPart);
 
         return {
-            title: `Authorized ${brand} Appliance Repair Service Center in ${city} | Doorstep Hub`,
-            description: `Book authorized ${brand} home appliance repair and service in ${city} at Doorstep Hub. Verified technicians, genuine ${brand} spare parts, and transparent pricing. Book now!`,
+            title: `${brand} Repair & Service Center in ${city} | Doorstep Hub`,
+            description: `Book ${brand} repair and service in ${city} at Doorstep Hub. Verified technicians, genuine ${brand} spare parts, and transparent pricing. Book now!`,
             keywords: [`${brand} repair ${city}`, `${brand} service center ${city}`, `doorstep repair`],
             image: brandAsset?.image || cityAsset?.image
         };
@@ -411,7 +444,7 @@ export function getFallbackMetadata(path) {
         const brand = brandAsset?.name || slugToTitle(match[3]);
 
         return {
-            title: `Authorized ${brand} ${category} Service Center in ${city} | Doorstep Hub`,
+            title: `${brand} ${category} Service Center in ${city} | Doorstep Hub`,
             description: `Professional ${brand} ${category} repair and service in ${city}. Verified technicians, genuine spare parts, and transparent pricing. Book now!`,
             keywords: [`${brand} ${category} repair ${city}`, `${brand} service center ${city}`, `doorstep repair`],
             image: brandAsset?.image || catAsset?.image || cityAsset?.image
@@ -561,8 +594,8 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
                     const d = result.data.data || result.data;
                     if (d.title && d.title !== 'Doorstep Hub | One-Stop Home & Lifestyle Services in India') {
                         resolvedData = d;
-                        if (!resolvedImageObj) {
-                            resolvedImageObj = getSocialPreviewImage(d);
+                        if (d.image || d.bannerImage || d.coverImage || d.logo) {
+                            resolvedImageObj = getSocialPreviewImage(d, { path: cleanPath });
                         }
                     }
                 }
@@ -584,7 +617,7 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
         ? (typeof defaultFallback.image === 'string'
             ? { url: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, secureUrl: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, width: 1200, height: 630, alt: title }
             : defaultFallback.image)
-        : (resolvedImageObj || getSocialPreviewImage(resolvedData, { image: generatedFallback.image, alt: title }));
+        : (resolvedImageObj || getSocialPreviewImage(resolvedData, { path: cleanPath, image: generatedFallback.image, alt: title }));
 
     // Ensure image alt text is accurate to page title
     finalImageObj.alt = title;

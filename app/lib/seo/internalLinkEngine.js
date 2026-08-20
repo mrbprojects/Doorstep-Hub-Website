@@ -21,7 +21,7 @@ export function getInternalLinks(entityType, params = {}) {
 
     if (city && brand) {
         links.push({
-            label: `Authorized ${brand} Service Center in ${city}`,
+            label: `${brand} Service Center in ${city}`,
             url: `${BASE_URL}/${brand.toLowerCase()}-appliance-repair-service-center/${city.toLowerCase()}`
         });
     }

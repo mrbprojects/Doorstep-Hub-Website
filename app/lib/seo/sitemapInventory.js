@@ -550,7 +550,9 @@ export async function getSitemapChunkManifest() {
 
     // Add Image Sitemap Chunks
     try {
-        const { manifest: imageManifest } = await getImageSitemapChunks();
+        // Reuse the already-built inventory. Rebuilding it here doubles all
+        // upstream API calls and makes /sitemap.xml unnecessarily slow.
+        const { manifest: imageManifest } = await getImageSitemapChunks(inventory);
         manifest.push(...imageManifest);
     } catch (e) {
         console.error('Error attaching image sitemap chunks:', e);

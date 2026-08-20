@@ -8,9 +8,11 @@ import path from 'path';
 
 // Vercel/serverless deployments only allow runtime writes in /tmp. Local
 // development keeps the inspectable registry under the project scratch folder.
-const REGISTRY_PATH = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
+const IS_SERVERLESS = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const REGISTRY_PATH = IS_SERVERLESS
     ? path.join('/tmp', 'doorstephub-url-registry.json')
     : path.join(process.cwd(), 'scratch', 'url_registry.json');
+let runtimeRegistry = { urls: {} };
 
 function ensureRegistry() {
     const dir = path.dirname(REGISTRY_PATH);
@@ -21,6 +23,7 @@ function ensureRegistry() {
 }
 
 function readRegistry() {
+    if (IS_SERVERLESS) return runtimeRegistry;
     try {
         ensureRegistry();
         return JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
@@ -30,6 +33,10 @@ function readRegistry() {
 }
 
 function writeRegistry(data) {
+    if (IS_SERVERLESS) {
+        runtimeRegistry = data;
+        return;
+    }
     try {
         ensureRegistry();
         fs.writeFileSync(REGISTRY_PATH, JSON.stringify(data, null, 2), 'utf8');
@@ -236,4 +243,3 @@ export function getRegistryStats() {
         byGroup
     };
 }
-

@@ -27,6 +27,7 @@ const INDEXNOW_ENABLED = getEnvVariable('INDEXNOW_ENABLED') !== 'false';
 // In-memory deduplication cache (URL + timestamp)
 const recentSubmissions = new Map();
 const DEDUPLICATION_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+const INDEXNOW_BATCH_SIZE = 10000;
 
 /**
  * Validates and normalizes a target URL for IndexNow submission.
@@ -112,10 +113,32 @@ export async function submitToIndexNow(urls, eventType = 'PAGE_UPDATED') {
         host: new URL(SITE_URL).host,
         key: INDEXNOW_KEY,
         keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
-        urlList: validUrls.slice(0, 10000) // Max IndexNow batch limit
+        urlList: validUrls.slice(0, INDEXNOW_BATCH_SIZE) // Max IndexNow batch limit
     };
 
     return executeIndexNowRequest(payload);
+}
+
+/**
+ * Submits every supplied URL, splitting large sitemap inventories into the
+ * maximum batch size accepted by IndexNow.
+ */
+export async function submitAllToIndexNow(urls, eventType = 'SITEMAP_RECONCILIATION') {
+    const uniqueUrls = [...new Set((Array.isArray(urls) ? urls : [urls]).filter(Boolean))];
+    const batches = [];
+
+    for (let start = 0; start < uniqueUrls.length; start += INDEXNOW_BATCH_SIZE) {
+        const batch = uniqueUrls.slice(start, start + INDEXNOW_BATCH_SIZE);
+        batches.push(await submitToIndexNow(batch, eventType));
+    }
+
+    const submittedCount = batches.reduce((total, result) => total + (result?.count || 0), 0);
+    return {
+        success: batches.every(result => result?.success),
+        requestedCount: uniqueUrls.length,
+        submittedCount,
+        batches
+    };
 }
 
 async function executeIndexNowRequest(payload, attempt = 1, maxRetries = 3) {

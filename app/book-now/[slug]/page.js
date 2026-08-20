@@ -131,7 +131,9 @@ function BookNowPageContent() {
             categoryNames: serviceCategoryNames,
             serviceName: sData.name || sData.serviceName,
             image: sData.mainImage || sData.bannerImage || sData.image,
-            description: sData.description || sData.seoDescription,
+            // Admin CKEditor content is stored as HTML. Prefer it so the public
+            // page preserves the exact authored structure and formatting.
+            description: sData.description_html || sData.description || sData.seoDescription,
             categoryName: categoryMatch?.name || categoryNameFromService || 'Standard Service',
             brandName: brandMatch?.name || brandNameFromService || 'Standard Brand',
             isAuthorized: true,
@@ -195,14 +197,14 @@ function BookNowPageContent() {
     <div className="min-h-screen bg-white">
       <Header theme={appliancesTheme} />
       
-      <main className="w-full px-6 lg:px-8 pt-24 sm:pt-28 pb-12">
+      <main className="w-full px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-12">
         {schemaData && (
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
           />
         )}
-        <div className="w-full">
+        <div className="w-full max-w-[1440px] mx-auto">
 
           <div className="mb-4">
             <button
@@ -214,22 +216,22 @@ function BookNowPageContent() {
             </button>
           </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] gap-7 lg:gap-10 xl:gap-12 items-start">
           {/* ── LEFT SECTION: IMAGE (STICKY) ── */}
-          <div className="w-full lg:w-[35%] lg:sticky lg:top-28">
+          <div className="w-full max-w-[540px] mx-auto lg:max-w-none lg:mx-0 lg:sticky lg:top-28">
             <div 
-              className="relative aspect-[4/3] w-full group overflow-hidden rounded-2xl bg-gray-50 border border-gray-100"
+              className="relative w-full group overflow-hidden rounded-2xl bg-gray-50 border border-gray-100 shadow-sm"
             >
               {service.image ? (
-                <div className="relative w-full h-full z-10">
+                <div className="relative w-full z-10">
                   <img loading="lazy" decoding="async" 
                     src={imageUrl} 
                     alt={service.serviceName} 
-                    className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105" 
+                    className="block w-full h-auto object-contain object-center"
                   />
                 </div>
               ) : (
-                <Wrench size={48} className="text-gray-200" />
+                <div className="aspect-[4/3] w-full flex items-center justify-center"><Wrench size={48} className="text-gray-200" /></div>
               )}
               
               {/* Overlay on hover */}
@@ -241,14 +243,14 @@ function BookNowPageContent() {
           </div>
 
           {/* ── RIGHT SECTION: CONTENT ── */}
-          <div className="w-full lg:w-[65%]">
-            <div className="py-1 flex flex-col">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 leading-snug tracking-tight mb-3">
+          <div className="w-full min-w-0">
+            <div className="flex flex-col lg:pt-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 leading-tight tracking-tight mb-4">
                 {service.serviceName}
               </h1>
 
-              <div className="mb-4">
-                <div className={`relative prose prose-xs sm:prose-sm text-gray-600 leading-relaxed max-w-none text-justify prose-p:mb-4 overflow-hidden transition-all duration-300 ${showFullDescription ? 'max-h-none' : 'max-h-[30vh] pb-6'}`}>
+              <div className="mb-2">
+                <div className={`relative ckeditor-content prose prose-sm sm:prose-base text-gray-600 leading-7 sm:leading-8 max-w-none overflow-hidden transition-all duration-300 [&_p]:mb-4 [&_p]:leading-7 [&_p]:sm:leading-8 [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-extrabold [&_h2]:text-gray-900 [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_strong]:font-extrabold [&_strong]:text-gray-700 [&_a]:font-semibold [&_a]:text-[#037166] [&_a]:underline [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-[#037166]/30 [&_blockquote]:pl-4 [&_blockquote]:italic ${showFullDescription ? 'max-h-none' : 'max-h-[18rem] sm:max-h-[20rem] pb-7'}`}>
                   <div dangerouslySetInnerHTML={{ __html: service.description }} />
                   {!showFullDescription && (
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white via-white/90 to-transparent" />
@@ -272,10 +274,10 @@ function BookNowPageContent() {
                 )}
               </div>
 
-              <div className="mt-4 flex justify-start z-40">
+              <div className="mt-5 flex justify-start z-40">
                 <button
                   onClick={() => setModalOpen(true)}
-                  className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_12px_24px_-5px_rgba(3,113,102,0.3)] hover:shadow-[0_18px_36px_-5px_rgba(3,113,102,0.45)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3 group"
+                  className="w-full sm:w-auto min-w-[235px] px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_12px_24px_-5px_rgba(3,113,102,0.3)] hover:shadow-[0_18px_36px_-5px_rgba(3,113,102,0.45)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3 group"
                 >
                   BOOK SERVICE NOW
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />

@@ -55,8 +55,41 @@ export async function getCompleteImageInventory(providedInventory = null) {
             const path = pageUrl.replace(BASE_URL, '') || '/';
             const pageImages = [];
 
-            // 1. Static Pages
-            if (group === 'static-pages') {
+            // Preserve real uploaded media supplied by the page inventory. This is
+            // used by Sell & Buy listings and avoids publishing made-up image URLs.
+            if (Array.isArray(page.images) && page.images.length > 0) {
+                page.images.forEach((imageUrl, index) => {
+                    const normalizedUrl = normalizeImageUrl(imageUrl);
+                    if (!normalizedUrl) return;
+                    pageImages.push({
+                        loc: pageUrl,
+                        imageLoc: normalizedUrl,
+                        title: group === 'sell-buy' ? 'Doorstep Hub Sell & Buy Listing Image' : 'Doorstep Hub Page Image',
+                        caption: group === 'sell-buy' ? 'Verified marketplace listing on Doorstep Hub' : 'Doorstep Hub page image',
+                        alt: group === 'sell-buy' ? 'Doorstep Hub Sell & Buy listing image' : 'Doorstep Hub image',
+                        format: detectImageFormat(normalizedUrl),
+                        isModernFormat: isModernFormat(detectImageFormat(normalizedUrl)),
+                        position: index + 1
+                    });
+                });
+            }
+
+            // Only publish an image URL when it is known to exist. Pages without
+            // an uploaded image use the real public logo instead of fabricated
+            // city/category image paths.
+            if (pageImages.length === 0) {
+                pageImages.push({
+                    loc: pageUrl,
+                    imageLoc: defaultLogo,
+                    title: 'Doorstep Hub Official Logo',
+                    caption: 'Doorstep Hub trusted home services',
+                    alt: 'Doorstep Hub Logo',
+                    width: 512,
+                    height: 512,
+                    format: 'PNG',
+                    isModernFormat: false
+                });
+            } else if (group === 'static-pages') {
                 pageImages.push({
                     loc: pageUrl,
                     imageLoc: defaultLogo,

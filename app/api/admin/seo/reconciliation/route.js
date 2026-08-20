@@ -1,11 +1,30 @@
 import { NextResponse } from 'next/server';
 import { getSitemapChunkManifest } from '../../../../lib/seo/sitemapInventory.js';
 import { getRegistryStats } from '../../../../lib/seo/urlRegistry.js';
-import { calculateSEOScore } from '../../../../lib/seo/seoScanner.js';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+const allowedAdminOrigins = [
+    process.env.ADMIN_APP_ORIGIN,
+    'https://admin.doorstephub.com',
+    'http://localhost:5173',
+    'http://localhost:3000'
+].filter(Boolean);
+
+function getCorsHeaders(request) {
+    const origin = request.headers.get('origin');
+    return {
+    'Access-Control-Allow-Origin': allowedAdminOrigins.includes(origin) ? origin : allowedAdminOrigins[0],
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    };
+}
+
+export function OPTIONS(request) {
+    return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
+}
+
+export async function GET(request) {
     try {
         const { manifest, inventory } = await getSitemapChunkManifest();
         const registryStats = getRegistryStats();
@@ -23,17 +42,6 @@ export async function GET() {
             };
         });
 
-        // Sample Page Score Calculation
-        const pageScoreSample = calculateSEOScore({
-            title: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
-            description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.',
-            canonical: 'https://doorstephub.com',
-            h1Count: 1,
-            hasSchema: true,
-            internalLinksCount: 10,
-            hasOgImage: true
-        });
-
         return NextResponse.json({
             success: true,
             version: '2.0.0',
@@ -46,22 +54,17 @@ export async function GET() {
                 totalChunksManifested: manifest.length
             },
             sitemapHealth: {
-                status: 'HEALTHY',
-                redirectsInSitemap: 0,
-                non200InSitemap: 0,
-                canonicalMismatches: 0,
-                noindexInSitemap: 0,
+                status: 'INVENTORY_ONLY',
+                redirectsInSitemap: null,
+                non200InSitemap: null,
+                canonicalMismatches: null,
+                noindexInSitemap: null,
                 groups: groupMetrics
             },
-            pageScores: {
-                averageScore: pageScoreSample.overallScore,
-                sampleScoreBand: pageScoreSample.scoreBand,
-                criticalFailuresCapActive: true
-            },
             lastUpdated: new Date().toISOString()
-        });
+        }, { headers: getCorsHeaders(request) });
     } catch (e) {
         console.error('Error in SEO Reconciliation API:', e);
-        return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+        return NextResponse.json({ success: false, error: e.message }, { status: 500, headers: getCorsHeaders(request) });
     }
 }

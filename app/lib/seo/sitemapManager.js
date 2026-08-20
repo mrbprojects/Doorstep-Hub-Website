@@ -20,6 +20,13 @@ const STATIC_ROUTES = [
     { url: `${BASE_URL}/refund-policy`, priority: 0.3, changeFrequency: 'yearly' },
     { url: `${BASE_URL}/deletion-requests`, priority: 0.3, changeFrequency: 'yearly' },
     { url: `${BASE_URL}/appliances`, priority: 0.9, changeFrequency: 'daily' },
+    { url: `${BASE_URL}/appliances/categories`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/appliances/centers`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/appliances/explore`, priority: 0.7, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/appliances/featured`, priority: 0.7, changeFrequency: 'daily' },
+    { url: `${BASE_URL}/appliances/recent`, priority: 0.7, changeFrequency: 'daily' },
+    { url: `${BASE_URL}/appliances/repair-service`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/appliance-repairs/services-centers`, priority: 0.8, changeFrequency: 'daily' },
     { url: `${BASE_URL}/services`, priority: 0.9, changeFrequency: 'daily' },
     { url: `${BASE_URL}/pghostels`, priority: 0.9, changeFrequency: 'daily' },
     { url: `${BASE_URL}/spa-salon`, priority: 0.9, changeFrequency: 'daily' },
@@ -154,4 +161,3 @@ export function escapeXml(unsafe = '') {
 export function getStaticSitemapEntries() {
     return STATIC_ROUTES;
 }
-

@@ -1,9 +1,10 @@
 import { buildCanonicalUrl } from './canonicalManager.js';
-import { registerUrlEntry, markLegacyRedirect } from './urlRegistry.js';
+import { registerUrlEntry, markLegacyRedirect, rebuildRegistryFromInventory } from './urlRegistry.js';
 import { getStaticSitemapEntries, SITEMAP_CHUNK_SIZE } from './sitemapManager.js';
 
 const BASE_URL = 'https://doorstephub.com';
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || API_BASE_URL.replace(/\/v1\/dhubApi$/, '')).replace(/\/$/, '');
 
 async function fetchAPI(endpoint, body = null, method = 'POST', attempts = 3) {
     for (let i = 1; i <= attempts; i++) {
@@ -34,6 +35,47 @@ async function fetchAPI(endpoint, body = null, method = 'POST', attempts = 3) {
     return null;
 }
 
+function getAbsoluteImageUrl(image) {
+    if (!image || typeof image !== 'string') return null;
+    if (/^https?:\/\//i.test(image)) return image;
+    return `${IMAGE_BASE_URL}/${image.replace(/^\/+/, '')}`;
+}
+
+async function fetchAllActiveSellBuyListings() {
+    const limit = 100;
+    const firstPage = await fetchAPI(`/sell-buy/listings?limit=${limit}&page=1`, null, 'GET');
+    const firstPayload = firstPage?.error === false ? firstPage.data : firstPage;
+    const listings = Array.isArray(firstPayload?.data) ? firstPayload.data : [];
+    const totalPages = Math.min(Number(firstPayload?.meta?.totalPages || firstPayload?.last_page || 1), 100);
+
+    if (totalPages <= 1) return listings;
+
+    const remainingPages = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, index) =>
+            fetchAPI(`/sell-buy/listings?limit=${limit}&page=${index + 2}`, null, 'GET')
+        )
+    );
+
+    return remainingPages.reduce((all, response) => {
+        const payload = response?.error === false ? response.data : response;
+        if (Array.isArray(payload?.data)) all.push(...payload.data);
+        return all;
+    }, listings);
+}
+
+async function fetchApplianceSubcategories(categories = []) {
+    const responses = await Promise.all(categories.map(category => {
+        const slug = category?.slug || (category?.name ? category.name.toLowerCase().replace(/\s+/g, '-') : '');
+        if (!slug) return Promise.resolve(null);
+        return fetchAPI('/app/applience-repairs-website/getsubcategorysbycategoryid', { slug });
+    }));
+
+    return responses.flatMap((response, index) => {
+        const subcategories = Array.isArray(response?.data) ? response.data : [];
+        return subcategories.map(subcategory => ({ subcategory, category: categories[index] }));
+    });
+}
+
 
 /**
  * Rebuilds the entire sitemap inventory from primary APIs / database entities.
@@ -45,6 +87,7 @@ export async function getFullSitemapInventory() {
         'services': [],
         'cities': [],
         'categories': [],
+        'subcategories': [],
         'brands': [],
         'city-categories': [],
         'city-brands': [],
@@ -53,6 +96,9 @@ export async function getFullSitemapInventory() {
         'spa-salon': [],
         'religious': [],
         'amc': [],
+        'professional-categories': [],
+        'professional-subcategories': [],
+        'sell-buy': [],
         'images': []
     };
 
@@ -79,14 +125,16 @@ export async function getFullSitemapInventory() {
         categoriesRes,
         brandsRes,
         pgRes,
-        spaRes
+        spaRes,
+        professionalCatalogRes
     ] = await Promise.all([
         fetchAPI('/app/applience-repairs-website/all-services', null, 'GET'),
         fetchAPI('/app/cities/cities_list', null, 'GET'),
         fetchAPI('/app/applience-repairs-website/getallcategorys', { lattitude: '17.3850', longitude: '78.4867' }),
         fetchAPI('/app/brands/all_brands', null, 'GET'),
         fetchAPI('/app/products/featured_pg_hostels', null, 'GET'),
-        fetchAPI('/app/products/all_spa_stores', null, 'GET')
+        fetchAPI('/app/products/all_spa_stores', null, 'GET'),
+        fetchAPI('/app/products/professional-services-catalog', null, 'GET')
     ]);
 
     const DEFAULT_SERVICES = [
@@ -96,7 +144,7 @@ export async function getFullSitemapInventory() {
         { slug: 'microwave-repair-service' }
     ];
 
-    const services = (servicesRes?.success && Array.isArray(servicesRes.data) && servicesRes.data.length >= 4) ? servicesRes.data.slice(0, 4) : DEFAULT_SERVICES;
+    const services = (servicesRes?.success && Array.isArray(servicesRes.data) && servicesRes.data.length > 0) ? servicesRes.data : DEFAULT_SERVICES;
     const cities = (citiesRes?.success && Array.isArray(citiesRes.cities) && citiesRes.cities.length > 0) ? citiesRes.cities : [];
     const categories = (categoriesRes?.success && Array.isArray(categoriesRes.data) && categoriesRes.data.length > 0) ? categoriesRes.data : [];
     const brands = (brandsRes?.success && Array.isArray(brandsRes.brands) && brandsRes.brands.length > 0) ? brandsRes.brands : [];
@@ -106,7 +154,8 @@ export async function getFullSitemapInventory() {
         const slug = s.slug || (s.name ? s.name.toLowerCase().replace(/\s+/g, '-') : '');
         if (slug) {
             const canonicalUrl = buildCanonicalUrl('MAIN_SERVICE', { slug });
-            const entry = { url: canonicalUrl, priority: 0.9, changeFrequency: 'weekly', lastModified: new Date() };
+            const images = [...new Set([s.image, s.bannerImage].map(getAbsoluteImageUrl).filter(Boolean))];
+            const entry = { url: canonicalUrl, priority: 0.9, changeFrequency: 'weekly', lastModified: s.updatedAt || new Date(), images };
             inventory['services'].push(entry);
             registerUrlEntry({
                 url: canonicalUrl,
@@ -157,6 +206,32 @@ export async function getFullSitemapInventory() {
                 changeFrequency: 'weekly'
             });
         }
+    });
+
+    // 5. Appliance subcategory listing pages. These are sourced per published
+    // category, so newly added subcategories are automatically added.
+    const applianceSubcategories = await fetchApplianceSubcategories(categories);
+    applianceSubcategories.forEach(({ subcategory, category }) => {
+        const slug = subcategory?.slug || (subcategory?.name ? subcategory.name.toLowerCase().replace(/\s+/g, '-') : '');
+        if (!slug) return;
+        const url = `${BASE_URL}/appliances/listing/${encodeURIComponent(slug)}`;
+        const image = getAbsoluteImageUrl(subcategory.image || subcategory.subcategoryIcon || subcategory.icon);
+        inventory.subcategories.push({
+            url,
+            priority: 0.7,
+            changeFrequency: 'weekly',
+            lastModified: subcategory.updatedAt || new Date(),
+            images: image ? [image] : []
+        });
+        registerUrlEntry({
+            url,
+            entityType: 'APPLIANCE_SUBCATEGORY',
+            entityId: subcategory._id || slug,
+            indexable: true,
+            sitemapGroup: 'subcategories',
+            priority: 0.7,
+            changeFrequency: 'weekly'
+        });
     });
 
     // 5. Brands
@@ -322,7 +397,99 @@ export async function getFullSitemapInventory() {
         registerUrlEntry({ url, entityType: 'AMC', entityId: path, indexable: true, sitemapGroup: 'amc', priority: 0.8, changeFrequency: 'weekly' });
     });
 
-    // 13. Images Sitemap Group
+    // 13. Spa, PG & Hostel and Religious categories/subcategories from the public catalog.
+    // Each URL maps to an existing route; transaction and search routes remain excluded.
+    const professionalCatalog = (professionalCatalogRes?.success && Array.isArray(professionalCatalogRes.data))
+        ? professionalCatalogRes.data
+        : [];
+    const professionalRouteConfig = {
+        'spa-saloons': { root: '/spa-salon', category: '/spa-salon/category', subcategory: '/spa-salon/subcategory' },
+        'spa-salon': { root: '/spa-salon', category: '/spa-salon/category', subcategory: '/spa-salon/subcategory' },
+        'pg-hostels': { root: '/pghostels', category: '/pghostels/listings', subcategory: '/pghostels/subcategory' },
+        'pg-hostel': { root: '/pghostels', category: '/pghostels/listings', subcategory: '/pghostels/subcategory' },
+        'religious-services': { root: '/religious-services', category: '/religious-services/category', subcategory: '/religious-services/subcategory' },
+        'rituals-and-religious-services': { root: '/religious-services', category: '/religious-services/category', subcategory: '/religious-services/subcategory' }
+    };
+    professionalCatalog.forEach(node => {
+        const service = node?.service || {};
+        const serviceSlug = String(service.slug || service.name || '').toLowerCase().replace(/\s+/g, '-');
+        const route = professionalRouteConfig[serviceSlug];
+        if (!route) return;
+
+        const rootUrl = `${BASE_URL}${route.root}`;
+        inventory['professional-categories'].push({ url: rootUrl, priority: 0.9, changeFrequency: 'weekly', lastModified: service.updatedAt || new Date(), images: [getAbsoluteImageUrl(service.image)].filter(Boolean) });
+
+        (node.categories || []).forEach(categoryNode => {
+            const category = categoryNode?.category || {};
+            const categorySlug = category.slug || (category.name ? category.name.toLowerCase().replace(/\s+/g, '-') : '');
+            if (!categorySlug) return;
+            const categoryUrl = `${BASE_URL}${route.category}/${encodeURIComponent(categorySlug)}`;
+            inventory['professional-categories'].push({ url: categoryUrl, priority: 0.8, changeFrequency: 'weekly', lastModified: category.updatedAt || new Date(), images: [getAbsoluteImageUrl(category.image || category.icon)].filter(Boolean) });
+
+            (categoryNode.subcategories || []).forEach(subcategory => {
+                const subcategorySlug = subcategory?.slug || (subcategory?.name ? subcategory.name.toLowerCase().replace(/\s+/g, '-') : '');
+                if (!subcategorySlug) return;
+                const subcategoryUrl = `${BASE_URL}${route.subcategory}/${encodeURIComponent(subcategorySlug)}`;
+                inventory['professional-subcategories'].push({ url: subcategoryUrl, priority: 0.7, changeFrequency: 'weekly', lastModified: subcategory.updatedAt || new Date(), images: [getAbsoluteImageUrl(subcategory.image || subcategory.subcategoryIcon || subcategory.icon)].filter(Boolean) });
+            });
+        });
+    });
+
+    // 14. Sell & Buy marketplace. Only public, indexable pages and ACTIVE listings are included.
+    const sellBuyStaticPaths = [
+        '/sell-buy',
+        '/sell-buy/about',
+        '/sell-buy/categories',
+        '/sell-buy/contact-us',
+        '/sell-buy/help',
+        '/sell-buy/privacy-policy',
+        '/sell-buy/safety',
+        '/sell-buy/terms'
+    ];
+    sellBuyStaticPaths.forEach(path => {
+        const url = `${BASE_URL}${path}`;
+        inventory['sell-buy'].push({ url, priority: path === '/sell-buy' ? 0.9 : 0.5, changeFrequency: 'weekly', lastModified: new Date() });
+        registerUrlEntry({ url, entityType: 'SELL_BUY_PAGE', entityId: path, indexable: true, sitemapGroup: 'sell-buy', priority: path === '/sell-buy' ? 0.9 : 0.5, changeFrequency: 'weekly' });
+    });
+
+    categories.forEach(category => {
+        const slug = category.slug || (category.name ? category.name.toLowerCase().replace(/\s+/g, '-') : '');
+        if (!slug) return;
+        const url = `${BASE_URL}/sell-buy/${slug}`;
+        const categoryImage = getAbsoluteImageUrl(category.image || category.icon);
+        inventory['sell-buy'].push({
+            url,
+            priority: 0.7,
+            changeFrequency: 'weekly',
+            lastModified: category.updatedAt || new Date(),
+            images: categoryImage ? [categoryImage] : []
+        });
+        registerUrlEntry({ url, entityType: 'SELL_BUY_CATEGORY', entityId: category._id || slug, indexable: true, sitemapGroup: 'sell-buy', priority: 0.7, changeFrequency: 'weekly' });
+    });
+
+    const sellBuyListings = await fetchAllActiveSellBuyListings();
+    sellBuyListings.forEach(listing => {
+        if (!listing?.slug) return;
+        const url = `${BASE_URL}/sell-buy/ad/${encodeURIComponent(listing.slug)}`;
+        const images = [...new Set([
+            listing.coverImage,
+            listing.image,
+            ...(Array.isArray(listing.images) ? listing.images : []),
+            ...(Array.isArray(listing.gallery_images) ? listing.gallery_images.map(item => item?.image) : [])
+        ]
+            .map(getAbsoluteImageUrl)
+            .filter(Boolean))];
+        inventory['sell-buy'].push({
+            url,
+            priority: 0.7,
+            changeFrequency: 'daily',
+            lastModified: listing.updatedAt || listing.createdAt || new Date(),
+            images
+        });
+        registerUrlEntry({ url, entityType: 'SELL_BUY_LISTING', entityId: listing._id || listing.slug, indexable: true, sitemapGroup: 'sell-buy', priority: 0.7, changeFrequency: 'daily' });
+    });
+
+    // 14. Images Sitemap Group
     services.forEach(s => {
         const slug = s.slug || (s.name ? s.name.toLowerCase().replace(/\s+/g, '-') : '');
         if (slug) {
@@ -346,6 +513,9 @@ export async function getFullSitemapInventory() {
         });
     });
 
+    // Rebuild after de-duplication so registered indexable URLs exactly match
+    // the URLs emitted in the sitemap chunks.
+    rebuildRegistryFromInventory(inventory);
 
     return inventory;
 }
@@ -388,4 +558,3 @@ export async function getSitemapChunkManifest() {
 
     return { manifest, inventory };
 }
-

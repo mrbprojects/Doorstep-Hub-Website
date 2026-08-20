@@ -10,7 +10,7 @@ export function slugToTitle(slug) {
     return lastPart
         .split('-')
         .map(word => {
-            if (['ac', 'pc', 'tv', 'ro', 'pg', 'led', 'lcd', 'cctv', 'dsh', 'amc', 'otp'].includes(word.toLowerCase())) {
+            if (['ac', 'pc', 'tv', 'ro', 'pg', 'led', 'lcd', 'cctv', 'dsh', 'amc', 'otp', 'ifb', 'hp', 'lg'].includes(word.toLowerCase())) {
                 return word.toUpperCase();
             }
             return word.charAt(0).toUpperCase() + word.slice(1);
@@ -34,21 +34,151 @@ function cleanAbsoluteImageUrl(raw) {
 }
 
 /**
+ * Resolves city-specific high-resolution banners from public assets.
+ */
+export function getCityAsset(citySlug) {
+    if (!citySlug) return null;
+    const norm = String(citySlug).toLowerCase().trim().replace(/_/g, '-');
+    if (norm.includes('vizag') || norm.includes('visakhapatnam')) return { name: 'Vizag', image: `${BASE_URL}/Vizag.png` };
+    if (norm.includes('hyderabad') || norm.includes('secunderabad')) return { name: 'Hyderabad', image: `${BASE_URL}/Hyderabad.png` };
+    if (norm.includes('bangalore') || norm.includes('bengaluru')) return { name: 'Bangalore', image: `${BASE_URL}/Banglore.png` };
+    if (norm.includes('mumbai') || norm.includes('chembur') || norm.includes('goregaon') || norm.includes('thane')) return { name: 'Mumbai', image: `${BASE_URL}/Mumbai.png` };
+    if (norm.includes('delhi') || norm.includes('noida') || norm.includes('gurgaon')) return { name: 'Delhi', image: `${BASE_URL}/Delhi.png` };
+    if (norm.includes('chennai') || norm.includes('alandur') || norm.includes('tambaram')) return { name: 'Chennai', image: `${BASE_URL}/chennai.png` };
+    if (norm.includes('kolkata')) return { name: 'Kolkata', image: `${BASE_URL}/kolkata.png` };
+    if (norm.includes('pune')) return { name: 'Pune', image: `${BASE_URL}/pune.png` };
+    if (norm.includes('vijayawada')) return { name: 'Vijayawada', image: `${BASE_URL}/Vijayawada.png` };
+    if (norm.includes('rajampet')) return { name: 'Rajampet', image: `${BASE_URL}/Rajampet.png` };
+    if (norm.includes('tirupati') || norm.includes('thirupathi') || norm.includes('thiruapathi')) return { name: 'Tirupati', image: `${BASE_URL}/Thirupathi.png` };
+    return null;
+}
+
+/**
+ * Resolves verified brand assets (logos & official names)
+ */
+export const KNOWN_BRANDS = [
+    { name: 'A.O. Smith', slug: 'ao-smith', image: 'uploads/brands/Ao_smitth.webp' },
+    { name: 'Acer', slug: 'acer', image: 'uploads/brands/1780465083897-pngwing.com_(4).webp' },
+    { name: 'All Brands', slug: 'all-brands', image: 'uploads/brands/1780557330276-4971442996-Multi_Brands_Home_Appliances.webp' },
+    { name: 'Apple', slug: 'apple', image: 'uploads/brands/1780464713260-pngwing.com_(6).webp' },
+    { name: 'Bajaj', slug: 'bajaj', image: 'uploads/brands/1780386459612-Bajaj.webp' },
+    { name: 'Blue Star', slug: 'blue-star', image: 'uploads/brands/1780386525719-Blue_Star.webp' },
+    { name: 'Bosch', slug: 'bosch', image: 'uploads/brands/1780378177445-Bosch.webp' },
+    { name: 'Carrier', slug: 'carrier', image: 'uploads/brands/1780378063182-Carrier.webp' },
+    { name: 'Crompton', slug: 'crompton', image: 'uploads/brands/1780386491840-Crompton.webp' },
+    { name: 'Daikin', slug: 'daikin', image: 'uploads/brands/1780378019212-Daikin.webp' },
+    { name: 'Dell', slug: 'dell', image: 'uploads/brands/1780464943694-pngwing.com (1).png' },
+    { name: 'Eureka Forbes', slug: 'eureka-forbes', image: 'uploads/brands/1780378555630-Eureka_Forbes-optimized.webp' },
+    { name: 'Eurekha Forbes', slug: 'eurekha-forbes', image: 'uploads/brands/1780378555630-Eureka_Forbes-optimized.webp' },
+    { name: 'Godrej', slug: 'godrej', image: 'uploads/brands/1780386304370-Godrej.webp' },
+    { name: 'HP', slug: 'hp', image: 'uploads/brands/1780464750566-pngwing.com.webp' },
+    { name: 'Haier', slug: 'haier', image: 'uploads/brands/1780378145929-Haier.webp' },
+    { name: 'Havells', slug: 'havells', image: 'uploads/brands/1780386435040-Havells-optimized.webp' },
+    { name: 'Hitachi', slug: 'hitachi', image: 'uploads/brands/1780378100242-Hitachi.webp' },
+    { name: 'IFB', slug: 'ifb', image: 'uploads/brands/1780386781518-IFB.webp' },
+    { name: 'Kenstar', slug: 'kenstar', image: 'uploads/brands/1780383516134-Kenstar.webp' },
+    { name: 'Kent', slug: 'kent', image: 'uploads/brands/Kent_Brand.webp' },
+    { name: 'LG', slug: 'lg', image: 'uploads/brands/1780378331042-LG.webp' },
+    { name: 'Lenovo', slug: 'lenovo', image: 'uploads/brands/1780465158969-pngwing.com_(3).webp' },
+    { name: 'Livpure', slug: 'livpure', image: 'uploads/brands/Livpure.webp' },
+    { name: 'Lloyd', slug: 'lloyd', image: 'uploads/brands/1780377557857-Lloyd.webp' },
+    { name: 'MI', slug: 'mi', image: 'uploads/brands/MI_TV_Repair_Center.webp' },
+    { name: 'MSI', slug: 'msi', image: 'uploads/brands/1780465194455-pngwing.com (5).png' },
+    { name: 'Onida', slug: 'onida', image: 'uploads/brands/1780386810235-Onida.webp' },
+    { name: 'Orient Electric', slug: 'orient-electric', image: 'uploads/brands/1780386661707-Orient_Electric.webp' },
+    { name: 'Panasonic', slug: 'panasonic', image: 'uploads/brands/1780377627405-Panasonic.webp' },
+    { name: 'Pureit', slug: 'pureit', image: 'uploads/brands/Pureit.webp' },
+    { name: 'Realme', slug: 'realme', image: 'uploads/brands/Realme_TV_Repair_Center.webp' },
+    { name: 'Samsung', slug: 'samsung', image: 'uploads/brands/1780378273486-Samsung.webp' },
+    { name: 'Sony', slug: 'sony', image: 'uploads/brands/Sony_TV_Repair_Center.webp' },
+    { name: 'TCL', slug: 'tcl', image: 'uploads/brands/1780377592715-tcl.webp' },
+    { name: 'V-Guard', slug: 'v-guard', image: 'uploads/brands/1780386692123-Guard.webp' },
+    { name: 'Voltas', slug: 'voltas', image: 'uploads/brands/1780386349103-Voltas.webp' },
+    { name: 'Whirlpool', slug: 'whirlpool', image: 'uploads/brands/1780378208453-Whirlpool.webp' },
+];
+
+export function getBrandAsset(text) {
+    if (!text) return null;
+    const lower = String(text).toLowerCase().replace(/_/g, '-');
+    for (const b of KNOWN_BRANDS) {
+        if (lower.startsWith(b.slug) || lower.includes(`${b.slug}-`) || lower.includes(`-${b.slug}`) || lower.includes(b.name.toLowerCase())) {
+            return {
+                name: b.name,
+                image: `${IMAGE_BASE_URL}/${b.image}`
+            };
+        }
+    }
+    return null;
+}
+
+/**
+ * Resolves appliance category & subcategory high-resolution images
+ */
+export function getApplianceCategoryAsset(text) {
+    if (!text) return null;
+    const lower = String(text).toLowerCase();
+
+    if (lower.includes('refrigerator') || lower.includes('fridge')) {
+        return {
+            categoryName: 'Refrigerator Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1766396823192-df2e7e1d2cdfa6aa805b04d39928d00b.jpg`
+        };
+    }
+    if (lower.includes('washing-machine') || lower.includes('washing machine') || lower.includes('washer')) {
+        return {
+            categoryName: 'Washing Machine Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1780375679417-Washing_Machine_Repair.webp`
+        };
+    }
+    if (lower.includes('ac-') || lower.includes('air-conditioner') || lower.includes('split ac') || lower.includes('cassette ac') || lower.includes('ac repair') || lower.includes('air conditioner')) {
+        return {
+            categoryName: 'AC Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1766397470990-ac repair with tech.jpg`
+        };
+    }
+    if (lower.includes('microwave') || lower.includes('oven')) {
+        return {
+            categoryName: 'Microwave Oven Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1780375661938-Oven_Repair.webp`
+        };
+    }
+    if (lower.includes('tv') || lower.includes('television') || lower.includes('led') || lower.includes('lcd')) {
+        return {
+            categoryName: 'TV Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1765533311561-LED tv.jpg`
+        };
+    }
+    if (lower.includes('computer') || lower.includes('laptop') || lower.includes('pc') || lower.includes('desktop')) {
+        return {
+            categoryName: 'Computer & Laptop Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1766397847160-laptop repair1.jpg`
+        };
+    }
+    if (lower.includes('geyser') || lower.includes('water-heater') || lower.includes('water heater')) {
+        return {
+            categoryName: 'Geyser Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1765534457937-geyser fit.jpg`
+        };
+    }
+    if (lower.includes('water-purifier') || lower.includes('ro-') || lower.includes('purifier') || lower.includes('water purifier')) {
+        return {
+            categoryName: 'Water Purifier Repair',
+            image: `${IMAGE_BASE_URL}/uploads/ondemandcategory/1766259651368-Water Purifier icon.jpg`
+        };
+    }
+    return null;
+}
+
+/**
  * Centralized Social Preview Image Selector
  * Evaluates candidate images in priority order and returns a valid absolute 1200x630 Open Graph image.
- * 
- * Priority:
- * 1. Page-specific banner / featured image
- * 2. Main visible image on that page
- * 3. First valid content / gallery / document image
- * 4. Provider / Profile image (when provider is primary subject)
- * 5. Category image
- * 6. Child service images (from extra data)
- * 7. Global fallback social card (1200x630)
  */
 export function getSocialPreviewImage(data = {}, extra = {}) {
     const candidates = [
-        // 1. Featured / Banner Images
+        // 1. Explicit Direct Overrides
+        extra?.image,
+
+        // 2. Featured / Banner Images
         data?.featuredImage,
         data?.featured_image,
         data?.bannerImage,
@@ -56,7 +186,7 @@ export function getSocialPreviewImage(data = {}, extra = {}) {
         Array.isArray(data?.banner_images) ? data.banner_images[0] : null,
         data?.banner,
 
-        // 2. Main Image / Cover Image
+        // 3. Main Image / Cover Image
         data?.mainImage,
         data?.main_image,
         data?.coverImage,
@@ -64,25 +194,25 @@ export function getSocialPreviewImage(data = {}, extra = {}) {
         data?.image,
         Array.isArray(data?.images) ? data.images[0] : null,
 
-        // 3. Provider / Profile / Logo Image
+        // 4. Provider / Profile / Logo Image
         data?.logo,
         data?.profile_image,
         data?.profilePic,
         data?.avatar,
 
-        // 4. Content / Gallery / Document Images
+        // 5. Content / Gallery / Document Images
         Array.isArray(data?.gallery) ? data.gallery[0] : null,
         Array.isArray(data?.business_images) ? data.business_images[0] : null,
         Array.isArray(data?.subCategories) && data.subCategories[0]?.image ? data.subCategories[0].image : null,
         Array.isArray(data?.data) && data.data[0]?.image ? data.data[0].image : null,
 
-        // 5. Category Image
+        // 6. Category Image
         data?.categoryImage,
         data?.category_image,
         data?.categoryId?.image,
         data?.category?.image,
 
-        // 6. Child Services Images from extraData
+        // 7. Child Services Images from extraData
         Array.isArray(extra?.services) && extra.services[0]?.image ? extra.services[0].image : null,
         Array.isArray(extra?.services) && Array.isArray(extra.services[0]?.banner_images) ? extra.services[0].banner_images[0] : null,
     ];
@@ -95,7 +225,7 @@ export function getSocialPreviewImage(data = {}, extra = {}) {
                 secureUrl: valid,
                 width: 1200,
                 height: 630,
-                alt: data?.title || data?.name || data?.business_name || 'Doorstep Hub Service',
+                alt: data?.title || data?.name || data?.business_name || extra?.alt || 'Doorstep Hub Service',
                 type: valid.endsWith('.png') ? 'image/png' : valid.endsWith('.webp') ? 'image/webp' : 'image/jpeg'
             };
         }
@@ -108,13 +238,13 @@ export function getSocialPreviewImage(data = {}, extra = {}) {
         secureUrl: fallbackUrl,
         width: 1200,
         height: 630,
-        alt: 'Doorstep Hub | Home & Appliance Services',
+        alt: data?.title || 'Doorstep Hub | Home & Appliance Services',
         type: 'image/png'
     };
 }
 
 /**
- * Generates highly optimized fallback tags for different business verticals
+ * Generates highly optimized fallback tags for different business verticals and route patterns
  */
 export function getFallbackMetadata(path) {
     const normalizedPath = (path || '/').toLowerCase().replace(/\/$/, '');
@@ -124,7 +254,8 @@ export function getFallbackMetadata(path) {
         return {
             title: 'Doorstep Hub Book AMC Services for Home Appliances & Electronics',
             description: 'Protect your AC, computer, washing machine, LED/Smart TV, refrigerator and other home appliances with Doorstep Hub Book AMC Services. Get preventive maintenance, expert repair support, doorstep service and priority booking. Book your AMC today at doorstephub.com/amc or call 8886688666.',
-            keywords: ['amc', 'annual maintenance contract', 'doorstep hub amc', 'appliance amc']
+            keywords: ['amc', 'annual maintenance contract', 'doorstep hub amc', 'appliance amc'],
+            image: `${IMAGE_BASE_URL}/uploads/Doorstep-Hub-AMC-Service.png`
         };
     }
 
@@ -178,61 +309,126 @@ export function getFallbackMetadata(path) {
         }
     }
 
-    // 5. Appliance Brand Repair Route
-    const brandRegex = /\/(appliances\/repair-service|(?![a-zA-Z0-9-]+\.))[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/;
-    if (brandRegex.test(normalizedPath)) {
-        const parts = normalizedPath.replace(/^\/(appliances\/repair-service\/)?/, '').split('/');
-        if (parts.length === 3) {
-            const city = slugToTitle(parts[0]);
-            const category = slugToTitle(parts[1]);
-            const brand = slugToTitle(parts[2]);
-            return {
-                title: `Authorized ${brand} ${category} Service Center in ${city} | Doorstep Hub`,
-                description: `Professional ${brand} ${category} repair and service in ${city}. Verified technicians, genuine spare parts, and transparent pricing. Book now!`,
-                keywords: [`${brand} ${category} repair ${city}`, `${brand} service center ${city}`, `doorstep repair`]
-            };
-        }
-    }
+    // 5. Nearby / Book Now Route: /nearby/service-slug/city-slug or /nearby/service-slug
+    if (normalizedPath.startsWith('/nearby/')) {
+        const parts = normalizedPath.replace('/nearby/', '').split('/');
+        const serviceSlug = parts[0] || '';
+        const citySlug = parts[1] || '';
+        const rawServiceName = slugToTitle(serviceSlug.replace(/-(?:book-doorstep-service-today|book-now).*$/i, ''));
+        const cityAsset = getCityAsset(citySlug);
+        const cityName = cityAsset?.name || slugToTitle(citySlug);
+        const brandAsset = getBrandAsset(serviceSlug);
+        const catAsset = getApplianceCategoryAsset(serviceSlug);
 
-    const flatBrandRegex =
-        /^\/[a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?repair-service-center\/[a-z0-9]+(?:-[a-z0-9]+)*$/i;
-    const flatBrandLegacyRegex =
-        /^\/[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?repair-service-center$/i;
-    if (flatBrandRegex.test(normalizedPath) || flatBrandLegacyRegex.test(normalizedPath)) {
-        const parts = normalizedPath.replace(/^\//, '').split('/');
-        const isLegacy = flatBrandLegacyRegex.test(normalizedPath);
-        const city = slugToTitle(parts[isLegacy ? 0 : 1]);
-        const brand = slugToTitle(parts[isLegacy ? 1 : 0]);
+        const title = cityName
+            ? `Book ${rawServiceName} in ${cityName} | Doorstep Hub`
+            : `Book ${rawServiceName} | Doorstep Hub`;
+        const description = cityName
+            ? `Book certified ${rawServiceName} in ${cityName} at Doorstep Hub. Same day doorstep service, genuine spare parts, transparent pricing and service warranty.`
+            : `Book certified ${rawServiceName} at Doorstep Hub. Same day doorstep service, genuine spare parts, transparent pricing and service warranty.`;
+
+        const image = brandAsset?.image || catAsset?.image || cityAsset?.image;
+
         return {
-            title: `Authorized ${brand} Appliance Repair Service Center in ${city} | Doorstep Hub`,
-            description: `Professional ${brand} appliance repair and service in ${city}. Verified technicians, genuine spare parts, and transparent pricing. Book now!`,
-            keywords: [`${brand} repair ${city}`, `${brand} service center ${city}`, `doorstep repair`]
+            title,
+            description,
+            keywords: [serviceSlug, cityName, 'doorstep repair', 'certified technician'],
+            image
         };
     }
 
-    // 6. Appliance Category/City Route
-    const catCityRegex = /\/appliances\/repair-service\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/;
-    if (catCityRegex.test(normalizedPath)) {
-        const parts = normalizedPath.replace('/appliances/repair-service/', '').split('/');
-        if (parts.length === 2) {
-            const city = slugToTitle(parts[0]);
-            const category = slugToTitle(parts[1]);
-            return {
-                title: `Professional ${category} Repair & Service in ${city} | Doorstep Hub`,
-                description: `Get professional doorstep ${category} repair and service in ${city} by expert technicians. Genuine spare parts, warranty on repairs, and same-day service.`,
-                keywords: [`${category} repair ${city}`, `${category} service ${city}`, `${category} technician`]
-            };
-        }
+    // 6. Flat City Landing Pages (e.g. /appliances-repair-service-center-vizag, /appliances-repair-service-vizag)
+    const flatCityMatch = normalizedPath.match(/^\/(?:appliances-repair-service-center-|appliances-repair-service-|appliances\/repair-service\/)([a-z0-9-]+)$/i);
+    if (flatCityMatch) {
+        const citySlug = flatCityMatch[1];
+        const cityAsset = getCityAsset(citySlug);
+        const cityName = cityAsset?.name || slugToTitle(citySlug);
+        return {
+            title: `Appliance Repair Service Center in ${cityName} | Doorstep Hub`,
+            description: `Book trusted home appliance repair and service in ${cityName} at Doorstep Hub. Expert technicians for Refrigerator, Washing Machine, AC, TV, Microwave, Geyser and more with doorstep warranty.`,
+            keywords: [`appliance repair ${cityName}`, `home appliance service center ${cityName}`, `technician in ${cityName}`],
+            image: cityAsset?.image || `${BASE_URL}/electric-appliance.png`
+        };
     }
 
-    // 7. General Single Slug Fallback (e.g. /geyser-repair-service)
+    // 7. Category + City Flat Route (e.g. /ac-repair-service-center-vizag, /refrigerator-repair-service-center-mumbai)
+    const catCityFlatMatch = normalizedPath.match(/^\/([a-z0-9-]+)-service-center-([a-z0-9-]+)$/i);
+    if (catCityFlatMatch) {
+        const catSlug = catCityFlatMatch[1];
+        const citySlug = catCityFlatMatch[2];
+        const catAsset = getApplianceCategoryAsset(catSlug);
+        const cityAsset = getCityAsset(citySlug);
+        const catName = catAsset?.categoryName || slugToTitle(catSlug);
+        const cityName = cityAsset?.name || slugToTitle(citySlug);
+
+        return {
+            title: `Professional ${catName} & Service Center in ${cityName} | Doorstep Hub`,
+            description: `Get professional doorstep ${catName} in ${cityName} by expert technicians. Genuine spare parts, warranty on repairs, and same-day service.`,
+            keywords: [`${catName} ${cityName}`, `repair service center in ${cityName}`],
+            image: catAsset?.image || cityAsset?.image
+        };
+    }
+
+    // 8. Brand Repair Route (e.g. /godrej-appliance-repair-service-center/vizag, /vizag/godrej-appliance-repair-service-center)
+    const flatBrandRegex =
+        /^\/([a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?repair-service-center)\/([a-z0-9]+(?:-[a-z0-9]+)*)$/i;
+    const flatBrandLegacyRegex =
+        /^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/([a-z0-9]+(?:-[a-z0-9]+)*-(?:appliance-)?repair-service-center)$/i;
+
+    if (flatBrandRegex.test(normalizedPath) || flatBrandLegacyRegex.test(normalizedPath)) {
+        const isLegacy = flatBrandLegacyRegex.test(normalizedPath);
+        const match = normalizedPath.match(isLegacy ? flatBrandLegacyRegex : flatBrandRegex);
+        const rawBrandPart = match[isLegacy ? 2 : 1];
+        const rawCityPart = match[isLegacy ? 1 : 2];
+
+        // Clean out duplicate keywords from brand slug
+        const cleanBrandSlug = rawBrandPart
+            .replace(/-(?:appliance-)?repair-service-center$/i, '')
+            .replace(/-services?$/i, '');
+        const brandAsset = getBrandAsset(cleanBrandSlug);
+        const brand = brandAsset?.name || slugToTitle(cleanBrandSlug);
+
+        const cityAsset = getCityAsset(rawCityPart);
+        const city = cityAsset?.name || slugToTitle(rawCityPart);
+
+        return {
+            title: `Authorized ${brand} Appliance Repair Service Center in ${city} | Doorstep Hub`,
+            description: `Book authorized ${brand} home appliance repair and service in ${city} at Doorstep Hub. Verified technicians, genuine ${brand} spare parts, and transparent pricing. Book now!`,
+            keywords: [`${brand} repair ${city}`, `${brand} service center ${city}`, `doorstep repair`],
+            image: brandAsset?.image || cityAsset?.image
+        };
+    }
+
+    // 9. 3-Part Brand Repair Route (/city/category/brand or /appliances/repair-service/city/category/brand)
+    const brand3PartRegex = /\/(?:appliances\/repair-service\/)?([a-zA-Z0-9-]+)\/([a-zA-Z0-9-]+)\/([a-zA-Z0-9-]+)$/;
+    if (brand3PartRegex.test(normalizedPath) && !normalizedPath.startsWith('/sell-buy/')) {
+        const match = normalizedPath.match(brand3PartRegex);
+        const cityAsset = getCityAsset(match[1]);
+        const city = cityAsset?.name || slugToTitle(match[1]);
+        const catAsset = getApplianceCategoryAsset(match[2]);
+        const category = catAsset?.categoryName || slugToTitle(match[2]);
+        const brandAsset = getBrandAsset(match[3]);
+        const brand = brandAsset?.name || slugToTitle(match[3]);
+
+        return {
+            title: `Authorized ${brand} ${category} Service Center in ${city} | Doorstep Hub`,
+            description: `Professional ${brand} ${category} repair and service in ${city}. Verified technicians, genuine spare parts, and transparent pricing. Book now!`,
+            keywords: [`${brand} ${category} repair ${city}`, `${brand} service center ${city}`, `doorstep repair`],
+            image: brandAsset?.image || catAsset?.image || cityAsset?.image
+        };
+    }
+
+    // 10. General Single Slug Fallback (e.g. /double-door-refrigerator-noise-repair-problems, /geyser-repair-service)
     const singleSlug = normalizedPath.replace(/^\//, '');
     if (singleSlug && !singleSlug.includes('/')) {
         const name = slugToTitle(singleSlug);
+        const catAsset = getApplianceCategoryAsset(singleSlug);
+        const brandAsset = getBrandAsset(singleSlug);
         return {
-            title: `${name} | Reliable Doorstep Service - Doorstep Hub`,
-            description: `Book professional doorstep ${name} at Doorstep Hub. Certified technicians, transparent pricing, genuine spares, and complete warranty.`,
-            keywords: [singleSlug, `${name} service`, `doorstep repair`]
+            title: `${name} | Doorstep Hub`,
+            description: `Expert doorstep service for ${name} at Doorstep Hub. Certified technicians, transparent pricing, genuine spare parts, and complete warranty.`,
+            keywords: [singleSlug, `${name} service`, `doorstep repair`],
+            image: catAsset?.image || brandAsset?.image
         };
     }
 
@@ -316,7 +512,7 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
                             resolvedImageObj = getSocialPreviewImage(listing);
                         }
                     }
-                } catch(e) {}
+                } catch (e) { }
             } else if (!sub.includes('/')) {
                 // Category page
                 const catName = slugToTitle(sub);
@@ -354,7 +550,7 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             }
         }
 
-        // 4. Fallback to Smart SEO API if not resolved yet
+        // 5. Fallback to Smart SEO API if not resolved yet
         if (!resolvedData) {
             const response = await fetch(`${API_BASE_URL}/web/seo/get-page-seo?path=${encodeURIComponent(cleanPath)}`, {
                 next: { revalidate: 3600 }
@@ -384,9 +580,11 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
     const keywordsRaw = defaultFallback?.keywords || resolvedData?.keywords || generatedFallback.keywords;
     const keywords = Array.isArray(keywordsRaw) ? keywordsRaw.join(', ') : String(keywordsRaw || '');
 
-    const finalImageObj = defaultFallback?.image 
-        ? (typeof defaultFallback.image === 'string' ? { url: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, secureUrl: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, width: 1200, height: 630, alt: title } : defaultFallback.image)
-        : (resolvedImageObj || getSocialPreviewImage(resolvedData, {}));
+    const finalImageObj = defaultFallback?.image
+        ? (typeof defaultFallback.image === 'string'
+            ? { url: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, secureUrl: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, width: 1200, height: 630, alt: title }
+            : defaultFallback.image)
+        : (resolvedImageObj || getSocialPreviewImage(resolvedData, { image: generatedFallback.image, alt: title }));
 
     // Ensure image alt text is accurate to page title
     finalImageObj.alt = title;

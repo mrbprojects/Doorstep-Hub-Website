@@ -93,8 +93,34 @@ export function ListingCard({ listing }) {
 
       const data = await res.json();
       if (data.success || data.error === false) {
-        setLiked(data.data?.isFavorite);
-        if (data.data?.isFavorite) {
+        const isFav = data.data?.isFavorite;
+        setLiked(isFav);
+
+        // Sync localStorage
+        try {
+          const storedFavs = JSON.parse(localStorage.getItem('sell_buy_favorites') || '[]');
+          let updatedFavs = Array.isArray(storedFavs) ? storedFavs : [];
+          if (isFav) {
+            if (!updatedFavs.some((f) => (f._id || f.id) === listingId)) {
+              updatedFavs.push({
+                _id: listingId,
+                id: listingId,
+                title,
+                price,
+                image: image || coverImage || images?.[0],
+                slug,
+                city: listing.city || location?.city || 'Hyderabad',
+                status: listing.status || 'ACTIVE',
+              });
+            }
+          } else {
+            updatedFavs = updatedFavs.filter((f) => (f._id || f.id) !== listingId);
+          }
+          localStorage.setItem('sell_buy_favorites', JSON.stringify(updatedFavs));
+          window.dispatchEvent(new Event('favorites-updated'));
+        } catch (e) {}
+
+        if (isFav) {
           toast.success('Added to wishlist');
         } else {
           toast.success('Removed from wishlist');
@@ -197,6 +223,22 @@ export function ListingCard({ listing }) {
 
         {/* Title */}
         <p className="text-sm font-medium text-gray-700 line-clamp-1">{displayTitle}</p>
+
+        {/* Electronics Highlights: Warranty & Bill Micro-badges */}
+        {(listing.warranty || listing.warrantyStatus || listing.billCopy === 'Available' || listing.hasBillCopy) && (
+          <div className="flex flex-wrap items-center gap-1 my-0.5">
+            {(listing.warranty || listing.warrantyStatus) && (
+              <span className="text-[10px] font-semibold text-[#037166] bg-[#037166]/10 px-1.5 py-0.5 rounded flex items-center gap-0.5 truncate max-w-[130px]" title={listing.warrantyStatus || listing.warranty}>
+                🛡️ {listing.warrantyStatus || listing.warranty}
+              </span>
+            )}
+            {(listing.billCopy === 'Available' || listing.hasBillCopy) && (
+              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                🧾 Bill Available
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Location */}
         {displayCity && (

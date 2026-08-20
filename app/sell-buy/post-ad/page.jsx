@@ -22,12 +22,29 @@ import { SubcategoryIcon } from '@/components/sell-buy/SubcategoryIcon';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/lib/cropImage';
 
+const isElectronicsCategory = (categoryName, subcategoryName) => {
+  const text = `${categoryName || ''} ${subcategoryName || ''}`.toLowerCase();
+  return (
+    text.includes('electronic') ||
+    text.includes('appliance') ||
+    text.includes('laptop') ||
+    text.includes('computer') ||
+    text.includes('mobile') ||
+    text.includes('tablet') ||
+    text.includes('tv') ||
+    text.includes('camera') ||
+    text.includes('gadget')
+  );
+};
+
 export default function PostAdPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [billCopyFile, setBillCopyFile] = useState(null);
+  const [billCopyPreview, setBillCopyPreview] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
 
   // Cropper state
@@ -47,6 +64,9 @@ export default function PostAdPage() {
     price: '',
     isNegotiable: true,
     condition: 'used',
+    warrantyStatus: 'Under Warranty',
+    warrantyDetails: '',
+    billCopy: 'Available',
     city: 'Hyderabad',
     area: '',
     phone: '',
@@ -267,6 +287,16 @@ export default function PostAdPage() {
       }
       fd.append('price', String(Number(formData.price) || 0));
       fd.append('condition', formData.condition);
+      if (isElectronicsCategory(formData.categoryName, formData.subcategoryName)) {
+        fd.append('warranty', formData.warrantyStatus || '');
+        fd.append('warrantyStatus', formData.warrantyStatus || '');
+        fd.append('warrantyDetails', formData.warrantyDetails || '');
+        fd.append('billCopy', formData.billCopy || '');
+        fd.append('hasBillCopy', formData.billCopy === 'Available' ? 'true' : 'false');
+        if (formData.billCopy === 'Available' && billCopyFile) {
+          fd.append('bill_copy_image', billCopyFile);
+        }
+      }
       fd.append('city', formData.city);
       fd.append('state', 'Telangana');
       fd.append('phone', formData.phone);
@@ -299,7 +329,7 @@ export default function PostAdPage() {
 
       if ((data.error === false || data.success)) {
         toast.success('Ad submitted for review! We will notify you once it goes live.');
-        router.push('/sell-buy');
+        router.push('/sell-buy/dashboard');
       } else {
         toast.error(data.message || 'Failed to post advertisement');
       }
@@ -554,6 +584,193 @@ export default function PostAdPage() {
                 </div>
               </div>
 
+              {/* ── ELECTRONICS SPECIFIC INFORMATION (Warranty & Bill Copy) ── */}
+              {isElectronicsCategory(formData.categoryName, formData.subcategoryName) && (
+                <div className="bg-gradient-to-br from-teal-50/70 via-slate-50 to-emerald-50/50 border border-[#037166]/25 rounded-2xl p-5 space-y-4 shadow-xs">
+                  <div className="flex items-center justify-between border-b border-teal-100/80 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-7 h-7 rounded-xl bg-[#037166] text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                        ⚡
+                      </span>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                          Electronics Specific Information
+                        </h4>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          Warranty status and original invoice availability for electronic devices
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-black uppercase px-2.5 py-1 bg-[#037166]/10 text-[#037166] rounded-full">
+                      Electronics Only
+                    </span>
+                  </div>
+
+                  {/* 1. Warranty Information */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Warranty Information *
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {[
+                        { label: 'Under Warranty', value: 'Under Warranty', icon: '🛡️' },
+                        { label: 'Brand Warranty', value: 'Brand Warranty', icon: '🏷️' },
+                        { label: 'Out of Warranty', value: 'Out of Warranty', icon: '⏱️' },
+                        { label: 'No Warranty', value: 'No Warranty', icon: '✕' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => handleChange('warrantyStatus', opt.value)}
+                          className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${
+                            formData.warrantyStatus === opt.value
+                              ? 'border-[#037166] bg-[#037166] text-white shadow-xs ring-2 ring-[#037166]/20'
+                              : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                          }`}
+                        >
+                          <span>{opt.icon}</span>
+                          <span className="truncate">{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {(formData.warrantyStatus === 'Under Warranty' || formData.warrantyStatus === 'Brand Warranty') && (
+                      <div className="pt-1.5">
+                        <input
+                          type="text"
+                          placeholder="Warranty duration / details (e.g. 6 Months Remaining, AppleCare+ till Dec 2026)"
+                          value={formData.warrantyDetails}
+                          onChange={(e) => handleChange('warrantyDetails', e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3.5 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-[#037166] focus:outline-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 2. Bill Copy Availability */}
+                  <div className="space-y-2 pt-3 border-t border-teal-100/60">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Original Bill / Invoice Copy Available? *
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleChange('billCopy', 'Available')}
+                        className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left cursor-pointer ${
+                          formData.billCopy === 'Available'
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20'
+                            : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                        }`}
+                      >
+                        <span className="text-xl">🧾</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold">Bill Copy Available</p>
+                          <p className="text-[11px] text-slate-500">I have original invoice / purchase bill copy</p>
+                        </div>
+                        {formData.billCopy === 'Available' && (
+                          <span className="text-xs font-bold text-emerald-600">✓ Selected</span>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleChange('billCopy', 'Not Available')}
+                        className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left cursor-pointer ${
+                          formData.billCopy === 'Not Available'
+                            ? 'border-amber-500 bg-amber-50 text-amber-900 ring-2 ring-amber-500/20'
+                            : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                        }`}
+                      >
+                        <span className="text-xl">📄</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold">Bill Copy Not Available</p>
+                          <p className="text-[11px] text-slate-500">Bill or invoice is not available</p>
+                        </div>
+                        {formData.billCopy === 'Not Available' && (
+                          <span className="text-xs font-bold text-amber-600">✓ Selected</span>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* ── Bill Copy Image Upload (when Available) ── */}
+                    {formData.billCopy === 'Available' && (
+                      <div className="mt-3 p-4 bg-white border border-emerald-200 rounded-2xl space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                            <span className="text-base">📸</span>
+                            <span>Upload Bill / Invoice Copy Image</span>
+                          </label>
+                          <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                            Invoice Photo
+                          </span>
+                        </div>
+
+                        {billCopyPreview ? (
+                          <div className="flex items-center gap-4">
+                            <div className="relative group">
+                              <img
+                                src={billCopyPreview}
+                                alt="Bill Copy Preview"
+                                className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl border-2 border-emerald-500 shadow-sm"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBillCopyFile(null);
+                                  setBillCopyPreview('');
+                                }}
+                                className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                                title="Remove Bill Copy"
+                              >
+                                <span className="text-xs font-bold">✕</span>
+                              </button>
+                            </div>
+                            <div className="text-xs space-y-1.5">
+                              <p className="font-bold text-emerald-700 flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                <span>Bill Copy Attached</span>
+                              </p>
+                              <p className="text-[11px] text-slate-500">
+                                {billCopyFile?.name || 'Invoice Image'}
+                              </p>
+                              <label
+                                htmlFor="page-bill-upload"
+                                className="inline-block text-xs text-[#037166] font-bold hover:underline cursor-pointer"
+                              >
+                                Change Image
+                              </label>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              id="page-bill-upload"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setBillCopyFile(file);
+                                  setBillCopyPreview(URL.createObjectURL(file));
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor="page-bill-upload"
+                              className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-xl bg-emerald-50/40 hover:bg-emerald-50/80 cursor-pointer transition-colors text-xs font-bold text-emerald-800"
+                            >
+                              <Upload className="w-4 h-4 text-emerald-600" />
+                              <span>Click to browse & upload Bill / Invoice copy image</span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-between pt-4">
                 <button
                   type="button"
@@ -734,7 +951,7 @@ export default function PostAdPage() {
 
                 <p className="text-xs text-slate-600 leading-relaxed">{formData.description || 'No description provided.'}</p>
 
-                <div className="flex items-center gap-4 text-xs text-slate-500 border-t border-slate-200 pt-3">
+                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 border-t border-slate-200 pt-3">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-slate-400" />
                     <span>{formData.area ? `${formData.area}, ${formData.city}` : formData.city}</span>
@@ -743,6 +960,27 @@ export default function PostAdPage() {
                     <Tag className="w-3.5 h-3.5 text-slate-400" />
                     <span className="capitalize">{formData.condition}</span>
                   </div>
+                  {isElectronicsCategory(formData.categoryName, formData.subcategoryName) && (
+                    <>
+                      <div className="flex items-center gap-1 text-[#037166] font-semibold">
+                        <span>🛡️</span>
+                        <span>Warranty: {formData.warrantyStatus || 'No Warranty'}{formData.warrantyDetails ? ` (${formData.warrantyDetails})` : ''}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>🧾</span>
+                        <span className={formData.billCopy === 'Available' ? 'text-emerald-600 font-bold' : 'text-slate-500'}>
+                          Bill: {formData.billCopy === 'Available' ? 'Available' : 'Not Available'}
+                        </span>
+                        {billCopyPreview && (
+                          <img
+                            src={billCopyPreview}
+                            alt="Bill Copy Thumbnail"
+                            className="w-7 h-7 object-cover rounded-md border border-emerald-300 ml-1"
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

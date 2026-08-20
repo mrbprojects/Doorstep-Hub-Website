@@ -18,6 +18,8 @@ import {
 } from '@/lib/sellBuyApi';
 import { ChevronLeft, ChevronRight, MapPin, Search, Plus, Globe, Menu, ShoppingBag, Sparkles, Tag, ShieldCheck, Grid, Loader2, SearchX, X, ArrowRight, Navigation, ChevronDown, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 // ─── DUAL PROMOTIONAL BANNER SECTION (MATCHING CHOTA BETA REFERENCE) ──────────
 function DualBannerSection({ sliders, onPostAdClick }) {
@@ -288,6 +290,11 @@ export default function SellBuyHomePage() {
       {/* Dual Promotional Banner Cards */}
       <DualBannerSection sliders={sliders} onPostAdClick={handleOpenPostAdModal} />
 
+      {/* ── PLACEMENT 1: TOP BODY UNIT ── */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <AdSenseUnit slotId={ADSENSE_CONFIG.slots.sellBuyTop} />
+      </div>
+
       {/* Popular Categories */}
       <PopularCategories categories={categories} isLoading={isLoading} />
 
@@ -312,6 +319,11 @@ export default function SellBuyHomePage() {
           />
         )
       )}
+
+      {/* ── PLACEMENT 2: IN-FEED / MID-BODY UNIT ── */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <AdSenseUnit slotId={ADSENSE_CONFIG.slots.sellBuyFeed} />
+      </div>
 
       {/* Fresh Recommendations / All Items */}
       <ItemSection

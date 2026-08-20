@@ -8,6 +8,8 @@ import { ListingCard, ListingGridSkeleton } from '@/components/sell-buy/cards/Li
 import { fetchSellBuyListings } from '@/lib/sellBuyApi';
 import { Grid, ChevronRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 export default function CategoryClient({ slug }) {
   const [listings, setListings] = useState([]);
@@ -59,15 +61,35 @@ export default function CategoryClient({ slug }) {
           </p>
         </div>
 
+        {/* ── PLACEMENT 1: CATEGORY TOP RESPONSIVE UNIT ── */}
+        <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryTop} />
+
         {/* Listings Grid */}
         {isLoading ? (
           <ListingGridSkeleton count={8} />
         ) : listings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {listings.map((item) => (
-              <ListingCard key={item._id} listing={item} />
-            ))}
-          </div>
+          <>
+            {/* First Batch of Listings */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {listings.slice(0, 8).map((item) => (
+                <ListingCard key={item._id} listing={item} />
+              ))}
+            </div>
+
+            {/* ── PLACEMENT 2: IN-FEED UNIT (Rendered only if >= 6 listings) ── */}
+            {listings.length >= 6 && (
+              <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
+            )}
+
+            {/* Remaining Listings */}
+            {listings.length > 8 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {listings.slice(8).map((item) => (
+                  <ListingCard key={item._id} listing={item} />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4 max-w-md mx-auto">
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">

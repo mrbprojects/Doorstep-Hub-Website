@@ -13,6 +13,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { DynamicSEO } from './components/ui/DynamicSEO';
 import dynamic from 'next/dynamic';
 import { GOOGLE_MAPS_API_KEY, IMAGE_BASE_URL } from './config/env';
+import { AdSenseScriptLoader } from './components/sell-buy/ads/AdSenseScriptLoader';
 
 // const InitialLocationModal = dynamic(() => import('./components/location/InitialLocationModal').then(m => m.InitialLocationModal), { ssr: false });
 const FloatingActionButtons = dynamic(() => import('./components/ui/FloatingActionButtons').then(m => m.FloatingActionButtons), { ssr: false });
@@ -148,6 +149,9 @@ export default function RootLayout({ children }) {
           src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=__onGoogleMapsLoaded&v=weekly`}
           strategy="afterInteractive"
         />
+
+        {/* Google AdSense Script Loader for Eligible Public Routes */}
+        <AdSenseScriptLoader />
 
         <ErrorBoundary>
           <DynamicSEO />

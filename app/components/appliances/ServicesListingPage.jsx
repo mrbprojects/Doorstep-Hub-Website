@@ -6,6 +6,8 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, DollarSign, Filter, X, Zap, RotateCcw, ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 export function ServicesListingPage({ category, subCategory, subCategoryId, childCategoryId, slug }) {
   const router = useRouter();
@@ -724,6 +726,11 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* ── RESPONSIVE ADSENSE UNIT ── */}
+            <div className="my-8">
+              <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
+            </div>
 
             {/* FAQs Accordion Section */}
             {(() => {

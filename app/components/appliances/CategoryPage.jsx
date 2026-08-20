@@ -20,6 +20,8 @@ import {
   Download,
   TicketCheck
 } from 'lucide-react';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 // Default theme settings
 const defaultTheme = {
@@ -533,6 +535,10 @@ export function CategoryPage({ slug, initialData }) {
 
               {/* All Other Subcategories - Compact Grid (Remaining) */}
 
+              {/* ── RESPONSIVE ADSENSE UNIT ── */}
+              <div className="my-8">
+                <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
+              </div>
 
               {/* FAQ Section */}
               {(() => {

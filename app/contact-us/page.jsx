@@ -10,6 +10,8 @@ import {
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { toast } from 'sonner';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 export default function ContactUsPage() {
     const [settings, setSettings] = useState(null);
@@ -576,6 +578,11 @@ export default function ContactUsPage() {
                         </div>
                     </section>
                 )}
+
+                {/* ── RESPONSIVE ADSENSE UNIT ── */}
+                <div className="max-w-4xl mx-auto px-6 py-6">
+                    <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
+                </div>
             </div>
 
             <Footer />

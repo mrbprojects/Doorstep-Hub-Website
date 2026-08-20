@@ -11,6 +11,8 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { API_BASE_URL, getImageUrl } from '@/config/env';
 import { motion } from 'motion/react';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 const appliancesTheme = {
   bgScrolled: 'bg-white/80',
@@ -282,6 +284,11 @@ function BookNowPageContent() {
             </div>
           </div>
         </div>
+        </div>
+
+        {/* ── RESPONSIVE ADSENSE UNIT ── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8">
+          <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
         </div>
       </main>
 

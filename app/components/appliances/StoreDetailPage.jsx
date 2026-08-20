@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
 import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
@@ -1235,6 +1237,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ── RESPONSIVE ADSENSE UNIT ── */}
+        <div className="my-8">
+          <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
+        </div>
       </div>
 
       <AnimatePresence>

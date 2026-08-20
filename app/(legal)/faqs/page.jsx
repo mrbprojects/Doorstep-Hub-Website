@@ -16,6 +16,8 @@ import { API_BASE_URL } from '@/config/env';
 import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 import LegalNavTabs from '@/components/legal/LegalNavTabs';
 import PolicyRoleBar from '@/components/legal/PolicyRoleBar';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 export default function FAQPage() {
     const [activeTab, setActiveTab] = useState('customer app');
@@ -174,6 +176,11 @@ export default function FAQPage() {
                             ))}
                         </div>
                     )}
+                </div>
+
+                {/* ── RESPONSIVE ADSENSE UNIT ── */}
+                <div className="w-full my-6">
+                    <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
                 </div>
 
                 {/* Support Section */}

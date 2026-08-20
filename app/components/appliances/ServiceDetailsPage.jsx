@@ -13,6 +13,8 @@ import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
 import { API_BASE_URL } from '@/config/env';
+import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
+import { ADSENSE_CONFIG } from '@/config/adsense';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -1010,6 +1012,11 @@ export function ServiceDetailsPage({
           </section>
         );
       })()}
+
+      {/* Responsive AdSense placement for public appliance service pages. */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
+      </div>
 
       {/* Related Services Section */}
       {relatedServices.length > 0 && (

@@ -39,13 +39,13 @@ export const ADSENSE_CONFIG = {
 };
 
 /**
- * Validates if the current pathname is an eligible public Sell & Buy page.
- * Returns false for private, dashboard, checkout, authentication, or modal routes.
+ * Validates if the current pathname is an eligible public page.
+ * Returns false for private, dashboard, checkout, authentication, or booking modal routes.
  */
 export function isAdSenseEligiblePath(pathname) {
   if (!pathname || typeof pathname !== 'string') return false;
 
-  // Explicitly Excluded Routes (Dashboard, Auth, Checkout, Chat, Modals, etc.)
+  // Explicitly Excluded Routes (Dashboard, Auth, Checkout, Booking Checkout, Chat, Admin, etc.)
   const excludedPatterns = [
     /^\/sell-buy\/dashboard(\/.*)?$/,
     /^\/sell-buy\/post-ad(\/.*)?$/,
@@ -54,10 +54,14 @@ export function isAdSenseEligiblePath(pathname) {
     /^\/login(\/.*)?$/,
     /^\/auth(\/.*)?$/,
     /^\/book-appointment(\/.*)?$/,
-    /^\/book-now(\/.*)?$/,
+    /^\/booking(\/.*)?$/,
     /^\/checkout(\/.*)?$/,
     /^\/cart(\/.*)?$/,
+    /^\/thank-you(\/.*)?$/,
+    /^\/thank-you-cod(\/.*)?$/,
+    /^\/payment-failed(\/.*)?$/,
     /^\/api(\/.*)?$/,
+    /^\/admin(\/.*)?$/,
   ];
 
   for (const pattern of excludedPatterns) {
@@ -66,14 +70,6 @@ export function isAdSenseEligiblePath(pathname) {
     }
   }
 
-  // Eligible Public Sell & Buy Routes
-  const eligiblePatterns = [
-    /^\/sell-buy\/?$/,
-    /^\/sell-buy\/categories\/?$/,
-    /^\/sell-buy\/search\/?$/,
-    /^\/sell-buy\/ad\/[^/]+$/,
-    /^\/sell-buy\/[^/]+$/,
-  ];
-
-  return eligiblePatterns.some((pattern) => pattern.test(pathname));
+  // All other public content pages (Sell & Buy, Appliances, Categories, Problems, Service Centers, Brand pages, Nearby, FAQs, Contact Us, etc.) are eligible
+  return true;
 }

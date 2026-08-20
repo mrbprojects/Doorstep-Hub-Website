@@ -1,12 +1,16 @@
-import { API_BASE_URL, IMAGE_BASE_URL, SITE_URL as BASE_URL, getImageUrl } from '@/config/env';
+import { API_BASE_URL, IMAGE_BASE_URL, SITE_URL as BASE_URL, getImageUrl } from '../config/env.js';
 
-// Helper to capitalize words from a slug (e.g., ac-repair -> AC Repair)
-function slugToTitle(slug) {
-    if (!slug) return '';
-    return slug
+/**
+ * Capitalizes words from a slug (e.g., ac-repair -> AC Repair, guguloth-raju -> Guguloth Raju)
+ */
+export function slugToTitle(slug) {
+    if (!slug || typeof slug !== 'string') return '';
+    const clean = slug.split('?')[0].replace(/^\/+|\/+$/g, '');
+    const lastPart = clean.split('/').pop() || clean;
+    return lastPart
         .split('-')
         .map(word => {
-            if (['ac', 'pc', 'tv', 'ro', 'pg'].includes(word.toLowerCase())) {
+            if (['ac', 'pc', 'tv', 'ro', 'pg', 'led', 'lcd', 'cctv', 'dsh', 'amc', 'otp'].includes(word.toLowerCase())) {
                 return word.toUpperCase();
             }
             return word.charAt(0).toUpperCase() + word.slice(1);
@@ -14,16 +18,106 @@ function slugToTitle(slug) {
         .join(' ');
 }
 
-// Generates highly optimized fallback tags for different business verticals
-function getFallbackMetadata(path) {
-    const normalizedPath = path.toLowerCase().replace(/\/$/, '');
+/**
+ * Validates and converts an image path to an absolute HTTPS URL.
+ */
+function cleanAbsoluteImageUrl(raw) {
+    if (!raw || typeof raw !== 'string') return null;
+    const trimmed = raw.trim();
+    if (!trimmed || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) return null;
+    if (trimmed.includes('default_image.jpg') || trimmed.includes('default_profile')) return null;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed.replace('http://', 'https://');
+    }
+    const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return `${IMAGE_BASE_URL}${path}`;
+}
 
-    // Default site fallback
-    const defaultMeta = {
-        title: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
-        description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.',
-        keywords: ['home services', 'doorstep repair', 'appliance repair', 'spa home services', 'pandits online', 'pg hostels']
+/**
+ * Centralized Social Preview Image Selector
+ * Evaluates candidate images in priority order and returns a valid absolute 1200x630 Open Graph image.
+ * 
+ * Priority:
+ * 1. Page-specific banner / featured image
+ * 2. Main visible image on that page
+ * 3. First valid content / gallery / document image
+ * 4. Provider / Profile image (when provider is primary subject)
+ * 5. Category image
+ * 6. Child service images (from extra data)
+ * 7. Global fallback social card (1200x630)
+ */
+export function getSocialPreviewImage(data = {}, extra = {}) {
+    const candidates = [
+        // 1. Featured / Banner Images
+        data?.featuredImage,
+        data?.featured_image,
+        data?.bannerImage,
+        data?.banner_image,
+        Array.isArray(data?.banner_images) ? data.banner_images[0] : null,
+        data?.banner,
+
+        // 2. Main Image / Cover Image
+        data?.mainImage,
+        data?.main_image,
+        data?.coverImage,
+        data?.cover_image,
+        data?.image,
+        Array.isArray(data?.images) ? data.images[0] : null,
+
+        // 3. Provider / Profile / Logo Image
+        data?.logo,
+        data?.profile_image,
+        data?.profilePic,
+        data?.avatar,
+
+        // 4. Content / Gallery / Document Images
+        Array.isArray(data?.gallery) ? data.gallery[0] : null,
+        Array.isArray(data?.business_images) ? data.business_images[0] : null,
+        Array.isArray(data?.subCategories) && data.subCategories[0]?.image ? data.subCategories[0].image : null,
+        Array.isArray(data?.data) && data.data[0]?.image ? data.data[0].image : null,
+
+        // 5. Category Image
+        data?.categoryImage,
+        data?.category_image,
+        data?.categoryId?.image,
+        data?.category?.image,
+
+        // 6. Child Services Images from extraData
+        Array.isArray(extra?.services) && extra.services[0]?.image ? extra.services[0].image : null,
+        Array.isArray(extra?.services) && Array.isArray(extra.services[0]?.banner_images) ? extra.services[0].banner_images[0] : null,
+    ];
+
+    for (const candidate of candidates) {
+        const valid = cleanAbsoluteImageUrl(candidate);
+        if (valid) {
+            return {
+                url: valid,
+                secureUrl: valid,
+                width: 1200,
+                height: 630,
+                alt: data?.title || data?.name || data?.business_name || 'Doorstep Hub Service',
+                type: valid.endsWith('.png') ? 'image/png' : valid.endsWith('.webp') ? 'image/webp' : 'image/jpeg'
+            };
+        }
+    }
+
+    // High-resolution global fallback
+    const fallbackUrl = `${BASE_URL}/d-hub-logo.png`;
+    return {
+        url: fallbackUrl,
+        secureUrl: fallbackUrl,
+        width: 1200,
+        height: 630,
+        alt: 'Doorstep Hub | Home & Appliance Services',
+        type: 'image/png'
     };
+}
+
+/**
+ * Generates highly optimized fallback tags for different business verticals
+ */
+export function getFallbackMetadata(path) {
+    const normalizedPath = (path || '/').toLowerCase().replace(/\/$/, '');
 
     // AMC Services Fallback
     if (normalizedPath.startsWith('/amc')) {
@@ -34,7 +128,18 @@ function getFallbackMetadata(path) {
         };
     }
 
-    // 1. Spa & Salon Services
+    // 1. Service List / Provider Detail Fallback (e.g. /service-list/guguloth-raju)
+    if (normalizedPath.startsWith('/service-list/')) {
+        const slug = normalizedPath.replace('/service-list/', '');
+        const name = slugToTitle(slug);
+        return {
+            title: `${name} | Doorstep Hub Verified Service Provider`,
+            description: `Book trusted, certified home appliance and repair services from ${name} on Doorstep Hub. Transparent pricing, verified professionals, and complete warranty.`,
+            keywords: [slug, `${name} service`, `${name} hyderabad`, 'doorstep repair', 'verified provider']
+        };
+    }
+
+    // 2. Spa & Salon Services
     if (normalizedPath.startsWith('/spa-salon/')) {
         const subPath = normalizedPath.replace('/spa-salon/', '');
         if (subPath) {
@@ -47,7 +152,7 @@ function getFallbackMetadata(path) {
         }
     }
 
-    // 2. Religious / Puja Services
+    // 3. Religious / Puja Services
     if (normalizedPath.startsWith('/religious-services/')) {
         const subPath = normalizedPath.replace('/religious-services/', '');
         if (subPath) {
@@ -60,7 +165,7 @@ function getFallbackMetadata(path) {
         }
     }
 
-    // 3. PG & Hostels
+    // 4. PG & Hostels
     if (normalizedPath.startsWith('/pghostels/')) {
         const subPath = normalizedPath.replace('/pghostels/', '');
         if (subPath) {
@@ -73,7 +178,7 @@ function getFallbackMetadata(path) {
         }
     }
 
-    // 4. Appliance Brand Repair Route: /[city]/[category]/[brand] or /[city]/[brand]
+    // 5. Appliance Brand Repair Route
     const brandRegex = /\/(appliances\/repair-service|(?![a-zA-Z0-9-]+\.))[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/;
     if (brandRegex.test(normalizedPath)) {
         const parts = normalizedPath.replace(/^\/(appliances\/repair-service\/)?/, '').split('/');
@@ -105,7 +210,7 @@ function getFallbackMetadata(path) {
         };
     }
 
-    // 5. Appliance Category/City Route: /appliances/repair-service/[city]/[category]
+    // 6. Appliance Category/City Route
     const catCityRegex = /\/appliances\/repair-service\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/;
     if (catCityRegex.test(normalizedPath)) {
         const parts = normalizedPath.replace('/appliances/repair-service/', '').split('/');
@@ -120,18 +225,7 @@ function getFallbackMetadata(path) {
         }
     }
 
-    // 6. Appliance City Route: /appliances/repair-service/[city]
-    const cityRegex = /\/appliances\/repair-service\/[a-zA-Z0-9-]+$/;
-    if (cityRegex.test(normalizedPath)) {
-        const city = slugToTitle(normalizedPath.split('/').pop());
-        return {
-            title: `Best Home Appliance Repair & Services in ${city} | Doorstep Hub`,
-            description: `Book trusted home appliance repair and maintenance services in ${city}. Certified technicians for AC, Refrigerator, ReRO, Washing Machine repair.`,
-            keywords: [`appliance repair ${city}`, `washing machine repair ${city}`, `fridge repair ${city}`]
-        };
-    }
-
-    // 7. General Slug Fallback (e.g. /geyser-repair-service)
+    // 7. General Single Slug Fallback (e.g. /geyser-repair-service)
     const singleSlug = normalizedPath.replace(/^\//, '');
     if (singleSlug && !singleSlug.includes('/')) {
         const name = slugToTitle(singleSlug);
@@ -142,7 +236,12 @@ function getFallbackMetadata(path) {
         };
     }
 
-    return defaultMeta;
+    // Default site fallback
+    return {
+        title: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
+        description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking System, Lifestyle and Religious services across India.',
+        keywords: ['home services', 'doorstep repair', 'appliance repair', 'spa home services', 'pandits online', 'pg hostels']
+    };
 }
 
 /**
@@ -155,10 +254,11 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
     const cleanPath = (rawPath || '/').split('?')[0].replace(/\/$/, '') || '/';
     const canonicalUrl = `${BASE_URL}${cleanPath === '/' ? '' : cleanPath}`;
 
-    let seoData = null;
+    let resolvedData = null;
+    let resolvedImageObj = null;
 
     try {
-        // Resolve dynamic endpoints based on route patterns (matching DynamicSEO client component logic)
+        // 1. Service Details endpoint (/details/[slug])
         if (cleanPath.includes('/details/')) {
             const slug = cleanPath.split('/details/').pop();
             const response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/dhub_service_details/${slug}`, {
@@ -169,32 +269,106 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             });
             if (response.ok) {
                 const result = await response.json();
-                if (result.success && result.seo) {
-                    seoData = result.seo;
+                if (result.success) {
+                    resolvedData = {
+                        title: result.seo?.title || result.data?.name || result.data?.title,
+                        description: result.seo?.description || result.data?.description,
+                        keywords: result.seo?.keywords,
+                    };
+                    resolvedImageObj = getSocialPreviewImage(result.data || result);
                 }
             }
-        } else if (cleanPath.includes('/store/') || cleanPath.includes('/service-list/')) {
-            const id = cleanPath.includes('/store/') ? cleanPath.split('/store/').pop() : cleanPath.split('/service-list/').pop();
-            const response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/service_center_services/${id}`, {
+        }
+        // 2. Service Center / Store / Service List (/service-list/[slug] or /store/[slug])
+        else if (cleanPath.includes('/store/') || cleanPath.includes('/service-list/')) {
+            const slug = cleanPath.includes('/store/') ? cleanPath.split('/store/').pop() : cleanPath.split('/service-list/').pop();
+            const response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/service_center_services/${slug}`, {
                 next: { revalidate: 3600 }
             });
             if (response.ok) {
                 const result = await response.json();
-                if (result.success && result.serviceCenter?.seo) {
-                    seoData = result.serviceCenter.seo;
+                if (result.success && result.serviceCenter) {
+                    const sc = result.serviceCenter;
+                    resolvedData = {
+                        title: sc.seo?.title || sc.metaTitle || (sc.business_name ? `${sc.business_name} | Doorstep Hub` : null) || (sc.name ? `${sc.name} | Doorstep Hub` : null),
+                        description: sc.seo?.description || sc.metaDescription || sc.bio,
+                        keywords: sc.seo?.keywords || sc.metakeywords,
+                    };
+                    resolvedImageObj = getSocialPreviewImage(sc, { services: result.services });
                 }
             }
         }
+        // 3. Sell & Buy Category or Ad
+        else if (cleanPath.startsWith('/sell-buy/')) {
+            const sub = cleanPath.replace('/sell-buy/', '');
+            if (sub.startsWith('ad/')) {
+                const adSlug = sub.replace('ad/', '');
+                try {
+                    const res = await fetch(`${API_BASE_URL}/sell-buy/listings/${adSlug}`, { next: { revalidate: 60 } });
+                    if (res.ok) {
+                        const json = await res.json();
+                        const listing = json.data?.listing;
+                        if (listing) {
+                            resolvedData = {
+                                title: `${listing.title} | Buy & Sell on Doorstep Hub`,
+                                description: listing.description?.substring(0, 160) || `Buy and sell ${listing.title} on Doorstep Hub.`,
+                            };
+                            resolvedImageObj = getSocialPreviewImage(listing);
+                        }
+                    }
+                } catch(e) {}
+            } else if (!sub.includes('/')) {
+                // Category page
+                const catName = slugToTitle(sub);
+                resolvedData = {
+                    title: `Buy & Sell Used ${catName} | Doorstep Hub Marketplace`,
+                    description: `Find verified pre-owned ${catName} at best prices. Browse local listings with inspection guarantee and direct buyer-seller chat on Doorstep Hub.`,
+                };
+            }
+        }
+        // 4. Root Slug / Category / Subcategory (/side-by-side-door-refrigerator-repair, etc.)
+        else if (cleanPath.startsWith('/') && !cleanPath.includes('/', 1)) {
+            const slug = cleanPath.slice(1);
+            // Try fetching category/subcategory
+            try {
+                const catResponse = await fetch(`${API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slug }),
+                    next: { revalidate: 3600 }
+                });
+                if (catResponse.ok) {
+                    const catData = await catResponse.json();
+                    if (catData.success && Array.isArray(catData.data) && catData.data.length > 0) {
+                        const name = catData.categoryName || slugToTitle(slug);
+                        resolvedData = {
+                            title: `Best ${name} Services | Doorstep Hub`,
+                            description: `Book top-rated doorstep ${name} by certified technicians. Transparent pricing, genuine spare parts, and doorstep service.`,
+                            keywords: [slug, `${name} service`, `${name} repair`, 'doorstep service']
+                        };
+                        resolvedImageObj = getSocialPreviewImage(catData);
+                    }
+                }
+            } catch (catErr) {
+                // Ignore and fall through
+            }
+        }
 
-        // Fallback to Smart SEO API if not resolved yet
-        if (!seoData) {
+        // 4. Fallback to Smart SEO API if not resolved yet
+        if (!resolvedData) {
             const response = await fetch(`${API_BASE_URL}/web/seo/get-page-seo?path=${encodeURIComponent(cleanPath)}`, {
                 next: { revalidate: 3600 }
             });
             if (response.ok) {
                 const result = await response.json();
                 if (result.success && result.data) {
-                    seoData = result.data.data || result.data;
+                    const d = result.data.data || result.data;
+                    if (d.title && d.title !== 'Doorstep Hub | One-Stop Home & Lifestyle Services in India') {
+                        resolvedData = d;
+                        if (!resolvedImageObj) {
+                            resolvedImageObj = getSocialPreviewImage(d);
+                        }
+                    }
                 }
             }
         }
@@ -202,27 +376,20 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
         console.error(`[SEO Server] Error fetching SEO metadata for path ${cleanPath}:`, error);
     }
 
-    // Determine fallback values
+    // Determine accurate fallback values
     const generatedFallback = getFallbackMetadata(cleanPath);
-    const title = seoData?.title && seoData.title !== 'Doorstep Hub | One-Stop Home & Lifestyle Services in India'
-        ? seoData.title
-        : (defaultFallback?.title || generatedFallback.title);
+    const title = defaultFallback?.title || resolvedData?.title || generatedFallback.title;
+    const description = defaultFallback?.description || resolvedData?.description || generatedFallback.description;
 
-    const description = seoData?.description && seoData.description !== 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.'
-        ? seoData.description
-        : (defaultFallback?.description || generatedFallback.description);
-
-    const keywordsRaw = seoData?.keywords || defaultFallback?.keywords || generatedFallback.keywords;
+    const keywordsRaw = defaultFallback?.keywords || resolvedData?.keywords || generatedFallback.keywords;
     const keywords = Array.isArray(keywordsRaw) ? keywordsRaw.join(', ') : String(keywordsRaw || '');
 
-    let rawImageUrl = seoData?.image || defaultFallback?.image || generatedFallback?.image;
-    let imageUrl = `${BASE_URL}/d-hub-logo.png`;
+    const finalImageObj = defaultFallback?.image 
+        ? (typeof defaultFallback.image === 'string' ? { url: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, secureUrl: cleanAbsoluteImageUrl(defaultFallback.image) || `${BASE_URL}/d-hub-logo.png`, width: 1200, height: 630, alt: title } : defaultFallback.image)
+        : (resolvedImageObj || getSocialPreviewImage(resolvedData, {}));
 
-    if (rawImageUrl && typeof rawImageUrl === 'string') {
-        imageUrl = getImageUrl(rawImageUrl);
-    } else if (cleanPath.startsWith('/amc')) {
-        imageUrl = getImageUrl('/uploads/Doorstep-Hub-AMC-Service.png');
-    }
+    // Ensure image alt text is accurate to page title
+    finalImageObj.alt = title;
 
     return {
         metadataBase: new URL(BASE_URL),
@@ -239,12 +406,12 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             siteName: 'Doorstep Hub',
             images: [
                 {
-                    url: imageUrl,
-                    secureUrl: imageUrl,
-                    width: 1200,
-                    height: 630,
+                    url: finalImageObj.url,
+                    secureUrl: finalImageObj.secureUrl || finalImageObj.url,
+                    width: finalImageObj.width || 1200,
+                    height: finalImageObj.height || 630,
                     alt: title,
-                    type: imageUrl.endsWith('.png') ? 'image/png' : imageUrl.endsWith('.webp') ? 'image/webp' : 'image/jpeg'
+                    type: finalImageObj.url.endsWith('.png') ? 'image/png' : finalImageObj.url.endsWith('.webp') ? 'image/webp' : 'image/jpeg'
                 },
             ],
             locale: 'en_IN',
@@ -254,12 +421,7 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
             card: 'summary_large_image',
             title,
             description,
-            images: [
-                {
-                    url: imageUrl,
-                    alt: title
-                }
-            ],
+            images: [finalImageObj.url],
         },
         robots: {
             index: true,
@@ -291,4 +453,3 @@ export function generateImageObjectSchema({ url, title, caption, width = 1200, h
         'height': height
     };
 }
-

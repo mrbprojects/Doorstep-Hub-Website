@@ -49,6 +49,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '@/config/env';
 
 export default function MarketplaceDashboardPage() {
   const router = useRouter();
@@ -59,6 +60,12 @@ export default function MarketplaceDashboardPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [emailInput, setEmailInput] = useState('');
+  const [initialEmail, setInitialEmail] = useState('');
+  const [emailOtp, setEmailOtp] = useState('');
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [sendingEmailOtp, setSendingEmailOtp] = useState(false);
+  const [verifyingEmailOtp, setVerifyingEmailOtp] = useState(false);
   const [profileImgFile, setProfileImgFile] = useState(null);
   const [profileImgPreview, setProfileImgPreview] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -303,7 +310,12 @@ export default function MarketplaceDashboardPage() {
       !rawAvatar.includes('default_image.jpg') &&
       !rawAvatar.includes('default_profile');
     setNameInput(activeUser?.name || '');
-    setEmailInput(activeUser?.email || '');
+    const existingEmail = activeUser?.email || '';
+    setEmailInput(existingEmail);
+    setInitialEmail(existingEmail);
+    setEmailOtp('');
+    setEmailOtpSent(false);
+    setEmailVerified(Boolean(activeUser?.emailVerifiedAt));
     setProfileImgPreview(hasCustom ? getImageUrl(rawAvatar) : null);
     setProfileImgFile(null);
     setIsProfileModalOpen(true);
@@ -324,6 +336,85 @@ export default function MarketplaceDashboardPage() {
     setProfileImgPreview(URL.createObjectURL(file));
   };
 
+  const isEmailChanged = emailInput.trim().toLowerCase() !== initialEmail.trim().toLowerCase();
+
+  const handleEmailChange = (value) => {
+    setEmailInput(value);
+    if (value.trim().toLowerCase() !== initialEmail.trim().toLowerCase()) {
+      setEmailVerified(false);
+    } else {
+      setEmailVerified(Boolean(activeUser?.emailVerifiedAt));
+    }
+    setEmailOtp('');
+    setEmailOtpSent(false);
+  };
+
+  const handleSendEmailOtp = async () => {
+    const email = emailInput.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    if (!authToken) {
+      toast.error('Please sign in again to verify your email');
+      return;
+    }
+
+    try {
+      setSendingEmailOtp(true);
+      const response = await fetch(`${API_BASE_URL}/app/user/profile/email-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to send verification code');
+      }
+      setEmailOtpSent(true);
+      setEmailVerified(false);
+      toast.success(data.message || 'Verification code sent');
+    } catch (err) {
+      toast.error(err.message || 'Failed to send verification code');
+    } finally {
+      setSendingEmailOtp(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async () => {
+    const email = emailInput.trim().toLowerCase();
+    if (!/^\d{6}$/.test(emailOtp)) {
+      toast.error('Enter the six-digit verification code');
+      return;
+    }
+
+    try {
+      setVerifyingEmailOtp(true);
+      const response = await fetch(`${API_BASE_URL}/app/user/profile/verify-email-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ email, otp: emailOtp }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Invalid verification code');
+      }
+      setEmailVerified(true);
+      setEmailOtpSent(false);
+      toast.success('Email verified successfully');
+    } catch (err) {
+      toast.error(err.message || 'Failed to verify email');
+    } finally {
+      setVerifyingEmailOtp(false);
+    }
+  };
+
   const handleSaveProfile = async (e) => {
     if (e) e.preventDefault();
     const trimmedName = nameInput.trim();
@@ -335,6 +426,10 @@ export default function MarketplaceDashboardPage() {
     }
     if (trimmedEmail && (!trimmedEmail.includes('@') || !trimmedEmail.includes('.'))) {
       toast.error('Please enter a valid email address');
+      return;
+    }
+    if (trimmedEmail && isEmailChanged && !emailVerified) {
+      toast.error('Verify your new email address before saving');
       return;
     }
 
@@ -850,7 +945,7 @@ export default function MarketplaceDashboardPage() {
                       className="bg-[#037166] hover:bg-[#025951] text-white font-extrabold text-xs px-6 py-3.5 rounded-md shadow-md transition-all flex items-center gap-2"
                     >
                       <PlusCircle className="w-4 h-4" />
-                      <span>POST NEW FREE AD</span>
+                      <span>Post AD Free Now</span>
                     </button>
 
                     {logout && (
@@ -1631,17 +1726,63 @@ export default function MarketplaceDashboardPage() {
 
               {/* Email Address */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="name@example.com"
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3.5 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-[#037166] focus:bg-white focus:outline-none transition-all"
-                />
+                <div className="flex items-center justify-between gap-3 mb-1">
+                  <label className="block text-xs font-bold text-slate-700">Email Address</label>
+                  {emailInput.trim() && emailVerified && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700">
+                      <CheckCircle className="w-3.5 h-3.5" /> Verified
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="email"
+                    placeholder="name@example.com"
+                    value={emailInput}
+                    onChange={(e) => handleEmailChange(e.target.value)}
+                    className="min-w-0 flex-1 bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3.5 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-[#037166] focus:bg-white focus:outline-none transition-all"
+                  />
+                  {!emailVerified && (
+                    <button
+                      type="button"
+                      onClick={handleSendEmailOtp}
+                      disabled={sendingEmailOtp || !emailInput.trim()}
+                      className="shrink-0 rounded-xl bg-[#037166]/10 px-3 py-2.5 text-[11px] font-extrabold text-[#037166] hover:bg-[#037166]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {sendingEmailOtp ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : emailOtpSent ? 'Resend' : 'Verify email'}
+                    </button>
+                  )}
+                </div>
                 <p className="text-[11px] text-slate-400 mt-1">
                   Used for buyer inquiry alerts and ad status notifications.
                 </p>
+                {emailOtpSent && !emailVerified && (
+                  <div className="mt-2.5 rounded-xl border border-[#037166]/20 bg-[#037166]/5 p-2.5">
+                    <p className="mb-2 text-[10px] font-semibold text-slate-600">
+                      Enter the six-digit code sent to {emailInput.trim()}.
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        value={emailOtp}
+                        onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="6-digit OTP"
+                        className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold tracking-[0.2em] text-slate-900 outline-none focus:ring-2 focus:ring-[#037166]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleVerifyEmailOtp}
+                        disabled={verifyingEmailOtp || emailOtp.length !== 6}
+                        className="shrink-0 rounded-lg bg-[#037166] px-3 py-2 text-[11px] font-extrabold text-white hover:bg-[#025951] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {verifyingEmailOtp ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Confirm'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Phone Number (Locked & Non-Editable) */}
@@ -1681,7 +1822,7 @@ export default function MarketplaceDashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={savingProfile || !nameInput.trim()}
+                  disabled={savingProfile || !nameInput.trim() || (Boolean(emailInput.trim()) && isEmailChanged && !emailVerified)}
                   className="bg-[#037166] hover:bg-[#025951] text-white font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : null}

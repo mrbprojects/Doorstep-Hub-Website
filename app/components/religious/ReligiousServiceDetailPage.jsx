@@ -315,7 +315,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--off-white)] pb-36 pt-20 md:pt-28">
+        <div className="min-h-screen overflow-x-hidden bg-[var(--off-white)] pb-36 pt-20 md:pt-28">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
@@ -340,16 +340,16 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                 </motion.button>
 
                 {/* Hero 3 Cards Section */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.6fr_1.4fr_250px] gap-4 sm:gap-5 items-stretch mb-6 sm:mb-8">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid min-w-0 grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)_250px] gap-4 sm:gap-5 items-stretch mb-6 sm:mb-8">
                     {/* CARD 1: BANNER IMAGE */}
-                    <div className="relative w-full h-28 sm:h-44 lg:h-[230px] rounded-2xl overflow-hidden border border-[var(--saffron)]/30 shadow-lg bg-white flex items-center justify-center">
+                    <div className="relative w-full h-28 sm:h-44 md:col-span-2 lg:col-span-1 lg:h-[230px] rounded-2xl overflow-hidden border border-[var(--saffron)]/30 shadow-lg bg-white flex items-center justify-center">
                         <img src={serviceData.mainImage || serviceData.logo} alt={serviceData.name} loading="eager" decoding="sync" fetchpriority="high" className="w-full h-full object-cover" />
                     </div>
 
                     {/* CARD 2: STORE INFO */}
-                    <div className="relative h-auto lg:h-[230px] bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
+                    <div className="relative w-full min-w-0 h-auto md:h-[230px] overflow-hidden bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
                         <div>
-                            <h1 className="text-lg sm:text-xl font-extrabold text-[var(--deep-charcoal)] leading-tight">{serviceData.name}</h1>
+                            <h1 className="break-words text-lg sm:text-xl font-extrabold text-[var(--deep-charcoal)] leading-tight">{serviceData.name}</h1>
                             <div className="flex items-center gap-1.5 mt-1.5 text-xs text-gray-600">
                                 <MapPin className="w-3.5 h-3.5 text-[var(--saffron)] shrink-0" />
                                 <span className="line-clamp-2">{serviceData.location}</span>
@@ -372,41 +372,61 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                     </div>
 
                     {/* CARD 3: PUJA BOOKING HOURS */}
-                    <div className="relative h-auto lg:h-[230px] bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-gray-100">
-                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[var(--saffron)]/10 flex items-center justify-center shrink-0">
-                                    <Clock className="w-4 h-4 text-[var(--saffron)]" />
-                                </div>
-                                <div className="min-w-0">
-                                    <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 leading-tight truncate">Puja Booking Hours</h3>
-                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                        </span>
-                                        <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="space-y-1.5 text-xs">
-                                <div>
-                                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Monday - Saturday</span>
-                                    <span className="text-gray-800 font-extrabold text-xs sm:text-sm block">06:00 AM - 09:00 PM</span>
-                                </div>
-                                <div>
-                                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Sunday</span>
-                                    <span className="text-gray-800 font-extrabold text-xs sm:text-sm block">06:00 AM - 10:00 PM</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-center">
-                            <span className="inline-flex w-auto max-w-[210px] flex-col items-center justify-center rounded-full px-4 py-1.5 text-white bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-center shadow-md">
-                                <span className="text-[9px] font-bold tracking-wider uppercase text-white/90">Available For</span>
-                                <span className="text-xs font-extrabold whitespace-nowrap">Same-day Ritual Booking</span>
-                            </span>
-                        </div>
-                    </div>
+                  <div className="relative w-full min-w-0 h-auto md:h-[230px] overflow-hidden bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg flex flex-col justify-between">
+    <div>
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-gray-100">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[var(--saffron)]/10 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 text-[var(--saffron)]" />
+            </div>
+
+            <div className="min-w-0">
+                <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 leading-tight truncate">
+                    Puja Booking Hours
+                </h3>
+
+                <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+
+                    <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">
+                        Open Now
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {/* Booking Hours */}
+        <div className="flex items-center w-full lg:flex-col lg:items-stretch">
+            {/* Monday - Saturday */}
+            <div className="flex-1 pr-4 lg:pr-0 lg:pb-3">
+                <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">
+                    Monday - Saturday
+                </span>
+
+                <span className="text-gray-800 font-extrabold text-xs sm:text-sm block whitespace-nowrap">
+                    06:00 AM - 09:00 PM
+                </span>
+            </div>
+
+            {/* Divider */}
+            <div className="h-8 w-px bg-gray-200 shrink-0 lg:h-px lg:w-full"></div>
+
+            {/* Sunday */}
+            <div className="flex-1 pl-4 lg:pl-0 lg:pt-3">
+                <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">
+                    Sunday
+                </span>
+
+                <span className="text-gray-800 font-extrabold text-xs sm:text-sm block whitespace-nowrap">
+                    06:00 AM - 10:00 PM
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
                 </motion.div>
             </div>
 
@@ -453,12 +473,12 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                             Please select a sacred offering to proceed:
                         </div>
                         {serviceData.packages.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                                 {filteredPackages.map((pkg, index) => (
                                     <div
                                         key={pkg._id || index}
                                         onClick={() => setSelectedPackage(pkg)}
-                                        className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-col sm:flex-row h-full ${selectedPackage?._id === pkg._id
+                                        className={`bg-white rounded-xl sm:rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer relative flex flex-row h-full ${selectedPackage?._id === pkg._id
                                             ? 'border-2 border-[var(--saffron)] ring-2 ring-[var(--saffron)]/10'
                                             : 'border-gray-100'
                                             }`}
@@ -468,7 +488,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                                 <Check className="w-3.5 h-3.5" />
                                             </div>
                                         )}
-                                        <div className="w-full sm:w-48 h-48 sm:h-auto bg-gray-100 relative flex-shrink-0">
+                                        <div className="w-36 sm:w-48 h-36 sm:h-auto bg-gray-100 relative flex-shrink-0">
                                             {pkg.image ? (
                                                 <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image}`} alt={pkg.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                             ) : (
@@ -477,21 +497,21 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-6 flex-1 flex flex-col justify-between">
+                                        <div className="p-4 sm:p-6 flex-1 min-w-0 flex flex-col justify-between">
                                             <div>
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <h3 className="text-xl font-bold text-[var(--deep-charcoal)]">{pkg.name}</h3>
+                                                    <h3 className="text-lg sm:text-xl font-bold text-[var(--deep-charcoal)] leading-tight">{pkg.name}</h3>
                                                     <div className="flex flex-col items-end">
                                                         <span className="text-[10px] text-gray-500 italic uppercase tracking-wider">Starts From</span>
                                                         <span className="text-[var(--saffron)] font-bold text-xl">₹{pkg.price}</span>
                                                     </div>
                                                 </div>
-                                                <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2 md:line-clamp-none">
+                                                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 line-clamp-2 md:line-clamp-none">
                                                     {pkg.description}
                                                 </p>
                                             </div>
 
-                                            <div className="flex items-center justify-between mt-auto">
+                                            <div className="flex items-center justify-between mt-auto pt-1">
                                                 <div className="flex items-center gap-4">
                                                     {pkg.banner_images && pkg.banner_images.length > 0 && (
                                                         <button
@@ -500,7 +520,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                                                 setViewingRateCard(pkg);
                                                                 setRateCardImageIndex(0);
                                                             }}
-                                                            className="text-xs font-bold text-[var(--saffron)] bg-[var(--saffron)]/10 px-3 py-1.5 rounded-lg border border-[var(--saffron)]/20 hover:bg-[var(--saffron)]/20 transition-all flex items-center gap-1"
+                                                            className="text-[11px] sm:text-xs font-bold text-[var(--saffron)] bg-[var(--saffron)]/10 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[var(--saffron)]/20 hover:bg-[var(--saffron)]/20 transition-all flex items-center gap-1"
                                                         >
                                                             View Details
                                                             <ChevronRight className="w-3 h-3" />

@@ -1,6 +1,6 @@
 import SellerProfileClient from './page-client';
-import { getSEOMetadata } from '@/lib/seo';
-import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
+import { getSEOMetadata, getSocialPreviewImage } from '@/lib/seo';
+import { API_BASE_URL } from '@/config/env';
 
 // Helper to fetch seller profile server-side for metadata
 async function getSellerProfile(slug) {
@@ -22,37 +22,17 @@ export async function generateMetadata({ params }) {
   const profile = data?.profile;
 
   const sellerName = profile?.displayName || profile?.userId?.name || undefined;
-  const title = sellerName ? `Seller Profile: ${sellerName}` : undefined;
-  const description = sellerName ? `View ${sellerName}'s profile on Doorstep Hub.` : undefined;
+  const title = sellerName ? `${sellerName} - Verified Seller | Doorstep Hub Marketplace` : undefined;
+  const description = sellerName ? `Explore verified listings and direct contact with ${sellerName} on Doorstep Hub.` : undefined;
 
-  let rawImageUrl = profile?.avatar || profile?.userId?.profilePic || null;
-  let fullImageUrl = rawImageUrl ? getImageUrl(rawImageUrl) : null;
+  const imageObj = getSocialPreviewImage(profile || profile?.userId);
 
   const metadata = await getSEOMetadata(`/sell-buy/seller/${slug}`, {
     title,
     description,
-    image: fullImageUrl || undefined,
+    image: imageObj,
   });
-  
-  if (fullImageUrl) {
-    const imageObj = {
-      url: fullImageUrl,
-      secureUrl: fullImageUrl,
-      width: 600,
-      height: 600,
-      alt: title || 'Seller Avatar',
-    };
-    metadata.openGraph = {
-      ...(metadata.openGraph || {}),
-      images: [imageObj],
-    };
-    metadata.twitter = {
-      ...(metadata.twitter || {}),
-      card: 'summary',
-      images: [imageObj],
-    };
-  }
-  
+
   return metadata;
 }
 

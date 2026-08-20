@@ -1,5 +1,5 @@
 import AdDetailClient from './page-client';
-import { getSEOMetadata } from '@/lib/seo';
+import { getSEOMetadata, getSocialPreviewImage } from '@/lib/seo';
 import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
 
 // Helper to fetch ad details server-side for metadata
@@ -19,42 +19,22 @@ export async function generateMetadata({ params }) {
   const data = await getListingDetails(slug);
   const listing = data?.listing;
 
-  const title = listing?.title || undefined;
-  const description = listing?.description ? listing.description.substring(0, 150) : undefined;
+  const title = listing?.title ? `${listing.title} | Buy & Sell on Doorstep Hub` : undefined;
+  const description = listing?.description ? listing.description.substring(0, 160) : undefined;
     
   let keywords = '';
   if (listing?.categoryId?.name) keywords += `${listing.categoryId.name}`;
   if (listing?.subcategoryId?.name) keywords += keywords ? `, ${listing.subcategoryId.name}` : `${listing.subcategoryId.name}`;
 
-  let rawImageUrl = listing?.coverImage || (listing?.images && listing.images.length > 0 ? listing.images[0] : null);
-  let fullImageUrl = rawImageUrl ? getImageUrl(rawImageUrl) : null;
+  const imageObj = getSocialPreviewImage(listing);
 
   const metadata = await getSEOMetadata(`/sell-buy/ad/${slug}`, {
     title,
     description,
     keywords: keywords || undefined,
-    image: fullImageUrl || undefined,
+    image: imageObj,
   });
-  
-  if (fullImageUrl) {
-    const imageObj = {
-      url: fullImageUrl,
-      secureUrl: fullImageUrl,
-      width: 1200,
-      height: 630,
-      alt: title || 'Product Image',
-    };
-    metadata.openGraph = {
-      ...(metadata.openGraph || {}),
-      images: [imageObj],
-    };
-    metadata.twitter = {
-      ...(metadata.twitter || {}),
-      card: 'summary_large_image',
-      images: [imageObj],
-    };
-  }
-  
+
   return metadata;
 }
 

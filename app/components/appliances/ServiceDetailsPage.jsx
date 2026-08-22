@@ -12,7 +12,7 @@ import DOMPurify from 'dompurify';
 import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
-import { API_BASE_URL } from '@/config/env';
+import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
 import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
 import { ADSENSE_CONFIG } from '@/config/adsense';
 
@@ -219,7 +219,7 @@ export function ServiceDetailsPage({
 
       setLoadingRelated(true);
       try {
-        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory', {
+        const response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/services_by_subcategory`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -278,8 +278,8 @@ export function ServiceDetailsPage({
 
   // Prepare images list (banner + service images)
   const images = serviceDetails?.storeData ? [
-    serviceDetails.storeData.bannerImage ? `https://devapis.doorstephub.com/${serviceDetails.storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
-    ...(serviceDetails.serviceImages || []).map(img => `https://devapis.doorstephub.com/${img}`)
+    serviceDetails.storeData.bannerImage ? getImageUrl(serviceDetails.storeData.bannerImage) : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
+    ...(serviceDetails.serviceImages || []).map(img => getImageUrl(img))
   ].filter(Boolean) : []; // Remove any null/undefined images
 
   // Auto-scroll for Main Image Gallery & Lightbox
@@ -742,7 +742,7 @@ export function ServiceDetailsPage({
                                   {card.image && (
                                     <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-100">
                                       <img loading="lazy" decoding="async"
-                                        src={`https://devapis.doorstephub.com/${card.image}`}
+                                        src={getImageUrl(Array.isArray(card.image) ? card.image[0] : card.image)}
                                         alt={card.title}
                                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                         onError={(e) => { e.target.style.display = 'none'; }}
@@ -803,7 +803,7 @@ export function ServiceDetailsPage({
                                 onClick={() => { setSelectedImageIndex(idx + 1); setIsLightboxOpen(true); }}
                                 className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative border border-slate-200"
                               >
-                                <img src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} alt={`Working Images ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" decoding="async" />
+                                <img src={getImageUrl(img)} alt={`Working Images ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" decoding="async" />
                               </div>
                             ))}
                           </div>
@@ -1053,7 +1053,7 @@ export function ServiceDetailsPage({
               >
                 <div className="relative h-40 overflow-hidden">
                   <img loading="lazy" decoding="async"
-                    src={service.mainImage ? `https://devapis.doorstephub.com/${service.mainImage}` : '/placeholder-service.jpg'}
+                    src={service.mainImage ? getImageUrl(service.mainImage) : '/placeholder-service.jpg'}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -1167,7 +1167,7 @@ export function ServiceDetailsPage({
 
               <div className="relative aspect-square md:aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black/20">
                 <img loading="lazy" decoding="async"
-                  src={`https://devapis.doorstephub.com/${rateCardModal.images[rateCardModal.currentIndex]}`}
+                  src={getImageUrl(rateCardModal.images[rateCardModal.currentIndex])}
                   alt={rateCardModal.title}
                   className="w-full h-full object-contain"
                 />

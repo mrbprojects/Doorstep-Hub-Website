@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
 import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
 import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
-import { API_BASE_URL } from '@/config/env';
+import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
 
 // Service-specific accent colors
 const serviceAccents = {
@@ -211,11 +211,17 @@ export function ServiceDetailsPage({
     null;
 
   // Prepare images list (banner + service images)
-  // FIXED CODE:
   const images = [
-    storeData.bannerImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${storeData.bannerImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
-    ...serviceImages.map(img => `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`)
+    storeData.bannerImage ? getImageUrl(storeData.bannerImage) : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800',
+    ...serviceImages.map(img => getImageUrl(img))
   ].filter(Boolean); // Remove any null/undefined images
+
+  const getRateCardImage = (card) => {
+    if (!card) return null;
+    const img = card.image || (card.serviceCardImages && card.serviceCardImages[0]) || (card.images && card.images[0]);
+    if (!img) return null;
+    return getImageUrl(Array.isArray(img) ? img[0] : img);
+  };
 
   const renderDescription = (htmlContent) => {
     if (!htmlContent) {

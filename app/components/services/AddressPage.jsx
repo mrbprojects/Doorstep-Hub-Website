@@ -629,21 +629,39 @@ export function AddressPage({
                       </div>
 
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="text-lg font-bold text-white capitalize">{address.type}</h4>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <h4 className="text-lg font-bold text-white capitalize">
+                            {address.type || 'Other'}
+                          </h4>
                           {address.defaultAddress && (
                             <span className="px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d] text-[10px] font-bold tracking-wider">
                               DEFAULT
                             </span>
                           )}
                         </div>
-                        <p className="font-semibold text-white/90 text-sm mb-1">{address.name}</p>
-                        <p className="text-white/60 text-xs leading-relaxed mb-1 line-clamp-2">
-                          {address.flat}, {address.area}
+                        {/* Name + Phone */}
+                        <p className="font-semibold text-white/90 text-sm mb-1">
+                          {address.name || address.userName || ''}
+                          {address.phone ? <span className="font-normal text-white/60"> &bull; {address.phone}</span> : null}
                         </p>
-                        <p className="text-white/40 text-[11px] font-medium uppercase tracking-tight">
-                          {address.cityName}, {address.postalCode}
-                        </p>
+                        {/* Street: flat, area, addressLineOne, addressLineTwo — strip N/A */}
+                        {(() => {
+                          const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' ? null : String(v).trim());
+                          const street = [clean(address.flat), clean(address.area), clean(address.addressLineOne), clean(address.addressLineTwo)].filter(Boolean);
+                          const seen = new Set();
+                          const unique = street.filter(s => { const k = s.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+                          return unique.length > 0 ? (
+                            <p className="text-white/60 text-xs leading-relaxed mb-1 line-clamp-2">{unique.join(', ')}</p>
+                          ) : null;
+                        })()}
+                        {/* City, State, Pincode */}
+                        {(() => {
+                          const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' ? null : String(v).trim());
+                          const city = [clean(address.cityName), clean(address.stateName), clean(address.postalCode)].filter(Boolean);
+                          return city.length > 0 ? (
+                            <p className="text-white/40 text-[11px] font-medium uppercase tracking-tight">{city.join(', ')}</p>
+                          ) : null;
+                        })()}
                       </div>
 
                       {isSelected && (

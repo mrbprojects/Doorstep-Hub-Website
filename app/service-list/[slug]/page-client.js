@@ -5,6 +5,9 @@ import dynamic from 'next/dynamic';
 const StoreDetailPage = dynamic(() => import('@/components/appliances/StoreDetailPage').then(m => m.StoreDetailPage), { ssr: false });
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 
 const appliancesTheme = {
     bgScrolled: 'bg-white/80',
@@ -56,6 +59,9 @@ function ServiceCenterContent() {
         <div className="min-h-screen">
             <Header theme={appliancesTheme} />
             <StoreDetailPage storeId={slug} serviceId={serviceId} />
+            <ApplianceHowItWorks />
+            <ApplianceComparison />
+            <PaymentMethodsSection />
             <Footer theme={footerTheme} />
         </div>
     );

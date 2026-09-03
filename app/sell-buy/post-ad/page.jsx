@@ -16,6 +16,8 @@ import {
   Sparkles,
   Grid,
   Loader2,
+  FileText,
+  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SubcategoryIcon } from '@/components/sell-buy/SubcategoryIcon';
@@ -53,6 +55,8 @@ export default function PostAdPage() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
+  const [draftKycModalOpen, setDraftKycModalOpen] = useState(false);
+  const [savedAdTitle, setSavedAdTitle] = useState('');
 
   const [formData, setFormData] = useState({
     categoryId: '',
@@ -315,27 +319,30 @@ export default function PostAdPage() {
       });
 
       const data = await res.json();
-      if (res.status === 403 || data?.kycStatus) {
-        const kycStatus = data?.kycStatus || 'NOT_SUBMITTED';
-        if (kycStatus === 'SUBMITTED' || kycStatus === 'UNDER_REVIEW') {
-          toast.info('Your account is under review. Once approved, we will let you know via email.', { duration: 6000 });
-          router.push('/sell-buy/dashboard');
-        } else {
-          toast.error('Seller Verification Required! Please submit your KYC documents to post ads.', { duration: 5000 });
-          router.push('/sell-buy/dashboard?kyc=open');
-        }
+
+      // ── KYC PENDING / DRAFT AD HANDLING ─────────────────────────────────────
+      if (data?.isDraft || data?.kycRequired) {
+        setSavedAdTitle(formData.title || 'Your Item');
+        setDraftKycModalOpen(true);
+        return;
+      }
+      // ────────────────────────────────────────────────────────────────────────
+
+      if (res.status === 403) {
+        setSavedAdTitle(formData.title || 'Your Item');
+        setDraftKycModalOpen(true);
         return;
       }
 
       if ((data.error === false || data.success)) {
-        toast.success('Ad submitted for review! We will notify you once it goes live.');
+        toast.success('🎉 Advertisement published successfully! Your ad is now live.');
         router.push('/sell-buy/dashboard');
       } else {
         toast.error(data.message || 'Failed to post advertisement');
       }
     } catch (err) {
+      console.error('Error posting ad:', err);
       toast.error('An error occurred while posting your ad.');
-      router.push('/sell-buy');
     } finally {
       setSubmitting(false);
     }
@@ -1068,6 +1075,51 @@ export default function PostAdPage() {
                   Crop & Continue
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Draft Saved Pending KYC Approval Modal */}
+      {draftKycModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center relative animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <FileText className="w-8 h-8" />
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 text-amber-800 text-[11px] font-extrabold uppercase mb-3">
+              <span>📋</span> Ad Saved as Draft
+            </div>
+
+            <h3 className="text-xl font-black text-slate-900 mb-2">
+              Ad Saved as Draft!
+            </h3>
+
+            <p className="text-sm text-slate-600 leading-relaxed mb-6">
+              Your advertisement for <strong className="text-slate-900">{savedAdTitle ? `"${savedAdTitle}"` : 'your item'}</strong> has been saved as a draft. 
+              <br /><br />
+              <span className="text-emerald-700 font-semibold bg-emerald-50 px-3 py-2 rounded-xl block border border-emerald-100 text-xs">
+                ✨ After KYC approval, your ad will automatically be posted and go live!
+              </span>
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => router.push('/sell-buy/dashboard?kyc=open')}
+                className="w-full py-3.5 px-4 rounded-xl text-sm font-black text-white bg-[#037166] hover:bg-[#025951] shadow-lg shadow-[#037166]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Complete KYC Verification
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/sell-buy')}
+                className="w-full py-3 px-4 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Go to Home
+              </button>
             </div>
           </div>
         </div>

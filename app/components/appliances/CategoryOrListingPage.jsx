@@ -10,6 +10,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Animated404 } from '@/components/ui/Animated404';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 
 const appliancesTheme = {
     bgScrolled: 'bg-white/80',
@@ -49,11 +52,18 @@ const footerTheme = {
     isLight: true,
 };
 
-function AppliancePageShell({ children }) {
+function AppliancePageShell({ children, includeStandardSections = true }) {
     return (
         <div className="appliance-global min-h-screen bg-white">
             <Header theme={appliancesTheme} />
             {children}
+            {includeStandardSections && (
+                <>
+                    <ApplianceHowItWorks />
+                    <ApplianceComparison />
+                    <PaymentMethodsSection />
+                </>
+            )}
             <Footer theme={footerTheme} />
         </div>
     );
@@ -298,7 +308,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
 
     if (viewType === 'category') {
         return (
-            <AppliancePageShell>
+            <AppliancePageShell includeStandardSections={false}>
                 <CategoryPage slug={slug} initialData={categoryData} onBack={onBack} />
             </AppliancePageShell>
         );

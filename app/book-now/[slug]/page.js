@@ -9,6 +9,9 @@ import { fetchCities, fetchCategories, fetchAllBrands } from '@/lib/api';
 import { parseBookNowCityFlatPath, parseNearbyBookNowPath } from '@/lib/applianceRepairSlugs';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 import { API_BASE_URL, getImageUrl } from '@/config/env';
 import { motion } from 'motion/react';
 import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
@@ -292,6 +295,10 @@ function BookNowPageContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8">
           <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
         </div>
+
+        <ApplianceHowItWorks />
+        <ApplianceComparison />
+        <PaymentMethodsSection />
       </main>
 
       <Footer theme={footerTheme} />

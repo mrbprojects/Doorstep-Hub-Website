@@ -5,6 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { ChevronLeft, Loader2, MapPin, CheckCircle2, HelpCircle, ChevronDown, Star } from 'lucide-react';
 import { fetchAllBrands, fetchCities, fetchCategories } from '@/lib/api';
 import { buildFlatBrandCityPublicPath, getCityReviewers } from '@/lib/applianceRepairSlugs';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 
 function FaqSection({ faqs, activeIndex, onToggle, cityName, categoryName }) {
   if (!faqs.length) return null;
@@ -310,6 +313,14 @@ function BrandPageContent() {
           </div>
         )}
 
+        <ApplianceHowItWorks />
+        <ApplianceComparison />
+
+        <CustomerReviewsSection
+          cityName={selectedCity?.name || citySlug}
+          categoryName={selectedCategory?.name}
+        />
+
         <FaqSection
           faqs={categoryFaqs.slice(0, 9)}
           activeIndex={faqActiveIndex}
@@ -318,10 +329,7 @@ function BrandPageContent() {
           categoryName={selectedCategory?.name}
         />
 
-        <CustomerReviewsSection
-          cityName={selectedCity?.name || citySlug}
-          categoryName={selectedCategory?.name}
-        />
+        <PaymentMethodsSection />
       </div>
     </main>
   );

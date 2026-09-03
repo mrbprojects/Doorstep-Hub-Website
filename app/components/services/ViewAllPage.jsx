@@ -4,6 +4,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Star, MapPin, Zap, ArrowRight, Filter, X } from 'lucide-react';
 import { fetchFeaturedServices, imageLoader } from '@/lib/api';
 import { useLocation } from '@/hooks/useLocation';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
+
+const DEFAULT_APP_LINKS = {
+  ios: 'https://apps.apple.com/in/app/doorstep-hub/id6475340236',
+  android:
+    'https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share',
+};
 
 export function ViewAllPage({
   type,
@@ -21,6 +31,7 @@ export function ViewAllPage({
   const [selectedRating, setSelectedRating] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const { location, detectLocation } = useLocation();
+  const { globalSettings } = useGlobalSettings() || {};
 
   const handleRatingSelect = (rating) => {
     setSelectedRating(rating === selectedRating ? null : rating);
@@ -183,13 +194,28 @@ export function ViewAllPage({
       case 'featured':
         return 'All Featured Services';
       case 'stores':
-        return 'All Nearby Stores';
+        return 'Nearest Appliance Service Centers';
       case 'categories':
-        return 'All Categories';
+        return 'Book Trusted Appliance Repair Services at Your Doorstep';
       case 'recent':
         return 'Recently Booked Services';
       default:
-        return '';
+        return 'Book Trusted Appliance Repair Services at Your Doorstep';
+    }
+  };
+
+  const getDescription = () => {
+    switch (type) {
+      case 'categories':
+        return 'Discover certified doorstep repair services for all major home and kitchen appliances. From ACs and refrigerators to washing machines and TVs, book expert technicians with genuine parts and warranty in minutes.';
+      case 'featured':
+        return 'Browse our most popular and highest-rated doorstep appliance repair solutions with verified professionals, upfront pricing, and comprehensive warranty support.';
+      case 'stores':
+        return 'Find authorized and certified appliance service centers near you for swift doorstep diagnostics, maintenance, and genuine replacement parts.';
+      case 'recent':
+        return 'Explore recently booked repair services trusted by homeowners in your city for quick turnaround and reliable doorstep repairs.';
+      default:
+        return 'Book expert doorstep repair and maintenance services for home appliances with certified professionals and guaranteed warranty.';
     }
   };
 
@@ -199,19 +225,114 @@ export function ViewAllPage({
       animate={{ opacity: 1 }}
       className="min-h-screen bg-[#0a0a0a] text-white"
     >
-      {/* Header */}
-      <section className="bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] text-white py-12">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+      {/* Header with Background Image & Gradient */}
+      <section className="relative overflow-hidden bg-slate-950 text-white pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 border-b border-white/10">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 scale-105 transition-transform duration-1000"
+          style={{ backgroundImage: "url('/categories-hero-bg.jpg')" }}
+        />
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-[#025a51]/80 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/40" />
+
+        <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 mb-6 px-4 py-2 mt-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all"
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/20 hover:bg-white/25 hover:border-white/40 text-white text-xs sm:text-sm font-bold shadow-lg transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back
+            <span>Back</span>
           </button>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 className="text-4xl md:text-5xl font-bold">{getTitle()}</h1>
-            {/* Rating Filter moved to sidebar */}
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Column (Title, Description, Highlights) */}
+            <div className="lg:col-span-7 xl:col-span-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/30 text-white text-[11px] sm:text-xs font-black tracking-widest uppercase mb-3 backdrop-blur-sm">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                <span>DOORSTEP HUB · VERIFIED SERVICES</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1] mb-3 sm:mb-4">
+                {getTitle()}
+              </h1>
+
+              <p className="text-sm sm:text-base md:text-lg text-white leading-relaxed font-normal max-w-2xl">
+                {getDescription()}
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-semibold text-white">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-white">
+                  <Zap className="w-3.5 h-3.5 text-white" /> Same Day Service
+                </span>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-white">
+                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> 4.8/5 Customer Rating
+                </span>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-white">
+                  🛡️ 30-90 Days Warranty
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column: App Download Card with Dynamic Links */}
+            <div className="lg:col-span-5 xl:col-span-4 flex justify-start lg:justify-end">
+              <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 p-5 sm:p-6 rounded-3xl shadow-2xl">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white mb-2">
+                  <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                  <span>Doorstep Hub App</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-white leading-snug">
+                  Experience Faster Bookings on Mobile
+                </h3>
+                <p className="text-xs sm:text-sm text-white mt-1 mb-4 leading-relaxed">
+                  Track service technicians in real-time, get instant updates & exclusive app offers.
+                </p>
+
+                {/* App Download Buttons */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <a
+                    href={globalSettings?.playStore || globalSettings?.customerAndroidAppLink || DEFAULT_APP_LINKS.android}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-12 w-36 sm:w-40 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 hover:scale-105 active:scale-95"
+                    title="Get it on Google Play"
+                  >
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src="/andriod1.png"
+                      alt="Google Play"
+                      className="h-full w-full object-cover opacity-95 brightness-0 invert"
+                    />
+                  </a>
+
+                  <a
+                    href={globalSettings?.appStore || globalSettings?.customerIosAppLink || DEFAULT_APP_LINKS.ios}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-12 w-36 sm:w-40 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 hover:scale-105 active:scale-95"
+                    title="Download on App Store"
+                  >
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src="/apple2.png"
+                      alt="App Store"
+                      className="h-full w-full object-cover opacity-95 brightness-0 invert"
+                    />
+                  </a>
+                </div>
+
+                <div className="mt-3.5 pt-3 border-t border-white/20 flex items-center justify-between text-[11px] text-white font-medium">
+                  <span className="flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                    <span>4.8 / 5.0 Rating</span>
+                  </span>
+                  <span>50k+ Downloads</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -382,11 +503,15 @@ export function ViewAllPage({
                     >
                       <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full overflow-hidden">
                         <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
-                          <img loading="lazy" decoding="async"
-                            src={imageLoader({ src: service.mainImage })}
-                            alt={service.serviceName}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
+                            <img loading="lazy" decoding="async"
+                              src={imageLoader({ src: service.mainImage || service.image })}
+                              alt={service.serviceName || 'Featured Service'}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
+                              }}
+                            />
                           <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-[9px] font-bold flex items-center gap-1 shadow-lg">
                             <Zap className="w-2.5 h-2.5" />
                             {service.serviceDelhiveryType || 'Featured'}
@@ -575,6 +700,11 @@ export function ViewAllPage({
           )}
         </AnimatePresence>
       </section>
+
+      {/* 3 Value Sections */}
+      <ApplianceHowItWorks />
+      <ApplianceComparison />
+      <PaymentMethodsSection />
     </motion.div>
   );
 }

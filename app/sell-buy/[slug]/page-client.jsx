@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
+import { SellBuyHowItWorks } from '@/components/sell-buy/SellBuyHowItWorks';
 import { ListingCard, ListingGridSkeleton } from '@/components/sell-buy/cards/ListingCard';
 import { fetchSellBuyListings } from '@/lib/sellBuyApi';
 import { Grid, ChevronRight, Search } from 'lucide-react';
@@ -108,6 +109,9 @@ export default function CategoryClient({ slug }) {
           </div>
         )}
       </main>
+
+      {/* How It Works Section */}
+      <SellBuyHowItWorks />
 
       <SellBuyFooter />
     </div>

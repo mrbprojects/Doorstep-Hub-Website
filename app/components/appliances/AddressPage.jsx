@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, X, Trash2, Edit2, Loader2, Search, Crosshair } from 'lucide-react';
+import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, X, Trash2, Edit2, Loader2, Search, Crosshair, ShieldCheck, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useLocationContext } from '@/context/LocationContext';
@@ -84,6 +84,30 @@ export function AddressPage({
     lng: Number(contextLocation?.lng) || 78.390456
   });
   const initialCenterRef = React.useRef(null);
+
+  // Dynamic app links for Android & iOS
+  const [appLinks, setAppLinks] = useState({
+    android: 'https://play.google.com/store/apps/details?id=com.doorstephub.customer',
+    ios: 'https://apps.apple.com/in/app/doorstep-hub-home-services/id6475340236'
+  });
+
+  useEffect(() => {
+    const fetchAppLinks = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi'}/app/get_global_settings`);
+        const data = await res.json();
+        if (data.success && data.policy) {
+          setAppLinks({
+            android: data.policy.customerAndroidAppLink || data.policy.playStore || 'https://play.google.com/store/apps/details?id=com.doorstephub.customer',
+            ios: data.policy.customerIosAppLink || data.policy.appStore || 'https://apps.apple.com/in/app/doorstep-hub-home-services/id6475340236'
+          });
+        }
+      } catch (e) {
+        // keep defaults
+      }
+    };
+    fetchAppLinks();
+  }, []);
 
   // Sync initial state and map center if contextLocation arrives
   useEffect(() => {
@@ -377,62 +401,52 @@ export function AddressPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-20 pb-32"
+      className="min-h-screen bg-[#f8fafc] pt-16 sm:pt-20 pb-12"
     >
       {authLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <Loader2 className="w-8 h-8 animate-spin text-[#037166]" />
         </div>
       )}
-      {/* Header */}
-      <section className="top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={onBack}
-            className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </motion.button>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-3xl md:text-4xl font-bold !text-white flex items-center gap-3"
-            >
-              <MapPin className="w-8 h-8 !text-white" />
-              <span className="!text-white">Manage Address</span>
-            </motion.h1>
+      {/* Header Banner */}
+      <section className="bg-gradient-to-r from-[#024e46] via-[#037166] to-[#049688] border-b border-white/10 shadow-sm">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-3.5 sm:py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3.5">
+              <button
+                onClick={onBack}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all text-xs font-medium border border-white/20"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden xs:inline">Back</span>
+              </button>
+              <h1 className="text-base sm:text-xl font-bold text-white flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#80dfd7] flex-shrink-0" />
+                <span>Manage Address</span>
+              </h1>
+            </div>
 
             {!showAddForm && (
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+              <button
                 onClick={() => {
                   setEditingAddress(null);
                   setNewAddress({
                     name: user?.name || '',
                     phone: user?.mobile || user?.phone || '',
                     type: 'Home',
-                    area: '',
-                    flat: '',
-                    postalCode: '',
-                    addressLineOne: '',
+                    area: contextLocation?.area || '',
+                    flat: contextLocation?.flat || '',
+                    postalCode: contextLocation?.postalCode || '',
+                    addressLineOne: contextLocation?.address || '',
                     addressLineTwo: '',
                     stateName: 'Telangana',
                     cityName: contextLocation?.city || 'Hyderabad',
                     defaultAddress: false,
                     latitude: contextLocation?.lat || "17.450123",
                     longitude: contextLocation?.lng || "78.390456",
-                    area: contextLocation?.area || '',
-                    postalCode: contextLocation?.postalCode || '',
-                    flat: contextLocation?.flat || '',
-                    addressLineOne: contextLocation?.address || ''
+                    stateId: "680cbb3d2d42e474f451ace3",
+                    cityId: "684d704faa93650a05d5ff47"
                   });
                   setMapCenter({
                     lat: Number(contextLocation?.lat) || 17.450123,
@@ -440,210 +454,339 @@ export function AddressPage({
                   });
                   setShowAddForm(true);
                 }}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-white/30 bg-white/10 hover:bg-white/20 transition-all"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-white text-[#037166] hover:bg-emerald-50 text-xs sm:text-sm font-semibold shadow-sm transition-all"
               >
-                <Plus className="w-5 h-5 text-white" />
-                <span className="text-white font-semibold">Add New Address</span>
-              </motion.button>
+                <Plus className="w-4 h-4" />
+                <span>Add Address</span>
+              </button>
             )}
           </div>
         </div>
       </section>
 
-      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="grid gap-6">
-          {/* Saved Addresses */}
-          <AnimatePresence mode="popLayout">
-            {loading && addresses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <div className="w-12 h-12 border-4 border-[#037166]/20 border-t-[#037166] rounded-full animate-spin mb-4" />
-              </div>
-            ) : (addresses.length === 0 || showAddForm) ? (
-              <div className="relative w-full h-[400px] rounded-3xl overflow-hidden bg-[#f0f2f5] border border-gray-200/20 group">
-                {/* Real-time Google Map */}
-                {isMapsLoaded ? (
-                  <>
-                    {/* GPS Guidance Banner */}
-                    {locationPermission === 'denied' && showPermissionBanner && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="absolute top-4 left-4 right-4 z-20 bg-black/60 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl flex items-center justify-between gap-4 pointer-events-none"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                            <MapPin className="w-5 h-5 text-yellow-500" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-white">GPS matches disabled</p>
-                            <p className="text-[11px] text-white/60">Drag the pin to your exact location for service.</p>
-                          </div>
+      {/* Main Container */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-5">
+        {loading && addresses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div className="w-10 h-10 border-3 border-[#037166]/20 border-t-[#037166] rounded-full animate-spin mb-3" />
+            <p className="text-sm font-medium text-gray-600">Loading your addresses...</p>
+          </div>
+        ) : (addresses.length === 0 || showAddForm) ? (
+          /* ── Add / Edit Address View (Map + Form) ── */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Map Column */}
+            <div className="lg:col-span-6 relative w-full h-[340px] sm:h-[420px] rounded-2xl overflow-hidden bg-[#f0f2f5] border border-gray-200 shadow-sm">
+              {isMapsLoaded ? (
+                <>
+                  {locationPermission === 'denied' && showPermissionBanner && (
+                    <div className="absolute top-3 left-3 right-3 z-20 bg-black/75 backdrop-blur-md p-3 rounded-xl border border-white/10 shadow-lg flex items-center justify-between gap-3 text-white">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                        <p className="text-xs">GPS disabled. Drag pin on map to your exact location.</p>
+                      </div>
+                      <button onClick={() => setShowPermissionBanner(false)} className="p-1 hover:bg-white/10 rounded-full">
+                        <X className="w-3.5 h-3.5 text-white/60" />
+                      </button>
+                    </div>
+                  )}
+
+                  <GoogleMap
+                    mapContainerStyle={MAP_CONTAINER_STYLE}
+                    center={mapCenter}
+                    zoom={17}
+                    options={MAP_OPTIONS}
+                    onLoad={(map) => { mapRef.current = map; }}
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={async () => {
+                      if (!mapRef.current) return;
+                      const center = mapRef.current.getCenter();
+                      const lat = Number(center.lat());
+                      const lng = Number(center.lng());
+
+                      if (!isNaN(lat) && !isNaN(lng)) {
+                        setMapCenter({ lat, lng });
+                      }
+
+                      try {
+                        const data = await locationManager.reverseGeocode(lat, lng);
+                        setNewAddress(prev => ({
+                          ...prev,
+                          area: data.area || prev.area,
+                          cityName: data.city || prev.cityName,
+                          postalCode: data.postalCode || prev.postalCode,
+                          stateName: data.state || prev.stateName,
+                          addressLineOne: data.address,
+                          flat: data.flat || prev.flat,
+                          latitude: lat.toString(),
+                          longitude: lng.toString()
+                        }));
+                      } catch (error) {
+                        console.error("Geocoding failed", error);
+                      } finally {
+                        setIsDragging(false);
+                      }
+                    }}
+                  >
+                    {/* Search Bar Overlay */}
+                    <div className="absolute top-3 left-3 right-3 z-10">
+                      <div className="relative">
+                        <div className="w-full bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-2.5 flex items-center gap-2">
+                          <Search className="w-4 h-4 text-gray-400 ml-1" />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => {
+                              const query = e.target.value;
+                              setSearchQuery(query);
+                              if (query.length > 2) {
+                                locationManager.searchLocation(query).then(setSearchResults);
+                              } else {
+                                setSearchResults([]);
+                              }
+                            }}
+                            placeholder="Search your street or area..."
+                            className="flex-1 outline-none text-gray-700 placeholder-gray-400 text-xs sm:text-sm font-medium bg-transparent"
+                          />
+                          {searchQuery && (
+                            <button onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="p-1 hover:bg-gray-100 rounded-full">
+                              <X className="w-3.5 h-3.5 text-gray-400" />
+                            </button>
+                          )}
                         </div>
-                        <button
-                          onClick={() => setShowPermissionBanner(false)}
-                          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                        >
-                          <X className="w-4 h-4 text-white/40" />
-                        </button>
-                      </motion.div>
-                    )}
-                    <GoogleMap
-                      mapContainerStyle={MAP_CONTAINER_STYLE}
-                      center={mapCenter}
-                      zoom={17}
-                      options={MAP_OPTIONS}
-                      onLoad={(map) => { mapRef.current = map; }}
-                      onDragStart={() => setIsDragging(true)}
-                      onDragEnd={async () => {
-                        if (!mapRef.current) return;
-                        const center = mapRef.current.getCenter();
-                        const lat = Number(center.lat());
-                        const lng = Number(center.lng());
 
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                          setMapCenter({ lat, lng });
-                        }
-
-                        try {
-                          const data = await locationManager.reverseGeocode(lat, lng);
-                          setNewAddress(prev => ({
-                            ...prev,
-                            area: data.area || prev.area,
-                            cityName: data.city || prev.cityName,
-                            postalCode: data.postalCode || prev.postalCode,
-                            stateName: data.state || prev.stateName,
-                            addressLineOne: data.address,
-                            flat: data.flat || prev.flat,
-                            latitude: lat.toString(),
-                            longitude: lng.toString()
-                          }));
-
-                          if (addresses.length === 0) {
-                            setShowAddForm(true);
-                          }
-                        } catch (error) {
-                          console.error("Geocoding failed", error);
-                        } finally {
-                          setIsDragging(false);
-                        }
-                      }}
-                    >
-                      {/* Search Bar Overlay */}
-                      <div className="absolute top-4 left-4 right-4 z-10">
-                        <div className="relative">
-                          <div className="w-full bg-white rounded-xl shadow-lg shadow-black/5 p-4 flex items-center gap-3">
-                            <Search className="w-5 h-5 text-gray-400" />
-                            <input
-                              type="text"
-                              value={searchQuery}
-                              onChange={(e) => {
-                                const query = e.target.value;
-                                setSearchQuery(query);
-                                if (query.length > 2) {
-                                  locationManager.searchLocation(query).then(setSearchResults);
-                                } else {
+                        {searchResults.length > 0 && (
+                          <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-xl shadow-xl border border-gray-100 max-h-52 overflow-y-auto divide-y divide-gray-50 z-50">
+                            {searchResults.map((result) => (
+                              <button
+                                key={result.place_id}
+                                onClick={async () => {
+                                  setSearchQuery(result.description);
                                   setSearchResults([]);
-                                }
-                              }}
-                              placeholder="Search for your location"
-                              className="flex-1 outline-none text-gray-700 placeholder-gray-400 text-sm font-medium"
-                            />
-                            {searchQuery && (
-                              <button onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="p-1 hover:bg-gray-100 rounded-full">
-                                <X className="w-4 h-4 text-gray-400" />
-                              </button>
-                            )}
-                          </div>
+                                  try {
+                                    const loc = await locationManager.setManualLocation(result.place_id);
+                                    const lat = Number(loc.lat);
+                                    const lng = Number(loc.lng);
 
-                          {/* Search Results Dropdown */}
-                          {searchResults.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 max-h-60 overflow-y-auto divide-y divide-gray-50 z-50">
-                              {searchResults.map((result) => (
-                                <button
-                                  key={result.place_id}
-                                  onClick={async () => {
-                                    setSearchQuery(result.description);
-                                    setSearchResults([]);
-                                    try {
-                                      const loc = await locationManager.setManualLocation(result.place_id);
-                                      const lat = Number(loc.lat);
-                                      const lng = Number(loc.lng);
-
-                                      if (!isNaN(lat) && !isNaN(lng)) {
-                                        const coords = { lat, lng };
-                                        setMapCenter(coords);
-                                        setNewAddress(prev => ({
-                                          ...prev,
-                                          ...loc,
-                                          latitude: lat.toString(),
-                                          longitude: lng.toString()
-                                        }));
-                                        if (mapRef.current) {
-                                          mapRef.current.panTo(coords);
-                                          mapRef.current.setZoom(17);
-                                          setShowAddForm(true);
-                                        }
+                                    if (!isNaN(lat) && !isNaN(lng)) {
+                                      const coords = { lat, lng };
+                                      setMapCenter(coords);
+                                      setNewAddress(prev => ({
+                                        ...prev,
+                                        ...loc,
+                                        latitude: lat.toString(),
+                                        longitude: lng.toString()
+                                      }));
+                                      if (mapRef.current) {
+                                        mapRef.current.panTo(coords);
+                                        mapRef.current.setZoom(17);
                                       }
-                                    } catch (e) {
-                                      toast.error("Failed to load location");
                                     }
-                                  }}
-                                  className="w-full p-3 text-left hover:bg-gray-50 flex items-start gap-3 transition-colors"
-                                >
-                                  <MapPin className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
-                                  <div>
-                                    <p className="text-sm font-medium text-gray-800 line-clamp-1">{result.main_text}</p>
-                                    <p className="text-xs text-gray-400 line-clamp-1">{result.secondary_text}</p>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Locate Me Button status-aware */}
-                      <div className="absolute bottom-24 right-6 z-20">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleAutoDetect(); }}
-                          disabled={isLocating}
-                          className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 ${locationPermission === 'denied'
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-                            : 'bg-white text-[#037166] hover:bg-gray-50'
-                            }`}
-                          title={locationPermission === 'denied' ? 'Enable GPS in browser settings' : 'Use Current Location'}
-                        >
-                          {isLocating ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                          ) : locationPermission === 'denied' ? (
-                            <X className="w-5 h-5" />
-                          ) : (
-                            <Crosshair className="w-6 h-6" />
-                          )}
-                        </button>
-                      </div>
-                    </GoogleMap>
-
-                    {/* Fixed Center Pin Target */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                      <div className="relative -mt-8 transition-transform duration-200" style={{ transform: isDragging ? 'scale(1.1) translateY(-10px)' : 'scale(1) translateY(0)' }}>
-                        <div className="w-4 h-4 rounded-full bg-black/20 animate-ping absolute -bottom-1 left-1/2 -translate-x-1/2" />
-                        <MapPin className="w-10 h-10 text-[#ea4335] drop-shadow-xl relative z-10" fill="#ea4335" />
-                        <div className="w-1 h-3 bg-black/80 mx-auto rounded-full mt-1" />
+                                  } catch (e) {
+                                    toast.error("Failed to load location");
+                                  }
+                                }}
+                                className="w-full p-2.5 text-left hover:bg-gray-50 flex items-start gap-2.5 transition-colors"
+                              >
+                                <MapPin className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="text-xs font-semibold text-gray-800 line-clamp-1">{result.main_text}</p>
+                                  <p className="text-[11px] text-gray-400 line-clamp-1">{result.secondary_text}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-400 bg-gray-100">
-                    <Loader2 className="w-8 h-8 animate-spin mb-2 text-[#037166]" />
-                    <span className="text-sm">Loading Google Maps...</span>
+
+                    {/* Locate Me Button */}
+                    <div className="absolute bottom-4 right-4 z-20">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleAutoDetect(); }}
+                        disabled={isLocating}
+                        className="w-10 h-10 rounded-full shadow-lg flex items-center justify-center bg-white text-[#037166] hover:bg-gray-50 transition-all active:scale-95"
+                        title="Use Current Location"
+                      >
+                        {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </GoogleMap>
+
+                  {/* Fixed Center Pin Target */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                    <div className="relative -mt-6" style={{ transform: isDragging ? 'scale(1.1) translateY(-6px)' : 'scale(1) translateY(0)' }}>
+                      <MapPin className="w-8 h-8 text-[#ea4335] drop-shadow-lg relative z-10" fill="#ea4335" />
+                      <div className="w-1.5 h-1.5 bg-black/60 mx-auto rounded-full mt-0.5" />
+                    </div>
                   </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 bg-gray-50">
+                  <Loader2 className="w-6 h-6 animate-spin mb-2 text-[#037166]" />
+                  <span className="text-xs">Loading Google Maps...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Form Column */}
+            <div className="lg:col-span-6 bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
+                <div>
+                  <h4 className="text-base font-bold text-[#0f172a]">
+                    {editingAddress ? 'Edit Address' : 'Add New Address'}
+                  </h4>
+                  <p className="text-gray-500 text-[11px]">Recipient & location details for service</p>
+                </div>
+                {addresses.length > 0 && (
+                  <button
+                    onClick={() => setShowAddForm(false)}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 )}
               </div>
-            ) : (
-              // Sort addresses: Selected first, then Default
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+              <div className="space-y-3">
+                {/* Type Selection */}
+                <div className="flex gap-2">
+                  {['Home', 'Office', 'Other'].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setNewAddress({ ...newAddress, type })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${newAddress.type === type
+                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-xs'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <input
+                      placeholder="Full Name *"
+                      value={newAddress.name}
+                      onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-xs text-gray-900 focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      placeholder="Phone Number *"
+                      value={newAddress.phone}
+                      onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-xs text-gray-900 focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <input
+                    placeholder="Flat / Plot / House No. *"
+                    value={newAddress.flat}
+                    onChange={(e) => setNewAddress({ ...newAddress, flat: e.target.value })}
+                    className="w-full px-3 py-2 pr-20 rounded-lg bg-white border border-gray-300 text-xs text-gray-900 focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAutoDetect}
+                    disabled={locationLoading}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded bg-[#037166]/10 text-[#037166] text-[10px] font-bold hover:bg-[#037166]/20 transition-all uppercase"
+                  >
+                    {locationLoading ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <MapPin className="w-2.5 h-2.5" />}
+                    <span>{detectionSuccess ? 'Detected' : 'Detect'}</span>
+                  </button>
+                </div>
+
+                <div>
+                  <input
+                    placeholder="Area / Locality *"
+                    value={newAddress.area}
+                    onChange={(e) => setNewAddress({ ...newAddress, area: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-xs text-gray-900 focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <input
+                    placeholder="City"
+                    value={newAddress.cityName}
+                    onChange={(e) => setNewAddress({ ...newAddress, cityName: e.target.value })}
+                    className="w-full px-2.5 py-2 rounded-lg bg-white border border-gray-300 text-xs text-gray-900 focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                  />
+                  <input
+                    placeholder="State"
+                    value={newAddress.stateName}
+                    onChange={(e) => setNewAddress({ ...newAddress, stateName: e.target.value })}
+                    className="w-full px-2.5 py-2 rounded-lg bg-white border border-gray-300 text-xs text-gray-900 focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                  />
+                  <input
+                    placeholder="Pincode *"
+                    value={newAddress.postalCode}
+                    onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
+                    className="w-full px-2.5 py-2 rounded-lg bg-white border border-gray-300 text-xs text-gray-900 focus:border-[#037166] focus:ring-1 focus:ring-[#037166] outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="defaultAddr"
+                    checked={newAddress.defaultAddress}
+                    onChange={(e) => setNewAddress({ ...newAddress, defaultAddress: e.target.checked })}
+                    className="w-3.5 h-3.5 rounded text-[#037166] focus:ring-[#037166]"
+                  />
+                  <label htmlFor="defaultAddr" className="text-xs text-gray-600 cursor-pointer">
+                    Set as Default Address
+                  </label>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  {addresses.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAddForm(false)}
+                      className="flex-1 py-2 px-4 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleAddOrUpdateAddress}
+                    disabled={loading}
+                    className="flex-1 py-2 px-4 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-xs font-semibold hover:shadow-md transition-all disabled:opacity-50"
+                  >
+                    {loading ? 'Processing...' : editingAddress ? 'Update Address' : 'Save Address'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ── Main 2-Column Responsive Dashboard Layout ── */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+            {/* Left Column: Address Selection & Booking CTA (7 cols on Desktop) */}
+            <div className="lg:col-span-7 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                    <span>Select Service Address</span>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                      {addresses.length} saved
+                    </span>
+                  </h2>
+                  <p className="text-xs text-gray-500">Technician will visit the selected address</p>
+                </div>
+              </div>
+
+              {/* Address Cards Grid: 2 columns on tablet/desktop, 1 on mobile */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[...addresses]
                   .sort((a, b) => {
                     if (selectedAddress?._id === a._id) return -1;
@@ -652,248 +795,269 @@ export function AddressPage({
                     if (b.defaultAddress && !selectedAddress) return 1;
                     return 0;
                   })
-                  .map((address, index) => {
+                  .map((address) => {
                     const Icon = getIcon(address.type);
                     const isSelected = selectedAddress?._id === address._id;
 
                     return (
-                      <motion.div
+                      <div
                         key={address._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: -100 }}
-                        transition={{ delay: index * 0.1 }}
-                        layout
                         onClick={() => onSelectAddress(address)}
-                        className={`relative cursor-pointer rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm ${isSelected
-                          ? 'bg-gradient-to-br from-[#ecf7f5] to-[#f4fbfa] border-2 border-[#2f7f74]'
-                          : 'bg-white border border-gray-200 hover:border-[#99c8c0] hover:shadow-md'
+                        className={`relative cursor-pointer rounded-xl p-3.5 transition-all duration-200 shadow-xs flex flex-col justify-between ${isSelected
+                          ? 'bg-gradient-to-br from-[#f0fbf9] to-white border-2 border-[#037166] ring-2 ring-[#037166]/10 shadow-sm'
+                          : 'bg-white border border-gray-200 hover:border-[#99c8c0] hover:shadow-xs'
                           }`}
                       >
-                        <div className="flex gap-4 sm:gap-6">
-                          <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected
-                            ? 'bg-gradient-to-br from-[#037166] to-[#04a99d]'
-                            : 'bg-[#eaf5f3]'
-                            }`}>
-                            <Icon className={`w-7 h-7 sm:w-8 sm:h-8 ${isSelected ? 'text-white' : 'text-[#2f7f74]'}`} />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h4 className="text-2xl font-bold text-[#0f172a] capitalize">{address.type}</h4>
-                              {address.defaultAddress && (
-                                <h6 className="px-2 py-0.5 rounded-full bg-[#037166]/20 text-[#04a99d] text-xs font-medium">
-                                  DEFAULT
-                                </h6>
-                              )}
+                        {/* Top: Icon + Title + Selection & Action Buttons */}
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isSelected
+                                ? 'bg-[#037166] text-white shadow-xs'
+                                : 'bg-[#eaf5f3] text-[#037166]'
+                                }`}>
+                                <Icon className="w-4 h-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <h4 className="text-xs sm:text-sm font-bold text-[#0f172a] capitalize truncate">
+                                    {address.type || 'Other'}
+                                  </h4>
+                                  {address.defaultAddress && (
+                                    <span className="px-1.5 py-0.2 rounded bg-[#037166]/15 text-[#037166] text-[9px] font-bold uppercase tracking-wider">
+                                      DEFAULT
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                            <p className="font-semibold text-[#334155] mb-1">{address.name}</p>
-                            <p className="text-[#475569] text-sm mb-1 line-clamp-2">
-                              {[address.flat, address.area].filter(Boolean).join(', ')}
-                            </p>
-                            <p className="text-[#64748b] text-xs line-clamp-1">
-                              {[address.cityName, address.postalCode].filter(Boolean).join(', ')}
-                            </p>
+
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              {isSelected && (
+                                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center text-white mr-1 shadow-xs">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleEditClick(address); }}
+                                className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition-all"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleDeleteAddress(address._id); }}
+                                className="p-1 rounded-md bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-all"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
                           </div>
 
-                          <div className="flex flex-col gap-2 items-end">
-                            {isSelected && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="w-8 h-8 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center"
-                              >
-                                <Check className="w-5 h-5 text-white" />
-                              </motion.div>
-                            )}
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleEditClick(address); }}
-                              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-[#0f172a] transition-all"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleDeleteAddress(address._id); }}
-                              className="p-2 rounded-lg bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-all"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                          {/* Recipient details */}
+                          <p className="text-xs font-semibold text-gray-800 truncate mb-1">
+                            {address.name || address.userName || ''}
+                            {address.phone ? <span className="font-normal text-gray-500"> • {address.phone}</span> : null}
+                          </p>
+
+                          {/* Street address line */}
+                          {(() => {
+                            const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' ? null : String(v).trim());
+                            const street = [clean(address.flat), clean(address.area), clean(address.addressLineOne), clean(address.addressLineTwo)].filter(Boolean);
+                            const seen = new Set();
+                            const unique = street.filter(s => { const k = s.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+                            return unique.length > 0 ? (
+                              <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">{unique.join(', ')}</p>
+                            ) : null;
+                          })()}
                         </div>
-                      </motion.div>
+
+                        {/* Bottom: City & Pin */}
+                        {(() => {
+                          const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' ? null : String(v).trim());
+                          const city = [clean(address.cityName), clean(address.stateName), clean(address.postalCode)].filter(Boolean);
+                          return city.length > 0 ? (
+                            <p className="text-[11px] text-gray-400 mt-2 pt-1.5 border-t border-gray-100 truncate">{city.join(', ')}</p>
+                          ) : null;
+                        })()}
+                      </div>
                     );
                   })}
               </div>
-            )}
-          </AnimatePresence>
 
-          {/* Add Address Form */}
-          <AnimatePresence>
-            {showAddForm && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
-                  <div className="flex items-center justify-between mb-6">
+              {/* Primary Action Button: Right Below Addresses */}
+              {selectedAddress && (
+                <div className="pt-2">
+                  <button
+                    onClick={handleContinue}
+                    className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#037166] via-[#028377] to-[#04a99d] text-white font-bold text-sm sm:text-base shadow-md hover:shadow-lg hover:shadow-[#037166]/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                  >
+                    <span>Continue to Booking</span>
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Payment Methods / Pay Your Way (Compact Guarantee Strip) */}
+              <div className="rounded-xl bg-white border border-gray-200 p-3 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <div>
-                      <h4 className="text-xl font-bold text-[#0f172a]">
-                        {editingAddress
-                          ? 'Edit Address'
-                          : (!newAddress.name || !newAddress.phone)
-                            ? 'Please complete your profile'
-                            : 'Add New Address'}
-                      </h4>
-                      {!editingAddress && (
-                        <p className="text-gray-500 text-xs mt-1">Information pre-filled from your profile</p>
-                      )}
+                      <h5 className="text-xs font-bold text-gray-900">Pay After Service • 100% Safe</h5>
+                      <p className="text-[10px] text-gray-500">Sirf service ke baad pay karein</p>
                     </div>
-                    <button
-                      onClick={() => setShowAddForm(false)}
-                      className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                    >
-                      <X className="w-5 h-5 text-gray-500" />
-                    </button>
                   </div>
-
-                  <div className="space-y-4">
-                    <div className="flex gap-3">
-                      {['Home', 'Office', 'Other'].map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => setNewAddress({ ...newAddress, type })}
-                          className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${newAddress.type === type
-                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1">
-                        <input
-                          placeholder="Full Name"
-                          value={newAddress.name}
-                          onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
-                        />
-                        <p className="text-[10px] text-gray-500 px-1 italic">Recipient name for service reference</p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <input
-                          placeholder="Phone Number"
-                          value={newAddress.phone}
-                          onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
-                        />
-                        <p className="text-[10px] text-gray-500 px-1 italic">Contact number for this address</p>
-                      </div>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        placeholder="Flat / Plot / House No."
-                        value={newAddress.flat}
-                        onChange={(e) => setNewAddress({ ...newAddress, flat: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all pr-32"
-                      />
-                      <button
-                        onClick={handleAutoDetect}
-                        disabled={locationLoading}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#037166]/20 text-[#04a99d] text-[10px] font-bold border border-[#037166]/30 hover:bg-[#037166]/30 transition-all uppercase tracking-wider disabled:opacity-50"
-                      >
-                        {locationLoading ? (
-                          <Loader2 className="w-3 animate-spin" />
-                        ) : detectionSuccess ? (
-                          <Check className="w-3 text-[#04a99d]" />
-                        ) : (
-                          <MapPin className="w-3" />
-                        )}
-                        {detectionSuccess ? 'Detected' : 'Detect'}
-                      </button>
-                    </div>
-
-                    <input
-                      placeholder="Area / Locality"
-                      value={newAddress.area}
-                      onChange={(e) => setNewAddress({ ...newAddress, area: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
-                    />
-
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <input
-                        placeholder="City"
-                        value={newAddress.cityName}
-                        onChange={(e) => setNewAddress({ ...newAddress, cityName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
-                      />
-                      <input
-                        placeholder="State"
-                        value={newAddress.stateName}
-                        onChange={(e) => setNewAddress({ ...newAddress, stateName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
-                      />
-                      <input
-                        placeholder="Postal Code"
-                        value={newAddress.postalCode}
-                        onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-white border border-[#123F4A] text-[#0f172a] focus:border-[#037166] transition-all"
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="defaultAddr"
-                        checked={newAddress.defaultAddress}
-                        onChange={(e) => setNewAddress({ ...newAddress, defaultAddress: e.target.checked })}
-                        className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#037166]"
-                      />
-                      <label htmlFor="defaultAddr" className="text-sm text-gray-600 cursor-pointer">Set as Default Address</label>
-                    </div>
-
-                    <div className="flex gap-3 pt-4">
-                      <button
-                        onClick={() => setShowAddForm(false)}
-                        className="flex-1 px-6 py-3 rounded-lg border border-[#123F4A] text-[#334155] hover:bg-gray-50 transition-all"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleAddOrUpdateAddress}
-                        disabled={loading}
-                        className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg hover:shadow-[#037166]/30 transition-all disabled:opacity-50"
-                      >
-                        {loading ? 'Processing...' : editingAddress ? 'Update Address' : 'Save Address'}
-                      </button>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      { label: 'UPI', color: '#6366f1', abbr: 'UP' },
+                      { label: 'PhonePe', color: '#7c3aed', abbr: 'PP' },
+                      { label: 'GPay', color: '#059669', abbr: 'G' },
+                      { label: 'Paytm', color: '#0284c7', abbr: 'Pt' },
+                      { label: 'Cards', color: '#1e40af', abbr: '💳' },
+                      { label: 'Cash', color: '#0f766e', abbr: '₹' },
+                    ].map(({ label, color, abbr }) => (
+                      <span key={label} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-50 border border-gray-200 text-[10px] font-medium text-gray-700">
+                        <span className="w-3 h-3 rounded text-white text-[7px] font-bold flex items-center justify-center" style={{ backgroundColor: color }}>{abbr}</span>
+                        {label}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              </div>
+            </div>
 
-        {/* Continue Button */}
-        {selectedAddress && !showAddForm && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 flex justify-center"
-          >
-            <button
-              onClick={handleContinue}
-              className="w-full md:w-auto md:min-w-[420px] px-10 py-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold text-lg hover:shadow-lg hover:shadow-[#037166]/40 transition-all"
-            >
-              Continue to Booking
-            </button>
-          </motion.div>
+            {/* Right Column: Comparison Table & App Promo (5 cols on Desktop) */}
+            <div className="lg:col-span-5 space-y-3.5">
+              {/* Comparison Card */}
+              <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-[#f0fbf9] text-white px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">SIDE BY SIDE</p>
+                    <h3 className="text-xs sm:text-sm font-bold text-white">
+                      Traditional Repair <span className="text-white/80 font-normal">vs</span> <span className="text-[#04a99d]">Doorstep Hub</span>
+                    </h3>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-blue-700 text-[10px] font-bold border border-emerald-500/30">
+                    Smart Choice
+                  </span>
+                </div>
+
+                <div className="divide-y divide-gray-100 text-xs">
+                  {[
+                    {
+                      feature: 'Finding Help',
+                      trad: 'Call around technicians yourself',
+                      dhub: 'Book online in 60s, verified pro assigned'
+                    },
+                    {
+                      feature: 'Service Visit',
+                      trad: 'Carry heavy appliance to shop',
+                      dhub: 'Professional technician at your doorstep'
+                    },
+                    {
+                      feature: 'Repair Cost',
+                      trad: 'Unclear pricing & extra charges',
+                      dhub: 'Upfront transparent rates & approval'
+                    },
+                    {
+                      feature: 'Your Time',
+                      trad: 'Long waiting & endless follow-ups',
+                      dhub: 'On-time inspection on your schedule'
+                    },
+                    {
+                      feature: 'Warranty',
+                      trad: 'No guarantee or post-repair bills',
+                      dhub: '30-day Doorstep Hub service warranty'
+                    }
+                  ].map((row, idx) => (
+                    <div key={row.feature} className={`p-2.5 flex items-start gap-2 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                      <div className="w-20 sm:w-24 flex-shrink-0 font-semibold text-gray-800 text-[11px]">{row.feature}</div>
+                      <div className="flex-1 text-gray-500 text-[11px] leading-tight">
+                        <span className="text-red-500 font-bold mr-1">✕</span>
+                        {row.trad}
+                      </div>
+                      <div className="flex-1 font-medium text-gray-900 text-[11px] leading-tight">
+                        <span className="text-emerald-600 font-bold mr-1">✓</span>
+                        {row.dhub}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="px-3.5 py-2 bg-gray-50 border-t border-gray-100 flex flex-wrap gap-1.5">
+                  {['🏠 At Your Doorstep', '⚡ Instant Booking', '₹ Clear Pricing', '🛡️ Service Warranty'].map((tag) => (
+                    <span key={tag} className="text-[10px] font-medium text-gray-600 bg-white border border-gray-200 rounded-full px-2 py-0.5">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* App Download Card */}
+              <div className="rounded-2xl bg-gradient-to-br from-[#f0fbf9] via-white to-[#e6f7f4] border border-[#a9ded7] p-3.5 sm:p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="inline-block px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] text-[9px] font-bold uppercase tracking-wider mb-1">
+                      Download Our App
+                    </span>
+                    <h3 className="text-sm sm:text-base font-extrabold text-gray-900 leading-snug">Everything in Your Pocket</h3>
+                    <p className="text-[11px] text-gray-600 mt-0.5">Access all services, track orders & manage daily needs.</p>
+                  </div>
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[] shadow-sm flex items-center justify-center p-2 flex-shrink-0 overflow-hidden">
+                    <img
+                      src="/d-hub-logo.png"
+                      alt="Doorstep Hub"
+                      className="w-full h-full object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 my-2.5">
+                  {['⚡ Fast booking', '🔒 Secure & private', '🎁 Exclusive app deals'].map((feat) => (
+                    <span key={feat} className="text-[10px] font-medium text-gray-700 bg-white/80 border border-[#b2ddd8] rounded-full px-2 py-0.5">
+                      {feat}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-[#b2ddd8]/50 gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <a
+                      href={appLinks.android}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0f172a] text-white text-[11px] font-semibold hover:bg-black transition-colors shadow-xs"
+                      title="Download on Google Play"
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.42.24.9.24 1.32 0l11.46-6.6-2.64-2.64L3.18 23.76zm16.8-9.72-3.12-1.8-2.88 2.88 2.88 2.88 3.12-1.8c.9-.54.9-1.62 0-2.16zM3.18.24.06 2.04C-.42 2.34-.42 3.18.06 3.48l10.14 5.88L12.84 6.6 4.5.24A1.2 1.2 0 0 0 3.18.24zm1.02 3.18L11.46 12 4.2 19.58 4.2 3.42z"/></svg>
+                      <span>Google Play</span>
+                    </a>
+                    <a
+                      href={appLinks.ios}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0f172a] text-white text-[11px] font-semibold hover:bg-black transition-colors shadow-xs"
+                      title="Download on App Store"
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                      <span>App Store</span>
+                    </a>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
+                    <span><strong className="text-gray-900 font-bold">4.8★</strong> (10k+)</span>
+                    <span>•</span>
+                    <span><strong className="text-gray-900 font-bold">50K+</strong></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         )}
       </div>
 

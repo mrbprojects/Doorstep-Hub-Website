@@ -23,6 +23,9 @@ import {
 import { fetchCategories, fetchCities, fetchServiceBanners, fetchApplianceServiceBanners } from '@/lib/api';
 import { buildApplianceCategoryCityPublicPath } from '@/lib/applianceRepairSlugs';
 import { ApplianceServiceBannerCarousel } from '@/components/appliances/ApplianceServiceBannerCarousel';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 
 const DEFAULT_APP_LINKS = {
   ios: 'https://apps.apple.com/in/app/doorstep-hub/id6475340236',
@@ -511,11 +514,16 @@ function CategoryPageContent() {
             </div>
           )}
 
+          <ApplianceHowItWorks />
+          <ApplianceComparison />
+
           <FaqSection
             faqs={allFaqs.slice(0, 9)}
             activeIndex={faqActiveIndex}
             onToggle={setFaqActiveIndex}
           />
+
+          <PaymentMethodsSection />
         </div>
       </div>
     </main>

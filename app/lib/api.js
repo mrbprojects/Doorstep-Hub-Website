@@ -112,40 +112,39 @@ export async function fetchAllServices() {
 }
 
 /**
- * Fetch featured services from the API
+ * Fetch featured services from the dynamic backend API
  * @returns {Promise<Array>} Array of featured service objects
  */
-export async function fetchFeaturedServices() {
-    const response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/featured_services`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+export async function fetchFeaturedServices(location = null) {
+    try {
+        const payload = (location?.lat && location?.lng) ? {
+            lattitude: location.lat,
+            longitude: location.lng
+        } : {};
 
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
+        const response = await fetch(`${API_BASE_URL}/app/applience-repairs-website/featured_services`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
 
-    const data = await response.json();
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
 
-    if (data.success && Array.isArray(data.updatedServices)) {
-        try {
-            // Fetch all services to get correct slugs for enrichment
-            const allServices = await fetchAllServices();
-            return data.updatedServices.map(service => {
-                if (service.slug) return service;
-                // Match by ID or name
-                const matched = allServices.find(as => as._id === service._id || as.serviceName === service.serviceName);
-                return matched ? { ...service, slug: matched.slug } : service;
-            });
-        } catch (error) {
-            console.error("Error enriching featured services with slugs:", error);
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.updatedServices)) {
             return data.updatedServices;
         }
-    }
 
-    throw new Error(data.message || 'Failed to fetch featured services');
+        return [];
+    } catch (error) {
+        console.error("Error fetching featured services from backend:", error);
+        return [];
+    }
 }
 
 /**
@@ -168,15 +167,18 @@ export function getServiceSlug(serviceName) {
 }
 
 /**
- * Image loader for Next.js Image component
+ * Image loader for Next.js Image component & img elements
  * @param {Object} config - Loader configuration
  * @returns {string} Full image URL
  */
 export function imageLoader({ src }) {
-    if (src.startsWith('http')) {
+    if (!src) return 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
+    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('blob:')) {
         return src;
     }
-    return `https://devapis.doorstephub.com/${src}`;
+    const cleanSrc = String(src).replace(/^\/+/, '');
+    const base = (IMAGE_BASE_URL || process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
+    return `${base}/${cleanSrc}`;
 }
 
 /**

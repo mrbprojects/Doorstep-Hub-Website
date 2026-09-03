@@ -8,7 +8,8 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
   // Local filtering is now disabled in favor of API search, 
   // but we keep the variable name to minimize changes to the JSX
   const filteredCities = cities;
-  const visibleCities = isExpanded ? filteredCities : (filteredCities || []).slice(0, 8);
+  const initialCount = 12;
+  const visibleCities = isExpanded ? filteredCities : (filteredCities || []).slice(0, initialCount);
 
   // SEO Schema for City-wise section
   const schemaData = {
@@ -25,25 +26,25 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
   };
 
   return (
-    <section id="centers" className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-20 bg-white">
+    <section id="centers" className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 bg-white">
       {/* SEO Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
       />
 
-      <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div className="mb-8 sm:mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
-          <p className="font-bold  tracking-[0.3em] text-[#037166]">City Wise Doorstep Hub Services</p>
-          <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl text-gray-900 leading-tight">
+          <p className="font-bold tracking-[0.3em] text-[#037166] text-xs sm:text-sm uppercase">City Wise Doorstep Hub Services</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl text-gray-900 leading-tight">
             Choose Your <span className="text-[#037166]">City</span>
           </h2>
         </div>
-        {filteredCities && filteredCities.length > 8 && (
+        {filteredCities && filteredCities.length > initialCount && (
           <div className="flex-shrink-0">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-white hover:text-white font-black text-xs tracking-widest uppercase transition-all duration-300 bg-gradient-to-r from-[#037166] to-[#04a99d] hover:opacity-90 px-8 py-3.5 rounded-full hover:shadow-xl shadow-md hover:-translate-y-0.5 transform"
+              className="text-white hover:text-white font-black text-xs tracking-widest uppercase transition-all duration-300 bg-gradient-to-r from-[#037166] to-[#04a99d] hover:opacity-90 px-7 py-3 sm:px-8 sm:py-3.5 rounded-full hover:shadow-xl shadow-md hover:-translate-y-0.5 transform"
             >
               {isExpanded ? 'Show Less' : 'Show More'}
             </button>
@@ -51,14 +52,15 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
         )}
       </div>
 
-      <div className="min-h-[400px] relative">
+      <div className="min-h-[300px] relative">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-[2px] rounded-[2.5rem]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#037166]"></div>
           </div>
         )}
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Responsive Grid: 6 cities per row on desktop (lg/xl) */}
+        <div className="grid gap-3.5 sm:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {visibleCities && visibleCities.length > 0 ? (
             visibleCities.map((city) => {
               const active = selectedCity?.name === city.name;
@@ -66,46 +68,43 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
                 <button
                   key={city.id || city.name}
                   onClick={() => onSelectCity(city)}
-                  className={`group rounded-3xl border overflow-hidden text-left transition-all duration-500 hover:-translate-y-2 h-[130px] sm:h-[150px] w-full ${active
+                  className={`group rounded-2xl border overflow-hidden text-left transition-all duration-300 hover:-translate-y-1.5 h-[120px] sm:h-[135px] w-full ${active
                       ? "border-[#037166] bg-white shadow-2xl shadow-[#037166]/20 ring-1 ring-[#037166]"
-                      : "border-gray-100 bg-white hover:border-[#037166]/30 shadow-xl shadow-gray-200/40"
+                      : "border-gray-100 bg-white hover:border-[#037166]/30 shadow-md hover:shadow-xl shadow-gray-200/40"
                     }`}
                 >
                   <div className="flex items-stretch h-full">
                     {/* Image Area - Fits card height */}
-                    <div className={`w-32 sm:w-40 h-full flex-shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-105`}>
+                    <div className="w-18 sm:w-22 md:w-24 h-full flex-shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-105 p-1.5 flex items-center justify-center">
                       {city.icon ? (
                         <img loading="lazy" decoding="async" src={city.icon} alt={city.name} className="w-full h-full object-contain object-center" />
                       ) : (
-                        <div className="w-full h-full bg-[#037166]/5 flex items-center justify-center">
-                          <MapPin className="text-[#037166]" size={32} />
+                        <div className="w-full h-full bg-[#037166]/5 flex items-center justify-center rounded-xl">
+                          <MapPin className="text-[#037166]" size={26} />
                         </div>
                       )}
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0">
+                    <div className="flex-1 p-2.5 sm:p-3 flex flex-col justify-between min-w-0">
                       <div>
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="text-xl font-black text-[#037166] leading-tight tracking-tight">{city.name}</h3>
-                        </div>
-                        <p className="mt-2 text-sm font-bold leading-tight text-gray-500 uppercase tracking-tight line-clamp-1">
+                        <h3 className="text-xs sm:text-sm md:text-base font-black text-gray-900 group-hover:text-[#037166] transition-colors leading-tight tracking-tight truncate">
+                          {city.name}
+                        </h3>
+                        <p className="mt-1 text-[10px] sm:text-[11px] font-bold leading-tight text-gray-400 uppercase tracking-tight truncate">
                           {city.area}
                         </p>
                       </div>
 
-                      <div className="mt-3 flex items-center justify-between gap-2">
-                        <p className="text-[10px] sm:text-xs font-black text-[#037166] min-w-0">
-                          <span className="line-clamp-1">{city.centers} Authorised Centers</span>
-                        </p>
+                      <div className="mt-2 flex items-center justify-between gap-1">
                         {active ? (
-                          <span className="inline-flex items-center justify-center rounded-full p-1.5 bg-[#037166] text-white shadow-md shadow-[#037166]/40">
-                            <Check className="w-6 h-6" />
+                          <span className="inline-flex items-center justify-center rounded-full p-1 bg-[#037166] text-white shadow-md shadow-[#037166]/40">
+                            <Check className="w-4 h-4" />
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all bg-[#037166]/10 text-[#037166] group-hover:bg-[#037166] group-hover:text-white">
+                          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] sm:text-[10px] font-bold whitespace-nowrap transition-all bg-[#037166]/10 text-[#037166] group-hover:bg-[#037166] group-hover:text-white">
                             Book Services
-                            <ArrowRight className="w-3 h-3" />
+                            <ArrowRight className="w-2.5 h-2.5" />
                           </span>
                         )}
                       </div>
@@ -120,8 +119,6 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
             </div>
           )}
         </div>
-
-
       </div>
     </section>
   );

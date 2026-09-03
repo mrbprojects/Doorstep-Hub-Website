@@ -12,6 +12,9 @@ import {
   FLAT_BRAND_AUTO_CITY,
 } from '@/lib/applianceRepairSlugs';
 import { useLocation } from '@/hooks/useLocation';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 
 function FaqSection({ faqs, activeIndex, onToggle, cityName, brandName }) {
   if (!faqs.length) return null;
@@ -387,6 +390,9 @@ function ServicePageContent() {
           )}
         </div>
 
+        <ApplianceHowItWorks />
+        <ApplianceComparison />
+
         <FaqSection
           faqs={pageFaqs.slice(0, 9)}
           activeIndex={faqActiveIndex}
@@ -394,6 +400,8 @@ function ServicePageContent() {
           cityName={selectedCity?.name}
           brandName={selectedBrand?.name}
         />
+
+        <PaymentMethodsSection />
       </div>
     </div>
   );

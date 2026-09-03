@@ -520,14 +520,16 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   };
 
   const ShimmerServiceCard = () => (
-    <div className="h-28 rounded-2xl bg-white border border-gray-100 overflow-hidden relative">
+    <div className="h-[280px] rounded-2xl bg-white border border-gray-100 overflow-hidden relative flex flex-col">
       <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-gray-50 to-transparent" />
-      <div className="flex flex-col sm:flex-row h-full">
-        <div className="w-full sm:w-32 bg-gray-100" />
-        <div className="flex-1 p-4 space-y-3">
-          <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
-          <div className="h-2 w-full bg-gray-100 rounded animate-pulse" />
+      <div className="w-full h-32 bg-gray-100 flex-shrink-0" />
+      <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
+        <div className="space-y-1.5">
+          <div className="h-3.5 w-3/4 bg-gray-200 rounded animate-pulse" />
+          <div className="h-2.5 w-1/2 bg-gray-100 rounded animate-pulse" />
+          <div className="h-4 w-1/3 bg-gray-200 rounded animate-pulse mt-2" />
         </div>
+        <div className="h-7 w-full bg-gray-200 rounded-full animate-pulse" />
       </div>
     </div>
   );
@@ -890,106 +892,106 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 )}
               </div>
 
-              {/* Service Cards */}
+              {/* Service Cards: 6 per row on desktop with responsive breakdown */}
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8 w-full">
-                  {Array.from({ length: 4 }).map((_, i) => <ShimmerServiceCard key={i} />)}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 mb-8 w-full">
+                  {Array.from({ length: 6 }).map((_, i) => <ShimmerServiceCard key={i} />)}
                 </div>
               ) : services && services.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8 w-full">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 mb-8 w-full">
                   {services.map((service, index) => (
                     <motion.div
                       key={service.id || index}
-                      initial={{ opacity: 0, y: 30 }}
+                      initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      transition={{ delay: index * 0.04 }}
                       onClick={() => handleSelectPackage(service.id)}
-                      className={`relative h-full min-h-[200px] bg-white border-2 rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${selectedPackages.includes(service.id)
-                        ? 'border-[#037166] shadow-xl shadow-[#037166]/10'
-                        : 'border-gray-100 hover:border-[#037166]/20'
+                      className={`group relative h-full bg-white border-2 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg flex flex-col justify-between ${selectedPackages.includes(service.id)
+                        ? 'border-[#037166] shadow-md shadow-[#037166]/10'
+                        : 'border-gray-100 hover:border-[#037166]/40'
                         }`}
                     >
-                      <div className="flex flex-col sm:flex-row h-full">
-                        {/* Service Image */}
-                        {service.image && (
-                          <div className="relative w-full sm:w-[30%] h-36 sm:h-auto sm:self-stretch overflow-hidden bg-white">
-                            <img loading="lazy" decoding="async"
-                              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
-                              alt={service.name}
-                              className="w-full h-full object-cover"
-                            />
-                            {/* Rating Badge */}
-                            {service.rating && (
-                              <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-white shadow-sm border border-gray-100 flex items-center gap-1">
-                                <Star className="w-2.5 h-2.5 fill-[#037166] text-[#037166]" />
-                                <span className="text-gray-900 font-bold text-[9px]">{service.rating}</span>
-                              </div>
-                            )}
+                      {/* Service Image */}
+                      <div className="relative w-full h-32 sm:h-36 overflow-hidden bg-gray-50 flex-shrink-0">
+                        {service.image ? (
+                          <img loading="lazy" decoding="async"
+                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
+                            alt={service.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                            <Wrench className="w-8 h-8 opacity-40" />
                           </div>
                         )}
 
-                        <div className="p-3 flex-1 flex flex-col justify-between">
-                          <div className="flex-1 mb-2">
-                            <div className="flex items-start justify-between mb-1">
-                              <div className="min-w-0">
-                                {selectedPackages.includes(service.id) && (
-                                  <div className="inline-flex items-center gap-1 text-[#037166] mb-0.5">
-                                    <CheckCircle className="w-3 h-3" />
-                                    <span className="text-[9px] font-bold uppercase tracking-wider">Selected</span>
-                                  </div>
-                                )}
-                                <h4 className="text-[16px] sm:text-[18px] font-extrabold text-gray-900 leading-snug line-clamp-2">{service.name}</h4>
-                              </div>
-                              <div className="text-right flex-shrink-0 ml-2">
-                                <p className="text-gray-500 text-[10px] italic">Starting from</p>
-                                <span className="text-[22px] sm:text-[25px] font-extrabold text-[#037166] leading-none">₹{service.price}</span>
-                                {service.priceUnit && (
-                                  <span className="text-gray-400 text-[10px] ml-0.5">/{service.priceUnit}</span>
-                                )}
-                              </div>
+                        {/* Selected Tag */}
+                        {selectedPackages.includes(service.id) && (
+                          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-[#037166] text-white shadow-sm flex items-center gap-1">
+                            <CheckCircle className="w-2.5 h-2.5" />
+                            <span className="text-[8px] font-bold uppercase tracking-wider">Selected</span>
+                          </div>
+                        )}
+
+                        {/* Rating Badge */}
+                        {service.rating && (
+                          <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-white/95 shadow-sm border border-gray-100 flex items-center gap-1 backdrop-blur-sm">
+                            <Star className="w-2.5 h-2.5 fill-[#037166] text-[#037166]" />
+                            <span className="text-gray-900 font-bold text-[9px]">{service.rating}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="p-2.5 sm:p-3 flex-1 flex flex-col justify-between">
+                        <div className="flex-1 mb-2">
+                          <h4 className="text-[13px] sm:text-[14px] font-extrabold text-gray-900 leading-snug line-clamp-2 mb-1 group-hover:text-[#037166] transition-colors">
+                            {service.name}
+                          </h4>
+
+                          {service.subcategoryName && (
+                            <div className="mb-1.5 inline-flex px-1.5 py-0.5 rounded bg-[#037166]/10 border border-[#037166]/20 max-w-full">
+                              <span className="text-[#037166] text-[9px] font-semibold uppercase tracking-wide truncate">{service.subcategoryName}</span>
                             </div>
+                          )}
 
-                            {service.subcategoryName && (
-                              <div className="mb-1.5 inline-flex px-2 py-0.5 rounded-full bg-[#037166]/10 border border-[#037166]/20">
-                                <span className="text-[#037166] text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap">{service.subcategoryName}</span>
-                              </div>
-                            )}
-
+                          {service.description && (
                             <div
-                              className="text-gray-500 text-xs font-medium line-clamp-2 max-w-2xl leading-relaxed"
+                              className="text-gray-500 text-[10px] sm:text-[11px] font-normal line-clamp-2 leading-relaxed mb-2"
                               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(service.description) }}
                             />
-                          </div>
+                          )}
 
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-gray-50 pt-2">
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4">
-                              {service.totalOrders > 0 && (
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1 text-gray-500 text-xs whitespace-nowrap">
-                                    <CheckCheck className="w-3.5 h-3.5 text-[#037166]" />
-                                    <span>{service.totalOrders} orders</span>
-                                  </div>
-                                </div>
-                              )}
-                              {service.duration && service.duration !== 'N/A' && (
-                                <div className="flex items-center gap-1 text-gray-500 text-xs">
-                                  <Clock className="w-3.5 h-3.5 text-[#037166]" />
-                                  <span>{service.duration}</span>
-                                </div>
+                          <div className="mt-1">
+                            <p className="text-gray-400 text-[9px] italic leading-tight">Starting from</p>
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-base sm:text-lg font-extrabold text-[#037166] leading-none">₹{service.price}</span>
+                              {service.priceUnit && (
+                                <span className="text-gray-400 text-[9px] sm:text-[10px]">/{service.priceUnit}</span>
                               )}
                             </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddToCart(service);
-                              }}
-                              className="w-full sm:w-auto px-3.5 py-1.5 rounded-full bg-[#037166] text-white font-bold text-xs whitespace-nowrap hover:bg-[#04a99d] transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow active:scale-95"
-                            >
-                              Book Now
-                              <ArrowLeft className="w-3 h-3 rotate-180" />
-                            </button>
                           </div>
+                        </div>
+
+                        {/* Card Footer: Orders & CTA */}
+                        <div className="flex flex-col gap-1.5 border-t border-gray-50 pt-2 mt-auto">
+                          {service.totalOrders > 0 && (
+                            <div className="flex items-center gap-1 text-gray-500 text-[10px] whitespace-nowrap">
+                              <CheckCheck className="w-3 h-3 text-[#037166]" />
+                              <span>{service.totalOrders} orders</span>
+                            </div>
+                          )}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(service);
+                            }}
+                            className="w-full py-1.5 px-2 rounded-full bg-[#037166] text-white font-bold text-[11px] whitespace-nowrap hover:bg-[#04a99d] transition-all flex items-center justify-center gap-1 shadow-sm hover:shadow active:scale-95"
+                          >
+                            Choose Service
+                            <ArrowLeft className="w-2.5 h-2.5 rotate-180" />
+                          </button>
                         </div>
                       </div>
                     </motion.div>

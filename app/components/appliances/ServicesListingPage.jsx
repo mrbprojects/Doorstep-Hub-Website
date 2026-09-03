@@ -6,8 +6,11 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Clock, DollarSign, Filter, X, Zap, RotateCcw, ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
+import { imageLoader } from '@/lib/api';
 import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
 import { ADSENSE_CONFIG } from '@/config/adsense';
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/+$/, '');
 
 export function ServicesListingPage({ category, subCategory, subCategoryId, childCategoryId, slug }) {
   const router = useRouter();
@@ -51,7 +54,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     const fetchSubcatDetails = async () => {
       if (!category) return;
       try {
-        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+        const response = await fetch(`${API_BASE}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug: category })
@@ -112,7 +115,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
       setLoading(true);
       try {
-        let apiUrl = 'https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_subcategory';
+        let apiUrl = `${API_BASE}/app/applience-repairs-website/services_by_subcategory`;
         let body = {
           lattitude: location.lat,
           longitude: location.lng,
@@ -121,7 +124,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         if (slug) {
           body.slug = slug;
         } else if (childCategoryId) {
-          apiUrl = 'https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/services_by_childcategory';
+          apiUrl = `${API_BASE}/app/applience-repairs-website/services_by_childcategory`;
           body.childcategoryId = childCategoryId;
         } else {
           body.subcategoryId = subCategoryId;
@@ -200,7 +203,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
       setLoadingCategories(true);
       try {
-        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getallcategorys', {
+        const response = await fetch(`${API_BASE}/app/applience-repairs-website/getallcategorys`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -232,7 +235,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     fetchedCatsRef.current.add(catId);
     setLoadingSubcats(prev => ({ ...prev, [catId]: true }));
     try {
-      const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+      const response = await fetch(`${API_BASE}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug: catSlug })
@@ -581,12 +584,21 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       >
                         <div className="flex flex-col relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                           {/* Image */}
-                          <div className="relative h-48 overflow-hidden">
-                            <img loading="lazy" decoding="async"
-                              src={service.mainImage ? `https://devapis.doorstephub.com/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'} // Fallback image
-                              alt={service.name}
-                              className="w-full h-full object-cover transition-transform duration-700"
-                            />
+                          <div className="relative h-48 overflow-hidden bg-slate-900">
+                            {(() => {
+                              const serviceImg = service.mainImage || service.image || service.itemImage || service.serviceImage;
+                              return (
+                                <img loading="lazy" decoding="async"
+                                  src={serviceImg ? imageLoader({ src: serviceImg }) : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'}
+                                  alt={service.name || 'Appliance Service'}
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                  onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
+                                  }}
+                                />
+                              );
+                            })()}
                             <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
 
                             {/* Rating Badge - Bottom Left Flush */}
@@ -664,12 +676,21 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       >
                         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full md:h-[185px]">
                           <div className="flex flex-col md:flex-row h-full">
-                            <div className="relative w-full md:w-44 h-36 md:h-full overflow-hidden flex-shrink-0">
-                              <img loading="lazy" decoding="async"
-                                src={center.logo ? `https://devapis.doorstephub.com/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
-                                alt={center.name}
-                                className="w-full h-full object-contain bg-white transition-transform duration-700 group-hover:scale-105"
-                              />
+                            <div className="relative w-full md:w-44 h-36 md:h-full overflow-hidden flex-shrink-0 bg-white">
+                              {(() => {
+                                const centerImg = center.logo || center.image || center.banner;
+                                return (
+                                  <img loading="lazy" decoding="async"
+                                    src={centerImg ? imageLoader({ src: centerImg }) : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
+                                    alt={center.name || 'Service Center'}
+                                    className="w-full h-full object-contain bg-white transition-transform duration-700 group-hover:scale-105"
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400';
+                                    }}
+                                  />
+                                );
+                              })()}
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a1a1a]/60" />
 
                               <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-[11px] font-semibold">

@@ -22,6 +22,9 @@ import {
 } from 'lucide-react';
 import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
 import { ADSENSE_CONFIG } from '@/config/adsense';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 
 // Default theme settings
 const defaultTheme = {
@@ -540,6 +543,16 @@ export function CategoryPage({ slug, initialData }) {
                 <AdSenseUnit slotId={ADSENSE_CONFIG.slots.categoryFeed} />
               </div>
 
+              {/* Four Simple Steps. Less Hassle. (How It Works) */}
+              <div className="mt-8">
+                <ApplianceHowItWorks />
+              </div>
+
+              {/* Side by Side Comparison */}
+              <div className="mt-8">
+                <ApplianceComparison />
+              </div>
+
               {/* FAQ Section */}
               {(() => {
                 const allFaqs = [
@@ -684,6 +697,9 @@ export function CategoryPage({ slug, initialData }) {
           </div>
         </div>
       </section>
+
+      {/* Pay Your Way / Payment Methods Section */}
+      <PaymentMethodsSection />
     </motion.div>
   );
 }

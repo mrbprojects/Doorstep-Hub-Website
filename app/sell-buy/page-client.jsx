@@ -8,6 +8,7 @@ import { ListingCard } from '@/components/sell-buy/cards/ListingCard';
 import { PostAdModal } from '@/components/sell-buy/PostAdModal';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
+import { SellBuyHowItWorks } from '@/components/sell-buy/SellBuyHowItWorks';
 import {
   fetchSellBuyCategories,
   fetchSellBuyListings,
@@ -210,14 +211,131 @@ function ItemSection({ title, items, viewAllHref, isLoading }) {
   );
 }
 
+// ─── INTRODUCING SELL & BUY ANNOUNCEMENT MODAL ────────────────────────────────
+function IntroducingMarketplaceModal({ isOpen, onClose, onPostAdClick }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl border border-teal-100 animate-scale-up">
+        {/* Top Gradient Header */}
+        <div className="bg-gradient-to-br from-teal-50 via-emerald-50 to-teal-100/80 p-6 sm:p-8 text-center border-b border-teal-100/80 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-400 hover:text-gray-700 flex items-center justify-center transition-all shadow-sm"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 text-amber-800 text-xs font-black tracking-wider uppercase mb-3 border border-amber-200">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+            <span>Introducing</span>
+          </div>
+
+          <div className="w-16 h-16 rounded-2xl bg-white shadow-md border border-teal-200/60 flex items-center justify-center mx-auto mb-3 text-[#037166]">
+            <ShoppingBag className="w-8 h-8" />
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+            Sell & Buy Marketplace 🎉
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-600 font-medium mt-1.5 max-w-sm mx-auto">
+            Your neighborhood marketplace to buy & sell pre-owned items locally with 0% brokerage!
+          </p>
+        </div>
+
+        {/* Benefits Grid */}
+        <div className="p-6 sm:p-7 space-y-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 text-emerald-600">
+              <Tag className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-gray-900">100% Free Ad Posting</h4>
+              <p className="text-xs text-gray-500 mt-0.5">
+                List mobiles, bikes, cars, furniture, appliances & fashion in under 30 seconds.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 text-blue-600">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-gray-900">Verified Sellers & Trust</h4>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Buy with confidence with KYC verified seller identity badges.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 text-amber-600">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-gray-900">Direct Buyer-Seller Chat & Calls</h4>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Connect instantly with real local buyers without any third-party fees.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-6 bg-gray-50/80 border-t border-gray-100 flex flex-col sm:flex-row items-center gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full sm:flex-1 py-3 px-4 bg-[#037166] hover:bg-[#025a51] text-white rounded-xl text-sm font-bold shadow-md shadow-teal-900/10 transition-all flex items-center justify-center gap-2"
+          >
+            <span>Explore Marketplace</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onPostAdClick();
+            }}
+            className="w-full sm:w-auto py-3 px-5 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+          >
+            <Plus className="w-4 h-4 text-[#037166]" />
+            <span>Post a Free Ad</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function SellBuyHomePage() {
+  const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [sliders, setSliders] = useState([]);
   const [featuredSections, setFeaturedSections] = useState([]);
   const [recentListings, setRecentListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPostAdModalOpen, setIsPostAdModalOpen] = useState(false);
+  const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Check if user has already seen the marketplace introduction popup
+    const seen = typeof window !== 'undefined' ? localStorage.getItem('seen_sell_buy_intro_v2') : null;
+    if (!seen) {
+      const timer = setTimeout(() => setIsIntroModalOpen(true), 600);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleDismissIntro = () => {
+    setIsIntroModalOpen(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('seen_sell_buy_intro_v2', 'true');
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -333,13 +451,23 @@ export default function SellBuyHomePage() {
         isLoading={isLoading}
       />
 
-      <div className="pb-16" />
+      {/* Sell & Buy How It Works */}
+      <SellBuyHowItWorks />
+
+      <div className="pb-8" />
 
       {/* Full Marketplace Footer */}
       <SellBuyFooter />
 
       {/* Post Ad Modal Popup */}
       <PostAdModal isOpen={isPostAdModalOpen} onClose={() => setIsPostAdModalOpen(false)} />
+
+      {/* Introducing Marketplace Announcement Modal */}
+      <IntroducingMarketplaceModal
+        isOpen={isIntroModalOpen}
+        onClose={handleDismissIntro}
+        onPostAdClick={handleOpenPostAdModal}
+      />
     </div>
   );
 }

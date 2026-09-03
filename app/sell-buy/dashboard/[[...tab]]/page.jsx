@@ -88,6 +88,7 @@ export default function MarketplaceDashboardPage() {
   const [userListings, setUserListings] = useState([]);
   const [loadingListings, setLoadingListings] = useState(true);
   const [isPostAdModalOpen, setIsPostAdModalOpen] = useState(false);
+  const [editingAd, setEditingAd] = useState(null);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   const [clientToken, setClientToken] = useState(null);
   const [localUser, setLocalUser] = useState(null);
@@ -577,6 +578,7 @@ export default function MarketplaceDashboardPage() {
 
   // Guard for posting ads - STRICT ADMIN APPROVAL REQUIRED
   const handleOpenPostAdModal = () => {
+    setEditingAd(null);
     if (!isAuthenticated) {
       if (openAuthModal) openAuthModal();
       else toast.error('Please login to post an advertisement');
@@ -591,6 +593,11 @@ export default function MarketplaceDashboardPage() {
       return;
     }
 
+    setIsPostAdModalOpen(true);
+  };
+
+  const handleOpenEditAdModal = (ad) => {
+    setEditingAd(ad);
     setIsPostAdModalOpen(true);
   };
 
@@ -1157,6 +1164,19 @@ export default function MarketplaceDashboardPage() {
                               </span>
                             )}
 
+                            {/* Edit Ad button (if not sold) */}
+                            {!isSold && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditAdModal(item)}
+                                title="Edit Advertisement"
+                                className="text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3.5 py-2 rounded-xl transition-all active:scale-95 inline-flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap"
+                              >
+                                <Pencil className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Edit</span>
+                              </button>
+                            )}
+
                             <Link
                               href={`/sell-buy/ad/${item.slug}`}
                               className={`text-xs font-bold px-3.5 py-2 rounded-xl transition-colors inline-flex items-center gap-1.5 border whitespace-nowrap ${
@@ -1291,8 +1311,15 @@ export default function MarketplaceDashboardPage() {
 
       <SellBuyFooter />
 
-      {/* Post Ad Modal Popup */}
-      <PostAdModal isOpen={isPostAdModalOpen} onClose={() => setIsPostAdModalOpen(false)} />
+      {/* Post / Edit Ad Modal Popup */}
+      <PostAdModal
+        isOpen={isPostAdModalOpen}
+        initialData={editingAd}
+        onClose={() => {
+          setIsPostAdModalOpen(false);
+          setEditingAd(null);
+        }}
+      />
 
       {/* SELLER KYC VERIFICATION MODAL (DYNAMIC FIELD VALIDATION) */}
       {isKycModalOpen && (

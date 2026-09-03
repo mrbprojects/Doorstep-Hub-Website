@@ -142,7 +142,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl sm:text-5xl font-bold mb-4 text-white"
+            className="text-4xl sm:text-5xl text-center font-bold mb-4 text-white"
           >
             Explore Our Featured Service
           </motion.h2>
@@ -151,9 +151,9 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-gray-400 text-lg max-w-2xl"
+            className="text-gray-400 text-center mx-auto max-w-5xl"
           >
-            Top-rated services trusted by thousands of customers
+            Discover our most popular home appliance services, chosen by customers for convenient doorstep support, skilled technicians, clear service guidance, and reliable repair solutions for everyday appliance problems.
           </motion.p>
         </div>
         <div className="mb-2 flex items-center justify-end gap-2">
@@ -193,9 +193,13 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
                 {/* Image */}
                 <div className="relative h-56 overflow-hidden">
                   <img loading="lazy" decoding="async"
-                    src={imageLoader({ src: service.mainImage })}
-                    alt={service.serviceName}
+                    src={imageLoader({ src: service.mainImage || service.image })}
+                    alt={service.serviceName || 'Featured Service'}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 

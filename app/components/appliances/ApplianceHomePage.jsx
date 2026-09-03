@@ -12,8 +12,10 @@ import { DownloadApp } from '@/components/appliances/DownloadApp';
 import { NearbyServiceCenters as NearbyStores } from '@/components/appliances/NearbyStores';
 import { PopularCenters } from '@/components/appliances/PopularCenters';
 import { KnowledgeSpace } from '@/components/appliances/KnowledgeSpace';
-import { Newsletter } from '@/components/appliances/Newsletter';
+import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
 import { ApplianceBookingFlow } from '@/components/appliances/booking-flow/ApplianceBookingFlow';
+import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
+import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 
 export function ApplianceHomePage() {
     const router = useRouter();
@@ -125,6 +127,7 @@ export function ApplianceHomePage() {
                     onSelect={handleExploreSelect}
                 />
                 <TopCategories onViewAll={() => router.push(`/${serviceSlugs.category}`)} />
+                <ApplianceHowItWorks />
                 <ApplianceBookingFlow />
                 <FeaturedServices
                     onServiceClick={handleServiceClick}
@@ -145,7 +148,8 @@ export function ApplianceHomePage() {
                     router.push(`/service-list/${storeId}`);
                 }} /> */}
                 <KnowledgeSpace />
-                <Newsletter />
+                <ApplianceComparison />
+                <PaymentMethodsSection />
             </div>
         </div>
     );

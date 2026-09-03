@@ -1016,7 +1016,7 @@ export function AddressPage({
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-1 my-2.5">
+                <div className="flex flex-wrap gap-1.5 my-2.5">
                   {['⚡ Fast booking', '🔒 Secure & private', '🎁 Exclusive app deals'].map((feat) => (
                     <span key={feat} className="text-[10px] font-medium text-gray-700 bg-white/80 border border-[#b2ddd8] rounded-full px-2 py-0.5">
                       {feat}

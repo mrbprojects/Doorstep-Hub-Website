@@ -6,10 +6,26 @@ import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, X, Trash2, Edit2, Load
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useLocationContext } from '@/context/LocationContext';
+import { useServiceCart } from '@/context/ServiceCartContext';
+import { useRouter } from 'next/navigation';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { GoogleMap } from '@react-google-maps/api';
 import { locationManager } from '@/services/locationManager';
 import { inferVertical, trackLeadEvent } from '@/lib/leadTracking';
+
+function areCitiesMatching(cityA, cityB) {
+  if (!cityA || !cityB) return true;
+  const clean = (c) => String(typeof c === 'object' ? (c?.name || '') : c || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+  const a = clean(cityA);
+  const b = clean(cityB);
+  if (!a || !b) return true;
+  if (a === b) return true;
+  const hyderabadGroup = ['hyderabad', 'secunderabad', 'cyberabad'];
+  if (hyderabadGroup.includes(a) && hyderabadGroup.includes(b)) return true;
+  if (a.includes(b) || b.includes(a)) return true;
+  return false;
+}
+
 
 const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
 const MAP_OPTIONS = {
@@ -30,6 +46,9 @@ export function AddressPage({
 }) {
   const { user, token, isAuthenticated, loading: authLoading } = useAuth();
   const { location: contextLocation, detectWithGPS, loading: locationLoading, isMapsLoaded } = useLocationContext();
+  const router = useRouter();
+  const { cartData } = useServiceCart();
+  const [locationMismatch, setLocationMismatch] = useState(null);
   const mapRef = React.useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -381,6 +400,27 @@ export function AddressPage({
       toast.error('Please select an address');
       return;
     }
+
+    // Check if selected service center city matches customer address city
+    const providerCity = cartData?.provider?.cityName;
+    const userCity = selectedAddress?.cityName;
+    if (providerCity && userCity && !areCitiesMatching(userCity, providerCity)) {
+      const providerName = cartData?.provider?.businessName ||
+        cartData?.provider?.name ||
+        [cartData?.provider?.firstName, cartData?.provider?.lastName].filter(Boolean).join(' ') ||
+        'Selected Service Center';
+
+      const userCityStr = typeof userCity === 'object' ? (userCity?.name || '') : String(userCity);
+      const providerCityStr = typeof providerCity === 'object' ? (providerCity?.name || '') : String(providerCity);
+
+      setLocationMismatch({
+        userCity: userCityStr,
+        providerCity: providerCityStr,
+        providerName
+      });
+      return;
+    }
+
     // Save address to sessionStorage for other pages
     sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
     trackLeadEvent({
@@ -395,6 +435,7 @@ export function AddressPage({
     });
     onContinue();
   };
+
 
   return (
     <motion.div
@@ -1071,7 +1112,67 @@ export function AddressPage({
           }
         }}
       />
+
+      {/* Location Mismatch Alert Modal */}
+      <AnimatePresence>
+        {locationMismatch && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-amber-200 relative overflow-hidden"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 border border-amber-200">
+                <MapPin className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-xl font-extrabold text-gray-900 mb-2">Location Mismatch</h3>
+
+              <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 mb-4 space-y-2 text-xs">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-500 font-semibold">Your Service Address:</span>
+                  <span className="font-bold text-gray-900 text-right">{locationMismatch.userCity}</span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-500 font-semibold">Selected Service Center:</span>
+                  <span className="font-bold text-amber-800 text-right">
+                    {locationMismatch.providerName} ({locationMismatch.providerCity})
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                Your service address is in <strong className="text-gray-900">{locationMismatch.userCity}</strong>, but the selected service center is located in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>. This service center is unable to provide service at your location.
+                <br /><br />
+                Kindly select a service center at your location, or choose an address in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>.
+              </p>
+
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocationMismatch(null);
+                    router.push('/services/child/683dbc04b62d2a241de0f7e8?category=Services&name=Service%20Centers');
+                  }}
+                  className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#037166] to-[#04a99d] hover:brightness-105 transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  Select Service Center in {locationMismatch.userCity}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocationMismatch(null)}
+                  className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all text-center"
+                >
+                  Choose Another Address
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
+
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Plus, Minus, Home, Briefcase, ShieldCheck, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -10,6 +10,20 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence } from 'motion/react';
+
+function areCitiesMatching(cityA, cityB) {
+  if (!cityA || !cityB) return true;
+  const clean = (c) => String(typeof c === 'object' ? (c?.name || '') : c || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+  const a = clean(cityA);
+  const b = clean(cityB);
+  if (!a || !b) return true;
+  if (a === b) return true;
+  const hyderabadGroup = ['hyderabad', 'secunderabad', 'cyberabad'];
+  if (hyderabadGroup.includes(a) && hyderabadGroup.includes(b)) return true;
+  if (a.includes(b) || b.includes(a)) return true;
+  return false;
+}
 
 export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
     const { cartData, cartItems, clearCart, addToCart, removeFromCart } = useServiceCart();
@@ -22,11 +36,12 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     // Calculate final payable amount directly from service-cart/get response
     const baseServiceCost = Number(cartData?.totalServiceCost || 0);
     const gstAmount = Number(cartData?.gstAmount || 0);
-    const consultationFee = doorstepInspectionFee ?? Number(cartData?.consultationFee || 0);
-    const platformFee = onlineBookingFee ?? Number(cartData?.platformFee || 0);
-    const bookingCost = Number(cartData?.finalAmount || (baseServiceCost + gstAmount + consultationFee));
-
-    const inspectionCost = Number(cartData?.inspectionCost || 0);
+    // Platform Fee (non-refundable booking fee paid online) — ₹99 default
+    const platformFee = Number(onlineBookingFee ?? cartData?.platformFee ?? 99);
+    // Doorstep Inspection Fee (paid at doorstep by technician) — ₹175 default
+    const consultationFee = Number(doorstepInspectionFee ?? cartData?.consultationFee ?? 175);
+    // Grand total = service cost + GST + platform fee (doorstep fee is collected separately)
+    const bookingCost = Number(cartData?.finalAmount || (baseServiceCost + gstAmount + platformFee));
 
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
@@ -38,6 +53,41 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [walletData, setWalletData] = useState(null);
     const [walletLoading, setWalletLoading] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+    const [fullAddress, setFullAddress] = useState(selectedAddress);
+    const [locationMismatch, setLocationMismatch] = useState(null);
+
+    const providerCity = cartData?.provider?.cityName;
+    const userCity = fullAddress?.cityName || selectedAddress?.cityName;
+    const isLocationMismatch = Boolean(providerCity && userCity && !areCitiesMatching(userCity, providerCity));
+
+    useEffect(() => {
+        if (selectedAddress) setFullAddress(selectedAddress);
+    }, [selectedAddress]);
+
+    // Ensure 100% complete address details even if sessionStorage had a partial snapshot
+    useEffect(() => {
+        if (!token || !selectedAddress?._id) return;
+        if (!selectedAddress.addressLineOne || !selectedAddress.phone) {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                        const match = data.data.find(a => a._id === selectedAddress._id);
+                        if (match) {
+                            setFullAddress(match);
+                            sessionStorage.setItem('selected_address', JSON.stringify(match));
+                        }
+                    }
+                })
+                .catch(() => {});
+        }
+    }, [token, selectedAddress?._id, selectedAddress?.addressLineOne, selectedAddress?.phone]);
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
@@ -201,7 +251,25 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             return;
         }
 
+        // Validate location matching
+        if (isLocationMismatch) {
+            const providerName = cartData?.provider?.businessName ||
+                cartData?.provider?.name ||
+                [cartData?.provider?.firstName, cartData?.provider?.lastName].filter(Boolean).join(' ') ||
+                'Selected Service Center';
+            const userCityStr = typeof userCity === 'object' ? (userCity?.name || '') : String(userCity);
+            const providerCityStr = typeof providerCity === 'object' ? (providerCity?.name || '') : String(providerCity);
+
+            setLocationMismatch({
+                userCity: userCityStr,
+                providerCity: providerCityStr,
+                providerName
+            });
+            return;
+        }
+
         setLoading(true);
+
 
         try {
             const endpoint = paymentMethod === 'ONLINE'
@@ -252,8 +320,17 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     if (onSuccess) onSuccess(data);
                 }
             } else {
-                toast.error(data.message || 'Checkout failed');
+                if (data.code === 'LOCATION_MISMATCH') {
+                    setLocationMismatch({
+                        userCity: data.userCity || (typeof userCity === 'object' ? userCity?.name : userCity),
+                        providerCity: data.providerCity || (typeof providerCity === 'object' ? providerCity?.name : providerCity),
+                        providerName: data.providerName || 'Selected Service Center'
+                    });
+                } else {
+                    toast.error(data.message || 'Checkout failed');
+                }
             }
+
         } catch (error) {
             console.error('Checkout error:', error);
             toast.error('Failed to complete checkout');
@@ -267,449 +344,644 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen pt-20 pb-32"
+            className="min-h-screen bg-[#f8fafc] pt-16 sm:pt-20 pb-16"
         >
-            {/* Header */}
-            <section className="sticky top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
-                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <motion.button
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        onClick={onBack}
-                        className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Address
-                    </motion.button>
+            {/* Sleek Compact Header */}
+            <section className="sticky top-16 sm:top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-md">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5">
+                            <motion.button
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                onClick={onBack}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white transition-all text-xs font-semibold flex-shrink-0"
+                            >
+                                <ArrowLeft className="w-3.5 h-3.5" />
+                                <span>Back</span>
+                            </motion.button>
+                            <div>
+                                <h1 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-emerald-300 flex-shrink-0" />
+                                    <span>Confirm Your Booking</span>
+                                </h1>
+                                <p className="text-white/80 text-[11px] hidden sm:block">
+                                    Select your preferred date, time slot & payment method
+                                </p>
+                            </div>
+                        </div>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
-                    >
-                        <Sparkles className="w-8 h-8 !text-white" />
-                        <span className="text-white"> Confirm Your Booking</span>
-                    </motion.h1>
-                </div>
-
-                {/* Progress Indicator */}
-                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6">
-                    <BookingSteps
-                        flowType={FLOW_TYPES.SERVICE_CENTER}
-                        currentStep="address"
-                        serviceSlug="appliances"
-                    />
+                        {/* Progress Stepper */}
+                        <div className="scale-90 sm:scale-95 origin-left md:origin-right py-1">
+                            <BookingSteps
+                                flowType={FLOW_TYPES.SERVICE_CENTER}
+                                currentStep="address"
+                                serviceSlug="appliances"
+                            />
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-                        {/* Date Selection */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
-                        >
-                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-[#04a99d]" />
-                                Select Date
-                            </h4>
-                            {availableDates.length === 0 ? (
-                                <p className="text-white/90 text-sm">No dates available at this time</p>
-                            ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    {availableDates.map((date) => (
+            {/* Main Content Layout */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+                <div className="grid lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+                    {/* Left Column: Form Cards */}
+                    <div className="lg:col-span-7 xl:col-span-8 space-y-4">
+                        {/* Location Mismatch Banner */}
+                        {isLocationMismatch && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-900 shadow-sm">
+                                <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                <div className="text-xs flex-1">
+                                    <p className="font-bold text-sm text-amber-900">Service Location Mismatch</p>
+                                    <p className="mt-1 text-amber-800 leading-relaxed">
+                                        Your service address is in <strong>{typeof userCity === 'object' ? userCity?.name : userCity}</strong>, but the selected service center is in <strong>{typeof providerCity === 'object' ? providerCity?.name : providerCity}</strong>. This provider cannot deliver service to your location.
+                                    </p>
+                                    <div className="mt-2.5 flex flex-wrap gap-2">
                                         <button
-                                            key={date.value}
-                                            onClick={() => setBookedDate(date.value)}
-                                            className={`p-4 rounded-xl font-medium transition-all ${bookedDate === date.value
-                                                ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                                                : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
-                                                }`}
+                                            type="button"
+                                            onClick={() => router.push('/services/child/683dbc04b62d2a241de0f7e8?category=Services&name=Service%20Centers')}
+                                            className="px-3 py-1.5 rounded-lg bg-[#037166] text-white text-[11px] font-bold hover:brightness-105 transition-all shadow-sm"
                                         >
-                                            {date.label}
+                                            Change Service Center
                                         </button>
-                                    ))}
-                                </div>
-                            )}
-                        </motion.div>
-
-                        {/* Time Selection */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
-                        >
-                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-[#04a99d]" />
-                                Select Time Slot
-                            </h4>
-                            {availableTimesForSelectedDate.length === 0 ? (
-                                <p className="text-white/90 text-sm">
-                                    {bookedDate
-                                        ? 'No time slots available for selected date'
-                                        : 'Please select a date first'
-                                    }
-                                </p>
-                            ) : (
-                                <div className="grid md:grid-cols-2 gap-3">
-                                    {availableTimesForSelectedDate.map((time) => (
                                         <button
-                                            key={time.value}
-                                            onClick={() => setBookedTime(time.value)}
-                                            className={`p-4 rounded-xl font-medium transition-all ${bookedTime === time.value
-                                                ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                                                : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
-                                                }`}
+                                            type="button"
+                                            onClick={onBack}
+                                            className="px-3 py-1.5 rounded-lg bg-white border border-amber-300 text-amber-900 text-[11px] font-semibold hover:bg-amber-100 transition-all"
                                         >
-                                            {time.label}
+                                            Change Address
                                         </button>
-                                    ))}
+                                    </div>
                                 </div>
-                            )}
-                        </motion.div>
+                            </div>
+                        )}
 
-                        {/* Technician Preference */}
+                        {/* 1. Schedule Service (Date & Time unified) */}
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                            className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
                         >
-                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <User className="w-5 h-5 text-[#04a99d]" />
-                                Technician Preference (Optional)
-                            </h4>
-                            <div className="grid md:grid-cols-3 gap-3">
-                                {[
-                                    { value: 'any', label: 'Any Available' },
-                                    { value: 'senior', label: 'Senior Technician' },
-                                    { value: 'same', label: 'Same as Last Time' },
-                                ].map((option) => (
-                                    <button
-                                        key={option.value}
-                                        onClick={() => setTechnicianPreference(option.value)}
-                                        className={`p-4 rounded-xl font-medium transition-all ${technicianPreference === option.value
-                                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                                            : 'bg-white/70 text-[#1f2937] hover:bg-white/90 border border-[#d1d5db]'
-                                            }`}
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
+                            <div className="flex items-center justify-between mb-3.5 pb-2.5 border-b border-gray-100">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="w-6 h-6 rounded-full bg-[#037166] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                        1
+                                    </span>
+                                    <div>
+                                        <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                                            <Calendar className="w-4 h-4 text-[#037166]" />
+                                            <span>Schedule Service</span>
+                                        </h3>
+                                        <p className="text-[11px] text-gray-500">Pick preferred appointment date and time</p>
+                                    </div>
+                                </div>
+                                {bookedDate && bookedTime && (
+                                    <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                                        <Check className="w-3.5 h-3.5" /> Slot Picked
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Date Selection */}
+                            <div className="mb-4">
+                                <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+                                    Choose Date
+                                </label>
+                                {availableDates.length === 0 ? (
+                                    <p className="text-gray-500 text-xs">No dates available at this time</p>
+                                ) : (
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                                        {availableDates.map((date) => {
+                                            const isSelected = bookedDate === date.value;
+                                            return (
+                                                <button
+                                                    key={date.value}
+                                                    type="button"
+                                                    onClick={() => setBookedDate(date.value)}
+                                                    className={`px-2 py-2 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border ${
+                                                        isSelected
+                                                            ? 'bg-gradient-to-br from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
+                                                            : 'bg-gray-50 hover:bg-white text-gray-700 hover:text-gray-900 border-gray-200 hover:border-[#037166]/50'
+                                                    }`}
+                                                >
+                                                    <span className={`text-[11px] font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                                                        {date.label.split(' ')[0]}
+                                                    </span>
+                                                    <span className={`text-[10px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                                                        {date.label.split(' ').slice(1).join(' ') || date.value.slice(5)}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Time Slot Selection */}
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                        Choose Time Slot
+                                    </label>
+                                    {bookedTime && (
+                                        <span className="text-[11px] text-[#037166] font-semibold">
+                                            2-Hour Arrival Window
+                                        </span>
+                                    )}
+                                </div>
+
+                                {availableTimesForSelectedDate.length === 0 ? (
+                                    <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 text-center text-xs text-gray-500">
+                                        {bookedDate ? 'No time slots available for this date. Please pick another date.' : 'Please select a date above to view available time slots'}
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        {availableTimesForSelectedDate.map((time) => {
+                                            const isSelected = bookedTime === time.value;
+                                            return (
+                                                <button
+                                                    key={time.value}
+                                                    type="button"
+                                                    onClick={() => setBookedTime(time.value)}
+                                                    className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border ${
+                                                        isSelected
+                                                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
+                                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#037166]/50'
+                                                    }`}
+                                                >
+                                                    <span className="flex items-center gap-1.5">
+                                                        <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#037166]'}`} />
+                                                        {time.label}
+                                                    </span>
+                                                    {isSelected && <Check className="w-3.5 h-3.5 text-white flex-shrink-0" />}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
 
-                        {/* Payment Method */}
+                        {/* 2. Technician Preference (Optional) */}
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                            transition={{ delay: 0.1 }}
+                            className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
                         >
-                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-[#04a99d]" />
-                                Select Payment Method
-                            </h4>
-
-                            {/* Virtual Wallet Card */}
-                            {paymentMethod === 'WALLET' && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                                    animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="relative p-7 rounded-2xl bg-gradient-to-br from-[#037166] to-[#04a99d] text-white shadow-2xl shadow-[#037166]/40 overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-                                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-24 -mb-24 blur-2xl" />
-
-                                        <div className="relative flex justify-between items-start mb-10">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1.5">
-                                                    <div className="w-2 h-2 rounded-full bg-[#05bfb0] animate-pulse" />
-                                                    <p className="!text-white/70 text-[10px] font-bold uppercase tracking-[0.2em]">DH Active Wallet</p>
+                            <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-gray-100">
+                                <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                    2
+                                </span>
+                                <div>
+                                    <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                                        <User className="w-4 h-4 text-[#037166]" />
+                                        <span>Technician Preference</span>
+                                        <span className="text-[11px] font-normal text-gray-400">(Optional)</span>
+                                    </h3>
+                                    <p className="text-[11px] text-gray-500">Choose who performs your appliance service</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                {[
+                                    { value: 'any', label: 'Any Available', sub: 'Fastest dispatch (Recommended)' },
+                                    { value: 'senior', label: 'Senior Technician', sub: '5+ yrs verified experience' },
+                                    { value: 'same', label: 'Same as Last Time', sub: 'Preferred technician' },
+                                ].map((option) => {
+                                    const isSelected = technicianPreference === option.value;
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() => setTechnicianPreference(option.value)}
+                                            className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                                                isSelected
+                                                    ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                                    : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold">{option.label}</span>
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                                                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                                                 </div>
-                                                <p className="!text-white/60 text-[10px] font-medium uppercase tracking-widest mb-1">Available Balance</p>
-                                                <h3 className="text-4xl font-bold tracking-tight flex items-baseline gap-1">
-                                                    <span className="text-2xl !text-white  opacity-60">₹</span>
-                                                    <span className="!text-white">{Number(walletBalance).toFixed(2)}</span>
-                                                </h3>
                                             </div>
-                                            <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
-                                                <Wallet className="w-6 h-6 text-white" />
+                                            <span className="text-[10px] text-gray-500 mt-1">{option.sub}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+
+                        {/* 3. Payment Method */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.15 }}
+                            className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
+                        >
+                            <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-gray-100">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                        3
+                                    </span>
+                                    <div>
+                                        <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                                            <CreditCard className="w-4 h-4 text-[#037166]" />
+                                            <span>Select Payment Method</span>
+                                        </h3>
+                                        <p className="text-[11px] text-gray-500">Pay platform booking fee securely</p>
+                                    </div>
+                                </div>
+                                <span className="text-[11px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> 100% Safe
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {/* Online Payment Card */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('ONLINE')}
+                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                                        paymentMethod === 'ONLINE'
+                                            ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentMethod === 'ONLINE' ? 'bg-[#037166] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                                                <CreditCard className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xs sm:text-sm font-bold text-gray-900">Online Payment</h4>
+                                                <span className="text-[10px] text-emerald-600 font-semibold">Recommended • Instant Confirmation</span>
                                             </div>
                                         </div>
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'ONLINE' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                                            {paymentMethod === 'ONLINE' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-gray-100 text-[10px] text-gray-500">
+                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">UPI</span>
+                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">PhonePe</span>
+                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">GPay</span>
+                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">Cards</span>
+                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">NetBanking</span>
+                                    </div>
+                                </button>
 
-                                        <div className="relative flex justify-between items-end">
-                                            <div className="space-y-1">
-                                                <p className="!text-white/50 text-[9px] uppercase tracking-widest font-bold">Wallet Account Number</p>
-                                                <p className="!text-white text-sm font-mono tracking-[0.3em] font-medium">
-                                                    {walletData?.walletId ? `**** ${walletData.walletId.split('-').pop()}` : '**** **** 7269'}
-                                                </p>
+                                {/* Wallet Pay Card */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('WALLET')}
+                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                                        paymentMethod === 'WALLET'
+                                            ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentMethod === 'WALLET' ? 'bg-[#037166] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                                                <Wallet className="w-4 h-4" />
                                             </div>
-                                            <div className="text-right">
-                                                <div className="flex flex-col items-end">
-                                                    <span className="text-[14px] font-black italic tracking-tighter text-white">DH<span className="text-white/50">PAY</span></span>
-                                                    <div className="flex gap-1 mt-1">
-                                                        <div className="w-4 h-2.5 rounded-sm bg-white/20" />
-                                                        <div className="w-4 h-2.5 rounded-sm bg-white/40" />
-                                                    </div>
-                                                </div>
+                                            <div>
+                                                <h4 className="text-xs sm:text-sm font-bold text-gray-900">DH Wallet</h4>
+                                                <span className="text-[10px] text-gray-500">
+                                                    Available: <strong className="text-gray-900 font-bold">₹{Number(walletBalance).toFixed(2)}</strong>
+                                                </span>
                                             </div>
+                                        </div>
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'WALLET' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                                            {paymentMethod === 'WALLET' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 italic pt-2 border-t border-gray-100">
+                                        Wallet usable after service completion verification
+                                    </p>
+                                </button>
+                            </div>
+
+                            {/* Active Wallet Details Box */}
+                            {paymentMethod === 'WALLET' && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="mt-3 p-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-xs"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <span className="text-[9px] uppercase tracking-wider text-emerald-200 font-bold">D-Hub Active Wallet</span>
+                                            <p className="text-xl !text-white  font-extrabold mt-0.5">₹{Number(walletBalance).toFixed(2)}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-xs font-mono tracking-widest text-emerald-100">
+                                                {walletData?.walletId ? `**** ${walletData.walletId.split('-').pop()}` : 'DH PAY'}
+                                            </span>
+                                            <span className="block text-[9px] text-emerald-200/80">Account Active</span>
                                         </div>
                                     </div>
                                 </motion.div>
                             )}
-
-                            <div className="grid md:grid-cols-2 gap-3">
-                                {[
-                                    {
-                                        id: 'WALLET',
-                                        label: 'Wallet Pay',
-                                        icon: Wallet,
-                                        disabled: false,
-                                        tooltip: 'Pay using your DH Wallet balance',
-                                        showBalance: true
-                                    },
-                                    {
-                                        id: 'ONLINE',
-                                        label: 'Online Payment',
-                                        icon: CreditCard,
-                                        disabled: false
-                                    },
-                                ].map((method) => (
-                                    <div key={method.id} className="relative group h-full">
-                                        <button
-                                            onClick={() => !method.disabled && setPaymentMethod(method.id)}
-                                            disabled={method.disabled}
-                                            className={`w-full h-full p-5 rounded-xl flex flex-col items-center justify-center gap-2 transition-all min-h-[140px] ${paymentMethod === method.id
-                                                ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg'
-                                                : method.disabled
-                                                    ? 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed'
-                                                    : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
-                                                }`}
-                                        >
-                                            <div className={`w-6 h-6 flex items-center justify-center ${paymentMethod === method.id ? '!text-white' : method.disabled ? 'text-white/10' : 'text-[#04a99d]'}`}>
-                                                {method.id === 'wallet' && !walletLoading && walletBalance > 0 ? (
-                                                    <span className="text-sm font-bold">₹{Number(walletBalance).toFixed(2)}</span>
-                                                ) : (
-                                                    <method.icon className="w-6 h-6" />
-                                                )}
-                                            </div>
-
-                                            <h6 className={`text-sm font-medium ${paymentMethod === method.id ? '!text-white' : ''}`}>{method.label}</h6>
-
-                                            {method.id === 'wallet' && (
-                                                <i className="text-[9px] text-white/40 block mt-0.5 leading-tight">
-                                                    Wallet Usable After Service Completion Only
-                                                </i>
-                                            )}
-                                        </button>
-
-                                        {/* Simple Tooltip on Top */}
-                                        {method.disabled && method.tooltip && (
-                                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 px-2 py-1 bg-black/90 text-white text-[12px] rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center">
-                                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/90 rotate-45 border-r border-b border-white/10" />
-                                                {method.tooltip}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
                         </motion.div>
 
-                        {/* Service Address */}
+                        {/* 4. Service Address */}
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
+                            transition={{ delay: 0.2 }}
+                            className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
                         >
-                            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-[#04a99d]" />
-                                Service Address
-                            </h4>
-                            <div className="p-4 rounded-lg bg-white/5">
-                                <h6 className="text-white font-medium mb-1">{selectedAddress?.name}</h6>
-                                <p className="text-white/80">{selectedAddress?.flat}, {selectedAddress?.area}</p>
-                                <p className="text-white/60">{selectedAddress?.cityName}, {selectedAddress?.postalCode}</p>
+                            <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-gray-100">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                        4
+                                    </span>
+                                    <div>
+                                        <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                                            <MapPin className="w-4 h-4 text-[#037166]" />
+                                            <span>Service Address</span>
+                                        </h3>
+                                        <p className="text-[11px] text-gray-500">Technician will visit this location</p>
+                                    </div>
+                                </div>
+                                {onBack && (
+                                    <button
+                                        type="button"
+                                        onClick={onBack}
+                                        className="text-xs font-bold text-[#037166] hover:text-[#025a51] hover:underline transition-colors"
+                                    >
+                                        Change Address
+                                    </button>
+                                )}
                             </div>
+
+                            {(() => {
+                                const currentAddr = fullAddress || selectedAddress;
+                                if (!currentAddr) {
+                                    return (
+                                        <div className="p-3.5 rounded-xl bg-gray-50 border border-dashed border-gray-300 text-center">
+                                            <p className="text-xs text-gray-500 mb-2">No service address selected</p>
+                                            {onBack && (
+                                                <button
+                                                    type="button"
+                                                    onClick={onBack}
+                                                    className="px-3 py-1.5 rounded-lg bg-[#037166] text-white text-xs font-semibold hover:bg-[#025a51] transition-all"
+                                                >
+                                                    Select Address
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                }
+
+                                const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' || String(v).trim().toUpperCase() === 'UNDEFINED' || String(v).trim().toUpperCase() === 'NULL' ? null : String(v).trim());
+
+                                const streetParts = [
+                                    clean(currentAddr.flat),
+                                    clean(currentAddr.area),
+                                    clean(currentAddr.addressLineOne),
+                                    clean(currentAddr.addressLineTwo),
+                                ].filter(Boolean);
+
+                                const seen = new Set();
+                                const uniqueStreet = streetParts.filter(s => {
+                                    const k = s.toLowerCase();
+                                    if (seen.has(k)) return false;
+                                    seen.add(k);
+                                    return true;
+                                });
+
+                                const regionParts = [
+                                    clean(currentAddr.cityName || currentAddr.city),
+                                    clean(currentAddr.stateName || currentAddr.state),
+                                    clean(currentAddr.postalCode || currentAddr.pincode),
+                                ].filter(Boolean);
+
+                                const addrType = clean(currentAddr.type)?.toLowerCase();
+
+                                return (
+                                    <div className="p-3.5 rounded-xl bg-[#f8fafc] border border-gray-200/80">
+                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                            <div className="flex items-center gap-1.5 font-bold text-[#0f172a] text-sm">
+                                                {addrType === 'home' ? (
+                                                    <Home className="w-3.5 h-3.5 text-[#037166]" />
+                                                ) : addrType === 'office' ? (
+                                                    <Briefcase className="w-3.5 h-3.5 text-[#037166]" />
+                                                ) : (
+                                                    <MapPin className="w-3.5 h-3.5 text-[#037166]" />
+                                                )}
+                                                <span>{clean(currentAddr.name) || clean(currentAddr.userName) || 'Customer'}</span>
+                                            </div>
+                                            {clean(currentAddr.type) && (
+                                                <span className="px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] text-[10px] font-bold uppercase tracking-wider">
+                                                    {clean(currentAddr.type)}
+                                                </span>
+                                            )}
+                                            {currentAddr.defaultAddress && (
+                                                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 text-[10px] font-bold uppercase tracking-wider">
+                                                    DEFAULT
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {clean(currentAddr.phone) && (
+                                            <p className="text-xs font-medium text-gray-600 mb-1">
+                                                Phone: <span className="font-semibold text-gray-900">{clean(currentAddr.phone)}</span>
+                                            </p>
+                                        )}
+
+                                        {uniqueStreet.length > 0 ? (
+                                            <p className="text-xs text-gray-700 leading-relaxed font-normal">
+                                                {uniqueStreet.join(', ')}
+                                            </p>
+                                        ) : clean(currentAddr.address) ? (
+                                            <p className="text-xs text-gray-700 leading-relaxed font-normal">
+                                                {clean(currentAddr.address)}
+                                            </p>
+                                        ) : null}
+
+                                        {regionParts.length > 0 && (
+                                            <p className="text-xs font-medium text-gray-500 mt-0.5">
+                                                {regionParts.join(', ')}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </motion.div>
                     </div>
 
-                    {/* Summary Sidebar */}
-                    <div className="lg:col-span-1">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="sticky top-48 p-6 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10"
-                        >
-                            <h4 className="text-xl font-bold text-white mb-6">Booking Summary</h4>
-
-                            {/* Cart Items */}
-                            <div className="space-y-4 mb-6">
-                                {cartItems.map((item) => (
-                                    <div key={item.itemId} className="flex justify-between text-sm">
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <h6 className="text-[#111827] font-bold max-w-[180px] leading-tight">{item.itemName}</h6>
-                                                <span className="text-[#1f2937] font-bold whitespace-nowrap ml-2">₹{item.price}</span>
-                                            </div>
-                                            <p className="text-[#0f766e] text-[10px] font-semibold uppercase tracking-wider mb-2">
-                                                {item.packageName}
-                                            </p>
-
-                                            {/* Quantity Controls */}
-                                            <div className="flex items-center gap-2.5">
-                                                <button
-                                                    onClick={() => handleUpdateQuantity(item, -1)}
-                                                    className="w-7 h-7 rounded-lg bg-white/80 border border-[#d1d5db] flex items-center justify-center text-[#111827] hover:bg-white transition-all active:scale-95"
-                                                >
-                                                    <Minus className="w-3 h-3" />
-                                                </button>
-                                                <span className="text-[#111827] text-sm font-bold w-4 text-center">{item.quantity || 1}</span>
-                                                <button
-                                                    onClick={() => handleUpdateQuantity(item, 1)}
-                                                    className="w-7 h-7 rounded-lg bg-white/80 border border-[#d1d5db] flex items-center justify-center text-[#111827] hover:bg-white transition-all active:scale-95"
-                                                >
-                                                    <Plus className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="h-px bg-white/10 mb-4" />
-
-                            {/* Pricing Breakdown */}
-                            <div className="space-y-4 mb-6">
-                                {/* Item Subtotal */}
-                                <div className="space-y-2">
-                                        <div className="flex justify-between items-center text-[#374151] text-xs uppercase tracking-wider font-bold">
-                                        <span>Services Subtotal</span>
-                                        <span>₹{baseServiceCost.toFixed(2)}</span>
-                                    </div>
-                                    <div className="h-px bg-white/5" />
-                                </div>
-
-                                {/* Fees & Taxes */}
-                                <div className="space-y-3">
-                                    {gstAmount > 0 && (
-                                        <div className="flex justify-between items-center text-[#374151] text-sm">
-                                            <div className="flex items-center gap-1.5">
-                                                <span>GST</span>
-                                                <span className="text-[10px] bg-black/5 px-1.5 py-0.5 rounded border border-black/10">18%</span>
-                                            </div>
-                                            <span className="text-[#374151] font-semibold">₹{gstAmount.toFixed(2)}</span>
-                                        </div>
-                                    )}
-
-                                    {cartData?.platformFee > 0 && (
-                                        <div className="flex justify-between items-center text-[#374151] text-sm">
-                                            <span>Platform Fee</span>
-                                            <span className="text-[#374151] font-semibold">₹{cartData.platformFee.toFixed(2)}</span>
-                                        </div>
-                                    )}
-
-                                    {(
-                                        <div className="flex justify-between items-center text-[#374151] text-sm">
-                                            <div className="flex flex-col">
-                                                <span>Platform Fee</span>
-                                                <span className="text-[10px] text-[#04a99d] inline-flex items-center gap-1">
-                                                    <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
-                                                    Non-refundable booking fee
-                                                </span>
-                                            </div>
-                                            <span className="text-[#374151] font-semibold">₹{consultationFee.toFixed(2)}</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex justify-between items-center text-[#374151] text-sm">
-                                        <div className="flex flex-col">
-                                            
-                                            <span>Doorstep Inspection Fee</span>
-                                            <span className="text-[10px] text-[#04a99d] inline-flex items-center gap-1">
-                                                <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
-                                                    Pay at doorstep
-                                            </span>
-                                        </div>
-                                        <span className="text-[#374151] font-semibold">₹{inspectionCost.toFixed(2)}</span>
-                                    </div>
-                                </div>
-
-                                <div className="h-px bg-white/10" />
-
-                                {/* Final Total */}
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-end">
-                                        <div className="flex flex-col">
-                                            <span className="text-[#4b5563] text-xs uppercase font-bold">Grand Total</span>
-                                            <span className="text-[#111827] font-bold text-2xl">₹{bookingCost.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-[#04a99d] text-[10px] font-bold uppercase py-1 px-2 bg-[#04a99d]/10 rounded-lg border border-[#04a99d]/20">
-                                                All inclusive
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* <div className="flex items-start gap-2 p-3 rounded-xl bg-[#04a99d]/5 border border-[#04a99d]/10 mt-4">
-                                        <Info className="w-4 h-4 text-[#04a99d] mt-0.5 flex-shrink-0" />
-                                        <p className="text-[11px] text-[#4b5563] leading-relaxed">
-                                            We collect the Doorstep Inspection Fee at doorstep.
-                                        </p>
-                                    </div> */}
-                                </div>
-                            </div>
-
-                            {/* Selected Date/Time Preview */}
-                            {bookedDate && bookedTime && (
-                                <div className="p-4 rounded-lg bg-[#037166]/10 border border-[#037166]/20 mb-6">
-                                    <p className="text-[#4b5563] text-sm mb-2">Scheduled for:</p>
-                                    <p className="text-[#1f2937] font-medium">
-                                        {availableDates.find(d => d.value === bookedDate)?.label}
-                                    </p>
-                                    <p className="text-[#1f2937] font-medium">
-                                        {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Confirm Button */}
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={handleCheckout}
-                                disabled={loading || !bookedDate || !bookedTime}
-                                className={`w-full px-6 py-4 rounded-xl font-medium text-lg transition-all ${loading || !bookedDate || !bookedTime
-                                    ? 'bg-white/20 text-white/60 cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:shadow-lg hover:shadow-[#037166]/40'
-                                    }`}
+                    {/* Right Column: Booking Summary Sidebar */}
+                    <div className="lg:col-span-5 xl:col-span-4">
+                        <div className="sticky top-28 space-y-3.5">
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.25 }}
+                                className="rounded-2xl bg-white border border-gray-200/90 shadow-sm p-4 sm:p-5"
                             >
-                                {loading ? (
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        Processing...
-                                    </div>
-                                ) : (
-                                    `Confirm Booking  ₹${bookingCost.toFixed(2)}`
-                                )}
-                            </motion.button>
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <h3 className="text-base font-bold text-gray-900">Booking Summary</h3>
+                                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                                        {cartItems.length} {cartItems.length === 1 ? 'service' : 'services'}
+                                    </span>
+                                </div>
 
-                            <p className="text-[#6b7280] text-[10px] text-center mt-4">
-                                By booking, you agree to our Terms & Cancellation Policy.
-                            </p>
-                            <div className="flex items-center justify-center gap-2 text-[10px] text-[#037166] bg-[#037166]/5 p-2.5 rounded-xl border border-[#037166]/10 mt-3">
-                                <Info className="w-3.5 h-3.5 flex-shrink-0" />
-                                <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
-                            </div>
-                        </motion.div>
+                                {/* Cart Items List */}
+                                <div className="divide-y divide-gray-100 max-h-56 overflow-y-auto pr-1 my-1.5">
+                                    {cartItems.map((item) => (
+                                        <div key={item.itemId} className="py-2.5 flex items-start justify-between gap-3 text-xs">
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-bold text-gray-900 truncate leading-snug">{item.itemName}</h4>
+                                                {item.packageName && (
+                                                    <span className="inline-block text-[10px] text-[#037166] font-semibold uppercase tracking-wider mt-0.5">
+                                                        {item.packageName}
+                                                    </span>
+                                                )}
+                                                <div className="flex items-center gap-2 mt-1.5">
+                                                    <div className="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleUpdateQuantity(item, -1)}
+                                                            className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-l-lg transition-colors active:scale-90"
+                                                            title="Decrease quantity"
+                                                        >
+                                                            <Minus className="w-2.5 h-2.5" />
+                                                        </button>
+                                                        <span className="w-6 text-center font-bold text-gray-900 text-xs">{item.quantity || 1}</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleUpdateQuantity(item, 1)}
+                                                            className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-r-lg transition-colors active:scale-90"
+                                                            title="Increase quantity"
+                                                        >
+                                                            <Plus className="w-2.5 h-2.5" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right flex-shrink-0">
+                                                <span className="font-bold text-gray-900 text-sm">₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                                                {item.quantity > 1 && (
+                                                    <span className="block text-[10px] text-gray-400 font-normal">₹{item.price} each</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Pricing Breakdown */}
+                                <div className="pt-3 border-t border-gray-100 space-y-2 text-xs">
+                                    <div className="flex justify-between items-center text-gray-600">
+                                        <span>Services Subtotal</span>
+                                        <span className="font-semibold text-gray-900">₹{baseServiceCost.toFixed(2)}</span>
+                                    </div>
+
+                                    {gstAmount > 0 && (
+                                        <div className="flex justify-between items-center text-gray-600">
+                                            <span className="flex items-center gap-1">
+                                                <span>GST</span>
+                                                <span className="text-[10px] px-1 rounded bg-gray-100 text-gray-600 border border-gray-200">18%</span>
+                                            </span>
+                                            <span className="font-semibold text-gray-900">₹{gstAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-between items-center text-gray-600">
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-gray-700">Platform Fee</span>
+                                            <span className="text-[10px] text-gray-400">Non-refundable booking fee</span>
+                                        </div>
+                                        <span className="font-semibold text-gray-900">₹{platformFee.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center text-gray-600">
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-gray-700">Doorstep Inspection Fee</span>
+                                            <span className="text-[10px] text-emerald-600 font-semibold">Pay at doorstep to technician</span>
+                                        </div>
+                                        <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                            ₹{consultationFee.toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Total Payable Now */}
+                                <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-200">
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Payable Now Online</span>
+                                            <h3 className="text-2xl font-black text-gray-900 leading-tight">₹{bookingCost.toFixed(2)}</h3>
+                                        </div>
+                                        <span className="text-[10px] font-bold uppercase px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">
+                                            All Inclusive
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 mt-1">
+                                        *Inspection fee of ₹{consultationFee.toFixed(2)} will be collected after on-site inspection.
+                                    </p>
+                                </div>
+
+                                {/* Scheduled Slot Chip */}
+                                {bookedDate && bookedTime && (
+                                    <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between">
+                                        <span className="flex items-center gap-1.5 font-semibold">
+                                            <Calendar className="w-3.5 h-3.5 text-emerald-700" />
+                                            {availableDates.find(d => d.value === bookedDate)?.label} • {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
+                                        </span>
+                                        <span className="text-[10px] font-bold uppercase bg-emerald-200/60 px-1.5 py-0.5 rounded text-emerald-800">Selected</span>
+                                    </div>
+                                )}
+
+                                {/* Primary Action Button */}
+                                <div className="mt-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleCheckout}
+                                        disabled={loading || !bookedDate || !bookedTime}
+                                        className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${
+                                            loading || !bookedDate || !bookedTime
+                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#025a51] hover:to-[#038e83] text-white hover:shadow-md hover:shadow-[#037166]/20 active:scale-[0.99]'
+                                        }`}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <span>Processing Booking...</span>
+                                            </>
+                                        ) : !bookedDate || !bookedTime ? (
+                                            <span>Select Date & Time Slot Above</span>
+                                        ) : (
+                                            <>
+                                                <span>Confirm & Pay ₹{bookingCost.toFixed(2)}</span>
+                                                <ArrowLeft className="w-4 h-4 rotate-180" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <p className="text-[#6b7280] text-[10px] text-center mt-3">
+                                    By booking, you agree to our Terms & Cancellation Policy.
+                                </p>
+
+                                {/* Trust and Policy micro-strip */}
+                                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-center gap-3 text-[10px] text-gray-500">
+                                    <span className="flex items-center gap-1">
+                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                        <span>Safe Checkout</span>
+                                    </span>
+                                    <span>•</span>
+                                    <span>Verified Pros</span>
+                                    <span>•</span>
+                                    <span>RBI Compliant</span>
+                                </div>
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -725,6 +997,68 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     }
                 }}
             />
+
+            {/* Location Mismatch Alert Modal */}
+            <AnimatePresence>
+                {locationMismatch && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-amber-200 relative overflow-hidden"
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 border border-amber-200">
+                                <MapPin className="w-6 h-6" />
+                            </div>
+
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-2">Location Mismatch</h3>
+
+                            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 mb-4 space-y-2 text-xs">
+                                <div className="flex justify-between items-start gap-2">
+                                    <span className="text-gray-500 font-semibold">Your Service Address:</span>
+                                    <span className="font-bold text-gray-900 text-right">{locationMismatch.userCity}</span>
+                                </div>
+                                <div className="flex justify-between items-start gap-2">
+                                    <span className="text-gray-500 font-semibold">Selected Service Center:</span>
+                                    <span className="font-bold text-amber-800 text-right">
+                                        {locationMismatch.providerName} ({locationMismatch.providerCity})
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                                Your service address is in <strong className="text-gray-900">{locationMismatch.userCity}</strong>, but the selected service center is located in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>. This service center is unable to provide service at your location.
+                                <br /><br />
+                                Kindly select a service center at your location, or choose an address in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>.
+                            </p>
+
+                            <div className="space-y-2.5">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setLocationMismatch(null);
+                                        router.push('/services/child/683dbc04b62d2a241de0f7e8?category=Services&name=Service%20Centers');
+                                    }}
+                                    className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#037166] to-[#04a99d] hover:brightness-105 transition-all shadow-md flex items-center justify-center gap-2"
+                                >
+                                    Select Service Center in {locationMismatch.userCity}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setLocationMismatch(null);
+                                        onBack();
+                                    }}
+                                    className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all text-center"
+                                >
+                                    Choose Another Address
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 }

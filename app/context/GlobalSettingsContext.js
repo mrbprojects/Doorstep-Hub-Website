@@ -5,7 +5,7 @@ import { API_BASE_URL } from '@/config/env';
 
 // ─── Default fee fallbacks (used until the backend adds these fields to policy) ───
 // Backend field names to watch for: onlineBookingFee, doorstepInspectionFee
-const DEFAULT_ONLINE_BOOKING_FEE = 125;
+const DEFAULT_ONLINE_BOOKING_FEE = 99;
 const DEFAULT_DOORSTEP_INSPECTION_FEE = 175;
 
 const GlobalSettingsContext = createContext(null);

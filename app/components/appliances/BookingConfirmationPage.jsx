@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle, Shield } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle, Shield, Home, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
@@ -736,25 +736,40 @@ export function BookingConfirmationPage({
               transition={{ delay: 0.4 }}
               className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
             >
-              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+              <h4 className="text-base sm:text-lg font-bold text-[#0f172a] mb-3.5 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-[#04a99d]" />
                 Service Address
               </h4>
-              {address ? (
-                <div className="p-4 rounded-lg bg-[#f8fcfb] border border-[#d8ece8]">
-                  <h6 className="text-[#0f172a] font-semibold mb-1">{address.name}</h6>
-                  <p className="text-[#334155]">
-                    {[address.flat, address.area].filter(Boolean).join(', ')}
-                  </p>
-                  <p className="text-[#64748b]">
-                    {[address.cityName || address.city, address.postalCode].filter(Boolean).join(', ')}
-                  </p>
-                </div>
-              ) : (
-                <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                  <p className="text-gray-500">No address selected</p>
-                </div>
-              )}
+              {(() => {
+                if (!address) {
+                  return (
+                    <div className="p-4 rounded-xl bg-gray-50 border border-dashed border-gray-300 text-center">
+                      <p className="text-xs text-gray-500">No address selected</p>
+                    </div>
+                  );
+                }
+                const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' || String(v).trim().toUpperCase() === 'UNDEFINED' || String(v).trim().toUpperCase() === 'NULL' ? null : String(v).trim());
+                const streetParts = [clean(address.flat), clean(address.area), clean(address.addressLineOne), clean(address.addressLineTwo)].filter(Boolean);
+                const seen = new Set();
+                const uniqueStreet = streetParts.filter(s => { const k = s.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+                const regionParts = [clean(address.cityName || address.city), clean(address.stateName || address.state), clean(address.postalCode || address.pincode)].filter(Boolean);
+                const addrType = clean(address.type)?.toLowerCase();
+                return (
+                  <div className="p-4 rounded-xl bg-[#f8fafc] border border-gray-200/80">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <div className="flex items-center gap-1.5 font-bold text-[#0f172a] text-sm sm:text-base">
+                        {addrType === 'home' ? <Home className="w-4 h-4 text-[#037166]" /> : addrType === 'office' ? <Briefcase className="w-4 h-4 text-[#037166]" /> : <MapPin className="w-4 h-4 text-[#037166]" />}
+                        <span>{clean(address.name) || clean(address.userName) || 'Customer'}</span>
+                      </div>
+                      {clean(address.type) && <span className="px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] text-[10px] font-bold uppercase tracking-wider">{clean(address.type)}</span>}
+                      {address.defaultAddress && <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 text-[10px] font-bold uppercase tracking-wider">DEFAULT</span>}
+                    </div>
+                    {clean(address.phone) && <p className="text-xs font-medium text-gray-600 mb-1.5">Phone: <span className="font-semibold text-gray-900">{clean(address.phone)}</span></p>}
+                    {uniqueStreet.length > 0 ? <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{uniqueStreet.join(', ')}</p> : clean(address.address) ? <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{clean(address.address)}</p> : null}
+                    {regionParts.length > 0 && <p className="text-xs font-medium text-gray-500 mt-1">{regionParts.join(', ')}</p>}
+                  </div>
+                );
+              })()}
             </motion.div>
           </div>
 

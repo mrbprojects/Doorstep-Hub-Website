@@ -20,6 +20,35 @@ const FILTERS = [
     { key: 'cancelled', label: 'Cancelled' },
 ];
 
+const TIME_SLOT_LABELS = {
+    '09:00': '09:00 AM - 11:00 AM',
+    '11:00': '11:00 AM - 01:00 PM',
+    '13:00': '01:00 PM - 03:00 PM',
+    '15:00': '03:00 PM - 05:00 PM',
+    '17:00': '05:00 PM - 07:00 PM',
+    '19:00': '07:00 PM - 09:00 PM',
+};
+
+function formatBookedTime(timeStr) {
+    if (!timeStr || timeStr === 'N/A') return null;
+    const clean = String(timeStr).trim();
+    if (TIME_SLOT_LABELS[clean]) return TIME_SLOT_LABELS[clean];
+    if (clean.includes('-')) return clean;
+
+    const match = clean.match(/^(\d{1,2}):(\d{2})/);
+    if (match) {
+        const hour = parseInt(match[1], 10);
+        const nextHour = (hour + 2) % 24;
+        const fmtHour = (h) => {
+            const period = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 === 0 ? 12 : h % 12;
+            return `${String(h12).padStart(2, '0')}:00 ${period}`;
+        };
+        return `${fmtHour(hour)} - ${fmtHour(nextHour)}`;
+    }
+    return clean;
+}
+
 function formatBookedDate(value) {
     if (!value || value === 'N/A') return null;
     return value;
@@ -250,10 +279,10 @@ export default function MyBookingsPage() {
                                                         {bookedDate}
                                                     </span>
                                                 )}
-                                                {order.bookedTime && order.bookedTime !== 'N/A' && (
+                                                {formatBookedTime(order.bookedTime) && (
                                                     <span className="inline-flex items-center gap-1.5">
                                                         <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                        {order.bookedTime}
+                                                        {formatBookedTime(order.bookedTime)}
                                                     </span>
                                                 )}
                                             </div>

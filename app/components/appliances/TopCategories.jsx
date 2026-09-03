@@ -333,7 +333,7 @@ export function TopCategories({ onViewAll }) {
       </div>
 
       <div className="relative mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-10 max-w-3xl text-center sm:mb-14">
+        <div className="mx-auto mb-10 max-w-7xl text-center sm:mb-14">
           <div className="mb-3 flex items-center justify-center gap-4 text-[#d38b46]">
             <span className="h-px w-10 bg-current/40" />
             <span className="text-sm font-semibold tracking-[0.2em] uppercase !text-[#037166]">{sectionCopy.eyebrow}</span>

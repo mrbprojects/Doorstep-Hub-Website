@@ -1007,7 +1007,7 @@ export function AddressPage({
                     <h3 className="text-sm sm:text-base font-extrabold text-gray-900 leading-snug">Everything in Your Pocket</h3>
                     <p className="text-[11px] text-gray-600 mt-0.5">Access all services, track orders & manage daily needs.</p>
                   </div>
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[] shadow-sm flex items-center justify-center p-2 flex-shrink-0 overflow-hidden">
+                  <div className="w-11 h-11 sm:w-11 sm:h-12 rounded-2xl bg-[] shadow-sm flex items-center justify-center p-2 flex-shrink-0 overflow-hidden">
                     <img
                       src="/d-hub-logo.png"
                       alt="Doorstep Hub"

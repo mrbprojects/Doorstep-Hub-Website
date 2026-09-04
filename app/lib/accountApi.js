@@ -133,6 +133,24 @@ export async function fetchOrderDetail(token, bookingId) {
     return payload.order || payload.booking || payload;
 }
 
+export async function cancelBookingService(token, bookingId, { cancelledReason, paymentOption = '' }) {
+    const response = await fetch(`${API_BASE}/app/servicebooking/cancel-booking/${bookingId}`, {
+        method: 'POST',
+        headers: bearerHeaders(token),
+        body: JSON.stringify({ cancelledReason, paymentOption }),
+    });
+    return parseResponse(response);
+}
+
+export async function initiateCancellationFeePayment(token, bookingId, { cancelledReason, websiteReturnUrl, websiteCancelUrl }) {
+    const response = await fetch(`${API_BASE}/app/servicebooking/initiate-cancellation-fee/${bookingId}`, {
+        method: 'POST',
+        headers: bearerHeaders(token),
+        body: JSON.stringify({ cancelledReason, websiteReturnUrl, websiteCancelUrl }),
+    });
+    return parseResponse(response);
+}
+
 export async function fetchWalletBalance(token) {
     const response = await fetch(`${API_BASE}/app/wallet/balance`, {
         headers: bearerHeaders(token, null),

@@ -234,7 +234,7 @@ export default function MarketplaceDashboardPage() {
   const loadUserFavorites = async () => {
     let activeFavs = [];
     try {
-      const favsStr = localStorage.getItem('sell_buy_favorites') || localStorage.getItem('favorites');
+      const favsStr = localStorage.getItem('sell_buy_favorites');
       if (favsStr) {
         const parsed = JSON.parse(favsStr);
         if (Array.isArray(parsed)) activeFavs = parsed;
@@ -244,13 +244,8 @@ export default function MarketplaceDashboardPage() {
     if (currentUserId) {
       try {
         const apiFavs = await fetchSellBuyFavorites(currentUserId, authToken);
-        if (Array.isArray(apiFavs) && apiFavs.length > 0) {
-          const map = new Map();
-          apiFavs.forEach((f) => map.set(String(f._id || f.id), f));
-          activeFavs.forEach((f) => {
-            if (!map.has(String(f._id || f.id))) map.set(String(f._id || f.id), f);
-          });
-          activeFavs = Array.from(map.values());
+        if (Array.isArray(apiFavs)) {
+          activeFavs = apiFavs;
         }
       } catch (e) {
         console.error('Error fetching favorites:', e);
@@ -571,7 +566,7 @@ export default function MarketplaceDashboardPage() {
     kycData.status === 'SUBMITTED' || kycData.status === 'UNDER_REVIEW' || kycData.status === 'PENDING_REVIEW';
 
   const kycStatusLabel = isKycApproved
-    ? 'Approved'
+    ? 'Verified'
     : isKycPending
     ? 'Under Admin Review'
     : 'Not Verified';
@@ -586,7 +581,7 @@ export default function MarketplaceDashboardPage() {
     }
 
     if (!isKycApproved) {
-      toast.error('Seller Verification Required! Admin must approve your KYC before you can post ads.', {
+      toast.error('Verification (KYC) Required! Admin must approve your KYC before you can post ads.', {
         duration: 4000,
       });
       setIsKycModalOpen(true);
@@ -885,7 +880,7 @@ export default function MarketplaceDashboardPage() {
                           type="button"
                           onClick={() => {
                             if (isKycApproved) {
-                              toast.success('✓ Your Seller Verification is Approved by Admin! You have full access to post ads.');
+                              toast.success('✓ Your Verification (KYC) is Approved by Admin! You have full access to post ads.');
                             } else if (isKycPending) {
                               toast.info('⏳ Your KYC documents are currently under Admin review.');
                             } else {
@@ -999,8 +994,13 @@ export default function MarketplaceDashboardPage() {
                   activeTab === 'listings' ? 'bg-white border-[#037166] shadow-md ring-2 ring-[#037166]/10' : 'bg-white border-slate-200 hover:border-[#037166]'
                 }`}
               >
-                <Tag className="w-8 h-8 text-[#037166] mb-3" />
-                <h3 className="text-base font-bold text-slate-900">My Listings ({userListings.length})</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <Tag className="w-8 h-8 text-[#037166]" />
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-50 text-[#037166] border border-teal-200">
+                    {userListings.length} {userListings.length === 1 ? 'Ad' : 'Ads'}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-slate-900">My Ads</h3>
                 <p className="text-xs text-slate-500 mt-1">Edit, renew, or manage your active advertisements.</p>
               </div>
 
@@ -1010,21 +1010,33 @@ export default function MarketplaceDashboardPage() {
                   activeTab === 'favorites' ? 'bg-white border-[#037166] shadow-md ring-2 ring-[#037166]/10' : 'bg-white border-slate-200 hover:border-[#037166]'
                 }`}
               >
-                <Heart className="w-8 h-8 text-rose-500 mb-3" />
-                <h3 className="text-base font-bold text-slate-900">Saved Favorites ({savedFavorites.length})</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <Heart className="w-8 h-8 text-rose-500" />
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
+                    {savedFavorites.length} {savedFavorites.length === 1 ? 'Ad' : 'Ads'}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Favorite Ads</h3>
                 <p className="text-xs text-slate-500 mt-1">View and manage bookmarked marketplace items.</p>
               </div>
 
               <Link href="/sell-buy/chat" className="bg-white p-6 rounded-lg border border-slate-200 hover:border-[#037166] hover:shadow-md transition-all block">
-                <MessageSquare className="w-8 h-8 text-purple-600 mb-3" />
-                <h3 className="text-base font-bold text-slate-900">Chats & Inquiries ({unreadChatsCount})</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <MessageSquare className="w-8 h-8 text-purple-600" />
+                  {unreadChatsCount > 0 && (
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 animate-pulse">
+                      New
+                    </span>
+                  )}
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Messages</h3>
                 <p className="text-xs text-slate-500 mt-1">Communicate directly with interested buyers.</p>
               </Link>
 
               <div
                 onClick={() => {
                   if (isKycApproved) {
-                    toast.success('✓ Your Seller Verification is Approved by Admin! You have full access to post ads.');
+                    toast.success('✓ Your Verification (KYC) is Approved by Admin! You have full access to post ads.');
                   } else if (isKycPending) {
                     toast.info('⏳ Your KYC documents are currently under Admin review.');
                   } else {
@@ -1040,20 +1052,20 @@ export default function MarketplaceDashboardPage() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <ShieldCheck className={`w-8 h-8 ${isKycApproved ? 'text-[#037166]' : isKycPending ? 'text-amber-600' : 'text-teal-600'}`} />
+                  <ShieldCheck className={`w-8 h-8 ${isKycApproved ? 'text-[#037166]' : isKycPending ? 'text-amber-600' : 'text-red-500'}`} />
                   <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
                     isKycApproved
                       ? 'bg-emerald-100 text-[#037166] border border-emerald-200'
                       : isKycPending
                       ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                      : 'bg-slate-100 text-slate-500'
+                      : 'bg-red-50 text-red-600 border border-red-200'
                   }`}>
-                    {isKycApproved ? 'Approved ✓' : isKycPending ? 'Under Review' : 'Required'}
+                    {isKycApproved ? 'Verified ✓' : isKycPending ? 'Under Review' : 'Not Verified'}
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-slate-900">Seller Verification</h3>
+                <h3 className="text-base font-bold text-slate-900">Verification (KYC)</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  KYC Status: <span className={`font-extrabold ${isKycApproved ? 'text-[#037166]' : isKycPending ? 'text-amber-700' : 'text-slate-600'}`}>{kycStatusLabel}</span>
+                  KYC Status: <span className={`font-extrabold ${isKycApproved ? 'text-[#037166]' : isKycPending ? 'text-amber-700' : 'text-red-600'}`}>{kycStatusLabel}</span>
                 </p>
               </div>
             </div>
@@ -1332,7 +1344,7 @@ export default function MarketplaceDashboardPage() {
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-black text-slate-900">Seller Verification (KYC)</h2>
+                  <h2 className="text-base font-black text-slate-900">Verification (KYC)</h2>
                   <p className="text-[11px] text-slate-500 font-medium">Earn a Verified Seller Badge on DoorstepHub</p>
                 </div>
               </div>
@@ -1351,7 +1363,7 @@ export default function MarketplaceDashboardPage() {
                   <BadgeCheck className="w-9 h-9 text-[#037166]" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-lg font-black text-slate-900">Seller Verification Approved</h3>
+                  <h3 className="text-lg font-black text-slate-900">Verification Approved</h3>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
                     Your identity documents have been reviewed and approved by the admin. Your account is fully verified.
                   </p>

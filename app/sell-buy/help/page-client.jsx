@@ -18,7 +18,7 @@ export default function HelpPage() {
     },
     {
       q: 'How do I get the Verified Seller Badge?',
-      a: 'Go to your Marketplace Dashboard -> Seller Verification KYC, and upload your official ID proof. Once admin approves it, your badge will be displayed on all your listings.',
+      a: 'Go to your Marketplace Dashboard -> Verification (KYC), and upload your official ID proof. Once admin approves it, your badge will be displayed on all your listings.',
     },
     {
       q: 'What items are prohibited on Sell & Buy D-Hub?',

@@ -6,20 +6,110 @@ import { motion } from 'motion/react';
 import { CheckCircle, Calendar, MapPin, Sparkles, Scissors, ArrowRight, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+const clean = (val) => {
+    if (!val) return '';
+    const s = String(val).trim();
+    if (!s || s.toLowerCase() === 'n/a' || s.toLowerCase() === 'undefined' || s.toLowerCase() === 'null') return '';
+    return s;
+};
+
+const formatCompleteAddress = (addr) => {
+    if (!addr) return 'Selected Address';
+    if (typeof addr === 'string') return addr;
+
+    const parts = [
+        clean(addr.flat),
+        clean(addr.area),
+        clean(addr.addressLineOne),
+        clean(addr.addressLineTwo),
+        clean(addr.cityName),
+        clean(addr.stateName),
+        clean(addr.postalCode || addr.pincode)
+    ].filter(Boolean);
+
+    const seen = new Set();
+    const uniqueParts = parts.filter(part => {
+        const lower = part.toLowerCase();
+        if (seen.has(lower)) return false;
+        seen.add(lower);
+        return true;
+    });
+
+    if (uniqueParts.length === 0) {
+        return clean(addr.address) || clean(addr.cityName) || 'Selected Address';
+    }
+
+    return uniqueParts.join(', ');
+};
+
 function SpaThankYouCodContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [bookingDetails, setBookingDetails] = useState({ date: '', time: '', address: '' });
 
     useEffect(() => {
-        const savedAddress = sessionStorage.getItem('selected_address');
-        const addressData = savedAddress ? JSON.parse(savedAddress) : null;
+        const rawSaved = sessionStorage.getItem('selected_address');
+        let addressData = null;
+        if (rawSaved) {
+            try { addressData = JSON.parse(rawSaved); } catch (e) {}
+        }
+        if (!addressData) {
+            try {
+                const pending = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+                if (pending?.address) addressData = pending.address;
+            } catch (e) {}
+        }
 
-        setBookingDetails({
-            date: searchParams.get('date') || 'Date not set',
-            time: searchParams.get('time') || '',
-            address: addressData ? `${addressData.flat}, ${addressData.area}, ${addressData.cityName}` : 'Selected Address'
-        });
+        const dateParam = searchParams.get('date') || 'Date not set';
+        const timeParam = searchParams.get('time') || '';
+
+        if (addressData) {
+            setBookingDetails({
+                date: dateParam,
+                time: timeParam,
+                address: formatCompleteAddress(addressData)
+            });
+        } else {
+            const token = typeof window !== 'undefined'
+                ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+                : null;
+
+            if (token) {
+                fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                        const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
+                        setBookingDetails({
+                            date: dateParam,
+                            time: timeParam,
+                            address: formatCompleteAddress(defaultAddr)
+                        });
+                    } else {
+                        setBookingDetails({
+                            date: dateParam,
+                            time: timeParam,
+                            address: 'Selected Address'
+                        });
+                    }
+                })
+                .catch(() => {
+                    setBookingDetails({
+                        date: dateParam,
+                        time: timeParam,
+                        address: 'Selected Address'
+                    });
+                });
+            } else {
+                setBookingDetails({
+                    date: dateParam,
+                    time: timeParam,
+                    address: 'Selected Address'
+                });
+            }
+        }
     }, [searchParams]);
 
     return (
@@ -77,10 +167,10 @@ function SpaThankYouCodContent() {
                         {/* Location */}
                         <div className="space-y-1.5 p-5 rounded-2xl bg-gray-50 border border-gray-100">
                             <div className="flex items-center gap-2 text-[#C06C84] mb-2">
-                                <MapPin className="w-4 h-4" />
+                                <MapPin className="w-4 h-4 shrink-0" />
                                 <span className="text-xs font-bold uppercase tracking-wider">Location</span>
                             </div>
-                            <p className="text-gray-900 font-bold line-clamp-2 leading-tight">
+                            <p className="text-gray-900 font-bold text-sm leading-snug break-words">
                                 {bookingDetails.address}
                             </p>
                         </div>

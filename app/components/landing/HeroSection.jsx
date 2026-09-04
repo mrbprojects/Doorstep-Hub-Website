@@ -319,7 +319,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
     if (upperName.includes('APPLIANCE')) slug = serviceSlugs.appliances;
     else if (upperName.includes('RELIGIOUS')) slug = serviceSlugs.religious;
     else if (upperName.includes('PG')) slug = serviceSlugs.pg;
-    else if (upperName.includes('SPA')) slug = serviceSlugs.spa;
+    else if (upperName.includes('SPA') || upperName.includes('SALON') || upperName.includes('SALOON') || upperName.includes('UNISEX') || upperName.includes('PET')) slug = serviceSlugs.spa;
 
     router.push(`/${slug}`);
   };
@@ -356,7 +356,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
       btn: 'bg-[#F57C00]',
       desc: customDesc || 'Puja, Pandit\n& More Services'
     };
-    if (n.includes('SPA') || n.includes('SALON')) return {
+    if (n.includes('SPA') || n.includes('SALON') || n.includes('SALOON') || n.includes('UNISEX') || n.includes('PET')) return {
       bg: 'bg-[#FFF0F5]',
       from: 'from-[#FFF0F5]',
       gradient: 'from-[#FFF0F5] via-[#FFF0F5]/90 to-transparent',

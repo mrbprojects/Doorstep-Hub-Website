@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Wallet, Truck, Info, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -13,6 +14,35 @@ import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
 
+function normalizeCityString(cityName) {
+  if (!cityName) return '';
+  const str = typeof cityName === 'object' ? (cityName?.name || '') : String(cityName);
+  return str
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
+
+function areCitiesMatching(cityA, cityB) {
+  const normA = normalizeCityString(cityA);
+  const normB = normalizeCityString(cityB);
+
+  if (!normA || !normB) return true;
+  if (normA === normB) return true;
+
+  const hyderabadGroup = ['hyderabad', 'secunderabad', 'cyberabad'];
+  if (hyderabadGroup.includes(normA) && hyderabadGroup.includes(normB)) {
+    return true;
+  }
+
+  if (normA.includes(normB) || normB.includes(normA)) {
+    return true;
+  }
+
+  return false;
+}
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   'https://devapis.doorstephub.com/v1/dhubApi';
@@ -22,6 +52,7 @@ export function BookingConfirmationPage({
   onBack,
   onConfirmBooking,
 }) {
+  const router = useRouter();
   const { user, token, isAuthenticated } = useAuth();
   const { cartItems: contextCartItems, cartTotal: contextCartTotal, clearCart } = useCart();
   const [selectedDate, setSelectedDate] = useState('');
@@ -33,6 +64,7 @@ export function BookingConfirmationPage({
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletData, setWalletData] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
+  const [locationMismatch, setLocationMismatch] = useState(null);
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
@@ -264,8 +296,24 @@ export function BookingConfirmationPage({
         bookedTime: selectedTime,
         bookedDateTime: dateTimeInfo.iso, // ISO 8601 format with timezone
         timezone: dateTimeInfo.timezone,
-        totalAmount: priceValidation.value.toString() // Use validated price
+        totalAmount: priceValidation.value.toString()
       };
+
+      // Preflight location verification: Verify customer address city matches provider location
+      const providerCity = cartItems?.[0]?.providerCity || cartItems?.[0]?.cityName || null;
+      const userCity = address?.cityName ? (typeof address.cityName === 'object' ? address.cityName?.name : address.cityName) : null;
+      if (providerCity && userCity && !areCitiesMatching(userCity, providerCity)) {
+        const providerName = cartItems?.[0]?.providerName || 'Selected Service Provider';
+        setLocationMismatch({
+          userCity: String(userCity),
+          providerCity: String(providerCity),
+          providerName
+        });
+        setIsConfirming(false);
+        setIsProcessing(false);
+        processingRef.current = false;
+        return;
+      }
 
       if (paymentMethod === 'amc') {
         if (!amcApplicable) throw new Error('This service is not covered under your active AMC.');
@@ -292,6 +340,14 @@ export function BookingConfirmationPage({
           cleanup();
           onConfirmBooking(data);
         } else {
+          if (data.code === 'LOCATION_MISMATCH') {
+            setLocationMismatch({
+              userCity: data.userCity || (typeof address?.cityName === 'object' ? address.cityName?.name : address?.cityName) || 'Your Location',
+              providerCity: data.providerCity || 'Provider Location',
+              providerName: data.providerName || 'Selected Service Provider'
+            });
+            return;
+          }
           throw new Error(data.message || 'AMC booking failed');
         }
       } else if (paymentMethod === 'COD' || paymentMethod === 'wallet') {
@@ -317,6 +373,14 @@ export function BookingConfirmationPage({
           cleanup();
           onConfirmBooking(data);
         } else {
+          if (data.code === 'LOCATION_MISMATCH') {
+            setLocationMismatch({
+              userCity: data.userCity || (typeof address?.cityName === 'object' ? address.cityName?.name : address?.cityName) || 'Your Location',
+              providerCity: data.providerCity || 'Provider Location',
+              providerName: data.providerName || 'Selected Service Provider'
+            });
+            return;
+          }
           // Handle wallet specific error if present in response
           if (paymentMethod === 'wallet' && data.required !== undefined) {
             const available = data.available || 0;
@@ -357,6 +421,14 @@ export function BookingConfirmationPage({
           cleanup();
           window.location.href = easebuzzUrl;
         } else {
+          if (data.code === 'LOCATION_MISMATCH') {
+            setLocationMismatch({
+              userCity: data.userCity || (typeof address?.cityName === 'object' ? address.cityName?.name : address?.cityName) || 'Your Location',
+              providerCity: data.providerCity || 'Provider Location',
+              providerName: data.providerName || 'Selected Service Provider'
+            });
+            return;
+          }
           throw new Error(data.message || 'Failed to initiate online payment');
         }
       }
@@ -781,6 +853,68 @@ export function BookingConfirmationPage({
           </div>
         </div>
       </div>
+
+      {/* Location Mismatch Alert Modal */}
+      <AnimatePresence>
+        {locationMismatch && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-amber-200 relative overflow-hidden"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 border border-amber-200">
+                <MapPin className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-xl font-extrabold text-gray-900 mb-2">Location Mismatch</h3>
+
+              <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 mb-4 space-y-2 text-xs">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-500 font-semibold">Your Service Address:</span>
+                  <span className="font-bold text-gray-900 text-right">{locationMismatch.userCity}</span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-500 font-semibold">Selected Provider:</span>
+                  <span className="font-bold text-amber-800 text-right">
+                    {locationMismatch.providerName} ({locationMismatch.providerCity})
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                Your service address is in <strong className="text-gray-900">{locationMismatch.userCity}</strong>, but the selected provider is located in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>. This provider is unable to provide service at your location.
+                <br /><br />
+                Kindly select a provider at your location, or choose an address in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>.
+              </p>
+
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocationMismatch(null);
+                    router.push('/services');
+                  }}
+                  className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#037166] to-[#04a99d] hover:brightness-105 transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  Select Provider in {locationMismatch.userCity}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocationMismatch(null);
+                    if (onBack) onBack();
+                  }}
+                  className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all text-center"
+                >
+                  Choose Another Address
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

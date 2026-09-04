@@ -2,15 +2,32 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Calendar, Clock, Loader2, MapPin, Package, Phone, User,
     CheckCircle, CreditCard, IndianRupee, Tag, Layers, Building2, Receipt,
-    ChevronDown, ChevronUp, AlertCircle, Home, Hash
+    ChevronDown, ChevronUp, AlertCircle, Home, Hash, Headphones, XCircle,
+    AlertTriangle, Wallet, ShieldAlert, X
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { fetchOrderDetail, resolveMediaUrl } from '@/lib/accountApi';
+import {
+    fetchOrderDetail,
+    resolveMediaUrl,
+    cancelBookingService,
+    fetchWalletBalance,
+    initiateCancellationFeePayment
+} from '@/lib/accountApi';
 import { getStatusLabel, getStatusStyle, resolveEffectiveOrderStatus } from '@/lib/orderStatus';
+
+const CANCELLATION_REASONS = [
+    'Change of plans / Schedule conflict',
+    'Provider delayed or not reachable',
+    'Found alternative service provider',
+    'Booked by mistake / duplicate booking',
+    'Pricing or quotation concern',
+    'Other reason'
+];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -165,9 +182,94 @@ export default function BookingDetailPage() {
     const params = useParams();
     const bookingId = params?.bookingId;
     const { token, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // ── Cancellation state ─────────────────────────────────────────────────
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    // step: 'reason' | 'fee_ack' | 'pay_choice' | 'processing'
+    const [cancelStep, setCancelStep] = useState('reason');
+    const [cancelReason, setCancelReason] = useState('');
+    const [customReason, setCustomReason] = useState('');
+    const [cancelLoading, setCancelLoading] = useState(false);
+    const [walletBalance, setWalletBalance] = useState(null);
+    const [walletLoading, setWalletLoading] = useState(false);
+
+    const openCancelModal = async () => {
+        setCancelStep('reason');
+        setCancelReason('');
+        setCustomReason('');
+        setCancelModalOpen(true);
+        // Pre-fetch wallet balance silently
+        if (token) {
+            setWalletLoading(true);
+            try {
+                const wb = await fetchWalletBalance(token);
+                setWalletBalance(Number(wb?.balance ?? wb?.currentBalance ?? wb?.data?.currentBalance ?? 0));
+            } catch { setWalletBalance(null); }
+            finally { setWalletLoading(false); }
+        }
+    };
+
+    const handleCancelNext = () => {
+        const finalReason = cancelReason === 'Other reason' ? customReason.trim() : cancelReason;
+        if (!finalReason) { toast.error('Please select or enter a reason'); return; }
+        if (isPaidOnline) {
+            setCancelStep('fee_ack');
+        } else {
+            setCancelStep('pay_choice');
+        }
+    };
+
+    const doCancel = async (paymentOption) => {
+        const finalReason = cancelReason === 'Other reason' ? customReason.trim() : cancelReason;
+        setCancelLoading(true);
+        try {
+            const res = await cancelBookingService(token, bookingId, { cancelledReason: finalReason, paymentOption });
+            if (res?.success) {
+                toast.success(res.message || 'Booking cancelled successfully');
+                setCancelModalOpen(false);
+                loadOrder();
+            } else if (res?.requiresFeePayment) {
+                // Should not reach here via UI but handle gracefully
+                setCancelStep('pay_choice');
+                toast.error(res.message || 'Platform fee required');
+            } else if (res?.code === 'INSUFFICIENT_WALLET') {
+                toast.error(res.message || 'Insufficient wallet balance');
+                setWalletBalance(Number(res.available ?? 0));
+            } else {
+                toast.error(res?.message || 'Failed to cancel booking');
+            }
+        } catch (e) {
+            toast.error('Failed to cancel booking. Please try again.');
+        } finally {
+            setCancelLoading(false);
+        }
+    };
+
+    const doInitiateGatewayPayment = async () => {
+        const finalReason = cancelReason === 'Other reason' ? customReason.trim() : cancelReason;
+        setCancelLoading(true);
+        try {
+            try { sessionStorage.setItem(`cancel_reason_${bookingId}`, finalReason); } catch (_) {}
+            const res = await initiateCancellationFeePayment(token, bookingId, {
+                cancelledReason: finalReason,
+                websiteReturnUrl: `${window.location.origin}/account/bookings/${bookingId}?cancelled=gateway_paid`,
+                websiteCancelUrl: `${window.location.origin}/account/bookings/${bookingId}`,
+            });
+            if (res?.success && res?.access_key) {
+                window.location.href = `https://pay.easebuzz.in/pay/${res.access_key}`;
+            } else {
+                toast.error(res?.message || 'Failed to initiate payment. Please try again.');
+            }
+        } catch (e) {
+            toast.error('Failed to initiate payment. Please try again.');
+        } finally {
+            setCancelLoading(false);
+        }
+    };
 
     const loadOrder = useCallback(async () => {
         if (!token || !bookingId) return;
@@ -190,6 +292,23 @@ export default function BookingDetailPage() {
         if (!token) { setLoading(false); return; }
         loadOrder();
     }, [authLoading, token, loadOrder]);
+
+    // Handle gateway_paid callback from Easebuzz redirect
+    const searchParamsLocal = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    useEffect(() => {
+        if (searchParamsLocal?.get('cancelled') === 'gateway_paid' && token && bookingId) {
+            const finalReason = sessionStorage.getItem(`cancel_reason_${bookingId}`) || 'Cancelled by user';
+            cancelBookingService(token, bookingId, { cancelledReason: finalReason, paymentOption: 'gateway_paid' })
+                .then(res => {
+                    if (res?.success) {
+                        toast.success('Booking cancelled after payment.');
+                        loadOrder();
+                    }
+                })
+                .catch(() => {});
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const status = order ? resolveEffectiveOrderStatus(order) : 'pending';
     const services = order ? resolveServices(order) : [];
@@ -264,6 +383,10 @@ export default function BookingDetailPage() {
     const createdAt = order?.createdAt || order?.logCreatedDate || null;
 
     const categoryName = order?.categoryName || order?.subcategoryName || null;
+
+    // Statuses that allow cancellation
+    const TERMINAL_STATUSES = ['cancelledByUser', 'cancelledByProvider', 'workIsCompleted', 'completed', 'Closed', 'closed', 'serviceCompleted', 'workCompleted'];
+    const canCancel = order && !TERMINAL_STATUSES.includes(status);
 
     return (
         <div className="space-y-4">
@@ -607,6 +730,198 @@ export default function BookingDetailPage() {
                                     <p className="text-base font-mono font-extrabold tracking-wide">{orderId}</p>
                                     <p className="text-[10px] text-white/60 mt-1">Share this ID with our support team for faster assistance.</p>
                                 </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ── Action Buttons ─────────────────────────────────── */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+                        <h2 className="font-bold text-gray-900 text-sm">Need Help?</h2>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            {/* Contact Support */}
+                            <a
+                                href={`/account/support/new?bookingId=${encodeURIComponent(orderId || '')}&bookingDbId=${encodeURIComponent(bookingId || '')}&category=booking`}
+                                className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl border-2 border-[#037166] text-[#037166] font-bold text-sm hover:bg-[#037166]/5 transition-all"
+                            >
+                                <Headphones className="w-4 h-4" />
+                                Contact Customer Support
+                            </a>
+
+                            {/* Cancel Service */}
+                            {canCancel && (
+                                <button
+                                    onClick={openCancelModal}
+                                    className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl border-2 border-red-400 text-red-600 font-bold text-sm hover:bg-red-50 transition-all"
+                                >
+                                    <XCircle className="w-4 h-4" />
+                                    Cancel My Service
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Cancellation Modal ─────────────────────────────────────── */}
+            {cancelModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={() => !cancelLoading && setCancelModalOpen(false)}
+                    />
+                    <div className="relative z-10 w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                            <div className="flex items-center gap-2">
+                                <XCircle className="w-5 h-5 text-red-500" />
+                                <span className="font-bold text-gray-900">
+                                    {cancelStep === 'reason' && 'Cancel My Service'}
+                                    {cancelStep === 'fee_ack' && 'Platform Fee Notice'}
+                                    {cancelStep === 'pay_choice' && 'Pay Platform Fee'}
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => !cancelLoading && setCancelModalOpen(false)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all"
+                            >
+                                <X className="w-4 h-4 text-gray-500" />
+                            </button>
+                        </div>
+
+                        <div className="px-5 py-4 space-y-4">
+
+                            {/* ── Step 1: Reason ── */}
+                            {cancelStep === 'reason' && (
+                                <>
+                                    <p className="text-sm text-gray-600">Please tell us why you want to cancel this booking.</p>
+                                    <div className="space-y-2">
+                                        {CANCELLATION_REASONS.map((r) => (
+                                            <label
+                                                key={r}
+                                                className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                                                    cancelReason === r ? 'border-[#037166] bg-[#037166]/5' : 'border-gray-100 hover:border-gray-200'
+                                                }`}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="cancelReason"
+                                                    value={r}
+                                                    checked={cancelReason === r}
+                                                    onChange={() => setCancelReason(r)}
+                                                    className="accent-[#037166]"
+                                                />
+                                                <span className="text-sm font-medium text-gray-800">{r}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {cancelReason === 'Other reason' && (
+                                        <textarea
+                                            rows={3}
+                                            className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] resize-none"
+                                            placeholder="Please describe your reason..."
+                                            value={customReason}
+                                            onChange={(e) => setCustomReason(e.target.value)}
+                                        />
+                                    )}
+                                    <button
+                                        onClick={handleCancelNext}
+                                        className="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all text-sm"
+                                    >
+                                        Continue
+                                    </button>
+                                </>
+                            )}
+
+                            {/* ── Step 2a: Already-paid fee acknowledgement ── */}
+                            {cancelStep === 'fee_ack' && (
+                                <>
+                                    <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex gap-3">
+                                        <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm font-bold text-amber-800 mb-1">Platform Fee is Non-Refundable</p>
+                                            <p className="text-xs text-amber-700">The ₹99 platform fee paid for this booking will <strong>not be refunded</strong> as per DoorStepHub policy. Your remaining service amount (if any) will be processed per the refund policy.</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 text-center">By confirming, you agree to this policy and your booking will be cancelled immediately.</p>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => setCancelStep('reason')}
+                                            disabled={cancelLoading}
+                                            className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all disabled:opacity-50"
+                                        >
+                                            Go Back
+                                        </button>
+                                        <button
+                                            onClick={() => doCancel('already_paid')}
+                                            disabled={cancelLoading}
+                                            className="flex-1 py-3 rounded-xl bg-[#037166] hover:bg-[#025a51] text-white font-bold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                            {cancelLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Cancelling...</> : 'I Agree'}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* ── Step 2b: Unpaid fee – payment choice ── */}
+                            {cancelStep === 'pay_choice' && (
+                                <>
+                                    <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 flex gap-3">
+                                        <AlertTriangle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm font-bold text-blue-800 mb-1">₹99 Platform Fee Required</p>
+                                            <p className="text-xs text-blue-700">A platform fee of ₹99 must be paid to cancel this booking. Choose how you'd like to pay.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {/* D-Hub Wallet */}
+                                        <button
+                                            onClick={() => doCancel('wallet')}
+                                            disabled={cancelLoading || walletLoading || (walletBalance !== null && walletBalance < 99)}
+                                            className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 border-[#037166] hover:bg-[#037166]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <div className="w-9 h-9 rounded-xl bg-[#037166]/10 flex items-center justify-center flex-shrink-0">
+                                                <Wallet className="w-4 h-4 text-[#037166]" />
+                                            </div>
+                                            <div className="flex-1 text-left">
+                                                <p className="text-sm font-bold text-gray-900">D-Hub Wallet</p>
+                                                <p className="text-xs text-gray-500">
+                                                    {walletLoading ? 'Checking balance...' :
+                                                        walletBalance !== null ?
+                                                            (walletBalance >= 99 ? `Available: ₹${walletBalance}` : `Insufficient (₹${walletBalance} available, need ₹99)`) :
+                                                            'Balance unavailable'
+                                                    }
+                                                </p>
+                                            </div>
+                                            {cancelLoading ? <Loader2 className="w-4 h-4 animate-spin text-[#037166]" /> : <CheckCircle className="w-4 h-4 text-[#037166]" />}
+                                        </button>
+
+                                        {/* Payment Gateway */}
+                                        <button
+                                            onClick={doInitiateGatewayPayment}
+                                            disabled={cancelLoading}
+                                            className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 border-gray-200 hover:border-[#037166]/30 hover:bg-gray-50 transition-all disabled:opacity-50"
+                                        >
+                                            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                                <CreditCard className="w-4 h-4 text-gray-600" />
+                                            </div>
+                                            <div className="flex-1 text-left">
+                                                <p className="text-sm font-bold text-gray-900">Pay Online (₹99)</p>
+                                                <p className="text-xs text-gray-500">Secure payment via Easebuzz Gateway</p>
+                                            </div>
+                                            {cancelLoading ? <Loader2 className="w-4 h-4 animate-spin text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90" />}
+                                        </button>
+                                    </div>
+
+                                    <button
+                                        onClick={() => setCancelStep('reason')}
+                                        disabled={cancelLoading}
+                                        className="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-all disabled:opacity-50"
+                                    >
+                                        Go Back
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>

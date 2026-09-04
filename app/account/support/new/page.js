@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowLeft, Loader2, Send, Upload } from 'lucide-react';
+import { ArrowLeft, Hash, Loader2, Send, Tag, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { createSupportTicket } from '@/lib/accountApi';
@@ -23,14 +23,26 @@ const inputCls =
     'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-[#123F4A] text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#037166]/40 focus:border-[#037166] transition-all';
 const labelCls = 'block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide';
 
-export default function CreateSupportTicketPage() {
+function CreateTicketForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const bookingIdParam = searchParams.get('bookingId') || '';
+    const bookingDbIdParam = searchParams.get('bookingDbId') || '';
+    const categoryParam = searchParams.get('category') || '';
+
     const { token } = useAuth();
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState(categoryParam || (bookingIdParam ? 'booking' : ''));
     const [attachment, setAttachment] = useState(null);
+
+    useEffect(() => {
+        if (bookingIdParam) {
+            setTitle(`Issue with Booking #${bookingIdParam}`);
+            if (!category) setCategory('booking');
+        }
+    }, [bookingIdParam]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,6 +66,11 @@ export default function CreateSupportTicketPage() {
             formData.append('description', description.trim());
             formData.append('subject', title.trim());
             formData.append('department', selected?.department || 'Customer Support');
+            if (bookingDbIdParam) formData.append('linkedBookingId', bookingDbIdParam);
+            if (bookingIdParam) {
+                formData.append('bookingId', bookingIdParam);
+                formData.append('orderId', bookingIdParam);
+            }
             if (attachment) formData.append('attachment', attachment);
 
             const res = await createSupportTicket(token, formData);
@@ -84,6 +101,12 @@ export default function CreateSupportTicketPage() {
             <div>
                 <h1 className="text-2xl font-extrabold text-gray-900">Raise Support Ticket</h1>
                 <p className="text-sm text-gray-500 mt-1">Describe your booking or service issue</p>
+                {bookingIdParam && (
+                    <div className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#037166]/10 border border-[#037166]/20 text-xs font-semibold text-[#037166]">
+                        <Hash className="w-3.5 h-3.5" />
+                        <span>Referenced Booking: #{bookingIdParam}</span>
+                    </div>
+                )}
             </div>
 
             <motion.form
@@ -183,5 +206,13 @@ export default function CreateSupportTicketPage() {
                 </button>
             </motion.form>
         </div>
+    );
+}
+
+export default function CreateSupportTicketPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-[#037166]" /></div>}>
+            <CreateTicketForm />
+        </Suspense>
     );
 }

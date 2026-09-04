@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useRef } from 'react';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
+import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
 
 // Safely convert any value (including nested objects) to a primitive for rendering
 const safeStr = (val, fallback = '') => {
@@ -41,6 +42,7 @@ function PGConfirmContent() {
     const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [locationMismatch, setLocationMismatch] = useState(null);
     const [paymentStatus, setPaymentStatus] = useState(null);
     const [mounted, setMounted] = useState(false);
 
@@ -160,6 +162,18 @@ function PGConfirmContent() {
         if (!bookedDate) { toast.error('Please select a move-in date'); return; }
         if (cartItems.length === 0) { toast.error('Your cart is empty'); return; }
 
+        // Preflight location verification
+        const providerCity = cartData?.provider?.cityName;
+        const userCity = selectedAddress?.cityName;
+        if (providerCity && userCity && !areCitiesMatching(userCity, providerCity)) {
+            setLocationMismatch({
+                userCity: String(userCity),
+                providerCity: String(providerCity),
+                providerName: cartData?.provider?.businessName || cartData?.provider?.name || 'Selected PG / Hostel'
+            });
+            return;
+        }
+
         setLoading(true);
         try {
             const payload = {
@@ -215,6 +229,14 @@ function PGConfirmContent() {
                     }
                 }
             } else {
+                if (data.code === 'LOCATION_MISMATCH') {
+                    setLocationMismatch({
+                        userCity: data.userCity || selectedAddress?.cityName,
+                        providerCity: data.providerCity || 'Provider Location',
+                        providerName: data.providerName || 'Selected PG / Hostel',
+                    });
+                    return;
+                }
                 toast.error(data.message || 'Checkout failed');
             }
         } catch {
@@ -622,6 +644,14 @@ function PGConfirmContent() {
                         router.push('/pghostels');
                     }
                 }}
+            />
+
+            <LocationMismatchModal
+                mismatch={locationMismatch}
+                onClose={() => setLocationMismatch(null)}
+                onSelectAnotherAddress={() => router.push('/pghostels/booking/address')}
+                browseUrl="/pghostels"
+                providerLabel="PG / Hostel"
             />
         </motion.div>
     );

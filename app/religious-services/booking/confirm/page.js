@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Info } from 'lucide-react';
+import {
+    ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, Sparkles,
+    CheckCircle, User, Loader2, Info, Check, ShieldCheck, Phone, Home, Briefcase, ChevronRight, Banknote
+} from 'lucide-react';
 
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -13,6 +16,54 @@ import { Link } from 'next/link';
 // If not found, I will just omit it or use the standard one available
 import { AuthModal } from '@/components/auth/AuthModal';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
+import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
+
+const clean = (v) => {
+    if (!v) return null;
+    const s = String(v).trim();
+    if (!s || s.toUpperCase() === 'N/A' || s === ',' || s === '-') return null;
+    return s;
+};
+
+const formatFullAddress = (addr) => {
+    if (!addr) return { street: '', cityState: '', postalCode: '', hasDetails: false };
+
+    const streetParts = [
+        clean(addr.flat),
+        clean(addr.area),
+        clean(addr.addressLineOne),
+        clean(addr.addressLineTwo)
+    ].filter(Boolean);
+
+    const seen = new Set();
+    const uniqueStreet = streetParts.filter(part => {
+        const lower = part.toLowerCase();
+        if (seen.has(lower)) return false;
+        seen.add(lower);
+        return true;
+    });
+
+    const cityParts = [
+        clean(addr.cityName),
+        clean(addr.stateName)
+    ].filter(Boolean);
+
+    const pin = clean(addr.postalCode);
+
+    return {
+        street: uniqueStreet.join(', '),
+        cityState: cityParts.join(', '),
+        postalCode: pin,
+        hasDetails: uniqueStreet.length > 0 || cityParts.length > 0
+    };
+};
+
+const getAddressIcon = (type) => {
+    const lower = type?.toLowerCase() || '';
+    if (lower.includes('home')) return Home;
+    if (lower.includes('work') || lower.includes('office')) return Briefcase;
+    return MapPin;
+};
 
 export default function ReligiousConfirmPage() {
     const router = useRouter();
@@ -30,6 +81,7 @@ export default function ReligiousConfirmPage() {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
     const [mounted, setMounted] = useState(false);
+    const [locationMismatch, setLocationMismatch] = useState(null);
 
     // Prevent hydration mismatch from new Date() during SSR
     useEffect(() => { setMounted(true); }, []);
@@ -40,38 +92,68 @@ export default function ReligiousConfirmPage() {
         const status = urlParams.get('status');
         if (status === 'success') {
             setPaymentStatus('success');
-            // Payment confirmed — now safe to clear cart
             clearCart();
 
-            const pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
-            sessionStorage.removeItem('pending_booking');
+            let pendingBooking = {};
+            try {
+                pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+            } catch (e) {}
+            if (!pendingBooking.bookedDate) {
+                try {
+                    pendingBooking = JSON.parse(localStorage.getItem('religious_last_booking') || '{}');
+                } catch (e) {}
+            }
+
+            const orderId = urlParams.get('orderId') || pendingBooking.orderId || '';
+            const date = urlParams.get('date') || pendingBooking.bookedDate || sessionStorage.getItem('religious_booking_date') || '';
+            const time = urlParams.get('time') || pendingBooking.bookedTime || sessionStorage.getItem('religious_booking_time') || '';
+
+            if (pendingBooking.address) {
+                sessionStorage.setItem('religious_booking_address', JSON.stringify(pendingBooking.address));
+            }
 
             toast.success('Payment successful! Booking confirmed.');
-            router.push(`/religious-services/thank-you?orderId=${pendingBooking.orderId || ''}&date=${pendingBooking.bookedDate || ''}&time=${pendingBooking.bookedTime || ''}`);
-        } else if (status === 'failure') {
+            router.push(`/religious-services/thank-you?orderId=${encodeURIComponent(orderId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`);
+        } else if (status === 'failure' || status === 'cancelled' || status === 'cancel') {
             setPaymentStatus('failure');
-            toast.error('Payment failed. Redirecting to cart for retry...');
-            setTimeout(() => {
-                router.push('/religious-services/cart');
-            }, 2000);
+            toast.error('Payment was cancelled or could not be completed. You can try again or choose Pay After Service.');
+            if (typeof window !== 'undefined') {
+                window.history.replaceState({}, '', window.location.pathname);
+            }
         }
     }, [clearCart, router]);
     const [technicianPreference, setTechnicianPreference] = useState('any');
 
-    // Load address - using 'religious_booking_address' as set in previous step
-    // OR 'selected_address' if matching PG Hostels strictly
-    // PG Hostels uses 'selected_address'. Religious Address page I just wrote used 'religious_booking_address'. 
-    // I should check both or standardize.
+    // Load address - check session storage first, otherwise fetch default user address from API
     useEffect(() => {
         const savedAddress = sessionStorage.getItem('religious_booking_address') || sessionStorage.getItem('selected_address');
         if (savedAddress) {
-            setSelectedAddress(JSON.parse(savedAddress));
-        } else {
-            // If no address, redirect back
-            toast.error("No address selected");
-            router.push('/religious-services/booking/address');
+            try {
+                setSelectedAddress(JSON.parse(savedAddress));
+                return;
+            } catch (e) {
+                console.error("Failed to parse saved address:", e);
+            }
         }
-    }, [router]);
+
+        // If no address in session storage, fetch user's saved default address
+        if (token) {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
+                    setSelectedAddress(defaultAddr);
+                    sessionStorage.setItem('religious_booking_address', JSON.stringify(defaultAddr));
+                }
+            })
+            .catch(err => console.error("Error fetching default address:", err));
+        }
+    }, [token]);
 
     // Check authentication on mount
     useEffect(() => {
@@ -106,6 +188,8 @@ export default function ReligiousConfirmPage() {
             date.setDate(date.getDate() + i);
             dates.push({
                 value: date.toISOString().split('T')[0],
+                dayLabel: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short' }),
+                dateLabel: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                 label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', {
                     weekday: 'short',
                     month: 'short',
@@ -145,8 +229,20 @@ export default function ReligiousConfirmPage() {
     };
 
     // Only compute on client to avoid hydration mismatch
-    const availableDates = mounted ? getAvailableDates() : [];
-    const availableTimesForSelectedDate = mounted ? getAvailableTimes(bookedDate) : [];
+    const availableDates = useMemo(() => {
+        return mounted ? getAvailableDates() : [];
+    }, [mounted]);
+
+    const availableTimesForSelectedDate = useMemo(() => {
+        return mounted ? getAvailableTimes(bookedDate) : [];
+    }, [mounted, bookedDate]);
+
+    // Auto-select first available date
+    useEffect(() => {
+        if (!bookedDate && availableDates.length > 0) {
+            setBookedDate(availableDates[0].value);
+        }
+    }, [availableDates, bookedDate]);
 
     useEffect(() => {
         setBookedTime('');
@@ -159,7 +255,8 @@ export default function ReligiousConfirmPage() {
             return;
         }
         if (!selectedAddress) {
-            toast.error('Please select an address');
+            toast.error('Please select an address for this ritual');
+            router.push('/religious-services/booking/address');
             return;
         }
         if (!bookedDate) {
@@ -179,9 +276,25 @@ export default function ReligiousConfirmPage() {
         const isProfessional = cartItems.some(item => item.itemType === 'professional_service' || item.itemType === 'professional_addon');
         const checkoutProviderType = isProfessional ? 'professional' : 'regular';
 
+        // Preflight location check
+        const providerCity = cartData?.provider?.cityName;
+        const userCity = selectedAddress?.cityName;
+        if (providerCity && userCity && !areCitiesMatching(userCity, providerCity)) {
+            setLocationMismatch({
+                userCity: String(userCity),
+                providerCity: String(providerCity),
+                providerName: cartData?.provider?.businessName || cartData?.provider?.name || 'Selected Priest / Ritual Specialist'
+            });
+            return;
+        }
+
         setLoading(true);
         try {
             let endpoint = '';
+            const currentCheckoutUrl = typeof window !== 'undefined'
+                ? `${window.location.protocol}//${window.location.host}${window.location.pathname}`
+                : '';
+
             let payload = {
                 serviceAddressId: selectedAddress._id,
                 bookedDate,
@@ -191,8 +304,9 @@ export default function ReligiousConfirmPage() {
                 ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
-                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed?type=professional&deepType=Religious Services`
+                returnUrl: currentCheckoutUrl,
+                surl: `${currentCheckoutUrl}?status=success&date=${encodeURIComponent(bookedDate)}&time=${encodeURIComponent(bookedTime)}`,
+                furl: `${currentCheckoutUrl}?status=cancelled`
             };
 
             if (paymentMethod === 'ONLINE') {
@@ -218,13 +332,22 @@ export default function ReligiousConfirmPage() {
                         vertical: 'religious',
                         bookingId: data.bookingId || data.orderId,
                     });
-                    // Save pending booking details to sessionStorage before redirect
-                    sessionStorage.setItem('pending_booking', JSON.stringify({
+                    // Save pending booking details to both sessionStorage and localStorage before redirect
+                    const pendingData = {
                         bookedDate,
                         bookedTime,
                         address: selectedAddress,
                         orderId: data.bookingId || data.orderId || null
-                    }));
+                    };
+                    sessionStorage.setItem('pending_booking', JSON.stringify(pendingData));
+                    sessionStorage.setItem('religious_booking_date', bookedDate);
+                    sessionStorage.setItem('religious_booking_time', bookedTime);
+                    if (selectedAddress) {
+                        sessionStorage.setItem('religious_booking_address', JSON.stringify(selectedAddress));
+                    }
+                    try {
+                        localStorage.setItem('religious_last_booking', JSON.stringify(pendingData));
+                    } catch (e) {}
 
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     toast.success('Redirecting to payment gateway...');
@@ -232,6 +355,9 @@ export default function ReligiousConfirmPage() {
                 } else {
                     toast.success('Booking created successfully!');
                     trackBookingCompleted(data.bookingId || data.orderId, { vertical: 'religious' });
+                    if (selectedAddress) {
+                        sessionStorage.setItem('religious_booking_address', JSON.stringify(selectedAddress));
+                    }
                     clearCart();
                     if (paymentMethod === 'COD') {
                         router.push(`/religious-services/thank-you-cod?date=${bookedDate}&time=${bookedTime}`);
@@ -240,7 +366,16 @@ export default function ReligiousConfirmPage() {
                     }
                 }
             } else {
-                toast.error(data.message || 'Checkout failed');
+                if (data.code === 'LOCATION_MISMATCH') {
+                    setLocationMismatch({
+                        userCity: data.userCity || selectedAddress?.cityName,
+                        providerCity: data.providerCity || 'Provider Location',
+                        providerName: data.providerName || 'Selected Priest / Ritual Specialist',
+                    });
+                    return;
+                }
+                const detail = data.easebuzz?.error_desc || data.easebuzz?.data || data.error;
+                toast.error(detail ? `${data.message || 'Checkout failed'}: ${detail}` : (data.message || 'Checkout failed'));
             }
         } catch (error) {
             console.error('Checkout error:', error);
@@ -263,345 +398,519 @@ export default function ReligiousConfirmPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen pt-20 pb-32 bg-[var(--off-white)]"
+            className="min-h-screen pt-16 sm:pt-20 pb-28 bg-[var(--off-white)]"
         >
-            {/* Header - Religious Theme */}
-            <section className="sticky top-20 z-40 bg-gradient-to-r from-[var(--saffron)] via-[var(--temple-red)] to-[var(--deep-charcoal)] border-b border-white/10 shadow-lg">
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
-                    <motion.button
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        onClick={() => router.back()}
-                        className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Address
-                    </motion.button>
-
-                    <div className="flex flex-col md:flex-row md:items-center justify-start gap-12">
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3 shrink-0"
+            {/* Header - Religious Theme (Compact) */}
+            <section className="sticky top-16 sm:top-20 z-40 bg-gradient-to-r from-[var(--saffron)] via-[var(--temple-red)] to-[var(--deep-charcoal)] border-b border-white/10 shadow-md">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 sm:py-4">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                        <motion.button
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            onClick={() => router.back()}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-white hover:bg-white/25 transition-all text-xs font-semibold"
                         >
-                            <Sparkles className="w-8 h-8" />
-                            Confirm Your Ritual
-                        </motion.h1>
+                            <ArrowLeft className="w-3.5 h-3.5" />
+                            <span>Back to Address</span>
+                        </motion.button>
+                        <div className="flex items-center gap-2 text-white/90 text-xs font-medium">
+                            <span className="hidden sm:inline">Selected Services:</span>
+                            <span className="font-bold text-white bg-white/20 px-2 py-0.5 rounded-full">
+                                {cartItems.length} {cartItems.length === 1 ? 'Ritual' : 'Rituals'}
+                            </span>
+                        </div>
+                    </div>
 
-                        <div className="flex-1 max-w-2xl">
-                            <div className="flex items-center gap-2">
-                                {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-amber-200" />
+                                Confirm Your Ritual Booking
+                            </h1>
+                            <p className="text-white/80 text-xs mt-0.5">
+                                Select ritual schedule and verify details before checkout
+                            </p>
+                        </div>
+
+                        {/* Stepper */}
+                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                            {['Selection', 'Address', 'Confirm & Pay'].map((step, index) => {
+                                const isCompleted = index < 2;
+                                const isCurrent = index === 2;
+                                return (
                                     <React.Fragment key={step}>
-                                        <div className="flex items-center gap-2 shrink-0">
-                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                                                <CheckCircle className="w-5 h-5 text-[var(--saffron)]" />
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                                                isCompleted ? 'bg-white text-[var(--saffron)] shadow-xs' :
+                                                isCurrent ? 'bg-amber-300 text-gray-900 ring-2 ring-white/40 font-extrabold shadow-sm' :
+                                                'bg-white/20 text-white/60'
+                                            }`}>
+                                                {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : index + 1}
                                             </div>
-                                            <span className="text-white/90 text-[10px] md:text-sm font-bold uppercase tracking-wider hidden sm:inline">{step}</span>
+                                            <span className={`text-[11px] font-bold uppercase tracking-wider transition-all hidden md:inline ${
+                                                isCurrent ? 'text-white' : 'text-white/70'
+                                            }`}>
+                                                {step}
+                                            </span>
                                         </div>
-                                        {index < 2 && <div className="h-0.5 flex-1 bg-white/30" />}
+                                        {index < 2 && <div className="w-6 sm:w-8 h-0.5 bg-white/25" />}
                                     </React.Fragment>
-                                ))}
-                            </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
-
             </section>
 
-            <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-8">
-                <div className="grid lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Date Selection */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    {/* Main Left Content Column */}
+                    <div className="lg:col-span-7 xl:col-span-8 space-y-4">
+                        {/* 1. Date Selection */}
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+                            className="p-4 sm:p-5 rounded-2xl bg-white border border-gray-200 shadow-xs"
                         >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-4 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-[var(--saffron)]" />
-                                Select Date
-                            </h3>
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-base font-bold text-[var(--deep-charcoal)] flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-[var(--saffron)]" />
+                                    <span>Select Ritual Date</span>
+                                </h3>
+                                {bookedDate && (
+                                    <span className="text-xs font-bold text-[var(--saffron)] bg-amber-50 px-2 py-0.5 rounded-full border border-[var(--saffron)]/20">
+                                        {availableDates.find(d => d.value === bookedDate)?.label}
+                                    </span>
+                                )}
+                            </div>
+
                             {availableDates.length === 0 ? (
-                                <p className="text-gray-500 text-sm">No dates available at this time</p>
+                                <p className="text-gray-500 text-xs py-3">No dates available at this time</p>
                             ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    {availableDates.map((date) => (
-                                        <button
-                                            key={date.value}
-                                            onClick={() => setBookedDate(date.value)}
-                                            className={`p-4 rounded-xl font-medium transition-all ${bookedDate === date.value
-                                                ? 'bg-[var(--saffron)] text-white shadow-lg shadow-[var(--saffron)]/30'
-                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    {availableDates.map((date) => {
+                                        const isSelected = bookedDate === date.value;
+                                        return (
+                                            <button
+                                                key={date.value}
+                                                type="button"
+                                                onClick={() => setBookedDate(date.value)}
+                                                className={`p-3 rounded-xl flex flex-col items-center justify-center transition-all border ${
+                                                    isSelected
+                                                        ? 'bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white shadow-md border-transparent ring-2 ring-[var(--saffron)]/25'
+                                                        : 'bg-white border-gray-200 text-gray-700 hover:border-[var(--saffron)]/40 hover:bg-amber-50/20'
                                                 }`}
-                                        >
-                                            {date.label}
-                                        </button>
-                                    ))}
+                                            >
+                                                <span className={`text-[10px] uppercase font-bold tracking-wider ${
+                                                    isSelected ? 'text-white/80' : 'text-gray-400'
+                                                }`}>
+                                                    {date.dayLabel || date.label}
+                                                </span>
+                                                <span className="text-sm font-extrabold mt-0.5">
+                                                    {date.dateLabel || date.label}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </motion.div>
 
-                        {/* Time Selection */}
+                        {/* 2. Time Slot Selection */}
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.05 }}
+                            className="p-4 sm:p-5 rounded-2xl bg-white border border-gray-200 shadow-xs"
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-base font-bold text-[var(--deep-charcoal)] flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-[var(--saffron)]" />
+                                    <span>Select Time Slot</span>
+                                </h3>
+                                {bookedTime && (
+                                    <span className="text-xs font-bold text-[var(--saffron)] bg-amber-50 px-2 py-0.5 rounded-full border border-[var(--saffron)]/20">
+                                        {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
+                                    </span>
+                                )}
+                            </div>
+
+                            {availableTimesForSelectedDate.length === 0 ? (
+                                <div className="text-center py-6 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                                    <Clock className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
+                                    <p className="text-gray-500 text-xs font-medium">
+                                        {bookedDate
+                                            ? 'No time slots available for selected date. Please choose another date.'
+                                            : 'Please select a ritual date first to view available time slots.'}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    {availableTimesForSelectedDate.map((time) => {
+                                        const isSelected = bookedTime === time.value;
+                                        return (
+                                            <button
+                                                key={time.value}
+                                                type="button"
+                                                onClick={() => setBookedTime(time.value)}
+                                                className={`py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-between transition-all border ${
+                                                    isSelected
+                                                        ? 'bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white shadow-md border-transparent ring-2 ring-[var(--saffron)]/25'
+                                                        : 'bg-white border-gray-200 text-gray-700 hover:border-[var(--saffron)]/40 hover:bg-amber-50/20'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-gray-400'}`} />
+                                                    <span>{time.label}</span>
+                                                </div>
+                                                {isSelected && <Check className="w-3.5 h-3.5 stroke-[3] text-white" />}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </motion.div>
+
+                        {/* 3. Booking Address / Ritual Location */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+                            className="p-4 sm:p-5 rounded-2xl bg-white border border-gray-200 shadow-xs"
                         >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-4 flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-[var(--saffron)]" />
-                                Select Time Slot
-                            </h3>
-                            {availableTimesForSelectedDate.length === 0 ? (
-                                <p className="text-gray-500 text-sm">
-                                    {bookedDate
-                                        ? 'No time slots available for selected date'
-                                        : 'Please select a date first'
-                                    }
-                                </p>
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-base font-bold text-[var(--deep-charcoal)] flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-[var(--saffron)]" />
+                                    <span>Ritual Location</span>
+                                </h3>
+                                <button
+                                    type="button"
+                                    onClick={() => router.push('/religious-services/booking/address')}
+                                    className="text-xs font-bold text-[var(--saffron)] hover:text-[var(--temple-red)] transition-colors inline-flex items-center gap-1"
+                                >
+                                    <span>Change Address</span>
+                                    <ChevronRight className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+
+                            {selectedAddress ? (
+                                (() => {
+                                    const Icon = getAddressIcon(selectedAddress.type);
+                                    const { street, cityState, postalCode } = formatFullAddress(selectedAddress);
+                                    return (
+                                        <div className="p-3.5 rounded-xl bg-amber-50/30 border border-amber-200/60 flex items-start gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-[var(--saffron)]/15 text-[var(--saffron)] flex items-center justify-center shrink-0 mt-0.5">
+                                                <Icon className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-xs font-bold text-gray-900 capitalize">
+                                                        {selectedAddress.type || 'Address'}
+                                                    </span>
+                                                    {selectedAddress.defaultAddress && (
+                                                        <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded bg-[var(--saffron)]/15 text-[var(--saffron)]">
+                                                            DEFAULT
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs font-semibold text-gray-800 mb-0.5">
+                                                    {selectedAddress.name}
+                                                    {selectedAddress.phone && (
+                                                        <span className="text-gray-500 font-normal"> • {selectedAddress.phone}</span>
+                                                    )}
+                                                </p>
+                                                {street && (
+                                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-1">
+                                                        {street}
+                                                    </p>
+                                                )}
+                                                {(cityState || postalCode) && (
+                                                    <p className="text-[11px] text-gray-500 font-medium">
+                                                        {cityState} {postalCode ? `- ${postalCode}` : ''}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })()
                             ) : (
-                                <div className="grid md:grid-cols-2 gap-3">
-                                    {availableTimesForSelectedDate.map((time) => (
-                                        <button
-                                            key={time.value}
-                                            onClick={() => setBookedTime(time.value)}
-                                            className={`p-4 rounded-xl font-medium transition-all ${bookedTime === time.value
-                                                ? 'bg-[var(--saffron)] text-white shadow-lg shadow-[var(--saffron)]/30'
-                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
-                                                }`}
-                                        >
-                                            {time.label}
-                                        </button>
-                                    ))}
+                                <div className="p-4 rounded-xl bg-gray-50 text-center">
+                                    <p className="text-xs text-gray-500">No address selected.</p>
+                                    <button
+                                        onClick={() => router.push('/religious-services/booking/address')}
+                                        className="mt-2 text-xs font-bold text-[var(--saffron)]"
+                                    >
+                                        Select Address
+                                    </button>
                                 </div>
                             )}
                         </motion.div>
 
-                        {/* Technician Preference (Optional) */}
+                        {/* 4. Priest Preference (Optional) */}
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.15 }}
+                            className="p-4 sm:p-5 rounded-2xl bg-white border border-gray-200 shadow-xs"
+                        >
+                            <h3 className="text-base font-bold text-[var(--deep-charcoal)] mb-3 flex items-center gap-2">
+                                <User className="w-4 h-4 text-[var(--saffron)]" />
+                                <span>Priest / Specialist Preference (Optional)</span>
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                {[
+                                    { value: 'any', label: 'Any Vedic Priest' },
+                                    { value: 'senior', label: 'Senior Pandit' },
+                                    { value: 'contact', label: 'Call Before Visit' },
+                                ].map((option) => {
+                                    const isSelected = technicianPreference === option.value;
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() => setTechnicianPreference(option.value)}
+                                            className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all border flex items-center justify-center gap-1.5 ${
+                                                isSelected
+                                                    ? 'bg-[var(--saffron)] text-white border-[var(--saffron)] shadow-xs'
+                                                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
+                                            }`}
+                                        >
+                                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                                            <span>{option.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+
+                        {/* 5. Payment Method */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+                            className="p-4 sm:p-5 rounded-2xl bg-white border border-gray-200 shadow-xs"
                         >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-4 flex items-center gap-2">
-                                <User className="w-5 h-5 text-[var(--saffron)]" />
-                                Service Preference (Optional)
+                            <h3 className="text-base font-bold text-[var(--deep-charcoal)] mb-1 flex items-center gap-2">
+                                <CreditCard className="w-4 h-4 text-[var(--saffron)]" />
+                                <span>Payment Method</span>
                             </h3>
-                            <div className="grid md:grid-cols-3 gap-3">
-                                {[
-                                    { value: 'any', label: 'Any Priest/Expert' },
-                                    { value: 'senior', label: 'Senior Pandit' },
-                                    { value: 'contact', label: 'Call before visit' },
-                                ].map((option) => (
-                                    <button
-                                        key={option.value}
-                                        onClick={() => setTechnicianPreference(option.value)}
-                                        className={`p-4 rounded-xl font-medium transition-all ${technicianPreference === option.value
-                                            ? 'bg-[var(--saffron)] text-white'
-                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
-                                            }`}
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
+                            <p className="text-xs text-gray-500 mb-3.5">Choose your preferred payment method</p>
+                            
+                            <div className="space-y-3">
+                                {/* Option 1: Instant Online Payment */}
+                                <div
+                                    onClick={() => setPaymentMethod('ONLINE')}
+                                    className={`p-3.5 rounded-xl flex items-center gap-3.5 cursor-pointer transition-all border ${
+                                        paymentMethod === 'ONLINE'
+                                            ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-[var(--saffron)] shadow-xs ring-1 ring-[var(--saffron)]/40'
+                                            : 'bg-white hover:bg-gray-50/80 border-gray-200'
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'ONLINE'
+                                            ? 'bg-[var(--saffron)] text-white shadow-xs'
+                                            : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                        <CreditCard className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs sm:text-sm font-bold text-gray-900 block">Instant Online Payment</span>
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Fast &amp; Secure</span>
+                                        </div>
+                                        <p className="text-[11px] text-gray-600 mt-0.5">Pay securely via UPI (GPay, PhonePe, Paytm), Credit/Debit Card, or Net Banking</p>
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'ONLINE'
+                                            ? 'border-[var(--saffron)] bg-[var(--saffron)] text-white'
+                                            : 'border-gray-300 bg-white'
+                                    }`}>
+                                        {paymentMethod === 'ONLINE' && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
+                                </div>
+
+                                {/* Option 2: Pay After Service (Cash on Service Delivery) */}
+                                <div
+                                    onClick={() => setPaymentMethod('COD')}
+                                    className={`p-3.5 rounded-xl flex items-center gap-3.5 cursor-pointer transition-all border ${
+                                        paymentMethod === 'COD'
+                                            ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-[var(--saffron)] shadow-xs ring-1 ring-[var(--saffron)]/40'
+                                            : 'bg-white hover:bg-gray-50/80 border-gray-200'
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'COD'
+                                            ? 'bg-[var(--saffron)] text-white shadow-xs'
+                                            : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                        <Banknote className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs sm:text-sm font-bold text-gray-900 block">Pay After Service (Cash on Service Delivery)</span>
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">No Advance</span>
+                                        </div>
+                                        <p className="text-[11px] text-gray-600 mt-0.5">Pay full payment with cash or UPI directly to priest after ritual completion</p>
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'COD'
+                                            ? 'border-[var(--saffron)] bg-[var(--saffron)] text-white'
+                                            : 'border-gray-300 bg-white'
+                                    }`}>
+                                        {paymentMethod === 'COD' && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
+                                </div>
                             </div>
-                        </motion.div>
-
-
-                        {/* Payment Method — Online Only */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
-                        >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-4 flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-[var(--saffron)]" />
-                                Payment Method
-                            </h3>
-                            <p className="text-xs text-gray-400 mb-4">Secure online payment only</p>
-                            <div className="p-5 rounded-xl flex items-center gap-4 bg-[var(--saffron)] text-white shadow-lg">
-                                <CreditCard className="w-6 h-6 text-white" />
-                                <div className="flex-1">
-                                    <span className="text-sm font-semibold">Online Payment</span>
-                                    <p className="text-xs text-white/70 mt-0.5">Pay securely via UPI / Card / Net Banking</p>
-                                </div>
-                                <CheckCircle className="w-5 h-5" />
-                            </div>
-                        </motion.div>
-
-
-
-                        {/* Service Address */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
-                        >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-4 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-[var(--saffron)]" />
-                                Booking Address
-                            </h3>
-                            {selectedAddress ? (
-                                <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                                    <p className="text-[var(--deep-charcoal)] font-medium mb-1">{selectedAddress.name}</p>
-                                    <p className="text-gray-600">{selectedAddress.flat}, {selectedAddress.area}</p>
-                                    <p className="text-gray-500">{selectedAddress.cityName}, {selectedAddress.postalCode}</p>
-                                </div>
-                            ) : (
-                                <div className="p-4 rounded-lg bg-gray-50">
-                                    <p className="text-gray-400">No address selected</p>
-                                </div>
-                            )}
                         </motion.div>
                     </div>
 
-                    {/* Summary Sidebar */}
-                    <div className="lg:col-span-1">
+                    {/* Right Column: Order Summary Sidebar */}
+                    <div className="lg:col-span-5 xl:col-span-4">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="sticky top-48 p-6 rounded-2xl bg-white border border-gray-200 shadow-lg"
+                            transition={{ delay: 0.25 }}
+                            className="sticky top-24 p-4 sm:p-5 rounded-2xl bg-white border border-gray-200 shadow-md space-y-4"
                         >
-                            <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-6">Order Summary</h3>
-
-                            {/* Service Details */}
-                            <div className="bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
-                                <div className="flex flex-col gap-3 mb-4 pb-4 border-b border-gray-200">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-xl bg-[var(--saffron)]/10 flex items-center justify-center text-[var(--saffron)]">
-                                            <Sparkles className="w-6 h-6" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Services Selected</p>
-                                            <p className="text-gray-900 font-bold">{cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-2 space-y-2 pl-1">
-                                        {cartItems.map((item, idx) => (
-                                            <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-[var(--saffron)] mt-2"></div>
-                                                <div className="flex justify-between w-full">
-                                                    <span className="line-clamp-1">{item.itemName}</span>
-                                                    <span className="font-medium text-gray-900">₹{Number(item.subtotal || item.price || 0).toFixed(2)}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="space-y-2.5 pt-1">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Subtotal</span>
-                                        <span className="text-gray-900 font-semibold">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
-                                    </div>
-
-                                    {(cartData?.gstAmount ?? 0) > 0 && (
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">GST (18%)</span>
-                                            <span className="text-gray-900 font-semibold">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
-                                        </div>
-                                    )}
-
-                                    {(cartData?.consultationFee ?? 0) > 0 && (
-                                        <div className="flex justify-between text-sm">
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-gray-500">Platform Fee</span>
-                                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 cursor-help" title="Non-refundable booking fee">?</div>
-                                            </div>
-                                            <span className="text-gray-900 font-semibold">₹{(cartData?.consultationFee ?? 0).toFixed(2)}</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center gap-1.5 mt-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-1.5 h-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="var(--saffron)" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" />
-                                        </svg>
-                                        <span className='text-[var(--saffron)] text-[12px]'>Pay Online.</span>
-                                    </div>
-
-                                    <div className="border-t border-gray-200 pt-2.5">
-                                        <div className="flex justify-between font-bold text-sm">
-                                            <span className="text-gray-800">Total Amount</span>
-                                            <span className="text-gray-900">₹{(cartData?.finalAmount || 0).toFixed(2)}</span>
-                                        </div>
-                                        <p className="text-[10px] text-gray-400 mt-0.5">Inclusive of all taxes &amp; fees</p>
-                                    </div>
-
-                                    <div className="flex items-center gap-1 text-[11px] text-gray-400">
-                                        <Info className="w-3 h-3 flex-shrink-0" />
-                                        <span>Platform fee is non-refundable.</span>
-                                    </div>
-                                </div>
+                            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                <h3 className="text-base font-bold text-[var(--deep-charcoal)]">Order Summary</h3>
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                                    {cartItems.length} {cartItems.length === 1 ? 'Service' : 'Services'}
+                                </span>
                             </div>
 
-                            {/* Final Calculation Cards */}
-                            <div className="mt-6 p-4 rounded-2xl bg-[var(--saffron)]/5 border border-[var(--saffron)]/20 mb-4">
-                                <div className="flex justify-between mb-1">
-                                    <span className="text-gray-600 font-medium text-sm">Payable Now</span>
-                                    <span className="text-2xl font-black text-[var(--saffron)]">
-                                        ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : (cartData?.finalAmount ?? 0).toFixed(2)}
-                                    </span>
-                                </div>
-                                <p className="text-[10px] text-[var(--saffron)] uppercase font-bold">
-                                    {paymentOption === 'ADVANCE' ? '' : 'Full Payment'}
-                                </p>
-                            </div>
-
-                            {/* {paymentOption === 'ADVANCE' && (
-                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-500 text-sm">Remaining to Pay</span>
-                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0)).toFixed(2)}</span>
-                                    </div>
-                                    <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at location after service</p>
-                                </div>
-                            )} */}
-
-                            {/* Selected Date/Time Preview */}
+                            {/* Scheduled for preview */}
                             {bookedDate && bookedTime && (
-                                <div className="p-4 rounded-lg bg-[var(--saffron)]/5 border border-[var(--saffron)]/10 mb-6">
-                                    <p className="text-gray-600 text-sm mb-2">Scheduled for:</p>
-                                    <p className="text-[var(--saffron)] font-bold">
-                                        {availableDates.find(d => d.value === bookedDate)?.label}
+                                <div className="p-3 rounded-xl bg-gradient-to-br from-amber-50/80 to-orange-50/40 border border-amber-200/80">
+                                    <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--saffron)] mb-1">
+                                        Scheduled Appointment
                                     </p>
-                                    <p className="text-[var(--saffron)] font-bold">
-                                        {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
-                                    </p>
+                                    <div className="flex items-center gap-2 text-xs font-bold text-gray-900">
+                                        <Calendar className="w-3.5 h-3.5 text-[var(--saffron)]" />
+                                        <span>{availableDates.find(d => d.value === bookedDate)?.label}</span>
+                                        <span className="text-gray-300">•</span>
+                                        <Clock className="w-3.5 h-3.5 text-[var(--saffron)]" />
+                                        <span>{availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}</span>
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Confirm Button */}
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={handleCheckout}
-                                disabled={loading || !bookedDate || !bookedTime}
-                                className={`w-full px-6 py-4 rounded-xl font-medium text-lg transition-all ${loading || !bookedDate || !bookedTime
-                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                    : 'bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white hover:shadow-lg'
-                                    }`}
-                            >
-                                {loading ? (
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        Processing...
+                            {/* Cart items list */}
+                            <div className="max-h-48 overflow-y-auto space-y-2 pr-1 divide-y divide-gray-50">
+                                {cartItems.map((item, idx) => (
+                                    <div key={idx} className="pt-1.5 first:pt-0 flex items-start justify-between gap-2 text-xs">
+                                        <div className="flex items-start gap-1.5 min-w-0">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--saffron)] mt-1.5 shrink-0" />
+                                            <span className="text-gray-700 font-medium line-clamp-1">{item.itemName}</span>
+                                        </div>
+                                        <span className="font-bold text-gray-900 shrink-0">
+                                            ₹{Number(item.subtotal || item.price || 0).toFixed(2)}
+                                        </span>
                                     </div>
-                                ) : (
-                                    'Book Now'
-                                )}
-                            </motion.button>
+                                ))}
+                            </div>
 
-                            <div className="mt-4 space-y-1.5 text-center">
+                            {/* Fee Breakdown */}
+                            <div className="space-y-2 pt-3 border-t border-gray-100 text-xs">
+                                <div className="flex justify-between text-gray-600">
+                                    <span>Subtotal</span>
+                                    <span className="font-semibold text-gray-900">₹{(cartData?.totalServiceCost || 0).toFixed(2)}</span>
+                                </div>
+
+                                {(cartData?.gstAmount ?? 0) > 0 && (
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>GST (18%)</span>
+                                        <span className="font-semibold text-gray-900">₹{(cartData?.gstAmount ?? 0).toFixed(2)}</span>
+                                    </div>
+                                )}
+
+                                {(cartData?.consultationFee ?? 0) > 0 && (
+                                    <div className="flex justify-between text-gray-600">
+                                        <span className="flex items-center gap-1">
+                                            <span>Platform Fee</span>
+                                        </span>
+                                        <span className="font-semibold text-gray-900">₹{(cartData?.consultationFee ?? 0).toFixed(2)}</span>
+                                    </div>
+                                )}
+
+                                <div className="border-t border-gray-200 pt-2.5 flex justify-between items-baseline">
+                                    <span className="text-sm font-bold text-gray-900">Total Amount</span>
+                                    <span className="text-lg font-extrabold text-gray-900">
+                                        ₹{(cartData?.finalAmount || 0).toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Payable Now Card */}
+                            <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-transparent border border-[var(--saffron)]/30">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <span className="text-xs text-gray-600 font-medium block">Payable Now</span>
+                                        <span className="text-[10px] text-[var(--saffron)] font-bold uppercase tracking-wider">
+                                            {paymentMethod === 'COD'
+                                                ? 'Pay After Service'
+                                                : paymentOption === 'ADVANCE'
+                                                    ? 'Platform Fee'
+                                                    : 'Full Payment'}
+                                        </span>
+                                    </div>
+                                    <span className="text-2xl font-black text-[var(--saffron)]">
+                                        {paymentMethod === 'COD'
+                                            ? '₹0.00'
+                                            : `₹${paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : (cartData?.finalAmount ?? 0).toFixed(2)}`}
+                                    </span>
+                                </div>
+                                {paymentMethod === 'COD' && (
+                                    <p className="text-[10px] text-amber-800 font-medium mt-1.5 pt-1.5 border-t border-[var(--saffron)]/20">
+                                        * Total ₹{(cartData?.finalAmount || 0).toFixed(2)} to be paid to priest after ritual completion.
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* CTA Button */}
+                            <div>
+                                {(!bookedDate || !bookedTime) && (
+                                    <p className="text-[11px] text-amber-600 font-semibold text-center mb-1.5">
+                                        Please select date &amp; time slot above
+                                    </p>
+                                )}
+                                <button
+                                    onClick={handleCheckout}
+                                    disabled={loading || !bookedDate || !bookedTime}
+                                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ${
+                                        loading || !bookedDate || !bookedTime
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white shadow-md hover:shadow-lg hover:shadow-[var(--saffron)]/30 active:scale-98'
+                                    }`}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <span>Processing...</span>
+                                        </>
+                                    ) : paymentMethod === 'COD' ? (
+                                        <>
+                                            <ShieldCheck className="w-4 h-4" />
+                                            <span>Book Now (Pay After Service)</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShieldCheck className="w-4 h-4" />
+                                            <span>
+                                                Book Now • ₹{paymentOption === 'ADVANCE' ? (cartData?.advPayment ?? 0).toFixed(2) : (cartData?.finalAmount ?? 0).toFixed(2)}
+                                            </span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+
+                            <div className="pt-2 text-center space-y-1">
                                 <p className="text-[10px] text-gray-400">
-                                    By booking, you agree to our Terms &amp; Cancellation Policy.
+                                    By continuing, you agree to our Terms &amp; Cancellation Policy.
                                 </p>
-                                <div className="flex items-center justify-center gap-2 text-[10px] text-[#ff9933] bg-[#ff9933]/5 p-2.5 rounded-xl border border-[#ff9933]/10">
-                                    <Info className="w-3.5 h-3.5 flex-shrink-0" />
-                                    <span className="font-medium">As per RBI guidelines, payment gateway charges may apply depending on the mode of payment.</span>
+                                <div className="flex items-center justify-center gap-1.5 text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200/50">
+                                    <Info className="w-3 h-3 text-amber-700 shrink-0" />
+                                    <span>Instant confirmation &amp; verified Vedic priests.</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -618,6 +927,14 @@ export default function ReligiousConfirmPage() {
                         router.back();
                     }
                 }}
+            />
+
+            <LocationMismatchModal
+                mismatch={locationMismatch}
+                onClose={() => setLocationMismatch(null)}
+                onSelectAnotherAddress={() => router.push('/religious-services/booking/address')}
+                browseUrl="/religious-services"
+                providerLabel="Priest / Ritual Specialist"
             />
         </motion.div>
     );

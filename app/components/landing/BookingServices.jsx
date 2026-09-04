@@ -154,7 +154,7 @@ export function BookingServices() {
 
     if (upperCategory.includes('RELIGIOUS') || upperTitle.includes('RELIGIOUS')) baseSlug = serviceSlugs.religious;
     else if (upperCategory.includes('PG') || upperTitle.includes('PG')) baseSlug = serviceSlugs.pg;
-    else if (upperCategory.includes('SPA') || upperTitle.includes('SPA')) baseSlug = serviceSlugs.spa;
+    else if (upperCategory.includes('SPA') || upperTitle.includes('SPA') || upperCategory.includes('SALON') || upperTitle.includes('SALON') || upperCategory.includes('SALOON') || upperTitle.includes('SALOON') || upperCategory.includes('UNISEX') || upperTitle.includes('UNISEX') || upperCategory.includes('PET') || upperTitle.includes('PET')) baseSlug = serviceSlugs.spa;
 
     if (baseSlug === serviceSlugs.spa) {
       router.push(`/spa-salon/${service.slug || service.id}`);

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { locationManager } from '@/services/locationManager';
+import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
 
 function PGAddressContent() {
     const router = useRouter();
@@ -48,6 +49,7 @@ function PGAddressContent() {
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [locationMismatch, setLocationMismatch] = useState(null);
     const [newAddress, setNewAddress] = useState({
         name: '', phone: '', type: 'Home', area: '', flat: '',
         postalCode: '', addressLineOne: '', addressLineTwo: '',
@@ -296,6 +298,35 @@ function PGAddressContent() {
         if (!selectedAddress) { toast.error('Please select an address'); return; }
         setLoading(true);
         try {
+            // Preflight location verification if provider is resolved
+            if (providerResolvedId && selectedAddress?._id && token) {
+                try {
+                    const valRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/validate-booking-location`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            providerId: providerResolvedId,
+                            serviceAddressId: selectedAddress._id
+                        })
+                    });
+                    const valData = await valRes.json();
+                    if (valData.success && valData.matched === false) {
+                        setLocationMismatch({
+                            userCity: valData.userCity,
+                            providerCity: valData.providerCity,
+                            providerName: valData.providerName || 'Selected PG / Hostel'
+                        });
+                        setLoading(false);
+                        return;
+                    }
+                } catch (valErr) {
+                    console.warn('Location validation check error:', valErr);
+                }
+            }
+
             sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
             trackLeadEvent({
                 eventType: 'LOCATION_ADDED',
@@ -604,6 +635,13 @@ function PGAddressContent() {
                     setShowAuthModal(false);
                     if (!isAuthenticated) router.back();
                 }}
+            />
+
+            <LocationMismatchModal
+                mismatch={locationMismatch}
+                onClose={() => setLocationMismatch(null)}
+                browseUrl="/pghostels"
+                providerLabel="PG / Hostel"
             />
         </div>
     );

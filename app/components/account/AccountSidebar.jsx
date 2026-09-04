@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -15,6 +16,7 @@ import {
     LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { fetchSupportTickets } from '@/lib/accountApi';
 
 const NAV_ITEMS = [
     { href: '/account', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -29,7 +31,22 @@ const NAV_ITEMS = [
 
 export function AccountSidebar({ onNavigate }) {
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const { user, logout, token } = useAuth();
+    const [pendingTicketsCount, setPendingTicketsCount] = useState(0);
+
+    useEffect(() => {
+        if (!token) return;
+        fetchSupportTickets(token)
+            .then((res) => {
+                const tickets = res?.userRequest || [];
+                const count = tickets.filter((t) => {
+                    const s = String(t.status || '').toLowerCase();
+                    return !['closed', 'solved', 'resolved'].includes(s);
+                }).length;
+                setPendingTicketsCount(count);
+            })
+            .catch(() => setPendingTicketsCount(0));
+    }, [token]);
 
     const isActive = (item) => {
         if (item.exact) return pathname === item.href;
@@ -75,6 +92,17 @@ export function AccountSidebar({ onNavigate }) {
                             >
                                 <Icon className="w-4 h-4 shrink-0" />
                                 <span className="flex-1">{item.label}</span>
+                                {item.href === '/account/support' && pendingTicketsCount > 0 && (
+                                    <span
+                                        className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                            active
+                                                ? 'bg-white text-[#037166]'
+                                                : 'bg-amber-100 text-amber-800 border border-amber-200'
+                                        }`}
+                                    >
+                                        {pendingTicketsCount}
+                                    </span>
+                                )}
                                 {active && <ChevronRight className="w-4 h-4 opacity-70" />}
                             </Link>
                         );

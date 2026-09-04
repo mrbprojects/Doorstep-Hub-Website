@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle, Shield, Home, Briefcase } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle, Shield, Home, Briefcase, ShieldCheck, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
@@ -13,6 +14,35 @@ import { inferVertical, trackBookingCompleted, trackPaymentStarted } from '@/lib
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
 
+function normalizeCityString(cityName) {
+  if (!cityName) return '';
+  const str = typeof cityName === 'object' ? (cityName?.name || '') : String(cityName);
+  return str
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
+
+function areCitiesMatching(cityA, cityB) {
+  const normA = normalizeCityString(cityA);
+  const normB = normalizeCityString(cityB);
+
+  if (!normA || !normB) return true;
+  if (normA === normB) return true;
+
+  const hyderabadGroup = ['hyderabad', 'secunderabad', 'cyberabad'];
+  if (hyderabadGroup.includes(normA) && hyderabadGroup.includes(normB)) {
+    return true;
+  }
+
+  if (normA.includes(normB) || normB.includes(normA)) {
+    return true;
+  }
+
+  return false;
+}
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   'https://devapis.doorstephub.com/v1/dhubApi';
@@ -22,6 +52,7 @@ export function BookingConfirmationPage({
   onBack,
   onConfirmBooking,
 }) {
+  const router = useRouter();
   const { user, token, isAuthenticated } = useAuth();
   const { cartItems: contextCartItems, cartData, clearCart } = useServiceCart();
   const contextCartTotal = cartData?.finalAmount || 0;
@@ -35,6 +66,7 @@ export function BookingConfirmationPage({
   const [walletLoading, setWalletLoading] = useState(false);
   const [directBookingItems, setDirectBookingItems] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+  const [locationMismatch, setLocationMismatch] = useState(null);
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
@@ -329,6 +361,25 @@ export function BookingConfirmationPage({
         selectedServiceRates: selectedServiceRates
       };
 
+      // Preflight validation: Verify customer address city matches provider location if provider is specified
+      const providerCity = cartData?.provider?.cityName || cartItems?.[0]?.providerCity || cartItems?.[0]?.cityName || null;
+      const userCity = address?.cityName ? (typeof address.cityName === 'object' ? address.cityName?.name : address.cityName) : null;
+      if (providerCity && userCity && !areCitiesMatching(userCity, providerCity)) {
+        const providerName = cartData?.provider?.businessName ||
+          cartData?.provider?.name ||
+          cartItems?.[0]?.providerName ||
+          'Selected Service Provider';
+        setLocationMismatch({
+          userCity: String(userCity),
+          providerCity: String(providerCity),
+          providerName
+        });
+        setIsConfirming(false);
+        setIsProcessing(false);
+        processingRef.current = false;
+        return;
+      }
+
       // Save address to sessionStorage for Thank You page redirect/persistence
       sessionStorage.setItem('selected_address', JSON.stringify(address));
 
@@ -367,6 +418,14 @@ export function BookingConfirmationPage({
             bookedTime: selectedTimeLabel,
           });
         } else {
+          if (data.code === 'LOCATION_MISMATCH') {
+            setLocationMismatch({
+              userCity: data.userCity || (typeof address?.cityName === 'object' ? address.cityName?.name : address?.cityName) || 'Your Location',
+              providerCity: data.providerCity || 'Provider Location',
+              providerName: data.providerName || 'Selected Service Provider'
+            });
+            return;
+          }
           throw new Error(data.message || 'AMC booking failed');
         }
       } else if (paymentMethod === 'COD' || paymentMethod === 'wallet') {
@@ -398,6 +457,14 @@ export function BookingConfirmationPage({
             bookedTime: selectedTimeLabel
           });
         } else {
+          if (data.code === 'LOCATION_MISMATCH') {
+            setLocationMismatch({
+              userCity: data.userCity || (typeof address?.cityName === 'object' ? address.cityName?.name : address?.cityName) || 'Your Location',
+              providerCity: data.providerCity || 'Provider Location',
+              providerName: data.providerName || 'Selected Service Provider'
+            });
+            return;
+          }
           // Handle wallet specific error if present in response
           if (paymentMethod === 'wallet' && data.required !== undefined) {
             const available = data.available || 0;
@@ -447,6 +514,14 @@ export function BookingConfirmationPage({
           // Redirect — cleanup will happen on return when ?status=success is detected
           window.location.href = easebuzzUrl;
         } else {
+          if (data.code === 'LOCATION_MISMATCH') {
+            setLocationMismatch({
+              userCity: data.userCity || (typeof address?.cityName === 'object' ? address.cityName?.name : address?.cityName) || 'Your Location',
+              providerCity: data.providerCity || 'Provider Location',
+              providerName: data.providerName || 'Selected Service Provider'
+            });
+            return;
+          }
           throw new Error(data.message || 'Failed to initiate online payment');
         }
       }
@@ -476,157 +551,234 @@ export function BookingConfirmationPage({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-20 pb-32"
+      className="min-h-screen bg-[#f8fafc] pt-16 sm:pt-20 pb-16"
     >
-      {/* Header */}
-      <section className=" top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-lg">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={onBack}
-            className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Address
-          </motion.button>
+      {/* Sleek Compact Header */}
+      <section className="sticky top-16 sm:top-20 z-40 bg-gradient-to-r from-[#025a51] via-[#037166] to-[#04a99d] border-b border-white/10 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+            <div className="flex items-center gap-2.5">
+              <motion.button
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                onClick={onBack}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white transition-all text-xs font-semibold flex-shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back</span>
+              </motion.button>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-300 flex-shrink-0" />
+                  <span>Confirm Your Booking</span>
+                </h1>
+                <p className="text-white/80 text-[11px] hidden sm:block">
+                  Select your preferred date, time slot & payment method
+                </p>
+              </div>
+            </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3"
-          >
-            <Sparkles className="w-8 h-8 text-white" />
-            <span className="!text-white">Confirm Your Booking</span>
-          </motion.h1>
-        </div>
-
-        {/* Progress Indicator */}
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-6">
-          <BookingSteps
-            flowType={directBookingItems ? FLOW_TYPES.NORMAL : FLOW_TYPES.SERVICE_CENTER}
-            currentStep="confirm"
-            serviceSlug="appliances"
-          />
+            {/* Progress Stepper */}
+            <div className="scale-90 sm:scale-95 origin-left md:origin-right py-1">
+              <BookingSteps
+                flowType={directBookingItems ? FLOW_TYPES.NORMAL : FLOW_TYPES.SERVICE_CENTER}
+                currentStep="confirm"
+                serviceSlug="appliances"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
-      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Date Selection */}
+      {/* Main Content Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+        <div className="grid lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+          {/* Left Column: Form Cards */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-4">
+            {/* 1. Schedule Service (Date & Time unified) */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+              className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
             >
-              <h4 className="text-3xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[#04a99d]" />
-                Select Date
-              </h4>
-              {availableDates.length === 0 ? (
-                <p className="text-gray-500 text-sm">No dates available at this time</p>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {availableDates.map((date) => (
-                    <button
-                      key={date.value}
-                      onClick={() => setSelectedDate(date.value)}
-                      className={`p-4 rounded-xl font-medium transition-all ${selectedDate === date.value
-                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-[#123F4A]'
-                        }`}
-                    >
-                      {date.label}
-                    </button>
-                  ))}
+              <div className="flex items-center justify-between mb-3.5 pb-2.5 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-[#037166] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    1
+                  </span>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-[#037166]" />
+                      <span>Schedule Service</span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500">Pick preferred appointment date and time</p>
+                  </div>
                 </div>
-              )}
-            </motion.div>
+                {selectedDate && selectedTime && (
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                    <Check className="w-3.5 h-3.5" /> Slot Picked
+                  </span>
+                )}
+              </div>
 
-            {/* Time Selection */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
-            >
-              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-[#04a99d]" />
-                Select Time Slot
-              </h4>
-              {availableTimesForSelectedDate.length === 0 ? (
-                <p className="text-gray-500 text-sm">
-                  {selectedDate
-                    ? 'No time slots available for selected date'
-                    : 'Please select a date first'
-                  }
-                </p>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-3">
-                  {availableTimesForSelectedDate.map((time) => (
-                    <button
-                      key={time.value}
-                      onClick={() => setSelectedTime(time.value)}
-                      className={`p-4 rounded-xl font-medium transition-all ${selectedTime === time.value
-                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
-                        : 'bg-white text-[#334155] hover:bg-gray-50 border border-[#123F4A]'
-                        }`}
-                    >
-                      {time.label}
-                    </button>
-                  ))}
+              {/* Date Selection */}
+              <div className="mb-4">
+                <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+                  Choose Date
+                </label>
+                {availableDates.length === 0 ? (
+                  <p className="text-gray-500 text-xs">No dates available at this time</p>
+                ) : (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                    {availableDates.map((date) => {
+                      const isSelected = selectedDate === date.value;
+                      return (
+                        <button
+                          key={date.value}
+                          type="button"
+                          onClick={() => setSelectedDate(date.value)}
+                          className={`px-2 py-2 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border ${
+                            isSelected
+                              ? 'bg-gradient-to-br from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
+                              : 'bg-gray-50 hover:bg-white text-gray-700 hover:text-gray-900 border-gray-200 hover:border-[#037166]/50'
+                          }`}
+                        >
+                          <span className={`text-[11px] font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                            {date.label.split(' ')[0]}
+                          </span>
+                          <span className={`text-[10px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                            {date.label.split(' ').slice(1).join(' ') || date.value.slice(5)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Time Slot Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    Choose Time Slot
+                  </label>
+                  {selectedTime && (
+                    <span className="text-[11px] text-[#037166] font-semibold">
+                      2-Hour Arrival Window
+                    </span>
+                  )}
                 </div>
-              )}
-            </motion.div>
 
-            {/* Technician Preference */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
-            >
-              <h4 className="text-2xl font-bold text-[#0f172a] mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-[#04a99d]" />
-                Technician Preference (Optional)
-              </h4>
-              <div className="grid md:grid-cols-3 gap-3">
-                {[
-                  { value: 'any', label: 'Any Available' },
-                  { value: 'senior', label: 'Senior Technician' },
-                  { value: 'same', label: 'Same as Last Time' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setTechnicianPreference(option.value)}
-                    className={`p-4 rounded-xl font-medium transition-all ${technicianPreference === option.value
-                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white'
-                      : 'bg-white text-[#334155] hover:bg-gray-50 border border-[#123F4A]'
-                      }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                {availableTimesForSelectedDate.length === 0 ? (
+                  <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 text-center text-xs text-gray-500">
+                    {selectedDate ? 'No time slots available for this date. Please pick another date.' : 'Please select a date above to view available time slots'}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {availableTimesForSelectedDate.map((time) => {
+                      const isSelected = selectedTime === time.value;
+                      return (
+                        <button
+                          key={time.value}
+                          type="button"
+                          onClick={() => setSelectedTime(time.value)}
+                          className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
+                              : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#037166]/50'
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#037166]'}`} />
+                            {time.label}
+                          </span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white flex-shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </motion.div>
 
+            {/* 2. Technician Preference (Optional) */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+              transition={{ delay: 0.1 }}
+              className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
             >
-              <h4 className="text-2xl font-bold text-[#0f172a] mb-1 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-[#04a99d]" />
-                Payment Method
-              </h4>
-              <p className="text-xs text-gray-500 mb-4">Select your preferred payment method</p>
+              <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-gray-100">
+                <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  2
+                </span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                    <User className="w-4 h-4 text-[#037166]" />
+                    <span>Technician Preference</span>
+                    <span className="text-[11px] font-normal text-gray-400">(Optional)</span>
+                  </h3>
+                  <p className="text-[11px] text-gray-500">Choose who performs your appliance service</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {[
+                  { value: 'any', label: 'Any Available', sub: 'Fastest dispatch (Recommended)' },
+                  { value: 'senior', label: 'Senior Technician', sub: '5+ yrs verified experience' },
+                  { value: 'same', label: 'Same as Last Time', sub: 'Preferred technician' },
+                ].map((option) => {
+                  const isSelected = technicianPreference === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setTechnicianPreference(option.value)}
+                      className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                        isSelected
+                          ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                          : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold">{option.label}</span>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-gray-500 mt-1">{option.sub}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* 3. Payment Method */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
+            >
+              <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    3
+                  </span>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-[#037166]" />
+                      <span>Select Payment Method</span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500">Pay platform booking fee securely</p>
+                  </div>
+                </div>
+                <span className="text-[11px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> 100% Safe
+                </span>
+              </div>
 
               {(amcApplicable || amcEligibility?.limitExhausted) && (
-                <div className="mb-4">
+                <div className="mb-3">
                   <AmcCoverageBanner
                     eligibility={amcEligibility}
                     compact
@@ -635,286 +787,496 @@ export function BookingConfirmationPage({
                 </div>
               )}
 
-              <div className="grid gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* AMC Cover Card */}
                 {amcApplicable && (
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('amc')}
-                    className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'amc'
-                      ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                      : 'bg-white text-[#334155] border-[#123F4A] hover:bg-gray-50'
-                      }`}
+                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between col-span-full ${
+                      paymentMethod === 'amc'
+                        ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                    }`}
                   >
-                    <Shield className={`w-6 h-6 ${paymentMethod === 'amc' ? 'text-white' : 'text-[#037166]'}`} />
-                    <div className="text-left flex-1">
-                      <p className={`font-semibold ${paymentMethod === 'amc' ? '!text-white' : 'text-[#334155]'}`}>
-                        Use AMC cover
-                      </p>
-                      <p className={`text-xs ${paymentMethod === 'amc' ? '!text-white/90' : 'text-gray-500'}`}>
-                        {amcEligibility?.benefitTitle
-                          ? `${amcEligibility.benefitTitle} · ₹0 · no payment gateway`
-                          : '₹0 booking fee · confirmed without payment gateway'}
-                      </p>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentMethod === 'amc' ? 'bg-[#037166] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                          <Shield className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-bold text-gray-900">Use AMC Cover</h4>
+                          <span className="text-[10px] text-emerald-600 font-semibold">
+                            {amcEligibility?.benefitTitle
+                              ? `${amcEligibility.benefitTitle} • ₹0 • No Gateway`
+                              : '₹0 booking fee • Instant Confirmation'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'amc' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                        {paymentMethod === 'amc' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </div>
                     </div>
-                    {paymentMethod === 'amc' && <CheckCircle className="w-5 h-5 ml-auto" />}
                   </button>
                 )}
 
-                {/* Online Payment */}
+                {/* Online Payment Card */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('online')}
-                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'online'
-                    ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                    : 'bg-white text-[#334155] border-[#123F4A] hover:bg-gray-50'
-                    }`}
+                  className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                    paymentMethod === 'online'
+                      ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                      : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                  }`}
                 >
-                  <CreditCard className={`w-6 h-6 ${paymentMethod === 'online' ? 'text-white' : 'text-[#037166]'}`} />
-                  <div className="text-left flex-1">
-                    <p className={`font-semibold ${paymentMethod === 'online' ? '!text-white' : 'text-[#334155]'}`}>Online Payment</p>
-                    <p className={`text-xs ${paymentMethod === 'online' ? '!text-white/90' : 'text-gray-500'}`}>
-                      Secure payment via UPI, Cards, or Net Banking
-                    </p>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentMethod === 'online' ? 'bg-[#037166] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                        <CreditCard className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-gray-900">Online Payment</h4>
+                        <span className="text-[10px] text-emerald-600 font-semibold">Recommended • Instant Confirmation</span>
+                      </div>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'online' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                      {paymentMethod === 'online' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </div>
                   </div>
-                  {paymentMethod === 'online' && <CheckCircle className="w-5 h-5 ml-auto" />}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-gray-100 text-[10px] text-gray-500">
+                    <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">UPI</span>
+                    <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">PhonePe</span>
+                    <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">GPay</span>
+                    <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">Cards</span>
+                    <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">NetBanking</span>
+                  </div>
                 </button>
 
-                {/* Wallet Payment */}
+                {/* Wallet Pay Card */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('wallet')}
-                  className={`p-4 rounded-xl border transition-all flex items-center gap-4 ${paymentMethod === 'wallet'
-                    ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-transparent'
-                    : 'bg-white text-[#334155] border-[#123F4A] hover:bg-gray-50'
-                    }`}
+                  className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                    paymentMethod === 'wallet'
+                      ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                      : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                  }`}
                 >
-                  <div className="w-6 h-6 flex items-center justify-center">
-                    <Wallet className={`w-6 h-6 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#04a99d]'}`} />
-                  </div>
-                  <div className="text-left flex-1">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className={`font-semibold ${paymentMethod === 'wallet' ? '!text-white' : 'text-[#334155]'}`}>Doorstep Hub Wallet</p>
-                      {!walletLoading && (
-                        <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] ${paymentMethod === 'wallet' ? 'text-white/90' : 'text-gray-500'}`}>Available Balance:</span>
-                          <span className={`text-sm font-black tracking-tight px-2.5 py-0.5 rounded-md border shadow-sm ${paymentMethod === 'wallet'
-                            ? 'bg-white/20 border-white/30 text-white shadow-black/20'
-                            : 'bg-[#ecf7f5] border-[#a8d8d0] text-[#037166] shadow-black/5'
-                            }`}>
-                            ₹{Number(walletBalance || 0).toFixed(2)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <p className={`text-xs ${paymentMethod === 'wallet' ? '!text-white/90' : 'text-gray-500'}`}>
-                      Pay using your Doorstep Hub wallet balance
-                    </p>
-                    {/* Referral Information Section */}
-                    <div className={`mt-4 p-3 rounded-xl flex gap-3 transition-all ${paymentMethod === 'wallet'
-                      ? 'bg-white/10 border border-white/20'
-                      : 'bg-[#f1faf8] border border-[#cde9e4]'
-                      }`}>
-                      <div className={`p-1.5 rounded-lg h-fit ${paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/10'
-                        }`}>
-                        <Info className={`w-4 h-4 ${paymentMethod === 'wallet' ? 'text-white' : 'text-[#037166]'
-                          }`} />
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentMethod === 'wallet' ? 'bg-[#037166] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                        <Wallet className="w-4 h-4" />
                       </div>
-                      <p className={`text-[11px] leading-relaxed ${paymentMethod === 'wallet' ? '!text-white/90' : 'text-[#037166]'
-                        }`}>
-                        Refer your friends and family members and earn cashback up to <span className="font-bold">₹99</span>. The amount will be credited to your Doorstep Hub Wallet after a successful booking.
-                      </p>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-gray-900">DH Wallet</h4>
+                        <span className="text-[10px] text-gray-500">
+                          Available: <strong className="text-gray-900 font-bold">₹{Number(walletBalance || 0).toFixed(2)}</strong>
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'wallet' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                      {paymentMethod === 'wallet' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                     </div>
                   </div>
-                  {paymentMethod === 'wallet' && <CheckCircle className="w-5 h-5 ml-auto" />}
+                  <p className="text-[10px] text-gray-400 italic pt-2 border-t border-gray-100">
+                    Pay directly using Doorstep Hub wallet balance
+                  </p>
                 </button>
               </div>
+
+              {/* Active Wallet Details Box */}
+              {paymentMethod === 'wallet' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-3 p-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[9px] uppercase tracking-wider text-emerald-200 font-bold">D-Hub Active Wallet</span>
+                      <p className="text-xl !text-white font-extrabold mt-0.5">₹{Number(walletBalance || 0).toFixed(2)}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-mono tracking-widest text-emerald-100">
+                        {walletData?.walletId ? `**** ${walletData.walletId.split('-').pop()}` : 'DH PAY'}
+                      </span>
+                      <span className="block text-[9px] text-emerald-200/80">Account Active</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center gap-2 text-[11px] text-emerald-100">
+                    <Info className="w-3.5 h-3.5 text-emerald-200 flex-shrink-0" />
+                    <span>Refer friends & family and earn cashback up to ₹99 credited after booking.</span>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
 
-            {/* Service Address */}
+            {/* 4. Service Address */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+              transition={{ delay: 0.2 }}
+              className="rounded-2xl bg-white border border-gray-200/90 shadow-xs p-4 sm:p-5"
             >
-              <h4 className="text-base sm:text-lg font-bold text-[#0f172a] mb-3.5 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#04a99d]" />
-                Service Address
-              </h4>
+              <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    4
+                  </span>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-[#037166]" />
+                      <span>Service Address</span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500">Technician will visit this location</p>
+                  </div>
+                </div>
+                {onBack && (
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="text-xs font-bold text-[#037166] hover:text-[#025a51] hover:underline transition-colors"
+                  >
+                    Change Address
+                  </button>
+                )}
+              </div>
+
               {(() => {
                 if (!address) {
                   return (
-                    <div className="p-4 rounded-xl bg-gray-50 border border-dashed border-gray-300 text-center">
-                      <p className="text-xs text-gray-500">No address selected</p>
+                    <div className="p-3.5 rounded-xl bg-gray-50 border border-dashed border-gray-300 text-center">
+                      <p className="text-xs text-gray-500 mb-2">No service address selected</p>
+                      {onBack && (
+                        <button
+                          type="button"
+                          onClick={onBack}
+                          className="px-3 py-1.5 rounded-lg bg-[#037166] text-white text-xs font-semibold hover:bg-[#025a51] transition-all"
+                        >
+                          Select Address
+                        </button>
+                      )}
                     </div>
                   );
                 }
+
                 const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' || String(v).trim().toUpperCase() === 'UNDEFINED' || String(v).trim().toUpperCase() === 'NULL' ? null : String(v).trim());
-                const streetParts = [clean(address.flat), clean(address.area), clean(address.addressLineOne), clean(address.addressLineTwo)].filter(Boolean);
+
+                const streetParts = [
+                  clean(address.flat),
+                  clean(address.area),
+                  clean(address.addressLineOne),
+                  clean(address.addressLineTwo),
+                ].filter(Boolean);
+
                 const seen = new Set();
-                const uniqueStreet = streetParts.filter(s => { const k = s.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
-                const regionParts = [clean(address.cityName || address.city), clean(address.stateName || address.state), clean(address.postalCode || address.pincode)].filter(Boolean);
+                const uniqueStreet = streetParts.filter(s => {
+                  const k = s.toLowerCase();
+                  if (seen.has(k)) return false;
+                  seen.add(k);
+                  return true;
+                });
+
+                const regionParts = [
+                  clean(address.cityName || address.city),
+                  clean(address.stateName || address.state),
+                  clean(address.postalCode || address.pincode),
+                ].filter(Boolean);
+
                 const addrType = clean(address.type)?.toLowerCase();
+
                 return (
-                  <div className="p-4 rounded-xl bg-[#f8fafc] border border-gray-200/80">
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <div className="flex items-center gap-1.5 font-bold text-[#0f172a] text-sm sm:text-base">
-                        {addrType === 'home' ? <Home className="w-4 h-4 text-[#037166]" /> : addrType === 'office' ? <Briefcase className="w-4 h-4 text-[#037166]" /> : <MapPin className="w-4 h-4 text-[#037166]" />}
+                  <div className="p-3.5 rounded-xl bg-[#f8fafc] border border-gray-200/80">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <div className="flex items-center gap-1.5 font-bold text-[#0f172a] text-sm">
+                        {addrType === 'home' ? (
+                          <Home className="w-3.5 h-3.5 text-[#037166]" />
+                        ) : addrType === 'office' ? (
+                          <Briefcase className="w-3.5 h-3.5 text-[#037166]" />
+                        ) : (
+                          <MapPin className="w-3.5 h-3.5 text-[#037166]" />
+                        )}
                         <span>{clean(address.name) || clean(address.userName) || 'Customer'}</span>
                       </div>
-                      {clean(address.type) && <span className="px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] text-[10px] font-bold uppercase tracking-wider">{clean(address.type)}</span>}
-                      {address.defaultAddress && <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 text-[10px] font-bold uppercase tracking-wider">DEFAULT</span>}
+                      {clean(address.type) && (
+                        <span className="px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] text-[10px] font-bold uppercase tracking-wider">
+                          {clean(address.type)}
+                        </span>
+                      )}
+                      {address.defaultAddress && (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 text-[10px] font-bold uppercase tracking-wider">
+                          DEFAULT
+                        </span>
+                      )}
                     </div>
-                    {clean(address.phone) && <p className="text-xs font-medium text-gray-600 mb-1.5">Phone: <span className="font-semibold text-gray-900">{clean(address.phone)}</span></p>}
-                    {uniqueStreet.length > 0 ? <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{uniqueStreet.join(', ')}</p> : clean(address.address) ? <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{clean(address.address)}</p> : null}
-                    {regionParts.length > 0 && <p className="text-xs font-medium text-gray-500 mt-1">{regionParts.join(', ')}</p>}
+
+                    {clean(address.phone) && (
+                      <p className="text-xs font-medium text-gray-600 mb-1">
+                        Phone: <span className="font-semibold text-gray-900">{clean(address.phone)}</span>
+                      </p>
+                    )}
+
+                    {uniqueStreet.length > 0 ? (
+                      <p className="text-xs text-gray-700 leading-relaxed font-normal">
+                        {uniqueStreet.join(', ')}
+                      </p>
+                    ) : clean(address.address) ? (
+                      <p className="text-xs text-gray-700 leading-relaxed font-normal">
+                        {clean(address.address)}
+                      </p>
+                    ) : null}
+
+                    {regionParts.length > 0 && (
+                      <p className="text-xs font-medium text-gray-500 mt-0.5">
+                        {regionParts.join(', ')}
+                      </p>
+                    )}
                   </div>
                 );
               })()}
             </motion.div>
           </div>
 
-          {/* Summary Sidebar */}
-          <div className="lg:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="sticky top-40 p-5 sm:p-6 rounded-2xl bg-white border border-[#123F4A] shadow-sm"
-            >
-              <h4 className="text-2xl font-bold text-[#0f172a] mb-4">Booking Summary</h4>
+          {/* Right Column: Booking Summary Sidebar */}
+          <div className="lg:col-span-5 xl:col-span-4">
+            <div className="sticky top-28 space-y-3.5">
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="rounded-2xl bg-white border border-gray-200/90 shadow-sm p-4 sm:p-5"
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                  <h3 className="text-base font-bold text-gray-900">Booking Summary</h3>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                    {cartItems.length} {cartItems.length === 1 ? 'service' : 'services'}
+                  </span>
+                </div>
 
-              {/* Selected Services Info - No Prices Shown */}
-              <div className="space-y-4 mb-6">
-                {cartItems.map((item, idx) => (
-                  <div key={item.id || item._id || idx} className="p-3 rounded-xl bg-[#f8fcfb] border border-[#123F4A]">
-                    <h6 className="text-[#0f172a] font-bold leading-tight mb-1">{item.serviceName || 'Professional Service'}</h6>
-                    <div className="flex flex-col gap-1">
-                      <p className="text-[#04a99d] text-[10px] font-bold uppercase tracking-widest bg-[#037166]/10 px-2 py-0.5 rounded w-fit">
-                        {item.packageName || item.title || 'Standard Package'}
-                      </p>
-                      <p className="text-gray-500 text-[10px] flex items-center gap-1 mt-1">
-                        <Info className="w-3 h-3" />
-                        Rates checked: approx. start from ₹{item.price}
-                      </p>
+                {/* Items list */}
+                <div className="divide-y divide-gray-100 max-h-56 overflow-y-auto pr-1 my-1.5">
+                  {cartItems.map((item, idx) => (
+                    <div key={item.id || item._id || idx} className="py-2.5 flex items-start justify-between gap-3 text-xs">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-gray-900 truncate leading-snug">{item.serviceName || item.packageName || item.title || 'Professional Service'}</h4>
+                        {(item.packageName || item.title) && (
+                          <span className="inline-block text-[10px] text-[#037166] font-semibold uppercase tracking-wider mt-0.5">
+                            {item.packageName || item.title}
+                          </span>
+                        )}
+                        {item.price && (
+                          <p className="text-gray-400 text-[10px] flex items-center gap-1 mt-1">
+                            <Info className="w-3 h-3 text-gray-400" />
+                            Rates approx. from ₹{item.price}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="h-px bg-gray-200 my-4" />
-
-              {/* Fees Breakdown */}
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-start text-[#334155] text-sm">
-                  <div className="flex flex-col">
-                    <span>Platform Fee</span>
-                    <span className="text-[#123F4A] text-[14px] font-medium flex items-center gap-1">
-                      <CreditCard className="w-3 h-3" />
-                      {amcApplies ? 'covered by AMC' : 'Pay Online Now'}
-                    </span>
-                  </div>
-                  <span className="font-bold text-[#0f172a]">
-                    {amcApplies ? (
-                      <>
-                        <span className="line-through text-gray-400 font-medium mr-1">₹{rawBookingCost}</span>
-                        ₹0
-                      </>
-                    ) : (
-                      <>₹{bookingCost}</>
-                    )}
-                  </span>
+                  ))}
                 </div>
 
-                <div className="flex justify-between items-start text-[#334155] text-sm">
-                  <div className="flex flex-col">
-                    <span>Inspection Fee</span>
-                    <span className="text-[#123F4A] text-[14px] font-medium flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {amcApplies ? 'covered by AMC' : 'Pay At Doorstep'}
+                {/* Pricing Breakdown */}
+                <div className="pt-3 border-t border-gray-100 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-gray-600">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-700">Platform Fee</span>
+                      <span className="text-[10px] text-gray-400">
+                        {amcApplies ? 'Covered by AMC' : 'Pay Online Now'}
+                      </span>
+                    </div>
+                    <span className="font-semibold text-gray-900">
+                      {amcApplies ? (
+                        <>
+                          <span className="line-through text-gray-400 font-medium mr-1">₹{rawBookingCost}</span>
+                          <span className="text-emerald-700">₹0</span>
+                        </>
+                      ) : (
+                        `₹${bookingCost}`
+                      )}
                     </span>
                   </div>
-                  <span className="font-bold text-[#0f172a]">
+
+                  <div className="flex justify-between items-center text-gray-600">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-700">Doorstep Inspection Fee</span>
+                      <span className="text-[10px] text-emerald-600 font-semibold">
+                        {amcApplies ? 'Covered by AMC' : 'Pay at doorstep to technician'}
+                      </span>
+                    </div>
+                    <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      {amcApplies ? (
+                        <>
+                          <span className="line-through text-gray-400 font-medium mr-1">₹{inspectionCost}</span>
+                          <span>₹0</span>
+                        </>
+                      ) : (
+                        `₹${inspectionCost}`
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#f1faf8] border border-[#cde9e4] text-[10px] text-[#475569] leading-relaxed">
                     {amcApplies ? (
-                      <>
-                        <span className="line-through text-gray-400 font-medium mr-1">₹{inspectionCost}</span>
-                        ₹0
-                      </>
+                      <p>
+                        AMC cover selected — booking fee is ₹0 (no payment gateway). Spare parts may be extra as per plan terms.
+                      </p>
+                    ) : amcApplicable ? (
+                      <p>
+                        AMC is available for this service. Choose <span className="text-[#037166] font-bold">Use AMC cover</span> for ₹0, or pay normally.
+                      </p>
                     ) : (
-                      <>₹{inspectionCost}</>
+                      <p>
+                        Only the <span className="text-[#037166] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.
+                      </p>
                     )}
-                  </span>
+                  </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#f1faf8] border border-[#cde9e4] text-[10px] text-[#475569] leading-relaxed">
-                  {amcApplies ? (
-                    <p>
-                      AMC cover selected — booking fee is ₹0 (no payment gateway). Spare parts may be extra as per plan terms.
-                    </p>
-                  ) : amcApplicable ? (
-                    <p>
-                      AMC is available for this service. Choose <span className="text-[#04a99d] font-bold">Use AMC cover</span> for ₹0, or pay normally.
-                    </p>
-                  ) : (
-                    <p>
-                      Only the <span className="text-[#04a99d] font-bold">Platform Fee</span> is charged now to confirm your booking. Final service charges will be shared after on-site inspection.
+                {/* Total Payable Now */}
+                <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-200">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Payable Now Online</span>
+                      <h3 className="text-2xl font-black text-gray-900 leading-tight">₹{total}</h3>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">
+                      {amcApplies ? 'Covered by AMC' : 'All Inclusive'}
+                    </span>
+                  </div>
+                  {!amcApplies && (
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      *Inspection fee of ₹{inspectionCost} will be collected after on-site inspection.
                     </p>
                   )}
                 </div>
-              </div>
 
-              <div className="h-px bg-gray-200 my-4" />
-
-              {/* Total Payable (Only Platform Fee) */}
-              <div className="flex justify-between items-center text-xl font-bold text-[#0f172a] mb-6">
-                <span>Payable Now</span>
-                <span className="text-[#04a99d]">₹{total}</span>
-              </div>
-
-              {/* Appointment Preview */}
-              {selectedDate && selectedTime && (
-                <div className="p-4 rounded-xl bg-[#f8fcfb] border border-[#d8ece8] mb-6">
-                  <div className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <Clock className="w-3 h-3" /> Scheduled
+                {/* Scheduled Slot Chip */}
+                {selectedDate && selectedTime && (
+                  <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 font-semibold">
+                      <Calendar className="w-3.5 h-3.5 text-emerald-700" />
+                      {availableDates.find(d => d.value === selectedDate)?.label} • {availableTimesForSelectedDate.find(t => t.value === selectedTime)?.label}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase bg-emerald-200/60 px-1.5 py-0.5 rounded text-emerald-800">Selected</span>
                   </div>
-                  <p className="text-[#0f172a] font-bold text-sm">
-                    {availableDates.find(d => d.value === selectedDate)?.label}
-                  </p>
-                  <p className="text-[#04a99d] text-xs font-medium">
-                    {availableTimesForSelectedDate.find(t => t.value === selectedTime)?.label}
-                  </p>
-                </div>
-              )}
-
-              {/* Confirm Button */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleConfirm}
-                disabled={isConfirming || !selectedDate || !selectedTime}
-                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all ${isConfirming || !selectedDate || !selectedTime
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#e89117] to-[#00796B] text-white shadow-xl shadow-[#037166]/30'
-                  }`}
-              >
-                {isConfirming ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Confirming...
-                  </div>
-                ) : amcApplies ? (
-                  'Confirm AMC booking (no payment)'
-                ) : (
-                  'Confirm Booking'
                 )}
-              </motion.button>
 
-              <p className="text-gray-500 text-[10px] text-center mt-4">
-                Confirmation details will be sent via SMS/Email
-              </p>
-            </motion.div>
+                {/* Primary Action Button */}
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={handleConfirm}
+                    disabled={isConfirming || !selectedDate || !selectedTime}
+                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${
+                      isConfirming || !selectedDate || !selectedTime
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#025a51] hover:to-[#038e83] text-white hover:shadow-md hover:shadow-[#037166]/20 active:scale-[0.99]'
+                    }`}
+                  >
+                    {isConfirming ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Confirming Booking...</span>
+                      </>
+                    ) : !selectedDate || !selectedTime ? (
+                      <span>Select Date & Time Slot Above</span>
+                    ) : amcApplies ? (
+                      <>
+                        <span>Confirm AMC Booking (₹0)</span>
+                        <ArrowLeft className="w-4 h-4 rotate-180" />
+                      </>
+                    ) : (
+                      <>
+                        <span>Confirm & Pay ₹{total}</span>
+                        <ArrowLeft className="w-4 h-4 rotate-180" />
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <p className="text-[#6b7280] text-[10px] text-center mt-3">
+                  By booking, you agree to our Terms & Cancellation Policy.
+                </p>
+
+                {/* Trust and Policy micro-strip */}
+                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-center gap-3 text-[10px] text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Safe Checkout</span>
+                  </span>
+                  <span>•</span>
+                  <span>Verified Pros</span>
+                  <span>•</span>
+                  <span>RBI Compliant</span>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Location Mismatch Alert Modal */}
+      <AnimatePresence>
+        {locationMismatch && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-amber-200 relative overflow-hidden"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 border border-amber-200">
+                <MapPin className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-xl font-extrabold text-gray-900 mb-2">Location Mismatch</h3>
+
+              <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 mb-4 space-y-2 text-xs">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-500 font-semibold">Your Service Address:</span>
+                  <span className="font-bold text-gray-900 text-right">{locationMismatch.userCity}</span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-500 font-semibold">Selected Provider:</span>
+                  <span className="font-bold text-amber-800 text-right">
+                    {locationMismatch.providerName} ({locationMismatch.providerCity})
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                Your service address is in <strong className="text-gray-900">{locationMismatch.userCity}</strong>, but the selected provider is located in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>. This provider is unable to provide service at your location.
+                <br /><br />
+                Kindly select a provider at your location, or choose an address in <strong className="text-gray-900">{locationMismatch.providerCity}</strong>.
+              </p>
+
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocationMismatch(null);
+                    router.push('/appliances');
+                  }}
+                  className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#037166] to-[#04a99d] hover:brightness-105 transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  Select Provider in {locationMismatch.userCity}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocationMismatch(null);
+                    if (onBack) onBack();
+                  }}
+                  className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all text-center"
+                >
+                  Choose Another Address
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

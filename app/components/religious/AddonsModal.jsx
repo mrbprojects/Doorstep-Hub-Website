@@ -4,14 +4,19 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Plus, Check, Loader2, Sparkles, Flower2 } from 'lucide-react';
 
-export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, onContinue }) {
+export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, selectedPackageIds, onContinue }) {
     const [addons, setAddons] = useState([]);
     const [selectedAddons, setSelectedAddons] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const packageIds = Array.isArray(selectedPackageIds) && selectedPackageIds.length > 0
+        ? selectedPackageIds
+        : (selectedPackageId ? [selectedPackageId] : []);
+    const packageIdsKey = packageIds.join(',');
+
     useEffect(() => {
-        if (isOpen && providerId && selectedPackageId) {
+        if (isOpen && providerId && packageIds.length > 0) {
             fetchAddons();
         } else {
             // Reset state when closed
@@ -19,7 +24,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
             setSelectedAddons([]);
             setLoading(true);
         }
-    }, [isOpen, providerId, selectedPackageId]);
+    }, [isOpen, providerId, packageIdsKey]);
 
     const fetchAddons = async () => {
         setLoading(true);
@@ -29,7 +34,7 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    serviceIds: [selectedPackageId],
+                    serviceIds: packageIds,
                     professionalProviderId: providerId
                 })
             });

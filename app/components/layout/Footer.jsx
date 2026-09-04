@@ -309,7 +309,7 @@ export function Footer({ theme = {} }) {
     const slug = sub.slug || sub._id;
     const lowerService = serviceName.toLowerCase();
 
-    if (lowerService.includes('spa')) {
+    if (lowerService.includes('spa') || lowerService.includes('salon') || lowerService.includes('saloon') || lowerService.includes('unisex') || lowerService.includes('pet')) {
       return `/${serviceSlugs.spa}/${slug}`;
     }
     if (lowerService.includes('pg') || lowerService.includes('hostel')) {
@@ -326,7 +326,7 @@ export function Footer({ theme = {} }) {
     const slug = category.slug || category._id;
     const lowerService = serviceName.toLowerCase();
 
-    if (lowerService.includes('spa')) {
+    if (lowerService.includes('spa') || lowerService.includes('salon') || lowerService.includes('saloon') || lowerService.includes('unisex') || lowerService.includes('pet')) {
       return `/${serviceSlugs.spa}/${slug}`;
     }
     if (lowerService.includes('pg') || lowerService.includes('hostel')) {
@@ -340,7 +340,7 @@ export function Footer({ theme = {} }) {
 
   const getProfessionalServiceHomeLink = (serviceName) => {
     const lowerService = serviceName.toLowerCase();
-    if (lowerService.includes('spa')) return `/${serviceSlugs.spa}`;
+    if (lowerService.includes('spa') || lowerService.includes('salon') || lowerService.includes('saloon') || lowerService.includes('unisex') || lowerService.includes('pet')) return `/${serviceSlugs.spa}`;
     if (lowerService.includes('pg') || lowerService.includes('hostel')) return `/${serviceSlugs.pg}`;
     if (lowerService.includes('religious')) return `/${serviceSlugs.religious}`;
     return '#';
@@ -405,7 +405,7 @@ export function Footer({ theme = {} }) {
         {/* Dynamic Professional Services Sections - Shown based on homescreen setting */}
         {!isLoading && showHomeScreen && professionalServices.map((section, sIdx) => {
           const serviceName = section.service.name;
-          const displayTitle = serviceName.includes('Spa') ? 'Spa & Salon' :
+          const displayTitle = (serviceName.includes('Spa') || serviceName.includes('Salon') || serviceName.includes('Saloon') || serviceName.includes('Unisex')) ? 'Spa & Salon' :
             serviceName.includes('PG') ? 'PG & Hostels' :
               serviceName;
 

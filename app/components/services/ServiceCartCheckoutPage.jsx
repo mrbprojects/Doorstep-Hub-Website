@@ -30,6 +30,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const router = useRouter();
 
     const bookingCost = cartData?.finalAmount || 0;
+    const baseServiceCost = Number(cartData?.totalServiceCost ?? cartData?.finalAmount ?? 0);
     const inspectionCost = cartItems.reduce((acc, item) => acc + (item.inspectionCost || 0), 0);
 
     const [bookedDate, setBookedDate] = useState('');
@@ -38,6 +39,13 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [technicianPreference, setTechnicianPreference] = useState('any');
+    const [walletBalance, setWalletBalance] = useState(0);
+    const [walletLimits, setWalletLimits] = useState({
+        minWalletUsageOrderAmount: 0,
+        maxWalletUsageOrderAmount: 0,
+        minWalletUsageEnabled: false,
+        maxWalletUsageEnabled: false,
+    });
     const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
     const [fullAddress, setFullAddress] = useState(selectedAddress);
     const [locationMismatch, setLocationMismatch] = useState(null);
@@ -66,8 +74,39 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     }
                 })
                 .catch(() => {});
-        }
     }, [token, selectedAddress?._id, selectedAddress?.addressLineOne, selectedAddress?.phone]);
+
+    useEffect(() => {
+        if (!token) return;
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/wallet/balance`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.wallet) {
+                    setWalletBalance(data.wallet.currentBalance || 0);
+                    setWalletLimits({
+                        minWalletUsageOrderAmount: Number(data.minWalletUsageOrderAmount || 0),
+                        maxWalletUsageOrderAmount: Number(data.maxWalletUsageOrderAmount || 0),
+                        minWalletUsageEnabled: Boolean(data.minWalletUsageEnabled),
+                        maxWalletUsageEnabled: Boolean(data.maxWalletUsageEnabled),
+                    });
+                }
+            })
+            .catch(() => {});
+    }, [token]);
+
+    const getWalletUsageBlockedReason = (amount) => {
+        const min = walletLimits.minWalletUsageEnabled ? walletLimits.minWalletUsageOrderAmount : 0;
+        const max = walletLimits.maxWalletUsageEnabled ? walletLimits.maxWalletUsageOrderAmount : 0;
+        if (min > 0 && amount < min) {
+            return `To enable D-Hub Wallet, minimum service charge should be above ₹${min} as per admin settings.`;
+        }
+        if (max > 0 && amount > max) {
+            return `To enable D-Hub Wallet, service charge should be below ₹${max} as per admin settings.`;
+        }
+        return null;
+    };
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
@@ -208,9 +247,19 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             return;
         }
 
+        if (paymentMethod === 'WALLET') {
+            const blockedReason = getWalletUsageBlockedReason(baseServiceCost);
+            if (blockedReason) {
+                toast.error(blockedReason);
+                return;
+            }
+        }
+
         setLoading(true);
         try {
-            const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
+            const endpoint = paymentMethod === 'ONLINE'
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
+                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -224,8 +273,9 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     bookedTime,
                     paymentMethod,
                     sourceOfLead: 'website',
+                    returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
                     surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                    furl: `${window.location.protocol}//${window.location.host}/services/payment-failed`
+                    furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=cancelled`
                 })
             });
 
@@ -261,7 +311,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                         providerName: data.providerName || 'Selected Service Center'
                     });
                 } else {
-                    toast.error(data.message || 'Checkout failed');
+                    const detail = data.easebuzz?.error_desc || data.easebuzz?.data || data.error;
+                    toast.error(detail ? `${data.message || 'Checkout failed'}: ${detail}` : (data.message || 'Checkout failed'));
                 }
             }
 
@@ -455,22 +506,31 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 <CreditCard className="w-5 h-5 text-[#04a99d]" />
                                 Select Payment Method
                             </h4>
-                            <div className="grid md:grid-cols-2 gap-3">
+                            <div className="grid md:grid-cols-3 gap-3">
                                 {[
                                     { id: 'WALLET', label: 'Wallet Pay', icon: Wallet },
                                     { id: 'ONLINE', label: 'Online Payment', icon: CreditCard },
-                                    { id: 'COD', label: 'Cash on Service Delivery', icon: Truck },
+                                    { id: 'COD', label: 'Pay After Service (Cash on Service Delivery)', icon: Truck },
                                 ].map((method) => (
                                     <button
                                         key={method.id}
-                                        onClick={() => setPaymentMethod(method.id)}
-                                        className={`p-5 rounded-xl flex flex-col items-center gap-2 transition-all ${paymentMethod === method.id
+                                        onClick={() => {
+                                            if (method.id === 'WALLET') {
+                                                const reason = getWalletUsageBlockedReason(baseServiceCost);
+                                                if (reason) {
+                                                    toast.error(reason);
+                                                    return;
+                                                }
+                                            }
+                                            setPaymentMethod(method.id);
+                                        }}
+                                        className={`p-5 rounded-xl flex flex-col items-center gap-2 transition-all text-center ${paymentMethod === method.id
                                             ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg'
                                             : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                                             }`}
                                     >
                                         <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-white' : 'text-[#04a99d]'}`} />
-                                        <h6 className="text-sm font-medium">{method.label}</h6>
+                                        <h6 className="text-xs font-medium leading-tight">{method.label}</h6>
                                     </button>
                                 ))}
                             </div>
@@ -592,8 +652,15 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
                             <div className="flex justify-between text-xl font-bold text-white mb-6">
                                 <span>Total</span>
-                                <span>₹{bookingCost.toFixed(2)}</span>
+                                <span>{paymentMethod === 'COD' ? '₹0.00' : `₹${bookingCost.toFixed(2)}`}</span>
                             </div>
+                            {paymentMethod === 'COD' && (
+                                <div className="p-3 rounded-lg bg-[#037166]/10 border border-[#037166]/20 mb-4">
+                                    <p className="text-white/70 text-xs">
+                                        * Total ₹{bookingCost.toFixed(2)} to be paid to the technician after service completion.
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Selected Date/Time Preview */}
                             {bookedDate && bookedTime && (
@@ -624,6 +691,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         <Loader2 className="w-5 h-5 animate-spin" />
                                         Processing...
                                     </div>
+                                ) : paymentMethod === 'COD' ? (
+                                    `Confirm Booking (Pay After Service)`
                                 ) : (
                                     `Confirm Booking - ₹${bookingCost.toFixed(2)}`
                                 )}

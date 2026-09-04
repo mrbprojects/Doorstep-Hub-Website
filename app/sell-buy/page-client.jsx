@@ -390,7 +390,7 @@ export default function SellBuyHomePage() {
     }
 
     if (kycStatus !== 'APPROVED' && kycStatus !== 'VERIFIED') {
-      toast.error('Seller Verification Required! Admin must approve your KYC before you can post ads.');
+      toast.error('Verification (KYC) Required! Admin must approve your KYC before you can post ads.');
       router.push('/sell-buy/dashboard');
       return;
     }

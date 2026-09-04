@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { locationManager } from '@/services/locationManager';
+import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
 
 function SpaAddressContent() {
     const router = useRouter();
@@ -31,6 +32,7 @@ function SpaAddressContent() {
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [locationMismatch, setLocationMismatch] = useState(null);
 
     // GPS / Map state
     const [gpsLoading, setGpsLoading] = useState(false);
@@ -298,8 +300,48 @@ function SpaAddressContent() {
                         providerIdFinal = resolvedId;
                         setProviderId(resolvedId);
                     }
+                    const storeCity = store?.cityName || store?.city || null;
+                    const userCity = selectedAddress.cityName;
+                    if (storeCity && userCity && !areCitiesMatching(userCity, storeCity)) {
+                        setLocationMismatch({
+                            userCity: String(userCity),
+                            providerCity: String(storeCity),
+                            providerName: store?.businessName || store?.name || 'Selected Spa & Salon Professional'
+                        });
+                        setLoading(false);
+                        return;
+                    }
                 } catch (e) {
                     console.warn('Could not resolve provider slug during checkout, proceeding with slug');
+                }
+            }
+
+            // Preflight backend location verification
+            if (providerIdFinal && selectedAddress?._id && token) {
+                try {
+                    const valRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/validate-booking-location`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            providerId: providerIdFinal,
+                            serviceAddressId: selectedAddress._id
+                        })
+                    });
+                    const valData = await valRes.json();
+                    if (valData.success && valData.matched === false) {
+                        setLocationMismatch({
+                            userCity: valData.userCity,
+                            providerCity: valData.providerCity,
+                            providerName: valData.providerName || 'Selected Spa & Salon Professional'
+                        });
+                        setLoading(false);
+                        return;
+                    }
+                } catch (valErr) {
+                    console.warn('Location validation check error:', valErr);
                 }
             }
 
@@ -699,6 +741,13 @@ function SpaAddressContent() {
                     </Button>
                 </div>
             </div>
+
+            <LocationMismatchModal
+                mismatch={locationMismatch}
+                onClose={() => setLocationMismatch(null)}
+                browseUrl="/spa-salon"
+                providerLabel="Spa & Salon Professional"
+            />
         </div>
     );
 }

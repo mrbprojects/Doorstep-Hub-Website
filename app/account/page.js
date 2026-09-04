@@ -125,7 +125,14 @@ export default function AccountDashboardPage() {
                                 <Icon className="w-5 h-5 text-[#037166]" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-bold text-gray-900">{item.label}</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="font-bold text-gray-900">{item.label}</p>
+                                    {item.href === '/account/support' && stats.openTickets > 0 && (
+                                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                            {stats.openTickets} Pending
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="text-sm text-gray-500">{item.desc}</p>
                             </div>
                             <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#037166] transition-colors" />

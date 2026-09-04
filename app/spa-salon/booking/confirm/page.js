@@ -3,12 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, CheckCircle, User, Loader2, Scissors, Info } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, CheckCircle, User, Loader2, Scissors, Info, Banknote, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
+import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
 
 export default function SpaConfirmPage() {
     const router = useRouter();
@@ -24,6 +25,7 @@ export default function SpaConfirmPage() {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null);
     const [mounted, setMounted] = useState(false);
+    const [locationMismatch, setLocationMismatch] = useState(null);
     const addressLine1 = [selectedAddress?.flat, selectedAddress?.area].filter(Boolean).join(', ');
     const addressLine2 = [selectedAddress?.cityName, selectedAddress?.postalCode].filter(Boolean).join(', ');
 
@@ -36,18 +38,31 @@ export default function SpaConfirmPage() {
         const status = urlParams.get('status');
         if (status === 'success') {
             setPaymentStatus('success');
-            // Payment confirmed — now safe to clear cart
             clearCart();
 
-            const pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+            let pendingBooking = {};
+            try { pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}'); } catch (e) {}
+            if (!pendingBooking.bookedDate) {
+                try { pendingBooking = JSON.parse(localStorage.getItem('spa_last_booking') || '{}'); } catch (e) {}
+            }
+
+            const orderId = urlParams.get('orderId') || pendingBooking.orderId || '';
+            const date = urlParams.get('date') || pendingBooking.bookedDate || '';
+            const time = urlParams.get('time') || pendingBooking.bookedTime || '';
+            const paid = pendingBooking.paid || '0';
+            const remaining = pendingBooking.remaining || '0';
+
             sessionStorage.removeItem('pending_booking');
 
             toast.success('Payment successful! Booking confirmed.');
-            trackBookingCompleted(pendingBooking.orderId, { vertical: 'spa-salon' });
-            router.push(`/spa-salon/thank-you?orderId=${pendingBooking.orderId || ''}&date=${pendingBooking.bookedDate || ''}&time=${pendingBooking.bookedTime || ''}&paid=${pendingBooking.paid || '0'}&remaining=${pendingBooking.remaining || '0'}`);
-        } else if (status === 'failure') {
+            trackBookingCompleted(orderId, { vertical: 'spa-salon' });
+            router.push(`/spa-salon/thank-you?orderId=${encodeURIComponent(orderId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&paid=${encodeURIComponent(paid)}&remaining=${encodeURIComponent(remaining)}`);
+        } else if (status === 'failure' || status === 'cancelled' || status === 'cancel') {
             setPaymentStatus('failure');
-            router.push('/spa-salon/booking/failure');
+            toast.error('Payment was cancelled or could not be completed. You can try again or choose Pay After Service.');
+            if (typeof window !== 'undefined') {
+                window.history.replaceState({}, '', window.location.pathname);
+            }
         }
     }, [clearCart, router]);
 
@@ -173,6 +188,18 @@ export default function SpaConfirmPage() {
         const isProfessional = cartItems.some(item => item.itemType === 'professional_service' || item.itemType === 'professional_addon');
         const checkoutProviderType = isProfessional ? 'professional' : 'regular';
 
+        // Preflight location check
+        const providerCity = cartData?.provider?.cityName;
+        const userCity = selectedAddress?.cityName;
+        if (providerCity && userCity && !areCitiesMatching(userCity, providerCity)) {
+            setLocationMismatch({
+                userCity: String(userCity),
+                providerCity: String(providerCity),
+                providerName: cartData?.provider?.businessName || cartData?.provider?.name || 'Selected Spa & Salon Professional'
+            });
+            return;
+        }
+
         setLoading(true);
         try {
             let payload = {
@@ -184,11 +211,14 @@ export default function SpaConfirmPage() {
                 ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
-                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}/spa-salon/booking/failure`
+                returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
+                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success&date=${encodeURIComponent(bookedDate)}&time=${encodeURIComponent(bookedTime)}`,
+                furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=cancelled`
             };
 
-            const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
+            const endpoint = paymentMethod === 'ONLINE'
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
+                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -216,14 +246,19 @@ export default function SpaConfirmPage() {
                         ? ((cartData?.finalAmount || 0) - (cartData?.advPayment || 0))
                         : 0;
 
-                    sessionStorage.setItem('pending_booking', JSON.stringify({
+                    const pendingData = {
                         bookedDate,
                         bookedTime,
                         address: selectedAddress,
                         orderId: data.bookingId || data.orderId || null,
                         paid,
                         remaining
-                    }));
+                    };
+                    sessionStorage.setItem('pending_booking', JSON.stringify(pendingData));
+                    if (selectedAddress) {
+                        sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
+                    }
+                    try { localStorage.setItem('spa_last_booking', JSON.stringify(pendingData)); } catch (e) {}
 
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     toast.success('Redirecting to payment gateway...');
@@ -247,7 +282,16 @@ export default function SpaConfirmPage() {
                     }
                 }
             } else {
-                toast.error(data.message || 'Checkout failed');
+                if (data.code === 'LOCATION_MISMATCH') {
+                    setLocationMismatch({
+                        userCity: data.userCity || selectedAddress?.cityName,
+                        providerCity: data.providerCity || 'Provider Location',
+                        providerName: data.providerName || 'Selected Spa & Salon Professional',
+                    });
+                    return;
+                }
+                const detail = data.easebuzz?.error_desc || data.easebuzz?.data || data.error;
+                toast.error(detail ? `${data.message || 'Checkout failed'}: ${detail}` : (data.message || 'Checkout failed'));
             }
         } catch (error) {
             console.error('Checkout error:', error);
@@ -453,7 +497,7 @@ export default function SpaConfirmPage() {
                             </div>
                         </motion.div> */}
 
-                        {/* Payment Method — Online Only */}
+                        {/* Payment Method */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -464,14 +508,72 @@ export default function SpaConfirmPage() {
                                 <CreditCard className="w-5 h-5 text-[#6D1357]" />
                                 Payment Method
                             </h3>
-                            <p className="text-xs text-gray-400 mb-4">Secure online payment only</p>
-                            <div className="p-5 rounded-xl flex items-center gap-4 bg-gradient-to-r from-[#6D1357] to-[#8E1B73] text-white shadow-lg">
-                                <CreditCard className="w-6 h-6 text-white" />
-                                <div className="flex-1">
-                                    <span className="text-sm font-semibold">Online Payment</span>
-                                    <p className="text-xs text-white/70 mt-0.5">Pay securely via UPI / Card / Net Banking</p>
+                            <p className="text-xs text-gray-400 mb-4">Choose your preferred payment method</p>
+
+                            <div className="space-y-3">
+                                {/* Option 1: Instant Online Payment */}
+                                <div
+                                    onClick={() => setPaymentMethod('ONLINE')}
+                                    className={`p-4 rounded-xl flex items-center gap-4 cursor-pointer transition-all border ${
+                                        paymentMethod === 'ONLINE'
+                                            ? 'bg-gradient-to-r from-[#6D1357]/10 to-[#8E1B73]/10 border-[#6D1357] shadow-xs ring-1 ring-[#6D1357]/40'
+                                            : 'bg-white hover:bg-gray-50/80 border-gray-200'
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'ONLINE'
+                                            ? 'bg-gradient-to-r from-[#6D1357] to-[#8E1B73] text-white shadow-xs'
+                                            : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                        <CreditCard className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-bold text-gray-900 block">Instant Online Payment</span>
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#6D1357]/10 text-[#6D1357]">Fast &amp; Secure</span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-0.5">Pay securely via UPI (GPay, PhonePe, Paytm), Credit/Debit Card, or Net Banking</p>
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'ONLINE'
+                                            ? 'border-[#6D1357] bg-[#6D1357] text-white'
+                                            : 'border-gray-300 bg-white'
+                                    }`}>
+                                        {paymentMethod === 'ONLINE' && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
                                 </div>
-                                <CheckCircle className="w-5 h-5" />
+
+                                {/* Option 2: Pay After Service (Cash on Service Delivery) */}
+                                <div
+                                    onClick={() => setPaymentMethod('COD')}
+                                    className={`p-4 rounded-xl flex items-center gap-4 cursor-pointer transition-all border ${
+                                        paymentMethod === 'COD'
+                                            ? 'bg-gradient-to-r from-[#6D1357]/10 to-[#8E1B73]/10 border-[#6D1357] shadow-xs ring-1 ring-[#6D1357]/40'
+                                            : 'bg-white hover:bg-gray-50/80 border-gray-200'
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'COD'
+                                            ? 'bg-gradient-to-r from-[#6D1357] to-[#8E1B73] text-white shadow-xs'
+                                            : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                        <Banknote className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-bold text-gray-900 block">Pay After Service (Cash on Service Delivery)</span>
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">No Advance</span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-0.5">Pay full payment with cash or UPI directly at salon / to specialist after service delivery</p>
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                        paymentMethod === 'COD'
+                                            ? 'border-[#6D1357] bg-[#6D1357] text-white'
+                                            : 'border-gray-300 bg-white'
+                                    }`}>
+                                        {paymentMethod === 'COD' && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
 
@@ -597,25 +699,20 @@ export default function SpaConfirmPage() {
                                 <div className="flex justify-between mb-1">
                                     <span className="text-gray-600 font-medium">Payable Now</span>
                                     <span className="text-2xl font-black text-[#6D1357]">
-                                        ₹{paymentOption === 'ADVANCE'
-                                            ? (cartData?.advPayment ?? 0).toFixed(2)
-                                            : (cartData?.finalAmount ?? 0).toFixed(2)}
+                                        {paymentMethod === 'COD'
+                                            ? '₹0.00'
+                                            : `₹${(cartData?.finalAmount ?? 0).toFixed(2)}`}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[#6D1357] uppercase font-bold">
-                                    {paymentOption === 'ADVANCE' ? '' : 'Full Amount (incl. all fees)'}
+                                    {paymentMethod === 'COD' ? 'Pay After Service Delivery' : 'Full Amount (incl. all fees)'}
                                 </p>
+                                {paymentMethod === 'COD' && (
+                                    <p className="text-[11px] text-[#6D1357] font-medium mt-1.5 pt-1.5 border-t border-[#6D1357]/20">
+                                        * Total ₹{(cartData?.finalAmount ?? 0).toFixed(2)} to be paid at salon or to specialist after service delivery.
+                                    </p>
+                                )}
                             </div>
-
-                            {/* {paymentOption === 'ADVANCE' && (
-                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-500 text-sm">Remaining to Pay</span>
-                                        <span className="text-gray-900 font-bold">₹{((cartData?.finalAmount ?? 0) - (cartData?.advPayment ?? 0)).toFixed(2)}</span>
-                                    </div>
-                                    <p className="text-[10px] text-gray-400 mt-1 uppercase">Pay at store after service</p>
-                                </div>
-                            )} */}
 
                             {/* Confirm Button */}
                             <motion.button
@@ -633,8 +730,10 @@ export default function SpaConfirmPage() {
                                         <Loader2 className="w-5 h-5 animate-spin" />
                                         Confirming...
                                     </div>
+                                ) : paymentMethod === 'COD' ? (
+                                    'Book Now (Pay After Service)'
                                 ) : (
-                                    'Book Now'
+                                    `Book Now • ₹${(cartData?.finalAmount ?? 0).toFixed(2)}`
                                 )}
                             </motion.button>
 
@@ -661,6 +760,14 @@ export default function SpaConfirmPage() {
                         router.back();
                     }
                 }}
+            />
+
+            <LocationMismatchModal
+                mismatch={locationMismatch}
+                onClose={() => setLocationMismatch(null)}
+                onSelectAnotherAddress={() => router.push('/spa-salon/booking/address')}
+                browseUrl="/spa-salon"
+                providerLabel="Spa & Salon Professional"
             />
         </motion.div>
     );

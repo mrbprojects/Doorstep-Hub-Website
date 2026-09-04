@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Plus, Minus, Home, Briefcase, ShieldCheck, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Plus, Minus, Home, Briefcase, ShieldCheck, Check, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -52,6 +52,12 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [walletBalance, setWalletBalance] = useState(0);
     const [walletData, setWalletData] = useState(null);
     const [walletLoading, setWalletLoading] = useState(false);
+    const [walletLimits, setWalletLimits] = useState({
+        minWalletUsageOrderAmount: 0,
+        maxWalletUsageOrderAmount: 0,
+        minWalletUsageEnabled: false,
+        maxWalletUsageEnabled: false,
+    });
     const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
     const [fullAddress, setFullAddress] = useState(selectedAddress);
     const [locationMismatch, setLocationMismatch] = useState(null);
@@ -123,6 +129,12 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 if (data.success && data.wallet) {
                     setWalletBalance(data.wallet.currentBalance || 0);
                     setWalletData(data.wallet);
+                    setWalletLimits({
+                        minWalletUsageOrderAmount: Number(data.minWalletUsageOrderAmount || 0),
+                        maxWalletUsageOrderAmount: Number(data.maxWalletUsageOrderAmount || 0),
+                        minWalletUsageEnabled: Boolean(data.minWalletUsageEnabled),
+                        maxWalletUsageEnabled: Boolean(data.maxWalletUsageEnabled),
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching wallet balance:', error);
@@ -135,6 +147,18 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             fetchWalletBalance();
         }
     }, [token, isAuthenticated]);
+
+    const getWalletUsageBlockedReason = (amount) => {
+        const min = walletLimits.minWalletUsageEnabled ? walletLimits.minWalletUsageOrderAmount : 0;
+        const max = walletLimits.maxWalletUsageEnabled ? walletLimits.maxWalletUsageOrderAmount : 0;
+        if (min > 0 && amount < min) {
+            return `To enable D-Hub Wallet, minimum service charge should be above ₹${min} as per admin settings.`;
+        }
+        if (max > 0 && amount > max) {
+            return `To enable D-Hub Wallet, service charge should be below ₹${max} as per admin settings.`;
+        }
+        return null;
+    };
 
     // Check authentication on mount
     useEffect(() => {
@@ -268,6 +292,14 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             return;
         }
 
+        if (paymentMethod === 'WALLET') {
+            const blockedReason = getWalletUsageBlockedReason(baseServiceCost);
+            if (blockedReason) {
+                toast.error(blockedReason);
+                return;
+            }
+        }
+
         setLoading(true);
 
 
@@ -288,8 +320,9 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     bookedTime,
                     paymentMethod,
                     sourceOfLead: 'website',
+                    returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
                     surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                    furl: `${window.location.protocol}//${window.location.host}/appliances/payment-failed`
+                    furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=cancelled`
                 })
             });
 
@@ -327,7 +360,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                         providerName: data.providerName || 'Selected Service Center'
                     });
                 } else {
-                    toast.error(data.message || 'Checkout failed');
+                    const detail = data.easebuzz?.error_desc || data.easebuzz?.data || data.error;
+                    toast.error(detail ? `${data.message || 'Checkout failed'}: ${detail}` : (data.message || 'Checkout failed'));
                 }
             }
 
@@ -599,7 +633,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 {/* Online Payment Card */}
                                 <button
                                     type="button"
@@ -617,26 +651,60 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             </div>
                                             <div>
                                                 <h4 className="text-xs sm:text-sm font-bold text-gray-900">Online Payment</h4>
-                                                <span className="text-[10px] text-emerald-600 font-semibold">Recommended • Instant Confirmation</span>
+                                                <span className="text-[10px] text-emerald-600 font-semibold">Instant Confirmation</span>
                                             </div>
                                         </div>
                                         <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'ONLINE' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
                                             {paymentMethod === 'ONLINE' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                                         </div>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-gray-100 text-[10px] text-gray-500">
-                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">UPI</span>
-                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">PhonePe</span>
-                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">GPay</span>
-                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">Cards</span>
-                                        <span className="bg-gray-100 px-1.5 py-0.5 rounded font-medium text-gray-700">NetBanking</span>
+                                    <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-gray-100 text-[9px] text-gray-500">
+                                        <span className="bg-gray-100 px-1 py-0.5 rounded font-medium text-gray-700">UPI</span>
+                                        <span className="bg-gray-100 px-1 py-0.5 rounded font-medium text-gray-700">Cards</span>
+                                        <span className="bg-gray-100 px-1 py-0.5 rounded font-medium text-gray-700">NetBanking</span>
                                     </div>
+                                </button>
+
+                                {/* Pay After Service (Cash on Service Delivery) */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('COD')}
+                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                                        paymentMethod === 'COD'
+                                            ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentMethod === 'COD' ? 'bg-[#037166] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                                                <Banknote className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xs sm:text-sm font-bold text-gray-900">Pay After Service</h4>
+                                                <span className="text-[10px] text-emerald-600 font-semibold">Cash / UPI at Doorstep</span>
+                                            </div>
+                                        </div>
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'COD' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
+                                            {paymentMethod === 'COD' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 pt-2 border-t border-gray-100">
+                                        Pay full payment directly to technician after service
+                                    </p>
                                 </button>
 
                                 {/* Wallet Pay Card */}
                                 <button
                                     type="button"
-                                    onClick={() => setPaymentMethod('WALLET')}
+                                    onClick={() => {
+                                        const reason = getWalletUsageBlockedReason(baseServiceCost);
+                                        if (reason) {
+                                            toast.error(reason);
+                                            return;
+                                        }
+                                        setPaymentMethod('WALLET');
+                                    }}
                                     className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
                                         paymentMethod === 'WALLET'
                                             ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
@@ -651,7 +719,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             <div>
                                                 <h4 className="text-xs sm:text-sm font-bold text-gray-900">DH Wallet</h4>
                                                 <span className="text-[10px] text-gray-500">
-                                                    Available: <strong className="text-gray-900 font-bold">₹{Number(walletBalance).toFixed(2)}</strong>
+                                                    Bal: <strong className="text-gray-900 font-bold">₹{Number(walletBalance).toFixed(2)}</strong>
                                                 </span>
                                             </div>
                                         </div>
@@ -660,7 +728,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         </div>
                                     </div>
                                     <p className="text-[10px] text-gray-400 italic pt-2 border-t border-gray-100">
-                                        Wallet usable after service completion verification
+                                        {getWalletUsageBlockedReason(baseServiceCost) || 'Pay using D-Hub wallet balance'}
                                     </p>
                                 </button>
                             </div>
@@ -914,16 +982,26 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-200">
                                     <div className="flex justify-between items-end">
                                         <div>
-                                            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Payable Now Online</span>
-                                            <h3 className="text-2xl font-black text-gray-900 leading-tight">₹{bookingCost.toFixed(2)}</h3>
+                                            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                                                {paymentMethod === 'COD' ? 'Payable Now' : 'Payable Now Online'}
+                                            </span>
+                                            <h3 className="text-2xl font-black text-gray-900 leading-tight">
+                                                {paymentMethod === 'COD' ? '₹0.00' : `₹${bookingCost.toFixed(2)}`}
+                                            </h3>
                                         </div>
                                         <span className="text-[10px] font-bold uppercase px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">
-                                            All Inclusive
+                                            {paymentMethod === 'COD' ? 'Pay at Doorstep' : 'All Inclusive'}
                                         </span>
                                     </div>
-                                    <p className="text-[10px] text-gray-500 mt-1">
-                                        *Inspection fee of ₹{consultationFee.toFixed(2)} will be collected after on-site inspection.
-                                    </p>
+                                    {paymentMethod === 'COD' ? (
+                                        <p className="text-[10px] text-emerald-700 font-medium mt-1">
+                                            * Total ₹{bookingCost.toFixed(2)} to be paid to technician after service completion.
+                                        </p>
+                                    ) : (
+                                        <p className="text-[10px] text-gray-500 mt-1">
+                                            *Inspection fee of ₹{consultationFee.toFixed(2)} will be collected after on-site inspection.
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Scheduled Slot Chip */}
@@ -956,6 +1034,16 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             </>
                                         ) : !bookedDate || !bookedTime ? (
                                             <span>Select Date & Time Slot Above</span>
+                                        ) : paymentMethod === 'COD' ? (
+                                            <>
+                                                <span>Confirm Booking (Pay After Service)</span>
+                                                <ArrowLeft className="w-4 h-4 rotate-180" />
+                                            </>
+                                        ) : paymentMethod === 'WALLET' ? (
+                                            <>
+                                                <span>Pay with Wallet • ₹{bookingCost.toFixed(2)}</span>
+                                                <ArrowLeft className="w-4 h-4 rotate-180" />
+                                            </>
                                         ) : (
                                             <>
                                                 <span>Confirm & Pay ₹{bookingCost.toFixed(2)}</span>

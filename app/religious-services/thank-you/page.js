@@ -7,26 +7,162 @@ import { CheckCircle, Home, Calendar, MapPin, Sparkles, Flower2, ArrowRight } fr
 import { Button } from '@/components/ui/button';
 import { trackBookingCompleted } from '@/lib/leadTracking';
 
+const clean = (val) => {
+    if (!val) return '';
+    const s = String(val).trim();
+    if (!s || s.toLowerCase() === 'n/a' || s.toLowerCase() === 'undefined' || s.toLowerCase() === 'null') return '';
+    return s;
+};
+
+const formatCompleteAddress = (addr) => {
+    if (!addr) return 'Selected Address';
+    if (typeof addr === 'string') return addr;
+
+    const parts = [
+        clean(addr.flat),
+        clean(addr.area),
+        clean(addr.addressLineOne),
+        clean(addr.addressLineTwo),
+        clean(addr.cityName),
+        clean(addr.stateName),
+        clean(addr.postalCode || addr.pincode)
+    ].filter(Boolean);
+
+    const seen = new Set();
+    const uniqueParts = parts.filter(part => {
+        const lower = part.toLowerCase();
+        if (seen.has(lower)) return false;
+        seen.add(lower);
+        return true;
+    });
+
+    if (uniqueParts.length === 0) {
+        return clean(addr.address) || clean(addr.cityName) || 'Selected Address';
+    }
+
+    return uniqueParts.join(', ');
+};
+
 function ThankYouContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState({ orderId: '', date: '', time: '', address: '' });
+    const [bookingDetails, setBookingDetails] = useState({
+        orderId: '',
+        date: '',
+        time: '',
+        address: '',
+        addressType: '',
+        contactPerson: '',
+        contactPhone: ''
+    });
 
     useEffect(() => {
-        // Retrieve address from session storage (used in booking flow)
-        const savedAddress = sessionStorage.getItem('religious_booking_address') || sessionStorage.getItem('selected_address');
-        const addressData = savedAddress ? JSON.parse(savedAddress) : null;
+        const rawSaved = sessionStorage.getItem('religious_booking_address') ||
+                         sessionStorage.getItem('selected_address');
+        let addressData = null;
+        if (rawSaved) {
+            try { addressData = JSON.parse(rawSaved); } catch (e) {}
+        }
 
-        setBookingDetails({
-            orderId: searchParams.get('orderId') || '',
-            date: searchParams.get('date'),
-            time: searchParams.get('time'),
-            address: addressData ? `${addressData.flat}, ${addressData.area}` : 'Selected Address'
-        });
+        let pending = {};
+        try {
+            pending = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+        } catch (e) {}
 
-        const orderId = searchParams.get('orderId');
-        if (orderId) {
-            trackBookingCompleted(orderId, { vertical: 'religious' });
+        let lastLocal = {};
+        try {
+            lastLocal = JSON.parse(localStorage.getItem('religious_last_booking') || '{}');
+        } catch (e) {}
+
+        if (!addressData) {
+            if (pending?.address) addressData = pending.address;
+            else if (lastLocal?.address) addressData = lastLocal.address;
+        }
+
+        const rawOrderId = (searchParams.get('orderId') || '').trim();
+        const rawDate = (searchParams.get('date') || '').trim();
+        const rawTime = (searchParams.get('time') || '').trim();
+
+        const resolvedOrderId = rawOrderId || pending.orderId || lastLocal.orderId || '';
+
+        const resolvedDate = (rawDate && rawDate !== 'Date not set')
+            ? rawDate
+            : (sessionStorage.getItem('religious_booking_date') || pending.bookedDate || lastLocal.bookedDate || 'Date not set');
+
+        const resolvedTime = rawTime
+            ? rawTime
+            : (sessionStorage.getItem('religious_booking_time') || pending.bookedTime || lastLocal.bookedTime || '');
+
+        if (addressData) {
+            setBookingDetails({
+                orderId: resolvedOrderId,
+                date: resolvedDate,
+                time: resolvedTime,
+                address: formatCompleteAddress(addressData),
+                addressType: addressData.type || '',
+                contactPerson: addressData.name || addressData.userName || '',
+                contactPhone: addressData.phone || ''
+            });
+        } else {
+            const token = typeof window !== 'undefined'
+                ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+                : null;
+
+            if (token) {
+                fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                        const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
+                        setBookingDetails({
+                            orderId: resolvedOrderId,
+                            date: resolvedDate,
+                            time: resolvedTime,
+                            address: formatCompleteAddress(defaultAddr),
+                            addressType: defaultAddr.type || '',
+                            contactPerson: defaultAddr.name || defaultAddr.userName || '',
+                            contactPhone: defaultAddr.phone || ''
+                        });
+                    } else {
+                        setBookingDetails({
+                            orderId: resolvedOrderId,
+                            date: resolvedDate,
+                            time: resolvedTime,
+                            address: 'Selected Address',
+                            addressType: '',
+                            contactPerson: '',
+                            contactPhone: ''
+                        });
+                    }
+                })
+                .catch(() => {
+                    setBookingDetails({
+                        orderId: resolvedOrderId,
+                        date: resolvedDate,
+                        time: resolvedTime,
+                        address: 'Selected Address',
+                        addressType: '',
+                        contactPerson: '',
+                        contactPhone: ''
+                    });
+                });
+            } else {
+                setBookingDetails({
+                    orderId: resolvedOrderId,
+                    date: resolvedDate,
+                    time: resolvedTime,
+                    address: 'Selected Address',
+                    addressType: '',
+                    contactPerson: '',
+                    contactPhone: ''
+                });
+            }
+        }
+
+        if (resolvedOrderId) {
+            trackBookingCompleted(resolvedOrderId, { vertical: 'religious' });
         }
     }, [searchParams]);
 
@@ -114,16 +250,28 @@ function ThankYouContent() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.6 }}
-                            className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--off-white)] border border-[var(--saffron)]/10"
+                            className="flex items-start gap-4 p-4 rounded-2xl bg-[var(--off-white)] border border-[var(--saffron)]/10"
                         >
-                            <div className="w-12 h-12 rounded-xl bg-[var(--saffron)]/10 flex items-center justify-center flex-shrink-0">
+                            <div className="w-12 h-12 rounded-xl bg-[var(--saffron)]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                                 <MapPin className="w-6 h-6 text-[var(--saffron)]" />
                             </div>
-                            <div>
-                                <p className="text-sm text-gray-500 font-medium">Service Location</p>
-                                <p className="text-[var(--deep-charcoal)] font-semibold leading-tight">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2 mb-1">
+                                    <p className="text-sm text-gray-500 font-medium">Service Location</p>
+                                    {bookingDetails.addressType && (
+                                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">
+                                            {bookingDetails.addressType}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-[var(--deep-charcoal)] font-semibold text-sm leading-snug break-words">
                                     {bookingDetails.address || 'Loading address...'}
                                 </p>
+                                {bookingDetails.contactPerson && (
+                                    <p className="text-xs text-gray-500 font-medium mt-1 pt-1 border-t border-gray-200/50">
+                                        Contact: {bookingDetails.contactPerson} {bookingDetails.contactPhone ? `• ${bookingDetails.contactPhone}` : ''}
+                                    </p>
+                                )}
                             </div>
                         </motion.div>
 

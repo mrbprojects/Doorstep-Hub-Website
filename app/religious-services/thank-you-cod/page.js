@@ -6,20 +6,134 @@ import { motion } from 'motion/react';
 import { CheckCircle, Calendar, MapPin, Sparkles, ArrowRight, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+const clean = (val) => {
+    if (!val) return '';
+    const s = String(val).trim();
+    if (!s || s.toLowerCase() === 'n/a' || s.toLowerCase() === 'undefined' || s.toLowerCase() === 'null') return '';
+    return s;
+};
+
+const formatCompleteAddress = (addr) => {
+    if (!addr) return 'Selected Address';
+    if (typeof addr === 'string') return addr;
+
+    const parts = [
+        clean(addr.flat),
+        clean(addr.area),
+        clean(addr.addressLineOne),
+        clean(addr.addressLineTwo),
+        clean(addr.cityName),
+        clean(addr.stateName),
+        clean(addr.postalCode || addr.pincode)
+    ].filter(Boolean);
+
+    const seen = new Set();
+    const uniqueParts = parts.filter(part => {
+        const lower = part.toLowerCase();
+        if (seen.has(lower)) return false;
+        seen.add(lower);
+        return true;
+    });
+
+    if (uniqueParts.length === 0) {
+        return clean(addr.address) || clean(addr.cityName) || 'Selected Address';
+    }
+
+    return uniqueParts.join(', ');
+};
+
 function ReligiousThankYouCodContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState({ date: '', time: '', address: '' });
+    const [bookingDetails, setBookingDetails] = useState({
+        date: '',
+        time: '',
+        address: '',
+        addressType: '',
+        contactPerson: '',
+        contactPhone: ''
+    });
 
     useEffect(() => {
-        const savedAddress = sessionStorage.getItem('religious_booking_address') || sessionStorage.getItem('selected_address');
-        const addressData = savedAddress ? JSON.parse(savedAddress) : null;
+        const rawSaved = sessionStorage.getItem('religious_booking_address') ||
+                         sessionStorage.getItem('selected_address');
+        let addressData = null;
+        if (rawSaved) {
+            try { addressData = JSON.parse(rawSaved); } catch (e) {}
+        }
+        if (!addressData) {
+            try {
+                const pending = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+                if (pending?.address) addressData = pending.address;
+            } catch (e) {}
+        }
 
-        setBookingDetails({
-            date: searchParams.get('date') || 'Date not set',
-            time: searchParams.get('time') || '',
-            address: addressData ? `${addressData.flat}, ${addressData.area}, ${addressData.cityName}` : 'Selected Address'
-        });
+        const dateParam = searchParams.get('date') || 'Date not set';
+        const timeParam = searchParams.get('time') || '';
+
+        if (addressData) {
+            setBookingDetails({
+                date: dateParam,
+                time: timeParam,
+                address: formatCompleteAddress(addressData),
+                addressType: addressData.type || '',
+                contactPerson: addressData.name || addressData.userName || '',
+                contactPhone: addressData.phone || ''
+            });
+        } else {
+            // Fallback: fetch default address if user is logged in
+            const token = typeof window !== 'undefined'
+                ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+                : null;
+
+            if (token) {
+                fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                        const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
+                        setBookingDetails({
+                            date: dateParam,
+                            time: timeParam,
+                            address: formatCompleteAddress(defaultAddr),
+                            addressType: defaultAddr.type || '',
+                            contactPerson: defaultAddr.name || defaultAddr.userName || '',
+                            contactPhone: defaultAddr.phone || ''
+                        });
+                    } else {
+                        setBookingDetails({
+                            date: dateParam,
+                            time: timeParam,
+                            address: 'Selected Address',
+                            addressType: '',
+                            contactPerson: '',
+                            contactPhone: ''
+                        });
+                    }
+                })
+                .catch(() => {
+                    setBookingDetails({
+                        date: dateParam,
+                        time: timeParam,
+                        address: 'Selected Address',
+                        addressType: '',
+                        contactPerson: '',
+                        contactPhone: ''
+                    });
+                });
+            } else {
+                setBookingDetails({
+                    date: dateParam,
+                    time: timeParam,
+                    address: 'Selected Address',
+                    addressType: '',
+                    contactPerson: '',
+                    contactPhone: ''
+                });
+            }
+        }
     }, [searchParams]);
 
     return (
@@ -76,13 +190,25 @@ function ReligiousThankYouCodContent() {
 
                         {/* Location */}
                         <div className="space-y-1.5 p-5 rounded-2xl bg-[var(--off-white)] border border-gray-100">
-                            <div className="flex items-center gap-2 text-[var(--saffron)] mb-2">
-                                <MapPin className="w-4 h-4" />
-                                <span className="text-xs font-bold uppercase tracking-wider">Location</span>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                                <div className="flex items-center gap-2 text-[var(--saffron)]">
+                                    <MapPin className="w-4 h-4 shrink-0" />
+                                    <span className="text-xs font-bold uppercase tracking-wider">Location</span>
+                                </div>
+                                {bookingDetails.addressType && (
+                                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">
+                                        {bookingDetails.addressType}
+                                    </span>
+                                )}
                             </div>
-                            <p className="text-[var(--deep-charcoal)] font-bold line-clamp-2 leading-tight">
+                            <p className="text-[var(--deep-charcoal)] font-bold text-sm leading-snug break-words">
                                 {bookingDetails.address}
                             </p>
+                            {bookingDetails.contactPerson && (
+                                <p className="text-xs text-gray-500 font-medium pt-1 border-t border-gray-200/50">
+                                    {bookingDetails.contactPerson} {bookingDetails.contactPhone ? `• ${bookingDetails.contactPhone}` : ''}
+                                </p>
+                            )}
                         </div>
                     </div>
 

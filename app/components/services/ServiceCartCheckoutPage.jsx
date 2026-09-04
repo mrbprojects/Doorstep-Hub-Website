@@ -74,6 +74,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     }
                 })
                 .catch(() => {});
+        }
     }, [token, selectedAddress?._id, selectedAddress?.addressLineOne, selectedAddress?.phone]);
 
     useEffect(() => {

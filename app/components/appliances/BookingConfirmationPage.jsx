@@ -869,7 +869,7 @@ export function BookingConfirmationPage({
                         <Wallet className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-gray-900">DH Wallet</h4>
+                        <h4 className="text-xs sm:text-sm font-bold text-gray-900">D-Hub Wallet</h4>
                         <span className="text-[10px] text-gray-500">
                           Available: <strong className="text-gray-900 font-bold">₹{Number(walletBalance || 0).toFixed(2)}</strong>
                         </span>

@@ -668,7 +668,7 @@ export function BookingConfirmationPage({
                   </div>
                   <div className="text-left flex-1">
                     <div className="flex items-center justify-between">
-                      <p className="font-semibold">DH Wallet</p>
+                      <p className="font-semibold">D-Hub Wallet</p>
                       {!walletLoading && (
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${paymentMethod === 'wallet' ? 'bg-white/20' : 'bg-[#037166]/20 text-[#04a99d]'
                           }`}>

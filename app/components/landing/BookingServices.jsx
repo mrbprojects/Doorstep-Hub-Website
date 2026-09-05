@@ -9,8 +9,8 @@ import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 /* ─── Skeleton ─────────────────────────────────────────────── */
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm flex flex-col">
-      <div className="h-44 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse flex-shrink-0" />
+    <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm flex flex-col group">
+      <div className="h-36 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse flex-shrink-0" />
       <div className="p-4 space-y-2.5 flex-1">
         <div className="h-2.5 w-20 bg-gray-100 rounded-full animate-pulse" />
         <div className="h-4 bg-gray-100 rounded-full animate-pulse w-4/5" />
@@ -31,11 +31,11 @@ function ServiceCard({ service, onBook, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
-      className="group relative cursor-pointer flex flex-col rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+      className="group relative cursor-pointer flex flex-col rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 h-full"
       onClick={() => onBook(service)}
     >
       {/* Image */}
-      <div className="relative h-44 overflow-hidden flex-shrink-0">
+      <div className="relative h-36 overflow-hidden flex-shrink-0">
         <ImageWithFallback
           src={service.image}
           alt={service.title}
@@ -121,7 +121,7 @@ export function BookingServices() {
             allServices = allData.success && Array.isArray(allData.data) ? allData.data : [];
           } catch (_) {}
 
-          const transformed = data.services.slice(0, 9).map(service => {
+          const transformed = data.services.slice(0, 12).map(service => {
             const matched = allServices.find(as => as._id === service._id || as.serviceName === service.serviceName);
             return {
               id: service._id,
@@ -251,7 +251,7 @@ export function BookingServices() {
 
         {/* Service Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : visibleServices.length > 0 ? (
@@ -262,7 +262,7 @@ export function BookingServices() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
             >
               {visibleServices.map((service, i) => (
                 <ServiceCard

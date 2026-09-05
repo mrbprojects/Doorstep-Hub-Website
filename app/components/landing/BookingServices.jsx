@@ -222,10 +222,10 @@ export function BookingServices() {
           <button
             type="button"
             onClick={() => setActiveCategory('all')}
-            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
+            className={`category-pill group flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
               activeCategory === 'all'
-                ? 'bg-[#037166] border-[#037166] text-white shadow-sm shadow-[#037166]/30'
-                : 'bg-white/5 border-[#037166]/25 text-[#58c4b4] hover:bg-white/10'
+                ? 'category-pill-active bg-[#037166] border-[#037166] !text-white shadow-sm shadow-[#037166]/30'
+                : 'bg-white border-blue-200 !text-blue-600 hover:bg-[#037166] hover:border-[#037166] hover:!text-white shadow-sm'
             }`}
           >
             All Services
@@ -234,21 +234,28 @@ export function BookingServices() {
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex-shrink-0 h-8 w-28 rounded-full bg-white/10 animate-pulse" />
               ))
-            : categories.map(cat => (
-                <button
-                  key={cat.name}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.name)}
-                  className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
-                    activeCategory === cat.name
-                      ? 'bg-[#037166] border-[#037166] text-white shadow-sm shadow-[#037166]/30'
-                      : 'bg-white/5 border-[#037166]/25 text-[#58c4b4] hover:bg-white/10'
-                  }`}
-                >
-                  {cat.name}
-                  <span className="ml-1.5 text-[10px] opacity-70">({cat.count})</span>
-                </button>
-              ))
+            : categories.map(cat => {
+                const isActive = activeCategory === cat.name;
+                return (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => setActiveCategory(cat.name)}
+                    className={`category-pill group flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'category-pill-active bg-[#037166] border-[#037166] !text-white shadow-sm shadow-[#037166]/30'
+                        : 'bg-white border-blue-200 !text-blue-600 hover:bg-[#037166] hover:border-[#037166] hover:!text-white shadow-sm'
+                    }`}
+                  >
+                    {cat.name}
+                    <span className={`ml-1.5 text-[10px] font-medium transition-colors ${
+                      isActive ? '!text-white/80' : '!text-blue-500 group-hover:!text-white'
+                    }`}>
+                      ({cat.count})
+                    </span>
+                  </button>
+                );
+              })
           }
         </div>
 

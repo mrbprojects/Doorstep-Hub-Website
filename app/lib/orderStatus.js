@@ -1,4 +1,6 @@
 export const ORDER_STATUS_LABELS = {
+    payment_pending: 'Payment Pending',
+    paymentPending: 'Payment Pending',
     pending: 'Pending',
     orderAcceptedByAdmin: 'Accepted',
     orderAccpetedByAdmin: 'Accepted',
@@ -23,6 +25,7 @@ export const ORDER_STATUS_LABELS = {
 };
 
 export const ACTIVE_STATUSES = [
+    'payment_pending', 'paymentPending',
     'pending', 'orderAcceptedByAdmin', 'orderAccpetedByAdmin', 'orderAcceptedBySystem',
     'assignToProvider', 'acceptedByProvider', 'appointmentConfirmedByProvider',
     'onTheWay', 'reachedLocation', 'workInProgress', 'rescheduleByProvider',
@@ -38,6 +41,8 @@ export function getStatusLabel(status) {
 
 export function getStatusStyle(status) {
     const styles = {
+        payment_pending: 'bg-amber-100 text-amber-800 border border-amber-300',
+        paymentPending: 'bg-amber-100 text-amber-800 border border-amber-300',
         pending: 'bg-amber-100 text-amber-700',
         workIsCompleted: 'bg-green-100 text-green-700',
         paymentReceived: 'bg-green-100 text-green-700',

@@ -16,7 +16,9 @@ import {
     resolveMediaUrl,
     cancelBookingService,
     fetchWalletBalance,
-    initiateCancellationFeePayment
+    initiateCancellationFeePayment,
+    reinitiateServiceBookingPayment,
+    payPlatformFee
 } from '@/lib/accountApi';
 import { getStatusLabel, getStatusStyle, resolveEffectiveOrderStatus } from '@/lib/orderStatus';
 
@@ -132,46 +134,139 @@ const PAYMENT_METHOD_LABELS = {
     cash: 'Cash',
 };
 
-// ─── Status Timeline ─────────────────────────────────────────────────────────
+// ─── Order Tracking Timeline ────────────────────────────────────────────────
 
-function StatusTimeline({ history = [] }) {
+function OrderTrackingTimeline({ status = 'pending', history = [], isPlatformFeePending = false }) {
     const [expanded, setExpanded] = useState(false);
-    if (!history || history.length === 0) return null;
+    const isCancelled = ['cancelledByUser', 'cancelledByProvider', 'rejectedByProvider', 'missed'].includes(status);
 
-    const shown = expanded ? history : history.slice(-3);
+    // Calculate active step index (0 to 4)
+    let currentStep = 0;
+    if (status === 'payment_pending' || isPlatformFeePending) {
+        currentStep = 0;
+    } else if (status === 'pending') {
+        currentStep = 1;
+    } else if (['orderAcceptedByAdmin', 'orderAccpetedByAdmin', 'orderAcceptedBySystem', 'assignToProvider', 'acceptedByProvider', 'appointmentConfirmedByProvider'].includes(status)) {
+        currentStep = 2;
+    } else if (['onTheWay', 'reachedLocation', 'workInProgress', 'sendQuotation', 'quotationAccepted', 'paymentRequested', 'paymentReceived'].includes(status)) {
+        currentStep = 3;
+    } else if (['workIsCompleted', 'completed', 'Closed', 'closed', 'serviceCompleted', 'workCompleted'].includes(status)) {
+        currentStep = 4;
+    }
+
+    const steps = [
+        { title: 'Order Placed', desc: (status === 'payment_pending' || isPlatformFeePending) ? 'Fee pending' : 'Request logged' },
+        { title: 'Booking Confirmed', desc: 'Platform fee verified' },
+        { title: 'Partner Assigned', desc: 'Service partner confirmed' },
+        { title: 'In Progress', desc: 'Doorstep service ongoing' },
+        { title: 'Completed', desc: 'Finished & verified' },
+    ];
+
+    const safeHistory = history && history.length > 0 ? history : [
+        {
+            status: status || 'pending',
+            statusTextMessage: (status === 'payment_pending' || isPlatformFeePending)
+                ? 'Booking Created - Platform Fee (₹99) Pending'
+                : 'Booking Placed & Confirmed',
+            logCreatedDate: new Date().toISOString()
+        }
+    ];
+
+    const shownHistory = expanded ? safeHistory : safeHistory.slice(-3);
 
     return (
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="font-bold text-gray-900 flex items-center gap-2">
                     <Layers className="w-4 h-4 text-[#037166]" />
-                    Status History
+                    Order Tracking
                 </h2>
-                {history.length > 3 && (
-                    <button
-                        onClick={() => setExpanded(e => !e)}
-                        className="text-xs text-[#037166] font-semibold flex items-center gap-1 hover:underline"
-                    >
-                        {expanded ? <><ChevronUp className="w-3 h-3" />Show less</> : <><ChevronDown className="w-3 h-3" />Show all ({history.length})</>}
-                    </button>
-                )}
+                <span className={`text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full ${getStatusStyle(status)}`}>
+                    {getStatusLabel(status)}
+                </span>
             </div>
-            <ol className="relative border-l-2 border-[#037166]/20 ml-2 space-y-3">
-                {shown.map((h, idx) => (
-                    <li key={idx} className="ml-5 relative">
-                        <div className="absolute -left-[22px] w-3.5 h-3.5 rounded-full bg-[#037166] border-2 border-white shadow-sm top-0.5" />
-                        <p className="text-xs font-semibold text-gray-800">{getStatusLabel(h.status) || h.status}</p>
-                        {h.statusTextMessage && h.statusTextMessage !== `Status updated to ${h.status}` && (
-                            <p className="text-[10px] text-gray-500 mt-0.5">{h.statusTextMessage}</p>
+
+            {/* Stepper Progress */}
+            {isCancelled ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3">
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
+                    <div>
+                        <p className="text-sm font-bold text-red-800">Booking Cancelled</p>
+                        <p className="text-xs text-red-600">This service booking has been cancelled ({getStatusLabel(status)}).</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="py-2">
+                    <div className="grid grid-cols-5 relative">
+                        {/* Connecting track line */}
+                        <div className="absolute top-4 left-[10%] right-[10%] h-1 bg-gray-200 -z-0">
+                            <div
+                                className="h-full bg-[#037166] transition-all duration-500"
+                                style={{ width: `${(Math.min(currentStep, 4) / 4) * 100}%` }}
+                            />
+                        </div>
+
+                        {steps.map((step, idx) => {
+                            const isDone = currentStep > idx;
+                            const isCurrent = currentStep === idx;
+                            return (
+                                <div key={idx} className="flex flex-col items-center text-center relative z-10">
+                                    <div
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                                            isDone
+                                                ? 'bg-[#037166] text-white'
+                                                : isCurrent
+                                                ? 'bg-white border-2 border-[#037166] text-[#037166] shadow-md ring-4 ring-[#037166]/20'
+                                                : 'bg-gray-100 border-2 border-gray-200 text-gray-400'
+                                        }`}
+                                    >
+                                        {isDone ? <CheckCircle className="w-4 h-4" /> : idx + 1}
+                                    </div>
+                                    <p className={`text-xs font-bold mt-2 ${isCurrent ? 'text-[#037166]' : isDone ? 'text-gray-900' : 'text-gray-400'}`}>
+                                        {step.title}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 hidden sm:block mt-0.5 max-w-[90px]">
+                                        {step.desc}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Detailed history log */}
+            {safeHistory && safeHistory.length > 0 && (
+                <div className="pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-bold text-gray-700">Detailed Activity Log</span>
+                        {safeHistory.length > 3 && (
+                            <button
+                                onClick={() => setExpanded(e => !e)}
+                                className="text-xs text-[#037166] font-semibold flex items-center gap-1 hover:underline"
+                            >
+                                {expanded ? <><ChevronUp className="w-3 h-3" />Show less</> : <><ChevronDown className="w-3 h-3" />Show all ({safeHistory.length})</>}
+                            </button>
                         )}
-                        {h.logCreatedDate && (
-                            <p className="text-[10px] text-gray-400 mt-0.5">
-                                {new Date(h.logCreatedDate).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-                            </p>
-                        )}
-                    </li>
-                ))}
-            </ol>
+                    </div>
+                    <ol className="relative border-l-2 border-[#037166]/20 ml-2 space-y-3">
+                        {shownHistory.map((h, idx) => (
+                            <li key={idx} className="ml-5 relative">
+                                <div className="absolute -left-[22px] w-3.5 h-3.5 rounded-full bg-[#037166] border-2 border-white shadow-sm top-0.5" />
+                                <p className="text-xs font-semibold text-gray-800">{getStatusLabel(h.status) || h.status}</p>
+                                {h.statusTextMessage && h.statusTextMessage !== `Status updated to ${h.status}` && (
+                                    <p className="text-[10px] text-gray-500 mt-0.5">{h.statusTextMessage}</p>
+                                )}
+                                {h.logCreatedDate && (
+                                    <p className="text-[10px] text-gray-400 mt-0.5">
+                                        {new Date(h.logCreatedDate).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                                    </p>
+                                )}
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+            )}
         </div>
     );
 }
@@ -186,6 +281,65 @@ export default function BookingDetailPage() {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Platform Fee Payment Modal State
+    const [payFeeModalOpen, setPayFeeModalOpen] = useState(false);
+    const [payFeeMethod, setPayFeeMethod] = useState('ONLINE'); // 'ONLINE' | 'WALLET'
+    const [payFeeLoading, setPayFeeLoading] = useState(false);
+
+    const handleOpenPayFeeModal = async () => {
+        setPayFeeModalOpen(true);
+        if (token) {
+            try {
+                setWalletLoading(true);
+                const res = await fetchWalletBalance(token);
+                if (res?.success) setWalletBalance(res?.data?.balance ?? res?.balance ?? 0);
+            } catch (_) {}
+            finally { setWalletLoading(false); }
+        }
+    };
+
+    const handleExecutePlatformFeePayment = async () => {
+        if (!token || !bookingId) return;
+        setPayFeeLoading(true);
+        try {
+            if (payFeeMethod === 'WALLET') {
+                const res = await payPlatformFee(token, bookingId, { paymentMethod: 'WALLET' });
+                if (res?.success) {
+                    toast.success(res?.message || 'Platform fee paid successfully via D-Hub Wallet! Booking confirmed.');
+                    setPayFeeModalOpen(false);
+                    const updated = await fetchOrderDetail(token, bookingId);
+                    setOrder(updated);
+                } else {
+                    toast.error(res?.message || 'Failed to pay platform fee via Wallet.');
+                }
+            } else {
+                const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+                const res = await payPlatformFee(token, bookingId, {
+                    paymentMethod: 'ONLINE',
+                    websiteReturnUrl: currentUrl,
+                    websiteCancelUrl: currentUrl
+                });
+                if (res?.success && (res?.access_key || res?.paymentUrl)) {
+                    toast.loading('Redirecting to payment gateway...');
+                    window.location.href = res.paymentUrl || `https://pay.easebuzz.in/pay/${res.access_key}`;
+                } else {
+                    const fallbackRes = await reinitiateServiceBookingPayment(token, bookingId);
+                    if (fallbackRes?.success && fallbackRes?.access_key) {
+                        toast.loading('Redirecting to payment gateway...');
+                        window.location.href = `https://pay.easebuzz.in/pay/${fallbackRes.access_key}`;
+                    } else {
+                        toast.error(res?.message || fallbackRes?.message || 'Failed to initiate payment.');
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Pay platform fee error:', e);
+            toast.error(e.message || 'Payment initiation failed. Please try again.');
+        } finally {
+            setPayFeeLoading(false);
+        }
+    };
 
     // ── Cancellation state ─────────────────────────────────────────────────
     const [cancelModalOpen, setCancelModalOpen] = useState(false);
@@ -341,8 +495,8 @@ export default function BookingDetailPage() {
     const paymentStatus = order?.paymentStatus || null;
     const paymentMethod = order?.paymentMethod || null;
 
-    const isPaidOnline = ['paid', 'completed'].includes(String(paymentStatus || '').toLowerCase()) ||
-        String(paymentMethod || '').toUpperCase() === 'ONLINE';
+    const isPaymentCompleted = ['paid', 'completed'].includes(String(paymentStatus || '').toLowerCase());
+    const isPaidOnline = isPaymentCompleted;
     const isServiceCenter = order?.partnerType === 'Service Center' ||
         order?.providerType === 'Service Center' ||
         order?.typeProvider === 'provider' ||
@@ -374,6 +528,11 @@ export default function BookingDetailPage() {
     const advancePaid = estimation?.advancePaid ?? order?.partialAmountPaid ?? null;
     const totalPaid = estimation?.totalPaid ?? null;
     const pendingAmount = estimation?.pendingAmount ?? null;
+
+    const platformFeePendingAmount = Number(order?.totalAmount || order?.amount || platformFee || 99);
+    const isPlatformFeePending = Boolean(order?.isPlatformFeePending) || (!isPaymentCompleted &&
+        !['cancelledByUser', 'cancelledByProvider', 'cancelled', 'workIsCompleted', 'completed', 'closed'].includes(String(order?.status || '')) &&
+        (String(paymentStatus || '').toLowerCase() === 'pending' || ['pending', 'payment_pending', 'missed'].includes(String(order?.status || '').toLowerCase())));
 
     const orderId = order?.orderId || '';
     const bookedDate = fmtDate(order?.bookedDate);
@@ -415,6 +574,45 @@ export default function BookingDetailPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
+
+                    {/* ── Pending Platform Fee Banner ─────────────────── */}
+                    {isPlatformFeePending && (
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 shadow-sm space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex items-start gap-3.5">
+                                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <AlertTriangle className="w-5 h-5 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <h3 className="text-base font-bold text-amber-950">Platform Fee Payment Pending</h3>
+                                            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">Action Required</span>
+                                        </div>
+                                        <p className="text-sm text-amber-900 mt-1 leading-relaxed">
+                                            Your booking request is created, but the platform fee of <span className="font-extrabold text-amber-950">₹{platformFeePendingAmount}</span> has not been received yet. Complete payment now to confirm your appointment and assign our nearest verified expert technician.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleOpenPayFeeModal}
+                                    disabled={payFeeLoading}
+                                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#037166] text-white font-bold text-sm shadow-md hover:bg-[#025c53] active:scale-95 transition-all disabled:opacity-60 flex-shrink-0"
+                                >
+                                    {payFeeLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CreditCard className="w-4 h-4" />
+                                            Pay Platform Fee (₹{platformFeePendingAmount})
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* ── Header Card ─────────────────────────────────────── */}
                     <div className="bg-white border border-gray-200 rounded-2xl p-5">
@@ -643,8 +841,8 @@ export default function BookingDetailPage() {
                                 </div>
                             )}
 
-                            {/* Status History */}
-                            <StatusTimeline history={statusHistory} />
+                            {/* Order Tracking & Status History */}
+                            <OrderTrackingTimeline status={status} history={statusHistory} isPlatformFeePending={isPlatformFeePending} />
                         </div>
 
                         {/* Right Column: Service Address + Provider Info */}
@@ -738,6 +936,27 @@ export default function BookingDetailPage() {
                     <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
                         <h2 className="font-bold text-gray-900 text-sm">Need Help?</h2>
                         <div className="flex flex-col sm:flex-row gap-3">
+                            {/* Pay Platform Fee (if pending) */}
+                            {isPlatformFeePending && (
+                                <button
+                                    onClick={handleOpenPayFeeModal}
+                                    disabled={payFeeLoading}
+                                    className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-[#037166] text-white font-bold text-sm hover:bg-[#025c53] shadow-sm transition-all disabled:opacity-60"
+                                >
+                                    {payFeeLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CreditCard className="w-4 h-4" />
+                                            Pay Platform Fee (₹{platformFeePendingAmount})
+                                        </>
+                                    )}
+                                </button>
+                            )}
+
                             {/* Contact Support */}
                             <a
                                 href={`/account/support/new?bookingId=${encodeURIComponent(orderId || '')}&bookingDbId=${encodeURIComponent(bookingId || '')}&category=booking`}
@@ -870,41 +1089,19 @@ export default function BookingDetailPage() {
                                         <AlertTriangle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                                         <div>
                                             <p className="text-sm font-bold text-blue-800 mb-1">₹99 Platform Fee Required</p>
-                                            <p className="text-xs text-blue-700">A platform fee of ₹99 must be paid to cancel this booking. Choose how you'd like to pay.</p>
+                                            <p className="text-xs text-blue-700">A platform fee of ₹99 must be paid to cancel this booking. Please proceed with secure online payment to complete cancellation.</p>
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        {/* D-Hub Wallet */}
-                                        <button
-                                            onClick={() => doCancel('wallet')}
-                                            disabled={cancelLoading || walletLoading || (walletBalance !== null && walletBalance < 99)}
-                                            className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 border-[#037166] hover:bg-[#037166]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <div className="w-9 h-9 rounded-xl bg-[#037166]/10 flex items-center justify-center flex-shrink-0">
-                                                <Wallet className="w-4 h-4 text-[#037166]" />
-                                            </div>
-                                            <div className="flex-1 text-left">
-                                                <p className="text-sm font-bold text-gray-900">D-Hub Wallet</p>
-                                                <p className="text-xs text-gray-500">
-                                                    {walletLoading ? 'Checking balance...' :
-                                                        walletBalance !== null ?
-                                                            (walletBalance >= 99 ? `Available: ₹${walletBalance}` : `Insufficient (₹${walletBalance} available, need ₹99)`) :
-                                                            'Balance unavailable'
-                                                    }
-                                                </p>
-                                            </div>
-                                            {cancelLoading ? <Loader2 className="w-4 h-4 animate-spin text-[#037166]" /> : <CheckCircle className="w-4 h-4 text-[#037166]" />}
-                                        </button>
-
                                         {/* Payment Gateway */}
                                         <button
                                             onClick={doInitiateGatewayPayment}
                                             disabled={cancelLoading}
-                                            className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 border-gray-200 hover:border-[#037166]/30 hover:bg-gray-50 transition-all disabled:opacity-50"
+                                            className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 border-[#037166] bg-[#037166]/5 hover:bg-[#037166]/10 transition-all disabled:opacity-50"
                                         >
-                                            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                                <CreditCard className="w-4 h-4 text-gray-600" />
+                                            <div className="w-9 h-9 rounded-xl bg-[#037166]/10 flex items-center justify-center flex-shrink-0">
+                                                <CreditCard className="w-4 h-4 text-[#037166]" />
                                             </div>
                                             <div className="flex-1 text-left">
                                                 <p className="text-sm font-bold text-gray-900">Pay Online (₹99)</p>
@@ -923,6 +1120,146 @@ export default function BookingDetailPage() {
                                     </button>
                                 </>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Pay Platform Fee Modal ── */}
+            {payFeeModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={() => !payFeeLoading && setPayFeeModalOpen(false)}
+                    />
+                    <div className="relative z-10 w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                            <div className="flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-[#037166]" />
+                                <span className="font-bold text-gray-900">Pay Platform Fee</span>
+                            </div>
+                            <button
+                                onClick={() => !payFeeLoading && setPayFeeModalOpen(false)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all"
+                            >
+                                <X className="w-4 h-4 text-gray-500" />
+                            </button>
+                        </div>
+
+                        <div className="px-5 py-4 space-y-4">
+                            <div className="rounded-xl bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-teal-800 uppercase tracking-wide">Required Platform Fee</p>
+                                        <p className="text-2xl font-extrabold text-teal-950 mt-0.5">₹{platformFeePendingAmount || 99}</p>
+                                    </div>
+                                    <span className="px-2.5 py-1 rounded-full bg-teal-200 text-teal-900 text-[10px] font-bold uppercase">
+                                        Confirmation Fee
+                                    </span>
+                                </div>
+                                <p className="text-xs text-teal-700 mt-2">
+                                    Paying this fee confirms your booking and automatically assigns our nearest certified technician.
+                                </p>
+                            </div>
+
+                            <p className="text-xs font-bold text-gray-600 uppercase tracking-wider">Select Payment Method</p>
+
+                            <div className="space-y-2.5">
+                                {/* Option 1: Online Gateway */}
+                                <label
+                                    className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                                        payFeeMethod === 'ONLINE'
+                                            ? 'border-[#037166] bg-[#037166]/5 shadow-sm'
+                                            : 'border-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="payFeeMethod"
+                                        value="ONLINE"
+                                        checked={payFeeMethod === 'ONLINE'}
+                                        onChange={() => setPayFeeMethod('ONLINE')}
+                                        className="accent-[#037166]"
+                                    />
+                                    <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                        <CreditCard className="w-4 h-4 text-[#037166]" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-bold text-gray-900">Pay Online Gateway</p>
+                                        <p className="text-xs text-gray-500">UPI (GPay, PhonePe), Cards & Net Banking</p>
+                                    </div>
+                                </label>
+
+                                {/* Option 2: D-Hub Wallet */}
+                                <label
+                                    className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all ${
+                                        walletBalance !== null && walletBalance < (platformFeePendingAmount || 99)
+                                            ? 'opacity-60 cursor-not-allowed border-gray-200 bg-gray-50'
+                                            : payFeeMethod === 'WALLET'
+                                            ? 'border-[#037166] bg-[#037166]/5 shadow-sm cursor-pointer'
+                                            : 'border-gray-200 hover:border-gray-300 cursor-pointer'
+                                    }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="payFeeMethod"
+                                        value="WALLET"
+                                        checked={payFeeMethod === 'WALLET'}
+                                        onChange={() => setPayFeeMethod('WALLET')}
+                                        disabled={walletBalance !== null && walletBalance < (platformFeePendingAmount || 99)}
+                                        className="accent-[#037166]"
+                                    />
+                                    <div className="w-9 h-9 rounded-xl bg-[#037166]/10 flex items-center justify-center flex-shrink-0">
+                                        <Wallet className="w-4 h-4 text-[#037166]" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-bold text-gray-900">D-Hub Wallet</p>
+                                            {walletBalance !== null && walletBalance < (platformFeePendingAmount || 99) && (
+                                                <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                                                    Low Balance
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-gray-500">
+                                            {walletLoading
+                                                ? 'Checking balance...'
+                                                : walletBalance !== null
+                                                ? `Balance: ₹${walletBalance}`
+                                                : 'Balance unavailable'}
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="pt-2 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setPayFeeModalOpen(false)}
+                                    disabled={payFeeLoading}
+                                    className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleExecutePlatformFeePayment}
+                                    disabled={payFeeLoading || (payFeeMethod === 'WALLET' && walletBalance !== null && walletBalance < (platformFeePendingAmount || 99))}
+                                    className="flex-1 py-3 rounded-xl bg-[#037166] hover:bg-[#025a51] text-white font-bold text-sm shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {payFeeLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Proceed to Pay ₹{platformFeePendingAmount || 99}
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

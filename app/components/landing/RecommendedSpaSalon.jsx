@@ -308,8 +308,8 @@ export function RecommendedSpaSalon() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Premium destinations handpicked for the ultimate pampering experience
+          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+            Explore recommended spas and salons for hair care, beauty treatments, grooming, facials, styling, massages, and wellness services. Compare suitable options based on services, location, and your personal care needs to book with ease.
           </p>
         </motion.div>
         <div className="mb-4 flex items-center justify-end gap-2">

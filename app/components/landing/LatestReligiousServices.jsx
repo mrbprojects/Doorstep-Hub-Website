@@ -235,7 +235,7 @@ export function LatestReligiousServices() {
   }
 
   return (
-    <section className="relative py-15 overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden">
       {/* Architectural World Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -248,14 +248,14 @@ export function LatestReligiousServices() {
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6 sm:mb-8"
         >
           {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#9b59b6]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Church className="w-4 h-4 text-[#9b59b6]" />
@@ -270,11 +270,11 @@ export function LatestReligiousServices() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Connect with your spiritual side through sacred ceremonies and community gatherings
+          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+           Explore the latest religious services for pujas, homams, rituals, temple ceremonies, housewarming, weddings, festivals, and other spiritual occasions. Find suitable priests and service options based on your tradition, location, and ceremony needs.
           </p>
         </motion.div>
-        <div className="mb-4 flex items-center justify-end gap-2">
+        <div className={`mb-3 items-center justify-end gap-2 ${shouldDesktopScroll ? 'flex' : 'hidden'}`}>
           <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -286,9 +286,16 @@ export function LatestReligiousServices() {
         {/* Services - Horizontal Scroller */}
         <div
           ref={scrollRef}
-          className={`overflow-x-auto pb-12 -mx-4 px-4 xl:mx-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
+          className={`overflow-x-auto pb-2 -mx-4 px-4 xl:mx-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
         >
-          <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
+          <div className={`flex min-w-max gap-3 sm:gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : `xl:min-w-0 xl:grid ${
+            services.length === 1 ? 'xl:grid-cols-1' :
+            services.length === 2 ? 'xl:grid-cols-2' :
+            services.length === 3 ? 'xl:grid-cols-3' :
+            services.length === 4 ? 'xl:grid-cols-4' :
+            services.length === 5 ? 'xl:grid-cols-5' :
+            'xl:grid-cols-6'
+          } xl:snap-none`}`}>
           {services.map((service, index) => (
             <motion.div
               key={service.id || index}
@@ -297,7 +304,7 @@ export function LatestReligiousServices() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.15, duration: 0.6 }}
-              className={`group w-[240px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
+              className={`group w-[260px] sm:w-[280px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
               onClick={() => handleServiceClick(service)}
             >
               {/* Spiritual Card */}

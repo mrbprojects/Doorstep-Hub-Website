@@ -209,11 +209,11 @@ export function BookingServices() {
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">
             <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
-              Latest Booking Services
+              Latest Appliance Servcie Bookings
             </span>
           </h2>
-          <p className="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">
-            Book your favorite services instantly with our advanced booking platform
+          <p className="text-gray-400 text-sm sm:text-base max-w-5xl mx-auto">
+            See the home appliance services customers are booking right now, from AC and refrigerator repairs to washing machine, TV, water purifier and other doorstep service needs.
           </p>
         </motion.div>
 

@@ -254,7 +254,7 @@ export function PremiumPGHostels() {
   };
 
   return (
-    <section className="relative py-22 overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden">
       {/* Architectural World Background */}
       {/* Animated Background */}
       <div className="absolute inset-0">
@@ -272,14 +272,14 @@ export function PremiumPGHostels() {
 
       </div>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6 sm:mb-8"
         >
           {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#ff6b35]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Building2 className="w-4 h-4 text-[#037166]" />
@@ -292,8 +292,9 @@ export function PremiumPGHostels() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-6">
-            Discover your perfect home away from home with modern amenities and comfort
+          <p className="text-gray-400 text-lg max-w-5xl mx-auto mb-6">
+            Discover premium PGs and hostels with comfortable rooms, essential amenities, convenient locations, and flexible stay options. Explore suitable accommodation for students and working professionals and choose the right place with ease.
+
           </p>
 
           {/* Explore All Button */}
@@ -308,7 +309,7 @@ export function PremiumPGHostels() {
           </motion.button>
         </motion.div>
 
-        <div className="mb-4 flex items-center justify-end gap-2">
+        <div className={`mb-3 items-center justify-end gap-2 ${shouldDesktopScroll ? 'flex' : 'hidden'}`}>
           <button
             type="button"
             onClick={() => scrollCards('left')}
@@ -329,8 +330,8 @@ export function PremiumPGHostels() {
 
         {/* PG Cards - Horizontal Scroller */}
         {loading ? (
-          <div className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
-            <div className="flex min-w-max gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
+          <div className="overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 xl:mx-0 xl:px-0">
+            <div className="flex min-w-max gap-3 sm:gap-4 xl:min-w-0 xl:grid xl:grid-cols-6">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
@@ -340,9 +341,16 @@ export function PremiumPGHostels() {
         ) : (
           <div
             ref={scrollRef}
-            className={`overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
+            className={`overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
           >
-            <div className={`flex min-w-max gap-4 ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6'}`}>
+            <div className={`flex min-w-max gap-3 sm:gap-4 ${shouldDesktopScroll ? '' : `xl:min-w-0 xl:grid ${
+              hostels.length === 1 ? 'xl:grid-cols-1' :
+              hostels.length === 2 ? 'xl:grid-cols-2' :
+              hostels.length === 3 ? 'xl:grid-cols-3' :
+              hostels.length === 4 ? 'xl:grid-cols-4' :
+              hostels.length === 5 ? 'xl:grid-cols-5' :
+              'xl:grid-cols-6'
+            }`}`}>
             {hostels.map((hostel, index) => (
               <motion.div
                 key={hostel.id || index}
@@ -351,7 +359,7 @@ export function PremiumPGHostels() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.6 }}
-                className={`group w-[240px] shrink-0 cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
+                className={`group w-[260px] sm:w-[280px] shrink-0 cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
                 onClick={() => handleHostelClick(hostel)}
               >
                 {/* Card with Parallax Effect */}

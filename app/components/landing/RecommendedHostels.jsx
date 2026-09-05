@@ -267,7 +267,7 @@ export function RecommendedHostels() {
   };
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden">
       {/* Architectural World Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -280,14 +280,14 @@ export function RecommendedHostels() {
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#025951]/8 rounded-full blur-[150px] pointer-events-none" />
       </div>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6 sm:mb-8"
         >
           {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#ff6b35]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Heart className="w-4 h-4 text-[#ff6b35]" />
@@ -302,12 +302,13 @@ export function RecommendedHostels() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Trusted accommodations with a focus on safety, comfort, and community
+          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+            Explore recommended hostels offering comfortable stays, useful amenities, convenient locations, and options for students and working professionals. Compare suitable choices and find a hostel that matches your budget, location, and daily needs.
+
           </p>
         </motion.div>
 
-        <div className="mb-4 flex items-center justify-end gap-2">
+        <div className={`mb-3 items-center justify-end gap-2 ${shouldDesktopScroll ? 'flex' : 'hidden'}`}>
           <button
             type="button"
             onClick={() => scrollCards('left')}
@@ -329,13 +330,20 @@ export function RecommendedHostels() {
         {/* Hostels - Horizontal Scroller */}
         <div
           ref={scrollRef}
-          className={`overflow-x-auto scrollbar-hide pb-12 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
+          className={`overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
         >
-          <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
+          <div className={`flex min-w-max gap-3 sm:gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : `xl:min-w-0 xl:grid ${
+            hostels.length === 1 ? 'xl:grid-cols-1' :
+            hostels.length === 2 ? 'xl:grid-cols-2' :
+            hostels.length === 3 ? 'xl:grid-cols-3' :
+            hostels.length === 4 ? 'xl:grid-cols-4' :
+            hostels.length === 5 ? 'xl:grid-cols-5' :
+            'xl:grid-cols-6'
+          } xl:snap-none`}`}>
           {loading ? (
             // Skeleton Loading State
             [1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="w-[240px] shrink-0 snap-start xl:w-auto">
+              <div key={i} className="w-[260px] sm:w-[280px] shrink-0 snap-start xl:w-auto">
                 <SkeletonCard />
               </div>
             ))
@@ -348,7 +356,7 @@ export function RecommendedHostels() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.6 }}
-                className={`group w-[240px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
+                className={`group w-[260px] sm:w-[280px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
                 onClick={() => handleHostelClick(hostel)}
               >
                 {/* Premium PG-style Card */}

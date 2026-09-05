@@ -1080,7 +1080,7 @@ export default function AdDetailPage() {
             <div className="bg-gradient-to-br from-amber-50/70 via-amber-50/40 to-orange-50/30 rounded-3xl border border-amber-200/70 p-5 space-y-3 shadow-xs">
               <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
-                <span className="uppercase tracking-wider text-[11px] font-black">Safety Guidelines</span>
+                <span className="uppercase tracking-wider text-[11px] font-black">Safety Guidelines & Disclaimer</span>
               </div>
               <ul className="text-xs text-amber-900/80 space-y-2 font-medium">
                 <li className="flex items-start gap-2">
@@ -1094,6 +1094,12 @@ export default function AdDetailPage() {
                 <li className="flex items-start gap-2">
                   <span className="text-amber-500 font-bold">•</span>
                   <span>Never transfer advance money without seeing the item.</span>
+                </li>
+                <li className="flex items-start gap-2 pt-2 border-t border-amber-200/60">
+                  <span className="text-amber-600 font-bold">•</span>
+                  <span className="text-amber-950 font-bold leading-relaxed">
+                    DoorStepHub is an open platform and is NOT responsible for any financial transactions, offline payments, warranties, or delivery arrangements between parties.
+                  </span>
                 </li>
               </ul>
             </div>

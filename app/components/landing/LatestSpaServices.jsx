@@ -184,9 +184,9 @@ export function LatestSpaServices() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-gray-400 text-lg max-w-2xl mx-auto"
+            className="text-gray-400 text-lg max-w-5xl mx-auto"
           >
-            Experience tranquility and rejuvenation with our premium spa treatments
+            Explore recently booked spa and salon services for hair care, beauty treatments, grooming, facials, styling, massages, and more. Discover popular services customers are choosing and book convenient beauty and wellness appointments near you.
           </motion.p>
         </motion.div>
 

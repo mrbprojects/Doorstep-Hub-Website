@@ -398,7 +398,13 @@ export function parseBookNowCityFlatPath(normalizedPath = '', brandSlugs = null)
 
     const [serviceSlug, citySlug] = parts;
     const normalizedServiceSlug = serviceSlug.toLowerCase();
-    if (brandSlugs?.has(normalizedServiceSlug) || isFlatBrandCenterSlug(normalizedServiceSlug)) {
+    const registry = normalizeSlugRegistry(brandSlugs);
+    const isBrand =
+        registry?.hasBrand(normalizedServiceSlug) ||
+        (brandSlugs instanceof Set && brandSlugs.has(normalizedServiceSlug)) ||
+        (typeof brandSlugs?.has === 'function' && brandSlugs.has(normalizedServiceSlug)) ||
+        isFlatBrandCenterSlug(normalizedServiceSlug);
+    if (isBrand) {
         return null;
     }
     if (!isBookNowFlatServiceSlug(serviceSlug) || !isValidCitySlug(citySlug)) return null;

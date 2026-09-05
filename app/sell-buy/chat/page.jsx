@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
-import { Search, Send, ShieldCheck, MapPin, Loader2, MessageSquare } from 'lucide-react';
+import { Search, Send, ShieldCheck, ShieldAlert, MapPin, Loader2, MessageSquare } from 'lucide-react';
 import {
   fetchConversations,
   fetchMessages,
@@ -333,6 +333,14 @@ export default function MarketplaceChatPage() {
                       View Listing
                     </Link>
                   )}
+                </div>
+
+                {/* Safety & Financial Disclaimer Banner */}
+                <div className="bg-slate-50 border-b border-slate-200/80 px-4 py-2 flex items-center gap-2 text-slate-600">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#037166] shrink-0" />
+                  <p className="text-[11px] leading-snug">
+                    <strong className="font-semibold text-slate-800">Safety Note:</strong> DoorStepHub is not responsible for payments between users. Never pay in advance. Inspect items in person before paying.
+                  </p>
                 </div>
 
                 {/* Messages Timeline */}

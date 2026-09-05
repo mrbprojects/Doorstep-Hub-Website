@@ -18,6 +18,7 @@ import {
   Loader2,
   FileText,
   ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SubcategoryIcon } from '@/components/sell-buy/SubcategoryIcon';
@@ -988,6 +989,17 @@ export default function PostAdPage() {
                       </div>
                     </>
                   )}
+                </div>
+              </div>
+
+              {/* Financial Transaction & Marketplace Disclaimer */}
+              <div className="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 my-4 shadow-xs">
+                <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-amber-900 leading-relaxed">
+                  <p className="font-bold text-amber-950 text-xs sm:text-sm mb-0.5">Marketplace Safety & Payment Policy</p>
+                  <p>
+                    <strong className="text-amber-950">DoorStepHub is NOT responsible for any financial transactions</strong>, direct bank/UPI transfers, advance booking fees, or delivery arrangements between buyers and sellers. All payments and product inspections are conducted directly between users at your own risk.
+                  </p>
                 </div>
               </div>
 

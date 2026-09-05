@@ -263,3 +263,23 @@ export function resolveMediaUrl(path = '') {
     const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com';
     return `${base.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`;
 }
+
+export async function reinitiateServiceBookingPayment(token, bookingId) {
+    const response = await fetch(`${API_BASE}/app/applience-repairs-website/reinitiate-service-booking-payment`, {
+        method: 'POST',
+        headers: bearerHeaders(token),
+        body: JSON.stringify({ bookingId }),
+    });
+    return parseResponse(response);
+}
+
+export async function payPlatformFee(token, bookingId, { paymentMethod = 'ONLINE', websiteReturnUrl, websiteCancelUrl } = {}) {
+    const response = await fetch(`${API_BASE}/app/servicebooking/pay-platform-fee/${bookingId}`, {
+        method: 'POST',
+        headers: bearerHeaders(token),
+        body: JSON.stringify({ paymentMethod, websiteReturnUrl, websiteCancelUrl }),
+    });
+    return parseResponse(response);
+}
+
+

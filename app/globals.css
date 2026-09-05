@@ -619,23 +619,43 @@ html {
   color: #111111 !important;
 }
 
-/* Category filter pills: blue text on white bg, white text on hover & active */
-.landing-global .category-pill {
+/* Keep text white on colored buttons, badges, and cards */
+.landing-global :is(
+  button.category-pill-active,
+  button[class~="bg-[#037166]"],
+  button[class*="from-[#e89117]"],
+  button[class*="to-[#00796B]"],
+  button[class*="bg-gradient-"],
+  div[class~="bg-[#037166]"]
+):not(.category-pill:not(.category-pill-active)),
+.landing-global :is(
+  button.category-pill-active,
+  button[class~="bg-[#037166]"],
+  button[class*="from-[#e89117]"],
+  button[class*="to-[#00796B]"],
+  button[class*="bg-gradient-"],
+  div[class~="bg-[#037166]"]
+):not(.category-pill:not(.category-pill-active)) :is(span, p, svg) {
+  color: #ffffff !important;
+}
+
+/* Category filter pills: Green text on white bg, white text on hover & active */
+.landing-global .category-pill:not(.category-pill-active) {
   background-color: #ffffff !important;
-  border-color: #bfdbfe !important;
-  color: #2563eb !important;
+  border-color: rgba(3, 113, 102, 0.3) !important;
+  color: #037166 !important;
 }
-.landing-global .category-pill,
-.landing-global .category-pill span {
-  color: #2563eb !important;
+.landing-global .category-pill:not(.category-pill-active),
+.landing-global .category-pill:not(.category-pill-active) span {
+  color: #037166 !important;
 }
-.landing-global .category-pill:hover {
+.landing-global .category-pill:not(.category-pill-active):hover {
   background-color: #037166 !important;
   border-color: #037166 !important;
   color: #ffffff !important;
 }
-.landing-global .category-pill:hover,
-.landing-global .category-pill:hover span {
+.landing-global .category-pill:not(.category-pill-active):hover,
+.landing-global .category-pill:not(.category-pill-active):hover span {
   color: #ffffff !important;
 }
 .landing-global .category-pill.category-pill-active,
@@ -648,24 +668,6 @@ html {
 .landing-global .category-pill.category-pill-active span,
 .landing-global .category-pill-active,
 .landing-global .category-pill-active span {
-  color: #ffffff !important;
-}
-
-/* Keep text white on colored buttons, badges, and cards */
-.landing-global :is(
-  button[class*="bg-[#037166]"],
-  button[class*="from-[#e89117]"],
-  button[class*="to-[#00796B]"],
-  button[class*="bg-gradient-"],
-  [class*="bg-[#037166]"]
-),
-.landing-global :is(
-  button[class*="bg-[#037166]"],
-  button[class*="from-[#e89117]"],
-  button[class*="to-[#00796B]"],
-  button[class*="bg-gradient-"],
-  [class*="bg-[#037166]"]
-) :is(span, p, svg) {
   color: #ffffff !important;
 }
 

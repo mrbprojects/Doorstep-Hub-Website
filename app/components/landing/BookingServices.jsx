@@ -225,7 +225,7 @@ export function BookingServices() {
             className={`category-pill group flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
               activeCategory === 'all'
                 ? 'category-pill-active bg-[#037166] border-[#037166] !text-white shadow-sm shadow-[#037166]/30'
-                : 'bg-white border-blue-200 !text-blue-600 hover:bg-[#037166] hover:border-[#037166] hover:!text-white shadow-sm'
+                : 'bg-white border-[#037166]/30 !text-[#037166] hover:bg-[#037166] hover:border-[#037166] hover:!text-white shadow-sm'
             }`}
           >
             All Services
@@ -244,12 +244,12 @@ export function BookingServices() {
                     className={`category-pill group flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
                       isActive
                         ? 'category-pill-active bg-[#037166] border-[#037166] !text-white shadow-sm shadow-[#037166]/30'
-                        : 'bg-white border-blue-200 !text-blue-600 hover:bg-[#037166] hover:border-[#037166] hover:!text-white shadow-sm'
+                        : 'bg-white border-[#037166]/30 !text-[#037166] hover:bg-[#037166] hover:border-[#037166] hover:!text-white shadow-sm'
                     }`}
                   >
                     {cat.name}
                     <span className={`ml-1.5 text-[10px] font-medium transition-colors ${
-                      isActive ? '!text-white/80' : '!text-blue-500 group-hover:!text-white'
+                      isActive ? '!text-white/80' : '!text-[#037166]/80 group-hover:!text-white'
                     }`}>
                       ({cat.count})
                     </span>

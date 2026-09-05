@@ -121,7 +121,7 @@ export function BookingServices() {
             allServices = allData.success && Array.isArray(allData.data) ? allData.data : [];
           } catch {}
 
-          const transformed = data.services.slice(0, 12).map(service => {
+          const transformed = data.services.map(service => {
             const matched = allServices.find(as => as._id === service._id || as.serviceName === service.serviceName);
             return {
               id: service._id,
@@ -146,21 +146,24 @@ export function BookingServices() {
     fetchData();
   }, []);
 
-  /* Derived categories */
+  /* Derived categories with up to 12 booking count */
   const categories = useMemo(() => {
     const map = {};
     services.forEach(s => {
-      const key = s.category || 'General';
+      const key = (s.category || 'General').trim();
       if (!map[key]) map[key] = 0;
       map[key]++;
     });
-    return Object.entries(map).map(([name, count]) => ({ name, count }));
+    return Object.entries(map).map(([name, count]) => ({
+      name,
+      count: Math.min(count, 12)
+    }));
   }, [services]);
 
-  /* Filtered services */
+  /* Filtered services: up to 12 bookings for each category (and 12 for "All") */
   const visibleServices = useMemo(() => {
-    if (activeCategory === 'all') return services;
-    return services.filter(s => s.category === activeCategory);
+    if (activeCategory === 'all') return services.slice(0, 12);
+    return services.filter(s => (s.category || 'General').trim() === activeCategory).slice(0, 12);
   }, [activeCategory, services]);
 
   /* Navigation handler */

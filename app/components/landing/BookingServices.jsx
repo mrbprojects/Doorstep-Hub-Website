@@ -60,18 +60,18 @@ function ServiceCard({ service, onBook, index }) {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-4 gap-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#037166]">
+      <div className="flex flex-col flex-1 p-3 sm:p-3.5 gap-1.5">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[#037166]">
           {service.category}
         </p>
-        <h4 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 flex-1">
+        <h4 className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug line-clamp-2 flex-1">
           {service.title}
         </h4>
         <div className="flex justify-end pt-1">
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onBook(service); }}
-            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#e89117] to-[#00796B] text-white text-xs font-bold px-4 py-2 shadow hover:opacity-90 hover:scale-105 transition-all"
+            className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#e89117] to-[#00796B] text-white text-[11px] sm:text-xs font-bold px-3 py-1.5 shadow hover:opacity-90 hover:scale-105 transition-all"
           >
             Book Now
             <ArrowRight className="w-3.5 h-3.5" />
@@ -106,7 +106,7 @@ export function BookingServices() {
           if (slugData.success && slugData.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: slugData.data.home }));
           }
-        } catch (_) { /* use default */ }
+        } catch { /* use default */ }
 
         // 2. Fetch latest services
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`);
@@ -119,7 +119,7 @@ export function BookingServices() {
             const allRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
             const allData = await allRes.json();
             allServices = allData.success && Array.isArray(allData.data) ? allData.data : [];
-          } catch (_) {}
+          } catch {}
 
           const transformed = data.services.slice(0, 12).map(service => {
             const matched = allServices.find(as => as._id === service._id || as.serviceName === service.serviceName);

@@ -257,7 +257,7 @@ export function Header({ theme = {}, navItems = [] }) {
               >
                 <div className="relative w-24 sm:w-48 h-10 sm:h-16 overflow-hidden flex-shrink-0">
                   <Image
-                    src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                    src={globalSettings?.applicaionLogo ? (globalSettings.applicaionLogo.startsWith('http') ? globalSettings.applicaionLogo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${globalSettings.applicaionLogo.replace(/^\/+/, '')}`) : "/d-hub-logo.png"}
                     alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
                     fill
                     sizes="(max-width: 640px) 96px, 192px"

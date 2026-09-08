@@ -598,7 +598,7 @@ export function Footer({ theme = {} }) {
                 {/* Logo */}
                 <div className="relative w-36 h-16 flex-shrink-0 overflow-hidden">
                   <Image
-                    src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                    src={globalSettings?.applicaionLogo ? (globalSettings.applicaionLogo.startsWith('http') ? globalSettings.applicaionLogo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${globalSettings.applicaionLogo.replace(/^\/+/, '')}`) : "/d-hub-logo.png"}
                     alt={globalSettings?.applicationName || "Doorstep Hub"}
                     fill
                     sizes="224px"

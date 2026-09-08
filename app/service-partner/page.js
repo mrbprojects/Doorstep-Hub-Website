@@ -142,11 +142,28 @@ const PartnerStats = [
 export default function ServicePartnerPage() {
     const router = useRouter();
     const [partnerLoginOpen, setPartnerLoginOpen] = useState(false);
+    const [isPartnerLoggedIn, setIsPartnerLoggedIn] = useState(false);
     const [appLinks, setAppLinks] = useState({
         android: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
         ios: 'https://apps.apple.com/in/app/doorstep-hub-partner/id6504071357'
     });
     const [globalSettings, setGlobalSettings] = useState(null);
+
+    useEffect(() => {
+        const checkPartnerSession = () => {
+            const session = getStoredProviderSession();
+            setIsPartnerLoggedIn(Boolean(session?.token));
+        };
+        checkPartnerSession();
+        window.addEventListener('storage', checkPartnerSession);
+        window.addEventListener('partner:login-success', checkPartnerSession);
+        window.addEventListener('provider-auth:change', checkPartnerSession);
+        return () => {
+            window.removeEventListener('storage', checkPartnerSession);
+            window.removeEventListener('partner:login-success', checkPartnerSession);
+            window.removeEventListener('provider-auth:change', checkPartnerSession);
+        };
+    }, []);
 
 
      const videoRef = React.useRef(null);
@@ -237,7 +254,7 @@ export default function ServicePartnerPage() {
 
             <main className="relative z-10 pt-20">
                 {/* Hero Section */}
-                <section className="relative pt-8 md:pt-8 lg:pt-8 pb-0 md:pb-1 overflow-hidden">
+                <section className="relative pt-6 md:pt-8 lg:pt-10 pb-8 md:pb-12 overflow-hidden">
                     {/* Animated Background */}
                     <div className="absolute inset-0">
                         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#037166]/15 via-[#04a99d]/10 to-transparent" />
@@ -246,7 +263,7 @@ export default function ServicePartnerPage() {
                     </div>
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                             {/* Hero Content */}
                             <motion.div
                                 initial={{ opacity: 0, x: -50 }}
@@ -290,84 +307,21 @@ export default function ServicePartnerPage() {
 
                             {/* Phone Mockup */}
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.7, x: 50 }}
+                                initial={{ opacity: 0, scale: 0.8, x: 50 }}
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                 transition={{ duration: 0.8, delay: 0.3 }}
-                                className="relative lg:ml-auto"
+                                className="relative lg:ml-auto flex justify-center items-center"
                             >
-                                <div className="relative group">
-                                    {/* Phone Container */}
-                                    <div className="w-full max-w-[225px] mx-auto aspect-[10/18] bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-[2.7rem] border-[7px] border-[#2a2a2a] shadow-2xl shadow-black/50 overflow-hidden hover:shadow-[#037166]/40 transition-all duration-500">
-                                        {/* Screen */}
-                                        <div className="h-full relative flex flex-col p-3.5">
-                                            {/* App Header */}
-                                            <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-white/10">
-                                                <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                                                    {globalSettings?.workerLogo ? (
-                                                        <img loading="lazy" decoding="async" 
-                                                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.workerLogo}`} 
-                                                            alt="Partner Logo" 
-                                                            className="w-full h-full object-contain p-2"
-                                                        />
-                                                    ) : (
-                                                        <TrendingUp className="w-5 h-5 text-[#037166]" />
-                                                    )}
-                                                </div>
-                                                    <div className="text-right">
-                                                        <div className="text-[10px] text-white/50">₹74000</div>
-                                                        <div className="text-[11px] font-bold text-[#04a99d]">This Month</div>
-                                                    </div>
-                                            </div>
-
-                                            {/* Stats Cards */}
-                                            <div className="space-y-2 mb-3">
-                                                <div className="p-2.5 rounded-2xl bg-gradient-to-r from-white/10 to-white/5 border border-white/20 backdrop-blur-sm flex items-center gap-2.5 hover:bg-white/20 transition-all">
-                                                    <div className="w-9 h-9 bg-[#037166]/20 rounded-lg flex items-center justify-center">
-                                                        <Wallet className="w-4 h-4 text-[#04a99d]" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="text-[10px] text-white/60 truncate">Today's Earnings</div>
-                                                        <div className="text-lg font-black text-white">₹3350</div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="p-2.5 rounded-2xl bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/30 backdrop-blur-sm flex items-center gap-2.5 hover:bg-blue-500/20 transition-all">
-                                                    <div className="w-9 h-9 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                                        <Users className="w-4 h-4 text-blue-400" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="text-[10px] text-white/60 truncate">Pending Jobs</div>
-                                                        <div className="text-lg font-black text-white">7 Active</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* CTA Button */}
-                                            <button className="w-full py-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-xs text-white font-bold shadow-2xl hover:shadow-[#037166]/50 hover:scale-[1.02] transition-all duration-200">
-                                                Accept New Job
-                                            </button>
-
-                                             {/* Quick Stats */}
-                                <div className="flex flex-wrap gap-2.5 pt-3">
-                                    {PartnerStats.slice(0, 2).map((stat, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.6 + i * 0.1 }}
-                                            className="flex items-center gap-1 p-2 flex-col rounded-xl bg-white border border-[#d9ebe7] shadow-sm"
-                                        >
-                                            <stat.icon className="w-3.5 h-3.5 text-[#04a99d]" />
-                                            <div>
-                                                <div className="text-[11px] text-center font-black text-[#0f172a]">{stat.value}</div>
-                                                <div className="text-[10px] text-gray-600">{stat.label}</div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                                        </div>
-
-                                    </div>
+                                <div className="relative group max-w-[210px] sm:max-w-[230px] md:max-w-[250px] w-full flex justify-center">
+                                    {/* Background glow */}
+                                    <div className="absolute -inset-2 bg-gradient-to-r from-[#037166]/25 to-[#04a99d]/25 rounded-[2.5rem] blur-lg opacity-60 group-hover:opacity-100 transition duration-500" />
+                                    <img
+                                        loading="lazy"
+                                        decoding="async"
+                                        src="/service-partner-phone-image.webp"
+                                        alt="Doorstep Hub Service Partner App"
+                                        className="relative w-full h-auto max-h-[420px] sm:max-h-[440px] md:max-h-[460px] object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-[1.02]"
+                                    />
                                 </div>
                             </motion.div>
                         </div>
@@ -406,7 +360,7 @@ export default function ServicePartnerPage() {
 
                 <ProviderAuthOnboardingSection />
 
-                <SubscriptionPlansSection />
+                {isPartnerLoggedIn && <SubscriptionPlansSection />}
 
                 {/* How It Works — Download App CTA */}
                <section id="app-download" className="relative min-h-[82vh] lg:min-h-[86vh] flex items-center overflow-hidden py-8 lg:py-10">
@@ -881,10 +835,28 @@ function PlanSkeleton() {
 }
 
 function SubscriptionPlansSection() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [apiPlans, setApiPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(true);
 
   useEffect(() => {
+    const checkPartnerSession = () => {
+      const session = getStoredProviderSession();
+      setIsLoggedIn(Boolean(session?.token));
+    };
+    checkPartnerSession();
+    window.addEventListener('storage', checkPartnerSession);
+    window.addEventListener('partner:login-success', checkPartnerSession);
+    window.addEventListener('provider-auth:change', checkPartnerSession);
+    return () => {
+      window.removeEventListener('storage', checkPartnerSession);
+      window.removeEventListener('partner:login-success', checkPartnerSession);
+      window.removeEventListener('provider-auth:change', checkPartnerSession);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
     const fetchPlans = async () => {
       try {
         const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
@@ -900,7 +872,9 @@ function SubscriptionPlansSection() {
       }
     };
     fetchPlans();
-  }, []);
+  }, [isLoggedIn]);
+
+  if (!isLoggedIn) return null;
 
   // Map API plans to display format
   const plans = apiPlans.map((plan, index) => {

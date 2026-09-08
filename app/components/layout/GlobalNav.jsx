@@ -81,7 +81,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
             >
               <div className="relative w-48 h-14 overflow-hidden flex-shrink-0">
                 <Image
-                  src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+                  src={globalSettings?.applicaionLogo ? (globalSettings.applicaionLogo.startsWith('http') ? globalSettings.applicaionLogo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${globalSettings.applicaionLogo.replace(/^\/+/, '')}`) : "/d-hub-logo.png"}
                   alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
                   fill
                   sizes="192px"

@@ -53,7 +53,7 @@ export function Navigation({ onLogoClick, onCartClick, cartItemCount = 0 }) {
             className="flex items-center gap-3 text-2xl font-bold cursor-pointer p-1 -m-1"
           >
             <Image
-              src={globalSettings?.applicaionLogo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${globalSettings.applicaionLogo}` : "/d-hub-logo.png"}
+              src={globalSettings?.applicaionLogo ? (globalSettings.applicaionLogo.startsWith('http') ? globalSettings.applicaionLogo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${globalSettings.applicaionLogo.replace(/^\/+/, '')}`) : "/d-hub-logo.png"}
               alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
               width={32}
               height={32}

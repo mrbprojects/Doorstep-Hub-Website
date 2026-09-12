@@ -657,7 +657,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             <div className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-[#FF4900]/15 blur-3xl pointer-events-none" />
 
             <div className="relative z-10 grid lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-7 space-y-5 text-left">
+              <div className="lg:col-span-7 xl:col-span-8 space-y-5 text-left">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-[#6ee7b7]">
                   <Sparkles className="w-4 h-4 text-[#34d399]" />
                   <span>Doorstep Hub Appliance Service</span>
@@ -671,19 +671,19 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   Doorstep Hub verified expert technicians provide fast on-site repair, genuine spare parts, and a <strong className="text-white font-semibold">30-day service warranty</strong> right at your doorstep. No waiting, no confusion!
                 </p>
 
-                {/* Direct Action Buttons */}
-                <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
+                {/* Direct Action Buttons in One Row */}
+                <div className="pt-2 flex items-center gap-2 sm:gap-2.5 flex-wrap lg:flex-nowrap">
                   <button
                     onClick={() => router.push('/book-appointment')}
-                    className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF4900] hover:from-[#ff7a1a] hover:to-[#e04000] text-white font-bold text-sm sm:text-base shadow-lg shadow-[#FF4900]/30 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-4 sm:px-4.5 py-3 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF4900] hover:from-[#ff7a1a] hover:to-[#e04000] text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#FF4900]/30 hover:shadow-xl hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
                   >
-                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <Calendar className="w-4 h-4" />
                     <span>Book Instant Appointment</span>
                   </button>
 
                   <button
                     onClick={() => router.push('/appliance-repairs')}
-                    className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 text-white font-semibold text-sm sm:text-base hover:-translate-y-0.5 transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 text-white font-semibold text-xs sm:text-sm hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
                   >
                     <Wrench className="w-4 h-4" />
                     <span>Browse All Services</span>
@@ -693,19 +693,13 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     href={`https://wa.me/918886688666?text=${encodeURIComponent(`Hi, I need doorstep repair service for ${formattedTitle}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-sm hover:-translate-y-0.5 transition-all shadow-md"
+                    className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-xs sm:text-sm hover:-translate-y-0.5 transition-all shadow-md whitespace-nowrap flex-shrink-0"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>WhatsApp Us</span>
                   </a>
 
-                  <a
-                    href="tel:08886688666"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-sm font-medium transition-colors"
-                  >
-                    <Phone className="w-4 h-4 text-[#34d399]" />
-                    <span>08886688666</span>
-                  </a>
+        
                 </div>
 
                 {/* Quick Trust Pillars */}
@@ -730,7 +724,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
               </div>
 
               {/* Right: Quick Booking Card / Visual Showcase */}
-              <div className="lg:col-span-5">
+              <div className="lg:col-span-5 xl:col-span-4">
                 <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-5 sm:p-7 shadow-xl text-left space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-white/15">
                     <div>
@@ -833,11 +827,15 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   <ul className="text-xs text-white/70 space-y-2 text-left">
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-[#2dd4bf] flex-shrink-0" />
-                      <span>Instant ₹100 OFF on first booking</span>
+                      <span>Instant ₹100 Welcome Bonus</span>
+                    </li>
+                     <li className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-[#2dd4bf] flex-shrink-0" />
+                      <span>Book Service With ₹99 and pay only ₹175 after service completion </span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-[#2dd4bf] flex-shrink-0" />
-                      <span>Live GPS tracking of assigned technician</span>
+                      <span>Real-time tracking of technician</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-[#2dd4bf] flex-shrink-0" />
@@ -850,7 +848,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     rel="noopener noreferrer"
                     className="inline-block w-full py-2.5 rounded-xl bg-white text-[#003831] font-bold text-xs hover:bg-gray-100 transition-colors"
                   >
-                    Install Free App
+                    Download App Now
                   </a>
                 </div>
               </div>
@@ -874,35 +872,35 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             </button>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
             {popularServices.map((srv, idx) => (
               <div
                 key={idx}
-                className="group relative rounded-2xl bg-white border border-gray-200/80 p-5 hover:shadow-xl hover:border-[#037166]/40 transition-all duration-300 flex flex-col justify-between"
+                className="group relative rounded-2xl bg-white border border-gray-200/80 p-3.5 sm:p-4 hover:shadow-xl hover:border-[#037166]/40 transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <span className="text-3xl p-2.5 rounded-xl bg-gray-50 border border-gray-100">{srv.icon}</span>
-                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#037166]/10 text-[#037166]">
+                  <div className="flex items-start justify-between gap-1.5 mb-2.5">
+                    <span className="text-2xl p-1.5 rounded-xl bg-gray-50 border border-gray-100">{srv.icon}</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] whitespace-nowrap">
                       {srv.badge}
                     </span>
                   </div>
-                  <h3 className="text-base font-bold text-gray-900 group-hover:text-[#037166] transition-colors">
+                  <h3 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-[#037166] transition-colors line-clamp-2 min-h-[34px]">
                     {srv.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed font-normal">
+                  <p className="text-[11px] sm:text-xs text-gray-500 mt-1 leading-snug line-clamp-2 font-normal">
                     {srv.subtitle}
                   </p>
                 </div>
 
-                <div className="pt-5 mt-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-500">Doorstep Inspection in 60m</span>
+                <div className="pt-2.5 mt-3 border-t border-gray-100 flex items-center justify-between gap-1">
+                  <span className="text-[10px] font-semibold text-gray-400 truncate">In 60 Mins</span>
                   <button
                     onClick={() => router.push(srv.href)}
-                    className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#037166] hover:bg-[#025951] text-white text-xs font-bold shadow-sm transition-colors"
+                    className="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-md bg-[#037166] hover:bg-[#025951] text-white text-[11px] font-bold shadow-sm transition-colors whitespace-nowrap flex-shrink-0"
                   >
                     <span>Book Now</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3 h-3" />
                   </button>
                 </div>
               </div>

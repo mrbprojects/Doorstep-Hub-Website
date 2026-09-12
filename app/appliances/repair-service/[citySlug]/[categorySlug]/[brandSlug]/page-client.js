@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Wrench, Loader2, MapPin, CheckCircle2, Star, HelpCircle, ChevronDown } from 'lucide-react';
-import { fetchServicesByBrand, fetchAuthorizedServices, fetchCities, fetchCategories, fetchAllBrands } from '@/lib/api';
+import { fetchServicesByBrand, fetchAuthorizedServices, fetchAuthorizedServicesByFilters, fetchCities, fetchCategories, fetchAllBrands, resolveMediaUrl } from '@/lib/api';
 import {
   buildFlatBrandCityPublicPath,
   buildFlatBrandPublicPath,
@@ -156,9 +156,12 @@ function ServicePageContent() {
         setSelectedBrand(brandMatch || { name: brandSlug, slug: brandSlug });
 
         const brandName = brandMatch?.name || brandSlug;
+        const brandId = brandMatch?._id || '';
         const [apiResult, authResult] = await Promise.allSettled([
           fetchServicesByBrand(brandName),
-          fetchAuthorizedServices(),
+          brandId
+            ? fetchAuthorizedServicesByFilters({ brandId, citySlug: resolvedCitySlug })
+            : fetchAuthorizedServices(),
         ]);
 
         let apiServices = apiResult.status === 'fulfilled' ? apiResult.value : [];
@@ -339,7 +342,7 @@ function ServicePageContent() {
                   <div className="w-24 sm:w-28 md:w-32 flex-shrink-0 h-full overflow-hidden bg-gray-50 border-r border-gray-100">
                     {service.image ? (
                       <img loading="lazy" decoding="async"
-                        src={`https://devapis.doorstephub.com/${service.image}`}
+                        src={resolveMediaUrl(service.image)}
                         alt={service.serviceName}
                         className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                       />

@@ -9,7 +9,10 @@ import {
     resolveBookNowCityFlatRewrite,
     resolveNearbyBookNowRewrite,
     buildNearbyBookNowPublicPath,
+    DEFAULT_BRAND_SLUGS,
 } from './app/lib/applianceRepairSlugs';
+
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 
 // Fallback slugs to ensure critical routes work even if API is slow or down
 const DEFAULT_SLUGS = {
@@ -41,12 +44,12 @@ let slugCache = {
 const CACHE_DURATION = 1000 * 60 * 10; // 10 minutes
 
 let brandSlugCache = {
-    slugs: new Set(),
+    slugs: new Set(DEFAULT_BRAND_SLUGS),
     timestamp: 0,
 };
 
 let slugRegistryCache = {
-    registry: null,
+    registry: createSlugRegistry({ brandSlugs: DEFAULT_BRAND_SLUGS }),
     timestamp: 0,
 };
 
@@ -58,14 +61,14 @@ async function getSlugRegistry() {
 
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500);
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
 
         const [brandsRes, servicesRes] = await Promise.allSettled([
-            fetch('https://devapis.doorstephub.com/v1/dhubApi/app/brands/all_brands', {
+            fetch(`${API_BASE_URL}/app/brands/all_brands`, {
                 signal: controller.signal,
                 next: { revalidate: 600 },
             }),
-            fetch('https://devapis.doorstephub.com/v1/dhubApi/app/authorized-services/all_authorized_services', {
+            fetch(`${API_BASE_URL}/app/authorized-services/all_authorized_services`, {
                 signal: controller.signal,
                 next: { revalidate: 600 },
             }),
@@ -73,13 +76,13 @@ async function getSlugRegistry() {
 
         clearTimeout(timeoutId);
 
-        const brandSlugs = [];
+        const brandSlugs = [...DEFAULT_BRAND_SLUGS];
         if (brandsRes.status === 'fulfilled' && brandsRes.value.ok) {
             const data = await brandsRes.value.json();
             if (data.success && Array.isArray(data.brands)) {
                 data.brands.forEach((brand) => {
                     const slug = String(brand.slug || '').trim().toLowerCase();
-                    if (slug) brandSlugs.push(slug);
+                    if (slug && !brandSlugs.includes(slug)) brandSlugs.push(slug);
                 });
             }
         }
@@ -103,12 +106,12 @@ async function getSlugRegistry() {
         console.error('Middleware slug registry fetch failed:', error);
     }
 
-    return slugRegistryCache.registry || createSlugRegistry();
+    return slugRegistryCache.registry || createSlugRegistry({ brandSlugs: DEFAULT_BRAND_SLUGS });
 }
 
 async function getBrandSlugSet() {
     const registry = await getSlugRegistry();
-    return registry?.brandSlugs instanceof Set ? registry.brandSlugs : new Set();
+    return registry?.brandSlugs instanceof Set ? registry.brandSlugs : new Set(DEFAULT_BRAND_SLUGS);
 }
 
 async function getDynamicSlugs() {
@@ -132,7 +135,7 @@ async function getDynamicSlugs() {
         const results = await Promise.allSettled(
             serviceIds.map(async (service) => {
                 try {
-                    const res = await fetch(`https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/get_slugs_by_serviceId/${service.id}`, {
+                    const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/${service.id}`, {
                         signal: controller.signal,
                         next: { revalidate: 600 } // Cache at fetch level too
                     });
@@ -226,6 +229,26 @@ export async function middleware(request) {
             const url = request.nextUrl.clone();
             url.pathname = categoryCityPath;
             return NextResponse.rewrite(url);
+        }
+
+        // Handle URLs ending with /service-list (e.g. /sony-tv-repair-service-center/service-list)
+        if (normalizedPath.endsWith('/service-list')) {
+            const clean = normalizedPath.replace(/\/service-list$/, '');
+            const slug = clean.split('/').pop();
+            if (slug && slug !== 'service-list') {
+                const url = request.nextUrl.clone();
+                url.pathname = `/service-list/${slug}`;
+                return NextResponse.rewrite(url);
+            }
+        }
+
+        // Dedicated /service-list/[slug] pages (except book-now and category subpaths) pass straight through
+        if (
+            normalizedPath.startsWith('service-list/') &&
+            !normalizedPath.startsWith('service-list/book-now/') &&
+            !normalizedPath.startsWith('service-list/category/')
+        ) {
+            return NextResponse.next();
         }
 
         const slugRegistry = (await getSlugRegistry()) || createSlugRegistry();

@@ -22,8 +22,43 @@ function normalizeCitySlug(citySlug = '') {
         .replace(/\s+/g, '-');
 }
 
-function isValidCitySlug(slug = '') {
-    return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+export const RESERVED_CITY_SLUGS = new Set([
+    'service-list',
+    'services',
+    'service',
+    'brand',
+    'brands',
+    'book-now',
+    'categories',
+    'category',
+    'detail',
+    'details',
+    'store',
+    'stores',
+    'center',
+    'centers',
+    'child',
+    'recent',
+    'featured',
+    'nearby',
+    'sell-buy',
+    'api',
+    'appliances',
+    'appliance-repairs',
+    'spa-salon',
+    'religious-services',
+    'pghostels',
+    'account',
+    'cart',
+    'address',
+    'booking-flow',
+    'all-services',
+]);
+
+export function isValidCitySlug(slug = '') {
+    const s = String(slug || '').trim().toLowerCase();
+    if (!s || RESERVED_CITY_SLUGS.has(s)) return false;
+    return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s);
 }
 
 /** Compare city objects or strings by normalized slug/name */
@@ -208,6 +243,47 @@ function normalizeSlugRegistry(registryOrBrandSlugs = null, serviceSlugs = null)
     };
 }
 
+export const DEFAULT_BRAND_SLUGS = [
+    'ao-smith-home-appliance-repair-services',
+    'acer-service-repair-center',
+    'apple-service-repair-center',
+    'bajaj-appliance-repair-service-center',
+    'blue-star-appliance-repair-service-center',
+    'bosch-appliance-repair-service-center',
+    'carrier-appliance-repair-service-center',
+    'crompton-appliance-repair-service-center',
+    'daikin-appliance-repair-service-center',
+    'dell-service-repair-center',
+    'eurekha-forbes-appliance-repair-service-center',
+    'godrej-appliance-repair-service-center',
+    'hp-service-repair-center',
+    'haier-appliance-repair-service-center',
+    'havells-appliance-repair-service-center',
+    'hitachi-ac-repair-service-center',
+    'ifb-appliance-repair-service-center',
+    'kenstar-appliance-repair-service-center',
+    'kent-water-purifier-repair-service-center',
+    'lg-appliance-repair-service-center',
+    'lenovo-service-repair-center',
+    'livpure',
+    'lloyd-appliance-repair-service-center',
+    'mi-tv-repair-service-center',
+    'msi-service-repair-center',
+    'onida-appliance-repair-service-center',
+    'orient-electric-appliance-repair-service-center',
+    'all-brands-tv-repair-service-center',
+    'panasonic-appliance-repair-service-center',
+    'pureit-water-purifier-repar-services',
+    'realme-tv-repair-service-center',
+    'samsung-appliance-repair-service-center',
+    'sony-tv-repair-service-center',
+    'tcl-appliance-repair-service-center',
+    'v-guard-appliance-repair-service-center',
+    'voltas-appliance-repair-service-center',
+    'whirlpool-appliance-repair-service-center'
+];
+const DEFAULT_BRAND_SET = new Set(DEFAULT_BRAND_SLUGS.map((s) => s.toLowerCase()));
+
 /**
  * Brand landing page slug — uses API registry when available.
  * Avoid adding new suffix regex rules; add slugs in admin/API instead.
@@ -218,10 +294,14 @@ export function isBrandPageSlug(brandSlug = '', registryOrBrandSlugs = null, ser
 
     const registry = normalizeSlugRegistry(registryOrBrandSlugs, serviceSlugs);
     if (registry) {
-        return registry.isBrandPage(slug);
+        if (registry.isBrandPage(slug)) return true;
     }
 
     if (registryOrBrandSlugs instanceof Set && registryOrBrandSlugs.has(slug)) {
+        return true;
+    }
+
+    if (DEFAULT_BRAND_SET.has(slug) || isFlatBrandCenterSlug(slug)) {
         return true;
     }
 
@@ -232,16 +312,20 @@ export function isFlatBrandListingSlug(brandSlug = '', registryOrBrandSlugs = nu
     return isBrandPageSlug(brandSlug, registryOrBrandSlugs, serviceSlugs);
 }
 
-function isRegisteredFlatBrandSlug(brandSlug = '', registryOrBrandSlugs = null, serviceSlugs = null) {
+export function isRegisteredFlatBrandSlug(brandSlug = '', registryOrBrandSlugs = null, serviceSlugs = null) {
     const slug = String(brandSlug || '').trim().toLowerCase();
     if (!slug) return false;
 
     const registry = normalizeSlugRegistry(registryOrBrandSlugs, serviceSlugs);
-    if (registry) {
-        return registry.hasBrand(slug);
+    if (registry && registry.hasBrand(slug)) {
+        return true;
     }
 
     if (registryOrBrandSlugs instanceof Set && registryOrBrandSlugs.has(slug)) {
+        return true;
+    }
+
+    if (DEFAULT_BRAND_SET.has(slug) || isFlatBrandCenterSlug(slug)) {
         return true;
     }
 

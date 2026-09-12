@@ -378,6 +378,7 @@ export async function fetchAuthorizedServicesByFilters(filters = {}) {
     const params = new URLSearchParams();
     if (filters.citySlug) params.set('citySlug', filters.citySlug);
     if (filters.categorySlug) params.set('categorySlug', filters.categorySlug);
+    if (filters.brandId) params.set('brandId', filters.brandId);
 
     const query = params.toString();
     const url = query

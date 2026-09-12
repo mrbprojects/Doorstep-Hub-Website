@@ -52,7 +52,11 @@ import { Suspense } from 'react';
 function ServiceCenterContent() {
     const params = useParams();
     const searchParams = useSearchParams();
-    const slug = params.slug;
+    const slug = (Array.isArray(params?.slug) ? params.slug[0] : params?.slug) || (
+        typeof window !== 'undefined'
+            ? window.location.pathname.replace(/^\/+|\/+$/g, '').replace(/\/service-list$/, '').split('/').pop()
+            : ''
+    );
     const serviceId = searchParams.get('serviceId');
 
     return (

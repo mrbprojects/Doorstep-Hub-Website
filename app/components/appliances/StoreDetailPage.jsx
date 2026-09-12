@@ -24,6 +24,7 @@ import {
   Download,
   Wrench,
   ChevronRight,
+  ChevronLeft,
   MessageCircle,
   Zap,
   ShieldCheck,
@@ -36,6 +37,106 @@ import { ADSENSE_CONFIG } from '@/config/adsense';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
 import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
+import { fetchCategories, fetchSubcategoriesByCategorySlug } from '@/lib/api';
+
+const DEFAULT_APPLIANCE_SUBCATEGORIES = [
+  {
+    _id: 'sub_tv',
+    title: 'TV Repair & Installation',
+    subtitle: 'LED, LCD, Smart TV, Screen, Motherboard & Sound fixes',
+    icon: '📺',
+    badge: 'Popular',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_ac',
+    title: 'AC Repair & Deep Jet Service',
+    subtitle: 'Deep Jet Cleaning, Gas Refill, Cooling & PCB repair',
+    icon: '❄️',
+    badge: 'Seasonal Deal',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_wm',
+    title: 'Washing Machine Service',
+    subtitle: 'Front & Top load, Drum, Motor, Drainage & PCB issues',
+    icon: '🧺',
+    badge: 'Quick Fix',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_fridge',
+    title: 'Refrigerator Repair',
+    subtitle: 'Single & Double Door, Compressor, Gas charging & Cooling',
+    icon: '🧊',
+    badge: 'Fast Support',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_micro',
+    title: 'Microwave & Kitchen Care',
+    subtitle: 'Heating issues, Magnetron, Turntable & Control Panel repair',
+    icon: '🍲',
+    badge: 'Expert Care',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_ro',
+    title: 'Water Purifier (RO) Service',
+    subtitle: 'Filter change, Membrane replacement, TDS & Taste control',
+    icon: '💧',
+    badge: 'Essential',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_chimney',
+    title: 'Kitchen Chimney Service',
+    subtitle: 'Deep duct cleaning, motor repair, filter change & oil cup fix',
+    icon: '💨',
+    badge: 'Trending',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_geyser',
+    title: 'Geyser & Water Heater',
+    subtitle: 'Thermostat replacement, element repair, water leak & scaling',
+    icon: '🔥',
+    badge: 'Verified',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_hob',
+    title: 'Gas Stove & Kitchen Hob',
+    subtitle: 'Burner cleaning, flame issues, gas leak & auto-ignition repair',
+    icon: '⚡',
+    badge: 'Top Rated',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_cooler',
+    title: 'Air Cooler Repair & Pump',
+    subtitle: 'Motor rewinding, pump replacement, wiring & pad cleaning',
+    icon: '🌬️',
+    badge: 'Quick Fix',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_dish',
+    title: 'Dishwasher Maintenance',
+    subtitle: 'Spray arm, water leakage, drainage pump & error code repair',
+    icon: '🍽️',
+    badge: 'Specialist',
+    href: '/appliance-repairs',
+  },
+  {
+    _id: 'sub_inverter',
+    title: 'Inverter & UPS Service',
+    subtitle: 'Battery charging, backup issues, PCB fix & wiring check',
+    icon: '🔋',
+    badge: 'Safe & Verified',
+    href: '/appliance-repairs',
+  },
+];
 
 // ── Map Configuration ──
 const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
@@ -109,6 +210,31 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     }
   };
 
+  // Subcategory horizontal scroll ref & state
+  const subcatScrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [dynamicApplianceSubcategories, setDynamicApplianceSubcategories] = useState(DEFAULT_APPLIANCE_SUBCATEGORIES);
+
+  const checkSubcatScroll = useCallback(() => {
+    if (subcatScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = subcatScrollRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  }, []);
+
+  const scrollSubcategories = (direction) => {
+    if (subcatScrollRef.current) {
+      const scrollAmount = subcatScrollRef.current.clientWidth * 0.85;
+      subcatScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+      setTimeout(checkSubcatScroll, 400);
+    }
+  };
+
   // Addons popup state
   const [showAddonsPopup, setShowAddonsPopup] = useState(false);
   const [currentService, setCurrentService] = useState(null);
@@ -157,6 +283,66 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
 
     fetchSubcategories();
   }, [resolvedProviderId]);
+
+  // Load all appliance repair subcategories dynamically for the exploration carousel
+  useEffect(() => {
+    let isMounted = true;
+    const loadDynamicSubcategories = async () => {
+      try {
+        const cats = await fetchCategories(location);
+        if (!isMounted || !Array.isArray(cats) || cats.length === 0) return;
+
+        const results = await Promise.allSettled(
+          cats.slice(0, 10).map((cat) =>
+            fetchSubcategoriesByCategorySlug(cat.slug, location).then((subs) => ({
+              catName: cat.name,
+              catSlug: cat.slug,
+              subs,
+            }))
+          )
+        );
+
+        if (!isMounted) return;
+        const merged = [];
+        const badgeList = ['Popular', 'Quick Fix', 'Seasonal Deal', 'Fast Support', 'Expert Care', 'Essential', 'Top Rated', 'Verified'];
+        const iconList = ['📺', '❄️', '🧺', '🧊', '🍲', '💧', '💨', '🔥', '⚡', '🌬️', '🍽️', '🔋'];
+        let idx = 0;
+
+        results.forEach((res) => {
+          if (res.status === 'fulfilled' && Array.isArray(res.value?.subs)) {
+            res.value.subs.forEach((sub) => {
+              merged.push({
+                _id: sub._id,
+                title: sub.name,
+                subtitle: sub.title || sub.description || `Expert doorstep repair & service for ${sub.name}`,
+                icon: sub.image ? (
+                  <img
+                    src={sub.image.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image}`}
+                    alt={sub.name}
+                    className="w-7 h-7 object-contain rounded-lg"
+                  />
+                ) : iconList[idx % iconList.length],
+                badge: badgeList[idx % badgeList.length],
+                href: sub.slug ? `/${sub.slug}` : `/appliance-repairs`,
+              });
+              idx++;
+            });
+          }
+        });
+
+        if (merged.length > 0) {
+          setDynamicApplianceSubcategories(merged);
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic appliance subcategories:', err);
+      }
+    };
+
+    loadDynamicSubcategories();
+    return () => {
+      isMounted = false;
+    };
+  }, [location?.lat, location?.lng]);
 
   // Handle subcategory filtering
   const handleSubcategoryTabChange = async (subcatId) => {
@@ -591,51 +777,6 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
       globalSettings?.customerIosAppLink ||
       'https://apps.apple.com/in/app/doorstep-hub/id6475340236';
 
-    const popularServices = [
-      {
-        title: 'TV Repair & Installation',
-        subtitle: 'LED, LCD, Smart TV, Screen, Motherboard & Sound fixes',
-        icon: '📺',
-        badge: 'Popular',
-        href: '/appliance-repairs',
-      },
-      {
-        title: 'AC Repair & Service',
-        subtitle: 'Deep Jet Cleaning, Gas Refill, Cooling & PCB repair',
-        icon: '❄️',
-        badge: 'Seasonal Deal',
-        href: '/appliance-repairs',
-      },
-      {
-        title: 'Washing Machine Service',
-        subtitle: 'Front & Top load, Drum, Motor, Drainage & PCB issues',
-        icon: '🧺',
-        badge: 'Quick Fix',
-        href: '/appliance-repairs',
-      },
-      {
-        title: 'Refrigerator Repair',
-        subtitle: 'Single & Double Door, Compressor, Gas charging & Cooling',
-        icon: '🧊',
-        badge: 'Fast Support',
-        href: '/appliance-repairs',
-      },
-      {
-        title: 'Microwave & Kitchen Care',
-        subtitle: 'Heating issues, Magnetron, Turntable & Control Panel repair',
-        icon: '🍲',
-        badge: 'Expert Care',
-        href: '/appliance-repairs',
-      },
-      {
-        title: 'Water Purifier (RO) Service',
-        subtitle: 'Filter change, Membrane replacement, TDS & Taste control',
-        icon: '💧',
-        badge: 'Essential',
-        href: '/appliance-repairs',
-      },
-    ];
-
     return (
       <div className="appliance-detail-page min-h-screen pt-20 pb-20 bg-[#F8FAFC]">
         {/* Top Breadcrumb */}
@@ -674,6 +815,15 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 {/* Direct Action Buttons in One Row */}
                 <div className="pt-2 flex items-center gap-2 sm:gap-2.5 flex-wrap lg:flex-nowrap">
                   <button
+                    onClick={() => router.push('/appliance-repairs')}
+                    className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 text-white font-semibold text-xs sm:text-sm hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
+                  >
+                    <Wrench className="w-4 h-4" />
+                    <span>Browse All Services</span>
+                  </button>
+                 
+                 
+                  <button
                     onClick={() => router.push('/book-appointment')}
                     className="inline-flex items-center justify-center gap-2 px-4 sm:px-4.5 py-3 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF4900] hover:from-[#ff7a1a] hover:to-[#e04000] text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#FF4900]/30 hover:shadow-xl hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
                   >
@@ -681,13 +831,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     <span>Book Instant Appointment</span>
                   </button>
 
-                  <button
-                    onClick={() => router.push('/appliance-repairs')}
-                    className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 text-white font-semibold text-xs sm:text-sm hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
-                  >
-                    <Wrench className="w-4 h-4" />
-                    <span>Browse All Services</span>
-                  </button>
+                 
 
                   <a
                     href={`https://wa.me/918886688666?text=${encodeURIComponent(`Hi, I need doorstep repair service for ${formattedTitle}`)}`}
@@ -856,31 +1000,59 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           </div>
         </div>
 
-        {/* Popular Services Grid */}
+        {/* Popular Services & Subcategories Horizontal Scroll with Manual Left/Right Chevrons */}
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-left">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
               <p className="text-xs sm:text-sm font-bold text-[#037166] uppercase tracking-wider">Explore Services</p>
               <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">Popular Appliance Repairs at Doorstep</h2>
             </div>
-            <button
-              onClick={() => router.push('/appliance-repairs')}
-              className="text-sm font-bold text-[#037166] hover:text-[#04a99d] inline-flex items-center gap-1 transition-colors"
-            >
-              <span>View All Categories</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollSubcategories('left')}
+                disabled={!canScrollLeft}
+                className="w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm transition-all hover:border-[#037166]/40"
+                aria-label="Previous subcategories"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollSubcategories('right')}
+                disabled={!canScrollRight}
+                className="w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm transition-all hover:border-[#037166]/40"
+                aria-label="Next subcategories"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/appliance-repairs')}
+                className="hidden sm:inline-flex text-sm font-bold text-[#037166] hover:text-[#04a99d] items-center gap-1 transition-colors ml-2"
+              >
+                <span>View All Categories</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-            {popularServices.map((srv, idx) => (
+          <div
+            ref={subcatScrollRef}
+            onScroll={checkSubcatScroll}
+            className="flex items-stretch gap-3 sm:gap-4 overflow-x-auto scroll-smooth pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {dynamicApplianceSubcategories.map((srv, idx) => (
               <div
-                key={idx}
-                className="group relative rounded-2xl bg-white border border-gray-200/80 p-3.5 sm:p-4 hover:shadow-xl hover:border-[#037166]/40 transition-all duration-300 flex flex-col justify-between"
+                key={srv._id || idx}
+                className="flex-shrink-0 w-[185px] sm:w-[195px] lg:w-[calc((100%-5*16px)/6)] group relative rounded-2xl bg-white border border-gray-200/80 p-3.5 sm:p-4 hover:shadow-xl hover:border-[#037166]/40 transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-1.5 mb-2.5">
-                    <span className="text-2xl p-1.5 rounded-xl bg-gray-50 border border-gray-100">{srv.icon}</span>
+                    <span className="text-2xl p-1.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center min-w-[36px] min-h-[36px]">
+                      {srv.icon}
+                    </span>
                     <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] whitespace-nowrap">
                       {srv.badge}
                     </span>
@@ -896,7 +1068,8 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                 <div className="pt-2.5 mt-3 border-t border-gray-100 flex items-center justify-between gap-1">
                   <span className="text-[10px] font-semibold text-gray-400 truncate">In 60 Mins</span>
                   <button
-                    onClick={() => router.push(srv.href)}
+                    type="button"
+                    onClick={() => router.push(srv.href || '/appliance-repairs')}
                     className="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-md bg-[#037166] hover:bg-[#025951] text-white text-[11px] font-bold shadow-sm transition-colors whitespace-nowrap flex-shrink-0"
                   >
                     <span>Book Now</span>
@@ -912,7 +1085,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-left">
           <div className="rounded-2xl bg-white border border-gray-200/80 p-6 sm:p-8">
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 text-center mb-6">
-              Why 10,000+ Customers Trust Doorstep Hub
+              Why Customers Trust Doorstep Hub
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               <div className="space-y-2">

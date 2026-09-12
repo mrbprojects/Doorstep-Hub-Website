@@ -422,7 +422,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
         body: fd,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       // ── KYC PENDING / DRAFT AD HANDLING ─────────────────────────────────────
       if (!isEditMode && (data?.isDraft || data?.kycRequired || res.status === 403)) {
@@ -437,7 +437,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
         toast.success(
           isEditMode
             ? 'Advertisement updated successfully and submitted for admin review.'
-            : 'Advertisement submitted successfully! It is under review and will go live once approved by the admin.'
+            : 'Advertisement submitted successfully! It is under review and will go live once approved .'
         );
         onClose();
         if (typeof window !== 'undefined') {
@@ -448,7 +448,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
       }
     } catch (err) {
       console.error('Error posting ad in modal:', err);
-      toast.error('An error occurred while posting your ad.');
+      toast.error(err?.message || 'An error occurred while posting your ad.');
     } finally {
       setSubmitting(false);
     }

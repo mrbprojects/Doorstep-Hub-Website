@@ -131,13 +131,20 @@ export const fetchFeaturedSections = async () => {
 
 // ─── Post / Create Listing ────────────────────────────────────────────────────
 
-export const createSellBuyListing = async (formData) => {
+export const createSellBuyListing = async (formData, token = '') => {
   try {
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API_BASE}/sell-buy/add-item`, {
       method: 'POST',
+      headers,
       body: formData, // FormData (multipart)
     });
-    return await res.json();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok && !data.message) {
+      return { success: false, error: true, message: `Server error (${res.status})` };
+    }
+    return data;
   } catch (err) {
     console.error('Error creating sell-buy listing:', err);
     return { success: false, error: true, message: err.message };

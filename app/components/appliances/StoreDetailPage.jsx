@@ -19,7 +19,15 @@ import {
   Check,
   Sparkles,
   ThumbsUp, CheckCheck, Loader2, Store,
-  VerifiedIcon
+  VerifiedIcon,
+  Smartphone,
+  Download,
+  Wrench,
+  ChevronRight,
+  MessageCircle,
+  Zap,
+  ShieldCheck,
+  ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -296,8 +304,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           console.log('Service center data loaded:', data);
         }
       } catch (error) {
-        console.error('Error fetching service center details:', error);
-        toast.error('Failed to load service center details');
+        console.warn('[StoreDetailPage] Service center slug not directly found, falling back to instant doorstep booking view:', error);
       } finally {
         setLoading(false);
       }
@@ -568,11 +575,378 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   }
 
   if (!centerData) {
+    const formattedTitle = storeId
+      ? storeId
+          .replace(/[-_]+/g, ' ')
+          .trim()
+          .split(' ')
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ')
+      : 'Doorstep Appliance Repair & Service';
+
+    const playStoreUrl =
+      globalSettings?.customerAndroidAppLink ||
+      'https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share';
+    const appStoreUrl =
+      globalSettings?.customerIosAppLink ||
+      'https://apps.apple.com/in/app/doorstep-hub/id6475340236';
+
+    const popularServices = [
+      {
+        title: 'TV Repair & Installation',
+        subtitle: 'LED, LCD, Smart TV, Screen, Motherboard & Sound fixes',
+        icon: '📺',
+        badge: 'Popular',
+        href: '/appliance-repairs',
+      },
+      {
+        title: 'AC Repair & Service',
+        subtitle: 'Deep Jet Cleaning, Gas Refill, Cooling & PCB repair',
+        icon: '❄️',
+        badge: 'Seasonal Deal',
+        href: '/appliance-repairs',
+      },
+      {
+        title: 'Washing Machine Service',
+        subtitle: 'Front & Top load, Drum, Motor, Drainage & PCB issues',
+        icon: '🧺',
+        badge: 'Quick Fix',
+        href: '/appliance-repairs',
+      },
+      {
+        title: 'Refrigerator Repair',
+        subtitle: 'Single & Double Door, Compressor, Gas charging & Cooling',
+        icon: '🧊',
+        badge: 'Fast Support',
+        href: '/appliance-repairs',
+      },
+      {
+        title: 'Microwave & Kitchen Care',
+        subtitle: 'Heating issues, Magnetron, Turntable & Control Panel repair',
+        icon: '🍲',
+        badge: 'Expert Care',
+        href: '/appliance-repairs',
+      },
+      {
+        title: 'Water Purifier (RO) Service',
+        subtitle: 'Filter change, Membrane replacement, TDS & Taste control',
+        icon: '💧',
+        badge: 'Essential',
+        href: '/appliance-repairs',
+      },
+    ];
+
     return (
-      <div className="appliance-detail-page min-h-screen pt-24 pb-20 bg-gray-50/30 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500 text-lg font-medium">Service center not found.</p>
-          <button onClick={() => router.back()} className="mt-4 px-6 py-2 rounded-full bg-[#037166] text-white font-semibold text-sm hover:bg-[#04a99d] transition-colors">Go Back</button>
+      <div className="appliance-detail-page min-h-screen pt-20 pb-20 bg-[#F8FAFC]">
+        {/* Top Breadcrumb */}
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 flex-wrap">
+            <button onClick={() => router.push('/')} className="hover:text-[#037166] transition-colors">Home</button>
+            <span>/</span>
+            <button onClick={() => router.push('/appliance-repairs')} className="hover:text-[#037166] transition-colors">Appliance Repairs</button>
+            <span>/</span>
+            <span className="text-gray-800 font-semibold truncate max-w-[280px] sm:max-w-md">{formattedTitle}</span>
+          </div>
+        </div>
+
+        {/* Hero Banner Section */}
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#003831] via-[#025951] to-[#037166] text-white p-6 sm:p-10 lg:p-12 shadow-2xl border border-white/10">
+            {/* Background Glows */}
+            <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#04a99d]/20 blur-3xl pointer-events-none" />
+            <div className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-[#FF4900]/15 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 grid lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-7 space-y-5 text-left">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-[#6ee7b7]">
+                  <Sparkles className="w-4 h-4 text-[#34d399]" />
+                  <span>Doorstep Hub Appliance Service</span>
+                </div>
+
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white">
+                  Looking for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5eead4] to-[#fef08a]">{formattedTitle}</span>?
+                </h1>
+
+                <p className="text-white/85 text-sm sm:text-base lg:text-lg leading-relaxed max-w-2xl font-normal">
+                  Doorstep Hub verified expert technicians provide fast on-site repair, genuine spare parts, and a <strong className="text-white font-semibold">30-day service warranty</strong> right at your doorstep. No waiting, no confusion!
+                </p>
+
+                {/* Direct Action Buttons */}
+                <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
+                  <button
+                    onClick={() => router.push('/book-appointment')}
+                    className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF4900] hover:from-[#ff7a1a] hover:to-[#e04000] text-white font-bold text-sm sm:text-base shadow-lg shadow-[#FF4900]/30 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                  >
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>Book Instant Appointment</span>
+                  </button>
+
+                  <button
+                    onClick={() => router.push('/appliance-repairs')}
+                    className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 text-white font-semibold text-sm sm:text-base hover:-translate-y-0.5 transition-all"
+                  >
+                    <Wrench className="w-4 h-4" />
+                    <span>Browse All Services</span>
+                  </button>
+
+                  <a
+                    href={`https://wa.me/918886688666?text=${encodeURIComponent(`Hi, I need doorstep repair service for ${formattedTitle}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-sm hover:-translate-y-0.5 transition-all shadow-md"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>WhatsApp Us</span>
+                  </a>
+
+                  <a
+                    href="tel:08886688666"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-sm font-medium transition-colors"
+                  >
+                    <Phone className="w-4 h-4 text-[#34d399]" />
+                    <span>08886688666</span>
+                  </a>
+                </div>
+
+                {/* Quick Trust Pillars */}
+                <div className="pt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-white/15">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-[#34d399] flex-shrink-0" />
+                    <span className="text-xs text-white/90 font-medium">Doorstep in 60 Mins</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#34d399] flex-shrink-0" />
+                    <span className="text-xs text-white/90 font-medium">30-Day Warranty</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCheck className="w-4 h-4 text-[#34d399] flex-shrink-0" />
+                    <span className="text-xs text-white/90 font-medium">Verified Experts</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-amber-400 fill-amber-400 flex-shrink-0" />
+                    <span className="text-xs text-white/90 font-medium">4.8★ Top Rated</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Quick Booking Card / Visual Showcase */}
+              <div className="lg:col-span-5">
+                <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-5 sm:p-7 shadow-xl text-left space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/15">
+                    <div>
+                      <p className="text-xs font-semibold text-[#6ee7b7] uppercase tracking-wider">Fast Home Service</p>
+                      <h3 className="text-lg font-bold text-white">Instant Service Request</h3>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF6B00] to-[#FF4900] flex items-center justify-center text-white shadow-md">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
+                    Skip the hassle of visiting a service center. Tell us your issue, and our nearest verified technician will visit your location.
+                  </p>
+
+                  <div className="space-y-2 text-xs sm:text-sm text-white/90">
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/10">
+                      <span className="w-6 h-6 rounded-full bg-[#037166] text-white flex items-center justify-center text-xs font-bold">1</span>
+                      <span>Select your appliance & problem</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/10">
+                      <span className="w-6 h-6 rounded-full bg-[#037166] text-white flex items-center justify-center text-xs font-bold">2</span>
+                      <span>Technician arrives at your selected time</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/10">
+                      <span className="w-6 h-6 rounded-full bg-[#037166] text-white flex items-center justify-center text-xs font-bold">3</span>
+                      <span>Inspect, repair & pay after service completion</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => router.push('/book-appointment')}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#04a99d] to-[#037166] hover:from-[#05b8ab] hover:to-[#025951] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>Schedule Booking Now</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stylish Mobile App Download Banner */}
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#0c1a17] via-[#091411] to-[#040e0b] border border-[#037166]/30 text-white p-6 sm:p-10 lg:p-12 shadow-xl">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 bg-[#037166]/20 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 grid lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-8 space-y-4 text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#037166]/20 border border-[#037166]/40 text-xs font-semibold text-[#2dd4bf]">
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>DOORSTEP HUB MOBILE APP</span>
+                </div>
+
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                  Download Doorstep Hub App — <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2dd4bf] to-[#99f6e4]">Bookings Made Effortless</span>
+                </h2>
+
+                <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-2xl">
+                  Get 1-click doorstep appliance repairs, real-time live GPS technician tracking, transparent pricing, and instant customer chat support right on your phone.
+                </p>
+
+                <div className="pt-2 flex flex-wrap items-center gap-4">
+                  <a
+                    href={playStoreUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center w-40 sm:w-44 h-12 sm:h-14 bg-gradient-to-br from-[#037166] to-[#04a99d] rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all overflow-hidden border border-[#037166]/30 p-2"
+                    title="Get it on Google Play"
+                  >
+                    <img src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain brightness-0 invert opacity-95" loading="lazy" />
+                  </a>
+
+                  <a
+                    href={appStoreUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center w-40 sm:w-44 h-12 sm:h-14 bg-gradient-to-br from-[#037166] to-[#04a99d] rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all overflow-hidden border border-[#9ecbc3] p-2"
+                    title="Download on App Store"
+                  >
+                    <img src="/apple2.png" alt="App Store" className="h-full w-auto object-contain brightness-0 invert opacity-95" loading="lazy" />
+                  </a>
+
+                  <div className="flex items-center gap-2 pl-2">
+                    <div className="flex text-amber-400">
+                      {'★'.repeat(5)}
+                    </div>
+                    <span className="text-xs sm:text-sm text-white/80 font-medium">4.8 / 5 Rating</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-4 flex justify-center lg:justify-end">
+                <div className="w-full max-w-xs rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-md text-center space-y-3">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-[#037166] text-white flex items-center justify-center shadow-lg shadow-[#037166]/40">
+                    <Download className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-base font-bold text-white">App-Exclusive Benefits</h4>
+                  <ul className="text-xs text-white/70 space-y-2 text-left">
+                    <li className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-[#2dd4bf] flex-shrink-0" />
+                      <span>Instant ₹100 OFF on first booking</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-[#2dd4bf] flex-shrink-0" />
+                      <span>Live GPS tracking of assigned technician</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-[#2dd4bf] flex-shrink-0" />
+                      <span>Easy 1-tap re-booking & warranty claims</span>
+                    </li>
+                  </ul>
+                  <a
+                    href={playStoreUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block w-full py-2.5 rounded-xl bg-white text-[#003831] font-bold text-xs hover:bg-gray-100 transition-colors"
+                  >
+                    Install Free App
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Popular Services Grid */}
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-left">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-[#037166] uppercase tracking-wider">Explore Services</p>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">Popular Appliance Repairs at Doorstep</h2>
+            </div>
+            <button
+              onClick={() => router.push('/appliance-repairs')}
+              className="text-sm font-bold text-[#037166] hover:text-[#04a99d] inline-flex items-center gap-1 transition-colors"
+            >
+              <span>View All Categories</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {popularServices.map((srv, idx) => (
+              <div
+                key={idx}
+                className="group relative rounded-2xl bg-white border border-gray-200/80 p-5 hover:shadow-xl hover:border-[#037166]/40 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <span className="text-3xl p-2.5 rounded-xl bg-gray-50 border border-gray-100">{srv.icon}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#037166]/10 text-[#037166]">
+                      {srv.badge}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900 group-hover:text-[#037166] transition-colors">
+                    {srv.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed font-normal">
+                    {srv.subtitle}
+                  </p>
+                </div>
+
+                <div className="pt-5 mt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500">Doorstep Inspection in 60m</span>
+                  <button
+                    onClick={() => router.push(srv.href)}
+                    className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#037166] hover:bg-[#025951] text-white text-xs font-bold shadow-sm transition-colors"
+                  >
+                    <span>Book Now</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Why Choose Doorstep Hub */}
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-left">
+          <div className="rounded-2xl bg-white border border-gray-200/80 p-6 sm:p-8">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 text-center mb-6">
+              Why 10,000+ Customers Trust Doorstep Hub
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div className="space-y-2">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#EBF7F6] text-[#037166] flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-gray-800">30-Day Warranty</h4>
+                <p className="text-xs text-gray-500">Free re-check guarantee on every completed repair</p>
+              </div>
+              <div className="space-y-2">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#EBF7F6] text-[#037166] flex items-center justify-center">
+                  <Users className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-gray-800">Verified Technicians</h4>
+                <p className="text-xs text-gray-500">100% background-checked & certified professionals</p>
+              </div>
+              <div className="space-y-2">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#EBF7F6] text-[#037166] flex items-center justify-center">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-gray-800">60-Minute Response</h4>
+                <p className="text-xs text-gray-500">Quick arrival with genuine replacement parts</p>
+              </div>
+              <div className="space-y-2">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#EBF7F6] text-[#037166] flex items-center justify-center">
+                  <Award className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-gray-800">Upfront Estimates</h4>
+                <p className="text-xs text-gray-500">No hidden surprises, fixed transparent rate card</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -1047,7 +1421,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     </div>
                     <h4 className="text-lg font-bold text-gray-900">Expert Technicians</h4>
                   </div>
-                  <p className="text-gray-500 font-medium">Certified professionals with years of experience</p>
+                  <p className="text-gray-500 font-medium">Verified professionals with years of experience</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-[#037166]/30 transition-all shadow-sm">

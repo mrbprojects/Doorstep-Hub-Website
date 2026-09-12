@@ -138,6 +138,15 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
             <Sparkles className="w-3 h-3 text-[#04a99d]" />
             <h6 className="text-sm font-medium text-[#04a99d]">FEATURED</h6>
           </motion.div>
+
+           <div className="mb-2 flex items-center justify-end gap-2">
+          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -156,14 +165,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
             Discover our most popular home appliance services, chosen by customers for convenient doorstep support, skilled technicians, clear service guidance, and reliable repair solutions for everyday appliance problems.
           </motion.p>
         </div>
-        <div className="mb-2 flex items-center justify-end gap-2">
-          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
+       
 
         {/* Services Horizontal Scroller */}
         <div ref={scrollRef} className="flex overflow-x-auto gap-6 scroll-smooth snap-x snap-mandatory py-6 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

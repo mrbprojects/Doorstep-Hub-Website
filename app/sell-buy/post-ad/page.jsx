@@ -313,13 +313,14 @@ export default function PostAdPage() {
       const headers = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/sell-buy/add-item`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/sell-buy/add-item`, {
         method: 'POST',
         headers,
         body: fd,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       // ── KYC PENDING / DRAFT AD HANDLING ─────────────────────────────────────
       if (data?.isDraft || data?.kycRequired) {
@@ -343,7 +344,7 @@ export default function PostAdPage() {
       }
     } catch (err) {
       console.error('Error posting ad:', err);
-      toast.error('An error occurred while posting your ad.');
+      toast.error(err?.message || 'An error occurred while posting your ad.');
     } finally {
       setSubmitting(false);
     }

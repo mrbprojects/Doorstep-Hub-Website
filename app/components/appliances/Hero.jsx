@@ -296,11 +296,11 @@ export function Hero({ onViewServices, onBookService }) {
               {/* Floating Badge 2: Top Right - Quick in 60 Mins */}
               <div className="absolute top-5 right-5 z-20">
                 <div className="px-3.5 py-2 rounded-2xl bg-[#037166] text-white shadow-lg">
-                  <p className="text-[9px] font-black uppercase tracking-widest opacity-80">
+                  <p className="text-[9px] !text-white font-black uppercase tracking-widest opacity-80">
                     QUICK
                   </p>
-                  <p className="text-xs font-black leading-tight">
-                    Service in 60 Mins
+                  <p className="text-xs !text-white font-black leading-tight">
+                    Service in 60-120 Mins
                   </p>
                 </div>
               </div>

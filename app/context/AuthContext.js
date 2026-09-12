@@ -353,10 +353,18 @@ export const AuthProvider = ({ children }) => {
             if (data.success) {
                 setUser(data.data);
                 toast.success('Profile updated successfully!');
+                return data;
+            } else {
+                toast.error(data.message || 'Failed to update profile');
+                throw new Error(data.message || 'Failed to update profile');
             }
-            return data;
         } catch (error) {
-            toast.error('Failed to update profile');
+            if (error.message && error.message !== 'Failed to update profile' && error.message !== 'Unauthorized' && error.message !== 'Token expired') {
+                // If message hasn't already been toasted
+                if (!error.message.includes('Failed to update')) {
+                    toast.error(error.message);
+                }
+            }
             throw error;
         }
     };

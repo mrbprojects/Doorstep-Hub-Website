@@ -1,4 +1,4 @@
-import KnowledgeArticle, { generateMetadata, revalidate } from '@/app/knowledge/[slug]/page';
+import KnowledgeArticle, { generateMetadata, revalidate } from '../../knowledge/[slug]/page';
 
 export { generateMetadata, revalidate };
 export default KnowledgeArticle;

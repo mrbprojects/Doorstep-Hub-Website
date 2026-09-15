@@ -99,6 +99,8 @@ export function BookingServices() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+
         // 1. Fetch dynamic slug
         try {
           const slugRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/683daaa8f261c1548bdf7442`);
@@ -108,35 +110,110 @@ export function BookingServices() {
           }
         } catch { /* use default */ }
 
-        // 2. Fetch latest services
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`);
-        const data = await response.json();
-
-        if (data.success && data.services) {
-          // Slug enrichment
-          let allServices = [];
-          try {
-            const allRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`);
-            const allData = await allRes.json();
-            allServices = allData.success && Array.isArray(allData.data) ? allData.data : [];
-          } catch {}
-
-          const transformed = data.services.map(service => {
-            const matched = allServices.find(as => as._id === service._id || as.serviceName === service.serviceName);
-            return {
-              id: service._id,
-              title: service.serviceName,
-              category: service.categoryName,
-              slug: service.slug || matched?.slug,
-              rating: 4.8,
-              image: service.mainImage
-                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}`
-                : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?w=400',
-              status: service.status === 'active' ? '10% Off' : null,
-            };
-          });
-          setServices(transformed);
+        // 2. Fetch latest bookings services
+        let bookingServices = [];
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/latest_bookings_services`);
+          const data = await response.json();
+          if (data.success && Array.isArray(data.services)) {
+            bookingServices = data.services;
+          }
+        } catch (e) {
+          console.warn('Error fetching latest bookings:', e);
         }
+
+        // 3. Fetch all active categories to ensure EVERY category is represented
+        let allCategories = [];
+        try {
+          const catRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lattitude: '17.3850', longitude: '78.4867' })
+          });
+          const catData = await catRes.json();
+          if (catData.success && Array.isArray(catData.data)) {
+            allCategories = catData.data;
+          }
+        } catch (e) {
+          console.warn('Error fetching categories:', e);
+        }
+
+        // Group bookingServices by category
+        const categoryServicesMap = {};
+        bookingServices.forEach(s => {
+          const catKey = (s.categoryName || '').trim().toLowerCase();
+          if (catKey) {
+            if (!categoryServicesMap[catKey]) categoryServicesMap[catKey] = [];
+            categoryServicesMap[catKey].push(s);
+          }
+        });
+
+        // 4. For any categories missing or having fewer than 3 services in bookingServices, fetch their subcategories
+        const missingOrLowCats = allCategories.filter(c => {
+          const key = (c.name || '').trim().toLowerCase();
+          return !categoryServicesMap[key] || categoryServicesMap[key].length < 3;
+        });
+
+        let additionalServices = [];
+        if (missingOrLowCats.length > 0) {
+          const subcatFetches = missingOrLowCats.map(c =>
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ categoryId: c._id })
+            })
+            .then(r => r.json())
+            .then(d => {
+              if (d.success && Array.isArray(d.data)) {
+                return d.data.map(sub => ({
+                  _id: sub._id,
+                  serviceName: sub.name,
+                  categoryName: c.name,
+                  slug: sub.slug,
+                  mainImage: sub.image,
+                  status: 'active'
+                }));
+              }
+              return [];
+            })
+            .catch(() => [])
+          );
+          const subcatResults = await Promise.all(subcatFetches);
+          additionalServices = subcatResults.flat();
+        }
+
+        // 5. Combine and transform all services
+        const combined = [...bookingServices, ...additionalServices];
+
+        // Deduplicate by ID
+        const seenIds = new Set();
+        const deduplicated = [];
+        combined.forEach(s => {
+          const id = (s._id || s.id || '').toString();
+          if (id && !seenIds.has(id)) {
+            seenIds.add(id);
+            deduplicated.push(s);
+          }
+        });
+
+        const transformed = deduplicated.map(service => {
+          const rawImage = service.mainImage || service.image || '';
+          const imageUrl = rawImage
+            ? (rawImage.startsWith('http') ? rawImage : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${rawImage.replace(/^\/+/, '')}`)
+            : 'https://images.unsplash.com/photo-1594873604892-b599f847e859?w=400';
+
+          return {
+            id: service._id || service.id,
+            title: service.serviceName || service.name || 'Appliance Service',
+            category: service.categoryName || service.category || 'General',
+            slug: service.slug,
+            rating: 4.8,
+            image: imageUrl,
+            status: service.status === 'active' ? '10% Off' : null,
+          };
+        });
+
+        setServices(transformed);
       } catch (err) {
         console.error('Error fetching booking services:', err);
       } finally {
@@ -146,7 +223,7 @@ export function BookingServices() {
     fetchData();
   }, []);
 
-  /* Derived categories with up to 12 booking count */
+  /* Derived categories with exact service counts */
   const categories = useMemo(() => {
     const map = {};
     services.forEach(s => {
@@ -156,14 +233,26 @@ export function BookingServices() {
     });
     return Object.entries(map).map(([name, count]) => ({
       name,
-      count: Math.min(count, 12)
+      count
     }));
   }, [services]);
 
-  /* Filtered services: up to 12 bookings for each category (and 12 for "All") */
+  /* Filtered services: balanced mix across all categories for 'all', full category list otherwise */
   const visibleServices = useMemo(() => {
-    if (activeCategory === 'all') return services.slice(0, 12);
-    return services.filter(s => (s.category || 'General').trim() === activeCategory).slice(0, 12);
+    if (activeCategory === 'all') {
+      // In "All Services", take up to 3 services from EACH category so every category is visible
+      const byCat = {};
+      services.forEach(s => {
+        const k = (s.category || 'General').trim();
+        if (!byCat[k]) byCat[k] = [];
+        if (byCat[k].length < 3) {
+          byCat[k].push(s);
+        }
+      });
+      const balanced = Object.values(byCat).flat();
+      return balanced.length > 0 ? balanced : services.slice(0, 24);
+    }
+    return services.filter(s => (s.category || 'General').trim() === activeCategory);
   }, [activeCategory, services]);
 
   /* Navigation handler */
@@ -184,9 +273,19 @@ export function BookingServices() {
       return;
     }
 
-    const categoryParam = encodeURIComponent(service.category);
-    const subCategoryParam = encodeURIComponent(service.title);
-    router.push(`/${service.slug || `${serviceSlugs.appliances}/detail/${service.id}?category=${categoryParam}&subCategory=${subCategoryParam}`}`);
+    if (service.slug && service.slug.startsWith('/')) {
+      router.push(service.slug);
+      return;
+    }
+
+    if (service.slug) {
+      router.push(`/${serviceSlugs.appliances}/${service.slug}`);
+      return;
+    }
+
+    const categoryParam = encodeURIComponent(service.category || '');
+    const subCategoryParam = encodeURIComponent(service.title || '');
+    router.push(`/${serviceSlugs.appliances}/detail/${service.id}?category=${categoryParam}&subCategory=${subCategoryParam}`);
   };
 
   return (
@@ -209,7 +308,7 @@ export function BookingServices() {
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">
             <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
-              Latest Appliance Servcie Bookings
+              Latest Appliance Service Bookings
             </span>
           </h2>
           <p className="text-gray-400 text-sm sm:text-base max-w-5xl mx-auto">
@@ -228,7 +327,7 @@ export function BookingServices() {
                 : 'bg-white border-[#037166]/30 !text-[#037166] hover:bg-[#037166] hover:border-[#037166] hover:!text-white shadow-sm'
             }`}
           >
-            All Services
+            All Services ({services.length})
           </button>
           {loading
             ? Array.from({ length: 4 }).map((_, i) => (

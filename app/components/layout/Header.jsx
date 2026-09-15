@@ -113,23 +113,25 @@ export function Header({ theme = {}, navItems = [] }) {
               };
             });
 
-          let finalNavItems = [];
-          const hasSellBuy = visibleItems.some(i => i.href === '/sell-buy' || i.name === 'Sell & Buy');
-          const mergedItems = hasSellBuy ? visibleItems : [{ name: 'Sell & Buy', href: '/sell-buy' }, ...visibleItems];
+          // Exclude Sell & Buy completely from header navigation
+          const filteredItems = visibleItems.filter(
+            item => item.href !== '/sell-buy' && item.name !== 'Sell & Buy' && !item.name?.toLowerCase().includes('sell & buy')
+          );
 
-          if (mergedItems.length > 5) {
-            finalNavItems = mergedItems.slice(0, 5);
+          let finalNavItems = [];
+          if (filteredItems.length > 5) {
+            finalNavItems = filteredItems.slice(0, 5);
             finalNavItems.push({
               name: 'More',
-              dropdown: mergedItems.slice(5)
+              dropdown: filteredItems.slice(5)
             });
           } else {
-            finalNavItems = mergedItems;
+            finalNavItems = filteredItems;
           }
 
           setApiNavItems(finalNavItems);
         } else {
-          setApiNavItems([{ name: 'Sell & Buy', href: '/sell-buy' }]);
+          setApiNavItems([]);
         }
       } catch (error) {
         console.error("Failed to fetch nav data:", error);

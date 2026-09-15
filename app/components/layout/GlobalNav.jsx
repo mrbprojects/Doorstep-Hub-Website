@@ -48,7 +48,6 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
   const navItems = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'Popular Services', href: '/appliances', icon: Briefcase },
-    { name: 'Sell & Buy', href: '/sell-buy', icon: Tag },
     { name: 'Nearby Service Centers', href: '/nearby', icon: MapPin },
     { name: 'Sell Old Things', href: '/selloldthings', icon: Tag }
   ];

@@ -648,7 +648,41 @@ export function HeroSection() {
         }
 
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-          setServices(data.data);
+          // Admin Panel Priority Mapping:
+          // Priority 1: Appliance Service (ID: 683daaa8f261c1548bdf7442)
+          // Priority 2: Sell & Buy (ID: 6a7db000a9d92694336007a0)
+          // Priority 3: Religious Services (ID: 695250aa57bb211ca094e5fd)
+          // Priority 4: Unisex & Pet Saloons / Spa (ID: 69524f4a57bb211ca094e5e6)
+          // Priority 5: PG & Hostels (ID: 69524fb157bb211ca094e5ee)
+          const adminPriorityMap = {
+            '683daaa8f261c1548bdf7442': 1,
+            '6a7db000a9d92694336007a0': 2,
+            '695250aa57bb211ca094e5fd': 3,
+            '69524f4a57bb211ca094e5e6': 4,
+            '69524fb157bb211ca094e5ee': 5,
+          };
+
+          const sorted = [...data.data].sort((a, b) => {
+            const getPriority = (item) => {
+              if (item.priority !== undefined && item.priority !== null && item.priority !== '') {
+                const n = Number(item.priority);
+                if (!isNaN(n)) return n;
+              }
+              const id = String(item._id || '');
+              if (adminPriorityMap[id] !== undefined) return adminPriorityMap[id];
+              const name = (item.name || '').toUpperCase();
+              if (name.includes('APPLIANCE')) return 1;
+              if (name.includes('SELL') || name.includes('BUY')) return 2;
+              if (name.includes('RELIGIOUS')) return 3;
+              if (name.includes('SPA') || name.includes('SALOON') || name.includes('SALON') || name.includes('UNISEX') || name.includes('PET')) return 4;
+              if (name.includes('PG') || name.includes('HOSTEL')) return 5;
+              return 999;
+            };
+
+            return getPriority(a) - getPriority(b);
+          });
+
+          setServices(sorted);
         } else if (data.success && (!data.data || data.data.length === 0)) {
           console.warn('API returned success but no services data');
           setServices([]);

@@ -50,9 +50,9 @@ const dummyArticles = [
   }
 ];
 
-export function KnowledgeSection() {
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+export function KnowledgeSection({ initialArticles }) {
+  const [articles, setArticles] = useState(initialArticles && initialArticles.length > 0 ? initialArticles : dummyArticles);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchArticles = async () => {

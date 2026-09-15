@@ -9,13 +9,14 @@ import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { NewsletterWidget } from '@/components/shared/NewsletterWidget';
 import DOMPurify from 'dompurify';
 
-export function ArticleViewPage({ slug }) {
+export function ArticleViewPage({ slug, initialArticle = null, initialRelated = [] }) {
     const router = useRouter();
-    const [article, setArticle] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [relatedArticles, setRelatedArticles] = useState([]);
+    const [article, setArticle] = useState(initialArticle);
+    const [loading, setLoading] = useState(!initialArticle);
+    const [relatedArticles, setRelatedArticles] = useState(initialRelated);
 
     useEffect(() => {
+        if (initialArticle) return;
         const fetchArticleData = async () => {
             try {
                 setLoading(true);

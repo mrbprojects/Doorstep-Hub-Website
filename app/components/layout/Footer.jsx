@@ -679,6 +679,7 @@ export function Footer({ theme = {} }) {
               {[
                 { name: 'About Us', href: '/about-us' },
                 { name: 'Contact Us', href: '/contact-us' },
+                { name: 'Blog & Guides', href: '/knowledge' },
                 { name: 'Careers', href: '/careers' },
                 { name: 'Become a Service Partner', href: '/service-partner' },
                 { name: 'Partner Dashboard', href: '/partner/dashboard' },

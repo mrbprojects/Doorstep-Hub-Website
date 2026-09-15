@@ -7,10 +7,10 @@ import { useRouter } from 'next/navigation';
 import { Search, Filter, BookOpen, Clock, ArrowRight, User, TrendingUp } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
-export function KnowledgeListingPage() {
+export function KnowledgeListingPage({ initialArticles = [] }) {
     const router = useRouter();
-    const [articles, setArticles] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [articles, setArticles] = useState(initialArticles);
+    const [loading, setLoading] = useState(initialArticles.length === 0);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [categories, setCategories] = useState(['All', 'Home Care', 'Appliance Repair', 'Cleaning', 'Pest Control', 'General']);
@@ -18,7 +18,7 @@ export function KnowledgeListingPage() {
     useEffect(() => {
         const fetchArticles = async () => {
             try {
-                setLoading(true);
+                if (initialArticles.length === 0) setLoading(true);
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/knowledge-base`);
                 const data = await response.json();
 

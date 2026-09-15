@@ -60,6 +60,12 @@ export function isAdSenseEligiblePath(pathname) {
     /^\/thank-you(\/.*)?$/,
     /^\/thank-you-cod(\/.*)?$/,
     /^\/payment-failed(\/.*)?$/,
+    /^\/book-now(\/.*)?$/,
+    /^\/contact-us(\/.*)?$/,
+    /^\/faqs(\/.*)?$/,
+    /^\/privacy-policy(\/.*)?$/,
+    /^\/terms-conditions(\/.*)?$/,
+    /^\/refund-policy(\/.*)?$/,
     /^\/api(\/.*)?$/,
     /^\/admin(\/.*)?$/,
   ];

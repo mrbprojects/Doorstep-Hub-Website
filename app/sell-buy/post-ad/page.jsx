@@ -999,7 +999,7 @@ export default function PostAdPage() {
                 <div className="text-xs text-amber-900 leading-relaxed">
                   <p className="font-bold text-amber-950 text-xs sm:text-sm mb-0.5">Marketplace Safety & Payment Policy</p>
                   <p>
-                    <strong className="text-amber-950">DoorStepHub is NOT responsible for any financial transactions</strong>, direct bank/UPI transfers, advance booking fees, or delivery arrangements between buyers and sellers. All payments and product inspections are conducted directly between users at your own risk.
+                    <strong className="text-amber-950">Doorstep Hub is NOT responsible for any financial transactions</strong>, direct bank/UPI transfers, advance booking fees, or delivery arrangements between buyers and sellers. All payments and product inspections are conducted directly between users at your own risk.
                   </p>
                 </div>
               </div>

@@ -79,7 +79,7 @@ export default function PartnerDeletionPage() {
                         <CheckCircle className="w-16 h-16 text-[#037166] mx-auto mb-4" />
                         <h2 className="text-2xl font-bold mb-2">Request Submitted</h2>
                         <p className="text-gray-600 text-sm max-w-md mx-auto mb-4">
-                            Your account deletion request has been stored and will be reviewed by our admin team. Processing typically takes up to 14 days.
+                            Your account deletion request has been stored and will be reviewed by our Doorstep Hub. Processing typically takes up to 14 days.
                         </p>
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#037166]/10 text-[#037166] text-sm font-semibold">
                             <Clock className="w-4 h-4" /> Admin review in progress

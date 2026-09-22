@@ -146,7 +146,7 @@ export default function AccountDeletionPage() {
             <div>
                 <h1 className="text-2xl font-extrabold text-gray-900">Account Deletion Request</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    Submit a request to permanently delete your account. Requests are stored and reviewed by our admin team.
+                    Submit a request to permanently delete your account. Requests are stored and reviewed by our Doorstep Hub.
                 </p>
             </div>
 

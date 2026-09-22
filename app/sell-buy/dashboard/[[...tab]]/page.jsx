@@ -539,7 +539,7 @@ export default function MarketplaceDashboardPage() {
           )
         );
         if (newStatus === 'ACTIVE') {
-          toast.success('Ad activated! It is now live on DoorstepHub marketplace.');
+          toast.success('Ad activated! It is now live on Doorstep Hub marketplace.');
         } else {
           toast.success(`Status updated to ${newStatus}`);
         }
@@ -1389,7 +1389,7 @@ export default function MarketplaceDashboardPage() {
                 <div className="space-y-1">
                   <h3 className="text-lg font-black text-slate-900">KYC Under Admin Review</h3>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Your documents have already been uploaded and are currently being reviewed by our admin team. No further action is required.
+                    Your documents have already been uploaded and are currently being reviewed by our Doorstep Hub. No further action is required.
                   </p>
                 </div>
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-800 font-bold max-w-sm mx-auto">

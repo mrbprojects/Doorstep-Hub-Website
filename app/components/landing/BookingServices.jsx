@@ -273,18 +273,14 @@ export function BookingServices() {
       return;
     }
 
-    if (service.slug && service.slug.startsWith('/')) {
-      router.push(service.slug);
+    const rawSlug = (service.slug || '').replace(/^\/+/, '').replace(/^appliance-repair-services\//, '');
+    if (rawSlug) {
+      router.push(`/${rawSlug}`);
       return;
     }
 
-    if (service.slug) {
-      router.push(`/${serviceSlugs.appliances}/${service.slug}`);
-      return;
-    }
-
-    const categoryParam = encodeURIComponent(service.category || '');
-    const subCategoryParam = encodeURIComponent(service.title || '');
+    const categoryParam = encodeURIComponent(service.category || 'General');
+    const subCategoryParam = encodeURIComponent(service.title || 'Service');
     router.push(`/${serviceSlugs.appliances}/detail/${service.id}?category=${categoryParam}&subCategory=${subCategoryParam}`);
   };
 

@@ -464,6 +464,14 @@ export function isNearbyServiceSlug(slug = '', registryOrBrandSlugs = null, serv
 export function isBookNowFlatServiceSlug(slug = '') {
     const s = String(slug || '').trim().toLowerCase();
     if (!isNearbyServiceSlug(s)) return false;
+    if (
+        s === 'appliance-repair-services' ||
+        s === 'appliance-repair-service' ||
+        s === 'appliances-repair-services' ||
+        s === 'appliances-repair-service'
+    ) {
+        return false;
+    }
     if (s.startsWith('book-')) return true;
     if (/-near-(you|me)$/i.test(s)) return true;
     if (/-repair-services?$/i.test(s)) return true;
@@ -482,6 +490,14 @@ export function parseBookNowCityFlatPath(normalizedPath = '', brandSlugs = null)
 
     const [serviceSlug, citySlug] = parts;
     const normalizedServiceSlug = serviceSlug.toLowerCase();
+    if (
+        normalizedServiceSlug === 'appliance-repair-services' ||
+        normalizedServiceSlug === 'appliance-repair-service' ||
+        normalizedServiceSlug === 'appliances-repair-services' ||
+        normalizedServiceSlug === 'appliances-repair-service'
+    ) {
+        return null;
+    }
     const registry = normalizeSlugRegistry(brandSlugs);
     const isBrand =
         registry?.hasBrand(normalizedServiceSlug) ||
@@ -523,6 +539,15 @@ export function parseNearbyBookNowPath(normalizedPath = '', brandSlugs = null) {
     if (parts.length !== 3 || parts[0] !== NEARBY_BOOK_NOW_PREFIX) return null;
 
     const [, serviceSlug, citySlug] = parts;
+    const normalizedServiceSlug = serviceSlug.toLowerCase();
+    if (
+        normalizedServiceSlug === 'appliance-repair-services' ||
+        normalizedServiceSlug === 'appliance-repair-service' ||
+        normalizedServiceSlug === 'appliances-repair-services' ||
+        normalizedServiceSlug === 'appliances-repair-service'
+    ) {
+        return null;
+    }
     if (!isNearbyServiceSlug(serviceSlug, brandSlugs) || !isValidCitySlug(citySlug)) return null;
 
     return {

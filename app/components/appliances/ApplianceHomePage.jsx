@@ -46,8 +46,9 @@ export function ApplianceHomePage() {
     }, []);
 
     const handleServiceClick = (serviceId, categoryName, subcategoryName, serviceSlug) => {
-        if (serviceSlug) {
-            router.push(`/${serviceSlug}`);
+        const rawSlug = (serviceSlug || '').replace(/^\/+/, '').replace(/^appliance-repair-services\//, '');
+        if (rawSlug) {
+            router.push(`/${rawSlug}`);
             return;
         }
         const categoryParam = encodeURIComponent(categoryName || 'General');

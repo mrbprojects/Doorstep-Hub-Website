@@ -305,6 +305,22 @@ export async function middleware(request) {
             return NextResponse.rewrite(url);
         }
 
+        // Redirect misconstructed or legacy /appliance-repair-services/{serviceSlug} to /{serviceSlug}
+        // while preserving known sub-routes (categories, featured, recent, centers, detail, cart, etc.)
+        const knownApplianceSections = new Set([
+            'categories', 'featured', 'recent', 'centers', 'detail', 'cart',
+            'checkout', 'booking', 'address', 'verified', 'select-service', 'repair-service'
+        ]);
+        if (normalizedPath.startsWith('appliance-repair-services/')) {
+            const sub = normalizedPath.slice('appliance-repair-services/'.length);
+            const firstSeg = sub.split('/')[0];
+            if (!knownApplianceSections.has(firstSeg) && sub) {
+                const url = request.nextUrl.clone();
+                url.pathname = `/${sub}`;
+                return NextResponse.redirect(url, 308);
+            }
+        }
+
         // 2. Resolve slugs
         const slugs = await getDynamicSlugs();
 

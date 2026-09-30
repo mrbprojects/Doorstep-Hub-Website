@@ -36,7 +36,7 @@ const footerLinks = {
     { name: 'Refund Policy', href: '/refund-policy' },
     { name: 'My Account', href: '/account' },
     { name: 'Account Deletion', href: '/account/deletion' },
-    // { name: 'Help Center', href: '/contact-us' },
+    { name: 'Help Center', href: '/help-center' },
   ],
 };
 

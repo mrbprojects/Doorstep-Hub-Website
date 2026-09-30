@@ -12,11 +12,13 @@ import {
     LogOut,
     ChevronRight,
     Gift,
+    ClipboardList,
 } from 'lucide-react';
 import { useProviderAuth } from '@/context/ProviderAuthContext';
 
 const NAV_ITEMS = [
     { href: '/partner/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+    { href: '/partner/dashboard/bookings', label: 'My Bookings', icon: ClipboardList },
     { href: '/partner/dashboard/kyc', label: 'KYC', icon: ShieldCheck },
     { href: '/partner/dashboard/subscription', label: 'Subscription', icon: CreditCard },
     { href: '/partner/dashboard/amc-referral', label: 'AMC Referral & Earn', icon: Gift },

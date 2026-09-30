@@ -16,11 +16,13 @@ import {
     Mail,
     MapPin,
     Building2,
+    ClipboardList,
 } from 'lucide-react';
 import { useProviderAuth } from '@/context/ProviderAuthContext';
 import { checkKycStatus, getSubscriptionHistory, getProviderSupportTickets, normalizeProviderSupportTickets, isProviderTicketOpen } from '@/lib/providerAuthApi';
 
 const QUICK_LINKS = [
+    { href: '/partner/dashboard/bookings', label: 'My Bookings', icon: ClipboardList, desc: 'View & track your bookings' },
     { href: '/partner/dashboard/kyc', label: 'KYC Verification', icon: ShieldCheck, desc: 'Upload & track documents' },
     { href: '/partner/dashboard/subscription', label: 'Subscription', icon: CreditCard, desc: 'Plans & billing history' },
     { href: '/partner/dashboard/profile', label: 'My Profile', icon: User, desc: 'Business & contact details' },

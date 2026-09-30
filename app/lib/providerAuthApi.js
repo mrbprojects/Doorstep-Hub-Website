@@ -533,3 +533,12 @@ export async function getMyAmcReferrals(token) {
   if (!response.ok) throw new Error(payload?.message || "Failed to load referrals list");
   return payload;
 }
+
+export async function getProviderBookings(token) {
+  return request("/homescreen/get-all-my-provider-bookings", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({}),
+  });
+}
+

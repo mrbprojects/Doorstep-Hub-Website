@@ -1,513 +1,256 @@
-// 'use client';
-
-// import React, { useEffect, useState } from 'react';
-// import { motion } from 'motion/react';
-// import { Sparkles } from 'lucide-react';
-// import Image from 'next/image';
-// import { useRouter } from 'next/navigation';
-
-// /* ---------- IMAGE LOADER ---------- */
-// const imageLoader = ({ src }) => {
-//   return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${src}`;
-// };
-
-// /* ---------- SERVICE NAME TO SLUG MAPPING ---------- */
-// const serviceSlugMap = {
-//   'APPLIANCE SERVICE': 'appliances',
-//   'PG Hostels': 'pg-hostel',
-//   'Religious Services': 'religious',
-//   'Spa Salons': 'spa-salon',
-//   'Daily Needs': 'daily-needs',
-//   'MEDICINE': 'medicine',
-//   'PARCEL': 'parcel',
-// };
-
-// /* ---------- COMPACT SERVICES SECTION ---------- */
-// function ServiceCardsSection({ services, loading }) {
-//   const router = useRouter();
-
-//   const containerVariants = {
-//     hidden: { opacity: 0 },
-//     visible: {
-//       opacity: 1,
-//       transition: { staggerChildren: 0.05 },
-//     },
-//   };
-
-//   const cardVariants = {
-//     hidden: { opacity: 0, scale: 0.9 },
-//     visible: {
-//       opacity: 1,
-//       scale: 1,
-//       transition: { duration: 0.4, ease: 'easeOut' },
-//     },
-//   };
-
-//   const handleServiceClick = (serviceName) => {
-//     const slug = serviceSlugMap[serviceName] || serviceName.toLowerCase().replace(/\s+/g, '-');
-//     router.push(`/${slug}`);
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="flex justify-center items-center py-8">
-//         <p className="text-gray-400">Loading services...</p>
-//       </div>
-//     );
-//   }
-
-//   if (!services || services.length === 0) {
-//     return null;
-//   }
-
-//   return (
-//     <motion.div
-//       variants={containerVariants}
-//       initial="hidden"
-//       animate="visible"
-//       className="mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
-//     >
-//       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
-//         {services.map((service, index) => (
-//           <motion.div
-//             key={service._id}
-//             variants={cardVariants}
-//             onClick={() => handleServiceClick(service.name)}
-//             className="group cursor-pointer"
-//           >
-//             <div className="relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 hover:scale-105">
-//               <Image
-//                 loader={imageLoader}
-//                 src={service.image}
-//                 alt={service.name}
-//                 fill
-//                 className="object-cover transition-transform duration-300 group-hover:scale-110"
-//                 sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 14vw"
-//               />
-//               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-//               {/* Service Name Overlay */}
-//               <div className="absolute bottom-0 left-0 right-0 p-3">
-
-//               </div>
-
-//               {/* Hover Glow */}
-//               <motion.div
-//                 initial={{ opacity: 0 }}
-//                 whileHover={{ opacity: 1 }}
-//                 className="absolute inset-0 bg-gradient-to-t from-[#037166]/30 to-transparent"
-//               />
-//             </div>
-
-
-
-//             <p className="text-white text-xs font-medium text-center line-clamp-2 group-hover:text-[#04a99d] transition-colors">
-//               {service.name}
-//             </p>
-//           </motion.div>
-//         ))}
-//       </div>
-//     </motion.div>
-//   );
-// }
-
-// /* ---------- HERO SECTION ---------- */
-// function HeroContent({ services = [], loading = false, error = null }) {
-//   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-//   useEffect(() => {
-//     const handleMouseMove = (e) => {
-//       setMousePosition({ x: e.clientX, y: e.clientY });
-//     };
-//     window.addEventListener('mousemove', handleMouseMove);
-//     return () => window.removeEventListener('mousemove', handleMouseMove);
-//   }, []);
-
-//   return (
-//     <section className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20">
-//       {/* Animated Background */}
-//       <div className="absolute inset-0">
-//         {/* Grid Pattern */}
-//         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
-
-//         {/* Gradient Orbs */}
-//         <motion.div initial={false}
-//           animate={{
-//             x: mousePosition.x * 0.02,
-//             y: mousePosition.y * 0.02,
-//           }}
-//           transition={{ type: 'spring', damping: 30 }}
-//           className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#037166]/20 rounded-full blur-[100px] pointer-events-none"
-//         />
-//         <motion.div initial={false}
-//           animate={{
-//             x: -mousePosition.x * 0.015,
-//             y: -mousePosition.y * 0.015,
-//           }}
-//           transition={{ type: 'spring', damping: 30 }}
-//           className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#025951]/20 rounded-full blur-[100px] pointer-events-none"
-//         />
-//       </div>
-
-//       {/* Main Content */}
-//       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-//         <motion.div
-//           initial={{ opacity: 0, y: 30 }}
-//           animate={{ opacity: 1, y: 0 }}
-//           transition={{ duration: 0.8 }}
-//         >
-//           {/* Eyebrow */}
-//           <motion.div
-//             initial={{ opacity: 0, scale: 0.8 }}
-//             animate={{ opacity: 1, scale: 1 }}
-//             transition={{ delay: 0.2 }}
-//             className="inline-flex items-center space-x-2 px-4 py-2 bg-[#037166]/10 border border-[#037166]/30 rounded-full mb-8"
-//           >
-//             <Sparkles className="w-4 h-4 text-[#037166]" />
-//             <span className="text-sm text-[#037166] font-medium">Welcome to the Future of Services</span>
-//           </motion.div>
-
-//           {/* Main Heading */}
-//           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
-//             <span className="block bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
-//               Everything You Need.
-//             </span>
-//             <span className="block mt-2 bg-gradient-to-r from-[#037166] via-[#02b39a] to-[#037166] bg-clip-text text-transparent">
-//               One Hub.
-//             </span>
-//           </h1>
-
-//           {/* Subtitle */}
-//           <motion.p
-//             initial={{ opacity: 0 }}
-//             animate={{ opacity: 1 }}
-//             transition={{ delay: 0.7 }}
-//             className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto"
-//           >
-//             Your premium gateway to services, spa, salon, hostels, religious experiences, and more.
-//             All in one beautifully crafted platform.
-//           </motion.p>
-
-//           {/* Service Cards - Right Below Subtitle */}
-//           <motion.div
-//             initial={{ opacity: 0, y: 20 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ delay: 0.9 }}
-//           >
-//             {error ? (
-//               <div className="mt-12 text-center">
-//                 <p className="text-red-400 text-sm mb-2">{error}</p>
-//                 <button
-//                   onClick={() => window.location.reload()}
-//                   className="text-[#04a99d] hover:text-[#037166] text-sm underline"
-//                 >
-//                   Retry
-//                 </button>
-//               </div>
-//             ) : (
-//               <ServiceCardsSection services={services} loading={loading} />
-//             )}
-//           </motion.div>
-//         </motion.div>
-//       </div>
-
-//       {/* Bottom Gradient */}
-//       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
-//     </section>
-//   );
-// }
-
-// /* ---------- HERO + SERVICES (API INTEGRATION HERE) ---------- */
-// export function HeroSection() {
-//   const [services, setServices] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchServices = async () => {
-//       try {
-//         setLoading(true);
-//         setError(null);
-
-//         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
-//           ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${process.env.NEXT_PUBLIC_API_ALL_SERVICES_ENDPOINT}`
-//           : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/all-services`;
-
-//         const response = await fetch(apiUrl, {
-//           method: 'GET',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//         });
-
-//         if (!response.ok) {
-//           throw new Error(`API Error: ${response.status} ${response.statusText}`);
-//         }
-
-//         const data = await response.json();
-
-//         // Validate API response structure
-//         if (!data || typeof data !== 'object') {
-//           throw new Error('Invalid API response format');
-//         }
-
-//         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-//           setServices(data.data);
-//         } else if (data.success && (!data.data || data.data.length === 0)) {
-//           console.warn('API returned success but no services data');
-//           setServices([]);
-//         } else {
-//           throw new Error(data.message || 'Failed to fetch services');
-//         }
-//       } catch (error) {
-//         console.error('Error fetching services:', error);
-//         setError(error.message || 'Failed to load services. Please try again later.');
-//         setServices([]);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchServices();
-//   }, []);
-
-//   return <HeroContent services={services} loading={loading} error={error} />;
-// }
-
-// export default HeroSection;
-
-
-
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { Sparkles, Download, Zap, Shield, Star, ChevronRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { API_BASE_URL } from '@/config/env';
+import {
+  ShieldCheck,
+  CalendarCheck,
+  Headphones,
+  Wrench,
+  Home,
+  Shield,
+  ChevronRight,
+} from 'lucide-react';
+import { API_BASE_URL, getImageUrl } from '@/config/env';
 
 /* ---------- IMAGE LOADER ---------- */
 const imageLoader = ({ src }) => {
-  return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${src}`;
+  return getImageUrl(src);
 };
 
+/* ---------- SERVICE THEMES & METADATA ---------- */
+const SERVICE_CONFIG = {
+  APPLIANCE: {
+    title: 'Appliance Services',
+    subtitle: 'Quick & Reliable Appliance Repair',
+    bg: 'bg-[#E7F3F2]',
+    gradient: 'from-[#E7F3F2] via-[#E7F3F2]/95 to-transparent',
+    titleColor: 'text-[#0F1B3D]',
+    subColor: 'text-[#00796B]',
+    btnBg: 'bg-[#008C80] hover:bg-[#006D65]',
+    borderColor: 'border-[#008C80]/15 hover:border-[#008C80]/40',
+  },
+  SELL_BUY: {
+    title: 'Sell & Buy',
+    subtitle: 'Sell & Buy Old Things',
+    bg: 'bg-[#FFF8E7]',
+    gradient: 'from-[#FFF8E7] via-[#FFF8E7]/95 to-transparent',
+    titleColor: 'text-[#0F1B3D]',
+    subColor: 'text-[#8D5B00]',
+    btnBg: 'bg-[#E69500] hover:bg-[#D48800]',
+    borderColor: 'border-[#E69500]/15 hover:border-[#E69500]/40',
+  },
+  RELIGIOUS: {
+    title: 'Religious Services',
+    subtitle: 'Puja, Pandit & More Services',
+    bg: 'bg-[#FFF6E9]',
+    gradient: 'from-[#FFF6E9] via-[#FFF6E9]/95 to-transparent',
+    titleColor: 'text-[#0F1B3D]',
+    subColor: 'text-[#7D3F1B]',
+    btnBg: 'bg-[#F57C00] hover:bg-[#E65100]',
+    borderColor: 'border-[#F57C00]/15 hover:border-[#F57C00]/40',
+  },
+  SALON_PET: {
+    title: 'Unisex & Pet Saloons',
+    subtitle: 'Unisex Saloons & Pet Care Centers',
+    bg: 'bg-[#FFF0F5]',
+    gradient: 'from-[#FFF0F5] via-[#FFF0F5]/95 to-transparent',
+    titleColor: 'text-[#0F1B3D]',
+    subColor: 'text-[#880E4F]',
+    btnBg: 'bg-[#C2185B] hover:bg-[#AD1457]',
+    borderColor: 'border-[#C2185B]/15 hover:border-[#C2185B]/40',
+  },
+  DEFAULT: {
+    title: 'Home Services',
+    subtitle: 'Trusted Quality for Everyday Needs',
+    bg: 'bg-[#F4F9F8]',
+    gradient: 'from-[#F4F9F8] via-[#F4F9F8]/95 to-transparent',
+    titleColor: 'text-[#0F1B3D]',
+    subColor: 'text-[#00796B]',
+    btnBg: 'bg-[#008C80] hover:bg-[#006D65]',
+    borderColor: 'border-[#008C80]/15',
+  },
+};
 
+function getServiceTheme(service) {
+  const name = (service?.name || '').toUpperCase();
+  if (name.includes('APPLIANCE')) return SERVICE_CONFIG.APPLIANCE;
+  if (name.includes('SELL') || name.includes('BUY')) return SERVICE_CONFIG.SELL_BUY;
+  if (name.includes('RELIGIOUS')) return SERVICE_CONFIG.RELIGIOUS;
+  if (name.includes('SPA') || name.includes('SALON') || name.includes('SALOON') || name.includes('UNISEX') || name.includes('PET')) {
+    return SERVICE_CONFIG.SALON_PET;
+  }
+  return SERVICE_CONFIG.DEFAULT;
+}
 
-//* ---------- COMPACT OVERLAY CARDS SECTION ---------- */
-function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
+/* ---------- 4 CATEGORY CARDS SECTION ---------- */
+function ServiceCategoryCards({ services = [], serviceSlugs }) {
   const router = useRouter();
 
-  const handleServiceClick = (service) => {
+  const handleCardClick = (service) => {
     const upperName = (service?.name || '').toUpperCase();
 
-    // Redirect to Sell & Buy module
+    // 1. Sell & Buy module
     if (upperName.includes('SELL') || upperName.includes('BUY')) {
       router.push('/sell-buy');
       return;
     }
 
-    localStorage.setItem('selectedService', JSON.stringify({
-      id: service._id,
-      name: service.name,
-      servicetypeName: service.servicetypeName || service.name,
-      image: service.image
-    }));
+    // 2. Persist selection for state continuity
+    try {
+      localStorage.setItem(
+        'selectedService',
+        JSON.stringify({
+          id: service._id,
+          name: service.name,
+          servicetypeName: service.servicetypeName || service.name,
+          image: service.image,
+        })
+      );
+    } catch {
+      // LocalStorage fallback
+    }
 
-    let slug = service.name ? service.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : service._id;
-    if (upperName.includes('APPLIANCE')) slug = serviceSlugs.appliances;
-    else if (upperName.includes('RELIGIOUS')) slug = serviceSlugs.religious;
-    else if (upperName.includes('PG')) slug = serviceSlugs.pg;
-    else if (upperName.includes('SPA') || upperName.includes('SALON') || upperName.includes('SALOON') || upperName.includes('UNISEX') || upperName.includes('PET')) slug = serviceSlugs.spa;
+    // 3. Routing
+    let targetRoute = service.name
+      ? service.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+      : service._id;
 
-    router.push(`/${slug}`);
+    if (upperName.includes('APPLIANCE')) targetRoute = serviceSlugs.appliances;
+    else if (upperName.includes('RELIGIOUS')) targetRoute = serviceSlugs.religious;
+    else if (upperName.includes('SPA') || upperName.includes('SALON') || upperName.includes('SALOON') || upperName.includes('UNISEX') || upperName.includes('PET')) {
+      targetRoute = serviceSlugs.spa;
+    } else if (upperName.includes('PG')) {
+      targetRoute = serviceSlugs.pg;
+    }
+
+    router.push(`/${targetRoute}`);
   };
 
-  const getServiceTheme = (service) => {
-    const name = typeof service === 'string' ? service : service?.name;
-    const n = (name || '').toUpperCase();
-    const customDesc = service?.description || service?.subTitle || service?.shortDescription;
-
-    if (n.includes('APPLIANCE')) return {
-      bg: 'bg-[#E7F3F2]',
-      from: 'from-[#E7F3F2]',
-      gradient: 'from-[#E7F3F2] via-[#E7F3F2]/90 to-transparent',
-      text: 'text-[#064E44]',
-      sub: 'text-[#00796B]',
-      btn: 'bg-[#00796B]',
-      desc: customDesc || 'Quick & Reliable\nAppliance Repair'
-    };
-    if (n.includes('PG') || n.includes('HOSTEL')) return {
-      bg: 'bg-[#EBF5FF]',
-      from: 'from-[#EBF5FF]',
-      gradient: 'from-[#EBF5FF] via-[#EBF5FF]/90 to-transparent',
-      text: 'text-[#01579B]',
-      sub: 'text-[#0288D1]',
-      btn: 'bg-[#0288D1]',
-      desc: customDesc || 'Comfortable\nStays for You'
-    };
-    if (n.includes('RELIGIOUS')) return {
-      bg: 'bg-[#FFF6E9]',
-      from: 'from-[#FFF6E9]',
-      gradient: 'from-[#FFF6E9] via-[#FFF6E9]/90 to-transparent',
-      text: 'text-[#7D3F1B]',
-      sub: 'text-[#8E5A3C]',
-      btn: 'bg-[#F57C00]',
-      desc: customDesc || 'Puja, Pandit\n& More Services'
-    };
-    if (n.includes('SPA') || n.includes('SALON') || n.includes('SALOON') || n.includes('UNISEX') || n.includes('PET')) return {
-      bg: 'bg-[#FFF0F5]',
-      from: 'from-[#FFF0F5]',
-      gradient: 'from-[#FFF0F5] via-[#FFF0F5]/90 to-transparent',
-      text: 'text-[#880E4F]',
-      sub: 'text-[#C2185B]',
-      btn: 'bg-[#C2185B]',
-      desc: customDesc || 'Relax, Refresh\n& Rejuvenate'
-    };
-    if (n.includes('SELL') || n.includes('BUY')) return {
-      bg: 'bg-[#FFF8E7]',
-      from: 'from-[#FFF8E7]',
-      gradient: 'from-[#FFF8E7] via-[#FFF8E7]/90 to-transparent',
-      text: 'text-[#8D5B00]',
-      sub: 'text-[#B47400]',
-      btn: 'bg-[#E69500]',
-      desc: customDesc || 'Buy & Sell Verified\nGoods & Products'
-    };
-    return {
-      bg: 'bg-[#F5F5F5]',
-      from: 'from-[#F5F5F5]',
-      gradient: 'from-[#F5F5F5] via-[#F5F5F5]/90 to-transparent',
-      text: 'text-[#212121]',
-      sub: 'text-[#616161]',
-      btn: 'bg-[#424242]',
-      desc: customDesc || 'Trusted Quality\nServices for You'
-    };
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <div className="flex space-x-2">
-          <div className="w-2 h-2 bg-[#037166] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="w-2 h-2 bg-[#037166] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <div className="w-2 h-2 bg-[#037166] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-        </div>
-      </div>
-    );
-  }
-
-  const isScrollMode = services.length > 4;
-
-  // Helper to render a single card
-  const renderCard = (service, index, keyPrefix = '') => {
-    const theme = getServiceTheme(service);
-    return (
-      <motion.div
-        key={`${keyPrefix}${service._id || index}`}
-        initial={isScrollMode ? false : { opacity: 0, scale: 0.9 }}
-        animate={isScrollMode ? false : { opacity: 1, scale: 1 }}
-        transition={{ delay: index * 0.05 }}
-        whileHover={{ y: isScrollMode ? 0 : -4 }}
-        onClick={() => handleServiceClick(service)}
-        className={`relative overflow-hidden rounded-[20px] cursor-pointer flex-shrink-0 ${
-          isScrollMode ? 'w-[190px] sm:w-[310px]' : 'w-full'
-        } h-[95px] sm:h-[150px] shadow-sm group ${theme.bg} border border-black/5 hover:shadow-md transition-all`}
-      >
-        {/* Image background block */}
-        <div className="absolute inset-0 z-0">
-          <div className="relative w-full h-full">
-            <Image
-              loader={imageLoader}
-              src={service.image}
-              alt={service.name}
-              fill
-              priority={index < 4}
-              className="object-cover object-right transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
-        </div>
-
-        {/* Soft Left Gradient Scrim to guarantee high contrast and readability on all backgrounds */}
-        <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} w-[70%] sm:w-[60%] z-[1] pointer-events-none`} />
-
-        {/* Text block and Arrow Button on left */}
-        <div className="absolute inset-y-0 left-0 p-3 sm:p-5 w-[65%] sm:w-[58%] z-10 pointer-events-none flex flex-col justify-between text-left">
-          <div>
-            <h3 className={`text-[11px] sm:text-[16px] font-extrabold leading-tight mb-0.5 sm:mb-1 ${theme.text}`}>
-              {service.name}
-            </h3>
-            <p className={`text-[8.5px] sm:text-[11px] md:text-[12px] font-semibold leading-tight whitespace-pre-line ${theme.sub}`}>
-              {theme.desc}
-            </p>
-          </div>
-
-          {/* Action Arrow Button */}
-          <div className={`hero-card-arrow-btn w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center !text-white text-white ${theme.btn} shadow-sm group-hover:scale-110 transition-transform duration-200`}>
-            <ChevronRight
-              className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3] !text-white !stroke-white text-white stroke-white"
-              color="#ffffff"
-              stroke="#ffffff"
-              style={{ color: '#ffffff', stroke: '#ffffff' }}
-            />
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
+  if (!services || services.length === 0) return null;
 
   return (
-    <div className="mt-8 mx-auto w-full max-w-7xl">
+    <div className="w-full max-w-[1360px] mx-auto mt-3 sm:mt-4 lg:mt-4 px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 xl:gap-4">
+        {services.slice(0, 4).map((service, index) => {
+          const theme = getServiceTheme(service);
+          const displayTitle = theme.title || service.name;
+          const displaySubtitle = service.shortDescription || theme.subtitle;
 
-      {isScrollMode ? (
-        /* ── Infinite Auto-Scroll Mode ── */
-        <div
-          className="overflow-hidden relative"
-          style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}
-        >
-          <style>{`
-            @keyframes scroll-cards {
-              0%   { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
-            }
-            .cards-track {
-              display: flex;
-              gap: 24px;
-              width: max-content;
-              animation: scroll-cards 20s linear infinite;
-            }
-            .cards-track:hover {
-              animation-play-state: paused;
-            }
-          `}</style>
-          <div className="cards-track">
-            {/* Render twice for seamless loop */}
-            {[...services, ...services].map((service, index) =>
-              renderCard(service, index, index < services.length ? '' : 'dup-')
-            )}
-          </div>
-        </div>
-      ) : (
-        /* ── Grid Mode (≤4 services) ── */
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 justify-center">
-          {services.map((service, index) => renderCard(service, index))}
-        </div>
-      )}
+          return (
+            <div
+              key={service._id || index}
+              onClick={() => handleCardClick(service)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleCardClick(service);
+                }
+              }}
+              className={`group relative overflow-hidden rounded-[20px] cursor-pointer ${theme.bg} ${theme.borderColor} border shadow-[0_3px_14px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 h-[148px] sm:h-[158px] lg:h-[168px] xl:h-[174px] select-none flex flex-col justify-between p-3.5 sm:p-4`}
+            >
+              {/* Full Card Background Image from Backend (object-right coverage) */}
+              {service.image && (
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                  <Image
+                    loader={imageLoader}
+                    src={service.image}
+                    alt={displayTitle}
+                    fill
+                    priority={index < 4}
+                    sizes="(max-width: 640px) 95vw, (max-width: 1024px) 48vw, 25vw"
+                    className="object-cover object-right transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              )}
+
+              {/* Left Gradient Scrim for Guaranteed High Contrast & Readability */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} w-[50%] sm:w-[48%] z-[1] pointer-events-none`}
+                aria-hidden="true"
+              />
+
+              {/* Left Text Block - Constrained to prevent any overlap with right illustrations */}
+              <div className="relative z-10 max-w-[48%] sm:max-w-[46%] text-left">
+                <h3 className={`text-[14.5px] sm:text-[15.5px] lg:text-[16.5px] xl:text-[17px] font-black leading-tight tracking-tight ${theme.titleColor}`}>
+                  {displayTitle}
+                </h3>
+                <p className={`text-[10.5px] sm:text-[11px] lg:text-[11.5px] font-medium mt-0.5 sm:mt-1 leading-snug line-clamp-2 ${theme.subColor}`}>
+                  {displaySubtitle}
+                </p>
+              </div>
+
+              {/* Bottom CTA Arrow Button */}
+              <div className="relative z-10 flex items-center justify-start mt-auto">
+                <div
+                  className={`hero-card-arrow-btn w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white ${theme.btnBg} shadow-sm group-hover:scale-110 transition-transform duration-200`}
+                  style={{ color: '#ffffff' }}
+                >
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.5]" stroke="#ffffff" color="#ffffff" style={{ stroke: '#ffffff', color: '#ffffff' }} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
+const DEFAULT_INITIAL_SERVICES = [
+  {
+    _id: '683daaa8f261c1548bdf7442',
+    name: 'Appliance Service',
+    image: 'uploads/service/Appliance_Repair_Services.webp',
+    shortDescription: 'Quick & Reliable Appliance Repair',
+    priority: '1',
+  },
+  {
+    _id: '6a7db000a9d92694336007a0',
+    name: 'Sell & Buy',
+    image: 'uploads/service/Sell_and_Buy_Old_Things.webp',
+    shortDescription: 'Sell & Buy Old Things',
+    priority: '2',
+  },
+  {
+    _id: '695250aa57bb211ca094e5fd',
+    name: 'Religious Services',
+    image: 'uploads/service/Pooja_Services.webp',
+    shortDescription: 'Puja, Pandit & More Services',
+    priority: '3',
+  },
+  {
+    _id: '69524f4a57bb211ca094e5e6',
+    name: 'Unisex & Pet Saloons',
+    image: 'uploads/service/Unisex_Salon_Petcare.webp',
+    shortDescription: 'Unisex Saloons & Pet Care Centers',
+    priority: '4',
+  },
+];
 
-/* ---------- HERO SECTION ---------- */
-function HeroContent({ services = [], loading = false, error = null }) {
+/* ---------- MAIN HERO SECTION ---------- */
+export function HeroSection() {
+  const [services, setServices] = useState(DEFAULT_INITIAL_SERVICES);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliance-repair-services',
     religious: 'religious-services',
     spa: 'spa-salon',
-    pg: 'pghostels'
+    pg: 'pghostels',
   });
 
-  // Fetch Service Slugs (only appliance ID is supported by this endpoint)
+  const appLinks = {
+    android:
+      'https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share',
+    ios: 'https://apps.apple.com/in/app/doorstep-hub/id6475340236',
+  };
+
+  // Fetch Service Slugs
   useEffect(() => {
     const fetchSlugs = async () => {
       try {
@@ -516,117 +259,16 @@ function HeroContent({ services = [], loading = false, error = null }) {
         );
         const data = await res.json();
         if (data.success && data.data?.home) {
-          setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
+          setServiceSlugs((prev) => ({ ...prev, appliances: data.data.home }));
         }
       } catch (e) {
-        console.warn('Failed to fetch appliance slug, using default:', e);
+        console.warn('Failed to fetch appliance slug:', e);
       }
     };
     fetchSlugs();
   }, []);
 
-
-  const isScrollMode = services.length > 4;
-
-  const videoRef = React.useRef(null);
-  const appLinks = {
-    android: 'https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share',
-    ios: 'https://apps.apple.com/in/app/doorstep-hub/id6475340236'
-  };
-
-  React.useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(error => {
-        console.log("Video autoplay failed:", error);
-      });
-    }
-  }, []);
-
-  return (
-    <section className="relative overflow-x-hidden pt-24 pb-4 sm:pb-6">
-      {/* Latest Booking Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-white" />
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.14)_1px,transparent_1px)] bg-[size:50px_50px]" />
-
-        {/* Gradient Orbs - Intensified */}
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[100px] bg-white/80 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/85 rounded-full blur-[120px] pointer-events-none" />
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
-        <div>
-          {/* Eyebrow */}
-          <div
-            className="inline-flex items-center space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#037166]/10 border border-[#037166]/30 rounded-full mb-2 sm:mb-4 max-w-full"
-          >
-            <Sparkles className="w-4 h-4 text-[#037166] shrink-0" />
-            <h6 className="text-[10px] sm:text-xs md:text-sm bg-gradient-to-r from-[#037166] to-[#ff6b35] bg-clip-text text-transparent font-medium line-clamp-1 sm:line-clamp-none">
-              We are Committed to Provide you a Safe Service Experience
-            </h6>
-          </div>
-
-          {/* Main Heading */}
-          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 italic leading-[1.1]">
-            <span className="block !text-[#037166] text-[28px] sm:text-[40px] drop-shadow-sm font-black">Everything You Need,</span>
-            <span className="block mt-1 sm:mt-2 !text-[#037166] drop-shadow-sm font-black">
-              Right at Your Doorstep
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            className="hidden sm:block text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 mx-auto max-w-4xl w-full leading-relaxed text-center"
-          >
-            Find trusted appliance repair services, spa and salon bookings, PG and hostel accommodations, and religious pooja services all in one place. Enjoy convenient doorstep solutions, verified professionals, easy booking, and reliable support for your everyday needs. Experience hassle-free home and lifestyle services with just a few clicks.
-          </p>
-
-          {/* Service Cards */}
-          <div>
-            {error ? (
-              <div className="mt-12 text-center">
-                <p className="text-red-400 text-sm mb-2">{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="text-[#04a99d] hover:text-[#037166] text-sm underline"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <ServiceCardsSection services={services} loading={loading} activeIndex={0} serviceSlugs={serviceSlugs} />
-            )}
-          </div>
-
-          {/* Download Buttons */}
-          <div
-            className="flex flex-wrap justify-center gap-4 mt-8 mb-4 relative z-20"
-          >
-            <a href={appLinks.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Get it on Google Play">
-              <img src="/andriod1.png" alt="Google Play" loading="lazy" decoding="async" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
-            </a>
-            <a href={appLinks.ios} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-36 xs:w-44 md:w-38 h-12 xs:h-14 md:h-13 bg-[#DEF2EF] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-[#9ecbc3]" title="Download on the App Store">
-              <img src="/apple2.png" alt="App Store" loading="lazy" decoding="async" className="h-full w-full object-cover brightness-0 invert opacity-95 hover:opacity-100 transition-opacity" />
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent" />
-    </section >
-  );
-}
-
-/* ---------- MAIN EXPORT ---------- */
-export function HeroSection() {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
+  // Fetch & Priority Sort Services
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -634,37 +276,24 @@ export function HeroSection() {
         setError(null);
 
         const apiUrl = `${API_BASE_URL}/app/applience-repairs-website/all-services`;
-
         const response = await fetch(apiUrl, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
 
         if (!response.ok) {
-          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          throw new Error(`API Error: ${response.status}`);
         }
 
         const data = await response.json();
 
-        if (!data || typeof data !== 'object') {
-          throw new Error('Invalid API response format');
-        }
-
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-          // Admin Panel Priority Mapping:
-          // Priority 1: Appliance Service (ID: 683daaa8f261c1548bdf7442)
-          // Priority 2: Sell & Buy (ID: 6a7db000a9d92694336007a0)
-          // Priority 3: Religious Services (ID: 695250aa57bb211ca094e5fd)
-          // Priority 4: Unisex & Pet Saloons / Spa (ID: 69524f4a57bb211ca094e5e6)
-          // Priority 5: PG & Hostels (ID: 69524fb157bb211ca094e5ee)
           const adminPriorityMap = {
-            '683daaa8f261c1548bdf7442': 1,
-            '6a7db000a9d92694336007a0': 2,
-            '695250aa57bb211ca094e5fd': 3,
-            '69524f4a57bb211ca094e5e6': 4,
-            '69524fb157bb211ca094e5ee': 5,
+            '683daaa8f261c1548bdf7442': 1, // Appliance Service
+            '6a7db000a9d92694336007a0': 2, // Sell & Buy
+            '695250aa57bb211ca094e5fd': 3, // Religious Services
+            '69524f4a57bb211ca094e5e6': 4, // Unisex & Pet Saloons
+            '69524fb157bb211ca094e5ee': 5, // PG & Hostels
           };
 
           const sorted = [...data.data].sort((a, b) => {
@@ -688,16 +317,12 @@ export function HeroSection() {
           });
 
           setServices(sorted);
-        } else if (data.success && (!data.data || data.data.length === 0)) {
-          console.warn('API returned success but no services data');
-          setServices([]);
         } else {
-          throw new Error(data.message || 'Failed to fetch services');
+          setServices([]);
         }
-      } catch (error) {
-        console.error('Error fetching services:', error);
-        setError(error.message || 'Failed to load services. Please try again later.');
-        setServices([]);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+        setError(err.message || 'Failed to load services');
       } finally {
         setLoading(false);
       }
@@ -706,8 +331,305 @@ export function HeroSection() {
     fetchServices();
   }, []);
 
-  return <HeroContent services={services} loading={loading} error={error} />;
+  return (
+    <section className="relative overflow-hidden bg-white pt-[76px] sm:pt-[80px] lg:pt-[82px] pb-3 sm:pb-4 lg:pb-5">
+      {/* ========================================================= */}
+      {/* 1. ATMOSPHERIC BACKGROUND (Subtle Grid + Soft Mint Glows)   */}
+      {/* ========================================================= */}
+      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" aria-hidden="true">
+        {/* Crisp clean white background */}
+        <div className="absolute inset-0 bg-white" />
+
+        {/* Subtle technical grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,140,128,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,140,128,0.04)_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+        {/* Soft mint abstract circular shapes behind left technician & right customer */}
+        <div className="hidden lg:block absolute -left-12 top-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full bg-[#E5F7F4] blur-3xl opacity-80" />
+        <div className="hidden lg:block absolute -right-12 top-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full bg-[#E5F7F4] blur-3xl opacity-80" />
+      </div>
+
+      {/* ========================================================= */}
+      {/* 2. THREE-ZONE HERO SECTION (Desktop 3-Zone, Mobile Stacked)*/}
+      {/* ========================================================= */}
+      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row items-end justify-between gap-4 lg:gap-2">
+          
+          {/* ─────────────────────────────────────────────────────── */}
+          {/* ZONE A: LEFT VISUAL (Professional Technician)          */}
+          {/* ─────────────────────────────────────────────────────── */}
+          <div className="hidden lg:flex w-[210px] xl:w-[250px] 2xl:w-[280px] flex-col justify-end relative select-none shrink-0">
+            {/* Technician Real Image */}
+            <div className="relative w-full h-[370px] xl:h-[420px] flex items-end justify-center">
+              <Image
+                src="/hero-technician.png"
+                alt="Doorstep Hub appliance service professional"
+                fill
+                priority
+                className="object-contain object-bottom pointer-events-none drop-shadow-md"
+                sizes="(max-width: 1280px) 250px, 280px"
+              />
+            </div>
+
+            {/* Left Trust Callout: Verified Professionals */}
+            <div className="absolute left-0 bottom-4 xl:bottom-6 z-20 bg-white/95 backdrop-blur-md rounded-2xl px-3.5 py-2 shadow-[0_6px_20px_rgba(0,0,0,0.08)] border border-[#008C80]/20 flex items-center gap-2 pointer-events-auto">
+              <div className="w-6 h-6 rounded-lg bg-[#008C80] flex items-center justify-center text-white shrink-0 shadow-xs" style={{ backgroundColor: '#008C80' }}>
+                <ShieldCheck className="w-3.5 h-3.5 text-white" stroke="#ffffff" color="#ffffff" style={{ stroke: '#ffffff', color: '#ffffff' }} />
+              </div>
+              <span className="text-xs font-bold text-[#0F1B3D] leading-tight whitespace-nowrap">
+                Verified<br />Professionals
+              </span>
+            </div>
+
+            {/* Floating Dotted Trajectory & Mini Icons */}
+            <div className="absolute right-1 top-8 z-20 flex flex-col items-center gap-5 pointer-events-none" aria-hidden="true">
+              {/* Tool Icon */}
+              <div className="w-8 h-8 rounded-full bg-white shadow-[0_3px_12px_rgba(0,140,128,0.15)] border border-[#008C80]/25 flex items-center justify-center text-[#008C80]">
+                <Wrench className="w-3.5 h-3.5 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+              </div>
+              {/* Home Icon */}
+              <div className="w-8 h-8 rounded-full bg-white shadow-[0_3px_12px_rgba(0,140,128,0.15)] border border-[#008C80]/25 flex items-center justify-center text-[#008C80] translate-x-2.5">
+                <Home className="w-3.5 h-3.5 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+              </div>
+              {/* Shield Icon */}
+              <div className="w-8 h-8 rounded-full bg-white shadow-[0_3px_12px_rgba(0,140,128,0.15)] border border-[#008C80]/25 flex items-center justify-center text-[#008C80] -translate-x-1">
+                <Shield className="w-3.5 h-3.5 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+              </div>
+            </div>
+
+            {/* Curved dashed connector line */}
+            <svg
+              className="absolute right-3 top-10 w-14 h-44 pointer-events-none z-10"
+              viewBox="0 0 60 180"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M 25 10 C 50 55, 10 95, 30 155"
+                stroke="#008C80"
+                strokeWidth="1.5"
+                strokeDasharray="4 4"
+                opacity="0.4"
+              />
+            </svg>
+          </div>
+
+          {/* ─────────────────────────────────────────────────────── */}
+          {/* ZONE B: CENTER HERO CONTENT (Headlines, Copy, Badges)   */}
+          {/* ─────────────────────────────────────────────────────── */}
+          <div className="flex-1 max-w-[680px] mx-auto text-center px-2 sm:px-4 pb-1">
+            
+            {/* 1. Safe, Verified & Convenient Trust Badge */}
+            <div className="inline-flex items-center justify-center gap-2 mb-2 sm:mb-2.5 select-none">
+              {/* Left decorative spark icon */}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-[#008C80]/70 shrink-0" aria-hidden="true">
+                <line x1="12" y1="2" x2="12" y2="8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="4.93" y1="4.93" x2="9.17" y2="9.17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="2" y1="12" x2="8" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+              
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EAF8F6] border border-[#008C80]/30 shadow-2xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#008C80] shrink-0" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+                <span className="text-[11.5px] sm:text-xs font-bold text-[#0F1B3D]">
+                  Safe, Verified &amp; Convenient Home Services
+                </span>
+              </div>
+
+              {/* Right decorative spark icon */}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-[#008C80]/70 shrink-0" aria-hidden="true">
+                <line x1="12" y1="2" x2="12" y2="8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="19.07" y1="4.93" x2="14.83" y2="9.17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="22" y1="12" x2="16" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+
+            {/* 2. Main Headline */}
+            <h1 className="text-2xl sm:text-4xl lg:text-[40px] xl:text-[46px] font-black tracking-tight leading-[1.04] text-center mb-2 sm:mb-2.5">
+              <span className="block text-[#0F1B3D]">
+                Everything You Need,
+              </span>
+              <span className="block text-[#008C80] mt-0.5 sm:mt-1">
+                Right at Your Doorstep
+              </span>
+            </h1>
+
+            {/* 3. Concise Description */}
+            <p className="text-xs sm:text-[13.5px] lg:text-[14.5px] text-[#475467] leading-relaxed max-w-lg mx-auto mb-3.5 sm:mb-4 text-center font-normal">
+              From appliance repair and salon &amp; spa to PG &amp; hostel accommodations, pooja services, pet care, and buy &amp; sell — get trusted professionals, easy booking, and reliable support for all your everyday needs.
+            </p>
+
+            {/* 4. Official Customer App Store Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 relative z-20">
+              {/* Google Play Badge */}
+              <a
+                href={appLinks.android}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Download Doorstep Hub Customer App on Google Play"
+                className="hero-app-badge app-store-badge inline-flex items-center gap-2.5 px-4 py-1.5 sm:py-2 bg-[#0B0F19] hover:bg-[#1A2234] text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 border border-[#1e293b] select-none"
+                style={{ backgroundColor: '#0B0F19', color: '#ffffff' }}
+              >
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3.608 1.636a1.442 1.442 0 0 0-.358.988v18.752c0 .385.127.733.358.988l.056.056 10.5-10.428v-.248L3.664 1.58l-.056.056Z" fill="#2196F3"/>
+                  <path d="M17.664 15.492l-3.5-3.48v-.248l3.5-3.48.08.046 4.148 2.357c1.184.673 1.184 1.774 0 2.447l-4.148 2.358-.08.046Z" fill="#FFC107"/>
+                  <path d="M14.244 11.764L3.608 22.364c.389.412 1.05.464 1.79.043l12.346-7.015-3.5-3.628Z" fill="#F44336"/>
+                  <path d="M14.244 11.764l3.5-3.628L5.398 1.121c-.74-.421-1.401-.369-1.79.043l10.636 10.6Z" fill="#4CAF50"/>
+                </svg>
+                <div className="flex flex-col text-left leading-none">
+                  <span className="store-subtext text-[8px] sm:text-[8.5px] uppercase tracking-wider font-semibold" style={{ color: '#CBD5E1' }}>
+                    GET IT ON
+                  </span>
+                  <span className="store-title text-xs sm:text-[13px] font-bold tracking-tight mt-0.5" style={{ color: '#FFFFFF' }}>
+                    Google Play
+                  </span>
+                </div>
+              </a>
+
+              {/* App Store Badge */}
+              <a
+                href={appLinks.ios}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Download Doorstep Hub Customer App on the App Store"
+                className="hero-app-badge app-store-badge inline-flex items-center gap-2.5 px-4 py-1.5 sm:py-2 bg-[#0B0F19] hover:bg-[#1A2234] text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 border border-[#1e293b] select-none"
+                style={{ backgroundColor: '#0B0F19', color: '#ffffff' }}
+              >
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="#ffffff" style={{ fill: '#ffffff', color: '#ffffff' }} aria-hidden="true">
+                  <path fill="#ffffff" style={{ fill: '#ffffff' }} d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.64-.78 1.08-1.86.96-2.84-.93.04-2.05.62-2.7 1.39-.58.67-1.08 1.76-.95 2.82 1.04.08 2.06-.59 2.69-1.37z"/>
+                </svg>
+                <div className="flex flex-col text-left leading-none">
+                  <span className="store-subtext text-[8px] sm:text-[8.5px] font-semibold" style={{ color: '#CBD5E1' }}>
+                    Download on the
+                  </span>
+                  <span className="store-title text-xs sm:text-[13px] font-bold tracking-tight mt-0.5" style={{ color: '#FFFFFF' }}>
+                    App Store
+                  </span>
+                </div>
+              </a>
+            </div>
+
+            {/* 5. Mobile / Tablet Only: Visual Group & Trust Chips */}
+            <div className="lg:hidden mt-4 flex flex-col items-center">
+              {/* Responsive Human Visuals Side-by-Side */}
+              <div className="flex items-end justify-center gap-2 h-[170px] sm:h-[210px] relative w-full overflow-hidden">
+                {/* Soft Mint Halo */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#EAF8F6] via-transparent to-transparent rounded-2xl -z-10" />
+
+                {/* Technician Mobile */}
+                <div className="relative w-[120px] sm:w-[150px] h-full">
+                  <Image
+                    src="/hero-technician.png"
+                    alt="Doorstep Hub technician"
+                    fill
+                    className="object-contain object-bottom"
+                    sizes="150px"
+                  />
+                </div>
+
+                {/* Customer Mobile */}
+                <div className="relative w-[120px] sm:w-[150px] h-full">
+                  <Image
+                    src="/hero-customer.png?v=2"
+                    alt="Customer using phone"
+                    fill
+                    className="object-contain object-bottom"
+                    sizes="150px"
+                  />
+                </div>
+              </div>
+
+              {/* Mobile Trust Chips */}
+              <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF8F6] border border-[#008C80]/20 text-[10.5px] font-bold text-[#0F1B3D]">
+                  <ShieldCheck className="w-3 h-3 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+                  Verified Professionals
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF8F6] border border-[#008C80]/20 text-[10.5px] font-bold text-[#0F1B3D]">
+                  <CalendarCheck className="w-3 h-3 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+                  Easy Booking
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF8F6] border border-[#008C80]/20 text-[10.5px] font-bold text-[#0F1B3D]">
+                  <Headphones className="w-3 h-3 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+                  Reliable Support
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ─────────────────────────────────────────────────────── */}
+          {/* ZONE C: RIGHT VISUAL (Customer using phone)             */}
+          {/* ─────────────────────────────────────────────────────── */}
+          <div className="hidden lg:flex w-[210px] xl:w-[250px] 2xl:w-[280px] flex-col justify-end relative select-none shrink-0">
+            {/* Customer Real Image */}
+            <div className="relative w-full h-[360px] xl:h-[410px] flex items-end justify-center">
+              <Image
+                src="/hero-customer.png?v=2"
+                alt="Customer booking Doorstep Hub services on her phone"
+                fill
+                priority
+                className="object-contain object-bottom pointer-events-none drop-shadow-md"
+                sizes="(max-width: 1280px) 250px, 280px"
+              />
+            </div>
+
+            {/* Right Trust Callout: Easy Booking (Top-Right) */}
+            <div className="absolute right-0 top-6 xl:top-8 z-20 bg-white/95 backdrop-blur-md rounded-2xl px-3.5 py-2 shadow-[0_6px_20px_rgba(0,0,0,0.08)] border border-[#008C80]/20 flex items-center gap-2 pointer-events-auto">
+              <div className="w-7 h-7 rounded-xl bg-[#EAF8F6] border border-[#008C80]/20 flex items-center justify-center text-[#008C80] shrink-0">
+                <CalendarCheck className="w-3.5 h-3.5 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+              </div>
+              <div className="text-left">
+                <h4 className="text-xs font-bold text-[#0F1B3D] leading-tight">
+                  Easy Booking
+                </h4>
+              </div>
+            </div>
+
+            {/* Right Trust Callout: Reliable Support (Bottom-Right) */}
+            <div className="absolute -right-1 xl:right-0 bottom-4 xl:bottom-6 z-20 bg-white/95 backdrop-blur-md rounded-2xl px-3.5 py-2 shadow-[0_6px_20px_rgba(0,0,0,0.08)] border border-[#008C80]/20 flex items-center gap-2 pointer-events-auto">
+              <div className="w-7 h-7 rounded-xl bg-[#EAF8F6] border border-[#008C80]/20 flex items-center justify-center text-[#008C80] shrink-0">
+                <Headphones className="w-3.5 h-3.5 text-[#008C80]" stroke="#008C80" color="#008C80" style={{ stroke: '#008C80', color: '#008C80' }} />
+              </div>
+              <div className="text-left">
+                <h4 className="text-xs font-bold text-[#0F1B3D] leading-tight">
+                  Reliable Support
+                </h4>
+              </div>
+            </div>
+
+            {/* Decorative mint sparkles near customer */}
+            <div className="absolute left-3 top-20 pointer-events-none select-none" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                <path d="M4 14 C 8 10, 14 18, 18 14" stroke="#008C80" strokeWidth="2" strokeLinecap="round" opacity="0.45"/>
+                <path d="M10 6 C 14 2, 20 10, 24 6" stroke="#008C80" strokeWidth="2" strokeLinecap="round" opacity="0.45"/>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ========================================================= */}
+        {/* 3. FOUR SERVICE CATEGORY CARDS                            */}
+        {/* ========================================================= */}
+        {error ? (
+          <div className="mt-4 text-center">
+            <p className="text-red-500 text-sm mb-1">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-[#008C80] hover:underline text-xs font-semibold"
+            >
+              Retry Loading Services
+            </button>
+          </div>
+        ) : (
+          <ServiceCategoryCards
+            services={services}
+            loading={loading}
+            serviceSlugs={serviceSlugs}
+          />
+        )}
+      </div>
+    </section>
+  );
 }
 
 export default HeroSection;
-

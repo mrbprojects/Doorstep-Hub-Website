@@ -659,23 +659,48 @@ html {
   stroke: #ffffff !important;
 }
 
-/* App Download Section Styling Overrides */
+/* App Download Section & Hero Badges Styling Overrides */
 .landing-global #app-download {
   background-color: #ffffff !important;
 }
 .app-store-badge,
+.hero-app-badge,
+.landing-global .app-store-badge,
+.landing-global .app-store-badge *,
+.landing-global .hero-app-badge,
+.landing-global .hero-app-badge *,
 .landing-global #app-download .app-store-badge,
 .landing-global #app-download .app-store-badge * {
   color: #ffffff !important;
 }
-.app-store-badge svg.fill-current {
+.app-store-badge .store-subtext,
+.hero-app-badge .store-subtext,
+.landing-global .app-store-badge .store-subtext,
+.landing-global .hero-app-badge .store-subtext {
+  color: #cbd5e1 !important;
+}
+.app-store-badge svg.fill-current,
+.hero-app-badge svg.fill-current,
+.landing-global .app-store-badge svg[fill="#ffffff"],
+.landing-global .hero-app-badge svg[fill="#ffffff"] {
   fill: #ffffff !important;
+  color: #ffffff !important;
 }
 .app-store-badge svg path[fill="#2196F3"],
+.hero-app-badge svg path[fill="#2196F3"] {
+  fill: #2196F3 !important;
+}
 .app-store-badge svg path[fill="#FFC107"],
+.hero-app-badge svg path[fill="#FFC107"] {
+  fill: #FFC107 !important;
+}
 .app-store-badge svg path[fill="#F44336"],
-.app-store-badge svg path[fill="#4CAF50"] {
-  fill: revert !important;
+.hero-app-badge svg path[fill="#F44336"] {
+  fill: #F44336 !important;
+}
+.app-store-badge svg path[fill="#4CAF50"],
+.hero-app-badge svg path[fill="#4CAF50"] {
+  fill: #4CAF50 !important;
 }
 .landing-global #app-download .app-callout-card,
 .app-callout-card {

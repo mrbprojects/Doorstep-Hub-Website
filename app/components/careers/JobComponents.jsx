@@ -1,120 +1,171 @@
-import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Filter } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { MapPin, Briefcase, Clock, Bookmark, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-export function JobFilter({ activeRole, onRoleChange }) {
-    const [roles, setRoles] = useState([]);
-    const [loading, setLoading] = useState(true);
+// Helper to get pastel pill color based on department or role name
+export function getDepartmentStyle(dept = '') {
+    const lower = dept.toLowerCase();
+    if (lower.includes('eng') || lower.includes('node') || lower.includes('tech') || lower.includes('qa') || lower.includes('react')) {
+        return { bg: 'bg-[#E0F2FE]', text: 'text-[#0284C7]', label: 'ENGINEERING' };
+    }
+    if (lower.includes('product')) {
+        return { bg: 'bg-[#E0F7FA]', text: 'text-[#00838F]', label: 'PRODUCT' };
+    }
+    if (lower.includes('operation') || lower.includes('support') || lower.includes('customer')) {
+        return { bg: 'bg-[#EEF2FF]', text: 'text-[#4F46E5]', label: 'OPERATIONS' };
+    }
+    if (lower.includes('market') || lower.includes('content') || lower.includes('writer')) {
+        return { bg: 'bg-[#F5F3FF]', text: 'text-[#7C3AED]', label: 'MARKETING' };
+    }
+    if (lower.includes('design') || lower.includes('ui') || lower.includes('ux') || lower.includes('graphic')) {
+        return { bg: 'bg-[#FEF3C7]', text: 'text-[#D97706]', label: 'DESIGN' };
+    }
+    if (lower.includes('data') || lower.includes('analytics')) {
+        return { bg: 'bg-[#CCFBF1]', text: 'text-[#0D9488]', label: 'DATA' };
+    }
+    if (lower.includes('crm') || lower.includes('sales')) {
+        return { bg: 'bg-[#ECFDF5]', text: 'text-[#059669]', label: 'SALES / CRM' };
+    }
+    return { bg: 'bg-[#E6F7F5]', text: 'text-[#008C80]', label: dept.toUpperCase() || 'GENERAL' };
+}
 
-    useEffect(() => {
-        const fetchRoles = async () => {
-            try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/careers/get-roles`);
-                const data = await response.json();
-                if (data.success) {
-                    setRoles(data.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch roles:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchRoles();
-    }, []);
-
+export function JobFilter({ activeRole, onRoleChange, roles = [] }) {
     return (
-        <div className="sticky top-24 z-30 bg-[#0a0a0a]/80 backdrop-blur-xl border-y border-white/10 py-6 mb-12">
-            <div className="max-w-7xl mx-auto px-4">
-                <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-                    {/* Horizontal Scrollable Categories */}
-                    <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => onRoleChange(null)}
-                                className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${!activeRole
-                                        ? 'bg-white text-black shadow-lg shadow-white/20'
-                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
-                                    }`}
-                            >
-                                All Roles
-                            </button>
-                            {roles.map((role) => (
-                                <button
-                                    key={role._id}
-                                    onClick={() => onRoleChange(role._id)}
-                                    className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${activeRole === role._id
-                                            ? 'bg-white text-black shadow-lg shadow-white/20'
-                                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
-                                        }`}
-                                >
-                                    {role.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                </div>
+        <div className="w-full overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="flex items-center gap-2 min-w-max">
+                <button
+                    type="button"
+                    onClick={() => onRoleChange(null)}
+                    aria-pressed={!activeRole}
+                    className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                        !activeRole
+                            ? 'bg-[#008C80] text-white shadow-2xs'
+                            : 'bg-white text-[#475467] border border-[#D5E2E0] hover:border-[#008C80] hover:text-[#008C80]'
+                    }`}
+                >
+                    All Roles
+                </button>
+                {roles.map((role) => {
+                    const isSelected = activeRole === role._id;
+                    return (
+                        <button
+                            key={role._id}
+                            type="button"
+                            onClick={() => onRoleChange(role._id)}
+                            aria-pressed={isSelected}
+                            className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                                isSelected
+                                    ? 'bg-[#008C80] text-white shadow-2xs'
+                                    : 'bg-white text-[#475467] border border-[#D5E2E0] hover:border-[#008C80] hover:text-[#008C80]'
+                            }`}
+                        >
+                            {role.name}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
 }
 
 export function JobCard({ job, onClick }) {
+    const [bookmarked, setBookmarked] = useState(false);
+    const deptStyle = getDepartmentStyle(job.department || (job.roleId && job.roleId.name) || '');
+
+    const handleBookmark = (e) => {
+        e.stopPropagation();
+        setBookmarked(!bookmarked);
+    };
+
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.25 }}
             onClick={onClick}
-            className="group relative p-8 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all cursor-pointer overflow-hidden"
+            className="group relative p-4 sm:p-5.5 rounded-xl sm:rounded-2xl bg-white border border-[#E5ECEB] hover:border-[#008C80]/40 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between h-full"
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-            <div className="relative z-10">
-                <div className="flex justify-between items-start mb-6">
-                    <div>
-                        <span className="inline-block px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-3">
-                            {job.department}
-                        </span>
-                        <h3 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors mb-2">
-                            {job.title}
-                        </h3>
-                    </div>
-                </div>
-
-                <div className="flex flex-wrap gap-4 text-gray-400 text-sm mb-8">
-                    <div className="flex items-center gap-1.5">
-                        <Briefcase className="w-4 h-4" />
-                        {job.experienceLevel}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4" />
-                        {job.location}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                        {job.employmentType}
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-auto">
-                    <div className="flex -space-x-2">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="w-8 h-8 rounded-full border-2 border-[#1a1a1a] bg-gray-700 flex items-center justify-center text-[10px] text-white">
-                                <Filter className="w-3 h-3" />
-                            </div>
-                        ))}
-                    </div>
-                    <span className="text-white font-medium group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                        View Details <span className="text-xl">→</span>
+            <div>
+                {/* Header: Department Badge & Bookmark Button */}
+                <div className="flex items-center justify-between mb-3">
+                    <span className={`inline-block px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wider ${deptStyle.bg} ${deptStyle.text}`}>
+                        {deptStyle.label}
                     </span>
+
+                    <button
+                        type="button"
+                        onClick={handleBookmark}
+                        aria-label={bookmarked ? "Unsave job" : "Save job"}
+                        className={`p-1 rounded-md border transition-colors ${
+                            bookmarked
+                                ? 'bg-[#E6F7F5] border-[#008C80] text-[#008C80]'
+                                : 'bg-transparent border-transparent text-[#98A2B3] hover:text-[#101828] hover:bg-gray-100'
+                        }`}
+                    >
+                        <Bookmark className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
+                    </button>
                 </div>
+
+                {/* Job Title */}
+                <h3 className="text-base sm:text-lg font-bold text-[#101828] group-hover:text-[#008C80] transition-colors mb-2 leading-snug">
+                    {job.title}
+                </h3>
+
+                {/* Metadata Row */}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[#667085] text-xs mb-4">
+                    <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-[#98A2B3]" />
+                        <span>{job.location || 'Hyderabad'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Briefcase className="w-3 h-3 text-[#98A2B3]" />
+                        <span>{job.employmentType || 'Full-time'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-[#98A2B3]" />
+                        <span>{job.experienceLevel || '2–5 years'}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Row: View Details Link */}
+            <div className="pt-3 border-t border-[#F2F4F7] flex items-center justify-between mt-auto">
+                <span className="text-[#008C80] font-bold text-xs sm:text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    <span>View Details</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                </span>
+
+                {job.openingsCount && (
+                    <span className="text-[11px] text-[#98A2B3]">
+                        {job.openingsCount} {job.openingsCount === 1 ? 'opening' : 'openings'}
+                    </span>
+                )}
             </div>
         </motion.div>
     );
 }
 
+export function JobCardSkeleton() {
+    return (
+        <div className="p-4 sm:p-5.5 rounded-xl sm:rounded-2xl bg-white border border-[#E5ECEB] shadow-2xs animate-pulse flex flex-col justify-between h-[180px] sm:h-[190px]">
+            <div>
+                <div className="flex justify-between items-center mb-3">
+                    <div className="w-20 h-5 bg-gray-200 rounded" />
+                    <div className="w-5 h-5 bg-gray-200 rounded" />
+                </div>
+                <div className="w-2/3 h-6 bg-gray-200 rounded mb-3" />
+                <div className="flex gap-3">
+                    <div className="w-16 h-3.5 bg-gray-200 rounded" />
+                    <div className="w-14 h-3.5 bg-gray-200 rounded" />
+                    <div className="w-14 h-3.5 bg-gray-200 rounded" />
+                </div>
+            </div>
+            <div className="pt-3 border-t border-[#F2F4F7] flex justify-between">
+                <div className="w-20 h-4 bg-gray-200 rounded" />
+                <div className="w-12 h-3.5 bg-gray-200 rounded" />
+            </div>
+        </div>
+    );
+}

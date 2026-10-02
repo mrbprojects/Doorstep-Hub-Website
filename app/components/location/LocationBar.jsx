@@ -162,19 +162,20 @@ export function LocationBar({ theme = {} }) {
             <motion.button
                 onClick={() => setIsOpen(true)}
                 data-location-trigger
-                className={`hidden lg:flex items-center space-x-2 px-3 py-2 rounded-xl glass-button-premium border transition-all group mr-2 focus:outline-none ${t.buttonBg} hover:bg-opacity-80 ${t.border}`}
+                className="hidden lg:flex items-center space-x-2.5 px-3.5 py-1.5 rounded-[14px] bg-white border border-[#008C80]/30 shadow-xs hover:border-[#008C80] transition-all group mr-2 focus:outline-none"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
             >
-                <div className="flex flex-col items-start min-w-[100px] max-w-[160px]">
-                    <span className={`text-[10px] uppercase tracking-wider font-semibold opacity-70 ${t.textMain}`}>
-                        {location ? 'Your Location' : 'Location'}
+                <MapPin className="w-4 h-4 text-[#008C80] fill-[#008C80] shrink-0" />
+                <div className="flex flex-col items-start min-w-[90px] max-w-[150px]">
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-gray-400 leading-tight">
+                        {location ? 'YOUR LOCATION' : 'LOCATION'}
                     </span>
-                    <span className={`text-xs font-medium truncate w-full text-left ${t.textMain}`}>
-                        {loading ? 'Detecting...' : location ? location.shortAddress : 'Select location'}
+                    <span className="text-xs font-bold truncate w-full text-left text-[#0F1B3D] leading-tight mt-0.5">
+                        {loading ? 'Detecting...' : location ? (location.city || location.shortAddress) : 'Select location'}
                     </span>
                 </div>
-                <ChevronDown className={`w-3 h-3 opacity-50 ${t.textMain} group-hover:opacity-100 transition-opacity`} />
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#008C80] transition-colors" />
             </motion.button>
 
             {/* Modal / Dropdown - Using Portal to escape Header stacking context */}

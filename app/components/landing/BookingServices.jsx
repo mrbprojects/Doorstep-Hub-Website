@@ -47,7 +47,7 @@ function ServiceCard({ service, onBook, index }) {
 
         {/* Status badge */}
         {service.status && service.status !== 'Unavailable' && (
-          <span className="absolute top-2.5 left-2.5 bg-[#037166] text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full shadow-sm">
+          <span className="absolute top-2.5 left-2.5 bg-[#037166] !text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full shadow-sm">
             {service.status}
           </span>
         )}
@@ -285,7 +285,7 @@ export function BookingServices() {
   };
 
   return (
-    <section id="booking-services" className="relative bg-[#0a0a0a] pt-10 pb-14 overflow-hidden">
+    <section id="booking-services" className="relative bg-[#0a0a0a] pt-4 sm:pt-6 pb-10 sm:pb-12 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.05)_1px,transparent_1px)] bg-[size:48px_48px]" />
@@ -307,7 +307,7 @@ export function BookingServices() {
               Latest Appliance Service Bookings
             </span>
           </h2>
-          <p className="text-gray-400 text-sm sm:text-base max-w-5xl mx-auto">
+          <p className="text-gray-400 text-sm sm:text-base max-w-4xl mx-auto">
             See the home appliance services customers are booking right now, from AC and refrigerator repairs to washing machine, TV, water purifier and other doorstep service needs.
           </p>
         </motion.div>

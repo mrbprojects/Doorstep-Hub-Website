@@ -270,7 +270,7 @@ export function LatestReligiousServices() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+          <p className="text-gray-400 text-lg max-w-4xl mx-auto">
            Explore the latest religious services for pujas, homams, rituals, temple ceremonies, housewarming, weddings, festivals, and other spiritual occasions. Find suitable priests and service options based on your tradition, location, and ceremony needs.
           </p>
         </motion.div>

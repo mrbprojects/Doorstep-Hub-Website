@@ -302,7 +302,7 @@ export function RecommendedHostels() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+          <p className="text-gray-400 text-lg max-w-4xl mx-auto">
             Explore recommended hostels offering comfortable stays, useful amenities, convenient locations, and options for students and working professionals. Compare suitable choices and find a hostel that matches your budget, location, and daily needs.
 
           </p>

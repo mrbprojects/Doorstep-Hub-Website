@@ -452,7 +452,7 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
   };
 
   return (
-    <div className={`mt-8 mx-auto w-full ${isScrollMode ? 'max-w-none px-0' : 'max-w-[1300px] px-3 sm:px-0'}`}>
+    <div className="mt-8 mx-auto w-full max-w-7xl">
 
       {isScrollMode ? (
         /* ── Infinite Auto-Scroll Mode ── */
@@ -538,7 +538,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
   }, []);
 
   return (
-    <section className="relative min-h-[60vh] flex flex-col items-center justify-center overflow-x-hidden pt-20 pb-8">
+    <section className="relative overflow-x-hidden pt-24 pb-4 sm:pb-6">
       {/* Latest Booking Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-white" />
@@ -552,7 +552,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-none mx-auto px-0 text-center w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
         <div>
           {/* Eyebrow */}
           <div
@@ -574,7 +574,7 @@ function HeroContent({ services = [], loading = false, error = null }) {
 
           {/* Subtitle */}
           <p
-            className={`hidden sm:block text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 mx-auto w-full leading-relaxed text-center ${isScrollMode ? 'max-w-none px-4 sm:px-6 md:px-12 lg:px-[155px]' : 'max-w-[1000px] px-3 sm:px-0'}`}
+            className="hidden sm:block text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 mx-auto max-w-4xl w-full leading-relaxed text-center"
           >
             Find trusted appliance repair services, spa and salon bookings, PG and hostel accommodations, and religious pooja services all in one place. Enjoy convenient doorstep solutions, verified professionals, easy booking, and reliable support for your everyday needs. Experience hassle-free home and lifestyle services with just a few clicks.
           </p>

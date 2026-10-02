@@ -351,7 +351,7 @@ export function Footer({ theme = {} }) {
       {/* Background Gradient Glow */}
       <div className="absolute inset-0 bg-gradient-to-t pointer-events-none" style={{ background: `linear-gradient(to top, ${t.accentGlow}08, transparent)` }} />
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8 py-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Explore Services Dynamic Section */}
         {!isLoading && serviceGroups.some(group => group.subcategories.length > 0) && (
           <div className="mb-16">

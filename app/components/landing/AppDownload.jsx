@@ -30,7 +30,7 @@ export function AppDownload() {
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-6 xl:gap-10 items-center">
           {/* Left: Content */}
           <motion.div

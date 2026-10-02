@@ -373,7 +373,7 @@ export function NearbyServiceCenters() {
   // YOUR EXACT ORIGINAL UI WITH DARK MAP & INSTANT LOAD
   return (
     <section
-      className="relative py-12 overflow-hidden"
+      className="relative py-8 sm:py-10 overflow-hidden"
       onClick={() => setSelectedService(null)}
     >
       {/* Section Background */}
@@ -388,13 +388,13 @@ export function NearbyServiceCenters() {
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/25 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-10"
         >
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             <Navigation className="w-4 h-4 text-[#037166]" />
@@ -407,7 +407,7 @@ export function NearbyServiceCenters() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+          <p className="text-gray-400 text-lg max-w-4xl mx-auto">
             Find nearby appliance service providers for ACs, refrigerators, washing machines, TVs, water purifiers and more. Compare available professionals, choose a suitable service, and book convenient doorstep repair support in your area.
  {location ? (location.shortAddress || 'you') : 'you'}
           </p>

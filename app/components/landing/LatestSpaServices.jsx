@@ -152,7 +152,7 @@ export function LatestSpaServices() {
   };
 
   return (
-    <section className="relative py-22 overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden">
       {/* Architectural World Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -161,14 +161,14 @@ export function LatestSpaServices() {
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6 sm:mb-8"
         >
           <motion.h2
             initial={{ opacity: 0 }}
@@ -184,7 +184,7 @@ export function LatestSpaServices() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-gray-400 text-lg max-w-5xl mx-auto"
+            className="text-gray-400 text-lg max-w-4xl mx-auto"
           >
             Explore recently booked spa and salon services for hair care, beauty treatments, grooming, facials, styling, massages, and more. Discover popular services customers are choosing and book convenient beauty and wellness appointments near you.
           </motion.p>

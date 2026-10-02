@@ -292,7 +292,7 @@ export function PremiumPGHostels() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-5xl mx-auto mb-6">
+          <p className="text-gray-400 text-lg max-w-4xl mx-auto mb-6">
             Discover premium PGs and hostels with comfortable rooms, essential amenities, convenient locations, and flexible stay options. Explore suitable accommodation for students and working professionals and choose the right place with ease.
 
           </p>

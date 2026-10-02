@@ -265,7 +265,7 @@ export function RecommendedReligious() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+          <p className="text-gray-400 text-lg max-w-4xl mx-auto">
             Explore recommended Pandits for pujas, homams, weddings, housewarming ceremonies, festivals, and other religious rituals. Choose experienced priests based on your tradition, ceremony requirements, language preference, and location.
           </p>
         </motion.div>

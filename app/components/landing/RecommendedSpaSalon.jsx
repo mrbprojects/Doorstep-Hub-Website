@@ -273,7 +273,7 @@ export function RecommendedSpaSalon() {
   }
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden">
       {/* Architectural World Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -286,14 +286,14 @@ export function RecommendedSpaSalon() {
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/15 rounded-full blur-[170px] pointer-events-none" />
       </div>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6 sm:mb-8"
         >
           {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#d4af37]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
             < Crown className="w-4 h-4 text-[#d4af37]" />
@@ -308,7 +308,7 @@ export function RecommendedSpaSalon() {
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-5xl mx-auto">
+          <p className="text-gray-400 text-lg max-w-4xl mx-auto">
             Explore recommended spas and salons for hair care, beauty treatments, grooming, facials, styling, massages, and wellness services. Compare suitable options based on services, location, and your personal care needs to book with ease.
           </p>
         </motion.div>

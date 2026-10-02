@@ -102,7 +102,7 @@ export function KnowledgeSection({ initialArticles }) {
   );
 
   return (
-    <section className="relative py-24 overflow-hidden bg-white">
+    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden bg-white">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#03716605,transparent_50%),radial-gradient(circle_at_bottom_left,#04a99d05,transparent_50%)]" />
       
@@ -116,9 +116,9 @@ export function KnowledgeSection({ initialArticles }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          className="text-center mb-8 sm:mb-10"
         >
-          <div className="inline-flex items-center space-x-2 px-5 py-2 bg-[#037166]/5 border border-[#037166]/20 rounded-full mb-8">
+          <div className="inline-flex items-center space-x-2 px-5 py-2 bg-[#037166]/5 border border-[#037166]/20 rounded-full mb-4">
             <BookOpen className="w-4 h-4 text-[#037166]" />
             <h6 className="text-xs font-black text-[#037166] uppercase tracking-[0.2em]">Insights & Stories</h6>
           </div>

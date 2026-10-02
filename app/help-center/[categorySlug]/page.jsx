@@ -1,5 +1,5 @@
 import React from 'react';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { API_BASE_URL } from '@/config/env';
 import {
     HELP_CATEGORIES,
@@ -21,14 +21,14 @@ async function fetchCategoryData(categorySlug) {
 
     try {
         // 1. Fetch articles from backend API
-        const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/knowledge-base?limit=50`, {
+        const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/knowledge-base?limit=100`, {
             next: { revalidate: 3600 }
         }).catch(() => null);
 
         if (res && res.ok) {
             const data = await res.json();
             if (data?.success && Array.isArray(data.data)) {
-                allArticles = data.data.map(item => normalizeArticle(item, categorySlug));
+                allArticles = data.data.map(item => normalizeArticle(item)).filter(Boolean);
             }
         }
 

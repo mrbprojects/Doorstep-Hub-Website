@@ -275,37 +275,32 @@ export function PremiumPGHostels() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-6 sm:mb-8"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-4 sm:mb-6"
         >
-          {/* <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-[#ff6b35]/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
-            <Building2 className="w-4 h-4 text-[#037166]" />
-            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent font-medium">Modern Architectural World</h6>
-          </div> */}
-
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
             <span className="bg-gradient-to-r from-[#037166] via-[#ff6b35] to-[#037166] bg-clip-text text-transparent">
               Premium PG & Hostels
             </span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-4xl mx-auto mb-6">
+          <p className="text-gray-500 text-xs sm:text-sm md:text-base max-w-3xl mx-auto mb-3 sm:mb-4 leading-relaxed">
             Discover premium PGs and hostels with comfortable rooms, essential amenities, convenient locations, and flexible stay options. Explore suitable accommodation for students and working professionals and choose the right place with ease.
-
           </p>
 
           {/* Explore All Button */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => router.push('/pghostels')}
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-[#297A70] text-[#ffffff] rounded-xl font-semibold shadow-lg cursor-pointer group/header-btn relative overflow-hidden"
+            className="inline-flex items-center space-x-2 px-5 py-2.5 sm:px-6 sm:py-3 bg-[#297A70] hover:bg-[#037166] !text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md cursor-pointer group/header-btn transition-all"
+            style={{ color: '#ffffff' }}
           >
-            <span className='!text-[#ffffff]'>Explore All PG & Hostels</span>
-            <ArrowRight className="w-5 h-5" />
+            <span className="!text-white font-bold" style={{ color: '#ffffff' }}>Explore All PG & Hostels</span>
+            <ArrowRight className="w-4 h-4 !text-white transition-transform group-hover/header-btn:translate-x-1" style={{ color: '#ffffff', stroke: '#ffffff' }} />
           </motion.button>
         </motion.div>
 

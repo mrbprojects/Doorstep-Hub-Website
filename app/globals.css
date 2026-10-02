@@ -626,7 +626,8 @@ html {
   button[class*="from-[#e89117]"],
   button[class*="to-[#00796B]"],
   button[class*="bg-gradient-"],
-  div[class~="bg-[#037166]"]
+  div[class~="bg-[#037166]"],
+  .hero-card-arrow-btn
 ):not(.category-pill:not(.category-pill-active)),
 .landing-global :is(
   button.category-pill-active,
@@ -634,9 +635,57 @@ html {
   button[class*="from-[#e89117]"],
   button[class*="to-[#00796B]"],
   button[class*="bg-gradient-"],
-  div[class~="bg-[#037166]"]
-):not(.category-pill:not(.category-pill-active)) :is(span, p, svg) {
+  div[class~="bg-[#037166]"],
+  .hero-card-arrow-btn
+):not(.category-pill:not(.category-pill-active)) :is(span, p, svg, path) {
   color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Ensure arrow marks in hero service cards and circular buttons are always white */
+.landing-global .hero-card-arrow-btn,
+.landing-global .hero-card-arrow-btn svg,
+.landing-global .hero-card-arrow-btn svg path,
+.landing-global .hero-card-arrow-btn *,
+.landing-global .btn-explore-all,
+.landing-global .btn-explore-all *,
+.landing-global .btn-newsletter-subscribe,
+.landing-global .btn-newsletter-subscribe *,
+.landing-global a[class*="bg-[#008C80]"],
+.landing-global a[class*="bg-[#008C80]"] *,
+.landing-global button[class*="bg-[#008C80]"],
+.landing-global button[class*="bg-[#008C80]"] * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* App Download Section Styling Overrides */
+.landing-global #app-download {
+  background-color: #ffffff !important;
+}
+.app-store-badge,
+.landing-global #app-download .app-store-badge,
+.landing-global #app-download .app-store-badge * {
+  color: #ffffff !important;
+}
+.app-store-badge svg.fill-current {
+  fill: #ffffff !important;
+}
+.app-store-badge svg path[fill="#2196F3"],
+.app-store-badge svg path[fill="#FFC107"],
+.app-store-badge svg path[fill="#F44336"],
+.app-store-badge svg path[fill="#4CAF50"] {
+  fill: revert !important;
+}
+.landing-global #app-download .app-callout-card,
+.app-callout-card {
+  background-color: #ffffff !important;
+}
+.landing-global #app-download .app-callout-card h4 {
+  color: #101828 !important;
+}
+.landing-global #app-download .app-callout-card p {
+  color: #667085 !important;
 }
 
 /* Category filter pills: Green text on white bg, white text on hover & active */

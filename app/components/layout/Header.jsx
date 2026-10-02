@@ -118,12 +118,21 @@ export function Header({ theme = {}, navItems = [] }) {
             item => item.href !== '/sell-buy' && item.name !== 'Sell & Buy' && !item.name?.toLowerCase().includes('sell & buy')
           );
 
+          // Ensure Help Center is included in navigation
+          if (!filteredItems.some(item => item.href === '/help-center' || item.name?.toLowerCase() === 'help center')) {
+            filteredItems.splice(2, 0, {
+              name: 'Help Center',
+              href: '/help-center',
+              originalService: null
+            });
+          }
+
           let finalNavItems = [];
-          if (filteredItems.length > 5) {
-            finalNavItems = filteredItems.slice(0, 5);
+          if (filteredItems.length > 6) {
+            finalNavItems = filteredItems.slice(0, 6);
             finalNavItems.push({
               name: 'More',
-              dropdown: filteredItems.slice(5)
+              dropdown: filteredItems.slice(6)
             });
           } else {
             finalNavItems = filteredItems;
@@ -321,11 +330,19 @@ export function Header({ theme = {}, navItems = [] }) {
                   ) : (
                     <Link href={item.href} onClick={() => handleServiceClick(item)}>
                       <motion.span
-                        className={`${currentTheme.textMain || 'text-white'} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
+                        className={`${
+                          item.href === pathname || (item.href === '/help-center' && pathname?.startsWith('/help-center'))
+                            ? '!text-[#008C80] font-bold'
+                            : (currentTheme.textMain || 'text-white')
+                        } ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
                         whileHover={{ y: -2 }}
                       >
                         {item.name}
-                        <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r ${currentTheme.accentGradientFrom} ${currentTheme.accentGradientTo} group-hover:w-full transition-all duration-300`} />
+                        <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r ${currentTheme.accentGradientFrom} ${currentTheme.accentGradientTo} ${
+                          item.href === pathname || (item.href === '/help-center' && pathname?.startsWith('/help-center'))
+                            ? 'w-full'
+                            : 'w-0 group-hover:w-full'
+                        } transition-all duration-300`} />
                       </motion.span>
                     </Link>
                   )}
@@ -491,7 +508,11 @@ export function Header({ theme = {}, navItems = [] }) {
                         }}
                       >
                         <motion.span
-                          className={`block py-3 px-4 ${currentTheme.textMain} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#037166]'} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} rounded-xl transition-all font-medium text-base cursor-pointer`}
+                          className={`block py-3 px-4 ${
+                            item.href === pathname || (item.href === '/help-center' && pathname?.startsWith('/help-center'))
+                              ? 'bg-[#008C80]/15 !text-[#008C80] font-bold'
+                              : currentTheme.textMain
+                          } ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#037166]'} rounded-xl transition-all font-medium text-base cursor-pointer`}
                           whileTap={{ x: 10 }}
                         >
                           {item.name}

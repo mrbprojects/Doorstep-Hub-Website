@@ -73,54 +73,54 @@ export function ArticleHeader({ article, category }) {
     };
 
     return (
-        <header className="space-y-4 pb-6 border-b border-slate-200">
+        <header className="space-y-2.5 sm:space-y-3 pb-3.5 sm:pb-4 border-b border-slate-200">
             {/* Category Pill Badge */}
             <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DEF2EF] border border-[#9ecbc3]/50 text-[#037166] text-xs font-black uppercase tracking-wider shadow-2xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#DEF2EF] border border-[#9ecbc3]/50 text-[#037166] text-[11px] font-black uppercase tracking-wider shadow-2xs">
                     <Sparkles className="w-3 h-3 text-[#037166]" />
                     {article?.category || category?.name || 'HELP GUIDE'}
                 </span>
             </div>
 
             {/* Article Title H1 */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-black tracking-tight text-[#101B3F] leading-[1.2]">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-[32px] font-black tracking-tight text-[#101B3F] leading-tight">
                 {article?.title}
             </h1>
 
             {/* Metadata and Actions Row */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+            <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 pt-0.5">
                 {/* Left Meta: Read time, Date, Verified */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-500 font-medium">
-                    <span className="inline-flex items-center gap-1.5">
-                        <Clock className="w-4 h-4 text-[#037166]" />
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs text-slate-500 font-medium">
+                    <span className="inline-flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-[#037166]" />
                         <span>{article?.readTime || '5 min read'}</span>
                     </span>
 
-                    <span className="inline-flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-slate-400" />
+                    <span className="inline-flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>Updated {article?.date || 'Recently'}</span>
                     </span>
 
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/60 text-emerald-800 text-xs font-semibold">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200/60 text-emerald-800 text-[11px] font-semibold">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         <span>Doorstep Hub Verified</span>
                     </span>
                 </div>
 
                 {/* Right Actions: Save and Share */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                     {/* Save Button */}
                     <button
                         type="button"
                         onClick={handleToggleSave}
-                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all border shadow-2xs ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border shadow-2xs ${
                             saved
                                 ? 'bg-[#DEF2EF] border-[#037166] text-[#037166]'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-[#037166] hover:text-[#037166]'
                         }`}
                         title={saved ? 'Saved in browser' : 'Save article'}
                     >
-                        <Bookmark className={`w-4 h-4 ${saved ? 'fill-[#037166] text-[#037166]' : ''}`} />
+                        <Bookmark className={`w-3.5 h-3.5 ${saved ? 'fill-[#037166] text-[#037166]' : ''}`} />
                         <span>{saved ? 'Saved' : 'Save'}</span>
                     </button>
 
@@ -128,17 +128,17 @@ export function ArticleHeader({ article, category }) {
                     <button
                         type="button"
                         onClick={handleShare}
-                        className="relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:border-[#037166] hover:text-[#037166] transition-all shadow-2xs"
+                        className="relative inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-[#037166] hover:text-[#037166] transition-all shadow-2xs"
                         title="Share article"
                     >
                         {copied ? (
                             <>
-                                <Check className="w-4 h-4 text-emerald-600" />
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
                                 <span className="text-emerald-700 font-bold">Copied!</span>
                             </>
                         ) : (
                             <>
-                                <Share2 className="w-4 h-4 text-slate-500" />
+                                <Share2 className="w-3.5 h-3.5 text-slate-500" />
                                 <span>Share</span>
                             </>
                         )}

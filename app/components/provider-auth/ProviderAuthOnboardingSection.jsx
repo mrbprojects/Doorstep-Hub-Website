@@ -28,8 +28,7 @@ import { Users,
   Star,
   Building2,
   CheckCircle2,
-  ArrowRight,
-  BadgeCheck,TrendingUp } from 'lucide-react';
+  ArrowRight } from 'lucide-react';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
 
@@ -246,8 +245,8 @@ return (
     id="join-partner"
     className={`relative overflow-hidden bg-[#f8fbfa] transition-all duration-500 ${
       step === 'success' || step === 'profile'
-        ? 'py-6'
-        : 'py-8 lg:py-10'
+        ? 'py-4 sm:py-6'
+        : 'py-6 sm:py-8 lg:py-10'
     }`}
   >
 
@@ -263,12 +262,12 @@ return (
           >
             {/* Top Heading */}
             <div className="mx-auto text-center">
-              <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-[#037166]/20 bg-[#037166]/5 px-6 py-2 text-sm font-black uppercase tracking-wide text-[#037166] shadow-sm backdrop-blur-xl">
-                <Users size={17} />
+              <div className="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#037166]/20 bg-[#037166]/5 px-4 py-1.5 text-xs font-black uppercase tracking-wide text-[#037166] shadow-sm backdrop-blur-xl">
+                <Users size={15} />
                 Join Our Growing Network
               </div>
 
-              <h1 className="mx-auto max-w-4xl text-2xl font-extrabold leading-[1.1] tracking-tight text-[#0f172a] sm:text-4xl lg:text-[2.6rem]">
+              <h1 className="mx-auto max-w-4xl text-2xl font-extrabold leading-[1.1] tracking-tight text-[#0f172a] sm:text-3xl lg:text-[2.25rem]">
                 Start Your Journey <br />
                 as a{" "}
                 <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent">
@@ -276,14 +275,14 @@ return (
                 </span>
               </h1>
 
-              <p className="mx-auto mt-2 max-w-xl text-xs font-medium leading-6 text-[#5b6778] sm:text-sm">
+              <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm font-medium leading-relaxed text-[#5b6778]">
                 Register today and join 50,000+ professionals growing their
                 business with Doorstep Hub.
               </p>
               {token && profile && (
                 <Link
                   href="/partner/dashboard"
-                  className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-[#037166] text-white font-bold rounded-xl shadow-md hover:bg-[#025951] transition-all"
+                  className="mt-3.5 inline-flex items-center gap-2 px-5 py-2.5 bg-[#037166] text-white font-bold rounded-xl shadow-md hover:bg-[#025951] transition-all text-xs sm:text-sm"
                 >
                   Open Partner Dashboard
                 </Link>
@@ -291,9 +290,9 @@ return (
             </div>
 
             {/* Hero Layout */}
-            <div className="relative mt-1 grid w-full items-start gap-6 lg:grid-cols-[1fr_1.1fr_1fr]">
+            <div className="relative mt-2 sm:mt-3 grid w-full items-start gap-4 sm:gap-6 lg:grid-cols-[1fr_1.1fr_1fr]">
               {/* Left Benefits */}
-              <div className="space-y-4 lg:space-y-6 pt-3 lg:pt-5">
+              <div className="space-y-3 lg:space-y-4 pt-1 lg:pt-3">
                 {[
                   {
                     icon: ShieldCheck,
@@ -321,17 +320,17 @@ return (
                       key={item.title}
                       className="group"
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
-                          <Icon className={item.color} size={18} />
+                      <div className="flex items-start gap-3.5">
+                        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#bfe0d8] bg-[#eefaf7] shadow-sm transition group-hover:scale-105 group-hover:border-teal-300/60">
+                          <Icon className={item.color} size={16} />
                         </div>
 
                         <div>
-                          <h3 className={`text-sm lg:text-base font-bold ${item.color}`}>
+                          <h3 className={`text-sm lg:text-[15px] font-bold ${item.color}`}>
                             {item.title}
                           </h3>
 
-                          <p className="mt-1 max-w-[280px] text-xs font-normal leading-relaxed text-[#5b6778]">
+                          <p className="mt-0.5 max-w-[280px] text-xs font-normal leading-relaxed text-[#5b6778]">
                             {item.desc}
                           </p>
                         </div>
@@ -346,7 +345,7 @@ return (
 
                 {/* Partner Image */}
                 <motion.div
-                  animate={{ y: [0, -10, 0] }}
+                  animate={{ y: [0, -8, 0] }}
                   transition={{
                     duration: 4,
                     repeat: Infinity,
@@ -355,19 +354,19 @@ return (
                   className="relative z-10 flex flex-col items-center"
                 >
                     <div 
-                      className="relative overflow-hidden rounded-[2.4rem] flex items-center justify-center"
+                      className="relative overflow-hidden rounded-[2rem] flex items-center justify-center"
                     >
                       <img loading="lazy" decoding="async"
                         src="/Join as a service partner.png"
                         alt="Join as a service partner"
-                        className="h-[460px] w-[410px] object-contain object-center drop-shadow-[0_0_20px_rgba(4,169,157,0.35)] transition-transform duration-500 hover:scale-105"
+                        className="max-h-[360px] sm:max-h-[420px] w-auto max-w-full object-contain object-center drop-shadow-[0_0_20px_rgba(4,169,157,0.35)] transition-transform duration-500 hover:scale-105"
                       />
                     </div>
                 </motion.div>
               </div>
 
               {/* Right Benefits */}
-              <div className="space-y-4 lg:space-y-6 pt-3 lg:pt-5">
+              <div className="space-y-3 lg:space-y-4 pt-1 lg:pt-3">
                 {[
                   {
                     icon: CalendarDays,

@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
     Search,
     X,
     ArrowUpDown,
-    HelpCircle,
     Inbox,
-    Sparkles,
-    ArrowRight
+    ArrowRight,
+    Headphones,
+    PhoneCall,
+    MessageCircle
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -19,8 +20,6 @@ import { CategoryHero } from '@/components/help-center/CategoryHero';
 import { CategorySidebar } from '@/components/help-center/CategorySidebar';
 import { ArticleCard } from '@/components/help-center/ArticleCard';
 import { HelpPagination } from '@/components/help-center/HelpPagination';
-import { API_BASE_URL } from '@/config/env';
-import { normalizeArticle } from '@/components/help-center/helpCenterData';
 
 const ARTICLES_PER_PAGE = 6;
 
@@ -31,14 +30,13 @@ export default function CategoryPageClient({
     initialCategoryCounts = {},
     initialSettings = null,
 }) {
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const [category] = useState(initialCategory);
-    const [allArticles, setAllArticles] = useState(initialArticles);
-    const [categoryCounts, setCategoryCounts] = useState(initialCategoryCounts);
+    const [allArticles] = useState(initialArticles);
+    const [categoryCounts] = useState(initialCategoryCounts);
     const [settings] = useState(initialSettings);
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
 
     // Filter states
     const [searchQuery, setSearchQuery] = useState(searchParams?.get('q') || '');
@@ -48,23 +46,20 @@ export default function CategoryPageClient({
     );
 
     // Support contact info from settings
-    const supportPhone = settings?.phone || '+91 888 668 8666';
+    const supportPhone = settings?.phone || '+91 88866 88666';
     const rawWhatsapp = settings?.whatsapp || settings?.phone || '918886688666';
     const whatsappClean = String(rawWhatsapp).replace(/[^0-9]/g, '');
 
-    // Filter articles belonging to this category
+    // Filter articles belonging strictly to this category
     const categoryArticles = useMemo(() => {
         return allArticles.filter((art) => {
+            if (art.categorySlug === categorySlug) return true;
             const matchesService = art.serviceName?.toLowerCase().includes(category?.shortName?.toLowerCase());
             const matchesKeyword = category?.serviceKeywords?.some((kw) =>
                 art.title.toLowerCase().includes(kw) ||
                 art.category.toLowerCase().includes(kw)
             );
-            // Default appliance repair gets articles if not matched elsewhere
-            if (categorySlug === 'appliance-repair') {
-                return true;
-            }
-            return matchesService || matchesKeyword;
+            return Boolean(matchesService || matchesKeyword);
         });
     }, [allArticles, category, categorySlug]);
 
@@ -128,8 +123,8 @@ export default function CategoryPageClient({
             <Header />
 
             {/* Main Content Area */}
-            <main className="flex-1 pt-28 sm:pt-32 lg:pt-36 pb-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <main className="flex-1 pt-20 sm:pt-24 lg:pt-26 pb-10 sm:pb-14">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3.5 sm:space-y-4 lg:space-y-5">
                     {/* ========================================================= */}
                     {/* BREADCRUMB                                                */}
                     {/* ========================================================= */}
@@ -153,13 +148,13 @@ export default function CategoryPageClient({
                     {/* ========================================================= */}
                     {/* SEARCH + SORT TOOLBAR                                     */}
                     {/* ========================================================= */}
-                    <div className="bg-white rounded-2xl border border-[#E4E7EC] p-3.5 sm:p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                    <div className="bg-white rounded-xl sm:rounded-2xl border border-[#E4E7EC] p-2.5 sm:p-3 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 sm:gap-3">
                         {/* Search Bar */}
                         <form
                             onSubmit={handleSearchSubmit}
                             className="relative flex-1 flex items-center"
                         >
-                            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 absolute left-3.5 pointer-events-none" />
+                            <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
                             <input
                                 type="text"
                                 placeholder={`Search within ${category?.name || ''} articles...`}
@@ -168,7 +163,7 @@ export default function CategoryPageClient({
                                     setSearchQuery(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="w-full pl-10 pr-24 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#037166] focus:bg-white transition-all"
+                                className="w-full pl-9 pr-22 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#037166] focus:bg-white transition-all"
                             />
                             {searchQuery && (
                                 <button
@@ -177,19 +172,19 @@ export default function CategoryPageClient({
                                     className="absolute right-16 p-1 text-slate-400 hover:text-slate-600 rounded-md"
                                     aria-label="Clear search"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-3.5 h-3.5" />
                                 </button>
                             )}
                             <button
                                 type="submit"
-                                className="absolute right-1.5 bg-[#037166] hover:bg-[#025951] text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition-colors shadow-2xs"
+                                className="absolute right-1 bg-[#037166] hover:bg-[#025951] text-white text-xs font-bold px-3 py-1.5 rounded-md transition-colors shadow-2xs"
                             >
                                 Search
                             </button>
                         </form>
 
                         {/* Sort Dropdown */}
-                        <div className="flex items-center justify-between md:justify-end gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                        <div className="flex items-center justify-between md:justify-end gap-2 shrink-0 pt-1.5 md:pt-0 border-t md:border-t-0 border-slate-100">
                             <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5 shrink-0">
                                 <ArrowUpDown className="w-3.5 h-3.5 text-[#037166]" />
                                 <span>Sort by:</span>
@@ -200,7 +195,7 @@ export default function CategoryPageClient({
                                     setSortBy(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-[#037166] focus:bg-white cursor-pointer"
+                                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#037166] focus:bg-white cursor-pointer"
                                 aria-label="Sort articles"
                             >
                                 <option value="popular">Most Popular</option>
@@ -214,7 +209,7 @@ export default function CategoryPageClient({
                     {/* ========================================================= */}
                     {/* TWO-COLUMN LAYOUT: SIDEBAR + ARTICLE GRID                 */}
                     {/* ========================================================= */}
-                    <div id="articles-section" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <div id="articles-section" className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-5 lg:gap-7 items-start">
                         {/* Left Sidebar (280px / 4 cols on lg) */}
                         <div className="lg:col-span-4 xl:col-span-3">
                             <CategorySidebar
@@ -226,9 +221,9 @@ export default function CategoryPageClient({
                         </div>
 
                         {/* Right Main Article Content (8 cols on lg) */}
-                        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+                        <div className="lg:col-span-8 xl:col-span-9 space-y-3 sm:space-y-3.5">
                             {/* Results Count Banner */}
-                            <div className="flex items-center justify-between text-xs sm:text-sm text-slate-500 font-medium pb-2 border-b border-slate-200">
+                            <div className="flex items-center justify-between text-xs sm:text-sm text-slate-500 font-medium pb-1.5 border-b border-slate-200">
                                 <span>
                                     Showing{' '}
                                     <strong className="text-[#101B3F]">
@@ -255,17 +250,17 @@ export default function CategoryPageClient({
 
                             {/* Loading State Skeleton */}
                             {loading ? (
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {[1, 2, 3, 4].map((i) => (
                                         <div
                                             key={i}
-                                            className="h-40 rounded-2xl bg-white border border-slate-200 p-5 flex gap-5 animate-pulse"
+                                            className="h-32 rounded-xl bg-white border border-slate-200 p-4 flex gap-4 animate-pulse"
                                         >
-                                            <div className="w-56 h-full bg-slate-200 rounded-xl shrink-0" />
-                                            <div className="flex-1 space-y-3 py-2">
-                                                <div className="h-5 bg-slate-200 rounded-md w-3/4" />
-                                                <div className="h-4 bg-slate-100 rounded-md w-full" />
-                                                <div className="h-4 bg-slate-100 rounded-md w-1/2" />
+                                            <div className="w-48 h-full bg-slate-200 rounded-lg shrink-0" />
+                                            <div className="flex-1 space-y-2.5 py-1">
+                                                <div className="h-4 bg-slate-200 rounded-md w-3/4" />
+                                                <div className="h-3.5 bg-slate-100 rounded-md w-full" />
+                                                <div className="h-3.5 bg-slate-100 rounded-md w-1/2" />
                                             </div>
                                         </div>
                                     ))}
@@ -273,9 +268,9 @@ export default function CategoryPageClient({
                             ) : paginatedArticles.length > 0 ? (
                                 <>
                                     {/* Vertical Stack of Article Row Cards */}
-                                    <div className="space-y-4 sm:space-y-5">
+                                    <div className="space-y-2.5 sm:space-y-3">
                                         {paginatedArticles.map((article) => (
-                                            <ArticleCard
+                                             <ArticleCard
                                                 key={article.id || article.slug}
                                                 article={article}
                                                 categorySlug={categorySlug}
@@ -292,29 +287,29 @@ export default function CategoryPageClient({
                                 </>
                             ) : searchQuery ? (
                                 /* Empty Search Results State */
-                                <div className="rounded-2xl bg-white border border-[#E4E7EC] p-8 sm:p-12 text-center space-y-4 shadow-sm">
-                                    <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto">
-                                        <Search className="w-6 h-6" />
+                                <div className="rounded-xl bg-white border border-[#E4E7EC] p-6 sm:p-8 text-center space-y-3 shadow-2xs">
+                                    <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto">
+                                        <Search className="w-5 h-5" />
                                     </div>
                                     <div className="max-w-md mx-auto space-y-1">
-                                        <h3 className="text-lg font-bold text-[#101B3F]">
+                                        <h3 className="text-base font-bold text-[#101B3F]">
                                             No articles found for “{searchQuery}”
                                         </h3>
-                                        <p className="text-xs sm:text-sm text-slate-500">
-                                            We couldn't find any guides matching your search in {category?.name}. Try searching with different keywords.
+                                        <p className="text-xs text-slate-500">
+                                            We couldn&apos;t find any guides matching your search in {category?.name}. Try searching with different keywords.
                                         </p>
                                     </div>
-                                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                                    <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
                                         <button
                                             type="button"
                                             onClick={handleClearSearch}
-                                            className="px-4 py-2 rounded-xl bg-[#037166] text-white text-xs sm:text-sm font-bold hover:bg-[#025951] transition-colors"
+                                            className="px-3.5 py-1.5 rounded-lg bg-[#037166] text-white text-xs font-bold hover:bg-[#025951] transition-colors"
                                         >
                                             Clear Search
                                         </button>
                                         <Link
                                             href="/contact-us"
-                                            className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs sm:text-sm font-bold hover:bg-slate-200 transition-colors"
+                                            className="px-3.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors"
                                         >
                                             Contact Support
                                         </Link>
@@ -322,34 +317,81 @@ export default function CategoryPageClient({
                                 </div>
                             ) : (
                                 /* Empty Category State */
-                                <div className="rounded-2xl bg-white border border-[#E4E7EC] p-8 sm:p-12 text-center space-y-4 shadow-sm">
-                                    <div className="w-14 h-14 rounded-2xl bg-[#DEF2EF] text-[#037166] border border-[#9ecbc3]/50 flex items-center justify-center mx-auto">
-                                        <Inbox className="w-6 h-6" />
+                                <div className="rounded-xl bg-white border border-[#E4E7EC] p-6 sm:p-8 text-center space-y-3 shadow-2xs">
+                                    <div className="w-12 h-12 rounded-xl bg-[#DEF2EF] text-[#037166] border border-[#9ecbc3]/50 flex items-center justify-center mx-auto">
+                                        <Inbox className="w-5 h-5" />
                                     </div>
                                     <div className="max-w-md mx-auto space-y-1">
-                                        <h3 className="text-lg font-bold text-[#101B3F]">
+                                        <h3 className="text-base font-bold text-[#101B3F]">
                                             No articles available yet
                                         </h3>
-                                        <p className="text-xs sm:text-sm text-slate-500">
-                                            We're currently preparing expert guides for {category?.name}. Browse our other service categories or contact support.
+                                        <p className="text-xs text-slate-500">
+                                            We&apos;re currently preparing expert guides for {category?.name}. Browse our other service categories or contact support.
                                         </p>
                                     </div>
-                                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                                    <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
                                         <Link
                                             href="/help-center/appliance-repair"
-                                            className="px-4 py-2 rounded-xl bg-[#037166] text-white text-xs sm:text-sm font-bold hover:bg-[#025951] transition-colors"
+                                            className="px-3.5 py-1.5 rounded-lg bg-[#037166] text-white text-xs font-bold hover:bg-[#025951] transition-colors"
                                         >
                                             Browse Appliance Repair
                                         </Link>
                                         <Link
                                             href="/contact-us"
-                                            className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs sm:text-sm font-bold hover:bg-slate-200 transition-colors"
+                                            className="px-3.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors"
                                         >
                                             Contact Support
                                         </Link>
                                     </div>
                                 </div>
                             )}
+
+                            {/* Mobile Only: Compact Need Help Card below articles */}
+                            <div className="lg:hidden mt-5 bg-gradient-to-br from-[#DEF2EF]/70 via-[#F0FDF9] to-[#ECF9F7] rounded-xl border border-[#9ecbc3]/50 p-4 shadow-2xs">
+                                <div className="flex items-start gap-3 mb-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-[#037166] text-white flex items-center justify-center shrink-0 shadow-xs shadow-[#037166]/20">
+                                        <Headphones className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-[#101B3F]">
+                                            Still need help?
+                                        </h3>
+                                        <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                                            Can&apos;t find what you&apos;re looking for? Our support team is here 24/7.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5 pt-0.5">
+                                    <Link
+                                        href="/contact-us"
+                                        className="w-full inline-flex items-center justify-center gap-1.5 bg-[#037166] hover:bg-[#025951] text-white text-xs font-bold py-2 px-3 rounded-lg transition-all shadow-xs group"
+                                    >
+                                        <span>Contact Support</span>
+                                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                                    </Link>
+
+                                    <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                                        <a
+                                            href={`tel:${supportPhone.replace(/\s+/g, '')}`}
+                                            className="inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-md bg-white border border-[#9ecbc3]/50 text-slate-700 hover:text-[#037166] text-[11px] font-semibold transition-colors shadow-2xs"
+                                        >
+                                            <PhoneCall className="w-3 h-3 text-[#037166]" />
+                                            <span>Call Us</span>
+                                        </a>
+
+                                        <a
+                                            href={`https://wa.me/${whatsappClean}?text=Hi%20Doorstep%20Hub,%20I%20need%20help%20with%20my%20service`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-md bg-white border border-[#9ecbc3]/50 text-slate-700 hover:text-emerald-700 text-[11px] font-semibold transition-colors shadow-2xs"
+                                        >
+                                            <MessageCircle className="w-3 h-3 text-emerald-600" />
+                                            <span>WhatsApp</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

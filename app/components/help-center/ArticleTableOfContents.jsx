@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, ChevronDown, ListFilter } from 'lucide-react';
 
-export function ArticleTableOfContents({ headings = [] }) {
+export function ArticleTableOfContents({ headings = [], variant = 'all' }) {
     const [activeId, setActiveId] = useState('');
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -56,31 +56,35 @@ export function ArticleTableOfContents({ headings = [] }) {
 
     if (!headings || headings.length === 0) return null;
 
+    const showMobile = variant === 'all' || variant === 'mobile';
+    const showDesktop = variant === 'all' || variant === 'desktop';
+
     return (
         <>
             {/* ========================================================= */}
             {/* MOBILE ONLY: Collapsible TOC Accordion                     */}
             {/* ========================================================= */}
-            <div className="lg:hidden mb-6 bg-[#DEF2EF]/40 border border-[#9ecbc3]/50 rounded-2xl p-4">
+            {showMobile && (
+                <div className={`${variant === 'all' ? 'lg:hidden' : ''} mb-4 bg-[#DEF2EF]/40 border border-[#9ecbc3]/50 rounded-xl p-3 sm:p-3.5`}>
                 <button
                     type="button"
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    className="w-full flex items-center justify-between text-left font-bold text-sm text-[#101B3F]"
+                    className="w-full flex items-center justify-between text-left font-bold text-xs sm:text-sm text-[#101B3F]"
                     aria-expanded={mobileOpen}
                 >
                     <div className="flex items-center gap-2">
-                        <ListFilter className="w-4 h-4 text-[#037166]" />
+                        <ListFilter className="w-3.5 h-3.5 text-[#037166]" />
                         <span>In This Article ({headings.length} sections)</span>
                     </div>
                     <ChevronDown
-                        className={`w-4 h-4 text-slate-500 transition-transform ${
+                        className={`w-3.5 h-3.5 text-slate-500 transition-transform ${
                             mobileOpen ? 'rotate-180' : ''
                         }`}
                     />
                 </button>
 
                 {mobileOpen && (
-                    <nav className="mt-3 pt-3 border-t border-[#9ecbc3]/40 space-y-1.5" aria-label="Mobile Table of Contents">
+                    <nav className="mt-2.5 pt-2.5 border-t border-[#9ecbc3]/40 space-y-1" aria-label="Mobile Table of Contents">
                         {headings.map((item, idx) => {
                             const isActive = activeId === item.id;
                             return (
@@ -88,7 +92,7 @@ export function ArticleTableOfContents({ headings = [] }) {
                                     key={idx}
                                     href={`#${item.id}`}
                                     onClick={(e) => handleScrollTo(e, item.id)}
-                                    className={`block text-xs py-1.5 px-2.5 rounded-lg transition-colors leading-snug ${
+                                    className={`block text-xs py-1 px-2 rounded-md transition-colors leading-snug ${
                                         isActive
                                             ? 'bg-[#037166] text-white font-bold'
                                             : 'text-slate-700 hover:text-[#037166]'
@@ -101,19 +105,21 @@ export function ArticleTableOfContents({ headings = [] }) {
                     </nav>
                 )}
             </div>
+            )}
 
             {/* ========================================================= */}
             {/* DESKTOP ONLY: Sticky TOC Sidebar Card                     */}
             {/* ========================================================= */}
-            <div className="hidden lg:block bg-white rounded-2xl border border-[#E4E7EC] p-5 shadow-sm">
-                <div className="flex items-center gap-2.5 pb-3 mb-3 border-b border-slate-100">
-                    <BookOpen className="w-4 h-4 text-[#037166]" />
-                    <h2 className="text-sm font-bold text-[#101B3F] uppercase tracking-wider">
-                        In This Article
-                    </h2>
-                </div>
+            {showDesktop && (
+                <div className={`${variant === 'all' ? 'hidden lg:block' : ''} bg-white rounded-xl border border-[#E4E7EC] p-4 shadow-2xs`}>
+                    <div className="flex items-center gap-2 pb-2.5 mb-2.5 border-slate-100 border-b">
+                        <BookOpen className="w-3.5 h-3.5 text-[#037166]" />
+                        <h2 className="text-xs font-bold text-[#101B3F] uppercase tracking-wider">
+                            In This Article
+                        </h2>
+                    </div>
 
-                <nav className="space-y-1" aria-label="Table of Contents">
+                <nav className="space-y-0.5" aria-label="Table of Contents">
                     {headings.map((item, idx) => {
                         const isActive = activeId === item.id;
                         return (
@@ -121,13 +127,13 @@ export function ArticleTableOfContents({ headings = [] }) {
                                 key={idx}
                                 href={`#${item.id}`}
                                 onClick={(e) => handleScrollTo(e, item.id)}
-                                className={`group flex items-start gap-2.5 px-3 py-2 rounded-xl text-xs sm:text-sm transition-all leading-snug border-l-2 ${
+                                className={`group flex items-start gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-all leading-snug border-l-2 ${
                                     isActive
                                         ? 'border-[#037166] bg-[#DEF2EF]/60 text-[#037166] font-bold shadow-2xs'
                                         : 'border-transparent text-slate-600 hover:text-[#101B3F] hover:bg-slate-50'
                                 }`}
                             >
-                                <span className={`text-[11px] font-bold ${isActive ? 'text-[#037166]' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                                <span className={`text-[10px] font-bold ${isActive ? 'text-[#037166]' : 'text-slate-400 group-hover:text-slate-600'}`}>
                                     {idx + 1}.
                                 </span>
                                 <span className="line-clamp-2">{item.title}</span>
@@ -136,6 +142,7 @@ export function ArticleTableOfContents({ headings = [] }) {
                     })}
                 </nav>
             </div>
+        )}
         </>
     );
 }

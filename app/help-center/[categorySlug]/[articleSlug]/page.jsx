@@ -8,7 +8,8 @@ import {
 } from '@/components/help-center/helpCenterData';
 import ArticlePageClient from './ArticlePageClient';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 /**
  * Fetch single article and related articles by slug for SSR
@@ -21,7 +22,7 @@ async function fetchArticleData(categorySlug, articleSlug) {
     try {
         // 1. Fetch single article by slug from backend
         const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/knowledge-base/${articleSlug}`, {
-            next: { revalidate: 3600 }
+            cache: 'no-store'
         }).catch(() => null);
 
         if (res && res.ok) {
@@ -34,18 +35,24 @@ async function fetchArticleData(categorySlug, articleSlug) {
             }
         }
 
-        // 2. Fetch related articles
-        const listRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/knowledge-base?limit=10`, {
-            next: { revalidate: 3600 }
+        // 2. Fetch related articles belonging strictly to THIS VERTICAL ONLY and randomly shuffle
+        const listRes = await fetch(`${API_BASE_URL}/app/applience-repairs-website/knowledge-base?limit=100`, {
+            cache: 'no-store'
         }).catch(() => null);
 
         if (listRes && listRes.ok) {
             const listData = await listRes.json();
             if (listData?.success && Array.isArray(listData.data)) {
-                relatedArticles = listData.data
-                    .filter(item => item.slug !== articleSlug)
-                    .slice(0, 3)
-                    .map(item => normalizeArticle(item, categorySlug));
+                const normalizedAll = listData.data.map(item => normalizeArticle(item)).filter(Boolean);
+
+                // Strictly filter to articles in this vertical only, excluding current article
+                const sameVerticalArticles = normalizedAll.filter(
+                    item => item.categorySlug === categorySlug && item.slug !== articleSlug
+                );
+
+                // Randomly shuffle articles from this vertical
+                const shuffled = [...sameVerticalArticles].sort(() => 0.5 - Math.random());
+                relatedArticles = shuffled.slice(0, 3);
             }
         }
     } catch (err) {
@@ -60,7 +67,7 @@ export async function generateMetadata({ params }) {
     const categorySlug = resolvedParams?.categorySlug || 'appliance-repair';
     const articleSlug = resolvedParams?.articleSlug || '';
 
-    const { category, article } = await fetchArticleData(categorySlug, articleSlug);
+    const { article } = await fetchArticleData(categorySlug, articleSlug);
 
     if (!article) {
         return {

@@ -443,8 +443,13 @@ function ServiceCardsSection({ services, loading, serviceSlugs, activeIndex }) {
           </div>
 
           {/* Action Arrow Button */}
-          <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white ${theme.btn} shadow-sm group-hover:scale-110 transition-transform duration-200`}>
-            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
+          <div className={`hero-card-arrow-btn w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center !text-white text-white ${theme.btn} shadow-sm group-hover:scale-110 transition-transform duration-200`}>
+            <ChevronRight
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3] !text-white !stroke-white text-white stroke-white"
+              color="#ffffff"
+              stroke="#ffffff"
+              style={{ color: '#ffffff', stroke: '#ffffff' }}
+            />
           </div>
         </div>
       </motion.div>

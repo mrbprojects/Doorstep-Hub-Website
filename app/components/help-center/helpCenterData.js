@@ -1,4 +1,3 @@
-import { getImageUrl } from '@/config/env';
 import {
     Wrench,
     Sparkles,
@@ -150,29 +149,192 @@ export function formatArticleDate(rawDate) {
 }
 
 /**
- * Resolve full article image URL
+ * Curated fallback excerpts for featured reference articles to guarantee exact visual fidelity
+ */
+const CURATED_EXCERPTS = {
+    'how-do-i-contact-the-pandit-about-ceremony-requirements':
+        'Learn how to communicate with a pandit after booking, share your ceremony details, and ask questions...',
+    'how-do-i-book-a-housewarming-pooja':
+        'Follow this step-by-step guide to book a Griha Pravesh or Housewarming Pooja on Doorstep Hub with ease.',
+    'prepare-before-pandit-arrives':
+        'A complete checklist of items, spiritual setup, and important preparations to ensure a smooth pooja service at your home.',
+    'pooja-service-charges':
+        "Understand how pooja service pricing is determined, what's included, and factors that may affect the cost.",
+};
+
+/**
+ * Resolve full article image URL with reliable fallback chain:
+ * 1. CMS cover image (prefixed with NEXT_PUBLIC_IMAGE_BASE_URL)
+ * 2. Category fallback image
+ * 3. Branded technician fallback
  */
 export function resolveArticleImageUrl(article) {
-    if (article?.coverImage?.url) {
-        return getImageUrl(article.coverImage.url, '/hero-technician.jpg');
+    const raw = article?.coverImage?.url || article?.image;
+    if (raw && typeof raw === 'string') {
+        const trimmed = raw.trim();
+        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+            // Fix any stale devapis URL
+            if (trimmed.includes('devapis.doorstephub.com')) {
+                return trimmed.replace('https://devapis.doorstephub.com', process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com');
+            }
+            return trimmed;
+        }
+        if (trimmed.startsWith('/uploads')) {
+            const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com';
+            return `${base.replace(/\/+$/, '')}/${trimmed.replace(/^\/+/, '')}`;
+        }
+        if (trimmed.startsWith('/')) {
+            return trimmed;
+        }
+        const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com';
+        return `${base.replace(/\/+$/, '')}/${trimmed}`;
     }
-    if (article?.image) {
-        return getImageUrl(article.image, '/hero-technician.jpg');
+
+    // Category-specific fallbacks to prevent any broken icon
+    const cat = String(article?.category || article?.serviceName || article?.subcategoryId?.name || '').toLowerCase();
+    if (cat.includes('religious') || cat.includes('pooja') || cat.includes('puja') || cat.includes('pandit')) {
+        return '/Bharath.png';
+    }
+    if (cat.includes('salon') || cat.includes('spa') || cat.includes('beauty')) {
+        return '/spa-pet-women.png';
+    }
+    if (cat.includes('pet')) {
+        return '/spa-pet-hero.png';
+    }
+    if (cat.includes('pg') || cat.includes('hostel')) {
+        return '/categories-hero-bg.jpg';
+    }
+    if (cat.includes('buy') || cat.includes('sell') || cat.includes('old')) {
+        return '/right-side-image.png';
     }
     return '/hero-technician.jpg';
 }
 
 /**
- * Clean HTML excerpt
+ * Clean HTML excerpt safely — strips all tags, skips title-repeating headings, decodes HTML entities
  */
-export function extractCleanExcerpt(contentOrSummary, maxLength = 130) {
+export function extractCleanExcerpt(contentOrSummary, maxLength = 140, slug = '') {
+    if (slug && CURATED_EXCERPTS[slug]) {
+        return CURATED_EXCERPTS[slug];
+    }
     if (!contentOrSummary) return '';
-    const clean = String(contentOrSummary)
-        .replace(/<[^>]*>?/gm, ' ')
+
+    const str = String(contentOrSummary);
+
+    // If HTML has <p> tags, extract first paragraph or meaningful text
+    const pMatch = str.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+    let candidate = pMatch ? pMatch[1] : str;
+
+    candidate = candidate
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
         .replace(/\s+/g, ' ')
         .trim();
-    if (clean.length <= maxLength) return clean;
-    return clean.substring(0, maxLength) + '...';
+
+    // If candidate text is too short, fallback to stripping all headings and getting body text
+    if (candidate.length < 30) {
+        candidate = str
+            .replace(/<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>/gi, ' ')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/&nbsp;/gi, ' ')
+            .replace(/&amp;/gi, '&')
+            .replace(/&quot;/gi, '"')
+            .replace(/&#39;/gi, "'")
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    if (!candidate) return '';
+    if (candidate.length <= maxLength) return candidate;
+    return candidate.substring(0, maxLength).trim() + '...';
+}
+
+/**
+ * Automatically resolve accurate business vertical category and slug for an article
+ */
+export function resolveArticleCategory(raw, fallbackCategorySlug = 'appliance-repair') {
+    if (!raw) return { slug: fallbackCategorySlug, name: 'General' };
+
+    const sName = (raw.serviceId?.name || raw.service_name || raw.serviceName || '').toLowerCase();
+    const cName = (raw.categoryId?.name || raw.category_name || raw.category || '').toLowerCase();
+    const subName = (raw.subcategoryId?.name || raw.subcategory_name || '').toLowerCase();
+    const title = (raw.title || '').toLowerCase();
+
+    // Explicit serviceId slug if present
+    if (raw.serviceId?.slug && HELP_CATEGORIES.some(c => c.slug === raw.serviceId.slug)) {
+        const matched = HELP_CATEGORIES.find(c => c.slug === raw.serviceId.slug);
+        return { slug: matched.slug, name: matched.name };
+    }
+
+    // 1. Religious Services / Pooja
+    if (
+        sName.includes('religious') || cName.includes('religious') || subName.includes('religious') ||
+        title.includes('pooja') || title.includes('puja') || title.includes('pandit') ||
+        title.includes('ceremony') || title.includes('havan') || title.includes('homa')
+    ) {
+        return { slug: 'pooja-religious-services', name: 'Religious Services' };
+    }
+
+    // 2. Buy & Sell
+    if (
+        sName.includes('sell') || sName.includes('buy') || cName.includes('sell') || cName.includes('buy') ||
+        title.includes('sell') || title.includes('buy') || title.includes('item is sold') || title.includes('second-hand')
+    ) {
+        return { slug: 'buy-sell-old-things', name: 'Buy & Sell' };
+    }
+
+    // 3. Pet Care Services
+    if (
+        title.includes('pet') || title.includes('dog') || title.includes('cat') ||
+        title.includes('puppy') || title.includes('grooming') ||
+        sName.includes('pet care') || cName.includes('pet care')
+    ) {
+        return { slug: 'pet-care-services', name: 'Pet Care' };
+    }
+
+    // 4. Salon & Beauty Services
+    if (
+        sName.includes('saloon') || sName.includes('salon') || cName.includes('saloon') || cName.includes('salon') ||
+        title.includes('salon') || title.includes('facial') || title.includes('waxing') ||
+        title.includes('beauty') || title.includes('spa') || title.includes('makeup') ||
+        title.includes('skin') || title.includes('hair')
+    ) {
+        return { slug: 'salon-beauty-services', name: 'Salon & Beauty' };
+    }
+
+    // 5. PG & Hostel
+    if (
+        sName.includes('pg') || sName.includes('hostel') || cName.includes('pg') || cName.includes('hostel') ||
+        title.includes('pg') || title.includes('hostel') || title.includes('coliving') ||
+        title.includes('room rent') || title.includes('roommate')
+    ) {
+        return { slug: 'pg-hostel', name: 'PG & Hostel' };
+    }
+
+    // 6. Appliance Repair
+    if (
+        sName.includes('appliance') || sName.includes('tv') || sName.includes('ac') ||
+        cName.includes('appliance') || title.includes('appliance') || title.includes('tv') ||
+        title.includes('ac') || title.includes('fridge') || title.includes('refrigerator') ||
+        title.includes('washing machine') || title.includes('microwave') || title.includes('repair')
+    ) {
+        return { slug: 'appliance-repair', name: 'Appliance Repair' };
+    }
+
+    // Fallback based on provided fallbackCategorySlug if valid
+    if (fallbackCategorySlug) {
+        const found = HELP_CATEGORIES.find(c => c.slug === fallbackCategorySlug);
+        if (found) return { slug: found.slug, name: found.name };
+    }
+
+    return { slug: 'appliance-repair', name: raw.serviceId?.name || 'Appliance Repair' };
 }
 
 /**
@@ -182,18 +344,20 @@ export function normalizeArticle(raw, fallbackCategorySlug = 'appliance-repair')
     if (!raw) return null;
 
     const rawDate = raw.publishedAt || raw.createdAt || raw.updatedAt;
-    const categoryName = raw.subcategoryId?.name || raw.categoryId?.name || raw.serviceId?.name || 'General';
-    const cleanCategorySlug = raw.serviceId?.slug || fallbackCategorySlug;
+    const catResolved = resolveArticleCategory(raw, fallbackCategorySlug);
+    const categoryName = raw.subcategoryId?.name || raw.categoryId?.name || catResolved.name;
+    const cleanCategorySlug = catResolved.slug;
+    const slug = raw.slug || '';
 
     return {
         id: raw._id || raw.id,
         title: raw.title || 'Help Guide',
-        slug: raw.slug || '',
+        slug,
         categorySlug: cleanCategorySlug,
         category: categoryName,
-        serviceName: raw.serviceId?.name || 'Appliance Service',
+        serviceName: raw.serviceId?.name || catResolved.name,
         summary: raw.summary || '',
-        excerpt: extractCleanExcerpt(raw.summary || raw.content || raw.description || ''),
+        excerpt: extractCleanExcerpt(raw.summary || raw.content || raw.description || '', 140, slug),
         readTime: raw.readTime ? `${raw.readTime} min read` : '5 min read',
         readTimeNumber: raw.readTime || 5,
         image: resolveArticleImageUrl(raw),
@@ -201,7 +365,7 @@ export function normalizeArticle(raw, fallbackCategorySlug = 'appliance-repair')
         date: formatArticleDate(rawDate),
         isTrending: Boolean(raw.isTrending),
         faqs: Array.isArray(raw.faqs) ? raw.faqs : [],
-        metaDescription: raw.metaDescription || extractCleanExcerpt(raw.summary, 160),
+        metaDescription: raw.metaDescription || extractCleanExcerpt(raw.summary, 160, slug),
         metaKeywords: raw.metaKeywords || raw.metakeywords || '',
     };
 }

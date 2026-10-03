@@ -9,6 +9,7 @@ import { PostAdModal } from '@/components/sell-buy/PostAdModal';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyHowItWorks } from '@/components/sell-buy/SellBuyHowItWorks';
+import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 import {
   fetchSellBuyCategories,
   fetchSellBuyListings,
@@ -457,6 +458,8 @@ export default function SellBuyHomePage() {
       <div className="pb-8" />
 
       {/* Full Marketplace Footer */}
+      <KnowledgeSection vertical="sell-buy" showNewsletter={false} />
+
       <SellBuyFooter />
 
       {/* Post Ad Modal Popup */}

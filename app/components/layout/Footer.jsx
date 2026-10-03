@@ -24,10 +24,10 @@ const footerLinks = {
     { name: 'Partner Dashboard', href: '/partner/dashboard' },
     { name: 'Book Appointment', href: '/book-appointment' },
     { name: 'Book AMC Services', href: '/amc' },
-    { name: 'Download Android App', href: '' },
-    { name: 'Download iOS App', href: '' },
-    { name: 'Download Partner Android App', href: '' },
-    { name: 'Download Partner iOS App', href: '' },
+    { name: 'Customer Android App', href: '' },
+    { name: 'Customer iOS App', href: '' },
+    { name: 'Service Partner Android App', href: '' },
+    { name: 'Service Partner iOS App', href: '' },
   ],
   Moreinfo: [
     { name: 'FAQs', href: '/faqs' },
@@ -235,7 +235,18 @@ export function Footer({ theme = {} }) {
   const [hoveredSocial, setHoveredSocial] = useState(null);
 
   useEffect(() => {
-    if (globalPolicy) setGlobalSettings(globalPolicy);
+    if (globalPolicy) {
+      setGlobalSettings(globalPolicy);
+    } else {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.policy) {
+            setGlobalSettings(data.policy);
+          }
+        })
+        .catch((err) => console.error('Error fetching global settings in footer:', err));
+    }
   }, [globalPolicy]);
 
   useEffect(() => {
@@ -278,18 +289,61 @@ export function Footer({ theme = {} }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const dynamicDownloadApps = [
+    {
+      name: 'Customer Android App',
+      href:
+        globalSettings?.customerAndroidAppLink ||
+        globalSettings?.playStore ||
+        'https://play.google.com/store/apps/details?id=com.doorstephub.customer',
+    },
+    {
+      name: 'Customer iOS App',
+      href:
+        globalSettings?.customerIosAppLink ||
+        globalSettings?.appStore ||
+        'https://apps.apple.com/in/app/doorstep-hub-home-services/id6475340236',
+    },
+    {
+      name: 'Service Partner Android App',
+      href:
+        globalSettings?.vendorAndroidAppLink ||
+        globalSettings?.partnerAndroidAppLink ||
+        'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
+    },
+    {
+      name: 'Service Partner iOS App',
+      href:
+        globalSettings?.vendorIosAppLink ||
+        globalSettings?.partnerIosAppLink ||
+        'https://apps.apple.com/in/app/service-partner-doorstep-hub/id6760889720',
+    },
+  ];
+
   const dynamicQuickLinks = footerLinks.Quicklinks.map(link => {
-    if (link.name === 'Download Android App' && globalSettings?.customerAndroidAppLink) {
-      return { ...link, href: globalSettings.customerAndroidAppLink };
+    if (
+      (link.name === 'Customer Android App' || link.name === 'Download Android App') &&
+      (globalSettings?.customerAndroidAppLink || globalSettings?.playStore)
+    ) {
+      return { ...link, href: globalSettings.customerAndroidAppLink || globalSettings.playStore };
     }
-    if (link.name === 'Download iOS App' && globalSettings?.customerIosAppLink) {
-      return { ...link, href: globalSettings.customerIosAppLink };
+    if (
+      (link.name === 'Customer iOS App' || link.name === 'Download iOS App') &&
+      (globalSettings?.customerIosAppLink || globalSettings?.appStore)
+    ) {
+      return { ...link, href: globalSettings.customerIosAppLink || globalSettings.appStore };
     }
-    if (link.name === 'Download Partner Android App' && globalSettings?.partnerAndroidAppLink) {
-      return { ...link, href: globalSettings.partnerAndroidAppLink };
+    if (
+      (link.name === 'Service Partner Android App' || link.name === 'Download Partner Android App') &&
+      (globalSettings?.vendorAndroidAppLink || globalSettings?.partnerAndroidAppLink)
+    ) {
+      return { ...link, href: globalSettings.vendorAndroidAppLink || globalSettings.partnerAndroidAppLink };
     }
-    if (link.name === 'Download Partner iOS App' && globalSettings?.partnerIosAppLink) {
-      return { ...link, href: globalSettings.partnerIosAppLink };
+    if (
+      (link.name === 'Service Partner iOS App' || link.name === 'Download Partner iOS App') &&
+      (globalSettings?.vendorIosAppLink || globalSettings?.partnerIosAppLink)
+    ) {
+      return { ...link, href: globalSettings.vendorIosAppLink || globalSettings.partnerIosAppLink };
     }
     return link;
   });
@@ -679,7 +733,6 @@ export function Footer({ theme = {} }) {
               {[
                 { name: 'About Us', href: '/about-us' },
                 { name: 'Contact Us', href: '/contact-us' },
-                { name: 'Blog & Guides', href: '/knowledge' },
                 { name: 'Careers', href: '/careers' },
                 { name: 'Become a Service Partner', href: '/service-partner' },
                 { name: 'Partner Dashboard', href: '/partner/dashboard' },
@@ -717,16 +770,6 @@ export function Footer({ theme = {} }) {
                   </a>
                 </li>
               ))}
-              {showHomeScreen && (
-                <li>
-                  <a
-                    href="/appliance-repair-services"
-                    className={`${t.textMuted} ${t.textLinkHover} transition-colors text-sm block whitespace-nowrap`}
-                  >
-                    All Services
-                  </a>
-                </li>
-              )}
             </ul>
           </motion.div>
 
@@ -739,7 +782,7 @@ export function Footer({ theme = {} }) {
           >
             <h4 className={`${t.textMain} font-bold mb-4 whitespace-nowrap`}>Download Apps</h4>
             <ul className="space-y-3">
-              {dynamicQuickLinks.filter(l => l.name.startsWith('Download')).map((link) => (
+              {dynamicDownloadApps.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href || '#'}

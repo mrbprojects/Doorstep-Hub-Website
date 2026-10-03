@@ -11,7 +11,7 @@ import { RecentlyBooked } from '@/components/appliances/RecentlyBooked';
 import { DownloadApp } from '@/components/appliances/DownloadApp';
 import { NearbyServiceCenters as NearbyStores } from '@/components/appliances/NearbyStores';
 import { PopularCenters } from '@/components/appliances/PopularCenters';
-import { KnowledgeSpace } from '@/components/appliances/KnowledgeSpace';
+import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
 import { ApplianceBookingFlow } from '@/components/appliances/booking-flow/ApplianceBookingFlow';
 import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
@@ -148,7 +148,7 @@ export function ApplianceHomePage() {
                     }
                     router.push(`/service-list/${storeId}`);
                 }} /> */}
-                <KnowledgeSpace />
+                <KnowledgeSection vertical="appliances" showNewsletter={false} />
                 <ApplianceComparison />
                 <PaymentMethodsSection />
             </div>

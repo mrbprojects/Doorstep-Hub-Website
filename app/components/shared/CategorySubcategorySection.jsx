@@ -256,9 +256,9 @@ export function CategorySubcategorySection({
   };
 
   return (
-    <section className={`relative overflow-x-hidden py-12 sm:py-16 lg:py-20 ${theme.sectionClass}`}>
+    <section className={`relative overflow-x-hidden ${theme.paddingClass || 'py-12 sm:py-16 lg:py-20'} ${theme.sectionClass}`}>
       <div className="relative mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-10 max-w-7xl text-center sm:mb-14">
+        <div className={`mx-auto ${theme.headerMarginClass || 'mb-10 sm:mb-14'} max-w-7xl text-center`}>
           <div className={`mb-3 flex items-center justify-center gap-4 ${theme.eyebrowClass}`}>
             <span className="h-px w-10 bg-current/40" />
             <span className="text-sm font-semibold tracking-[0.2em] uppercase">{theme.eyebrow}</span>

@@ -654,7 +654,13 @@ html {
 .landing-global a[class*="bg-[#008C80]"],
 .landing-global a[class*="bg-[#008C80]"] *,
 .landing-global button[class*="bg-[#008C80]"],
-.landing-global button[class*="bg-[#008C80]"] * {
+.landing-global button[class*="bg-[#008C80]"] *,
+.landing-global div[class*="bg-[#008C80]"],
+.landing-global div[class*="bg-[#008C80]"] *,
+.landing-global .spa-view-details-btn,
+.landing-global .spa-view-details-btn *,
+.landing-global .spa-badge,
+.landing-global .spa-badge * {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }

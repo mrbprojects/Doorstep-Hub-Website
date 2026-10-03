@@ -20,6 +20,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import dynamic from 'next/dynamic';
 import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
+import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 
 const ReligiousQuestionnaireModal = dynamic(() => import('@/components/religious/ReligiousQuestionnaireModal').then(m => m.ReligiousQuestionnaireModal), { ssr: false });
 
@@ -49,14 +50,14 @@ const SPARKLES = Array.from({ length: 8 }, (_, i) => ({
 // Section wrapper with scroll reveal
 function SectionReveal({ children, delay = 0 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-30px" });
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -386,74 +387,63 @@ export default function ReligiousServicesPage() {
         </div>
 
         {/* Hero Content */}
-        <div className="container relative mx-auto px-4 pt-16 pb-8 mt-10 z-10">
+        <div className="container relative mx-auto px-4 pt-20 sm:pt-24 pb-6 sm:pb-8 z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Trust Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="mb-4 inline-flex items-center space-x-2 rounded-full bg-white/80 backdrop-blur-sm px-5 py-2 border border-[var(--saffron)]/30 shadow-lg"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-3 sm:mb-4 inline-flex items-center space-x-2 rounded-full bg-white/85 backdrop-blur-sm px-4 py-1.5 sm:px-5 sm:py-2 border border-[var(--saffron)]/30 shadow-md"
             >
               <Sparkles className="h-4 w-4 text-[var(--saffron)]" />
-              <h6 className="text-sm font-medium text-[var(--temple-red)]">Trusted by 50,000+ Devotees</h6>
-            </motion.div>
-
-            {/* Centered Sacred Om Symbol */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.2 }}
-              className="mb-4 text-6xl md:text-7xl text-[var(--warm-gold)] drop-shadow-[0_0_20px_rgba(255,191,0,0.5)] flex justify-center"
-              style={{ fontFamily: 'serif' }}
-            >
+              <h6 className="text-xs sm:text-sm font-medium text-[var(--temple-red)]">Trusted by 50,000+ Devotees</h6>
             </motion.div>
 
             {/* Main Headline with Background Om */}
-          {/* Main Headline with Background Om */}
-<div className="relative mb-6">
-  <motion.div
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ 
-      opacity: [0.12, 0.2, 0.12], // Increased from 0.04-0.08 to 0.12-0.2
-      scale: [1, 1.05, 1],
-    }}
-    transition={{ 
-      duration: 6, 
-      repeat: Infinity, 
-      ease: "easeInOut" 
-    }}
-    className="absolute inset-0 flex items-center justify-center pointer-events-none select-none -z-10 text-[15rem] md:text-[25rem] text-[var(--saffron)] font-serif leading-none"
-  >
-    ॐ
-  </motion.div>
-  <motion.h1
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.9, delay: 0.5 }}
-    className="text-4xl md:text-6xl font-bold text-[var(--deep-charcoal)] leading-tight relative z-10"
-  >
-    Book Trusted Religious &{' '}
-    <span className="bg-gradient-to-r from-[var(--saffron)] via-[var(--temple-red)] to-[var(--vermilion)] bg-clip-text text-transparent">
-      Spiritual Services
-    </span>
-  </motion.h1>
-</div>
+            <div className="relative mb-4 sm:mb-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ 
+                  opacity: [0.12, 0.2, 0.12],
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{ 
+                  duration: 6, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+                className="absolute inset-0 flex items-center justify-center pointer-events-none select-none -z-10 text-[9rem] sm:text-[14rem] md:text-[20rem] text-[var(--saffron)] font-serif leading-none"
+              >
+                ॐ
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--deep-charcoal)] leading-tight relative z-10"
+              >
+                Book Trusted Religious &{' '}
+                <span className="bg-gradient-to-r from-[var(--saffron)] via-[var(--temple-red)] to-[var(--vermilion)] bg-clip-text text-transparent">
+                  Spiritual Services
+                </span>
+              </motion.h1>
+            </div>
 
             {/* CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.9 }}
+              transition={{ duration: 0.7, delay: 0.5 }}
               className="flex flex-col items-center gap-3 justify-center"
             >
               {/* Primary CTA with Glow Pulse */}
               <motion.div
                 animate={{
                   boxShadow: [
-                    '0 0 20px rgba(255, 153, 51, 0.3)',
-                    '0 0 40px rgba(255, 153, 51, 0.5)',
-                    '0 0 20px rgba(255, 153, 51, 0.3)'
+                    '0 0 15px rgba(255, 153, 51, 0.25)',
+                    '0 0 30px rgba(255, 153, 51, 0.45)',
+                    '0 0 15px rgba(255, 153, 51, 0.25)'
                   ]
                 }}
                 transition={{
@@ -461,12 +451,12 @@ export default function ReligiousServicesPage() {
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="rounded-lg inline-block"
+                className="rounded-xl inline-block"
               >
                 <Button
                   onClick={() => setIsModalOpen(true)}
                   size="lg"
-                  className="relative bg-gradient-to-r from-[var(--saffron)] via-[var(--warm-gold)] to-[var(--temple-red)] text-white hover:opacity-90 shadow-2xl px-8 py-4 text-base md:text-lg font-semibold overflow-hidden group"
+                  className="relative bg-gradient-to-r from-[var(--saffron)] via-[var(--warm-gold)] to-[var(--temple-red)] text-white hover:opacity-90 shadow-xl px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base md:text-lg font-semibold overflow-hidden group rounded-xl"
                 >
                   {/* Shine Sweep Effect */}
                   <motion.div
@@ -476,75 +466,65 @@ export default function ReligiousServicesPage() {
                     transition={{ duration: 0.6 }}
                   />
                   <span className="relative z-10">Book a Religious Service</span>
-                  <ArrowRight className="ml-2 h-5 w-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </motion.div>
 
-             {/* Alternative - Traditional Religious Theme */}
-<div className="relative flex flex-wrap justify-center gap-3">
-  {/* Google Play Button */}
-  <motion.a
-    href={globalSettings?.playStore || "#"}
-    target={globalSettings?.playStore ? "_blank" : undefined}
-    rel={globalSettings?.playStore ? "noopener noreferrer" : undefined}
-    whileHover={{ scale: 1.05, y: -2 }}
-    whileTap={{ scale: 0.95 }}
-    className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
-    title="Get it on Google Play"
-  >
-    <img loading="lazy" decoding="async" 
-      src="/andriod1.png" 
-      alt="Google Play" 
-      className="h-full w-full object-cover brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
-    />
-  </motion.a>
+              {/* Alternative - Traditional Religious Theme */}
+              <div className="relative flex flex-wrap justify-center gap-2.5 sm:gap-3 mt-1">
+                {/* Google Play Button */}
+                <motion.a
+                  href={globalSettings?.playStore || "#"}
+                  target={globalSettings?.playStore ? "_blank" : undefined}
+                  rel={globalSettings?.playStore ? "noopener noreferrer" : undefined}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center w-28 sm:w-34 h-9 sm:h-11 rounded-2xl bg-[#DF5D31] shadow-md hover:shadow-lg transition-all overflow-hidden group"
+                  title="Get it on Google Play"
+                >
+                  <img loading="lazy" decoding="async" 
+                    src="/andriod1.png" 
+                    alt="Google Play" 
+                    className="h-full w-full object-cover brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
+                  />
+                </motion.a>
 
-  {/* App Store Button */}
-  <motion.a
-    href={globalSettings?.appStore || "#"}
-    target={globalSettings?.appStore ? "_blank" : undefined}
-    rel={globalSettings?.appStore ? "noopener noreferrer" : undefined}
-    whileHover={{ scale: 1.05, y: -2 }}
-    whileTap={{ scale: 0.95 }}
-    className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-12 rounded-3xl bg-[#DF5D31] shadow-lg hover:shadow-xl transition-all overflow-hidden group"
-    title="Download on the App Store"
-  >
-    <img loading="lazy" decoding="async" 
-      src="/apple2.png" 
-      alt="App Store" 
-      className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" 
-    />
-  </motion.a>
-</div>
-
-              {/* Secondary CTA */}
-              {/* <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-[var(--saffron)] text-[var(--saffron)] hover:bg-[var(--saffron)]/10 px-10 py-6 text-lg font-semibold bg-white/80 backdrop-blur-sm"
-                onClick={() => router.push('/religious-services/category')}
-              >
-                Explore Services
-              </Button> */}
+                {/* App Store Button */}
+                <motion.a
+                  href={globalSettings?.appStore || "#"}
+                  target={globalSettings?.appStore ? "_blank" : undefined}
+                  rel={globalSettings?.appStore ? "noopener noreferrer" : undefined}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center w-28 sm:w-34 h-9 sm:h-11 rounded-2xl bg-[#DF5D31] shadow-md hover:shadow-lg transition-all overflow-hidden group"
+                  title="Download on the App Store"
+                >
+                  <img loading="lazy" decoding="async" 
+                    src="/apple2.png" 
+                    alt="App Store" 
+                    className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" 
+                  />
+                </motion.a>
+              </div>
             </motion.div>
 
             {/* Trust Indicators */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 1.1 }}
-              className="mt-6 flex flex-wrap justify-center gap-8 text-sm text-[var(--muted-foreground)]"
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 text-xs sm:text-sm text-[var(--muted-foreground)]"
             >
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-[var(--sacred-teal)]" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <CheckCircle className="h-4 w-4 text-[var(--sacred-teal)] shrink-0" />
                 <span>Verified Priests</span>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-[var(--sacred-teal)]" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <CheckCircle className="h-4 w-4 text-[var(--sacred-teal)] shrink-0" />
                 <span>Authentic Rituals</span>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-[var(--sacred-teal)]" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <CheckCircle className="h-4 w-4 text-[var(--sacred-teal)] shrink-0" />
                 <span>Instant Booking</span>
               </div>
             </motion.div>
@@ -585,6 +565,8 @@ export default function ReligiousServicesPage() {
               title: 'Sacred Service Categories',
               description: 'Browse divine categories on the left and open the exact ritual or spiritual service you want on the right.',
               viewAllLabel: 'View all',
+              paddingClass: 'py-8 sm:py-12 lg:py-14',
+              headerMarginClass: 'mb-6 sm:mb-8',
               sectionClass: 'bg-gradient-to-b from-white via-[var(--soft-cream)] to-[var(--off-white)]',
               eyebrowClass: 'text-[var(--saffron)]',
               titleClass: 'text-[var(--deep-charcoal)]',
@@ -619,24 +601,24 @@ export default function ReligiousServicesPage() {
 
       {/* 3. ASTROLOGY & CONSULTATION (FEATURED) */}
       <SectionReveal delay={0.2}>
-        <section className="py-20 bg-gradient-to-b from-[var(--soft-cream)] to-[var(--off-white)]">
+        <section className="py-8 sm:py-12 md:py-14 bg-gradient-to-b from-[var(--soft-cream)] to-[var(--off-white)]">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12 cursor-pointer group" onClick={() => {
+            <div className="text-center mb-6 sm:mb-8 cursor-pointer group" onClick={() => {
               router.push('/religious-services/all-services');
             }}>
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4 group-hover:text-[var(--saffron)] transition-colors">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-2 sm:mb-3 group-hover:text-[var(--saffron)] transition-colors">
                 Astrology & Religious Consultation
-                <ArrowRight className="inline-block ml-2 h-8 w-8 group-hover:translate-x-2 transition-transform" />
+                <ArrowRight className="inline-block ml-2 h-6 w-6 sm:h-7 sm:w-7 group-hover:translate-x-2 transition-transform" />
               </h2>
-              <p className="text-lg text-[var(--muted-foreground)]">
+              <p className="text-sm sm:text-base md:text-lg text-[var(--muted-foreground)]">
                 Expert guidance for your spiritual and life decisions
               </p>
             </div>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
   {featuredLoading ? (
-    <div className="col-span-4 flex items-center justify-center py-20">
-      <div className="w-10 h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin" />
+    <div className="col-span-4 flex items-center justify-center py-12 sm:py-16">
+      <div className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin" />
     </div>
   ) : featuredServices.slice(0, 4).map((service, index) => (
     <motion.div
@@ -654,11 +636,11 @@ export default function ReligiousServicesPage() {
                         router.push(`/religious-services/${target}`);
                       }}
       >
-        <CardContent className="p-6 h-full flex flex-col">
+        <CardContent className="p-4 sm:p-5 h-full flex flex-col">
           {/* Name and Image Side by Side */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-3 sm:mb-4">
             {/* Image Circle */}
-            <div className="h-14 w-14 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--saffron)]/10 to-[var(--temple-red)]/10 group-hover:scale-110 transition-transform shadow-sm flex-shrink-0">
+            <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--saffron)]/10 to-[var(--temple-red)]/10 group-hover:scale-110 transition-transform shadow-sm flex-shrink-0">
               {service.image ? (
                 <img loading="lazy" decoding="async"
                   src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
@@ -671,24 +653,24 @@ export default function ReligiousServicesPage() {
                 />
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-[var(--saffron)]" />
+                  <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-[var(--saffron)]" />
                 </div>
               )}
             </div>
             
             {/* Name */}
-            <h3 className="text-lg font-semibold text-[var(--deep-charcoal)] group-hover:text-[var(--saffron)] transition-colors line-clamp-2 flex-1">
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--deep-charcoal)] group-hover:text-[var(--saffron)] transition-colors line-clamp-2 flex-1">
               {service.serviceName || `${service.firstName} ${service.lastName}`}
             </h3>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-[var(--muted-foreground)] mb-4 line-clamp-3" title={service.bio || ''}>
+          <p className="text-xs sm:text-sm text-[var(--muted-foreground)] mb-3 sm:mb-4 line-clamp-3" title={service.bio || ''}>
             {service.bio?.replace(/<[^>]+>/g, '') || 'Expert religious services.'}
           </p>
 
           {/* Footer */}
-          <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-2">
+          <div className="mt-auto pt-3 sm:pt-4 border-t border-gray-100 flex flex-col gap-1.5">
             <span className="text-[11px] font-bold text-[var(--saffron)] tracking-wider">
               <span className="text-[11px] italic font-bold text-[var(--saffron)] tracking-wider">Starting at</span> ₹{service.startingAt || service.serviceBookingCost}
             </span>
@@ -702,38 +684,39 @@ export default function ReligiousServicesPage() {
         </section>
       </SectionReveal>
 
+      {/* 4. AVAILABLE SERVICES */}
       <SectionReveal delay={0.3}>
-        <section className="py-20 bg-white">
+        <section className="py-8 sm:py-12 md:py-14 bg-white">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 sm:mb-8">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-2">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-1 sm:mb-1.5">
                   Available Services
                 </h2>
-                <p className="text-lg text-[var(--muted-foreground)]">
+                <p className="text-sm sm:text-base md:text-lg text-[var(--muted-foreground)]">
                   Browse our verified spiritual services
                 </p>
               </div>
               {services.length > 0 && (
-                <div className="mt-4 md:mt-0">
-                  <Badge variant="outline" className="border-[var(--saffron)]/20 text-[var(--saffron)] px-4 py-1.5 rounded-full bg-[var(--soft-cream)] font-semibold">
+                <div className="mt-3 md:mt-0">
+                  <Badge variant="outline" className="border-[var(--saffron)]/20 text-[var(--saffron)] px-3.5 py-1 rounded-full bg-[var(--soft-cream)] font-semibold text-xs sm:text-sm">
                     {services.length} Total Services Found
                   </Badge>
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {!location && !loading ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-20 bg-[var(--soft-cream)] rounded-3xl border border-dashed border-[var(--saffron)]/30">
-                  <MapPin className="h-16 w-16 text-[var(--saffron)] mb-6 opacity-50 animate-bounce" />
-                  <h3 className="text-2xl font-bold text-[var(--deep-charcoal)] mb-3">Divine Presence Near You</h3>
-                  <p className="text-[var(--muted-foreground)] text-center max-w-md mb-8 px-6">
+                <div className="col-span-full flex flex-col items-center justify-center py-12 sm:py-16 bg-[var(--soft-cream)] rounded-2xl border border-dashed border-[var(--saffron)]/30">
+                  <MapPin className="h-12 w-12 sm:h-14 sm:w-14 text-[var(--saffron)] mb-4 opacity-50 animate-bounce" />
+                  <h3 className="text-xl sm:text-2xl font-bold text-[var(--deep-charcoal)] mb-2">Divine Presence Near You</h3>
+                  <p className="text-xs sm:text-sm text-[var(--muted-foreground)] text-center max-w-md mb-6 px-4">
                     To show you verified priests and rituals available in your city, please set your location.
                   </p>
                   <Button
                     onClick={() => detectLocation()}
-                    className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white px-10 py-6 rounded-2xl text-lg shadow-xl shadow-[var(--saffron)]/20"
+                    className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base shadow-md shadow-[var(--saffron)]/20"
                   >
                     Find My Location
                   </Button>
@@ -747,13 +730,13 @@ export default function ReligiousServicesPage() {
                     transition={{ duration: 0.4, delay: (i % 4) * 0.1 }}
                   >
                     <Card
-                      className="overflow-hidden hover:shadow-xl transition-shadow group cursor-pointer h-full border border-gray-100 hover:border-[var(--saffron)]/30"
+                      className="overflow-hidden hover:shadow-xl transition-shadow group cursor-pointer h-full border border-gray-100 hover:border-[var(--saffron)]/30 flex flex-col"
                       onClick={() => {
                         const target = service.slug || service._id;
                         router.push(`/religious-services/${target}`);
                       }}
                     >
-                      <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
+                      <div className="relative h-40 sm:h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                         <img loading="lazy" decoding="async"
                           src={service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                           alt={service.business_name}
@@ -761,31 +744,28 @@ export default function ReligiousServicesPage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                       </div>
-                      <CardContent className="p-5">
+                      <CardContent className="p-4 sm:p-5 flex flex-col flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex flex-col gap-1">
                             <Badge className="bg-[var(--sacred-teal)]/10 text-[var(--sacred-teal)] text-[9px] uppercase font-bold tracking-wider w-fit">Verified Service</Badge>
-                            {/* <span className="text-[9px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter">
-                              <CheckCircle className="h-2.5 w-2.5" /> Cash on Delivery
-                            </span> */}
                           </div>
-                          <div className="flex items-center text-sm font-semibold text-[var(--deep-charcoal)]">
+                          <div className="flex items-center text-xs sm:text-sm font-semibold text-[var(--deep-charcoal)]">
                             <Star className="h-3 w-3 fill-[var(--warm-gold)] text-[var(--warm-gold)] mr-1" />
                             {service.avgRating || 4.8}
                           </div>
                         </div>
-                        <h3 className="text-base font-bold text-[var(--deep-charcoal)] mb-1.5 group-hover:text-[var(--saffron)] transition-colors line-clamp-1">
+                        <h3 className="text-base font-bold text-[var(--deep-charcoal)] mb-1 group-hover:text-[var(--saffron)] transition-colors line-clamp-1">
                           {service.business_name || `${service.firstName} ${service.lastName}`}
                         </h3>
-                        <p className="text-xs text-[var(--muted-foreground)] mb-4 line-clamp-2 h-8">
+                        <p className="text-xs text-[var(--muted-foreground)] mb-3 line-clamp-2 h-8">
                           {service.description || service.bio || 'Expert religious services for your sacred needs.'}
                         </p>
-                        <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
                           <div className="flex flex-col">
                             <span className="text-[10px] text-gray-400 italic font-medium">Starting from</span>
-                            <span className="text-xl font-bold text-[var(--saffron)] leading-none">₹{(service.startingAt || service.BasePrice || service.minFare || 1000).toLocaleString('en-IN')}</span>
+                            <span className="text-lg sm:text-xl font-bold text-[var(--saffron)] leading-none">₹{(service.startingAt || service.BasePrice || service.minFare || 1000).toLocaleString('en-IN')}</span>
                           </div>
-                          <Button size="sm" className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white h-8 px-4 text-xs font-semibold rounded-lg shadow-sm">
+                          <Button size="sm" className="bg-[var(--saffron)] hover:bg-[var(--temple-red)] text-white h-7 sm:h-8 px-3.5 sm:px-4 text-xs font-semibold rounded-lg shadow-sm">
                             Book Now
                           </Button>
                         </div>
@@ -794,29 +774,29 @@ export default function ReligiousServicesPage() {
                   </motion.div>
                 ))
               ) : loading ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-20">
-                  <div className="w-10 h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin mb-4" />
-                  <p className="text-[var(--muted-foreground)] animate-pulse">Seeking Divine Services...</p>
+                <div className="col-span-full flex flex-col items-center justify-center py-12 sm:py-16">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin mb-3" />
+                  <p className="text-xs sm:text-sm text-[var(--muted-foreground)] animate-pulse">Seeking Divine Services...</p>
                 </div>
               ) : (
-                <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
-                  <div className="mb-4 text-5xl">🕉️</div>
-                  <h3 className="text-xl font-bold text-[var(--deep-charcoal)] mb-2">No Services Found Nearby</h3>
-                  <p className="text-[var(--muted-foreground)]">Please try another location for verified priests and poojas.</p>
+                <div className="col-span-full flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                  <div className="mb-3 text-4xl sm:text-5xl">🕉️</div>
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--deep-charcoal)] mb-1.5">No Services Found Nearby</h3>
+                  <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">Please try another location for verified priests and poojas.</p>
                 </div>
               )}
             </div>
 
             {services.length > 8 && (
-              <div className="mt-16 text-center">
+              <div className="mt-8 sm:mt-10 text-center">
                 <Button
                   onClick={() => router.push('/religious-services/all-services')}
                   variant="outline"
                   size="lg"
-                  className="border-2 border-[var(--saffron)] text-[var(--saffron)] hover:bg-[var(--saffron)] hover:text-white px-10 py-7 text-lg font-bold rounded-2xl transition-all duration-300 group"
+                  className="border-2 border-[var(--saffron)] text-[var(--saffron)] hover:bg-[var(--saffron)] hover:text-white px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-bold rounded-xl transition-all duration-300 group"
                 >
                   View All Services
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-2 transition-transform" />
                 </Button>
               </div>
             )}
@@ -826,18 +806,18 @@ export default function ReligiousServicesPage() {
 
       {/* 5. TRUST & AUTHENTICITY */}
       <SectionReveal delay={0.4}>
-        <section className="py-20 bg-gradient-to-br from-[var(--soft-cream)] via-[var(--off-white)] to-[var(--warm-beige)]">
+        <section className="py-8 sm:py-12 md:py-14 bg-gradient-to-br from-[var(--soft-cream)] via-[var(--off-white)] to-[var(--warm-beige)]">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-2">
                 Why Trust Us
               </h2>
-              <p className="text-lg text-[var(--muted-foreground)]">
+              <p className="text-sm sm:text-base md:text-lg text-[var(--muted-foreground)]">
                 Your spiritual journey in safe hands
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
               {[
                 { icon: Shield, title: 'Verified Priests', desc: 'Background checked & qualified', color: 'from-blue-500 to-cyan-500' },
                 { icon: Award, title: 'Years of Experience', desc: 'Decades of combined expertise', color: 'from-orange-500 to-amber-500' },
@@ -850,15 +830,15 @@ export default function ReligiousServicesPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="text-center"
+                  className="text-center p-3 sm:p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-orange-100/60 shadow-xs"
                 >
-                  <div className={`mb-4 mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br ${item.color} p-4 shadow-lg`}>
+                  <div className={`mb-2.5 sm:mb-3 mx-auto h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-gradient-to-br ${item.color} p-3 sm:p-3.5 shadow-md`}>
                     <item.icon className="h-full w-full text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-[var(--deep-charcoal)] mb-2">
+                  <h4 className="text-sm sm:text-base font-semibold text-[var(--deep-charcoal)] mb-1">
                     {item.title}
                   </h4>
-                  <p className="text-sm text-[var(--muted-foreground)]">
+                  <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">
                     {item.desc}
                   </p>
                 </motion.div>
@@ -870,24 +850,24 @@ export default function ReligiousServicesPage() {
 
       {/* 6. POPULAR RITUALS & POOJAS */}
       <SectionReveal delay={0.5}>
-        <section className="py-20 bg-white">
+        <section className="py-8 sm:py-12 md:py-14 bg-white">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-2">
                 Popular Rituals & Poojas
               </h2>
-              <p className="text-lg text-[var(--muted-foreground)]">
+              <p className="text-sm sm:text-base md:text-lg text-[var(--muted-foreground)]">
                 Trending and commonly booked spiritual services
               </p>
             </div>
 
             <div className="mx-auto w-full">
               {latestLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="w-10 h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin" />
+                <div className="flex items-center justify-center py-12 sm:py-16">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-[var(--saffron)]/20 border-t-[var(--saffron)] rounded-full animate-spin" />
                 </div>
               ) : (
-                <Slider {...sliderSettings} className="px-2 pb-10">
+                <Slider {...sliderSettings} className="px-1 sm:px-2 pb-4 sm:pb-6">
                   {latestServices.slice(0, 6).map((ritual, index) => (
                     <motion.div
                       key={index}
@@ -895,11 +875,11 @@ export default function ReligiousServicesPage() {
                       whileInView={{ opacity: 1, scale: 1 }}
                       transition={{ delay: index * 0.1 }}
                       viewport={{ once: true }}
-                      whileHover={{ scale: 1.03 }}
-                      className="px-3"
+                      whileHover={{ scale: 1.02 }}
+                      className="px-2 sm:px-3"
                     >
-                      <Card className="overflow-hidden group cursor-pointer border-2 border-transparent hover:border-[var(--saffron)]/30 transition-all flex flex-col h-full" onClick={() => router.push(`/religious-services/${ritual.slug || ritual._id}`)}>
-                        <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
+                      <Card className="overflow-hidden group cursor-pointer border border-gray-100 hover:border-[var(--saffron)]/30 transition-all flex flex-col h-full shadow-xs hover:shadow-md" onClick={() => router.push(`/religious-services/${ritual.slug || ritual._id}`)}>
+                        <div className="relative h-40 sm:h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
                           <img loading="lazy" decoding="async"
                             src={ritual.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${ritual.image}` : 'https://images.unsplash.com/photo-1599030859770-940e6a970d4d?auto=format&fit=crop&w=600&q=80'}
                             alt={ritual.serviceName}
@@ -907,27 +887,23 @@ export default function ReligiousServicesPage() {
                             onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                           />
                           <div className="hidden absolute inset-0 items-center justify-center">
-                            <Sparkles className="h-12 w-12 text-[var(--saffron)]" />
+                            <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--saffron)]" />
                           </div>
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                         </div>
-                        <CardContent className="p-5 flex flex-col flex-1">
-                          <h3 className="text-lg font-semibold text-[var(--deep-charcoal)] mb-1 group-hover:text-[var(--saffron)] transition-colors line-clamp-1">
+                        <CardContent className="p-4 sm:p-5 flex flex-col flex-1">
+                          <h3 className="text-base sm:text-lg font-semibold text-[var(--deep-charcoal)] mb-1 group-hover:text-[var(--saffron)] transition-colors line-clamp-1">
                             {ritual.serviceName || `${ritual.firstName} ${ritual.lastName}`}
                           </h3>
-
-                          {/* <div className="text-[10px] font-bold text-green-600 flex items-center gap-1 uppercase tracking-tighter mb-4">
-                            <CheckCircle className="h-3 w-3" /> Cash on Delivery Available
-                          </div> */}
 
                           <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
                             <div className="flex flex-col">
                               <span className="text-[10px] text-gray-400 italic font-medium">Starts from</span>
-                              <span className="text-xl font-bold text-[var(--saffron)]">
+                              <span className="text-lg sm:text-xl font-bold text-[var(--saffron)]">
                                 ₹{ritual.startingAt || ritual.serviceBookingCost || 1000}
                               </span>
                             </div>
-                            <Button size="sm" variant="ghost" className="text-[var(--saffron)] hover:text-[var(--temple-red)] hover:bg-[var(--saffron)]/5">
+                            <Button size="sm" variant="ghost" className="text-[var(--saffron)] hover:text-[var(--temple-red)] hover:bg-[var(--saffron)]/5 text-xs sm:text-sm px-2.5">
                               View Details →
                             </Button>
                           </div>
@@ -944,18 +920,18 @@ export default function ReligiousServicesPage() {
 
       {/* 7. HOW IT WORKS */}
       <SectionReveal delay={0.6}>
-        <section className="py-20 bg-gradient-to-b from-[var(--soft-cream)] to-[var(--off-white)]">
+        <section className="py-8 sm:py-12 md:py-14 bg-gradient-to-b from-[var(--soft-cream)] to-[var(--off-white)]">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-4">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--deep-charcoal)] mb-2">
                 How It Works
               </h2>
-              <p className="text-lg text-[var(--muted-foreground)]">
+              <p className="text-sm sm:text-base md:text-lg text-[var(--muted-foreground)]">
                 Simple steps to book your spiritual service
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto">
               {[
                 { step: '1', icon: Calendar, title: 'Choose Category', desc: 'Select from our services' },
                 { step: '2', icon: Sparkles, title: 'Select Ritual', desc: 'Pick your ceremony' },
@@ -968,21 +944,21 @@ export default function ReligiousServicesPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.15 }}
                   viewport={{ once: true }}
-                  className="relative text-center"
+                  className="relative text-center p-3 sm:p-4 rounded-2xl bg-white/70 backdrop-blur-sm border border-orange-100/60 shadow-xs"
                 >
-                  <div className="mb-4 mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-[var(--saffron)] to-[var(--temple-red)] flex items-center justify-center text-2xl font-bold text-white shadow-lg relative">
+                  <div className="mb-2 sm:mb-3 mx-auto h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-[var(--saffron)] to-[var(--temple-red)] flex items-center justify-center text-xl sm:text-2xl font-bold text-white shadow-md relative">
                     {step.step}
                     {index < 3 && (
                       <div className="hidden md:block absolute left-full top-1/2 w-full h-0.5 bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)]/30" />
                     )}
                   </div>
-                  <div className="mb-3 mx-auto h-12 w-12 rounded-xl bg-[var(--saffron)]/10 p-2.5">
+                  <div className="mb-2 mx-auto h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-[var(--saffron)]/10 p-2 sm:p-2.5">
                     <step.icon className="h-full w-full text-[var(--saffron)]" />
                   </div>
-                  <h5 className="text-lg font-semibold text-[var(--deep-charcoal)] mb-2">
+                  <h5 className="text-sm sm:text-base font-semibold text-[var(--deep-charcoal)] mb-1">
                     {step.title}
                   </h5>
-                  <p className="text-sm text-[var(--muted-foreground)]">
+                  <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">
                     {step.desc}
                   </p>
                 </motion.div>
@@ -992,27 +968,30 @@ export default function ReligiousServicesPage() {
         </section>
       </SectionReveal>
 
+      {/* Help Center Section - Religious Services Articles */}
+      <KnowledgeSection vertical="religious" showNewsletter={false} className="py-8 sm:py-12 md:py-14" />
+
       {/* 8. FINAL DEVOTIONAL CTA */}
-      <section className="relative py-24 overflow-hidden">
+      <section className="relative py-10 sm:py-14 md:py-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--saffron)] via-[var(--temple-red)] to-[var(--vermilion)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.1),transparent_60%)]" />
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="container mx-auto px-4 text-center relative"
         >
-          <Sparkles className="h-16 w-16 text-white/80 mx-auto mb-6" />
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+          <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 text-white/80 mx-auto mb-3 sm:mb-4" />
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3">
             Begin Your Sacred Journey Today
           </h2>
-          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto">
             Connect with verified spiritual guides and experience authentic rituals performed with devotion
           </p>
-          <Button size="lg" onClick={() => setIsModalOpen(true)} className="bg-white text-[var(--temple-red)] hover:bg-white/90 shadow-2xl px-10 py-6 text-lg font-semibold">
+          <Button size="lg" onClick={() => setIsModalOpen(true)} className="bg-white text-[var(--temple-red)] hover:bg-white/90 shadow-xl px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-semibold rounded-xl">
             Book a Religious Service
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </motion.div>
       </section>

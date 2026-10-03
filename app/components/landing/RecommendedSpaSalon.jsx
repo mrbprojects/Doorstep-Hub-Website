@@ -84,16 +84,37 @@ export function RecommendedSpaSalon() {
             const cleanAmenityText = (text) => {
               if (!text) return '';
               let str = String(text).trim().replace(/\s*\([^)]*\)/g, '');
+              // Strip descriptive suffixes after em-dash, en-dash, or hyphen
+              if (str.includes('–')) str = str.split('–')[0].trim();
+              if (str.includes('—')) str = str.split('—')[0].trim();
+              if (str.includes(' - ')) str = str.split(' - ')[0].trim();
+
+              const lower = str.toLowerCase();
+              if (lower.includes('beverage') || lower.includes('tea') || lower.includes('coffee') || lower.includes('snack')) return 'Beverages';
+              if (lower.includes('wi-fi') || lower.includes('wifi')) return 'Free Wi-Fi';
+              if (lower.includes('towel')) return 'Warm Towels';
+              if (lower.includes('vanity') || lower.includes('refresh')) return 'Vanity Area';
+              if (lower.includes('manicure') || lower.includes('pedicure') || lower.includes('nail')) return 'Nail Care';
+              if (lower.includes('massage')) return 'Massage';
+              if (lower.includes('steam')) return 'Steam Room';
+              if (lower.includes('sauna')) return 'Sauna';
+              if (lower.includes('facial')) return 'Facial';
+              if (lower.includes('lounge')) return 'Relax Lounge';
+              if (lower.includes('locker')) return 'Lockers';
+              if (lower.includes('haircut')) return 'Haircut';
+              if (lower.includes('color')) return 'Hair Color';
+              if (lower.includes('style') || lower.includes('styling')) return 'Styling';
+
               const mappings = {
                 'Steam room or sauna': 'Steam Room',
                 'Steam room': 'Steam Room',
                 'Sauna': 'Sauna',
-                'Hot towel service': 'Hot Towel',
-                'Relaxation lounges': 'Relaxation Lounge',
+                'Hot towel service': 'Warm Towels',
+                'Relaxation lounges': 'Relax Lounge',
                 'Complimentary beverages': 'Beverages',
                 'Robes & slippers': 'Robes & Slippers',
-                'Lockers & secure storage': 'Secure Lockers',
-                'Lockers & secure storage for personal items': 'Secure Lockers',
+                'Lockers & secure storage': 'Lockers',
+                'Lockers & secure storage for personal items': 'Lockers',
                 'Haircut': 'Haircut',
                 'Hair Coloring': 'Hair Color',
                 'Styling': 'Styling',
@@ -102,7 +123,7 @@ export function RecommendedSpaSalon() {
                 'Premium Products': 'Premium Products',
               };
               if (mappings[str]) return mappings[str];
-              if (str.length > 20) {
+              if (str.length > 18) {
                 const words = str.split(' ');
                 if (words.length > 2) return words.slice(0, 2).join(' ');
               }
@@ -373,7 +394,7 @@ export function RecommendedSpaSalon() {
                 <div className="relative z-10 -mt-10 p-4">
                   {/* Main Info Card */}
                   <motion.div
-                    className="mb-4 flex h-[220px] flex-col rounded-2xl border border-[#037166]/30 bg-[#1a1a1a]/90 p-3 shadow-xl backdrop-blur-xl"
+                    className="mb-4 flex min-h-[220px] flex-col justify-between rounded-2xl border border-[#037166]/30 bg-[#1a1a1a]/90 p-3 shadow-xl backdrop-blur-xl"
                   >
                     <div className="mb-2 min-h-[48px]">
                       <h6 className="mb-1 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-[10px] font-semibold uppercase tracking-[0.18em] text-transparent">

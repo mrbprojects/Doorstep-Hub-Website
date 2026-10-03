@@ -54,30 +54,35 @@ export function LatestSpaServices() {
         if (data.success && data.stores) {
           const cleanAmenityText = (text) => {
             if (!text) return '';
-            let str = String(text).trim().replace(/\s*\([^)]*\)/g, '');
-            const mappings = {
-              'Steam room or sauna': 'Steam Room',
-              'Steam room': 'Steam Room',
-              'Sauna': 'Sauna',
-              'Hot towel service': 'Hot Towel',
-              'Relaxation lounges': 'Relaxation Lounge',
-              'Complimentary beverages': 'Beverages',
-              'Robes & slippers': 'Robes & Slippers',
-              'Lockers & secure storage': 'Secure Lockers',
-              'Lockers & secure storage for personal items': 'Secure Lockers',
-              'Haircut': 'Haircut',
-              'Hair Coloring': 'Hair Color',
-              'Styling': 'Styling',
-              'Facial': 'Facial',
-              'Massage': 'Massage',
-              'Premium Products': 'Premium Products',
-            };
-            if (mappings[str]) return mappings[str];
-            if (str.length > 20) {
-              const words = str.split(' ');
-              if (words.length > 2) return words.slice(0, 2).join(' ');
+            // Extract text before dash, en-dash, em-dash, or colon
+            let title = String(text).trim().split(/\s+[–—]\s+|\s+-\s+/)[0].trim();
+            title = title.replace(/\s*\([^)]*\)/g, '').trim();
+
+            const lower = title.toLowerCase();
+            if (lower.includes('beverage') || lower.includes('coffee') || lower.includes('tea') || lower.includes('drink')) return 'Beverages';
+            if (lower.includes('wi-fi') || lower.includes('wifi') || lower.includes('internet')) return 'Free Wi-Fi';
+            if (lower.includes('warm towel') || lower.includes('hot towel') || lower.includes('towel')) return 'Warm Towels';
+            if (lower.includes('vanity') || lower.includes('refresh') || lower.includes('mirror')) return 'Vanity Area';
+            if (lower.includes('manicure') && lower.includes('pedicure')) return 'Nail Care';
+            if (lower.includes('manicure')) return 'Manicure';
+            if (lower.includes('pedicure')) return 'Pedicure';
+            if (lower.includes('massage')) return 'Massage';
+            if (lower.includes('haircut') || lower.includes('hair cut')) return 'Haircut';
+            if (lower.includes('steam')) return 'Steam Room';
+            if (lower.includes('sauna')) return 'Sauna';
+            if (lower.includes('lounge') || lower.includes('relax')) return 'Lounge';
+            if (lower.includes('charging')) return 'Charging Station';
+            if (lower.includes('entertainment') || lower.includes('reading') || lower.includes('tv')) return 'Entertainment';
+            if (lower.includes('hygien') || lower.includes('clean') || lower.includes('sanitiz')) return 'Hygienic Setup';
+            if (lower.includes('expert') || lower.includes('therapist') || lower.includes('certified')) return 'Expert Staff';
+            if (lower.includes('product') || lower.includes('premium')) return 'Premium Products';
+
+            if (title.length > 16) {
+              const parts = title.split(/[&/,]/)[0].trim();
+              if (parts.length > 0 && parts.length <= 16) return parts;
+              return title.split(' ').slice(0, 2).join(' ').slice(0, 16);
             }
-            return str;
+            return title;
           };
 
           const getCityFromStore = (s) => {
@@ -142,17 +147,17 @@ export function LatestSpaServices() {
   }, []);
 
   const scrollRef = React.useRef(null);
-  const shouldDesktopScroll = isDesktop && spaStores.length > 6;
+  const shouldDesktopScroll = isDesktop && spaStores.length > 5;
   const scrollCards = (direction) => {
     if (!scrollRef.current) return;
     const firstCard = scrollRef.current.querySelector('[data-scroll-card="latest-spa"]');
-    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 228;
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 280;
     const amount = cardWidth + 16;
     scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
   };
 
   return (
-    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-14 overflow-hidden">
       {/* Architectural World Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0d12] to-[#0a0a0a]" />
@@ -174,7 +179,7 @@ export function LatestSpaServices() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-4xl sm:text-5xl font-bold mb-4"
+            className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 tracking-tight"
           >
             <span className="bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-transparent">
               Recently Booked Spa & Saloons
@@ -184,31 +189,57 @@ export function LatestSpaServices() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-gray-400 text-lg max-w-4xl mx-auto"
+            className="text-gray-500 text-sm sm:text-base lg:text-lg max-w-3xl mx-auto leading-relaxed"
           >
             Explore recently booked spa and salon services for hair care, beauty treatments, grooming, facials, styling, massages, and more. Discover popular services customers are choosing and book convenient beauty and wellness appointments near you.
           </motion.p>
         </motion.div>
 
+        {/* Carousel Navigation Buttons */}
         <div className="mb-4 flex items-center justify-end gap-2">
-          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
-            <ChevronLeft className="h-5 w-5" />
+          <button
+            type="button"
+            onClick={() => scrollCards('left')}
+            className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white shadow-2xs"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
-          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
-            <ChevronRight className="h-5 w-5" />
+          <button
+            type="button"
+            onClick={() => scrollCards('right')}
+            className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#037166] transition hover:bg-[#037166] hover:text-white shadow-2xs"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
-        {/* Spa Services Slider */}
+        {/* Spa Services Slider / Responsive Grid */}
         <div
           ref={scrollRef}
-          className={`overflow-x-auto scrollbar-hide pb-8 -mx-4 px-4 xl:mx-0 ${shouldDesktopScroll ? 'xl:px-0' : 'xl:px-0 xl:overflow-visible'}`}
+          className={`overflow-x-auto scrollbar-hide pb-6 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 ${
+            shouldDesktopScroll ? 'xl:overflow-x-auto' : 'xl:overflow-visible'
+          }`}
         >
-          <div className={`flex min-w-max gap-4 snap-x snap-mandatory ${shouldDesktopScroll ? '' : 'xl:min-w-0 xl:grid xl:grid-cols-6 xl:snap-none'}`}>
+          <div
+            className={`flex gap-4 sm:gap-5 snap-x snap-mandatory ${
+              shouldDesktopScroll
+                ? 'min-w-max'
+                : `min-w-max xl:min-w-0 xl:grid ${
+                    spaStores.length === 1 ? 'xl:grid-cols-1 max-w-sm mx-auto' :
+                    spaStores.length === 2 ? 'xl:grid-cols-2 max-w-2xl mx-auto' :
+                    spaStores.length === 3 ? 'xl:grid-cols-3 max-w-4xl mx-auto' :
+                    spaStores.length === 4 ? 'xl:grid-cols-4' :
+                    spaStores.length === 5 ? 'xl:grid-cols-5' :
+                    'xl:grid-cols-6'
+                  } xl:snap-none`
+            }`}
+          >
             {loading ? (
-              [1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="group relative w-[228px] shrink-0 snap-start xl:w-auto">
-                  <div className="relative h-[320px] rounded-2xl bg-white/5 animate-pulse" />
+              [1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="w-[260px] sm:w-[280px] shrink-0 snap-start xl:w-auto">
+                  <div className="h-[380px] rounded-2xl bg-slate-100 animate-pulse border border-slate-200" />
                 </div>
               ))
             ) : (
@@ -216,78 +247,90 @@ export function LatestSpaServices() {
                 <motion.div
                   key={place._id || index}
                   data-scroll-card="latest-spa"
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.7 }}
-                  className={`group relative w-[228px] shrink-0 snap-start cursor-pointer ${shouldDesktopScroll ? '' : 'xl:w-auto'}`}
+                  transition={{ delay: index * 0.08, duration: 0.5 }}
+                  className={`group relative w-[260px] sm:w-[280px] shrink-0 snap-start cursor-pointer ${
+                    shouldDesktopScroll ? '' : 'xl:w-auto'
+                  }`}
                   onClick={() => handleStoreClick(place)}
                 >
-                  {/* Premium Card - Matching Recommended Spa & Salon */}
-                  <div className="relative h-full overflow-hidden rounded-2xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] via-[#1a1510] to-[#0f0f0f]">
+                  {/* Clean, Uniform Card with Dynamic Heights and Proper Alignment */}
+                  <div className="relative h-full flex flex-col rounded-2xl border border-[#037166]/20 bg-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] hover:shadow-xl hover:border-[#037166]/40 transition-all duration-300 overflow-hidden">
                     {/* Top Badge */}
-                    <div className="absolute top-0 left-1/2 z-20 flex -translate-x-1/2 items-center space-x-2 whitespace-nowrap rounded-lg rounded-t-none border border-t-0 border-[#037166]/30 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] px-5 py-1 shadow-lg backdrop-blur-md">
-                      <Award className="w-3 h-3 text-white" />
-                      <span className="text-xs font-bold !text-white uppercase tracking-wider block">{place.badge}</span>
+                    <div className="spa-badge absolute top-0 left-1/2 z-20 -translate-x-1/2 flex items-center gap-1.5 whitespace-nowrap rounded-b-lg bg-gradient-to-r from-[#037166] via-[#049486] to-[#037166] px-4 py-1 shadow-md">
+                      <Award className="w-3.5 h-3.5 !text-white shrink-0" style={{ color: '#ffffff' }} />
+                      <span className="text-[10px] font-extrabold !text-white uppercase tracking-wider" style={{ color: '#ffffff' }}>
+                        {place.badge}
+                      </span>
                     </div>
 
-                    {/* Image */}
-                    <div className="relative h-44 overflow-hidden">
+                    {/* Image with Aspect Ratio */}
+                    <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                       <ImageWithFallback
                         src={place.image}
                         alt={place.storeName}
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
                     </div>
 
-                    {/* Content */}
-                    <div className="relative z-10 -mt-10 p-4">
-                      <motion.div
-                        className="mb-4 flex h-[220px] flex-col rounded-2xl border border-[#037166]/30 bg-[#1a1a1a]/90 p-3 shadow-xl backdrop-blur-xl"
-                      >
-                        <div className="mb-2 min-h-[48px]">
-                          <h6 className="mb-1 bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-[10px] font-semibold uppercase tracking-[0.18em] text-transparent">
-                            {place.category}
-                          </h6>
-                          <h4 className="line-clamp-2 w-full bg-gradient-to-r from-[#037166] via-[#d4af37] to-[#037166] bg-clip-text text-[15px] font-bold leading-tight text-transparent" title={place.storeName}>
-                            {place.storeName}
-                          </h4>
+                    {/* Floating Content Box */}
+                    <div className="relative z-10 -mt-6 mx-3 mb-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex flex-col justify-between flex-1">
+                      {/* Category & Title */}
+                      <div className="mb-2">
+                        <span className="block text-[10px] font-black uppercase tracking-wider text-[#008C80] mb-1 truncate">
+                          {place.category}
+                        </span>
+                        <h4
+                          className="text-sm font-extrabold text-[#101828] leading-tight line-clamp-2 h-10 group-hover:text-[#008C80] transition-colors"
+                          title={place.storeName}
+                        >
+                          {place.storeName}
+                        </h4>
+                      </div>
+
+                      {/* Price & Action Box with Fixed Safe Vertical Rhythm */}
+                      <div className="flex items-center justify-between gap-2 rounded-xl border border-[#008C80]/15 bg-[#E9F8F6]/60 px-3 py-2 my-2">
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[9px] font-semibold text-gray-500 uppercase tracking-wider">
+                            Starting at
+                          </span>
+                          <span className="text-xs sm:text-sm font-black text-[#6D1357] leading-tight truncate">
+                            {place.price}
+                          </span>
                         </div>
 
-                        {/* Price & Action */}
-                        <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-[#037166]/20 bg-[#037166]/5 p-2">
-                          <div>
-                            <h6 className="mb-0.5 font-ubuntu text-[9px] text-gray-400">
-                              Starting at
-                            </h6>
-                            <div className="font-ubuntu text-[11px] font-bold text-[#6D1357]">
-                              {place.price}
-                            </div>
-                          </div>
+                        <button
+                          type="button"
+                          className="spa-view-details-btn rounded-full bg-[#008C80] group-hover:bg-[#006D65] px-3 py-1.5 text-[9px] font-bold !text-white shadow-2xs transition-colors shrink-0 whitespace-nowrap cursor-pointer"
+                          style={{ color: '#ffffff' }}
+                        >
+                          <span className="!text-white text-white font-bold" style={{ color: '#ffffff' }}>
+                            View Details
+                          </span>
+                        </button>
+                      </div>
 
-                          <div>
-                            <div className="whitespace-nowrap rounded-full bg-[#297A70] px-3 py-1.5 text-[9px] font-semibold shadow-lg">
-                              <span className="!text-white">
-                                View Details
+                      {/* 2x2 Highlights / Amenities Grid */}
+                      <div className="grid grid-cols-2 gap-1.5 mt-auto pt-1">
+                        {place.highlights.map((highlight, idx) => {
+                          const Icon = amenityIcons[highlight] || Sparkles;
+                          return (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50/80 px-2 py-1.5 min-w-0"
+                              title={highlight}
+                            >
+                              <Icon className="h-3 w-3 shrink-0 text-[#d4af37]" />
+                              <span className="text-[10px] font-medium text-gray-700 truncate leading-none">
+                                {highlight}
                               </span>
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Highlights / Amenities */}
-                        <div className="mt-auto grid grid-cols-2 gap-2">
-                          {place.highlights.map((highlight, idx) => {
-                            const Icon = amenityIcons[highlight] || Sparkles;
-                            return (
-                              <div key={idx} className="flex min-h-[36px] items-center space-x-1.5 rounded-lg border border-[#037166]/10 bg-[#1a1a1a]/50 px-2 py-1.5">
-                                <Icon className="h-3 w-3 shrink-0 text-[#d4af37]" />
-                                <span className="text-[9px] text-gray-300 leading-tight break-words">{highlight}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </motion.div>

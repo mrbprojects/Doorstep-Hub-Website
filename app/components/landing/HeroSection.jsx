@@ -22,10 +22,20 @@ const imageLoader = ({ src }) => {
 /* ---------- SERVICE THEMES & METADATA ---------- */
 const SERVICE_CONFIG = {
   APPLIANCE: {
-    title: 'Appliance Services',
+    title: 'Appliance Service',
     subtitle: 'Quick & Reliable Appliance Repair',
     bg: 'bg-[#E7F3F2]',
     gradient: 'from-[#E7F3F2] via-[#E7F3F2]/95 to-transparent',
+    titleColor: 'text-[#0F1B3D]',
+    subColor: 'text-[#00796B]',
+    btnBg: 'bg-[#008C80] hover:bg-[#006D65]',
+    borderColor: 'border-[#008C80]/15 hover:border-[#008C80]/40',
+  },
+  PG: {
+    title: 'PG & Hostels',
+    subtitle: 'Discover the Best PGs & Hostels',
+    bg: 'bg-[#EBF6F9]',
+    gradient: 'from-[#EBF6F9] via-[#EBF6F9]/95 to-transparent',
     titleColor: 'text-[#0F1B3D]',
     subColor: 'text-[#00796B]',
     btnBg: 'bg-[#008C80] hover:bg-[#006D65]',
@@ -54,12 +64,12 @@ const SERVICE_CONFIG = {
   SALON_PET: {
     title: 'Unisex & Pet Saloons',
     subtitle: 'Unisex Saloons & Pet Care Centers',
-    bg: 'bg-[#FFF0F5]',
-    gradient: 'from-[#FFF0F5] via-[#FFF0F5]/95 to-transparent',
+    bg: 'bg-[#F2FBF7]',
+    gradient: 'from-[#F2FBF7] via-[#F2FBF7]/95 to-transparent',
     titleColor: 'text-[#0F1B3D]',
-    subColor: 'text-[#880E4F]',
-    btnBg: 'bg-[#C2185B] hover:bg-[#AD1457]',
-    borderColor: 'border-[#C2185B]/15 hover:border-[#C2185B]/40',
+    subColor: 'text-[#007A55]',
+    btnBg: 'bg-[#009E69] hover:bg-[#008457]',
+    borderColor: 'border-[#009E69]/15 hover:border-[#009E69]/40',
   },
   DEFAULT: {
     title: 'Home Services',
@@ -76,15 +86,21 @@ const SERVICE_CONFIG = {
 function getServiceTheme(service) {
   const name = (service?.name || '').toUpperCase();
   if (name.includes('APPLIANCE')) return SERVICE_CONFIG.APPLIANCE;
+  if (name.includes('PG') || name.includes('HOSTEL')) return SERVICE_CONFIG.PG;
   if (name.includes('SELL') || name.includes('BUY')) return SERVICE_CONFIG.SELL_BUY;
-  if (name.includes('RELIGIOUS')) return SERVICE_CONFIG.RELIGIOUS;
+  if (name.includes('RELIGIOUS') || name.includes('POOJA')) return SERVICE_CONFIG.RELIGIOUS;
   if (name.includes('SPA') || name.includes('SALON') || name.includes('SALOON') || name.includes('UNISEX') || name.includes('PET')) {
     return SERVICE_CONFIG.SALON_PET;
   }
   return SERVICE_CONFIG.DEFAULT;
 }
 
-/* ---------- 4 CATEGORY CARDS SECTION ---------- */
+const cleanDescription = (desc) => {
+  if (!desc) return '';
+  return String(desc).replace(/\r\n|\r|\n/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+/* ---------- ACTIVE BUSINESS VERTICAL CARDS (ALL 5 SERVICES) ---------- */
 function ServiceCategoryCards({ services = [], serviceSlugs }) {
   const router = useRouter();
 
@@ -121,7 +137,7 @@ function ServiceCategoryCards({ services = [], serviceSlugs }) {
     else if (upperName.includes('RELIGIOUS')) targetRoute = serviceSlugs.religious;
     else if (upperName.includes('SPA') || upperName.includes('SALON') || upperName.includes('SALOON') || upperName.includes('UNISEX') || upperName.includes('PET')) {
       targetRoute = serviceSlugs.spa;
-    } else if (upperName.includes('PG')) {
+    } else if (upperName.includes('PG') || upperName.includes('HOSTEL')) {
       targetRoute = serviceSlugs.pg;
     }
 
@@ -132,11 +148,18 @@ function ServiceCategoryCards({ services = [], serviceSlugs }) {
 
   return (
     <div className="w-full max-w-[1360px] mx-auto mt-3 sm:mt-4 lg:mt-4 px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 xl:gap-4">
-        {services.slice(0, 4).map((service, index) => {
+      {/* 
+        Responsive layout for all active business verticals:
+        - Mobile (< 640px): Smooth swipeable horizontal row with snap points so user can swipe through all 5 cards in 1 clean line without vertical sprawl
+        - Tablet (640px - 1023px): 2 or 3 columns responsive grid
+        - Desktop (>= 1024px): All 5 active business verticals displayed together in ONE single line row (lg:grid-cols-5)
+      */}
+      <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 xl:gap-3.5">
+        {services.map((service, index) => {
           const theme = getServiceTheme(service);
-          const displayTitle = theme.title || service.name;
-          const displaySubtitle = service.shortDescription || theme.subtitle;
+          // Prioritize dynamic backend title & description
+          const displayTitle = service.name || theme.title;
+          const displaySubtitle = cleanDescription(service.shortDescription) || theme.subtitle;
 
           return (
             <div
@@ -150,7 +173,7 @@ function ServiceCategoryCards({ services = [], serviceSlugs }) {
                   handleCardClick(service);
                 }
               }}
-              className={`group relative overflow-hidden rounded-[20px] cursor-pointer ${theme.bg} ${theme.borderColor} border shadow-[0_3px_14px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 h-[148px] sm:h-[158px] lg:h-[168px] xl:h-[174px] select-none flex flex-col justify-between p-3.5 sm:p-4`}
+              className={`group relative overflow-hidden rounded-[20px] cursor-pointer ${theme.bg} ${theme.borderColor} border shadow-[0_3px_14px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 h-[146px] sm:h-[154px] lg:h-[158px] xl:h-[164px] select-none flex flex-col justify-between p-3.5 sm:p-3.5 xl:p-4 w-[78vw] max-w-[280px] shrink-0 snap-start sm:w-auto`}
             >
               {/* Full Card Background Image from Backend (object-right coverage) */}
               {service.image && (
@@ -160,8 +183,8 @@ function ServiceCategoryCards({ services = [], serviceSlugs }) {
                     src={service.image}
                     alt={displayTitle}
                     fill
-                    priority={index < 4}
-                    sizes="(max-width: 640px) 95vw, (max-width: 1024px) 48vw, 25vw"
+                    priority={index < 5}
+                    sizes="(max-width: 640px) 80vw, (max-width: 1024px) 33vw, 20vw"
                     className="object-cover object-right transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -169,16 +192,16 @@ function ServiceCategoryCards({ services = [], serviceSlugs }) {
 
               {/* Left Gradient Scrim for Guaranteed High Contrast & Readability */}
               <div
-                className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} w-[50%] sm:w-[48%] z-[1] pointer-events-none`}
+                className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} w-[56%] sm:w-[52%] lg:w-[54%] xl:w-[50%] z-[1] pointer-events-none`}
                 aria-hidden="true"
               />
 
               {/* Left Text Block - Constrained to prevent any overlap with right illustrations */}
-              <div className="relative z-10 max-w-[48%] sm:max-w-[46%] text-left">
-                <h3 className={`text-[14.5px] sm:text-[15.5px] lg:text-[16.5px] xl:text-[17px] font-black leading-tight tracking-tight ${theme.titleColor}`}>
+              <div className="relative z-10 max-w-[54%] sm:max-w-[50%] lg:max-w-[54%] xl:max-w-[48%] text-left">
+                <h3 className={`text-[13.5px] sm:text-[14px] lg:text-[13.5px] xl:text-[15.5px] font-black leading-tight tracking-tight ${theme.titleColor}`}>
                   {displayTitle}
                 </h3>
-                <p className={`text-[10.5px] sm:text-[11px] lg:text-[11.5px] font-medium mt-0.5 sm:mt-1 leading-snug line-clamp-2 ${theme.subColor}`}>
+                <p className={`text-[10px] sm:text-[10.5px] lg:text-[10px] xl:text-[11px] font-medium mt-1 leading-snug line-clamp-2 ${theme.subColor}`}>
                   {displaySubtitle}
                 </p>
               </div>
@@ -186,7 +209,7 @@ function ServiceCategoryCards({ services = [], serviceSlugs }) {
               {/* Bottom CTA Arrow Button */}
               <div className="relative z-10 flex items-center justify-start mt-auto">
                 <div
-                  className={`hero-card-arrow-btn w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white ${theme.btnBg} shadow-sm group-hover:scale-110 transition-transform duration-200`}
+                  className={`hero-card-arrow-btn w-6 h-6 sm:w-6.5 sm:h-6.5 xl:w-7 xl:h-7 rounded-full flex items-center justify-center text-white ${theme.btnBg} shadow-sm group-hover:scale-110 transition-transform duration-200`}
                   style={{ color: '#ffffff' }}
                 >
                   <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.5]" stroke="#ffffff" color="#ffffff" style={{ stroke: '#ffffff', color: '#ffffff' }} />
@@ -206,6 +229,13 @@ const DEFAULT_INITIAL_SERVICES = [
     name: 'Appliance Service',
     image: 'uploads/service/Appliance_Repair_Services.webp',
     shortDescription: 'Quick & Reliable Appliance Repair',
+    priority: '1',
+  },
+  {
+    _id: '69524fb157bb211ca094e5ee',
+    name: 'PG & Hostels',
+    image: 'uploads/service/1780375226268-Pg_and_Hostels.webp',
+    shortDescription: 'Your Comfort, Our Priority.. Discover the Best PGs & Hostels',
     priority: '1',
   },
   {
@@ -290,10 +320,10 @@ export function HeroSection() {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           const adminPriorityMap = {
             '683daaa8f261c1548bdf7442': 1, // Appliance Service
-            '6a7db000a9d92694336007a0': 2, // Sell & Buy
-            '695250aa57bb211ca094e5fd': 3, // Religious Services
-            '69524f4a57bb211ca094e5e6': 4, // Unisex & Pet Saloons
-            '69524fb157bb211ca094e5ee': 5, // PG & Hostels
+            '69524fb157bb211ca094e5ee': 2, // PG & Hostels
+            '6a7db000a9d92694336007a0': 3, // Sell & Buy
+            '695250aa57bb211ca094e5fd': 4, // Religious Services
+            '69524f4a57bb211ca094e5e6': 5, // Unisex & Pet Saloons
           };
 
           const sorted = [...data.data].sort((a, b) => {
@@ -306,10 +336,10 @@ export function HeroSection() {
               if (adminPriorityMap[id] !== undefined) return adminPriorityMap[id];
               const name = (item.name || '').toUpperCase();
               if (name.includes('APPLIANCE')) return 1;
-              if (name.includes('SELL') || name.includes('BUY')) return 2;
-              if (name.includes('RELIGIOUS')) return 3;
-              if (name.includes('SPA') || name.includes('SALOON') || name.includes('SALON') || name.includes('UNISEX') || name.includes('PET')) return 4;
-              if (name.includes('PG') || name.includes('HOSTEL')) return 5;
+              if (name.includes('PG') || name.includes('HOSTEL')) return 2;
+              if (name.includes('SELL') || name.includes('BUY')) return 3;
+              if (name.includes('RELIGIOUS') || name.includes('POOJA')) return 4;
+              if (name.includes('SPA') || name.includes('SALOON') || name.includes('SALON') || name.includes('UNISEX') || name.includes('PET')) return 5;
               return 999;
             };
 

@@ -8,6 +8,7 @@ import { QuestionnaireModal } from './QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
 import Image from 'next/image';
 import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
+import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 
 const MOCK_CATEGORIES = [
     {
@@ -892,6 +893,9 @@ export function HomePage() {
                     </div>
                 </div>
             </section>
+
+            {/* Help Center Section - Spa, Salon & Pet Care Articles */}
+            <KnowledgeSection vertical="spa-salon" showNewsletter={false} />
 
             {/* Questionnaire Modal */}
             <QuestionnaireModal

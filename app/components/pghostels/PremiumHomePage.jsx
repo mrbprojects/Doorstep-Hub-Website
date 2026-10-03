@@ -12,6 +12,7 @@ import { QuestionnaireModal } from '@/components/pghostels/QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
 import { NearbyHostelsSection } from './NearbyHostelsSection';
 import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
+import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
 const SERVICE_ID = '69524fb157bb211ca094e5ee'; // PG Hostels Service ID
@@ -516,6 +517,9 @@ export function PremiumHomePage() {
 
             {/* Featured Hostels */}
             <FeaturedHostelsSection listings={featuredHostels} loading={loading} router={router} />
+
+            {/* Help Center Section - PG & Hostel Articles */}
+            <KnowledgeSection vertical="pg-hostel" showNewsletter={false} />
 
             {/* Questionnaire Modal */}
             <QuestionnaireModal

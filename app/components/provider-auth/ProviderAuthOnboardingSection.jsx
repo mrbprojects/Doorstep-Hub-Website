@@ -69,6 +69,30 @@ export function ProviderAuthOnboardingSection() {
     setToken(parsed.token || '');
     setUserId(parsed.userId || '');
     setProfile(parsed.profile || null);
+    if (parsed.token && parsed.profile && (parsed.profile._id || parsed.profile.id || parsed.profile.name || parsed.profile.phone)) {
+      setStep('success');
+      setIsNewUser(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const parsed = getStoredProviderSession();
+      if (parsed?.token && parsed?.profile && (parsed.profile._id || parsed.profile.id || parsed.profile.name || parsed.profile.phone)) {
+        setPhone(parsed.phone || '');
+        setToken(parsed.token || '');
+        setUserId(parsed.userId || '');
+        setProfile(parsed.profile);
+        setStep('success');
+        setIsNewUser(false);
+      }
+    };
+    window.addEventListener('partner:login-success', handleAuthChange);
+    window.addEventListener('provider-auth:change', handleAuthChange);
+    return () => {
+      window.removeEventListener('partner:login-success', handleAuthChange);
+      window.removeEventListener('provider-auth:change', handleAuthChange);
+    };
   }, []);
 
   useEffect(() => {

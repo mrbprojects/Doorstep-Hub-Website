@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import dynamic from 'next/dynamic';
-import { getStoredProviderSession } from '@/lib/providerAuthApi';
+import { getStoredProviderSession, getProviderProfile, saveStoredProviderSession } from '@/lib/providerAuthApi';
 
 const ProviderAuthOnboardingSection = dynamic(() => import('@/components/provider-auth/ProviderAuthOnboardingSection').then(m => m.ProviderAuthOnboardingSection), { ssr: false });
 const PartnerLoginModal = dynamic(() => import('@/components/partner/PartnerLoginModal').then(m => m.PartnerLoginModal), { ssr: false });
@@ -106,15 +106,44 @@ export default function ServicePartnerPage() {
     });
 
     useEffect(() => {
-        const checkPartnerSession = () => {
+        let isMounted = true;
+        const checkPartnerSession = async () => {
             const session = getStoredProviderSession();
-            setIsPartnerLoggedIn(Boolean(session?.token));
+            if (!session?.token) {
+                if (isMounted) setIsPartnerLoggedIn(false);
+                return;
+            }
+
+            // Check if user has a verified, registered partner profile
+            const profile = session?.profile;
+            if (profile && (profile._id || profile.id || profile.phone || profile.mobile || profile.name || profile.email || profile.businessName)) {
+                if (isMounted) setIsPartnerLoggedIn(true);
+                return;
+            }
+
+            // If token exists but profile was not cached, try fetching partner profile
+            if (session?.userId) {
+                try {
+                    const fetchedProfile = await getProviderProfile(session.token, session.userId);
+                    if (fetchedProfile && (fetchedProfile._id || fetchedProfile.id || fetchedProfile.phone || fetchedProfile.mobile || fetchedProfile.name || fetchedProfile.email)) {
+                        saveStoredProviderSession({ ...session, profile: fetchedProfile });
+                        if (isMounted) setIsPartnerLoggedIn(true);
+                        return;
+                    }
+                } catch {
+                    // Not a registered partner profile
+                }
+            }
+
+            if (isMounted) setIsPartnerLoggedIn(false);
         };
+
         checkPartnerSession();
         window.addEventListener('storage', checkPartnerSession);
         window.addEventListener('partner:login-success', checkPartnerSession);
         window.addEventListener('provider-auth:change', checkPartnerSession);
         return () => {
+            isMounted = false;
             window.removeEventListener('storage', checkPartnerSession);
             window.removeEventListener('partner:login-success', checkPartnerSession);
             window.removeEventListener('provider-auth:change', checkPartnerSession);
@@ -221,7 +250,7 @@ export default function ServicePartnerPage() {
 
                 <ProviderAuthOnboardingSection />
 
-                {isPartnerLoggedIn && <SubscriptionPlansSection />}
+                {isPartnerLoggedIn && <SubscriptionPlansSection isPartnerLoggedIn={isPartnerLoggedIn} />}
 
                 {/* Partner App Download / Grow Your Business Section */}
                 <PartnerAppDownload
@@ -522,21 +551,49 @@ function PlanSkeleton() {
   );
 }
 
-function SubscriptionPlansSection() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+function SubscriptionPlansSection({ isPartnerLoggedIn = false }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(isPartnerLoggedIn);
   const [apiPlans, setApiPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(true);
 
   useEffect(() => {
-    const checkPartnerSession = () => {
+    setIsLoggedIn(isPartnerLoggedIn);
+  }, [isPartnerLoggedIn]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkPartnerSession = async () => {
       const session = getStoredProviderSession();
-      setIsLoggedIn(Boolean(session?.token));
+      if (!session?.token) {
+        if (isMounted) setIsLoggedIn(false);
+        return;
+      }
+      const profile = session?.profile;
+      if (profile && (profile._id || profile.id || profile.phone || profile.mobile || profile.name || profile.email || profile.businessName)) {
+        if (isMounted) setIsLoggedIn(true);
+        return;
+      }
+      if (session?.userId) {
+        try {
+          const fetchedProfile = await getProviderProfile(session.token, session.userId);
+          if (fetchedProfile && (fetchedProfile._id || fetchedProfile.id || fetchedProfile.phone || fetchedProfile.mobile || fetchedProfile.name || fetchedProfile.email)) {
+            saveStoredProviderSession({ ...session, profile: fetchedProfile });
+            if (isMounted) setIsLoggedIn(true);
+            return;
+          }
+        } catch {
+          // not registered
+        }
+      }
+      if (isMounted) setIsLoggedIn(false);
     };
+
     checkPartnerSession();
     window.addEventListener('storage', checkPartnerSession);
     window.addEventListener('partner:login-success', checkPartnerSession);
     window.addEventListener('provider-auth:change', checkPartnerSession);
     return () => {
+      isMounted = false;
       window.removeEventListener('storage', checkPartnerSession);
       window.removeEventListener('partner:login-success', checkPartnerSession);
       window.removeEventListener('provider-auth:change', checkPartnerSession);
@@ -545,21 +602,25 @@ function SubscriptionPlansSection() {
 
   useEffect(() => {
     if (!isLoggedIn) return;
+    let isMounted = true;
     const fetchPlans = async () => {
       try {
         const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
         const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/get_subscription_plans`);
         const data = await res.json();
-        if (data.success && data.data && data.data.length > 0) {
+        if (isMounted && data.success && Array.isArray(data.data) && data.data.length > 0) {
           setApiPlans(data.data);
         }
       } catch (err) {
         console.error('Failed to fetch subscription plans:', err);
       } finally {
-        setPlansLoading(false);
+        if (isMounted) setPlansLoading(false);
       }
     };
     fetchPlans();
+    return () => {
+      isMounted = false;
+    };
   }, [isLoggedIn]);
 
   if (!isLoggedIn) return null;

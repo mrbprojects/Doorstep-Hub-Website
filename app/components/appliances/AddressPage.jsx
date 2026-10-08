@@ -975,16 +975,35 @@ export function AddressPage({
             <div className="lg:col-span-5 space-y-3.5">
               {/* Comparison Card */}
               <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
-                <div className="bg-[#f0fbf9] text-white px-4 py-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">SIDE BY SIDE</p>
-                    <h3 className="text-xs sm:text-sm font-bold text-white">
-                      Traditional Repair <span className="text-white/80 font-normal">vs</span> <span className="text-[#04a99d]">Doorstep Hub</span>
-                    </h3>
+                <div className="bg-gradient-to-r from-[#eef9f7] via-[#f2fbf9] to-[#e6f7f4] border-b border-[#bde5df] px-3 sm:px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md bg-[#037166] text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                        SIDE BY SIDE
+                      </span>
+                      <h3 className="text-xs sm:text-sm font-bold text-gray-900">
+                        Traditional Repair <span className="text-gray-400 font-normal">vs</span> <span className="text-[#037166]">Doorstep Hub</span>
+                      </h3>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-100/90 text-[#037166] text-[10px] font-extrabold border border-emerald-200/80 shadow-2xs flex-shrink-0 flex items-center gap-1">
+                      <span>★</span> Smart Choice
+                    </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-blue-700 text-[10px] font-bold border border-emerald-500/30">
-                    Smart Choice
-                  </span>
+
+                  {/* Column Headers Perfectly Aligned With Table Columns Below */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-[#037166]/15">
+                    <div className="w-20 sm:w-24 flex-shrink-0 text-gray-500 uppercase tracking-wider text-[10px] font-bold">
+                      Experience
+                    </div>
+                    <div className="flex-1 text-gray-700 text-[11px] sm:text-xs font-bold flex items-center gap-1.5">
+                      <span className="w-3.5 h-3.5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-[9px] font-bold flex-shrink-0">✕</span>
+                      <span>Traditional Repair</span>
+                    </div>
+                    <div className="flex-1 text-[#037166] text-[11px] sm:text-xs font-extrabold flex items-center gap-1.5">
+                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-100 text-[#037166] flex items-center justify-center text-[9px] font-bold flex-shrink-0">✓</span>
+                      <span>Doorstep Hub</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="divide-y divide-gray-100 text-xs">
@@ -1015,7 +1034,7 @@ export function AddressPage({
                       dhub: '30-day Doorstep Hub service warranty'
                     }
                   ].map((row, idx) => (
-                    <div key={row.feature} className={`p-2.5 flex items-start gap-2 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                    <div key={row.feature} className={`px-3 sm:px-4 py-2.5 flex items-start gap-2 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
                       <div className="w-20 sm:w-24 flex-shrink-0 font-semibold text-gray-800 text-[11px]">{row.feature}</div>
                       <div className="flex-1 text-gray-500 text-[11px] leading-tight">
                         <span className="text-red-500 font-bold mr-1">✕</span>

@@ -326,6 +326,29 @@ export async function initiateSubscriptionGateway(token, planId) {
   });
 }
 
+export async function getProviderWalletDetails(token) {
+  return request("/auth/providerHomeScreenProfile", {
+    method: "GET",
+    headers: headers(token, false),
+  });
+}
+
+export async function getProviderWalletHistory(token) {
+  return request("/wallet/getall-wallet-history", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({}),
+  });
+}
+
+export async function requestProviderWithdrawal(token, amount, bankId) {
+  return request("/wallet/addwithdraw", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({ amount, bankId }),
+  });
+}
+
 export function isProviderTicketOpen(status) {
   const value = String(status || "").toLowerCase();
   return !["closed", "solved", "resolved"].includes(value);
@@ -541,4 +564,24 @@ export async function getProviderBookings(token) {
     body: JSON.stringify({}),
   });
 }
+
+export async function getProviderBookingDetails(token, bookingId) {
+  const payload = await request("/services-booking/getmyproviderbookingbyid", {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({ id: bookingId }),
+  });
+  return payload?.booking || payload?.data?.booking || payload?.data || payload;
+}
+
+export function resolveInvoiceUrl(path = "") {
+  if (!path) return "";
+  const trimmed = String(path).trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://devapis.doorstephub.com")
+    .replace(/\/+$/, "")
+    .replace(/\/v1\/dhubApi$/, "");
+  return `${base}/${trimmed.replace(/^\/+/, "")}`;
+}
+
 

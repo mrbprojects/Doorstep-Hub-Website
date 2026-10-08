@@ -165,6 +165,25 @@ export async function fetchWalletTransactions(token) {
     return parseResponse(response);
 }
 
+export async function initiateWalletTopup(token, amount, returnUrl) {
+    const response = await fetch(`${API_BASE}/app/wallet/topup/initiate`, {
+        method: 'POST',
+        headers: bearerHeaders(token, 'application/json'),
+        body: JSON.stringify({
+            amount: Number(amount),
+            returnUrl: returnUrl || (typeof window !== 'undefined' ? `${window.location.origin}/account/wallet` : ''),
+        }),
+    });
+    return parseResponse(response);
+}
+
+export async function fetchWalletTopupStatus(token, txnid) {
+    const response = await fetch(`${API_BASE}/app/wallet/topup/status/${txnid}`, {
+        headers: bearerHeaders(token, null),
+    });
+    return parseResponse(response);
+}
+
 export async function fetchReferralDetails(token) {
     const response = await fetch(`${API_BASE}/app/referrals/me`, {
         headers: bearerHeaders(token, null),

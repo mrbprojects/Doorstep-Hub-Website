@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
     ArrowLeft, Calendar, Clock, Loader2, MapPin, Package, Phone, User,
-    CheckCircle, CreditCard, IndianRupee, Tag, Layers, Building2, Receipt,
+    CheckCircle, CreditCard, Tag, Layers, Building2, Receipt,
     ChevronDown, ChevronUp, AlertCircle, Home, Hash, Headphones, XCircle,
-    AlertTriangle, Wallet, ShieldAlert, X
+    AlertTriangle, Wallet, ShieldAlert, X, Wrench, MessageCircle, RefreshCw,
+    ShieldCheck, Download, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -32,6 +33,47 @@ const CANCELLATION_REASONS = [
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+function resolveStartOtp(order, bookingId) {
+    if (!order) return '';
+    const serverOTP = (
+        order.startOtp ||
+        order.start_otp ||
+        order.serviceOtp ||
+        order.otp ||
+        order.verificationCode ||
+        order.otpCode ||
+        order.premiumLeadFlow?.startOtp ||
+        order.premiumLeadFlow?.otp ||
+        order.premiumLeadFlow?.verificationCode ||
+        order.premiumLeadFlow?.otpCode ||
+        ''
+    );
+    if (serverOTP && String(serverOTP).trim().length >= 4) {
+        return String(serverOTP).trim();
+    }
+    const id = String(order._id || bookingId || order.orderId || '');
+    if (!id) return '';
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = ((hash << 5) - hash) + id.charCodeAt(i);
+        hash |= 0;
+    }
+    return (Math.abs(hash) % 9000 + 1000).toString();
+}
+
+function fmtDateTime(d) {
+    if (!d) return null;
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return String(d);
+    const day = date.getDate();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day} ${month} ${year}, ${hours}:${minutes}`;
+}
 
 function resolveServices(order = {}) {
     // Prefer selectedServiceRates (most detailed)
@@ -84,7 +126,10 @@ function resolveAddress(order = {}) {
 function fmtAmount(val) {
     const n = Number(val);
     if (isNaN(n)) return '—';
-    return '₹' + n.toFixed(0);
+    return '₹' + n.toLocaleString('en-IN', {
+        minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+        maximumFractionDigits: 2,
+    });
 }
 
 function fmtDate(dateStr) {
@@ -136,9 +181,58 @@ const PAYMENT_METHOD_LABELS = {
 
 // ─── Order Tracking Timeline ────────────────────────────────────────────────
 
-function OrderTrackingTimeline({ status = 'pending', history = [], isPlatformFeePending = false }) {
+function OrderTrackingTimeline({
+    status = 'pending',
+    history = [],
+    isPlatformFeePending = false,
+    order = null,
+    bookingId = '',
+    providerName = '',
+    providerPhone = '',
+    orderId = '',
+}) {
     const [expanded, setExpanded] = useState(false);
-    const isCancelled = ['cancelledByUser', 'cancelledByProvider', 'rejectedByProvider', 'missed'].includes(status);
+    const [showFullTracking, setShowFullTracking] = useState(true);
+
+    const normalizedStatus = String(status || order?.status || '').toLowerCase().replace(/[\s_-]/g, '');
+    const isCancelled = ['cancelledbyuser', 'cancelledbyprovider', 'rejectedbyprovider', 'missed', 'cancelled'].includes(normalizedStatus);
+    const isCompleted = ['workiscompleted', 'completed', 'closed', 'servicecompleted', 'workcompleted'].includes(normalizedStatus);
+
+    const hasProviderAccepted = Boolean(
+        order?.providerAcceptedAt ||
+        order?.premiumLeadFlow?.providerAcceptedAt ||
+        order?.premiumLeadFlow?.acceptedAt ||
+        order?.providerId ||
+        order?.serviceProviderId ||
+        providerName ||
+        providerPhone ||
+        [
+            'acceptedbyprovider',
+            'provideraccepted',
+            'appointmentconfirmedbyprovider',
+            'ontheway',
+            'reachedlocation',
+            'workinprogress',
+            'sendquotation',
+            'quotationaccepted',
+            'paymentrequested',
+            'paymentreceived',
+        ].includes(normalizedStatus)
+    );
+
+    const isProviderAssigned = Boolean(providerName || providerPhone || order?.providerId);
+
+    // Calculate OTP using backend-compatible algorithm
+    const otp = resolveStartOtp(order, bookingId);
+    const otpDigits = (otp && String(otp).trim().length >= 4)
+        ? String(otp).trim().slice(-4).split('')
+        : ['—', '—', '—', '—'];
+
+    // Show OTP when provider accepted and booking is not cancelled, completed, or pending platform fee
+    const showOTP = !isCancelled && !isCompleted && !['pending', 'payment_pending'].includes(normalizedStatus) && (
+        hasProviderAccepted ||
+        Boolean(order?.startOtp || order?.serviceOtp || order?.otp)
+    );
 
     // Calculate active step index (0 to 4)
     let currentStep = 0;
@@ -146,20 +240,20 @@ function OrderTrackingTimeline({ status = 'pending', history = [], isPlatformFee
         currentStep = 0;
     } else if (status === 'pending') {
         currentStep = 1;
-    } else if (['orderAcceptedByAdmin', 'orderAccpetedByAdmin', 'orderAcceptedBySystem', 'assignToProvider', 'acceptedByProvider', 'appointmentConfirmedByProvider'].includes(status)) {
+    } else if (['orderAcceptedByAdmin', 'orderAccpetedByAdmin', 'orderAcceptedBySystem', 'assignToProvider', 'acceptedByProvider', 'provideraccepted', 'appointmentConfirmedByProvider'].includes(status) || ['acceptedbyprovider', 'provideraccepted', 'assigntoprovider'].includes(normalizedStatus)) {
         currentStep = 2;
-    } else if (['onTheWay', 'reachedLocation', 'workInProgress', 'sendQuotation', 'quotationAccepted', 'paymentRequested', 'paymentReceived'].includes(status)) {
+    } else if (['onTheWay', 'reachedLocation', 'workInProgress', 'sendQuotation', 'quotationAccepted', 'paymentRequested', 'paymentReceived'].includes(status) || ['ontheway', 'reachedlocation', 'workinprogress', 'sendquotation', 'quotationaccepted', 'paymentrequested', 'paymentreceived'].includes(normalizedStatus)) {
         currentStep = 3;
-    } else if (['workIsCompleted', 'completed', 'Closed', 'closed', 'serviceCompleted', 'workCompleted'].includes(status)) {
+    } else if (isCompleted) {
         currentStep = 4;
     }
 
     const steps = [
         { title: 'Order Placed', desc: (status === 'payment_pending' || isPlatformFeePending) ? 'Fee pending' : 'Request logged' },
-        { title: 'Booking Confirmed', desc: 'Platform fee verified' },
-        { title: 'Partner Assigned', desc: 'Service partner confirmed' },
-        { title: 'In Progress', desc: 'Doorstep service ongoing' },
-        { title: 'Completed', desc: 'Finished & verified' },
+        { title: 'Booking Confirmed', desc: 'Fee verified' },
+        { title: 'Partner Assigned', desc: 'Partner confirmed' },
+        { title: 'In Progress', desc: 'Doorstep service' },
+        { title: 'Completed', desc: 'Finished' },
     ];
 
     const safeHistory = history && history.length > 0 ? history : [
@@ -168,103 +262,217 @@ function OrderTrackingTimeline({ status = 'pending', history = [], isPlatformFee
             statusTextMessage: (status === 'payment_pending' || isPlatformFeePending)
                 ? 'Booking Created - Platform Fee (₹99) Pending'
                 : 'Booking Placed & Confirmed',
-            logCreatedDate: new Date().toISOString()
+            logCreatedDate: order?.createdAt || new Date().toISOString()
         }
     ];
 
     const shownHistory = expanded ? safeHistory : safeHistory.slice(-3);
+    const latestTime = safeHistory[safeHistory.length - 1]?.logCreatedDate || order?.updatedAt || order?.createdAt;
+    const cleanPhone = String(providerPhone || '').replace(/\D/g, '').slice(-10);
 
     return (
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
-            <div className="flex items-center justify-between">
-                <h2 className="font-bold text-gray-900 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-[#037166]" />
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-xs">
+            {/* ── Section Title: Order Tracking ── */}
+            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                <h2 className="font-extrabold text-sm sm:text-base text-gray-900 flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-[#007367]" />
                     Order Tracking
                 </h2>
-                <span className={`text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full ${getStatusStyle(status)}`}>
+                <span className={`text-[10px] sm:text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full ${getStatusStyle(status)}`}>
                     {getStatusLabel(status)}
                 </span>
             </div>
 
-            {/* Stepper Progress */}
-            {isCancelled ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3">
-                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
-                    <div>
-                        <p className="text-sm font-bold text-red-800">Booking Cancelled</p>
-                        <p className="text-xs text-red-600">This service booking has been cancelled ({getStatusLabel(status)}).</p>
-                    </div>
+            {/* Current Status Row */}
+            <div className="flex items-start justify-between gap-3 pt-0.5">
+                <div>
+                    <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-gray-400">Current Status</p>
+                    <h3 className="text-base sm:text-lg font-black text-gray-900 mt-0.5">
+                        {getStatusLabel(status)}
+                    </h3>
+                    {latestTime && (
+                        <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
+                            {fmtDateTime(latestTime)}
+                        </p>
+                    )}
                 </div>
-            ) : (
-                <div className="py-2">
-                    <div className="grid grid-cols-5 relative">
-                        {/* Connecting track line */}
-                        <div className="absolute top-4 left-[10%] right-[10%] h-1 bg-gray-200 -z-0">
-                            <div
-                                className="h-full bg-[#037166] transition-all duration-500"
-                                style={{ width: `${(Math.min(currentStep, 4) / 4) * 100}%` }}
-                            />
-                        </div>
+                <button
+                    type="button"
+                    onClick={() => setShowFullTracking(v => !v)}
+                    className="text-[10px] sm:text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-teal-50 text-[#007367] border border-teal-200 hover:bg-teal-100 transition-colors"
+                >
+                    {showFullTracking ? 'HIDE' : 'LIVE'}
+                </button>
+            </div>
 
-                        {steps.map((step, idx) => {
-                            const isDone = currentStep > idx;
-                            const isCurrent = currentStep === idx;
-                            return (
-                                <div key={idx} className="flex flex-col items-center text-center relative z-10">
-                                    <div
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
-                                            isDone
-                                                ? 'bg-[#037166] text-white'
-                                                : isCurrent
-                                                ? 'bg-white border-2 border-[#037166] text-[#037166] shadow-md ring-4 ring-[#037166]/20'
-                                                : 'bg-gray-100 border-2 border-gray-200 text-gray-400'
-                                        }`}
-                                    >
-                                        {isDone ? <CheckCircle className="w-4 h-4" /> : idx + 1}
-                                    </div>
-                                    <p className={`text-xs font-bold mt-2 ${isCurrent ? 'text-[#037166]' : isDone ? 'text-gray-900' : 'text-gray-400'}`}>
-                                        {step.title}
-                                    </p>
-                                    <p className="text-[10px] text-gray-400 hidden sm:block mt-0.5 max-w-[90px]">
-                                        {step.desc}
-                                    </p>
-                                </div>
-                            );
-                        })}
+            {/* ── SERVICE START OTP CARD (Exact Match to Mobile App) ── */}
+            {showOTP && (
+                <div className="bg-[#007367] rounded-xl p-3 sm:p-3.5 text-white shadow-xs flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-sm">🔐</span>
+                            <span className="font-bold text-xs sm:text-sm text-white truncate">
+                                Service Start OTP
+                            </span>
+                        </div>
+                        <p className="text-[10px] sm:text-[11px] text-white/85 mt-0.5 truncate">
+                            {otp ? 'Share with partner on arrival' : 'OTP sent when partner reaches location'}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                        {otpDigits.map((digit, idx) => (
+                            <div
+                                key={idx}
+                                className="w-7 h-8 sm:w-8 sm:h-9 bg-white rounded-md flex items-center justify-center font-extrabold text-sm sm:text-base text-[#007367] shadow-xs select-all"
+                            >
+                                {digit}
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
 
-            {/* Detailed history log */}
-            {safeHistory && safeHistory.length > 0 && (
-                <div className="pt-3 border-t border-gray-100">
-                    <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-bold text-gray-700">Detailed Activity Log</span>
-                        {safeHistory.length > 3 && (
-                            <button
-                                onClick={() => setExpanded(e => !e)}
-                                className="text-xs text-[#037166] font-semibold flex items-center gap-1 hover:underline"
+            {/* ── ASSIGNED PARTNER CARD (Exact Match to Mobile App) ── */}
+            {isProviderAssigned && (providerName || providerPhone) && (
+                <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#166534]">
+                            Assigned Partner
+                        </p>
+                        <p className="text-sm sm:text-base font-bold text-[#15803D] truncate mt-0.5">
+                            {providerName || 'Service Partner'}
+                        </p>
+                        {providerPhone && (
+                            <a
+                                href={`tel:${cleanPhone || providerPhone}`}
+                                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#166534] hover:underline mt-1"
                             >
-                                {expanded ? <><ChevronUp className="w-3 h-3" />Show less</> : <><ChevronDown className="w-3 h-3" />Show all ({safeHistory.length})</>}
-                            </button>
+                                <Phone className="w-3.5 h-3.5" />
+                                <span>{providerPhone}</span>
+                            </a>
                         )}
                     </div>
-                    <ol className="relative border-l-2 border-[#037166]/20 ml-2 space-y-3">
-                        {shownHistory.map((h, idx) => (
-                            <li key={idx} className="ml-5 relative">
-                                <div className="absolute -left-[22px] w-3.5 h-3.5 rounded-full bg-[#037166] border-2 border-white shadow-sm top-0.5" />
-                                <p className="text-xs font-semibold text-gray-800">{getStatusLabel(h.status) || h.status}</p>
-                                {h.statusTextMessage && h.statusTextMessage !== `Status updated to ${h.status}` && (
-                                    <p className="text-[10px] text-gray-500 mt-0.5">{h.statusTextMessage}</p>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                        {providerPhone && (
+                            <a
+                                href={`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hello ${providerName || 'Partner'}, regarding my Doorstep Hub booking #${orderId || ''}`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white text-xs sm:text-sm font-bold shadow-xs active:scale-95 transition-all"
+                            >
+                                <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <span>WhatsApp</span>
+                            </a>
+                        )}
+                        {providerPhone && (
+                            <a
+                                href={`tel:${cleanPhone || providerPhone}`}
+                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#007367] hover:bg-[#005f54] text-white text-xs sm:text-sm font-bold shadow-xs active:scale-95 transition-all"
+                            >
+                                <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <span>Call</span>
+                            </a>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Toggle Full Tracking Button */}
+            <button
+                type="button"
+                onClick={() => setShowFullTracking(v => !v)}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#007367] hover:bg-[#005f54] active:scale-[0.99] text-white font-bold text-xs sm:text-sm text-center shadow-xs transition-all"
+            >
+                {showFullTracking ? 'Hide Full Tracking' : 'View Full Tracking'}
+            </button>
+
+            {/* Full Tracking Content: Stepper & Activity Log */}
+            {showFullTracking && (
+                <div className="space-y-4 pt-1">
+                    {/* Stepper Progress */}
+                    {isCancelled ? (
+                        <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3">
+                            <XCircle className="w-6 h-6 text-red-600 shrink-0" />
+                            <div>
+                                <p className="text-sm font-bold text-red-800">Booking Cancelled</p>
+                                <p className="text-xs text-red-600">This service booking has been cancelled ({getStatusLabel(status)}).</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="py-2">
+                            <div className="grid grid-cols-5 relative">
+                                {/* Connecting track line */}
+                                <div className="absolute top-3.5 sm:top-4 left-[10%] right-[10%] h-1 bg-gray-200 -z-0">
+                                    <div
+                                        className="h-full bg-[#007367] transition-all duration-500"
+                                        style={{ width: `${(Math.min(currentStep, 4) / 4) * 100}%` }}
+                                    />
+                                </div>
+
+                                {steps.map((step, idx) => {
+                                    const isDone = currentStep > idx;
+                                    const isCurrent = currentStep === idx;
+                                    return (
+                                        <div key={idx} className="flex flex-col items-center text-center relative z-10 px-0.5">
+                                            <div
+                                                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-[11px] sm:text-xs transition-all ${
+                                                    isDone
+                                                        ? 'bg-[#007367] text-white'
+                                                        : isCurrent
+                                                        ? 'bg-white border-2 border-[#007367] text-[#007367] shadow-xs ring-4 ring-[#007367]/20'
+                                                        : 'bg-gray-100 border-2 border-gray-200 text-gray-400'
+                                                }`}
+                                            >
+                                                {isDone ? <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : idx + 1}
+                                            </div>
+                                            <p className={`text-[10px] sm:text-xs font-bold mt-1.5 sm:mt-2 leading-tight ${isCurrent ? 'text-[#007367]' : isDone ? 'text-gray-900' : 'text-gray-400'}`}>
+                                                {step.title}
+                                            </p>
+                                            <p className="text-[9px] sm:text-[10px] text-gray-400 hidden sm:block mt-0.5 max-w-[90px]">
+                                                {step.desc}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Detailed history log */}
+                    {safeHistory && safeHistory.length > 0 && (
+                        <div className="pt-3 border-t border-gray-100">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs font-bold text-gray-700">Detailed Activity Log</span>
+                                {safeHistory.length > 3 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setExpanded(e => !e)}
+                                        className="text-xs text-[#007367] font-semibold flex items-center gap-1 hover:underline"
+                                    >
+                                        {expanded ? <><ChevronUp className="w-3 h-3" />Show less</> : <><ChevronDown className="w-3 h-3" />Show all ({safeHistory.length})</>}
+                                    </button>
                                 )}
-                                {h.logCreatedDate && (
-                                    <p className="text-[10px] text-gray-400 mt-0.5">
-                                        {new Date(h.logCreatedDate).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-                                    </p>
-                                )}
-                            </li>
-                        ))}
-                    </ol>
+                            </div>
+                            <ol className="relative border-l-2 border-[#007367]/20 ml-2 space-y-3">
+                                {shownHistory.map((h, idx) => (
+                                    <li key={idx} className="ml-5 relative">
+                                        <div className="absolute -left-[22px] w-3.5 h-3.5 rounded-full bg-[#007367] border-2 border-white shadow-xs top-0.5" />
+                                        <p className="text-xs font-semibold text-gray-800">{getStatusLabel(h.status) || h.status}</p>
+                                        {h.statusTextMessage && h.statusTextMessage !== `Status updated to ${h.status}` && (
+                                            <p className="text-[10px] text-gray-500 mt-0.5">{h.statusTextMessage}</p>
+                                        )}
+                                        {h.logCreatedDate && (
+                                            <p className="text-[10px] text-gray-400 mt-0.5">
+                                                {new Date(h.logCreatedDate).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                                            </p>
+                                        )}
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -277,7 +485,6 @@ export default function BookingDetailPage() {
     const params = useParams();
     const bookingId = params?.bookingId;
     const { token, loading: authLoading } = useAuth();
-    const router = useRouter();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -470,22 +677,47 @@ export default function BookingDetailPage() {
 
     const providerName =
         order?.providerName ||
+        order?.partnerName ||
         order?.provider?.name ||
         order?.provider?.providerName ||
         order?.serviceProviderName ||
+        order?.assignedProvider?.name ||
+        order?.assignedPartner?.name ||
         (order?.providerId?.firstName
             ? `${order.providerId.firstName || ''} ${order.providerId.lastName || ''}`.trim()
-            : order?.providerId?.businessName) ||
+            : order?.providerId?.businessName || order?.providerId?.name) ||
         null;
 
-    const providerPhone = order?.providerPhone || order?.provider?.phone || null;
+    const providerPhone =
+        order?.providerPhone ||
+        order?.providerMobile ||
+        order?.partnerPhone ||
+        order?.provider?.phone ||
+        order?.provider?.mobile ||
+        order?.assignedProvider?.phone ||
+        order?.assignedPartner?.phone ||
+        order?.providerId?.phone ||
+        order?.providerId?.mobileNumber ||
+        order?.providerId?.mobile ||
+        null;
     const providerType = order?.partnerType || order?.typeProvider || null;
 
-    // Fee breakdown
-    const estimation = order?.estimation || order?.latestEstimation || null;
-    const servicesSubtotal = estimation?.baseAmount ??
-        (services.reduce((acc, s) => acc + (s.price != null ? Number(s.price) * (s.quantity || 1) : 0), 0) || null);
-    const gstAmount = estimation?.gstAmount ?? order?.gstAmount ?? null;
+    // Fee breakdown (Multi-quotation aggregated)
+    const rawEstimations = Array.isArray(order?.estimations) && order.estimations.length > 0
+        ? order.estimations
+        : (order?.estimation ? [order.estimation] : (order?.latestEstimation ? [order.latestEstimation] : []));
+    const activeEstimations = rawEstimations.filter(e => !['rejected', 'quotationrejected'].includes(String(e?.status || '').toLowerCase()));
+    const hasEstimations = activeEstimations.length > 0;
+
+    // Services Subtotal (Sum of all accepted quotation base amounts, or initial services fallback)
+    const servicesSubtotal = hasEstimations
+        ? activeEstimations.reduce((acc, e) => acc + Number(e.baseAmount || e.totalAmount || 0), 0)
+        : (services.reduce((acc, s) => acc + (s.price != null ? Number(s.price) * (s.quantity || 1) : 0), 0) || null);
+
+    // GST Amount (Sum of all accepted quotation GSTs, or order.gstAmount fallback)
+    const gstAmount = hasEstimations
+        ? (activeEstimations.reduce((acc, e) => acc + Number(e.gstAmount || 0), 0) || Number(order?.gstAmount || 0))
+        : (order?.gstAmount ?? null);
 
     // Platform Fee vs Consultation/Inspection Fee resolution:
     // In Service Center / prepaid flows, the customer pays the full amount online.
@@ -506,28 +738,63 @@ export default function BookingDetailPage() {
     let consultationFee = null;
 
     if (!platformFee && rawConsultation > 0) {
-        // The fee (e.g. ₹99) is the Platform Fee
         platformFee = rawConsultation;
     } else if (platformFee && rawConsultation > 0) {
-        // Only consider consultation fee if not already paid in full / not service center flow
         if (!isPaidOnline && !isServiceCenter && String(paymentMethod || '').toUpperCase() === 'COD') {
             consultationFee = rawConsultation;
         }
     }
 
-    const couponDiscount = estimation?.couponDiscountAmount ?? order?.couponDiscountAmount ?? null;
-    const grandTotal = estimation?.grandTotal ?? order?.totalAmount ?? null;
+    const couponDiscount = Number(order?.couponDiscountAmount || activeEstimations[0]?.couponDiscountAmount || 0);
 
-    // Fallback: If platformFee is still null, but grandTotal = subtotal + gst + diff
-    if (!platformFee && grandTotal != null && servicesSubtotal != null) {
-        const diff = Math.round(Number(grandTotal) - Number(servicesSubtotal) - Number(gstAmount || 0) + Number(couponDiscount || 0));
-        if (diff > 0 && diff <= 500) {
-            platformFee = diff;
+    // Grand Total
+    let grandTotal = null;
+    if (hasEstimations) {
+        if (order?.totalAmount && Number(order.totalAmount) > 0) {
+            grandTotal = Number(order.totalAmount);
+        } else {
+            const rawSum = Number(servicesSubtotal || 0) + Number(gstAmount || 0);
+            grandTotal = Math.max(0, rawSum - couponDiscount);
         }
+    } else {
+        grandTotal = order?.totalAmount ?? null;
     }
-    const advancePaid = estimation?.advancePaid ?? order?.partialAmountPaid ?? null;
-    const totalPaid = estimation?.totalPaid ?? null;
-    const pendingAmount = estimation?.pendingAmount ?? null;
+
+    // Payment amounts:
+    const rawPartialPaid = Number(order?.partialAmountPaid || 0);
+    const rawFullPaid = Number(order?.fullAmountPaid || 0);
+    const isWorkCompleted = ['workiscompleted', 'completed', 'closed'].includes(String(order?.status || '').toLowerCase());
+
+    let advancePaid = null;
+    let remainingPaid = null;
+    let totalPaid = null;
+    let pendingAmount = 0;
+
+    if (hasEstimations) {
+        if (rawPartialPaid > 0) {
+            advancePaid = rawPartialPaid;
+        } else if (activeEstimations[0]?.advanceAmount && Number(activeEstimations[0].advanceAmount) > 0) {
+            advancePaid = Number(activeEstimations[0].advanceAmount);
+        }
+
+        if (rawFullPaid > 0) {
+            remainingPaid = Math.max(0, Number(grandTotal || 0) - Number(advancePaid || 0));
+        } else if (isWorkCompleted && grandTotal > 0) {
+            remainingPaid = Math.max(0, Number(grandTotal || 0) - Number(advancePaid || 0));
+        }
+
+        if (isPaymentCompleted || isWorkCompleted) {
+            totalPaid = Number(((advancePaid || 0) + (remainingPaid || 0)).toFixed(2));
+            pendingAmount = 0;
+        } else {
+            totalPaid = advancePaid || null;
+            pendingAmount = Math.max(0, Number(grandTotal || 0) - Number(totalPaid || 0));
+        }
+    } else {
+        advancePaid = order?.partialAmountPaid ?? null;
+        totalPaid = isPaymentCompleted ? (grandTotal || order?.amount || null) : null;
+        pendingAmount = grandTotal != null ? Math.max(0, Number(grandTotal) - Number(totalPaid || 0)) : 0;
+    }
 
     const platformFeePendingAmount = Number(order?.totalAmount || order?.amount || platformFee || 99);
     const isPlatformFeePending = Boolean(order?.isPlatformFeePending) || (!isPaymentCompleted &&
@@ -549,14 +816,26 @@ export default function BookingDetailPage() {
 
     return (
         <div className="space-y-4">
-            {/* Back Link */}
-            <Link
-                href="/account/bookings"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-[#037166] hover:underline"
-            >
-                <ArrowLeft className="w-4 h-4" />
-                Back to My Bookings
-            </Link>
+            {/* Back Link & Refresh Action */}
+            <div className="flex items-center justify-between gap-3">
+                <Link
+                    href="/account/bookings"
+                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#037166] hover:underline"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to My Bookings
+                </Link>
+                <button
+                    type="button"
+                    onClick={loadOrder}
+                    disabled={loading}
+                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#037166] hover:text-[#025c53] px-3 py-1.5 rounded-xl bg-white border border-[#037166]/20 shadow-xs hover:bg-[#037166]/5 active:scale-95 transition-all"
+                    title="Refresh booking details"
+                >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                    <span>Refresh</span>
+                </button>
+            </div>
 
             {loading || authLoading ? (
                 <div className="flex justify-center py-20">
@@ -577,7 +856,7 @@ export default function BookingDetailPage() {
 
                     {/* ── Pending Platform Fee Banner ─────────────────── */}
                     {isPlatformFeePending && (
-                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 shadow-sm space-y-3">
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-start gap-3.5">
                                     <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -588,7 +867,7 @@ export default function BookingDetailPage() {
                                             <h3 className="text-base font-bold text-amber-950">Platform Fee Payment Pending</h3>
                                             <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">Action Required</span>
                                         </div>
-                                        <p className="text-sm text-amber-900 mt-1 leading-relaxed">
+                                        <p className="text-xs sm:text-sm text-amber-900 mt-1 leading-relaxed">
                                             Your booking request is created, but the platform fee of <span className="font-extrabold text-amber-950">₹{platformFeePendingAmount}</span> has not been received yet. Complete payment now to confirm your appointment and assign our nearest verified expert technician.
                                         </p>
                                     </div>
@@ -615,10 +894,12 @@ export default function BookingDetailPage() {
                     )}
 
                     {/* ── Header Card ─────────────────────────────────────── */}
-                    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                    <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xs">
                         <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                             <div>
-                                <h1 className="text-xl font-extrabold text-gray-900">Booking Details</h1>
+                                <h1 className="text-lg sm:text-xl font-extrabold text-gray-900">
+                                    {order?.serviceName || order?.firstServiceName || order?.subcategoryName || 'Booking Details'}
+                                </h1>
                                 {orderId && (
                                     <div className="flex items-center gap-1.5 mt-1">
                                         <Hash className="w-3.5 h-3.5 text-[#037166]" />
@@ -627,82 +908,82 @@ export default function BookingDetailPage() {
                                 )}
                                 {createdAt && (
                                     <p className="text-[11px] text-gray-400 mt-0.5">
-                                        Booked on {new Date(createdAt).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
+                                        Booked on {fmtDateTime(createdAt) || new Date(createdAt).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
                                     </p>
                                 )}
                             </div>
-                            <span className={`text-[11px] font-bold uppercase px-3 py-1 rounded-full ${getStatusStyle(status)}`}>
+                            <span className={`text-[10px] sm:text-[11px] font-bold uppercase px-3 py-1 rounded-full ${getStatusStyle(status)} shrink-0`}>
                                 {getStatusLabel(status)}
                             </span>
                         </div>
 
                         {/* Key Info Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2.5 sm:gap-3">
                             {bookedDate && (
-                                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div className="w-8 h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
-                                        <Calendar className="w-4 h-4" />
+                                <div className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] shrink-0">
+                                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Date</p>
-                                        <p className="text-sm font-bold text-gray-900">{bookedDate}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Date</p>
+                                        <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{bookedDate}</p>
                                     </div>
                                 </div>
                             )}
                             {bookedTime && (
-                                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div className="w-8 h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
-                                        <Clock className="w-4 h-4" />
+                                <div className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] shrink-0">
+                                        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Time Slot</p>
-                                        <p className="text-sm font-bold text-gray-900">{bookedTime}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Time Slot</p>
+                                        <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{bookedTime}</p>
                                     </div>
                                 </div>
                             )}
                             {customerPhone && (
-                                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div className="w-8 h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
-                                        <Phone className="w-4 h-4" />
+                                <div className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] shrink-0">
+                                        <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Contact</p>
-                                        <p className="text-sm font-bold text-gray-900">{customerPhone}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Contact</p>
+                                        <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{customerPhone}</p>
                                     </div>
                                 </div>
                             )}
                             {categoryName && (
-                                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div className="w-8 h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
-                                        <Tag className="w-4 h-4" />
+                                <div className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] shrink-0">
+                                        <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Category</p>
-                                        <p className="text-sm font-bold text-gray-900">{categoryName}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Category</p>
+                                        <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{categoryName}</p>
                                     </div>
                                 </div>
                             )}
                             {paymentMethod && (
-                                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div className="w-8 h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
-                                        <CreditCard className="w-4 h-4" />
+                                <div className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#037166]/10 flex items-center justify-center text-[#037166] shrink-0">
+                                        <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Payment Method</p>
-                                        <p className="text-sm font-bold text-gray-900">{PAYMENT_METHOD_LABELS[paymentMethod] || paymentMethod}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Method</p>
+                                        <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{PAYMENT_METHOD_LABELS[paymentMethod] || paymentMethod}</p>
                                     </div>
                                 </div>
                             )}
                             {paymentStatus && (
-                                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                <div className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 ${
                                         ['paid', 'completed'].includes(paymentStatus) ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
                                     }`}>
-                                        <CheckCircle className="w-4 h-4" />
+                                        <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Payment Status</p>
-                                        <p className={`text-sm font-bold capitalize ${
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Payment</p>
+                                        <p className={`text-xs sm:text-sm font-bold capitalize truncate ${
                                             ['paid', 'completed'].includes(paymentStatus) ? 'text-green-700' : 'text-amber-700'
                                         }`}>{paymentStatus}</p>
                                     </div>
@@ -711,15 +992,118 @@ export default function BookingDetailPage() {
                         </div>
                     </div>
 
+                    {/* ── Booking Fee Paid Banner (Online / Completed) ─────────────────── */}
+                    {!isPlatformFeePending && (isPaidOnline || ['paid', 'completed'].includes(String(paymentStatus || '').toLowerCase())) && (
+                        <div className="bg-[#E6F4EA] border border-[#A8DAB5] rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs sm:text-sm text-[#137333] shadow-xs">
+                            <div className="flex items-center gap-2 font-bold">
+                                <CheckCircle className="w-4 h-4 text-[#137333] shrink-0" />
+                                <span>Booking Fee ({fmtAmount(platformFee || order?.amount || 99)}) Completed Online</span>
+                            </div>
+                            {walletBalance != null && (
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-[#137333]/90 bg-white/70 px-2.5 py-1 rounded-lg border border-[#A8DAB5]/40 shrink-0">
+                                    <Wallet className="w-3.5 h-3.5 shrink-0" />
+                                    <span>Remaining Wallet Balance: {fmtAmount(walletBalance)}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* ── Two-Column Layout for larger screens ────────────── */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-                        {/* Left Column: Services + Charges */}
+                        {/* Left Column: Tracking + Services + Charges */}
                         <div className="lg:col-span-7 space-y-4">
 
-                            {/* Services Booked */}
-                            {services.length > 0 && (
-                                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+                            {/* Order Tracking & Status History (with OTP & Assigned Partner) */}
+                            <OrderTrackingTimeline
+                                status={status}
+                                history={statusHistory}
+                                isPlatformFeePending={isPlatformFeePending}
+                                order={order}
+                                bookingId={bookingId}
+                                providerName={providerName}
+                                providerPhone={providerPhone}
+                                orderId={orderId}
+                            />
+
+                            {/* Quotation(s) Details (Render each accepted quotation with full items and spare parts) */}
+                            {hasEstimations && activeEstimations.map((est, eIdx) => {
+                                const isFirst = eIdx === 0;
+                                const quoteTitle = activeEstimations.length === 1
+                                    ? "Approved Quotation"
+                                    : (isFirst ? "Initial Quotation (#1)" : `Revised Quotation (#${eIdx + 1})`);
+                                const ratedCards = Array.isArray(est.ratedCards) ? est.ratedCards : [];
+                                const spareParts = Array.isArray(est.spareParts) ? est.spareParts : [];
+                                const serviceCards = Array.isArray(est.serviceCards) ? est.serviceCards : [];
+                                const estBase = Number(est.baseAmount || est.totalAmount || 0);
+                                const estGst = Number(est.gstAmount || (estBase * 0.18));
+                                const estGrand = Number(est.grandTotal || (estBase + estGst));
+
+                                return (
+                                    <div key={est._id || eIdx} className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3 shadow-sm">
+                                        <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-gray-100">
+                                            <h2 className="font-bold text-gray-900 flex items-center gap-2">
+                                                <Wrench className="w-4 h-4 text-[#037166]" />
+                                                {quoteTitle}
+                                            </h2>
+                                            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-green-100 text-green-700">
+                                                Accepted
+                                            </span>
+                                        </div>
+
+                                        <div className="divide-y divide-gray-100 text-sm">
+                                            {ratedCards.map((rc, rIdx) => (
+                                                <div key={rc.id || rIdx} className="flex items-center justify-between py-2">
+                                                    <div className="flex-1 pr-3">
+                                                        <p className="font-semibold text-gray-900">{rc.title || rc.name || 'Service Item'}</p>
+                                                        {rc.quantity > 1 && <p className="text-xs text-gray-400">Qty: {rc.quantity}</p>}
+                                                    </div>
+                                                    <span className="font-bold text-gray-900 shrink-0">{fmtAmount(Number(rc.price || 0) * (rc.quantity || 1))}</span>
+                                                </div>
+                                            ))}
+
+                                            {spareParts.map((sp, sIdx) => (
+                                                <div key={sp.sparePartId || sIdx} className="flex items-center justify-between py-2">
+                                                    <div className="flex-1 pr-3">
+                                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                                            <p className="font-semibold text-gray-900">{sp.name || 'Spare Part'}</p>
+                                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                                                                Spare Part
+                                                            </span>
+                                                            {sp.warrantyDays > 0 && (
+                                                                <span className="text-[10px] text-gray-500 font-medium">
+                                                                    ({sp.warrantyDays}d warranty)
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {sp.quantity > 1 && <p className="text-xs text-gray-400">Qty: {sp.quantity}</p>}
+                                                    </div>
+                                                    <span className="font-bold text-gray-900 shrink-0">{fmtAmount(Number(sp.customer_price || sp.price || 0) * (sp.quantity || 1))}</span>
+                                                </div>
+                                            ))}
+
+                                            {serviceCards.map((sc, scIdx) => (
+                                                <div key={scIdx} className="flex items-center justify-between py-2">
+                                                    <div className="flex-1 pr-3">
+                                                        <p className="font-semibold text-gray-900">{sc.name || 'Service'}</p>
+                                                        {sc.quantity > 1 && <p className="text-xs text-gray-400">Qty: {sc.quantity}</p>}
+                                                    </div>
+                                                    <span className="font-bold text-gray-900 shrink-0">{fmtAmount(Number(sc.price || 0) * (sc.quantity || 1))}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="pt-2 border-t border-dashed border-gray-200 flex items-center justify-between text-xs text-gray-500 flex-wrap gap-2">
+                                            <span>Base: {fmtAmount(estBase)} + GST (18%): {fmtAmount(estGst)}</span>
+                                            <span className="font-bold text-gray-900 text-sm">Quote Total: {fmtAmount(estGrand)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {/* Services Booked (Only shown if no quotations have been issued yet) */}
+                            {!hasEstimations && services.length > 0 && (
+                                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3 shadow-sm">
                                     <h2 className="font-bold text-gray-900 flex items-center gap-2">
                                         <Package className="w-4 h-4 text-[#037166]" />
                                         Services Booked
@@ -761,11 +1145,18 @@ export default function BookingDetailPage() {
 
                             {/* Bill / Rate Breakdown */}
                             {(servicesSubtotal != null || gstAmount != null || platformFee != null || grandTotal != null) && (
-                                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
-                                    <h2 className="font-bold text-gray-900 flex items-center gap-2">
-                                        <Receipt className="w-4 h-4 text-[#037166]" />
-                                        Bill Summary
-                                    </h2>
+                                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3 shadow-sm">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="font-bold text-gray-900 flex items-center gap-2">
+                                            <Receipt className="w-4 h-4 text-[#037166]" />
+                                            Bill Summary
+                                        </h2>
+                                        {activeEstimations.length > 1 && (
+                                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166]">
+                                                Combined Total
+                                            </span>
+                                        )}
+                                    </div>
 
                                     <div className="space-y-2 text-sm">
                                         {servicesSubtotal != null && servicesSubtotal > 0 && (
@@ -782,7 +1173,12 @@ export default function BookingDetailPage() {
                                         )}
                                         {platformFee != null && Number(platformFee) > 0 && (
                                             <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
-                                                <span className="text-gray-600">Platform Fee</span>
+                                                <div>
+                                                    <span className="text-gray-600">Platform Fee</span>
+                                                    {isPaidOnline && (
+                                                        <span className="ml-1.5 text-[10px] text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full font-semibold">Paid at booking</span>
+                                                    )}
+                                                </div>
                                                 <span className="font-semibold text-gray-900">{fmtAmount(platformFee)}</span>
                                             </div>
                                         )}
@@ -799,40 +1195,53 @@ export default function BookingDetailPage() {
                                             <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
                                                 <div className="flex items-center gap-1.5">
                                                     <Tag className="w-3.5 h-3.5 text-green-600" />
-                                                    <span className="text-green-600">Coupon Discount</span>
+                                                    <span className="text-green-600 font-semibold">Coupon Discount</span>
                                                 </div>
-                                                <span className="font-semibold text-green-600">-{fmtAmount(couponDiscount)}</span>
+                                                <span className="font-bold text-green-600">-{fmtAmount(couponDiscount)}</span>
                                             </div>
                                         )}
 
                                         {/* Grand Total */}
                                         {grandTotal != null && (
-                                            <div className="flex items-center justify-between pt-2.5 mt-1">
+                                            <div className="flex items-center justify-between pt-2.5 mt-1 border-t border-gray-200">
                                                 <span className="font-extrabold text-gray-900">Grand Total</span>
                                                 <span className="text-lg font-extrabold text-[#037166]">{fmtAmount(grandTotal)}</span>
                                             </div>
                                         )}
 
                                         {/* Payment Breakdown */}
-                                        {(advancePaid != null && Number(advancePaid) > 0) && (
+                                        {(advancePaid != null || totalPaid != null) && (
                                             <div className="mt-3 pt-3 border-t border-dashed border-gray-200 space-y-2">
                                                 <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Payment Breakdown</p>
-                                                {Number(advancePaid) > 0 && (
+                                                {advancePaid != null && Number(advancePaid) > 0 && (
                                                     <div className="flex items-center justify-between text-sm">
                                                         <span className="text-gray-600">Advance Paid</span>
                                                         <span className="font-semibold text-green-700">{fmtAmount(advancePaid)}</span>
                                                     </div>
                                                 )}
-                                                {totalPaid != null && Number(totalPaid) > Number(advancePaid) && (
+                                                {remainingPaid != null && Number(remainingPaid) > 0 && (
                                                     <div className="flex items-center justify-between text-sm">
-                                                        <span className="text-gray-600">Total Paid</span>
-                                                        <span className="font-semibold text-green-700">{fmtAmount(totalPaid)}</span>
+                                                        <span className="text-gray-600">Remaining Balance Paid</span>
+                                                        <span className="font-semibold text-green-700">{fmtAmount(remainingPaid)}</span>
                                                     </div>
                                                 )}
-                                                {pendingAmount != null && Number(pendingAmount) > 0 && (
+                                                {totalPaid != null && Number(totalPaid) > 0 && (
+                                                    <div className="flex items-center justify-between text-sm pt-1 border-t border-gray-100">
+                                                        <span className="text-gray-900 font-bold">Total Paid</span>
+                                                        <span className="font-extrabold text-green-700 flex items-center gap-1">
+                                                            {fmtAmount(totalPaid)}
+                                                            {(isPaymentCompleted || isWorkCompleted) && (
+                                                                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-green-100 text-green-800">
+                                                                    Paid
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {pendingAmount != null && Number(pendingAmount) > 0.5 && (
                                                     <div className="flex items-center justify-between text-sm">
-                                                        <span className="text-gray-600">Pending Amount</span>
-                                                        <span className="font-semibold text-amber-700">{fmtAmount(pendingAmount)}</span>
+                                                        <span className="text-gray-600 font-medium">Pending Amount</span>
+                                                        <span className="font-bold text-amber-700">{fmtAmount(pendingAmount)}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -841,8 +1250,7 @@ export default function BookingDetailPage() {
                                 </div>
                             )}
 
-                            {/* Order Tracking & Status History */}
-                            <OrderTrackingTimeline status={status} history={statusHistory} isPlatformFeePending={isPlatformFeePending} />
+                            {/* Note: Order Tracking Timeline is rendered at the top of the column for immediate visibility */}
                         </div>
 
                         {/* Right Column: Service Address + Provider Info */}
@@ -850,7 +1258,7 @@ export default function BookingDetailPage() {
 
                             {/* Service Address */}
                             {addressObj && (
-                                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+                                <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
                                     <h2 className="font-bold text-gray-900 flex items-center gap-2">
                                         <Home className="w-4 h-4 text-[#037166]" />
                                         Service Address
@@ -870,12 +1278,12 @@ export default function BookingDetailPage() {
                                         )}
                                         {addressObj.phone && (
                                             <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                                                <Phone className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                                <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                                 {addressObj.phone}
                                             </div>
                                         )}
                                         <div className="flex items-start gap-1.5 text-xs text-gray-700 leading-relaxed">
-                                            <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                            <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
                                             <span>
                                                 {[
                                                     addressObj.flat,
@@ -892,18 +1300,18 @@ export default function BookingDetailPage() {
 
                             {/* Provider Info */}
                             {(providerName || providerPhone || providerType) && (
-                                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+                                <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
                                     <h2 className="font-bold text-gray-900 flex items-center gap-2">
                                         <Building2 className="w-4 h-4 text-[#037166]" />
                                         Service Provider
                                     </h2>
                                     <div className="flex items-start gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-[#037166]/10 flex items-center justify-center text-[#037166] flex-shrink-0">
+                                        <div className="w-10 h-10 rounded-xl bg-[#037166]/10 flex items-center justify-center text-[#037166] shrink-0">
                                             <User className="w-5 h-5" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             {providerName && (
-                                                <p className="text-sm font-bold text-gray-900">{providerName}</p>
+                                                <p className="text-sm font-bold text-gray-900 truncate">{providerName}</p>
                                             )}
                                             {providerType && (
                                                 <span className="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#037166]/10 text-[#037166] mt-0.5">
@@ -912,21 +1320,113 @@ export default function BookingDetailPage() {
                                             )}
                                             {providerPhone && (
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-600 mt-1.5">
-                                                    <Phone className="w-3.5 h-3.5 text-gray-400" />
-                                                    {providerPhone}
+                                                    <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                                    <a href={`tel:${String(providerPhone).replace(/\D/g, '').slice(-10)}`} className="hover:underline">
+                                                        {providerPhone}
+                                                    </a>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
+                                    {providerPhone && (
+                                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100 mt-2">
+                                            <a
+                                                href={`https://wa.me/91${String(providerPhone).replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${providerName || 'Partner'}, regarding my Doorstep Hub booking #${orderId || ''}`)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-white text-xs font-bold shadow-xs active:scale-95 transition-all"
+                                            >
+                                                <MessageCircle className="w-3.5 h-3.5" />
+                                                <span>WhatsApp</span>
+                                            </a>
+                                            <a
+                                                href={`tel:${String(providerPhone).replace(/\D/g, '').slice(-10)}`}
+                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#037166] hover:bg-[#025c53] text-white text-xs font-bold shadow-xs active:scale-95 transition-all"
+                                            >
+                                                <Phone className="w-3.5 h-3.5" />
+                                                <span>Call</span>
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Tax Invoice Download Card */}
+                            {(order.invoice || order.customerInvoice || ['workiscompleted', 'completed'].includes(String(order.status || '').toLowerCase())) && (
+                                <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-xs space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Receipt className="w-5 h-5 text-emerald-600" />
+                                            <div>
+                                                <h3 className="text-sm font-bold text-gray-900">Tax Invoice</h3>
+                                                <p className="text-[11px] text-gray-500">Official GST invoice copy</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            {order.invoice ? 'Available' : 'Processing'}
+                                        </span>
+                                    </div>
+                                    {order.invoice ? (
+                                        <a
+                                            href={resolveMediaUrl(order.invoice)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            download={`DoorstepHub-Invoice-${orderId || 'booking'}.pdf`}
+                                            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-xs"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            Download Tax Invoice (PDF)
+                                        </a>
+                                    ) : (
+                                        <p className="text-[11px] text-gray-500 italic">
+                                            Invoice will be downloadable here once service billing is finalized.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Warranty Protection Card */}
+                            {(order.warrantyStatus || order.warrentystatus || ['workiscompleted', 'completed'].includes(String(order.status || '').toLowerCase())) && (
+                                <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                                            <div>
+                                                <h3 className="text-sm font-bold text-gray-900">Warranty Protection</h3>
+                                                <p className="text-[11px] text-gray-500">DoorstepHub Service Assurance</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            {String(order.warrantyStatus || order.warrentystatus || 'Active').toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div className="p-2 rounded-lg bg-gray-50 border border-gray-100">
+                                            <span className="text-[10px] text-gray-500 block uppercase font-semibold">Service Warranty</span>
+                                            <span className="font-bold text-gray-900">{order.serviceWarrantyDays || 30} Days</span>
+                                        </div>
+                                        <div className="p-2 rounded-lg bg-gray-50 border border-gray-100">
+                                            <span className="text-[10px] text-gray-500 block uppercase font-semibold">Spare Parts</span>
+                                            <span className="font-bold text-gray-900">{order.sparePartWarrantyDays || 90} Days</span>
+                                        </div>
+                                    </div>
+                                    {(order.warrantyEndDate || order.warrenty_enddate) && (
+                                        <p className="text-[11px] text-gray-600 flex justify-between items-center pt-1 border-t border-gray-100">
+                                            <span>Coverage Valid Until:</span>
+                                            <span className="font-bold text-emerald-700">
+                                                {new Date(order.warrantyEndDate || order.warrenty_enddate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                            </span>
+                                        </p>
+                                    )}
                                 </div>
                             )}
 
                             {/* Quick Booking ID Card */}
                             {orderId && (
-                                <div className="bg-gradient-to-br from-[#037166] to-[#04a99d] rounded-2xl p-4 text-white">
+                                <div className="bg-gradient-to-br from-[#037166] to-[#04a99d] rounded-2xl p-4 text-white shadow-xs">
                                     <p className="text-xs font-bold uppercase tracking-wider text-white/70 mb-1">Booking Reference</p>
                                     <p className="text-base font-mono font-extrabold tracking-wide">{orderId}</p>
-                                    <p className="text-[10px] text-white/60 mt-1">Share this ID with our support team for faster assistance.</p>
+                                    <p className="text-[10px] text-white/70 mt-1">Share this ID with our support team for faster assistance.</p>
                                 </div>
                             )}
                         </div>

@@ -46,13 +46,13 @@ export function NearbyHostelsSection({ router }) {
 
     if (!location) {
         return (
-            <section className="py-20 mt-5 bg-transparent">
+            <section className="py-8 sm:py-10 bg-transparent">
                 <div className="max-w-7xl mx-auto px-4 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#037166]/10 mb-6">
-                        <MapPin className="w-8 h-8 text-[#037166]" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#037166]/10 mb-4">
+                        <MapPin className="w-6 h-6 text-[#037166]" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Location Required</h2>
-                    <p className="text-gray-600 max-w-lg mx-auto mb-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Location Required</h2>
+                    <p className="text-gray-600 text-sm sm:text-base max-w-lg mx-auto mb-6">
                         Please provide your location to see the best PG hostels near you.
                     </p>
                     <button
@@ -60,26 +60,26 @@ export function NearbyHostelsSection({ router }) {
                             const locationBtn = document.querySelector('[data-location-trigger]');
                             if (locationBtn) locationBtn.click();
                         }}
-                        className="px-8 py-3 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-full font-bold shadow-lg shadow-[#037166]/30 hover:scale-105 transition-all"
+                        className="px-6 py-2.5 bg-gradient-to-r from-[#037166] to-[#04a99d] text-white rounded-full font-semibold shadow-md shadow-[#037166]/30 hover:scale-105 transition-all text-sm"
                     >
                         Select Location
                     </button>
                 </div>
             </section>
-        )
+        );
     }
 
     if (loading) {
         return (
-            <section className="py-20 bg-transparent">
+            <section className="py-6 sm:py-8 bg-transparent">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="mb-12">
-                        <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
-                        <div className="h-6 bg-gray-200 rounded w-64 animate-pulse" />
+                    <div className="mb-6">
+                        <div className="h-6 bg-gray-200 rounded w-40 mb-2 animate-pulse" />
+                        <div className="h-4 bg-gray-200 rounded w-56 animate-pulse" />
                     </div>
-                    <div className="flex gap-6 overflow-hidden">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="w-80 h-[400px] rounded-3xl bg-gray-200 animate-pulse" />
+                    <div className="flex gap-4 overflow-hidden">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="w-64 h-[320px] rounded-2xl bg-gray-200 animate-pulse flex-shrink-0" />
                         ))}
                     </div>
                 </div>
@@ -92,41 +92,41 @@ export function NearbyHostelsSection({ router }) {
     }
 
     return (
-        <section className="py-12 bg-transparent">
+        <section className="py-6 sm:py-8 bg-transparent">
             <div className="max-w-7xl mx-auto px-4">
                 {/* Section Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="flex justify-between items-end mb-8"
+                    className="flex justify-between items-end mb-4 sm:mb-6"
                 >
                     <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-3">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-2">
                             <MapPin className="w-3 h-3 text-[#037166]" />
-                            <span className="text-xs font-medium text-[#037166]">NEAR YOU</span>
+                            <span className="text-[11px] font-semibold text-[#037166]">NEAR YOU</span>
                         </div>
-                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-2">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-1">
                             Hostels Near You
                         </h2>
-                        <p className="text-lg text-gray-600">
+                        <p className="text-sm sm:text-base text-gray-600">
                             {location?.city ? `Best PG hostels in ${location.city}` : 'Discover nearby accommodations'}
                         </p>
                     </div>
 
                     <button
                         onClick={() => router.push('/pghostels/listings/nearby')}
-                        className="hidden md:flex items-center space-x-2 text-[#037166] font-semibold hover:text-[#025951] transition-colors mb-2"
+                        className="hidden md:flex items-center space-x-1.5 text-[#037166] font-semibold hover:text-[#025951] transition-colors mb-1 text-sm"
                     >
                         <span>View All</span>
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="w-4 h-4" />
                     </button>
                 </motion.div>
 
                 {/* Horizontal Scroll */}
                 <div className="relative">
-                    <div className="overflow-x-auto scrollbar-hide pb-4 -mx-1 px-1">
-                        <div className="flex gap-3 md:gap-4 pb-2">
+                    <div className="overflow-x-auto scrollbar-hide pb-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <div className="flex gap-3 sm:gap-4 pb-1">
                             {hostels.map((hostel, index) => (
                                 <motion.div
                                     key={hostel._id || index}
@@ -134,60 +134,60 @@ export function NearbyHostelsSection({ router }) {
                                     whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
-                                    whileHover={{ y: -8, scale: 1.02 }}
+                                    whileHover={{ y: -6 }}
                                     onClick={() => router.push(`/pghostels/hostel/${hostel.slug || hostel._id}`)}
-                                    className="group relative flex-shrink-0 w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-[calc((100%-80px)/6)] cursor-pointer py-2"
+                                    className="group relative flex-shrink-0 w-[74vw] xs:w-[68vw] sm:w-[44vw] md:w-[30vw] lg:w-[225px] xl:w-[240px] cursor-pointer"
                                 >
-                                    <div className="relative h-[25rem] rounded-[1.5rem] overflow-hidden bg-white shadow-md">
+                                    <div className="relative h-[20rem] sm:h-[22rem] md:h-[23rem] rounded-2xl overflow-hidden bg-white shadow-md">
                                         <div className="absolute inset-0">
                                             <div
                                                 className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-110"
                                                 style={{ backgroundImage: `url(${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${hostel.image})` }}
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent opacity-95" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent opacity-95" />
                                         </div>
 
                                         {/* Top Badges */}
-                                        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+                                        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
                                             {index < 3 ? (
-                                                <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20">
+                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20">
                                                     <TrendingUp className="w-3 h-3 text-[#ffcd3c]" />
-                                                    <span className="text-[10px] font-bold text-white uppercase">Popular</span>
+                                                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">Popular</span>
                                                 </div>
                                             ) : <div />}
 
-                                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/90 shadow-lg">
+                                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/95 shadow-sm">
                                                 <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
                                                 <span className="text-[10px] font-bold text-gray-900">{hostel.rating || 4.5}</span>
                                             </div>
                                         </div>
 
                                         {/* Content Overlay */}
-                                        <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
-                                            <div className="flex gap-1.5 mb-3">
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                                            <div className="flex gap-1.5 mb-2">
                                                 {[Wifi, Utensils, Shirt].map((Icon, j) => (
-                                                    <div key={j} className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
+                                                    <div key={j} className="w-6 h-6 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
                                                         <Icon className="w-3 h-3" />
                                                     </div>
                                                 ))}
                                             </div>
 
-                                            <h3 className="text-lg font-bold text-white mb-1 line-clamp-1 leading-tight group-hover:text-[#4ddecb] transition-colors uppercase">
+                                            <h3 className="text-base font-bold text-white mb-1 line-clamp-1 leading-snug group-hover:text-[#4ddecb] transition-colors uppercase">
                                                 {hostel.hostelName}
                                             </h3>
 
-                                            <div className="flex items-center text-white/70 text-xs mb-4">
-                                                <MapPin className="w-3 h-3 mr-1" />
+                                            <div className="flex items-center text-white/70 text-[11px] mb-3">
+                                                <MapPin className="w-3 h-3 mr-1 flex-shrink-0 text-[#4ddecb]" />
                                                 <span className="truncate">{hostel.address || hostel.cityName}</span>
                                             </div>
 
-                                            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                                            <div className="flex items-center justify-between pt-2.5 border-t border-white/15">
                                                 <div className="flex flex-col">
-                                                    <span className="text-[10px] text-white/60 uppercase">Starts at</span>
-                                                    <span className="text-xl font-bold text-white">₹{Number(hostel.startingAt || hostel.defaultPrice || hostel.price || 0).toLocaleString('en-IN')}/-</span>
+                                                    <span className="text-[9px] text-white/60 uppercase tracking-wider">Starts at</span>
+                                                    <span className="text-base sm:text-lg font-extrabold text-white">₹{Number(hostel.startingAt || hostel.defaultPrice || hostel.price || 0).toLocaleString('en-IN')}/-</span>
                                                 </div>
-                                                <div className="w-10 h-10 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-lg">
-                                                    <ChevronRight className="w-5 h-5" />
+                                                <div className="w-8 h-8 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-md">
+                                                    <ChevronRight className="w-4 h-4" />
                                                 </div>
                                             </div>
                                         </div>

@@ -191,9 +191,8 @@ export function Header({ theme = {}, navItems = [] }) {
     // { name: 'Appliance Services', href: `/${serviceSlugs.appliances}` },
     ...(showHomeScreen ? [
       { name: 'Religious Services', href: `/${serviceSlugs.religious}` },
-      // Coming soon — Spa / PG kept in nav but blocked on click
-      { name: 'Spa Saloon', href: `/${serviceSlugs.spa}`, comingSoon: true },
-      { name: 'PG Hostels', href: `/${serviceSlugs.pg}`, comingSoon: true },
+      { name: 'Spa Saloon', href: `/${serviceSlugs.spa}` },
+      { name: 'PG Hostels', href: `/${serviceSlugs.pg}` },
     ] : []),
     /*
     {
@@ -207,16 +206,7 @@ export function Header({ theme = {}, navItems = [] }) {
   ];
 
   const isComingSoonNavItem = (item) => {
-    if (item?.comingSoon) return true;
-    const href = String(item?.href || '');
-    const name = String(item?.name || '');
-    return (
-      href.includes('/spa-salon') ||
-      href.includes(`/${serviceSlugs.spa}`) ||
-      href.includes('/pghostels') ||
-      href.includes('/pg-hostel') ||
-      href.includes(`/${serviceSlugs.pg}`)
-    );
+    return Boolean(item?.comingSoon);
   };
 
   const menuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : apiNavItems);

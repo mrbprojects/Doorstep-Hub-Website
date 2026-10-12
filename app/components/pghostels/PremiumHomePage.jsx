@@ -13,6 +13,7 @@ import { useLocationContext } from '@/context/LocationContext';
 import { NearbyHostelsSection } from './NearbyHostelsSection';
 import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
 import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
+import { AppDownload } from '@/components/landing/AppDownload';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
 const SERVICE_ID = '69524fb157bb211ca094e5ee'; // PG Hostels Service ID
@@ -189,10 +190,10 @@ export function PremiumHomePage() {
             <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-[#037166]/3 via-transparent to-[#037166]/5" />
 
             {/* Hero Section */}
-            <section ref={heroRef} className="relative min-h-[70vh] flex items-center pt-20">
+            <section ref={heroRef} className="relative flex items-center pt-16 sm:pt-20">
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-[#037166]/5 to-transparent" />
 
-                <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10 grid md:grid-cols-2 gap-6 md:gap-8 items-center relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 grid md:grid-cols-2 gap-6 md:gap-8 items-center relative z-10">
                     {/* Left Content */}
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
@@ -207,7 +208,7 @@ export function PremiumHomePage() {
                                 transition={{ delay: 0.2 }}
                                 className="inline-block"
                             >
-                                <div className="px-3 py-1.5 sm:px-4 sm:py-1.5 bg-gradient-to-r from-[#037166]/20 to-transparent border border-[#037166]/30 rounded-full backdrop-blur-sm">
+                                <div className="px-3.5 py-1.5 bg-gradient-to-r from-[#037166]/20 to-transparent border border-[#037166]/30 rounded-full backdrop-blur-sm">
                                     <h6 className="text-[#037166] text-xs sm:text-sm font-semibold">✨ Find Your Perfect Stay</h6>
                                 </div>
                             </motion.div>
@@ -216,69 +217,68 @@ export function PremiumHomePage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ delay: 0.3 }}
-                                className="text-[2.75rem] sm:text-4xl md:text-5xl font-bold leading-[0.98]"
+                                className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight sm:leading-[1.1] text-gray-900"
                             >
                                 <span className="bg-gradient-to-r from-gray-900 to-[#037166] bg-clip-text text-transparent">
                                     Find your next stay
-                                </span>
-                                <span>{" "}</span>
-                                <span className="text-gray-900">in minutes.</span>
+                                </span>{" "}
+                                <span>in minutes.</span>
                             </motion.h1>
 
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ delay: 0.4 }}
-                                className="text-base sm:text-lg text-gray-600 leading-relaxed"
+                                className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl"
                             >
                                 Verified PGs, co-living spaces, and hostels near your college or office.
                             </motion.p>
 
-                            <section className="relative md:-mt-4 mt-0 z-20">
-                                <div className="max-w-4xl px-1">
-                                    <div className="flex flex-col md:flex-row items-center gap-2.5">
-                                                {/* Search Bar */}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    viewport={{ once: true }}
-                                                    className="flex-1 bg-white/40 md:bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-gray-200 p-2 w-full"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex-1 relative">
-                                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                            <Input
-                                                                value={searchQuery}
-                                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                                onKeyDown={handleKeyDown}
-                                                                placeholder="Search by area, college, landmark..."
-                                                                className="pl-10 h-9 sm:h-10 bg-white/30 md:bg-white/50 border-transparent focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
-                                                            />
-                                                        </div>
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.05 }}
-                                                            whileTap={{ scale: 0.95 }}
-                                                            onClick={handleSearch}
-                                                            className="px-4 py-2 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-lg shadow-[#037166]/20 text-sm hidden sm:block"
-                                                        >
-                                                            Search
-                                                        </motion.button>
-                                                    </div>
-                                                </motion.div>
-
-                                                {/* Explore PGs Button - Beside Search Bar */}
+                            <section className="relative md:-mt-2 mt-0 z-20">
+                                <div className="max-w-4xl">
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                                        {/* Search Bar */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            className="flex-1 bg-white/60 md:bg-white/80 backdrop-blur-2xl rounded-2xl shadow-lg border border-gray-200 p-1.5 w-full"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 relative">
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                    <Input
+                                                        value={searchQuery}
+                                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                                        onKeyDown={handleKeyDown}
+                                                        placeholder="Search by area, college, landmark..."
+                                                        className="pl-9 h-9 sm:h-10 bg-white/40 md:bg-white/60 border-transparent focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
+                                                    />
+                                                </div>
                                                 <motion.button
-                                                    initial={{ opacity: 0, x: 20 }}
-                                                    whileInView={{ opacity: 1, x: 0 }}
-                                                    viewport={{ once: true }}
-                                                    whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(3, 113, 102, 0.3)" }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => router.push('/pghostels/listings/all')}
-                                                    className="px-5 py-2 bg-[#037166] text-white rounded-2xl font-bold shadow-xl shadow-[#037166]/30 flex items-center gap-2 whitespace-nowrap h-[46px] text-sm"
+                                                    whileHover={{ scale: 1.03 }}
+                                                    whileTap={{ scale: 0.97 }}
+                                                    onClick={handleSearch}
+                                                    className="px-4 py-2 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-md shadow-[#037166]/20 text-xs sm:text-sm whitespace-nowrap"
                                                 >
-                                                    <span>Explore PGs</span>
-                                                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                    Search
                                                 </motion.button>
+                                            </div>
+                                        </motion.div>
+
+                                        {/* Explore PGs Button */}
+                                        <motion.button
+                                            initial={{ opacity: 0, x: 20 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            viewport={{ once: true }}
+                                            whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(3, 113, 102, 0.25)" }}
+                                            whileTap={{ scale: 0.97 }}
+                                            onClick={() => router.push('/pghostels/listings/all')}
+                                            className="px-5 py-2.5 bg-[#037166] text-white rounded-2xl font-bold shadow-lg shadow-[#037166]/30 flex items-center justify-center gap-2 whitespace-nowrap h-[46px] text-sm"
+                                        >
+                                            <span>Explore PGs</span>
+                                            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </motion.button>
                                     </div>
 
                                     {/* App Buttons below search bar */}
@@ -400,7 +400,7 @@ export function PremiumHomePage() {
 
                         {/* Floating Price Card */}
                         <motion.div initial={false}
-                            className="absolute top-12 left-0 md:-left-8 bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-2xl border border-white/50 z-20 pointer-events-none"
+                            className="absolute top-6 left-1 sm:-left-6 md:-left-8 bg-white/95 backdrop-blur-xl rounded-2xl p-3 sm:p-4 shadow-xl border border-white/50 z-20 pointer-events-none"
                             animate={{
                                 y: [0, 10, 0],
                             }}
@@ -418,7 +418,7 @@ export function PremiumHomePage() {
 
                         {/* Floating Rating Card */}
                         <motion.div initial={false}
-                            className="absolute bottom-12 right-0 md:-right-8 bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-2xl border border-white/50 z-20 pointer-events-none"
+                            className="absolute bottom-6 right-1 sm:-right-6 md:-right-8 bg-white/95 backdrop-blur-xl rounded-2xl p-3 sm:p-4 shadow-xl border border-white/50 z-20 pointer-events-none"
                             animate={{
                                 y: [0, -10, 0],
                             }}
@@ -450,7 +450,7 @@ export function PremiumHomePage() {
             {/* Quick Search Strip */}
 
 
-            <section ref={categoriesRef} className="py-15 relative">
+            <section ref={categoriesRef} className="py-6 sm:py-8 relative">
               <CategorySubcategorySection
                 categories={apiCategories}
                 categoriesLoading={loading}
@@ -521,6 +521,9 @@ export function PremiumHomePage() {
             {/* Help Center Section - PG & Hostel Articles */}
             <KnowledgeSection vertical="pg-hostel" showNewsletter={false} />
 
+            {/* App Download Section (same as Home page) */}
+            <AppDownload />
+
             {/* Questionnaire Modal */}
             <QuestionnaireModal
                 isOpen={isModalOpen}
@@ -542,63 +545,79 @@ function TopDealsSection({ router }) {
         {
             title: 'Zero Deposit Options',
             desc: 'Move in without hefty deposits',
-            gradient: 'from-purple-500 to-pink-500',
+            gradient: 'from-purple-600 to-indigo-600',
             icon: '🏠',
+            tag: 'Instant Move-in'
         },
         {
             title: 'Without Meals PGs',
-            desc: 'Home-cooked food included',
-            gradient: 'from-orange-500 to-red-500',
+            desc: 'Budget-friendly flexible options',
+            gradient: 'from-orange-500 to-amber-600',
             icon: '🍽️',
+            tag: 'Save Big'
         },
         {
             title: 'Best for Professionals',
-            desc: 'Premium co-working spaces',
-            gradient: 'from-blue-500 to-cyan-500',
+            desc: 'High-speed WiFi & desk setup',
+            gradient: 'from-teal-600 to-emerald-600',
             icon: '💼',
+            tag: 'Work Friendly'
         },
     ];
 
     return (
-        <section className="py-15 bg-transparent">
-            <div className="max-w-7xl mx-auto px-4">
+        <section className="py-6 sm:py-8 bg-transparent">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="mb-12"
+                    className="flex items-end justify-between mb-4 sm:mb-6"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold text-black mb-2">
-                        Top Deals
-                    </h2>
-                    <p className="text-xl text-gray-600">Exclusive offers just for you</p>
+                    <div>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-2">
+                            <Sparkles className="w-3 h-3 text-[#037166]" />
+                            <span className="text-[11px] font-semibold text-[#037166] uppercase tracking-wider">Top Deals</span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                            Exclusive Offers
+                        </h2>
+                        <p className="text-sm sm:text-base text-gray-600 mt-0.5">Special pricing and curated perks just for you</p>
+                    </div>
                 </motion.div>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4 md:gap-5">
                     {deals.map((deal, i) => (
                         <motion.div
                             key={i}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            whileHover={{ scale: 1.05, y: -5 }}
-                            className={`relative h-50 rounded-3xl overflow-hidden cursor-pointer bg-gradient-to-br ${deal.gradient} p-8 flex flex-col justify-between`}
+                            transition={{ delay: i * 0.08 }}
+                            whileHover={{ y: -4 }}
+                            onClick={() => router.push('/pghostels/listings/all')}
+                            className={`group relative rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-br ${deal.gradient} p-4 sm:p-5 flex items-center justify-between shadow-md hover:shadow-lg transition-all`}
                         >
-                            <div>
-                                <motion.div
-                                    animate={{ rotate: [0, 10, -10, 0] }}
-                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                    className="text-6xl mb-4"
-                                >
+                            <div className="flex items-center gap-3.5 min-w-0 pr-2">
+                                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl flex-shrink-0 shadow-inner">
                                     {deal.icon}
-                                </motion.div>
-                                <h4 className="text-2xl font-bold text-white mb-2">{deal.title}</h4>
-                                <p className="text-white/90">{deal.desc}</p>
+                                </div>
+                                <div className="min-w-0">
+                                    <span className="inline-block text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">
+                                        {deal.tag}
+                                    </span>
+                                    <h4 className="text-sm sm:text-base font-bold text-white leading-tight truncate">
+                                        {deal.title}
+                                    </h4>
+                                    <p className="text-xs text-white/85 line-clamp-1 mt-0.5">
+                                        {deal.desc}
+                                    </p>
+                                </div>
                             </div>
-                            {/* <button className="self-start px-6 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl font-medium hover:bg-white/30 transition-colors border border-white/30">
-                                Explore
-                            </button> */}
+
+                            <div className="w-8 h-8 rounded-full bg-white/20 group-hover:bg-white text-white group-hover:text-gray-900 flex items-center justify-center flex-shrink-0 transition-all shadow-sm">
+                                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                            </div>
                         </motion.div>
                     ))}
                 </div>
@@ -606,7 +625,6 @@ function TopDealsSection({ router }) {
         </section>
     );
 }
-
 // How It Works Section
 function HowItWorksSection() {
     const steps = [
@@ -616,7 +634,7 @@ function HowItWorksSection() {
     ];
 
     return (
-<section className="py-14 md:py-24 bg-transparent">
+<section className="py-8 sm:py-12 bg-transparent">
   <div className="max-w-7xl mx-auto px-4">
 
     {/* Heading */}
@@ -624,7 +642,7 @@ function HowItWorksSection() {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="text-center mb-10 md:mb-16"
+      className="text-center mb-6 sm:mb-8"
     >
       <h2 className="text-3xl md:text-5xl font-bold text-gray-900">
         Book in 3 simple steps
@@ -648,7 +666,7 @@ function HowItWorksSection() {
           <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
-            className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-[#037166] to-[#025951] rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-lg shadow-[#037166]/30"
+            className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-[#037166] to-[#025951] rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-lg shadow-[#037166]/30"
           >
             <step.icon className="w-7 h-7 md:w-10 md:h-10 text-white" />
           </motion.div>
@@ -798,35 +816,35 @@ function FeaturedHostelsSection({ listings, loading, router }) {
     const displayListings = hasData ? listings.slice(0, 12) : fallbackListings;
 
     return (
-        <section className="py-12 bg-transparent">
+        <section className="py-6 sm:py-8 bg-transparent">
             <div className="max-w-7xl mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="flex justify-between items-end mb-8"
+                    className="flex justify-between items-end mb-4 sm:mb-6"
                 >
                     <div>
-                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-2">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1">
                             Featured Hostels
                         </h2>
-                        <p className="text-lg text-gray-600">Handpicked stays for you</p>
+                        <p className="text-sm sm:text-base text-gray-600">Handpicked stays for you</p>
                     </div>
                     <button
                         onClick={() => router.push('/pghostels/listings/all')}
-                        className="hidden md:flex items-center space-x-2 text-[#037166] font-semibold hover:text-[#025951] transition-colors"
+                        className="hidden md:flex items-center space-x-1.5 text-[#037166] font-semibold hover:text-[#025951] transition-colors mb-1 text-sm"
                     >
                         <span>View All</span>
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="w-4 h-4" />
                     </button>
                 </motion.div>
 
                 <div className="relative">
-                    <div className="overflow-x-auto px-1 md:px-0 scrollbar-hide pb-4 -mx-1 px-1">
-                        <div className="flex gap-3 md:gap-4 pb-2">
+                    <div className="overflow-x-auto scrollbar-hide pb-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <div className="flex gap-3 sm:gap-4 pb-1">
                             {loading ? (
                                 [...Array(4)].map((_, i) => (
-                                    <div key={i} className="bg-gray-200 rounded-[1.5rem] h-[25rem] min-w-[280px] md:min-w-0 flex-shrink-0 animate-pulse" />
+                                    <div key={i} className="bg-gray-200 rounded-2xl h-[20rem] sm:h-[22rem] w-[74vw] xs:w-[68vw] sm:w-[44vw] md:w-[30vw] lg:w-[225px] xl:w-[240px] flex-shrink-0 animate-pulse" />
                                 ))
                             ) : (
                                 displayListings.map((listing, i) => {
@@ -847,47 +865,47 @@ function FeaturedHostelsSection({ listings, loading, router }) {
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
                                             transition={{ delay: i * 0.1 }}
-                                            whileHover={isClickable ? { y: -8 } : {}}
+                                            whileHover={isClickable ? { y: -6 } : {}}
                                             onClick={() => isClickable && router.push(`/pghostels/hostel/${hostelSlug}`)}
-                                            className={`group relative rounded-[1.5rem] overflow-hidden h-[25rem] w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-[calc((100%-80px)/6)] flex-shrink-0 snap-start bg-white shadow-md ${isClickable ? 'cursor-pointer' : ''}`}
+                                            className={`group relative rounded-2xl overflow-hidden h-[20rem] sm:h-[22rem] md:h-[23rem] w-[74vw] xs:w-[68vw] sm:w-[44vw] md:w-[30vw] lg:w-[225px] xl:w-[240px] flex-shrink-0 snap-start bg-white shadow-md ${isClickable ? 'cursor-pointer' : ''}`}
                                         >
                                             <div className="absolute inset-0">
                                                 <div
                                                     className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-110"
                                                     style={{ backgroundImage: `url("${hostelImage}")` }}
                                                 />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent opacity-90" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent opacity-95" />
                                             </div>
 
-                                            <div className="absolute inset-0 p-5 flex flex-col justify-between">
+                                            <div className="absolute inset-0 p-4 flex flex-col justify-between">
                                                 <div className="flex justify-between items-start">
-                                                    <div className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
-                                                        <span className="text-white text-[10px] font-semibold tracking-wide uppercase">Featured</span>
+                                                    <div className="px-2.5 py-0.5 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
+                                                        <span className="text-white text-[10px] font-semibold tracking-wider uppercase">Featured</span>
                                                     </div>
                                                 </div>
 
                                                 <div>
-                                                    <div className="flex gap-1.5 mb-3">
+                                                    <div className="flex gap-1.5 mb-2">
                                                         {[Wifi, Utensils, Shirt].map((Icon, j) => (
-                                                            <div key={j} className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
-                                                                 <Icon className="w-3.5 h-3.5" />
+                                                            <div key={j} className="w-6 h-6 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
+                                                                <Icon className="w-3 h-3" />
                                                             </div>
                                                         ))}
                                                     </div>
 
-                                                    <h3 className="text-base font-bold text-white mb-1 line-clamp-2 uppercase tracking-wide leading-tight">{hostelName}</h3>
-                                                    <div className="flex items-center text-white/70 text-[11px] mb-4">
-                                                        <MapPin className="w-3.5 h-3.5 mr-1" />
+                                                    <h3 className="text-base font-bold text-white mb-1 line-clamp-1 leading-snug uppercase tracking-wide">{hostelName}</h3>
+                                                    <div className="flex items-center text-white/70 text-[11px] mb-3">
+                                                        <MapPin className="w-3 h-3 mr-1 text-[#4ddecb]" />
                                                         <span className="truncate">{hostelArea}</span>
                                                     </div>
 
-                                                    <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                                                    <div className="flex items-center justify-between pt-2.5 border-t border-white/15">
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] text-white/60 uppercase">Starts at</span>
-                                                            <span className="text-xl font-bold text-white">₹{Number(hostelPrice || 0).toLocaleString('en-IN')}/-</span>
+                                                            <span className="text-[9px] text-white/60 uppercase tracking-wider">Starts at</span>
+                                                            <span className="text-base sm:text-lg font-extrabold text-white">₹{Number(hostelPrice || 0).toLocaleString('en-IN')}/-</span>
                                                         </div>
-                                                        <div className="w-10 h-10 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-lg">
-                                                            <ChevronRight className="w-5 h-5" />
+                                                        <div className="w-8 h-8 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-md">
+                                                            <ChevronRight className="w-4 h-4" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -903,5 +921,3 @@ function FeaturedHostelsSection({ listings, loading, router }) {
         </section>
     );
 }
-
-

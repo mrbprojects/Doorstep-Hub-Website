@@ -53,66 +53,92 @@ let slugRegistryCache = {
     timestamp: 0,
 };
 
+let inFlightRegistryPromise = null;
+
 async function getSlugRegistry() {
     const now = Date.now();
     if (slugRegistryCache.timestamp && now - slugRegistryCache.timestamp < CACHE_DURATION && slugRegistryCache.registry) {
         return slugRegistryCache.registry;
     }
 
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-
-        const [brandsRes, servicesRes] = await Promise.allSettled([
-            fetch(`${API_BASE_URL}/app/brands/all_brands`, {
-                signal: controller.signal,
-                next: { revalidate: 600 },
-            }),
-            fetch(`${API_BASE_URL}/app/authorized-services/all_authorized_services`, {
-                signal: controller.signal,
-                next: { revalidate: 600 },
-            }),
-        ]);
-
-        clearTimeout(timeoutId);
-
-        const brandSlugs = [...DEFAULT_BRAND_SLUGS];
-        if (brandsRes.status === 'fulfilled' && brandsRes.value.ok) {
-            const data = await brandsRes.value.json();
-            if (data.success && Array.isArray(data.brands)) {
-                data.brands.forEach((brand) => {
-                    const slug = String(brand.slug || '').trim().toLowerCase();
-                    if (slug && !brandSlugs.includes(slug)) brandSlugs.push(slug);
-                });
-            }
-        }
-
-        const serviceSlugs = [];
-        if (servicesRes.status === 'fulfilled' && servicesRes.value.ok) {
-            const data = await servicesRes.value.json();
-            if (data.success && Array.isArray(data.services)) {
-                data.services.forEach((service) => {
-                    const slug = String(service.slug || '').trim().toLowerCase();
-                    if (slug) serviceSlugs.push(slug);
-                });
-            }
-        }
-
-        const registry = createSlugRegistry({ brandSlugs, serviceSlugs });
-        slugRegistryCache = { registry, timestamp: now };
-        brandSlugCache = { slugs: registry.brandSlugs, timestamp: now };
-        return registry;
-    } catch (error) {
-        console.error('Middleware slug registry fetch failed:', error);
+    if (inFlightRegistryPromise) {
+        return inFlightRegistryPromise;
     }
 
-    return slugRegistryCache.registry || createSlugRegistry({ brandSlugs: DEFAULT_BRAND_SLUGS });
+    inFlightRegistryPromise = (async () => {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+            const [brandsRes, servicesRes] = await Promise.allSettled([
+                fetch(`${API_BASE_URL}/app/brands/all_brands`, {
+                    signal: controller.signal,
+                    headers: { 'Accept': 'application/json' },
+                }),
+                fetch(`${API_BASE_URL}/app/authorized-services/all_authorized_services`, {
+                    signal: controller.signal,
+                    headers: { 'Accept': 'application/json' },
+                }),
+            ]);
+
+            clearTimeout(timeoutId);
+
+            const brandSlugs = [...DEFAULT_BRAND_SLUGS];
+            if (brandsRes.status === 'fulfilled' && brandsRes.value && brandsRes.value.ok) {
+                try {
+                    const data = await brandsRes.value.json();
+                    if (data && data.success && Array.isArray(data.brands)) {
+                        data.brands.forEach((brand) => {
+                            const slug = String(brand.slug || '').trim().toLowerCase();
+                            if (slug && !brandSlugs.includes(slug)) brandSlugs.push(slug);
+                        });
+                    }
+                } catch (e) {
+                    // Ignore body consumption issues
+                }
+            }
+
+            const serviceSlugs = [];
+            if (servicesRes.status === 'fulfilled' && servicesRes.value && servicesRes.value.ok) {
+                try {
+                    const data = await servicesRes.value.json();
+                    if (data && data.success && Array.isArray(data.services)) {
+                        data.services.forEach((service) => {
+                            const slug = String(service.slug || '').trim().toLowerCase();
+                            if (slug) serviceSlugs.push(slug);
+                        });
+                    }
+                } catch (e) {
+                    // Ignore body consumption issues
+                }
+            }
+
+            const registry = createSlugRegistry({ brandSlugs, serviceSlugs });
+            slugRegistryCache = { registry, timestamp: now };
+            brandSlugCache = { slugs: registry.brandSlugs, timestamp: now };
+            return registry;
+        } catch (error) {
+            console.error('Middleware slug registry fetch failed:', error);
+            // Cache fallback for 1 minute on error so concurrent requests don't loop
+            slugRegistryCache = {
+                registry: slugRegistryCache.registry || createSlugRegistry({ brandSlugs: DEFAULT_BRAND_SLUGS }),
+                timestamp: now - CACHE_DURATION + (60 * 1000),
+            };
+            return slugRegistryCache.registry;
+        } finally {
+            inFlightRegistryPromise = null;
+        }
+    })();
+
+    return inFlightRegistryPromise;
 }
 
 async function getBrandSlugSet() {
     const registry = await getSlugRegistry();
     return registry?.brandSlugs instanceof Set ? registry.brandSlugs : new Set(DEFAULT_BRAND_SLUGS);
 }
+
+let inFlightDynamicSlugsPromise = null;
 
 async function getDynamicSlugs() {
     const now = Date.now();
@@ -121,69 +147,83 @@ async function getDynamicSlugs() {
         return slugCache.data;
     }
 
-    const serviceIds = [
-        // Only the appliance service ID is supported by this endpoint.
-        // Spa, PG, and religious IDs return 404 — their slugs come from DEFAULT_SLUGS.
-        { id: '683daaa8f261c1548bdf7442', internalPrefix: '/appliances' },
-    ];
-
-    try {
-        // Use Promise.allSettled and a timeout to prevent middleware hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout
-
-        const results = await Promise.allSettled(
-            serviceIds.map(async (service) => {
-                try {
-                    const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/${service.id}`, {
-                        signal: controller.signal,
-                        next: { revalidate: 600 } // Cache at fetch level too
-                    });
-
-                    if (!res.ok) return null;
-                    const data = await res.json();
-
-                    if (data.success && data.data) {
-                        const { home, category, recentlyBooked, featuredServices } = data.data;
-                        const mapping = {};
-                        if (home) mapping[home] = service.internalPrefix;
-                        if (category) mapping[category] = `${service.internalPrefix}/categories`;
-                        if (recentlyBooked) mapping[recentlyBooked] = `${service.internalPrefix}/recent`;
-                        if (featuredServices) mapping[featuredServices] = `${service.internalPrefix}/featured`;
-                        if (data.data.serviceCenter) mapping[data.data.serviceCenter] = `${service.internalPrefix}/centers`;
-
-                        // Specific manual mapping
-                        if (service.id === '683daaa8f261c1548bdf7442') {
-                            mapping['verified-appliance-repair-partners'] = `${service.internalPrefix}/child/683dbbfbb62d2a241de0f7e3`;
-                        }
-                        return mapping;
-                    }
-                } catch (e) {
-                    // Silently fail individual fetches
-                }
-                return null;
-            })
-        );
-
-        clearTimeout(timeoutId);
-
-        const newSlugs = { ...DEFAULT_SLUGS };
-        results.forEach((result) => {
-            if (result.status === 'fulfilled' && result.value) {
-                Object.assign(newSlugs, result.value);
-            }
-        });
-
-        // Update cache
-        slugCache = {
-            data: newSlugs,
-            timestamp: now,
-        };
-        return newSlugs;
-    } catch (error) {
-        console.error("Middleware slug fetch failed:", error);
-        return slugCache.data || DEFAULT_SLUGS;
+    if (inFlightDynamicSlugsPromise) {
+        return inFlightDynamicSlugsPromise;
     }
+
+    inFlightDynamicSlugsPromise = (async () => {
+        const serviceIds = [
+            // Only the appliance service ID is supported by this endpoint.
+            // Spa, PG, and religious IDs return 404 — their slugs come from DEFAULT_SLUGS.
+            { id: '683daaa8f261c1548bdf7442', internalPrefix: '/appliances' },
+        ];
+
+        try {
+            // Use Promise.allSettled and a timeout to prevent middleware hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+            const results = await Promise.allSettled(
+                serviceIds.map(async (service) => {
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/get_slugs_by_serviceId/${service.id}`, {
+                            signal: controller.signal,
+                            headers: { 'Accept': 'application/json' },
+                        });
+
+                        if (!res.ok) return null;
+                        const data = await res.json();
+
+                        if (data.success && data.data) {
+                            const { home, category, recentlyBooked, featuredServices } = data.data;
+                            const mapping = {};
+                            if (home) mapping[home] = service.internalPrefix;
+                            if (category) mapping[category] = `${service.internalPrefix}/categories`;
+                            if (recentlyBooked) mapping[recentlyBooked] = `${service.internalPrefix}/recent`;
+                            if (featuredServices) mapping[featuredServices] = `${service.internalPrefix}/featured`;
+                            if (data.data.serviceCenter) mapping[data.data.serviceCenter] = `${service.internalPrefix}/centers`;
+
+                            // Specific manual mapping
+                            if (service.id === '683daaa8f261c1548bdf7442') {
+                                mapping['verified-appliance-repair-partners'] = `${service.internalPrefix}/child/683dbbfbb62d2a241de0f7e3`;
+                            }
+                            return mapping;
+                        }
+                    } catch (e) {
+                        // Silently fail individual fetches
+                    }
+                    return null;
+                })
+            );
+
+            clearTimeout(timeoutId);
+
+            const newSlugs = { ...DEFAULT_SLUGS };
+            results.forEach((result) => {
+                if (result.status === 'fulfilled' && result.value) {
+                    Object.assign(newSlugs, result.value);
+                }
+            });
+
+            // Update cache
+            slugCache = {
+                data: newSlugs,
+                timestamp: now,
+            };
+            return newSlugs;
+        } catch (error) {
+            console.error("Middleware slug fetch failed:", error);
+            slugCache = {
+                data: slugCache.data || DEFAULT_SLUGS,
+                timestamp: now - CACHE_DURATION + (60 * 1000),
+            };
+            return slugCache.data;
+        } finally {
+            inFlightDynamicSlugsPromise = null;
+        }
+    })();
+
+    return inFlightDynamicSlugsPromise;
 }
 
 export async function middleware(request) {

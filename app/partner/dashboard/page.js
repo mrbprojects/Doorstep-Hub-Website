@@ -184,9 +184,19 @@ export default function PartnerDashboardPage() {
                 'not_applied';
 
             const history = historyRes?.history || historyRes?.data || [];
-            const active = Array.isArray(history)
-                ? history.find((h) => String(h.status || '').toLowerCase() === 'active')
+            const activePaid = Array.isArray(history)
+                ? history.find(
+                      (h) =>
+                          String(h.status || '').toLowerCase() === 'active' &&
+                          !['free', 'trial', 'welcome_bonus'].includes(String(h.type || '').toLowerCase()) &&
+                          !String(h.plansName || h.planName || '').toLowerCase().includes('welcome plan')
+                  )
                 : null;
+            const active =
+                activePaid ||
+                (Array.isArray(history)
+                    ? history.find((h) => String(h.status || '').toLowerCase() === 'active')
+                    : null);
 
             const tickets = normalizeProviderSupportTickets(ticketsRes);
             const openTickets = tickets.filter((t) => isProviderTicketOpen(t.status)).length;

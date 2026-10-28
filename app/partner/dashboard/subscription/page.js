@@ -68,8 +68,19 @@ export default function PartnerSubscriptionPage() {
                 getSubscriptionPlans(token),
                 getSubscriptionHistory(token),
             ]);
+            const rawHistory = parseList(historyRes, 'history');
+            const hasActivePaid = rawHistory.some(
+                (h) => String(h.status || '').toLowerCase() === 'active' &&
+                       !['free', 'trial', 'welcome_bonus'].includes(String(h.type || '').toLowerCase())
+            );
+            const sanitizedHistory = hasActivePaid
+                ? rawHistory.filter(
+                      (h) => !['free', 'trial', 'welcome_bonus'].includes(String(h.type || '').toLowerCase()) &&
+                             !String(h.plansName || h.planName || '').toLowerCase().includes('welcome plan')
+                  )
+                : rawHistory;
             setPlans(parseList(plansRes));
-            setHistory(parseList(historyRes, 'history'));
+            setHistory(sanitizedHistory);
         } finally {
             setLoading(false);
         }

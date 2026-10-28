@@ -1385,8 +1385,30 @@ export default function BookingDetailPage() {
                                 </div>
                             )}
 
-                            {/* Warranty Protection Card */}
-                            {(order.warrantyStatus || order.warrentystatus || ['workiscompleted', 'completed'].includes(String(order.status || '').toLowerCase())) && (
+                            {/* Warranty Protection Card - strictly applicable ONLY for Appliance Repair Services */}
+                            {(() => {
+                                const orderHints = [
+                                    order?.serviceType,
+                                    order?.serviceName,
+                                    order?.subcategoryName,
+                                    order?.subCategoryName,
+                                    order?.categoryName,
+                                    order?.department,
+                                    order?.serviceRole
+                                ].filter(Boolean).map(s => String(s).toLowerCase());
+
+                                const isProfessional = orderHints.some(h =>
+                                    ['religious', 'religeous', 'purohit', 'pandit', 'pooja', 'puja', 'ritual', 'hostel', 'pg', 'spa', 'salon', 'saloon', 'parlour', 'parlor', 'grooming', 'pet', 'yoga', 'astrology', 'music', 'dance', 'photography', 'catering', 'event', 'wedding'].some(kw => h.includes(kw))
+                                );
+                                const isAppliance = !isProfessional && orderHints.some(h =>
+                                    ['appliance', 'repair', 'ac', 'refrigerator', 'fridge', 'washing machine', 'microwave', 'geyser', 'ro', 'purifier', 'chimney', 'cooler', 'tv', 'television', 'electric'].some(kw => h.includes(kw))
+                                );
+                                const hasActiveWarranty = String(order?.warrantyStatus || order?.warrentystatus || '').toLowerCase() === 'active' || Boolean(order?.warrantyEndDate || order?.warrenty_enddate);
+                                const isWarrantyApplicable = !isProfessional && isAppliance && (hasActiveWarranty || ['workiscompleted', 'completed'].includes(String(order?.status || '').toLowerCase()));
+
+                                if (!isWarrantyApplicable) return null;
+
+                                return (
                                 <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs space-y-2.5">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -1419,7 +1441,8 @@ export default function BookingDetailPage() {
                                         </p>
                                     )}
                                 </div>
-                            )}
+                                );
+                            })()}
 
                             {/* Quick Booking ID Card */}
                             {orderId && (

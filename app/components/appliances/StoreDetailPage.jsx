@@ -173,6 +173,86 @@ const CENTER_LOGO = {
   anchor: { x: 19, y: 50 },
 };
 
+const getServiceFallbackImage = (name = '', subcategoryName = '') => {
+  const n = (name || '').toLowerCase();
+  const sub = (subcategoryName || '').toLowerCase();
+  const text = `${n} ${sub}`;
+
+  // 1. Check specific service name first
+  if (n.includes('inspect') || n.includes('diagnos') || n.includes('visit') || n.includes('doorstep')) {
+    return 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('hardware') || n.includes('component') || n.includes('ram')) {
+    return 'https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('motherboard') || n.includes('chip') || n.includes('circuit') || n.includes('ic')) {
+    return 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('data') || n.includes('recovery') || n.includes('backup') || n.includes('hdd') || n.includes('ssd')) {
+    return 'https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('screen') || n.includes('display') || n.includes('panel')) {
+    return 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('charging') || n.includes('port') || n.includes('power')) {
+    return 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('virus') || n.includes('malware') || n.includes('security')) {
+    return 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('software') || n.includes('os') || n.includes('windows')) {
+    return 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('clean')) {
+    return 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('network') || n.includes('wifi') || n.includes('setup')) {
+    return 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('laptop')) {
+    return 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&auto=format&fit=crop&q=80';
+  }
+  if (n.includes('desktop') || n.includes('computer') || n.includes('pc')) {
+    return 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=600&auto=format&fit=crop&q=80';
+  }
+
+  // 2. Appliance checks
+  if (text.includes('refrigerat') || text.includes('fridge')) {
+    return 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=600&auto=format&fit=crop&q=80';
+  }
+  if (text.includes('wash') || text.includes('laundry')) {
+    return 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=600&auto=format&fit=crop&q=80';
+  }
+  if (text.includes('tv') || text.includes('television')) {
+    return 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=600&auto=format&fit=crop&q=80';
+  }
+  if (text.includes('microwave') || text.includes('oven')) {
+    return 'https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=600&auto=format&fit=crop&q=80';
+  }
+  if (text.includes('ac') || text.includes('air condition')) {
+    return 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80';
+  }
+
+  if (sub.includes('laptop')) {
+    return 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&auto=format&fit=crop&q=80';
+  }
+  if (sub.includes('desktop') || sub.includes('computer')) {
+    return 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=600&auto=format&fit=crop&q=80';
+  }
+
+  return 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80';
+};
+
+const resolveServiceImageUrl = (imagePath, serviceName = '', subcategoryName = '') => {
+  const fallback = getServiceFallbackImage(serviceName, subcategoryName);
+  if (!imagePath || typeof imagePath !== 'string') return fallback;
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+
+  const clean = imagePath.replace(/^\/+/, '');
+  // Uploads live on devapis.doorstephub.com
+  return `https://devapis.doorstephub.com/${clean}`;
+};
+
 export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Service Rates');
@@ -1458,17 +1538,17 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     >
                       {/* Service Image */}
                       <div className="relative w-full h-32 sm:h-36 overflow-hidden bg-gray-50 flex-shrink-0">
-                        {service.image ? (
-                          <img loading="lazy" decoding="async"
-                            src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
-                            alt={service.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                            <Wrench className="w-8 h-8 opacity-40" />
-                          </div>
-                        )}
+                        <img
+                          loading="lazy"
+                          decoding="async"
+                          src={resolveServiceImageUrl(service.image, service.name, service.subcategoryName)}
+                          alt={service.name || 'Service Rate Card'}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = getServiceFallbackImage(service.name, service.subcategoryName);
+                          }}
+                        />
 
                         {/* Selected Tag */}
                         {selectedPackages.includes(service.id) && (

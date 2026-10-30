@@ -69,7 +69,7 @@ const steps = [
 
 export function ApplianceHowItWorks() {
   return (
-    <section className="relative py-12 md:py-20 overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-12 overflow-hidden">
       {/* Decorative background blurs */}
       <div className="absolute top-1/2 left-0 -translate-y-1/2 w-72 h-72 bg-[#037166]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 right-0 w-80 h-80 bg-[#04a99d]/5 rounded-full blur-3xl pointer-events-none" />
@@ -77,13 +77,13 @@ export function ApplianceHowItWorks() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-7xl mx-auto mb-10 md:mb-14">
+        <div className="text-center max-w-7xl mx-auto mb-5 sm:mb-6">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 text-[#037166] text-xs md:text-sm font-bold tracking-widest uppercase mb-4"
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20 text-[#037166] text-xs md:text-sm font-bold tracking-widest uppercase mb-2.5"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>HOW IT WORKS</span>
@@ -94,7 +94,7 @@ export function ApplianceHowItWorks() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight"
           >
             Four Simple Steps. Less Hassle.
           </motion.h2>
@@ -104,7 +104,7 @@ export function ApplianceHowItWorks() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-3 text-base sm:text-lg md:text-xl text-gray-600 font-medium"
+            className="mt-2 text-sm sm:text-base text-gray-600 font-medium"
           >
             From Booking to Doorstep Repair.
           </motion.p>
@@ -115,7 +115,7 @@ export function ApplianceHowItWorks() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-6 inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-md px-4 sm:px-6 py-2.5 rounded-2xl border border-gray-200/80 shadow-sm"
+            className="mt-4 sm:mt-5 inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-md px-4 sm:px-6 py-2 rounded-2xl border border-gray-200/80 shadow-sm"
           >
             {steps.map((s, idx) => (
               <React.Fragment key={s.stepNumber}>

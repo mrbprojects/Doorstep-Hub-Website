@@ -26,17 +26,17 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
   };
 
   return (
-    <section id="centers" className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 bg-white">
+    <section id="centers" className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 bg-white">
       {/* SEO Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
       />
 
-      <div className="mb-8 sm:mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div className="mb-5 sm:mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="font-bold tracking-[0.3em] text-[#037166] text-xs sm:text-sm uppercase">City Wise Doorstep Hub Services</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl text-gray-900 leading-tight">
+          <p className="font-bold tracking-[0.25em] text-[#037166] text-xs sm:text-sm uppercase">City Wise Doorstep Hub Services</p>
+          <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-4xl text-gray-900 leading-tight">
             Choose Your <span className="text-[#037166]">City</span>
           </h2>
         </div>
@@ -44,7 +44,7 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
           <div className="flex-shrink-0">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-white hover:text-white font-black text-xs tracking-widest uppercase transition-all duration-300 bg-gradient-to-r from-[#037166] to-[#04a99d] hover:opacity-90 px-7 py-3 sm:px-8 sm:py-3.5 rounded-full hover:shadow-xl shadow-md hover:-translate-y-0.5 transform"
+              className="text-white hover:text-white font-black text-xs tracking-widest uppercase transition-all duration-300 bg-gradient-to-r from-[#037166] to-[#04a99d] hover:opacity-90 px-6 py-2.5 sm:px-7 sm:py-3 rounded-full hover:shadow-xl shadow-md hover:-translate-y-0.5 transform"
             >
               {isExpanded ? 'Show Less' : 'Show More'}
             </button>
@@ -52,7 +52,7 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
         )}
       </div>
 
-      <div className="min-h-[300px] relative">
+      <div className="relative">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-[2px] rounded-[2.5rem]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#037166]"></div>

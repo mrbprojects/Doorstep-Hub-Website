@@ -55,14 +55,12 @@ function ApplianceListingContent() {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
-            <Header theme={appliancesTheme} />
             <ServicesListingPage
                 slug={slug}
                 category={categorySlug}
                 subCategory={subCategoryName}
                 subCategoryId={subCategoryId}
             />
-            <Footer theme={footerTheme} />
         </div>
     );
 }

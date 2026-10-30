@@ -119,33 +119,54 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
     <section className="py-8 sm:py-12 relative overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-8 sm:mb-10">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-3"
-          >
-            <TrendingUp className="w-3 h-3 text-[#04a99d]" />
-            <h6 className="text-xs font-semibold text-[#04a99d] tracking-wider uppercase">TRENDING NOW</h6>
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 text-white"
-          >
-            Explore Our Recently Booked Services
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-gray-400 text-sm sm:text-base max-w-2xl"
-          >
-            See what services your neighbors are booking right now
-          </motion.p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5 sm:mb-6">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-3"
+            >
+              <TrendingUp className="w-3 h-3 text-[#04a99d]" />
+              <h6 className="text-xs font-semibold text-[#04a99d] tracking-wider uppercase">TRENDING NOW</h6>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 text-white"
+            >
+              Explore Our Recently Booked Services
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-gray-400 text-sm sm:text-base max-w-2xl"
+            >
+              See what services your neighbors are booking right now
+            </motion.p>
+          </div>
+
+          {onViewAll && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="self-start sm:self-end flex-shrink-0"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-6 py-2.5 sm:px-7 sm:py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold text-xs sm:text-sm shadow-md shadow-[#037166]/30 hover:shadow-lg hover:shadow-[#037166]/50 transition-all inline-flex items-center gap-2"
+                onClick={onViewAll}
+              >
+                <span>View All Services</span>
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            </motion.div>
+          )}
         </div>
 
         {/* Services Grid: 6 per row on desktop, total 12 (2 rows of 6) */}
@@ -233,21 +254,6 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
             );
           })}
         </div>
-
-        {/* View All CTA */}
-        {onViewAll && (
-          <div className="text-center mt-10">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-sm sm:text-base shadow-lg shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all inline-flex items-center gap-2"
-              onClick={onViewAll}
-            >
-              <span>View All Services</span>
-              <ArrowRight className="w-4 h-4" />
-            </motion.button>
-          </div>
-        )}
       </div>
     </section>
   );

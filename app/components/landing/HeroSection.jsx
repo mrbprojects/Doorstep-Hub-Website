@@ -147,14 +147,14 @@ function ServiceCategoryCards({ services = [], serviceSlugs }) {
   if (!services || services.length === 0) return null;
 
   return (
-    <div className="w-full max-w-[1360px] mx-auto mt-3 sm:mt-4 lg:mt-4 px-4 sm:px-6 lg:px-8">
+    <div className="w-full max-w-full min-w-0 mx-auto mt-3 sm:mt-4 lg:mt-4 overflow-hidden sm:overflow-visible">
       {/* 
         Responsive layout for all active business verticals:
         - Mobile (< 640px): Smooth swipeable horizontal row with snap points so user can swipe through all 5 cards in 1 clean line without vertical sprawl
         - Tablet (640px - 1023px): 2 or 3 columns responsive grid
         - Desktop (>= 1024px): All 5 active business verticals displayed together in ONE single line row (lg:grid-cols-5)
       */}
-      <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 xl:gap-3.5">
+      <div className="w-full max-w-full min-w-0 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 xl:gap-3.5">
         {services.map((service, index) => {
           const theme = getServiceTheme(service);
           // Prioritize dynamic backend title & description
@@ -362,7 +362,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-white pt-[76px] sm:pt-[80px] lg:pt-[82px] pb-3 sm:pb-4 lg:pb-5">
+    <section className="relative overflow-hidden bg-white pt-[60px] sm:pt-[64px] lg:pt-[66px] pb-3 sm:pb-4 lg:pb-5">
       {/* ========================================================= */}
       {/* 1. ATMOSPHERIC BACKGROUND (Subtle Grid + Soft Mint Glows)   */}
       {/* ========================================================= */}
@@ -381,7 +381,7 @@ export function HeroSection() {
       {/* ========================================================= */}
       {/* 2. THREE-ZONE HERO SECTION (Desktop 3-Zone, Mobile Stacked)*/}
       {/* ========================================================= */}
-      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden sm:overflow-visible min-w-0">
         <div className="flex flex-col lg:flex-row items-end justify-between gap-4 lg:gap-2">
           
           {/* ─────────────────────────────────────────────────────── */}

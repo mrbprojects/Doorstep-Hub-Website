@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -209,7 +209,81 @@ export function Header({ theme = {}, navItems = [] }) {
     return Boolean(item?.comingSoon);
   };
 
-  const menuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : apiNavItems);
+  // Header is transparent only on the landing page when not scrolled
+  const isLandingPage = pathname === '/';
+  const isHeaderSolid = isScrolled || !isLandingPage;
+
+  const rawMenuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : []);
+
+  const menuItems = useMemo(() => {
+    const items = rawMenuItems
+      .filter((item) => {
+        const name = (item.name || '').toLowerCase();
+        const href = (item.href || '').toLowerCase();
+        // Keep only Become A Partner and App Download (hide faqs, careers, help center, contact us, services links, etc. on all pages)
+        const isBecomePartner =
+          name.includes('become a partner') ||
+          name.includes('become partner');
+        const isAppDownload =
+          name.includes('app download') ||
+          name.includes('download app') ||
+          name.includes('join us') ||
+          href === '/app';
+
+        return isBecomePartner || isAppDownload;
+      })
+      .map((item) => {
+        const name = (item.name || '').toLowerCase();
+        const href = (item.href || '').toLowerCase();
+        const isBecomePartner =
+          name.includes('become a partner') ||
+          name.includes('become partner');
+
+        if (isBecomePartner) {
+          return {
+            ...item,
+            name: 'Become A Partner',
+            isButton: true,
+            buttonVariant: 'secondary',
+          };
+        }
+        return {
+          ...item,
+          name: 'Download App Now',
+          isButton: true,
+          buttonVariant: 'primary',
+        };
+      });
+
+    // Ensure both Become A Partner and Download App Now are always present
+    const hasBecomePartner = items.some(i => i.buttonVariant === 'secondary');
+    const hasAppDownload = items.some(i => i.buttonVariant === 'primary');
+
+    const result = [];
+    if (hasBecomePartner) {
+      result.push(items.find(i => i.buttonVariant === 'secondary'));
+    } else {
+      result.push({
+        name: 'Become A Partner',
+        href: '/service-partner',
+        isButton: true,
+        buttonVariant: 'secondary',
+      });
+    }
+
+    if (hasAppDownload) {
+      result.push(items.find(i => i.buttonVariant === 'primary'));
+    } else {
+      result.push({
+        name: 'Download App Now',
+        href: '/app',
+        isButton: true,
+        buttonVariant: 'primary',
+      });
+    }
+
+    return result;
+  }, [rawMenuItems]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -234,10 +308,6 @@ export function Header({ theme = {}, navItems = [] }) {
     pathname?.includes('/listings') ||
     Object.values(serviceSlugs).some(slug => pathname?.includes(slug));
 
-  // Header is transparent only on the landing page when not scrolled
-  const isLandingPage = pathname === '/';
-  const isHeaderSolid = isScrolled || !isLandingPage;
-
   return (
     <>
       <motion.header
@@ -250,101 +320,122 @@ export function Header({ theme = {}, navItems = [] }) {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link href="/">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center relative group flex-shrink-0"
-              >
-                <div className="relative w-24 sm:w-48 h-10 sm:h-16 overflow-hidden flex-shrink-0">
-                  <Image
-                    src={globalSettings?.applicaionLogo ? (globalSettings.applicaionLogo.startsWith('http') ? globalSettings.applicaionLogo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${globalSettings.applicaionLogo.replace(/^\/+/, '')}`) : "/d-hub-logo.png"}
-                    alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
-                    fill
-                    sizes="(max-width: 640px) 96px, 192px"
-                    className="object-contain object-left transition-all duration-300"
-                    priority
-                  />
-                </div>
-              </motion.div>
-            </Link>
+            {/* Left Side: Logo & Location Bar */}
+            <div className="flex items-center space-x-3 sm:space-x-5 flex-shrink-0">
+              <Link href="/">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="flex items-center relative group flex-shrink-0"
+                >
+                  <div className="relative w-24 sm:w-48 h-10 sm:h-16 overflow-hidden flex-shrink-0">
+                    <Image
+                      src={globalSettings?.applicaionLogo ? (globalSettings.applicaionLogo.startsWith('http') ? globalSettings.applicaionLogo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${globalSettings.applicaionLogo.replace(/^\/+/, '')}`) : "/d-hub-logo.png"}
+                      alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
+                      fill
+                      sizes="(max-width: 640px) 96px, 192px"
+                      className="object-contain object-left transition-all duration-300"
+                      priority
+                    />
+                  </div>
+                </motion.div>
+              </Link>
 
-            {/* Desktop Navigation */}
-            <nav id="navbar-services" className="hidden lg:flex items-center space-x-8">
-              {menuItems.map((item, index) => (
-                <div key={index} className="relative nav-item-dropdown">
-                  {item.dropdown ? (
-                    <>
-                      <motion.button
-                        onClick={() => setActiveDropdown(activeDropdown === index ? null : index)}
-                        whileHover={{ y: -2 }}
-                        className={`${currentTheme.textMain || 'text-white'} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative font-medium whitespace-nowrap flex items-center gap-1`}
-                      >
-                        {item.name}
-                        <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${activeDropdown === index ? 'rotate-90' : ''}`} />
-                        <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r ${currentTheme.accentGradientFrom} ${currentTheme.accentGradientTo} ${activeDropdown === index ? 'w-full' : ''} transition-all duration-300`} />
-                      </motion.button>
-
-                      {/* Dropdown */}
-                      <AnimatePresence>
-                        {activeDropdown === index && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className={`absolute top-full left-0 mt-2 w-48 ${currentTheme.bgMobile} backdrop-blur-xl border ${currentTheme.border} rounded-xl shadow-2xl z-50 overflow-hidden`}
-                          >
-                            {item.dropdown.map((subItem, idx) => (
-                              <Link key={idx} href={subItem.href} onClick={() => setActiveDropdown(null)}>
-                                <span className={`block px-4 py-3 text-sm ${currentTheme.textMain} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#037166]'} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/5` : 'hover:bg-[#037166]/5'} transition-all cursor-pointer`}>
-                                  {subItem.name}
-                                </span>
-                              </Link>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </>
-                  ) : isComingSoonNavItem(item) ? (
-                    // Coming soon — was: <Link href={item.href} onClick={() => handleServiceClick(item)}>
-                    <span
-                      className={`${currentTheme.textMain || 'text-white'} opacity-60 relative group font-medium whitespace-nowrap cursor-not-allowed inline-flex items-center gap-1.5`}
-                      title="Coming Soon"
-                      aria-disabled="true"
-                    >
-                      {item.name}
-                      <span className="rounded-full bg-slate-900/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
-                        Soon
-                      </span>
-                    </span>
-                  ) : (
-                    <Link href={item.href} onClick={() => handleServiceClick(item)}>
-                      <motion.span
-                        className={`${
-                          item.href === pathname || (item.href === '/help-center' && pathname?.startsWith('/help-center'))
-                            ? '!text-[#008C80] font-bold'
-                            : (currentTheme.textMain || 'text-white')
-                        } ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
-                        whileHover={{ y: -2 }}
-                      >
-                        {item.name}
-                        <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r ${currentTheme.accentGradientFrom} ${currentTheme.accentGradientTo} ${
-                          item.href === pathname || (item.href === '/help-center' && pathname?.startsWith('/help-center'))
-                            ? 'w-full'
-                            : 'w-0 group-hover:w-full'
-                        } transition-all duration-300`} />
-                      </motion.span>
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </nav>
-
-            {/* Right Actions */}
-            <div className="flex items-center space-x-1 sm:space-x-3">
+              {/* Location Bar beside Logo */}
               <div id="location-bar">
                 <LocationBar theme={currentTheme} />
               </div>
+            </div>
+
+            {/* Right Side: Navigation / Buttons + Profile Icon + Mobile Menu */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Desktop Navigation / Action Buttons */}
+              <nav id="navbar-services" className="hidden lg:flex items-center space-x-3 sm:space-x-4">
+                {menuItems.map((item, index) => (
+                  <div key={index} className="relative nav-item-dropdown">
+                    {item.dropdown ? (
+                      <>
+                        <motion.button
+                          onClick={() => setActiveDropdown(activeDropdown === index ? null : index)}
+                          whileHover={{ y: -2 }}
+                          className={`${currentTheme.textMain || 'text-white'} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative font-medium whitespace-nowrap flex items-center gap-1`}
+                        >
+                          {item.name}
+                          <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${activeDropdown === index ? 'rotate-90' : ''}`} />
+                          <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r ${currentTheme.accentGradientFrom} ${currentTheme.accentGradientTo} ${activeDropdown === index ? 'w-full' : ''} transition-all duration-300`} />
+                        </motion.button>
+
+                        {/* Dropdown */}
+                        <AnimatePresence>
+                          {activeDropdown === index && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className={`absolute top-full left-0 mt-2 w-48 ${currentTheme.bgMobile} backdrop-blur-xl border ${currentTheme.border} rounded-xl shadow-2xl z-50 overflow-hidden`}
+                            >
+                              {item.dropdown.map((subItem, idx) => (
+                                <Link key={idx} href={subItem.href} onClick={() => setActiveDropdown(null)}>
+                                  <span className={`block px-4 py-3 text-sm ${currentTheme.textMain} ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#037166]'} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/5` : 'hover:bg-[#037166]/5'} transition-all cursor-pointer`}>
+                                    {subItem.name}
+                                  </span>
+                                </Link>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </>
+                    ) : isComingSoonNavItem(item) ? (
+                      <span
+                        className={`${currentTheme.textMain || 'text-white'} opacity-60 relative group font-medium whitespace-nowrap cursor-not-allowed inline-flex items-center gap-1.5`}
+                        title="Coming Soon"
+                        aria-disabled="true"
+                      >
+                        {item.name}
+                        <span className="rounded-full bg-slate-900/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                          Soon
+                        </span>
+                      </span>
+                    ) : item.isButton ? (
+                      <Link
+                        href={item.href || (item.buttonVariant === 'secondary' ? '/partner' : '/app')}
+                        onClick={() => handleServiceClick(item)}
+                      >
+                        <motion.button
+                          whileHover={{ scale: 1.04 }}
+                          whileTap={{ scale: 0.96 }}
+                          className={
+                            item.buttonVariant === 'secondary'
+                              ? "px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border-2 border-[#037166] text-[#037166] hover:bg-[#037166] hover:text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md transition-all inline-flex items-center gap-1.5 cursor-pointer bg-white/80 backdrop-blur-xs"
+                              : "px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#04a99d] hover:to-[#037166] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#037166]/25 hover:shadow-lg hover:shadow-[#037166]/40 transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                          }
+                        >
+                          <span>{item.name}</span>
+                        </motion.button>
+                      </Link>
+                    ) : (
+                      <Link href={item.href} onClick={() => handleServiceClick(item)}>
+                        <motion.span
+                          className={`${
+                            item.href === pathname || (item.href === '/help-center' && pathname?.startsWith('/help-center'))
+                              ? '!text-[#008C80] font-bold'
+                              : (currentTheme.textMain || 'text-white')
+                          } ${currentTheme.textHover ? `hover:${currentTheme.textHover}` : 'hover:text-[#04a99d]'} transition-colors relative group font-medium whitespace-nowrap cursor-pointer`}
+                          whileHover={{ y: -2 }}
+                        >
+                          {item.name}
+                          <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r ${currentTheme.accentGradientFrom} ${currentTheme.accentGradientTo} ${
+                            item.href === pathname || (item.href === '/help-center' && pathname?.startsWith('/help-center'))
+                              ? 'w-full'
+                              : 'w-0 group-hover:w-full'
+                          } transition-all duration-300`} />
+                        </motion.span>
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </nav>
+
+              {/* Profile / Auth Button */}
 
               {/* Cart Button */}
               {/* <motion.button
@@ -489,6 +580,24 @@ export function Header({ theme = {}, navItems = [] }) {
                           Soon
                         </span>
                       </span>
+                    ) : item.isButton ? (
+                      <Link
+                        href={item.href || (item.buttonVariant === 'secondary' ? '/partner' : '/app')}
+                        onClick={() => {
+                          handleServiceClick(item);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <div
+                          className={
+                            item.buttonVariant === 'secondary'
+                              ? "w-full text-center py-2.5 px-4 rounded-xl border-2 border-[#037166] text-[#037166] font-bold text-sm bg-[#037166]/5"
+                              : "w-full text-center py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-sm shadow-md"
+                          }
+                        >
+                          {item.name}
+                        </div>
+                      </Link>
                     ) : (
                       <Link
                         href={item.href}

@@ -326,35 +326,26 @@ export function TopCategories({ onViewAll }) {
     : visibleSubCategories;
 
   return (
-    <section className="relative bg-[#fbfbfa] py-12 sm:py-16 lg:py-20 overflow-x-hidden">
+    <section id="top-categories" className="relative bg-[#fbfbfa] py-8 sm:py-10 lg:py-12 overflow-x-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-12 left-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-[#037166]/6 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-56 w-56 rounded-full bg-[#f0b16f]/10 blur-3xl" />
       </div>
 
       <div className="relative mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-10 max-w-7xl text-center sm:mb-14">
-          <div className="mb-3 flex items-center justify-center gap-4 text-[#d38b46]">
+        <div className="mx-auto mb-6 max-w-7xl text-center sm:mb-8">
+          <div className="mb-2 flex items-center justify-center gap-4 text-[#d38b46]">
             <span className="h-px w-10 bg-current/40" />
             <span className="text-sm font-semibold tracking-[0.2em] uppercase !text-[#037166]">{sectionCopy.eyebrow}</span>
             <span className="h-px w-10 bg-current/40" />
           </div>
 
-          <h2 className="text-4xl font-bold tracking-tight text-[#0c7b78] sm:text-5xl">
+          <h2 className="text-3xl font-bold tracking-tight text-[#0c7b78] sm:text-4xl">
             {sectionCopy.title}
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-[#6b7280] sm:text-lg">
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-[#6b7280] sm:text-base">
             {sectionCopy.description}
           </p>
-
-          <button
-            type="button"
-            onClick={onViewAll}
-            className="mt-5 inline-flex items-center gap-2 text-lg font-semibold !text-[#037166] transition-colors hover:text-[#c97832]"
-          >
-            View all
-            <ArrowRight className="h-5 w-5" />
-          </button>
         </div>
 
         {!location?.lat || !location?.lng ? (
@@ -504,10 +495,7 @@ export function TopCategories({ onViewAll }) {
               )}
             </div>
 
-            <div
-              className="min-w-0"
-              style={isDesktop ? { marginTop: `${offsetY}px`, transition: 'margin-top 0.4s cubic-bezier(0.16, 1, 0.3, 1)' } : {}}
-            >
+            <div className="min-w-0">
               {isLoadingCategories || isLoadingSubCategories ? (
                 <ServiceGridSkeleton />
               ) : subCategories.length > 0 ? (
@@ -527,13 +515,14 @@ export function TopCategories({ onViewAll }) {
                         onClick={() => router.push(`/${subCategory.slug}`)}
                         className="group relative overflow-hidden rounded-[18px] text-left shadow-[0_12px_30px_rgba(15,23,42,0.12)]"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#d8dee4] to-[#f2f4f7]" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0c5c53] via-[#004d40] to-[#102033]" />
                         {subCategory.image ? (
                           <img
-                            loading="lazy"
+                            loading={index < 16 ? 'eager' : 'lazy'}
                             decoding="async"
                             src={subCategory.image}
                             alt={subCategory.name}
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
                         ) : (
@@ -549,20 +538,35 @@ export function TopCategories({ onViewAll }) {
                         </div>
                       </motion.button>
                     ))}
-                  </div>
 
-                  {subCategories.length > initialVisibleCount && (
-                    <div className="mt-8 flex justify-center">
-                      <button
+                    {/* Show More / Show Less Card as the Last Card */}
+                    {subCategories.length > initialVisibleCount && (
+                      <motion.button
+                        key="show-more-card"
                         type="button"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        whileHover={{ y: -6 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => setShowAllVisibleCards((current) => !current)}
-                        className="inline-flex items-center gap-2 rounded-full border border-[#d6e5e2] px-5 py-3 text-sm font-semibold text-[#037166] transition hover:bg-[#f6fbfa]"
+                        className="group relative flex flex-col items-center justify-center overflow-hidden rounded-[18px] text-center shadow-[0_12px_30px_rgba(15,23,42,0.12)] border-2 border-dashed border-[#037166]/40 hover:border-[#04a99d] bg-gradient-to-br from-[#0c5c53]/35 via-[#004d40]/25 to-[#102033]/40 hover:from-[#0c5c53]/60 hover:to-[#004d40]/50 transition-all p-3"
                       >
-                        {showAllVisibleCards ? 'Show Less' : `Show More (${subCategories.length})`}
-                        <ChevronRight className={`h-4 w-4 transition-transform ${showAllVisibleCards ? '-rotate-90' : 'rotate-90'}`} />
-                      </button>
-                    </div>
-                  )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                        <div className="relative z-10 flex flex-col items-center justify-center">
+                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] flex items-center justify-center text-white mb-2 group-hover:scale-110 shadow-md transition-transform">
+                            <ChevronRight className={`h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 ${showAllVisibleCards ? '-rotate-90' : 'rotate-90'}`} />
+                          </div>
+                          <span className="text-xs sm:text-sm font-bold text-white drop-shadow-sm">
+                            {showAllVisibleCards ? 'Show Less' : `Show More (${subCategories.length})`}
+                          </span>
+                          <span className="text-[10px] sm:text-[11px] text-[#5eead4] mt-0.5 font-medium">
+                            {showAllVisibleCards ? 'Collapse list' : `+${subCategories.length - initialVisibleCount} More`}
+                          </span>
+                        </div>
+                      </motion.button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="rounded-[28px] border border-[#edf0f2] bg-white px-6 py-14 text-center shadow-sm">

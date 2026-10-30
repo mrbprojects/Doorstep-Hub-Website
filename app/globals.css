@@ -625,6 +625,12 @@ html {
   button[class~="bg-[#037166]"],
   button[class*="from-[#e89117]"],
   button[class*="to-[#00796B]"],
+  button[class*="bg-[#00796F]"],
+  button[class*="bg-[#00695C]"],
+  a[class*="bg-[#00796F]"],
+  a[class*="bg-[#00695C]"],
+  .btn-redeem-offer,
+  .btn-view-all-offers,
   button[class*="bg-gradient-"],
   div[class~="bg-[#037166]"],
   .hero-card-arrow-btn
@@ -634,10 +640,24 @@ html {
   button[class~="bg-[#037166]"],
   button[class*="from-[#e89117]"],
   button[class*="to-[#00796B]"],
+  button[class*="bg-[#00796F]"],
+  button[class*="bg-[#00695C]"],
+  a[class*="bg-[#00796F]"],
+  a[class*="bg-[#00695C]"],
+  .btn-redeem-offer,
+  .btn-view-all-offers,
   button[class*="bg-gradient-"],
   div[class~="bg-[#037166]"],
   .hero-card-arrow-btn
-):not(.category-pill:not(.category-pill-active)) :is(span, p, svg, path) {
+):not(.category-pill:not(.category-pill-active)) :is(span, p, svg, path, *) {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.btn-redeem-offer,
+.btn-redeem-offer *,
+.btn-view-all-offers,
+.btn-view-all-offers * {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }

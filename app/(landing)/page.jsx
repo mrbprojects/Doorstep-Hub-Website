@@ -14,6 +14,9 @@ const LatestSpaServices = nextDynamic(() => import('@/components/landing/LatestS
 const RecommendedSpaSalon = nextDynamic(() => import('@/components/landing/RecommendedSpaSalon').then(m => m.RecommendedSpaSalon));
 const KnowledgeSection = nextDynamic(() => import('@/components/landing/KnowledgeSection').then(m => m.KnowledgeSection));
 const AppDownload = nextDynamic(() => import('@/components/landing/AppDownload').then(m => m.AppDownload));
+const HomeHowItWorksSection = nextDynamic(() => import('@/components/landing/HomeHowItWorksSection').then(m => m.HomeHowItWorksSection));
+const HomeWhyChooseUsSection = nextDynamic(() => import('@/components/landing/HomeWhyChooseUsSection').then(m => m.HomeWhyChooseUsSection));
+const HomeExclusiveOffersSection = nextDynamic(() => import('@/components/landing/HomeExclusiveOffersSection').then(m => m.HomeExclusiveOffersSection));
 
 export const dynamic = 'force-dynamic';
 
@@ -79,14 +82,11 @@ export default async function Home() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
             />
             <HeroSection />
-            <BookingServices />
-            <NearbyServiceCenters />
-            <PremiumPGHostels />
-            <RecommendedHostels />
-            <LatestReligiousServices />
-            <RecommendedReligious />
-            <LatestSpaServices />
-            <RecommendedSpaSalon />
+            {/* Dynamic Exclusive Offers & Coupons placed immediately below Hero section */}
+            <HomeExclusiveOffersSection />
+            {/* How It Works & Why Choose Doorstep Hub */}
+            <HomeHowItWorksSection />
+            <HomeWhyChooseUsSection />
             <KnowledgeSection />
             <AppDownload />
         </div>

@@ -405,10 +405,10 @@ export function Footer({ theme = {} }) {
       {/* Background Gradient Glow */}
       <div className="absolute inset-0 bg-gradient-to-t pointer-events-none" style={{ background: `linear-gradient(to top, ${t.accentGlow}08, transparent)` }} />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* Explore Services Dynamic Section */}
         {!isLoading && serviceGroups.some(group => group.subcategories.length > 0) && (
-          <div className="mb-16">
+          <div className="mb-8 sm:mb-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -477,7 +477,7 @@ export function Footer({ theme = {} }) {
                 >
                   {displayTitle}
                 </Link>
-                <div className={`text-sm leading-8 ${t.textMuted}`}>
+                <div className={`text-sm leading-8 ${t.textMuted} break-words overflow-hidden`}>
                   {section.categories.map((catGroup, groupIdx) => (
                     <span key={catGroup.category._id} className="inline mr-1">
                       <Link
@@ -569,7 +569,7 @@ export function Footer({ theme = {} }) {
 
         {/* Services in Popular Cities Dynamic SEO Link Grid */}
         {!isLoading && cities.length > 0 && (
-          <div className="mb-16">
+          <div className="mb-8 sm:mb-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

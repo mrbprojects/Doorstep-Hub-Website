@@ -146,7 +146,7 @@ export default function RootLayout({ children }) {
         */}
         <Script
           id="google-maps-script"
-          src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=__onGoogleMapsLoaded&v=weekly`}
+          src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=__onGoogleMapsLoaded&v=quarterly&loading=async`}
           strategy="afterInteractive"
         />
 

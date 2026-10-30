@@ -158,7 +158,7 @@ export function LocationBar({ theme = {} }) {
 
     return (
         <>
-            {/* Navbar Trigger */}
+            {/* Desktop Navbar Trigger */}
             <motion.button
                 onClick={() => setIsOpen(true)}
                 data-location-trigger
@@ -176,6 +176,22 @@ export function LocationBar({ theme = {} }) {
                     </span>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#008C80] transition-colors" />
+            </motion.button>
+
+            {/* Mobile / Compact Trigger */}
+            <motion.button
+                onClick={() => setIsOpen(true)}
+                data-location-trigger-mobile
+                className="flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-[#008C80]/30 shadow-2xs hover:border-[#008C80] text-xs font-bold text-[#0F1B3D] focus:outline-none shrink-0"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                aria-label="Select location"
+            >
+                <MapPin className="w-3.5 h-3.5 text-[#008C80] fill-[#008C80] shrink-0" />
+                <span className="truncate max-w-[80px] sm:max-w-[110px] text-[11px] font-bold text-[#0F1B3D]">
+                    {loading ? '...' : location ? (location.city || location.shortAddress) : 'Select'}
+                </span>
+                <ChevronDown className="w-3 h-3 text-gray-400 shrink-0" />
             </motion.button>
 
             {/* Modal / Dropdown - Using Portal to escape Header stacking context */}

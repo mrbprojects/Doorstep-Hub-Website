@@ -46,17 +46,17 @@ const bottomHighlights = [
 
 export function ApplianceComparison() {
   return (
-    <section className="relative py-14 md:py-24 bg-gradient-to-b from-white via-gray-50/40 to-white overflow-hidden">
+    <section className="relative py-8 sm:py-10 lg:py-12 bg-gradient-to-b from-white via-gray-50/40 to-white overflow-hidden">
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-7xl mx-auto mb-10 md:mb-14">
+        <div className="text-center max-w-7xl mx-auto mb-5 sm:mb-6">
           <motion.p
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-xs md:text-sm font-black uppercase tracking-[0.25em] text-[#2563EB] mb-2"
+            className="text-xs md:text-sm font-black uppercase tracking-[0.25em] text-[#2563EB] mb-1.5"
           >
             SIDE BY SIDE
           </motion.p>
@@ -65,7 +65,7 @@ export function ApplianceComparison() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight"
           >
             Traditional Repair <span className="text-gray-400 font-medium">vs</span> <span className="text-[#037166]">Doorstep Hub</span>
           </motion.h2>
@@ -177,7 +177,7 @@ export function ApplianceComparison() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8 md:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
+          className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
         >
           {bottomHighlights.map((item) => {
             const Icon = item.icon;

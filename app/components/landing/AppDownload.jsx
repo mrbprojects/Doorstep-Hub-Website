@@ -32,7 +32,7 @@ export function AppDownload() {
   return (
     <section
       id="app-download"
-      className="relative overflow-hidden bg-white py-14 sm:py-20 lg:py-24 border-t border-[#E9F8F6]"
+      className="relative overflow-hidden bg-white py-8 sm:py-10 lg:py-12 border-t border-[#E9F8F6]"
     >
       {/* ========================================================= */}
       {/* ATMOSPHERIC BACKGROUND DECORATIONS                        */}
@@ -59,16 +59,16 @@ export function AppDownload() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 xl:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 xl:gap-10 items-center">
           
           {/* ========================================================= */}
           {/* LEFT COLUMN: HERO CONTENT, BENEFITS, STORES, STATS        */}
           {/* ========================================================= */}
-          <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+          <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-center text-left space-y-4 sm:space-y-5">
             
             {/* 1. BADGE: DOWNLOAD OUR APP */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E9F8F6] border border-[#BCE3DE] shadow-2xs">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E9F8F6] border border-[#BCE3DE] shadow-2xs">
                 <Smartphone className="w-4 h-4 text-[#008C80]" />
                 <span className="text-xs font-black uppercase tracking-wider text-[#0A2540]">
                   DOWNLOAD OUR APP
@@ -78,7 +78,7 @@ export function AppDownload() {
 
             {/* 2. MAIN HEADLINE */}
             <div>
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#101828] tracking-tight leading-[1.1]">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#101828] tracking-tight leading-[1.12]">
                 Everything in{' '}
                 <span className="relative inline-block text-[#008C80]">
                   Your Pocket
@@ -90,7 +90,7 @@ export function AppDownload() {
                 </span>
               </h2>
 
-              <p className="mt-4 text-[#475467] text-base sm:text-lg lg:text-xl font-normal leading-relaxed max-w-xl">
+              <p className="mt-2.5 text-[#475467] text-sm sm:text-base font-normal leading-relaxed max-w-xl">
                 Access all services, book appointments, track orders, and manage your daily needs — all from one powerful app.
               </p>
             </div>

@@ -529,7 +529,7 @@ export function KnowledgeSection({
   const hasCustomPy = className && className.includes('py-');
 
   return (
-    <section id="help-center-resources" className={`relative ${hasCustomPy ? '' : 'py-12 sm:py-16 lg:py-20'} overflow-hidden bg-white ${className}`}>
+    <section id="help-center-resources" className={`relative ${hasCustomPy ? '' : 'py-8 sm:py-10 lg:py-12'} overflow-hidden bg-white ${className}`}>
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#008C8008,transparent_50%),radial-gradient(circle_at_bottom_left,#008C8005,transparent_50%)] pointer-events-none" />
       
@@ -544,16 +544,16 @@ export function KnowledgeSection({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10 sm:mb-12"
+          className="text-center mb-6 sm:mb-8"
         >
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E9F8F6] border border-[#BCE3DE] text-[#008C80] text-xs font-black uppercase tracking-wider mb-3.5 shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E9F8F6] border border-[#BCE3DE] text-[#008C80] text-xs font-black uppercase tracking-wider mb-2.5 shadow-2xs">
             <BookOpen className="w-4 h-4 text-[#008C80]" />
             <span>{displayBadgeText}</span>
           </div>
 
           {/* Title: Help Center with mint accent marks */}
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#101828] mb-3 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#101828] mb-2 tracking-tight">
             {title ? (
               title
             ) : (
@@ -652,11 +652,11 @@ export function KnowledgeSection({
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center mt-10 sm:mt-12"
+            className="text-center mt-6 sm:mt-8"
           >
             <Link
               href={finalExploreHref}
-              className="btn-explore-all inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-3.5 sm:py-4 bg-[#008C80] hover:bg-[#006D65] !text-white font-extrabold text-xs sm:text-sm tracking-wider rounded-full shadow-lg shadow-[#008C80]/20 hover:shadow-xl hover:scale-105 transition-all group"
+              className="btn-explore-all inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[#008C80] hover:bg-[#006D65] !text-white font-extrabold text-xs sm:text-sm tracking-wider rounded-full shadow-md shadow-[#008C80]/15 hover:shadow-lg hover:scale-105 transition-all group"
               style={{ color: '#ffffff' }}
             >
               <span className="!text-white font-bold" style={{ color: '#ffffff' }}>Explore All</span>
@@ -667,7 +667,7 @@ export function KnowledgeSection({
 
         {/* Optional Newsletter Section */}
         {showNewsletter && (
-          <div className="mt-16 sm:mt-20">
+          <div className="mt-8 sm:mt-10">
             <NewsletterWidget />
           </div>
         )}

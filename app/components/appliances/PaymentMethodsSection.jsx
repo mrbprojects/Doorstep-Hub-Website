@@ -64,7 +64,7 @@ const paymentMethods = [
 
 export function PaymentMethodsSection() {
   return (
-    <section className="relative py-12 md:py-16 bg-gradient-to-b from-white to-gray-50/50 border-t border-gray-100">
+    <section className="relative py-8 sm:py-10 lg:py-12 bg-gradient-to-b from-white to-gray-50/50 border-t border-gray-100">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">
           

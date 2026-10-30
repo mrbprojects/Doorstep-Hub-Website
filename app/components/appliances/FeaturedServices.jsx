@@ -122,48 +122,73 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
   }
 
   return (
-    <section id="featured-services" className="py-15 relative overflow-hidden">
+    <section id="featured-services" className="py-8 sm:py-10 lg:py-12 relative overflow-hidden">
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f1614]/30 to-transparent" />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-12">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-4"
-          >
-            <Sparkles className="w-3 h-3 text-[#04a99d]" />
-            <h6 className="text-sm font-medium text-[#04a99d]">FEATURED</h6>
-          </motion.div>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5 sm:mb-6">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-2.5"
+            >
+              <Sparkles className="w-3 h-3 text-[#04a99d]" />
+              <h6 className="text-xs font-semibold text-[#04a99d] tracking-wider uppercase">FEATURED</h6>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-white"
+            >
+              Explore Our Featured Service
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-gray-400 text-sm sm:text-base max-w-2xl"
+            >
+              Discover our most popular home appliance services, chosen by customers for convenient doorstep support, skilled technicians, clear service guidance, and reliable repair solutions for everyday appliance problems.
+            </motion.p>
+          </div>
 
-           <div className="mb-2 flex items-center justify-end gap-2">
-          <button type="button" onClick={() => scrollCards('left')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll left">
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button type="button" onClick={() => scrollCards('right')} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white" aria-label="Scroll right">
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl sm:text-5xl text-center font-bold mb-4 text-white"
-          >
-            Explore Our Featured Service
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-gray-400 text-center mx-auto max-w-5xl"
-          >
-            Discover our most popular home appliance services, chosen by customers for convenient doorstep support, skilled technicians, clear service guidance, and reliable repair solutions for everyday appliance problems.
-          </motion.p>
+          <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-end flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => scrollCards('left')}
+                className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCards('right')}
+                className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#037166]/40 bg-[#037166]/10 text-[#04a99d] transition hover:bg-[#037166] hover:text-white"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+            </div>
+            {onViewAll && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold text-xs sm:text-sm shadow-md shadow-[#037166]/30 hover:shadow-lg hover:shadow-[#037166]/50 transition-all inline-flex items-center gap-2"
+                onClick={onViewAll}
+              >
+                <span>View All Services</span>
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            )}
+          </div>
         </div>
        
 
@@ -258,24 +283,6 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
             </motion.div>
           ))}
         </div>
-
-        {/* View All Button */}
-          <motion.div
-  initial={{ opacity: 0, y: 20 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  className="flex justify-center mt-12 mb-5"
->
-  <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    className="px-8 py-4 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-bold text-lg shadow-lg shadow-[#037166]/30 hover:shadow-[#037166]/50 transition-all duration-300 inline-flex items-center gap-3 group"
-    onClick={onViewAll}
-  >
-    View All Services
-    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-  </motion.button>
-</motion.div>
       </div>
     </section>
   );

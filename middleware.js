@@ -27,8 +27,11 @@ const DEFAULT_SLUGS = {
 
 
     'service-list/category/appliance-repair-services': '/appliances/categories',
-
     'service-list/category/appliance-repair-service': '/appliances/categories',
+    'service-list/featured-services/all': '/appliances/featured',
+    'service-list/featured-services': '/appliances/featured',
+    'all-service-categories': '/appliances/recent',
+    'nearby-service-centers': '/appliance-repairs/services-centers',
     'verified-appliance-repair-partners': '/appliances/child/683dbbfbb62d2a241de0f7e3',
     'salon-at-home-services': '/spa-salon',
     'pg-hostels-near-me': '/pghostels',
@@ -282,13 +285,23 @@ export async function middleware(request) {
             }
         }
 
-        // Dedicated /service-list/[slug] pages (except book-now and category subpaths) pass straight through
+        // Dedicated /service-list/[slug] pages (except book-now, category, and featured-services subpaths) pass straight through
         if (
             normalizedPath.startsWith('service-list/') &&
             !normalizedPath.startsWith('service-list/book-now/') &&
-            !normalizedPath.startsWith('service-list/category/')
+            !normalizedPath.startsWith('service-list/category/') &&
+            !normalizedPath.startsWith('service-list/featured-services')
         ) {
             return NextResponse.next();
+        }
+
+        if (
+            normalizedPath === 'service-list/featured-services/all' ||
+            normalizedPath === 'service-list/featured-services'
+        ) {
+            const url = request.nextUrl.clone();
+            url.pathname = '/appliances/featured';
+            return NextResponse.rewrite(url);
         }
 
         const slugRegistry = (await getSlugRegistry()) || createSlugRegistry();

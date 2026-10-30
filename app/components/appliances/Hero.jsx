@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  ArrowRight, 
-  Shield, 
-  Zap, 
-  Star, 
-  Users, 
-  MessageCircle, 
+import {
+  ArrowRight,
+  Shield,
+  Zap,
+  Star,
+  Users,
+  MessageCircle,
   Wrench,
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -36,43 +36,33 @@ export function Hero({ onViewServices, onBookService }) {
   const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Hi Doorstep Hub, I need an appliance repair service in ${currentCityName} at my doorstep.`)}`;
 
   return (
-    <section className="relative overflow-hidden pt-16 sm:pt-20 lg:pt-20 pb-8 sm:pb-10 bg-gradient-to-b from-slate-50/70 via-white to-slate-50/50">
+    <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32 xl:pt-36 pb-8 sm:pb-10 lg:pb-12 bg-gradient-to-b from-slate-50/70 via-white to-slate-50/50">
       {/* Background Subtle Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(3,113,102,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(3,113,102,0.06)_1px,transparent_1px)] bg-[size:44px_44px] pointer-events-none" />
       <div className="pointer-events-none absolute top-10 right-10 h-[450px] w-[450px] rounded-full bg-[#037166]/5 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-10 left-10 h-[450px] w-[450px] rounded-full bg-[#04a99d]/5 blur-[120px]" />
 
       <div className="relative z-10 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-        
+
         {/* Main Two-Column Split Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-          
+
           {/* ── LEFT COLUMN: HEADLINE, PROOF, & BOOKING CARD ── */}
           <div className="lg:col-span-7 flex flex-col justify-center">
-            
-            {/* Tag / Eyebrow Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2563EB]/10 border border-[#2563EB]/20 text-[#2563EB] text-[11px] sm:text-xs font-black tracking-widest uppercase mb-3 w-fit"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse" />
-              <span>HELLO INDIA · SAHI SERVICE, SAHI PRICE</span>
-            </motion.div>
 
             {/* Headline */}
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="text-2xl sm:text-4xl lg:text-[44px] xl:text-[48px] font-black text-[#0f172a] tracking-tight leading-[1.12] mb-3"
+              className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[40px] font-black text-[#0f172a] tracking-tight leading-[1.3] mb-4"
             >
-              Experience the best <span className="text-[#037166]">appliance repair</span> at your doorstep.
+              <span className="block">Experience the Best <span className="text-[#037166]">Appliance</span></span>
+              <span className="block mt-1 sm:mt-1.5"><span className="text-[#037166]">Repair</span> at Your Doorstep.</span>
             </motion.h1>
 
             {/* Subheading / Value Proposition */}
-            <motion.p
+            {/* <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.15 }}
@@ -80,10 +70,10 @@ export function Hero({ onViewServices, onBookService }) {
             >
               Get an instant quote for your appliances. Genuine parts, certified technicians, doorstep service.{' '}
               <strong className="text-slate-900 font-bold">Service in 60 Mins @ your doorstep · Warranty included.</strong>
-            </motion.p>
+            </motion.p> */}
 
             {/* Trust Pills / Social Proof Row */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
@@ -101,7 +91,7 @@ export function Hero({ onViewServices, onBookService }) {
                 <Shield className="w-3.5 h-3.5 text-blue-600" />
                 <span>30-90 Days Warranty</span>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             {/* Interactive Booking Widget Card */}
             <motion.div
@@ -114,11 +104,10 @@ export function Hero({ onViewServices, onBookService }) {
               <div className="grid grid-cols-2 p-1 bg-slate-100/80 rounded-2xl mb-3.5">
                 <button
                   onClick={() => setActiveTab('book')}
-                  className={`py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${
-                    activeTab === 'book'
-                      ? 'bg-white text-[#037166] shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  className={`py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${activeTab === 'book'
+                    ? 'bg-white text-[#037166] shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                    }`}
                 >
                   Book Repair Service
                 </button>
@@ -127,11 +116,10 @@ export function Hero({ onViewServices, onBookService }) {
                     setActiveTab('explore');
                     onViewServices?.();
                   }}
-                  className={`py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${
-                    activeTab === 'explore'
-                      ? 'bg-white text-[#037166] shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  className={`py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${activeTab === 'explore'
+                    ? 'bg-white text-[#037166] shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                    }`}
                 >
                   Explore All Categories
                 </button>
@@ -142,8 +130,8 @@ export function Hero({ onViewServices, onBookService }) {
                 <label className="block text-[10.5px] font-black uppercase tracking-wider text-slate-400">
                   Select Appliance or Problem
                 </label>
-                
-                <div 
+
+                <div
                   onClick={onBookService}
                   className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 cursor-pointer hover:border-[#037166]/40 hover:bg-slate-100/50 transition-colors"
                 >
@@ -278,7 +266,7 @@ export function Hero({ onViewServices, onBookService }) {
         </div>
 
         {/* ── BOTTOM TRUST FEATURES ROW (3 CARDS) ── */}
-        <div className="mt-8 sm:mt-10 pt-6 sm:pt-7 border-t border-slate-200/80 grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-6">
+        <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-slate-200/80 grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5">
           {TRUST_FEATURES.map((item, i) => (
             <div
               key={i}

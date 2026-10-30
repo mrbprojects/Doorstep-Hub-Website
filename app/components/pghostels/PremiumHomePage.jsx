@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { Fragment, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, useScroll, useInView, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
-    MapPin, Search, Users, Home, Bed, Sparkles, Star, ChevronRight,
-    Wifi, Utensils, Shirt, Check, TrendingUp, Shield, Clock, Heart
+    MapPin, Search, Users, Home, Bed, Sparkles, Star, ChevronRight, ChevronLeft,
+    Wifi, Utensils, Shirt, Check, TrendingUp, Shield, Clock, Heart,
+    Zap, Percent, Flame
 } from 'lucide-react';
-import { Input } from '@/components/pghostels/ui/input';
 import { QuestionnaireModal } from '@/components/pghostels/QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
 import { NearbyHostelsSection } from './NearbyHostelsSection';
+import { PGLifestyleSection } from './PGLifestyleSection';
 import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
 import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 import { AppDownload } from '@/components/landing/AppDownload';
@@ -47,22 +48,14 @@ export function PremiumHomePage() {
     const isCategoriesInView = useInView(categoriesRef, { once: true });
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [heroSlideIndex, setHeroSlideIndex] = useState(0);
     const [globalSettings, setGlobalSettings] = useState(null);
-
-    useEffect(() => {
-        if (apiCategories.length > 0) {
-            const timer = setInterval(() => {
-                setHeroSlideIndex((prev) => (prev + 1) % apiCategories.length);
-            }, 4000);
-            return () => clearInterval(timer);
-        }
-    }, [apiCategories.length]);
 
 
     const handleSearch = useCallback(() => {
         if (searchQuery.trim()) {
-            router.push(`/pghostels/listings/all?query=${encodeURIComponent(searchQuery)}`);
+            router.push(`/pghostels/listings/all?query=${encodeURIComponent(searchQuery.trim())}`);
+        } else {
+            router.push('/pghostels/listings/all');
         }
     }, [searchQuery, router]);
 
@@ -181,7 +174,7 @@ export function PremiumHomePage() {
     }), [location?.city, apiCategories]);
 
     return (
-        <div className="min-h-screen bg-[#E2E6E6] overflow-hidden">
+        <div className="min-h-screen bg-[#F4FCF9] overflow-hidden">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
@@ -190,271 +183,222 @@ export function PremiumHomePage() {
             <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-[#037166]/3 via-transparent to-[#037166]/5" />
 
             {/* Hero Section */}
-            <section ref={heroRef} className="relative flex items-center pt-16 sm:pt-20">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-[#037166]/5 to-transparent" />
+            <section ref={heroRef} className="relative overflow-hidden bg-gradient-to-r from-[#F0F9F6] via-[#F5FBF9] to-[#E8F7F3] pt-20 pb-0 border-b border-[#E2F5EE]">
+                {/* Subtle Atmospheric Highlights */}
+                <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[600px] h-[600px] bg-[#B2EEDB]/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-0 left-0 w-[450px] h-[450px] bg-[#C4F3E5]/25 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 grid md:grid-cols-2 gap-6 md:gap-8 items-center relative z-10">
-                    {/* Left Content */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={isHeroInView ? { opacity: 1, x: 0 } : {}}
-                        transition={{ duration: 0.8, ease: [0.6, 0.05, 0.01, 0.9] }}
-                        className="space-y-4"
-                    >
-                        <div className="space-y-3 sm:space-y-4">
+                <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+                        {/* Left Content - approximately 48-50% (6 cols of 12) */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={isHeroInView ? { opacity: 1, x: 0 } : {}}
+                            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                            className="lg:col-span-6 xl:col-span-6 space-y-3.5 sm:space-y-4 py-4 lg:py-6"
+                        >
+                            {/* Top Badge */}
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 10 }}
                                 animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
-                                transition={{ delay: 0.2 }}
-                                className="inline-block"
+                                transition={{ duration: 0.5, delay: 0.1 }}
+                                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#DDF8F0] border border-[#BCEEDA] shadow-xs"
                             >
-                                <div className="px-3.5 py-1.5 bg-gradient-to-r from-[#037166]/20 to-transparent border border-[#037166]/30 rounded-full backdrop-blur-sm">
-                                    <h6 className="text-[#037166] text-xs sm:text-sm font-semibold">✨ Find Your Perfect Stay</h6>
+                                <div className="w-5 h-5 rounded-full bg-[#00796F] flex items-center justify-center text-white shrink-0">
+                                    <Home className="w-3 h-3 stroke-[2.5]" />
+                                </div>
+                                <span className="text-xs font-semibold text-[#00695C] tracking-tight">
+                                    Verified PGs & Hostels Near You
+                                </span>
+                            </motion.div>
+
+                            {/* Main Headline */}
+                            <motion.h1
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                                className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] xl:text-[48px] font-extrabold tracking-tight leading-[1.12] text-[#102033]"
+                            >
+                                Find Your <span className="text-[#00796F]">Perfect Stay</span>
+                                <br />
+                                in Minutes.
+                            </motion.h1>
+
+                            {/* Description */}
+                            <motion.p
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ duration: 0.6, delay: 0.3 }}
+                                className="text-sm sm:text-base text-[#64748B] leading-relaxed max-w-lg font-normal"
+                            >
+                                Comfortable, safe and affordable PGs, co-living spaces, and hostels near your college or office.
+                            </motion.p>
+
+                            {/* Search Bar */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ duration: 0.6, delay: 0.4 }}
+                                className="w-full max-w-xl bg-white rounded-full p-1.5 pl-4 sm:pl-5 shadow-[0_8px_28px_rgba(0,121,111,0.08)] border border-[#E2E8F0] flex items-center gap-2 sm:gap-3 transition-shadow hover:shadow-[0_12px_32px_rgba(0,121,111,0.12)]"
+                            >
+                                <MapPin className="w-5 h-5 text-[#00796F] shrink-0" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Search by area, college, landmark or city..."
+                                    className="w-full bg-transparent text-sm text-[#102033] placeholder:text-[#94A3B8] font-normal outline-none focus:outline-none"
+                                    aria-label="Search by area, college, landmark or city"
+                                />
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handleSearch}
+                                    className="px-5 sm:px-6 py-2 sm:py-2.5 bg-[#00796F] hover:bg-[#00695C] text-white rounded-full font-semibold shadow-md shadow-[#00796F]/20 text-xs sm:text-sm flex items-center gap-1.5 shrink-0 transition-colors"
+                                >
+                                    <Search className="w-4 h-4 text-white stroke-[2.5]" />
+                                    <span>Search</span>
+                                </motion.button>
+                            </motion.div>
+
+                            {/* Benefit Indicators */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ duration: 0.6, delay: 0.5 }}
+                                className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-3 sm:gap-4 lg:gap-5 pt-0.5"
+                            >
+                                {/* 1. Verified Listings */}
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-[#00796F] flex items-center justify-center text-white shrink-0 shadow-xs">
+                                        <Check className="w-4 h-4 stroke-[2.5]" />
+                                    </div>
+                                    <div className="text-[11px] sm:text-xs font-bold text-[#102033] leading-tight">
+                                        <div>Verified</div>
+                                        <div>Listings</div>
+                                    </div>
+                                </div>
+
+                                {/* 2. Instant Booking */}
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-[#FEF3C7] flex items-center justify-center shrink-0 shadow-xs">
+                                        <Zap className="w-4 h-4 text-[#D97706] fill-[#D97706]" />
+                                    </div>
+                                    <div className="text-[11px] sm:text-xs font-bold text-[#102033] leading-tight">
+                                        <div>Instant</div>
+                                        <div>Booking</div>
+                                    </div>
+                                </div>
+
+                                {/* 3. No Brokerage */}
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-[#DBEAFE] flex items-center justify-center shrink-0 shadow-xs">
+                                        <Percent className="w-4 h-4 text-[#2563EB] stroke-[2.5]" />
+                                    </div>
+                                    <div className="text-[11px] sm:text-xs font-bold text-[#102033] leading-tight">
+                                        <div>No</div>
+                                        <div>Brokerage</div>
+                                    </div>
+                                </div>
+
+                                {/* 4. Student Friendly */}
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-[#FFE4E6] flex items-center justify-center shrink-0 shadow-xs">
+                                        <Users className="w-4 h-4 text-[#E11D48] stroke-[2.5]" />
+                                    </div>
+                                    <div className="text-[11px] sm:text-xs font-bold text-[#102033] leading-tight">
+                                        <div>Student</div>
+                                        <div>Friendly</div>
+                                    </div>
                                 </div>
                             </motion.div>
 
-                            <motion.h1
-                                initial={{ opacity: 0, y: 20 }}
+                            {/* App Store Badges & 10,000+ Happy Students */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
                                 animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
-                                transition={{ delay: 0.3 }}
-                                className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight sm:leading-[1.1] text-gray-900"
+                                transition={{ duration: 0.6, delay: 0.6 }}
+                                className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-1"
                             >
-                                <span className="bg-gradient-to-r from-gray-900 to-[#037166] bg-clip-text text-transparent">
-                                    Find your next stay
-                                </span>{" "}
-                                <span>in minutes.</span>
-                            </motion.h1>
-
-                            <motion.p
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
-                                transition={{ delay: 0.4 }}
-                                className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl"
-                            >
-                                Verified PGs, co-living spaces, and hostels near your college or office.
-                            </motion.p>
-
-                            <section className="relative md:-mt-2 mt-0 z-20">
-                                <div className="max-w-4xl">
-                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                                        {/* Search Bar */}
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
-                                            className="flex-1 bg-white/60 md:bg-white/80 backdrop-blur-2xl rounded-2xl shadow-lg border border-gray-200 p-1.5 w-full"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex-1 relative">
-                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                    <Input
-                                                        value={searchQuery}
-                                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                                        onKeyDown={handleKeyDown}
-                                                        placeholder="Search by area, college, landmark..."
-                                                        className="pl-9 h-9 sm:h-10 bg-white/40 md:bg-white/60 border-transparent focus:border-[#037166] text-sm text-black placeholder:text-gray-500 rounded-xl"
-                                                    />
-                                                </div>
-                                                <motion.button
-                                                    whileHover={{ scale: 1.03 }}
-                                                    whileTap={{ scale: 0.97 }}
-                                                    onClick={handleSearch}
-                                                    className="px-4 py-2 bg-gradient-to-r from-[#037166] to-[#025951] text-white rounded-xl font-semibold shadow-md shadow-[#037166]/20 text-xs sm:text-sm whitespace-nowrap"
-                                                >
-                                                    Search
-                                                </motion.button>
-                                            </div>
-                                        </motion.div>
-
-                                        {/* Explore PGs Button */}
-                                        <motion.button
-                                            initial={{ opacity: 0, x: 20 }}
-                                            whileInView={{ opacity: 1, x: 0 }}
-                                            viewport={{ once: true }}
-                                            whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(3, 113, 102, 0.25)" }}
-                                            whileTap={{ scale: 0.97 }}
-                                            onClick={() => router.push('/pghostels/listings/all')}
-                                            className="px-5 py-2.5 bg-[#037166] text-white rounded-2xl font-bold shadow-lg shadow-[#037166]/30 flex items-center justify-center gap-2 whitespace-nowrap h-[46px] text-sm"
-                                        >
-                                            <span>Explore PGs</span>
-                                            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        </motion.button>
-                                    </div>
-
-                                    {/* App Buttons below search bar */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
-                                        transition={{ delay: 0.5 }}
-                                        className="flex flex-wrap justify-center sm:justify-start gap-2.5 mt-4"
-                                    >
-                                        <motion.a
-                                            href={globalSettings?.appStore || "#"}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
-                                            title="Download on the App Store"
-                                        >
-                                            <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
-                                        </motion.a>
-
-                                        <motion.a
-                                            href={globalSettings?.playStore || "#"}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            className="flex items-center justify-center w-28 xs:w-36 md:w-32 h-10 xs:h-11 md:h-11 bg-gradient-to-r from-[#037166] to-[#025951] rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden border border-white/10"
-                                            title="Get it on Google Play"
-                                        >
-                                            <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
-                                        </motion.a>
-                                    </motion.div>
-                                </div>
-                            </section>
-                        </div>
-
-                        {/* Trust Badges */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={isHeroInView ? { opacity: 1 } : {}}
-                            transition={{ delay: 0.6 }}
-                            className="flex flex-wrap gap-3 sm:gap-4 pt-1"
-                        >
-                            {[
-                                { icon: Shield, text: 'Verified Listings' },
-                                { icon: Clock, text: 'Instant Booking' },
-                                { icon: TrendingUp, text: 'No Brokerage' },
-                            ].map((badge, i) => (
-                                <div key={i} className="flex items-center space-x-2 text-gray-600">
-                                    <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#037166]/10 rounded-full flex items-center justify-center">
-                                        <badge.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#037166]" />
-                                    </div>
-                                    <h6 className="text-xs sm:text-sm font-medium">{badge.text}</h6>
-                                </div>
-                            ))}
-                        </motion.div>
-                    </motion.div>
-
-                    {/* Right - Animated Card Collage */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={isHeroInView ? { opacity: 1, x: 0 } : {}}
-                        transition={{ duration: 0.8, ease: [0.6, 0.05, 0.01, 0.9] }}
-                        className="relative h-[390px] md:h-[470px] flex items-center justify-center p-3 md:p-4"
-                    >
-                        {/* Main Card Slider */}
-                        <motion.div
-                            className="relative w-56 md:w-72 h-[340px] md:h-[430px] rounded-[2.75rem] overflow-hidden shadow-2xl z-10 bg-gray-900"
-                            animate={{
-                                y: [0, -15, 0],
-                            }}
-                            transition={{
-                                duration: 5,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                        >
-                            <AnimatePresence mode='wait'>
-                                <motion.div
-                                    key={heroSlideIndex}
-                                    initial={{ opacity: 0, scale: 1.1 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.8 }}
-                                    className="absolute inset-0"
+                                {/* Apple App Store Badge */}
+                                <a
+                                    href={globalSettings?.appStore || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-black hover:bg-neutral-900 text-white rounded-lg shadow-sm transition-all hover:-translate-y-0.5 shrink-0"
+                                    title="Download on the App Store"
                                 >
-                                    <div
-                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110"
-                                        style={{
-                                            backgroundImage: (apiCategories[heroSlideIndex]?.category_image || apiCategories[heroSlideIndex]?.image)
-                                                ? `url("${getImageUrl(apiCategories[heroSlideIndex]?.category_image || apiCategories[heroSlideIndex]?.image)}")`
-                                                : 'none'
-                                        }}
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                                    {/* Category Info Overlay */}
-                                    <div className="absolute bottom-10 left-8 right-8">
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.3 }}
-                                            className="space-y-2"
-                                        >
-                                            <div className="w-12 h-1 bg-[#037166] rounded-full" />
-                                            <h3 className="text-3xl font-bold text-white mb-1">
-                                                {apiCategories.length > 0 ? apiCategories[heroSlideIndex]?.name : 'Modern Stay'}
-                                            </h3>
-                                            <div className="flex items-center text-white/80 text-sm">
-                                                <Users className="w-4 h-4 mr-2" />
-                                                <span>Verified Listings</span>
-                                            </div>
-                                        </motion.div>
+                                    <svg className="w-5 h-5 shrink-0 fill-current text-white" viewBox="0 0 24 24">
+                                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.64-.78 1.08-1.86.96-2.84-.93.04-2.05.62-2.7 1.39-.58.67-1.08 1.76-.95 2.82 1.04.08 2.06-.59 2.69-1.37z"/>
+                                    </svg>
+                                    <div className="flex flex-col text-left leading-none">
+                                        <span className="text-[7.5px] sm:text-[8px] text-gray-300">Download on the</span>
+                                        <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight mt-0.5">App Store</span>
                                     </div>
-                                </motion.div>
-                            </AnimatePresence>
-                        </motion.div>
+                                </a>
 
-                        {/* Floating Price Card */}
-                        <motion.div initial={false}
-                            className="absolute top-6 left-1 sm:-left-6 md:-left-8 bg-white/95 backdrop-blur-xl rounded-2xl p-3 sm:p-4 shadow-xl border border-white/50 z-20 pointer-events-none"
-                            animate={{
-                                y: [0, 10, 0],
-                            }}
-                            transition={{
-                                duration: 4,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                                delay: 0.5
-                            }}
-                        >
-                            <div className="text-sm text-gray-500 font-medium">Starting from</div>
-                            <div className="text-3xl font-bold text-[#037166]">₹8,500</div>
-                            <div className="text-xs text-gray-400">/month</div>
-                        </motion.div>
+                                {/* Google Play Store Badge */}
+                                <a
+                                    href={globalSettings?.playStore || "https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-black hover:bg-neutral-900 text-white rounded-lg shadow-sm transition-all hover:-translate-y-0.5 shrink-0"
+                                    title="Get it on Google Play"
+                                >
+                                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3.608 1.636a1.442 1.442 0 0 0-.358.988v18.752c0 .385.127.733.358.988l.056.056 10.5-10.428v-.248L3.664 1.58l-.056.056Z" fill="#2196F3"/>
+                                        <path d="M17.664 15.492l-3.5-3.48v-.248l3.5-3.48.08.046 4.148 2.357c1.184.673 1.184 1.774 0 2.447l-4.148 2.358-.08.046Z" fill="#FFC107"/>
+                                        <path d="M14.244 11.764L3.608 22.364c.389.412 1.05.464 1.79.043l12.346-7.015-3.5-3.628Z" fill="#F44336"/>
+                                        <path d="M14.244 11.764l3.5-3.628L5.398 1.121c-.74-.421-1.401-.369-1.79.043l10.636 10.6Z" fill="#4CAF50"/>
+                                    </svg>
+                                    <div className="flex flex-col text-left leading-none">
+                                        <span className="text-[7.5px] sm:text-[8px] uppercase tracking-wider text-gray-300">GET IT ON</span>
+                                        <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight mt-0.5">Google Play</span>
+                                    </div>
+                                </a>
 
-                        {/* Floating Rating Card */}
-                        <motion.div initial={false}
-                            className="absolute bottom-6 right-1 sm:-right-6 md:-right-8 bg-white/95 backdrop-blur-xl rounded-2xl p-3 sm:p-4 shadow-xl border border-white/50 z-20 pointer-events-none"
-                            animate={{
-                                y: [0, -10, 0],
-                            }}
-                            transition={{
-                                duration: 4.5,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                                delay: 1
-                            }}
-                        >
-                            <div className="flex items-center space-x-2">
-                                <div className="p-1 bg-amber-100 rounded-lg">
-                                    <Star className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B]" />
+                                {/* 10,000+ Happy Students */}
+                                <div className="flex items-center gap-2.5 pl-1 shrink-0">
+                                    <img
+                                        src="/pghostels/student-avatars-transparent.png"
+                                        alt="Happy Students"
+                                        className="h-7 sm:h-8 w-auto object-contain"
+                                    />
+                                    <div className="flex flex-col text-left leading-none">
+                                        <span className="text-xs sm:text-sm font-extrabold text-[#102033]">10,000+</span>
+                                        <span className="text-[10px] sm:text-[11px] font-medium text-[#64748B] mt-0.5">Happy Students</span>
+                                    </div>
                                 </div>
-                                <span className="text-2xl font-bold text-gray-900">4.8</span>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-2 font-medium flex items-center">
-                                <MapPin className="w-3 h-3 mr-1 text-[#037166]" />
-                                0.8 km away
-                            </div>
+                            </motion.div>
                         </motion.div>
 
-                        {/* Glow Effect */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#037166]/10 blur-[120px] rounded-full pointer-events-none" />
-                    </motion.div>
+                        {/* Right Content - prominent person image filling right section (6 cols of 12) */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.98, y: 15 }}
+                            animate={isHeroInView ? { opacity: 1, scale: 1, y: 0 } : {}}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                            className="lg:col-span-6 xl:col-span-6 relative flex items-center justify-center lg:justify-end mt-2 lg:mt-0"
+                        >
+                            <div className="relative w-full flex justify-center lg:justify-end">
+                                <img
+                                    src="/pghostels/hero-pg-hostel-approved.jpg"
+                                    alt="Doorstep Hub PG & Hostels - Find Your Perfect Stay"
+                                    className="w-full max-w-[660px] lg:max-w-[760px] xl:max-w-[820px] h-auto object-contain block"
+                                />
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 
             {/* Quick Search Strip */}
 
 
-            <section ref={categoriesRef} className="py-6 sm:py-8 relative">
-              <CategorySubcategorySection
+            <div ref={categoriesRef}>
+              <PGLifestyleSection
                 categories={apiCategories}
                 categoriesLoading={loading}
-                isLocationReady={true}
                 onViewAll={() => router.push('/pghostels/listings/all')}
                 onOpenCategory={(category) => router.push(`/pghostels/${category.slug || category._id}`)}
                 onSubcategoryClick={(subCategory) => router.push(`/pghostels/${subCategory.slug || subCategory._id}`)}
@@ -467,41 +411,8 @@ export function PremiumHomePage() {
                   const data = await response.json();
                   return data.success && Array.isArray(data.data) ? data.data : [];
                 }}
-                theme={{
-                  eyebrow: 'Lifestyle',
-                  title: 'Browse by lifestyle',
-                  description: 'Choose the stay category that matches your comfort and budget, then jump straight into the exact PG or hostel type.',
-                  viewAllLabel: 'View all',
-                  sectionClass: 'bg-transparent',
-                  eyebrowClass: 'text-[#037166]',
-                  titleClass: 'text-gray-900',
-                  descriptionClass: 'text-gray-600',
-                  viewAllClass: 'text-[#037166] hover:text-[#025951]',
-                  locationBoxClass: 'border border-[#d9e4e2] bg-white/90',
-                  locationIconClass: 'text-[#037166]/60',
-                  locationTitleClass: 'text-gray-900',
-                  locationButtonClass: 'bg-[#037166] text-white hover:bg-[#025951]',
-                  mutedCardClass: 'border border-[#dbe4e2] bg-white/80',
-                  categoryCardClass: 'border-[#dbe4e2] bg-white hover:border-[#bdd5d0] hover:bg-gradient-to-r hover:from-[#f7fbfa] hover:to-white',
-                  activeCategoryCardClass: 'border-[#bdd5d0] bg-gradient-to-r from-[#eef6f4] via-white to-[#f4fbf9] shadow-[0_20px_40px_rgba(3,113,102,0.12)]',
-                  thumbClass: 'border-[#dde8e6] bg-[#f7fbfa]',
-                  activeThumbClass: 'border-[#bdd5d0] bg-white shadow-sm',
-                  categoryTextClass: 'text-gray-900',
-                  activeCategoryTextClass: 'text-[#037166]',
-                  categoryAccentTextClass: 'text-[#037166]',
-                  countTextClass: 'text-gray-500',
-                  arrowClass: 'bg-[#f7f9f9] text-[#95a5a2] group-hover:bg-gradient-to-r group-hover:from-[#037166] group-hover:to-[#025951] group-hover:text-white',
-                  activeArrowClass: 'bg-gradient-to-r from-[#037166] to-[#025951] text-white shadow-[0_10px_24px_rgba(3,113,102,0.24)]',
-                  gridCardHeightClass: 'h-[190px]',
-                  gridFallbackClass: 'bg-gradient-to-br from-[#d7ebe7] to-[#eef4f3]',
-                  gridOverlayClass: 'bg-gradient-to-t from-[rgba(12,31,28,0.92)] via-[rgba(12,31,28,0.3)] to-transparent',
-                  showMoreClass: 'border-[#d0ddda] text-[#037166] hover:bg-[#f4fbf9]',
-                  emptyBoxClass: 'border border-[#dbe4e2] bg-white',
-                  emptyTitleClass: 'text-gray-900',
-                  emptyTextClass: 'text-gray-500',
-                }}
               />
-            </section>
+            </div>
 
             {/* Near You Section */}
             <NearbyHostelsSection router={router} />
@@ -516,7 +427,7 @@ export function PremiumHomePage() {
             {/* <TestimonialsSection testimonials={testimonials} /> */}
 
             {/* Featured Hostels */}
-            <FeaturedHostelsSection listings={featuredHostels} loading={loading} router={router} />
+            <FeaturedHostelsSection listings={featuredHostels} loading={loading} router={router} city={location?.city} />
 
             {/* Help Center Section - PG & Hostel Articles */}
             <KnowledgeSection vertical="pg-hostel" showNewsletter={false} />
@@ -539,382 +450,515 @@ export function PremiumHomePage() {
 }
 
 
-// Top Deals Section
+// Top Deals Section (Exclusive Offers) - High Quality Native UI
 function TopDealsSection({ router }) {
-    const deals = [
-        {
-            title: 'Zero Deposit Options',
-            desc: 'Move in without hefty deposits',
-            gradient: 'from-purple-600 to-indigo-600',
-            icon: '🏠',
-            tag: 'Instant Move-in'
-        },
-        {
-            title: 'Without Meals PGs',
-            desc: 'Budget-friendly flexible options',
-            gradient: 'from-orange-500 to-amber-600',
-            icon: '🍽️',
-            tag: 'Save Big'
-        },
-        {
-            title: 'Best for Professionals',
-            desc: 'High-speed WiFi & desk setup',
-            gradient: 'from-teal-600 to-emerald-600',
-            icon: '💼',
-            tag: 'Work Friendly'
-        },
-    ];
-
     return (
-        <section className="py-6 sm:py-8 bg-transparent">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="flex items-end justify-between mb-4 sm:mb-6"
-                >
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#EBF7F4] via-[#F4FCF9] to-[#F8FCFA] py-5 sm:py-6 border-b border-[#DDF4EC]">
+            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 relative z-10">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 mb-3.5 sm:mb-4">
                     <div>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-2">
-                            <Sparkles className="w-3 h-3 text-[#037166]" />
-                            <span className="text-[11px] font-semibold text-[#037166] uppercase tracking-wider">Top Deals</span>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#DDF8F0] border border-[#BCEEDA] shadow-xs mb-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-[#00695C]" />
+                            <span className="text-[10.5px] font-bold text-[#00695C] uppercase tracking-wider">
+                                Top Deals
+                            </span>
                         </div>
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                        <h2 className="text-2xl sm:text-3xl lg:text-[32px] font-black text-[#102033] tracking-tight leading-tight mb-0.5">
                             Exclusive Offers
                         </h2>
-                        <p className="text-sm sm:text-base text-gray-600 mt-0.5">Special pricing and curated perks just for you</p>
+                        <p className="text-xs sm:text-[13px] text-[#64748B] leading-relaxed">
+                            Special pricing and curated perks just for you ✨
+                        </p>
                     </div>
-                </motion.div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4 md:gap-5">
-                    {deals.map((deal, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.08 }}
-                            whileHover={{ y: -4 }}
-                            onClick={() => router.push('/pghostels/listings/all')}
-                            className={`group relative rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-br ${deal.gradient} p-4 sm:p-5 flex items-center justify-between shadow-md hover:shadow-lg transition-all`}
-                        >
-                            <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl flex-shrink-0 shadow-inner">
-                                    {deal.icon}
-                                </div>
-                                <div className="min-w-0">
-                                    <span className="inline-block text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">
-                                        {deal.tag}
-                                    </span>
-                                    <h4 className="text-sm sm:text-base font-bold text-white leading-tight truncate">
-                                        {deal.title}
-                                    </h4>
-                                    <p className="text-xs text-white/85 line-clamp-1 mt-0.5">
-                                        {deal.desc}
-                                    </p>
+                    {/* Right side handwritten callout with radiant sun rays */}
+                    <div className="hidden sm:flex items-center relative self-start sm:self-end pb-1">
+                        <img
+                            src="/pghostels/callout_save_more_transparent.png"
+                            alt="Save more on your stay!"
+                            className="h-9 sm:h-11 w-auto object-contain"
+                        />
+                    </div>
+                </div>
+
+                {/* 3 Native High-Resolution Offer Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5">
+                    {/* Card 1: Zero Deposit Options */}
+                    <motion.div
+                        whileHover={{ y: -3, scale: 1.01 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => router.push('/pghostels/listings/all')}
+                        className="group relative rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-r from-[#9747FF] via-[#7B3FE4] to-[#5138E8] h-[105px] sm:h-[110px] p-3 sm:p-3.5 flex items-center justify-between shadow-[0_4px_16px_rgba(151,71,255,0.22)] hover:shadow-[0_8px_24px_rgba(151,71,255,0.32)] transition-all"
+                    >
+                        <div className="flex items-center gap-2.5 min-w-0 pr-1 h-full">
+                            {/* Student cutout & house icon */}
+                            <div className="relative shrink-0 flex items-center h-full">
+                                <img
+                                    src="/pghostels/girl_books_sharp.png"
+                                    alt="Student"
+                                    className="h-[95px] w-auto object-contain -ml-2 shrink-0 drop-shadow-sm select-none"
+                                />
+                                <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0 -ml-1 shadow-xs">
+                                    <Home className="w-4 h-4 stroke-[2.5]" />
                                 </div>
                             </div>
 
-                            <div className="w-8 h-8 rounded-full bg-white/20 group-hover:bg-white text-white group-hover:text-gray-900 flex items-center justify-center flex-shrink-0 transition-all shadow-sm">
-                                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                            {/* Text */}
+                            <div className="min-w-0 flex flex-col justify-center">
+                                <span className="text-[9.5px] font-black text-white/80 uppercase tracking-wider mb-0.5 leading-none">
+                                    INSTANT MOVE-IN
+                                </span>
+                                <h4 className="text-[15px] sm:text-[16px] font-black text-white leading-tight truncate">
+                                    Zero Deposit Options
+                                </h4>
+                                <p className="text-[11px] text-white/90 font-medium line-clamp-1 mt-0.5">
+                                    Move in without hefty deposits
+                                </p>
                             </div>
-                        </motion.div>
-                    ))}
+                        </div>
+
+                        <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center shrink-0 ml-1 group-hover:scale-105 transition-transform">
+                            <ChevronRight className="w-3.5 h-3.5 stroke-[2.5] text-[#5138E8]" />
+                        </div>
+                    </motion.div>
+
+                    {/* Card 2: Without Meals PGs */}
+                    <motion.div
+                        whileHover={{ y: -3, scale: 1.01 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => router.push('/pghostels/listings/all')}
+                        className="group relative rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-r from-[#FF8B20] via-[#F57C00] to-[#E85B00] h-[105px] sm:h-[110px] p-3 sm:p-3.5 flex items-center justify-between shadow-[0_4px_16px_rgba(255,139,32,0.22)] hover:shadow-[0_8px_24px_rgba(255,139,32,0.32)] transition-all"
+                    >
+                        <div className="flex items-center gap-2.5 min-w-0 h-full">
+                            {/* Plate icon */}
+                            <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0 shadow-xs">
+                                <Utensils className="w-4 h-4 stroke-[2.5]" />
+                            </div>
+
+                            {/* Text */}
+                            <div className="min-w-0 flex flex-col justify-center">
+                                <span className="text-[9.5px] font-black text-white/80 uppercase tracking-wider mb-0.5 leading-none">
+                                    SAVE BIG
+                                </span>
+                                <h4 className="text-[15px] sm:text-[16px] font-black text-white leading-tight truncate">
+                                    Without Meals PGs
+                                </h4>
+                                <p className="text-[11px] text-white/90 font-medium line-clamp-1 mt-0.5">
+                                    Budget-friendly flexible options
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Right: Food Bowls & Arrow */}
+                        <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                            <img
+                                src="/pghostels/food_bowls_sharp.png"
+                                alt="Meals"
+                                className="h-14 sm:h-16 w-auto object-contain drop-shadow-sm select-none"
+                            />
+                            <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                <ChevronRight className="w-3.5 h-3.5 stroke-[2.5] text-[#E85B00]" />
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Card 3: Best for Professionals */}
+                    <motion.div
+                        whileHover={{ y: -3, scale: 1.01 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => router.push('/pghostels/listings/all')}
+                        className="group relative rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-r from-[#08A98F] via-[#05967E] to-[#006B61] h-[105px] sm:h-[110px] p-3 sm:p-3.5 flex items-center justify-between shadow-[0_4px_16px_rgba(8,169,143,0.22)] hover:shadow-[0_8px_24px_rgba(8,169,143,0.32)] transition-all"
+                    >
+                        <div className="flex items-center gap-2.5 min-w-0 pr-1 h-full">
+                            {/* Desk setup photo */}
+                            <img
+                                src="/pghostels/laptop_desk_sharp.png"
+                                alt="Desk setup"
+                                className="h-[95px] w-auto object-contain -ml-2 shrink-0 drop-shadow-sm select-none"
+                            />
+
+                            {/* Text */}
+                            <div className="min-w-0 flex flex-col justify-center">
+                                <span className="text-[9.5px] font-black text-white/80 uppercase tracking-wider mb-0.5 leading-none">
+                                    WORK FRIENDLY
+                                </span>
+                                <h4 className="text-[15px] sm:text-[16px] font-black text-white leading-tight truncate">
+                                    Best for Professionals
+                                </h4>
+                                <p className="text-[11px] text-white/90 font-medium line-clamp-1 mt-0.5">
+                                    High-speed WiFi & desk setup
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center shrink-0 ml-1 group-hover:scale-105 transition-transform">
+                            <ChevronRight className="w-3.5 h-3.5 stroke-[2.5] text-[#006B61]" />
+                        </div>
+                    </motion.div>
                 </div>
             </div>
         </section>
     );
 }
-// How It Works Section
+
+// How It Works Section (Book in 3 Simple Steps) - High Quality Native UI
 function HowItWorksSection() {
-    const steps = [
-        { icon: Search, title: 'Select Category', desc: 'Choose your Preferred type of stay' },
-        { icon: Star, title: 'Compare PGs & Hostels', desc: 'View Room Images, Amenities, and Prices' },
-        { icon: Check, title: 'Book & Move In', desc: 'Confirm booking and move in hassle-free' },
-    ];
-
     return (
-<section className="py-8 sm:py-12 bg-transparent">
-  <div className="max-w-7xl mx-auto px-4">
-
-    {/* Heading */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="text-center mb-6 sm:mb-8"
-    >
-      <h2 className="text-3xl md:text-5xl font-bold text-gray-900">
-        Book in 3 simple steps
-      </h2>
-    </motion.div>
-
-    {/* Steps */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-
-      {steps.map((step, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.2 }}
-          className="text-center relative"
-        >
-
-          {/* Icon */}
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
-            className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-[#037166] to-[#025951] rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-lg shadow-[#037166]/30"
-          >
-            <step.icon className="w-7 h-7 md:w-10 md:h-10 text-white" />
-          </motion.div>
-
-          {/* Title */}
-          <h4 className="text-lg md:text-2xl font-bold text-gray-900 mb-1 md:mb-3">
-            {step.title}
-          </h4>
-
-          {/* Description */}
-          <p className="text-gray-600 text-sm md:text-base max-w-xs mx-auto">
-            {step.desc}
-          </p>
-
-          {/* Desktop connector line */}
-          {i < steps.length - 1 && (
-            <div className="hidden md:block absolute top-10 left-[60%] w-full h-[2px] bg-gradient-to-r from-[#037166]/30 to-transparent" />
-          )}
-
-        </motion.div>
-      ))}
-
-    </div>
-
-  </div>
-</section>
-    );
-}
-
-// Testimonials Section
-function TestimonialsSection({ testimonials }) {
-    // Double the testimonials for seamless infinite loop
-    const doubledTestimonials = [...testimonials, ...testimonials, ...testimonials];
-
-    return (
-        <section className="py-15 overflow-hidden bg-transparent relative">
-            <div className="max-w-7xl mx-auto px-4 mb-16">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center"
-                >
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                        Why users love us
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#F2FBF9] via-[#FAFDFD] to-[#F5FCFA] py-6 sm:py-8 border-b border-[#DDF4EC]">
+            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 relative z-10">
+                {/* Heading */}
+                <div className="text-center max-w-xl mx-auto mb-4 sm:mb-6">
+                    <h2 className="text-2xl sm:text-3xl lg:text-[32px] font-black text-[#102033] tracking-tight leading-tight mb-0.5">
+                        Book in 3 Simple Steps
                     </h2>
-                    <p className="text-xl text-gray-600">Join thousands of happy residents</p>
-                </motion.div>
-            </div>
+                    <p className="text-xs sm:text-[13px] text-[#64748B]">
+                        From search to move-in, we make it easy and hassle-free.
+                    </p>
+                </div>
 
-            {/* Marquee Container */}
-            <div className="flex relative overflow-hidden group">
-                {/* Initial Scroller */}
-                <motion.div
-                    animate={{
-                        x: [0, -1920], // Adjust based on content width
-                    }}
-                    transition={{
-                        duration: 30,
-                        repeat: Infinity,
-                        ease: "linear",
-                    }}
-                    className="flex gap-6 whitespace-nowrap"
-                >
-                    {doubledTestimonials.map((test, i) => (
-                        <div
-                            key={i}
-                            className="flex-shrink-0 w-[400px] bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300"
-                        >
-                            <div className="flex items-center space-x-4 mb-6">
-                                <div className="w-14 h-14 bg-gradient-to-br from-[#037166] to-[#025951] rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-[#037166]/20">
-                                    {test.avatar}
+                {/* 3 Step Cards Row */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-2 lg:gap-3 max-w-[1240px] mx-auto">
+                    {/* Step 1: Select Category */}
+                    <div className="flex-1 w-full bg-white rounded-2xl p-3.5 sm:p-4 border border-[#E2F3EE] shadow-[0_4px_20px_rgba(0,121,111,0.06)] hover:shadow-[0_8px_28px_rgba(0,121,111,0.12)] transition-all flex items-center justify-between h-[135px] sm:h-[142px] relative overflow-hidden">
+                        <div className="flex flex-col justify-center z-10 pr-2">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                                <div className="w-6 h-6 rounded-lg bg-[#00796F] text-white font-black text-xs flex items-center justify-center shadow-xs">
+                                    1
                                 </div>
-                                <div>
-                                    <h5 className="font-bold text-gray-900 whitespace-normal">{test.name}</h5>
-                                    <p className="text-sm text-gray-500">{test.role}</p>
+                                <div className="w-8 h-8 rounded-full bg-[#E6F8F3] border border-[#BCEEDA] flex items-center justify-center text-[#00796F] shadow-xs">
+                                    <Search className="w-4 h-4 stroke-[2.5]" />
                                 </div>
                             </div>
-                            <div className="flex mb-4">
-                                {[...Array(test.rating)].map((_, j) => (
-                                    <Star key={j} className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
-                                ))}
-                            </div>
-                            <p className="text-gray-700 leading-relaxed whitespace-normal italic">"{test.review}"</p>
-                            <div className="mt-6 pt-6 border-t border-gray-50 flex items-center text-sm text-[#037166] font-medium">
-                                <div className="w-2 h-2 bg-[#037166] rounded-full mr-2" />
-                                <span>Verified Resident</span>
-                            </div>
+                            <h3 className="text-sm sm:text-[15px] font-black text-[#102033] mb-0.5">
+                                Select Category
+                            </h3>
+                            <p className="text-[11px] sm:text-[11.5px] text-[#64748B] leading-tight">
+                                Choose your preferred type of stay<br />(Hostel, PG, Dormitory, etc.)
+                            </p>
                         </div>
-                    ))}
-                </motion.div>
-            </div>
+                        <img
+                            src="/pghostels/step1_art_sharp.png"
+                            alt="Select Category"
+                            className="h-[125px] sm:h-[135px] w-auto object-contain -mr-1 shrink-0 select-none pointer-events-none"
+                        />
+                    </div>
 
-            {/* Fading Edges Overlay */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#E2E6E6] to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#E2E6E6] to-transparent z-10" />
+                    {/* Dashed Arrow 1 */}
+                    <div className="hidden md:flex items-center justify-center shrink-0 w-6 lg:w-8 text-[#00796F]">
+                        <svg className="w-full h-3" viewBox="0 0 36 12" fill="none">
+                            <line x1="2" y1="6" x2="30" y2="6" stroke="currentColor" strokeWidth="1.8" strokeDasharray="3 3" />
+                            <polyline points="26,2 32,6 26,10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+
+                    {/* Step 2: Compare PGs & Hostels */}
+                    <div className="flex-1 w-full bg-white rounded-2xl p-3.5 sm:p-4 border border-[#E2F3EE] shadow-[0_4px_20px_rgba(0,121,111,0.06)] hover:shadow-[0_8px_28px_rgba(0,121,111,0.12)] transition-all flex items-center justify-between h-[135px] sm:h-[142px] relative overflow-hidden">
+                        <div className="flex flex-col justify-center z-10 pr-2">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                                <div className="w-6 h-6 rounded-lg bg-[#00796F] text-white font-black text-xs flex items-center justify-center shadow-xs">
+                                    2
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-[#E6F8F3] border border-[#BCEEDA] flex items-center justify-center text-[#00796F] shadow-xs">
+                                    <Star className="w-4 h-4 stroke-[2.5]" />
+                                </div>
+                            </div>
+                            <h3 className="text-sm sm:text-[15px] font-black text-[#102033] mb-0.5">
+                                Compare PGs & Hostels
+                            </h3>
+                            <p className="text-[11px] sm:text-[11.5px] text-[#64748B] leading-tight">
+                                View room images, amenities,<br />ratings and prices
+                            </p>
+                        </div>
+                        <img
+                            src="/pghostels/step2_art_sharp.png"
+                            alt="Compare PGs and Hostels"
+                            className="h-[125px] sm:h-[135px] w-auto object-contain -mr-1 shrink-0 select-none pointer-events-none"
+                        />
+                    </div>
+
+                    {/* Dashed Arrow 2 */}
+                    <div className="hidden md:flex items-center justify-center shrink-0 w-6 lg:w-8 text-[#00796F]">
+                        <svg className="w-full h-3" viewBox="0 0 36 12" fill="none">
+                            <line x1="2" y1="6" x2="30" y2="6" stroke="currentColor" strokeWidth="1.8" strokeDasharray="3 3" />
+                            <polyline points="26,2 32,6 26,10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+
+                    {/* Step 3: Book & Move In */}
+                    <div className="flex-1 w-full bg-white rounded-2xl p-3.5 sm:p-4 border border-[#E2F3EE] shadow-[0_4px_20px_rgba(0,121,111,0.06)] hover:shadow-[0_8px_28px_rgba(0,121,111,0.12)] transition-all flex items-center justify-between h-[135px] sm:h-[142px] relative overflow-hidden">
+                        <div className="flex flex-col justify-center z-10 pr-2">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                                <div className="w-6 h-6 rounded-lg bg-[#00796F] text-white font-black text-xs flex items-center justify-center shadow-xs">
+                                    3
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-[#E6F8F3] border border-[#BCEEDA] flex items-center justify-center text-[#00796F] shadow-xs">
+                                    <Check className="w-4 h-4 stroke-[2.5]" />
+                                </div>
+                                <div className="w-5 h-5 rounded-full bg-[#00796F] text-white flex items-center justify-center shadow-xs">
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                            </div>
+                            <h3 className="text-sm sm:text-[15px] font-black text-[#102033] mb-0.5">
+                                Book & Move In
+                            </h3>
+                            <p className="text-[11px] sm:text-[11.5px] text-[#64748B] leading-tight">
+                                Confirm your booking and<br />move in with confidence
+                            </p>
+                        </div>
+                        <img
+                            src="/pghostels/step3_art_sharp.png"
+                            alt="Book & Move In"
+                            className="h-[125px] sm:h-[135px] w-auto object-contain -mr-1 shrink-0 select-none pointer-events-none"
+                        />
+                    </div>
+                </div>
+            </div>
         </section>
     );
 }
 
 // Featured Hostels Section
-function FeaturedHostelsSection({ listings, loading, router }) {
+function FeaturedHostelsSection({ listings, loading, router, city }) {
+    const scrollContainerRef = useRef(null);
+
     const fallbackListings = [
         {
-            _id: 'fallback-1',
-            hostelName: 'Premium Student Living',
-            address: 'North Campus, Delhi',
-            defaultPrice: '12500',
-            image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop',
-            rating: 4.8,
-            reviews: 120,
-            isFallback: true
-        },
-        {
-            _id: 'fallback-2',
-            hostelName: 'Urban Co-living Space',
-            address: 'Koramangala, Bangalore',
-            defaultPrice: '15000',
-            image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop',
+            _id: 'feat-1',
+            slug: 'westside-coliving',
+            hostelName: 'WESTSIDE COLIVING',
+            address: 'Gachibowli, Hyderabad',
+            startingAt: 5500,
+            image: '/pghostels/clean_feat_1.png',
             rating: 4.5,
-            reviews: 85,
             isFallback: true
         },
         {
-            _id: 'fallback-3',
-            hostelName: 'Elite Ladies Hostel',
-            address: 'Hitech City, Hyderabad',
-            defaultPrice: '11000',
-            image: 'https://images.unsplash.com/photo-1626015504767-542e58e4585c?q=80&w=1956&auto=format&fit=crop',
-            rating: 4.9,
-            reviews: 200,
+            _id: 'feat-2',
+            slug: 'yvr-deluxe-hostel-pg',
+            hostelName: 'YVR DELUXE HOSTEL & PG',
+            address: 'Tawakkal Nagar, Hyderabad',
+            startingAt: 5500,
+            image: '/pghostels/clean_feat_2.png',
+            rating: 4.4,
             isFallback: true
         },
         {
-            _id: 'fallback-4',
-            hostelName: 'Scholars Inn',
-            address: 'Anna Nagar, Chennai',
-            defaultPrice: '9500',
-            image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop',
-            rating: 4.2,
-            reviews: 50,
+            _id: 'feat-3',
+            slug: 'shiva-nivas-deluxe-pg',
+            hostelName: 'SHIVA NIVAS DELUXE PG',
+            address: 'HITEC City, Hyderabad',
+            startingAt: 199,
+            image: '/pghostels/clean_feat_3.png',
+            rating: 4.6,
+            isFallback: true
+        },
+        {
+            _id: 'feat-4',
+            slug: 'prasana-womens-pg',
+            hostelName: 'PRASANA WOMENS PG',
+            address: 'UCO Bank Ln, Hyderabad',
+            startingAt: 199,
+            image: '/pghostels/clean_feat_4.png',
+            rating: 4.5,
+            isFallback: true
+        },
+        {
+            _id: 'feat-5',
+            slug: 'vara-lakshmilakshmi-pg-srnagar',
+            hostelName: 'VARA LAKSHMILAKSHMI PG',
+            address: 'SR Nagar, Hyderabad',
+            startingAt: 5500,
+            image: '/pghostels/clean_feat_5.png',
+            rating: 4.3,
             isFallback: true
         }
     ];
 
+    const scroll = (direction) => {
+        if (scrollContainerRef.current) {
+            const amount = direction === 'left' ? -300 : 300;
+            scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+    };
+
     const hasData = listings && listings.length > 0;
-    const displayListings = hasData ? listings.slice(0, 12) : fallbackListings;
+    const displayListings = hasData ? listings.slice(0, 5) : fallbackListings;
+    const currentCity = city || 'Hyderabad';
 
     return (
-        <section className="py-6 sm:py-8 bg-transparent">
-            <div className="max-w-7xl mx-auto px-4">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="flex justify-between items-end mb-4 sm:mb-6"
-                >
-                    <div>
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1">
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF9EE] via-[#FCFDFD] to-[#F2FBF8] py-7 sm:py-8 border-b border-[#E8F3EE]">
+            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 relative z-10">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 sm:mb-5">
+                    {/* Left: Eyebrow + Title + Subtitle */}
+                    <div className="max-w-2xl">
+                        <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFF0D4] border border-[#FFE0A3] shadow-xs mb-1.5">
+                            <Star className="w-3 h-3 text-[#D97706] fill-[#D97706]" />
+                            <span className="text-[10px] font-black text-[#B45309] uppercase tracking-wider">
+                                Handpicked
+                            </span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-black text-[#102033] tracking-tight leading-tight mb-1">
                             Featured Hostels
                         </h2>
-                        <p className="text-sm sm:text-base text-gray-600">Handpicked stays for you</p>
+                        <p className="text-xs sm:text-[13px] text-[#64748B] leading-relaxed">
+                            Top-rated PGs and hostels in {currentCity}, chosen for your comfort and convenience.
+                        </p>
                     </div>
-                    <button
-                        onClick={() => router.push('/pghostels/listings/all')}
-                        className="hidden md:flex items-center space-x-1.5 text-[#037166] font-semibold hover:text-[#025951] transition-colors mb-1 text-sm"
-                    >
-                        <span>View All</span>
-                        <ChevronRight className="w-4 h-4" />
-                    </button>
-                </motion.div>
 
-                <div className="relative">
-                    <div className="overflow-x-auto scrollbar-hide pb-3 -mx-4 px-4 sm:mx-0 sm:px-0">
-                        <div className="flex gap-3 sm:gap-4 pb-1">
-                            {loading ? (
-                                [...Array(4)].map((_, i) => (
-                                    <div key={i} className="bg-gray-200 rounded-2xl h-[20rem] sm:h-[22rem] w-[74vw] xs:w-[68vw] sm:w-[44vw] md:w-[30vw] lg:w-[225px] xl:w-[240px] flex-shrink-0 animate-pulse" />
-                                ))
-                            ) : (
-                                displayListings.map((listing, i) => {
-                                    const hostelId = listing._id;
-                                    const hostelSlug = listing.slug || listing.hostelSlug || hostelId;
-                                    const hostelName = listing.hostelName;
-                                    const hostelArea = listing.address || listing.cityName;
-                                    const hostelPrice = listing.startingAt || (listing.defaultPrice ? parseInt(listing.defaultPrice) : 8500);
-                                    const hostelImage = listing.image?.startsWith('http')
-                                        ? listing.image
-                                        : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${listing.image}`;
-                                    const isClickable = !listing.isFallback;
-
-                                    return (
-                                        <motion.div
-                                            key={hostelId}
-                                            initial={{ opacity: 0, y: 30 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
-                                            transition={{ delay: i * 0.1 }}
-                                            whileHover={isClickable ? { y: -6 } : {}}
-                                            onClick={() => isClickable && router.push(`/pghostels/hostel/${hostelSlug}`)}
-                                            className={`group relative rounded-2xl overflow-hidden h-[20rem] sm:h-[22rem] md:h-[23rem] w-[74vw] xs:w-[68vw] sm:w-[44vw] md:w-[30vw] lg:w-[225px] xl:w-[240px] flex-shrink-0 snap-start bg-white shadow-md ${isClickable ? 'cursor-pointer' : ''}`}
-                                        >
-                                            <div className="absolute inset-0">
-                                                <div
-                                                    className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-110"
-                                                    style={{ backgroundImage: `url("${hostelImage}")` }}
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent opacity-95" />
-                                            </div>
-
-                                            <div className="absolute inset-0 p-4 flex flex-col justify-between">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="px-2.5 py-0.5 bg-white/20 backdrop-blur-md border border-white/20 rounded-full">
-                                                        <span className="text-white text-[10px] font-semibold tracking-wider uppercase">Featured</span>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <div className="flex gap-1.5 mb-2">
-                                                        {[Wifi, Utensils, Shirt].map((Icon, j) => (
-                                                            <div key={j} className="w-6 h-6 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/90">
-                                                                <Icon className="w-3 h-3" />
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    <h3 className="text-base font-bold text-white mb-1 line-clamp-1 leading-snug uppercase tracking-wide">{hostelName}</h3>
-                                                    <div className="flex items-center text-white/70 text-[11px] mb-3">
-                                                        <MapPin className="w-3 h-3 mr-1 text-[#4ddecb]" />
-                                                        <span className="truncate">{hostelArea}</span>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between pt-2.5 border-t border-white/15">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[9px] text-white/60 uppercase tracking-wider">Starts at</span>
-                                                            <span className="text-base sm:text-lg font-extrabold text-white">₹{Number(hostelPrice || 0).toLocaleString('en-IN')}/-</span>
-                                                        </div>
-                                                        <div className="w-8 h-8 bg-white text-[#037166] rounded-full flex items-center justify-center group-hover:bg-[#037166] group-hover:text-white transition-all shadow-md">
-                                                            <ChevronRight className="w-4 h-4" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })
-                            )}
+                    {/* Right: Handwritten Callout + View All Link */}
+                    <div className="flex items-center gap-3 shrink-0 self-start sm:self-end">
+                        {/* Callout */}
+                        <div className="hidden sm:flex items-center gap-1.5">
+                            <svg className="w-7 h-3 text-[#00796F]" viewBox="0 0 32 16" fill="none">
+                                <path d="M2 14C12 4 22 2 30 10M30 10L24 6M30 10L28 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <span className="text-[11.5px] font-semibold text-[#00796F] italic font-serif whitespace-nowrap">
+                                Our top picks for you
+                            </span>
                         </div>
+
+                        {/* View All */}
+                        <button
+                            onClick={() => router.push('/pghostels/listings/all')}
+                            className="inline-flex items-center gap-1 text-[#00796F] hover:text-[#005a53] font-bold text-xs sm:text-sm transition-colors py-1 pl-1"
+                        >
+                            <span>View All</span>
+                            <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Carousel Row with 5 Columns filling desktop width */}
+                <div className="relative group/feat">
+                    {/* Left Button */}
+                    <button
+                        onClick={() => scroll('left')}
+                        aria-label="Previous featured hostels"
+                        className="hidden md:flex absolute -left-3.5 lg:-left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white text-[#102033] hover:text-[#00796F] shadow-md border border-[#E2E8F0] items-center justify-center z-20 hover:scale-105 active:scale-95 transition-all"
+                    >
+                        <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+                    </button>
+
+                    {/* Right Button */}
+                    <button
+                        onClick={() => scroll('right')}
+                        aria-label="Next featured hostels"
+                        className="hidden md:flex absolute -right-3.5 lg:-right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#00796F] text-white hover:bg-[#00695C] shadow-md items-center justify-center z-20 hover:scale-105 active:scale-95 transition-all"
+                    >
+                        <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                    </button>
+
+                    {/* Cards Track: 5 cards filling desktop width */}
+                    <div
+                        ref={scrollContainerRef}
+                        className="flex lg:grid lg:grid-cols-5 gap-3 sm:gap-3.5 overflow-x-auto lg:overflow-visible scrollbar-hide py-1 px-0.5 scroll-smooth"
+                    >
+                        {loading && !hasData ? (
+                            [...Array(5)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="w-[72vw] xs:w-[65vw] sm:w-[42vw] md:w-[28vw] lg:w-auto h-[310px] sm:h-[320px] rounded-2xl bg-[#F0EBE1] animate-pulse shrink-0"
+                                />
+                            ))
+                        ) : (
+                            displayListings.map((listing, index) => {
+                                const hostelId = listing._id || `feat-${index}`;
+                                const hostelSlug = listing.slug || listing.hostelSlug || hostelId;
+                                const hostelName = listing.hostelName || 'Featured Stay';
+                                const hostelArea = listing.address || listing.cityName || 'Hyderabad';
+                                const price = listing.startingAt || listing.defaultPrice || 5500;
+                                const rating = listing.rating || 4.5;
+                                const hostelImage = listing.image?.startsWith('http') || listing.image?.startsWith('/')
+                                    ? listing.image
+                                    : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${listing.image}`;
+                                const isClickable = !listing.isFallback;
+
+                                return (
+                                    <motion.div
+                                        key={hostelId}
+                                        whileHover={{ y: -5 }}
+                                        transition={{ duration: 0.2 }}
+                                        onClick={() => {
+                                            if (isClickable) {
+                                                router.push(`/pghostels/hostel/${hostelSlug}`);
+                                            } else {
+                                                router.push('/pghostels/listings/all');
+                                            }
+                                        }}
+                                        className="w-[72vw] xs:w-[65vw] sm:w-[42vw] md:w-[28vw] lg:w-auto h-[310px] sm:h-[320px] rounded-2xl overflow-hidden relative group cursor-pointer shadow-[0_4px_16px_rgba(16,32,51,0.08)] hover:shadow-[0_10px_24px_rgba(0,121,111,0.18)] transition-all duration-300 shrink-0 bg-[#0F1E2E]"
+                                    >
+                                        {/* Image */}
+                                        <div
+                                            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                                            style={{ backgroundImage: `url("${hostelImage}")` }}
+                                        />
+
+                                        {/* Dark Gradient Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1522] via-[#0B1522]/55 to-black/20 opacity-95" />
+
+                                        {/* Top Badges */}
+                                        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 pointer-events-none">
+                                            {/* Featured Pill (Orange) with Star icon */}
+                                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FF7A18] text-white shadow-xs">
+                                                <Star className="w-2.5 h-2.5 text-white fill-white" />
+                                                <span className="text-[9.5px] font-extrabold uppercase tracking-wider">Featured</span>
+                                            </div>
+
+                                            {/* Rating Pill */}
+                                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/95 shadow-sm">
+                                                <Star className="w-2.5 h-2.5 text-[#FFB800] fill-[#FFB800]" />
+                                                <span className="text-[10.5px] font-black text-[#102033]">
+                                                    {Number(rating).toFixed(1)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Content at Bottom */}
+                                        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-3.5 z-10">
+                                            {/* Amenities */}
+                                            <div className="flex items-center gap-1.5 mb-2">
+                                                <div className="w-5.5 h-5.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/90">
+                                                    <Wifi className="w-2.5 h-2.5" />
+                                                </div>
+                                                <div className="w-5.5 h-5.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/90">
+                                                    <Bed className="w-2.5 h-2.5" />
+                                                </div>
+                                                <div className="w-5.5 h-5.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/90">
+                                                    <Utensils className="w-2.5 h-2.5" />
+                                                </div>
+                                            </div>
+
+                                            {/* Hostel Name */}
+                                            <h3 className="text-[13px] sm:text-[13.5px] font-extrabold text-white mb-0.5 line-clamp-1 leading-snug tracking-tight uppercase group-hover:text-[#4ddecb] transition-colors">
+                                                {hostelName}
+                                            </h3>
+
+                                            {/* Location */}
+                                            <div className="flex items-center text-white/75 text-[10.5px] mb-2">
+                                                <MapPin className="w-2.5 h-2.5 mr-1 text-[#4ddecb] shrink-0" />
+                                                <span className="truncate">{hostelArea}</span>
+                                            </div>
+
+                                            {/* Bottom Divider & Price */}
+                                            <div className="flex items-center justify-between pt-2 border-t border-white/15">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[8.5px] text-white/60 uppercase tracking-wider font-semibold leading-none mb-0.5">Starts at</span>
+                                                    <span className="text-sm sm:text-base font-black text-white leading-tight">
+                                                        ₹{Number(price).toLocaleString('en-IN')}/-
+                                                    </span>
+                                                </div>
+
+                                                <div className="w-7 h-7 rounded-full bg-white text-[#00796F] group-hover:bg-[#00796F] group-hover:text-white flex items-center justify-center shadow-md transition-all">
+                                                    <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })
+                        )}
                     </div>
                 </div>
             </div>

@@ -67,7 +67,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                             { _id: 'mock_pkg_1', name: 'Standard Glow', description: 'Clean up and mask', price: 999, priceUnit: 'session', image: '' },
                             { _id: 'mock_pkg_2', name: 'Premium Radiance', description: 'Full facial + massage', price: 1499, priceUnit: 'session', image: '' }
                         ],
-                        about: 'Experience the best spa service at home.',
+                        about: 'Experience the Best Spa Service at Home.',
                         rules: [{ rule: 'Please provide water', allowed: true }]
                     };
                     setServiceData(mockData);

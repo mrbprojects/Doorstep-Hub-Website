@@ -26,6 +26,15 @@ const CENTER_LOGO = {
   anchor: { x: 19, y: 50 },
 };
 
+const FALLBACK_SERVICE_IMAGES = [
+  'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=500&auto=format&fit=crop&q=80',
+];
+
 // Light map theme for landing page
 const mapOptions = {
   zoomControl: true,
@@ -178,10 +187,12 @@ export function NearbyServiceCenters() {
               lat: (() => { const r = parseFloat(service?.lattitude || service?.latitude); const g = parseFloat(service?.longitude); return (!isNaN(r) && r !== 0 && !isNaN(g)) ? r : location.lat + latOffset; })(),
               lng: (() => { const r = parseFloat(service?.lattitude || service?.latitude); const g = parseFloat(service?.longitude); return (!isNaN(r) && r !== 0 && !isNaN(g)) ? g : location.lng + lngOffset; })(),
               image: service.image && !service.image.startsWith('u')
-                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`
-                : service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : `https://images.unsplash.com/photo-${index + 1}?w=400`,
+                ? (service.image.startsWith('http') ? service.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`)
+                : (service.image && service.image.startsWith('http'))
+                  ? service.image
+                  : FALLBACK_SERVICE_IMAGES[index % FALLBACK_SERVICE_IMAGES.length],
               logo: service.logo
-                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}`
+                ? (service.logo.startsWith('http') ? service.logo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}`)
                 : null,
             };
           });
@@ -235,24 +246,19 @@ export function NearbyServiceCenters() {
 
   // Skeleton (YOUR ORIGINAL)
   const SkeletonService = () => (
-    <div className="p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-slate-200 animate-pulse">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1 space-y-2">
-          <div className="h-5 w-32 bg-slate-200 rounded" />
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <div className="w-4 h-4 bg-slate-200 rounded-full" />
-              <div className="h-3 w-12 bg-slate-200 rounded" />
-            </div>
+    <div className="p-4 sm:p-5 rounded-2xl bg-white/90 backdrop-blur-sm border border-slate-200 animate-pulse">
+      <div className="flex items-start gap-3.5 sm:gap-4">
+        <div className="w-20 h-20 sm:w-[88px] sm:h-[88px] bg-slate-200 rounded-2xl shrink-0" />
+        <div className="flex-1 space-y-2.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-20 bg-slate-200 rounded-full" />
+            <div className="h-4 w-12 bg-slate-200 rounded" />
           </div>
+          <div className="h-5 w-44 bg-slate-200 rounded" />
+          <div className="h-3 w-full bg-slate-200 rounded" />
+          <div className="h-3 w-2/3 bg-slate-200 rounded" />
         </div>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-slate-200 rounded-full" />
-          <div className="h-4 w-20 bg-slate-200 rounded" />
-        </div>
-        <div className="h-10 w-20 bg-slate-200 rounded-lg" />
+        <div className="w-11 h-11 sm:w-12 sm:h-12 bg-slate-200 rounded-2xl shrink-0 self-center" />
       </div>
     </div>
   );
@@ -260,6 +266,8 @@ export function NearbyServiceCenters() {
   // ─── Service Card Sub-component ──────────────────────────────────────────────
   const ServiceCard = ({ service, actualIndex }) => {
     const isActive = selectedService === actualIndex;
+    const cardImage = service.image || service.logo || '/servicecenterpointlogo.png';
+
     return (
       <motion.div
         key={service.id}
@@ -269,48 +277,63 @@ export function NearbyServiceCenters() {
           e.stopPropagation();
           router.push(`/service-list/${service.slug || service.id}`);
         }}
-        whileHover={{ x: 10 }}
+        whileHover={{ x: 6 }}
         name="service-card"
-        className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${isActive
+        className={`p-4 sm:p-5 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-sm relative group ${isActive
           ? 'bg-gradient-to-r from-[#e6f4f1] to-[#d8efe9] border-[#7dbeb3] shadow-lg shadow-[#037166]/10'
-          : 'bg-white/90 border-slate-200 hover:border-[#037166]/30'
+          : 'bg-white/95 border-slate-200 hover:border-[#037166]/40 shadow-xs hover:shadow-md'
           }`}
       >
         {isActive && (
-          <span className="absolute top-3 right-16 inline-flex h-6 w-6 items-center justify-center rounded-md border border-[#037166]/35 bg-white shadow-sm">
+          <span className="absolute top-3 right-16 inline-flex h-6 w-6 items-center justify-center rounded-md border border-[#037166]/35 bg-white shadow-sm z-10">
             <Check className="h-3.5 w-3.5 text-[#037166]" />
           </span>
         )}
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3.5 sm:gap-4">
+          {/* Store Image / Logo */}
+          <div className="relative w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 shadow-xs mt-0.5">
+            <img
+              src={cardImage}
+              alt={service.name}
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/servicecenterpointlogo.png';
+              }}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+
           <div className="flex-1 min-w-0">
             {/* Top Row: Distance & Rating */}
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[#cbe8e1] text-[#1f4f49] whitespace-nowrap">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#cbe8e1] text-[#1f4f49] whitespace-nowrap">
                 {service.distance} AWAY
               </span>
-              <div className="flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5 fill-[#04a99d] text-[#04a99d]" />
-                <span className="text-sm font-bold text-white">{service.rating}</span>
+              <div className="flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 fill-[#f59e0b] text-[#f59e0b]" />
+                <span className="text-xs sm:text-sm font-bold text-slate-800">{service.rating}</span>
               </div>
             </div>
 
             {/* Business Name */}
-            <h4 className={`text-xl font-bold transition-colors leading-tight mb-1.5 ${isActive ? 'text-white' : 'text-slate-900 group-hover:text-white'}`}>
+            <h4 className={`text-base sm:text-lg font-bold transition-colors leading-snug mb-1 line-clamp-1 ${isActive ? 'text-[#005a52]' : 'text-slate-900 group-hover:text-[#00796F]'}`}>
               {service.name}
             </h4>
 
             {/* Address */}
-            <p className="text-slate-500 text-sm line-clamp-2 mb-4">
+            <p className="text-slate-500 text-xs line-clamp-2 mb-3">
               {service.address}
             </p>
 
             {/* Bottom Row: Time and View Details */}
-            <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-200">
-              <div className="flex items-center gap-2 text-slate-500">
-                <Clock className="w-4 h-4 text-[#04a99d]" />
-                <span className="text-xs font-medium tracking-wide">{service.status}</span>
+            <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <Clock className="w-3.5 h-3.5 text-[#00796F]" />
+                <span className="text-[11px] sm:text-xs font-medium tracking-wide">{service.status}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[#04a99d] font-bold text-xs group-hover:gap-2 transition-all">
+              <div className="flex items-center gap-1 text-[#00796F] font-bold text-xs group-hover:gap-1.5 transition-all">
                 View Details
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
@@ -318,15 +341,17 @@ export function NearbyServiceCenters() {
           </div>
 
           {/* Floating WhatsApp button on the RIGHT */}
-          <div className="flex items-center self-center">
+          <div className="flex items-center self-center shrink-0">
             <a
-              href={`https://wa.me/918886688666?text=Hi, I'm interested in ${service.name} service.`}
+              href={`https://wa.me/918886688666?text=Hi, I'm interested in ${encodeURIComponent(service.name)} service.`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="p-3.5 rounded-2xl bg-white/5 hover:bg-[#25D366] text-white/60 hover:text-white transition-all border border-white/10 hover:border-[#25D366] shadow-lg"
+              title={`Chat with ${service.name} on WhatsApp`}
+              aria-label={`Chat with ${service.name} on WhatsApp`}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white shadow-md shadow-[#25D366]/25 hover:shadow-lg hover:shadow-[#25D366]/35 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0"
             >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 fill-white" viewBox="0 0 24 24">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
               </svg>
             </a>
@@ -394,22 +419,19 @@ export function NearbyServiceCenters() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-10"
+          className="text-center mb-5 sm:mb-6"
         >
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#037166]/10 via-white/10 to-[#037166]/10 border border-[#037166]/30 rounded-full mb-6">
-            <Navigation className="w-4 h-4 text-[#037166]" />
-            <h6 className="text-sm bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent font-medium">Nearby Service Provider Locations</h6>
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-[#EAF9F5] border border-[#00796F]/30 rounded-full mb-2.5 shadow-xs">
+            <Navigation className="w-3.5 h-3.5 text-[#00796F]" />
+            <span className="text-xs sm:text-sm text-[#00796F] font-bold tracking-wide uppercase">Nearby Service Provider Locations</span>
           </div>
 
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-[#037166] via-white to-[#037166] bg-clip-text text-transparent">
-              Nearby Local Service Providers
-            </span>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#102033] tracking-tight mb-2">
+            Nearby Local <span className="text-[#00796F]">Service Providers</span>
           </h2>
 
-          <p className="text-gray-400 text-lg max-w-4xl mx-auto">
-            Find nearby appliance service providers for ACs, refrigerators, washing machines, TVs, water purifiers and more. Compare available professionals, choose a suitable service, and book convenient doorstep repair support in your area.
- {location ? (location.shortAddress || 'you') : 'you'}
+          <p className="text-slate-600 text-sm sm:text-base max-w-3xl mx-auto leading-relaxed">
+            Find nearby appliance service providers for ACs, refrigerators, washing machines, TVs, water purifiers and more. Compare available professionals, choose a suitable service, and book convenient doorstep repair support in {location?.shortAddress || location?.city || 'your area'}.
           </p>
 
           {!location && (
@@ -584,16 +606,16 @@ export function NearbyServiceCenters() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex justify-center mt-16"
+          className="flex justify-center mt-6 sm:mt-8"
         >
           <motion.button
-            whileHover={{ scale: 1 }}
-            whileTap={{ scale: 0.99 }}
-            className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-[#037166] hover:border-[#049985] text-white font-medium transition-all duration-300 flex items-center gap-2 group"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-8 py-3.5 rounded-full bg-[#00796F] hover:bg-[#00695C] text-white font-bold text-sm sm:text-base shadow-lg shadow-[#00796F]/25 hover:shadow-xl hover:shadow-[#00796F]/35 transition-all duration-300 flex items-center gap-2 group cursor-pointer"
             onClick={() => router.push('/nearby-service-centers')}
           >
-            Explore Service Centers
-            <Navigation className="w-4 h-4" />
+            <span>Explore Service Centers</span>
+            <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
           </motion.button>
         </motion.div>
       </div>

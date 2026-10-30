@@ -13,18 +13,18 @@ export function AdSenseScriptLoader() {
   const pathname = usePathname();
   const isEligible = isAdSenseEligiblePath(pathname);
 
-  if (!isEligible || !ADSENSE_CONFIG.clientId) {
-    return null;
-  }
+  React.useEffect(() => {
+    if (!isEligible || !ADSENSE_CONFIG.clientId) return;
+    if (document.querySelector('script[src*="adsbygoogle.js"]')) return;
 
-  return (
-    <Script
-      id="adsbygoogle-init"
-      strategy="afterInteractive"
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CONFIG.clientId}`}
-      crossOrigin="anonymous"
-    />
-  );
+    const script = document.createElement('script');
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CONFIG.clientId}`;
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    document.head.appendChild(script);
+  }, [isEligible]);
+
+  return null;
 }
 
 export default AdSenseScriptLoader;

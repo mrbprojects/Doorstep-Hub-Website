@@ -193,7 +193,7 @@ export function NewsletterWidget({ compact = false }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="relative w-full max-w-6xl mx-auto rounded-[28px] sm:rounded-[36px] p-6 sm:p-10 lg:p-12 overflow-hidden bg-gradient-to-r from-[#F0FAF8] via-white to-[#E8F7F4] border border-[#BCE3DE] shadow-[0_8px_30px_-4px_rgba(0,140,128,0.08)]"
+            className="relative w-full max-w-6xl mx-auto rounded-2xl sm:rounded-3xl p-5 sm:p-7 lg:p-8 overflow-hidden bg-gradient-to-r from-[#F0FAF8] via-white to-[#E8F7F4] border border-[#BCE3DE] shadow-[0_6px_24px_-4px_rgba(0,140,128,0.06)]"
         >
             {/* Ambient Background Gradient Circles */}
             <div className="absolute -top-16 -left-16 w-56 h-56 bg-[#008C80]/5 rounded-full blur-3xl pointer-events-none" />

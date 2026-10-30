@@ -9,6 +9,7 @@ import { TopCategories } from '@/components/appliances/TopCategories';
 import { FeaturedServices } from '@/components/appliances/FeaturedServices';
 import { RecentlyBooked } from '@/components/appliances/RecentlyBooked';
 import { DownloadApp } from '@/components/appliances/DownloadApp';
+import { NearbyServiceCenters } from '@/components/landing/NearbyServiceCenters';
 import { NearbyServiceCenters as NearbyStores } from '@/components/appliances/NearbyStores';
 import { PopularCenters } from '@/components/appliances/PopularCenters';
 import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
@@ -128,6 +129,8 @@ export function ApplianceHomePage() {
                     onSelect={handleExploreSelect}
                 />
                 <TopCategories onViewAll={() => router.push(`/${serviceSlugs.category}`)} />
+                {/* Nearby Service Provider Locations moved from Home Page */}
+                <NearbyServiceCenters />
                 <ApplianceHowItWorks />
                 <ApplianceBookingFlow />
                 <FeaturedServices

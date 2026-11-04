@@ -80,10 +80,16 @@ export function getAppPromotionForRoute(pathname = '') {
         '/payment-failed',
         '/appliances/payment-failed',
         '/services/payment-failed',
+        '/amc/payment-result',
         '/spa-salon/booking/failure',
         '/thank-you',
         '/services/thank-you',
-        '/spa-salon/thank-you'
+        '/appliances/thank-you',
+        '/appliances/thank-you-cod',
+        '/spa-salon/thank-you',
+        '/spa-salon/thank-you-cod',
+        '/religious-services/thank-you',
+        '/religious-services/thank-you-cod'
     ];
 
     for (const prefix of excludedPrefixes) {

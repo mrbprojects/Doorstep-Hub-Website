@@ -15,7 +15,8 @@ export function FloatingActionButtons() {
     useEffect(() => { setMounted(true); }, []);
     if (!mounted || !pathname) return null;
     const isBookingPage = pathname === '/book-appointment';
-    const isHomePage = pathname === '/';
+    // Hide mobile floating Book Now pill on home page and appliance repair services landing page
+    const hideMobileBookNow = pathname === '/' || pathname.startsWith('/appliance-repair-services') || pathname.startsWith('/appliances');
 
     // Services to hide icons for
     const hideForServices = [
@@ -65,8 +66,8 @@ export function FloatingActionButtons() {
             {/* Bottom-right: Book Appointment (desktop) + Book Now pill (mobile) */}
             <div className="fixed bottom-6 right-4 sm:right-6 z-50 flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:gap-4">
 
-                {/* Book Appointment Button - Desktop only, hidden on booking page, home page, and service detail pages */}
-                {!isBookingPage && !isServiceDetailPage && !isHomePage && (
+                {/* Book Appointment Button - Desktop only, visible on home page & appliance repair landing page */}
+                {!isBookingPage && !isServiceDetailPage && (
                     <Link href="/book-appointment" className="hidden sm:block">
                         <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -78,8 +79,8 @@ export function FloatingActionButtons() {
                     </Link>
                 )}
 
-                {/* Book Now — Mobile only compact pill, hidden on booking page, home page, and service detail pages */}
-                {!isBookingPage && !isServiceDetailPage && !isHomePage && (
+                {/* Book Now — Mobile only compact pill, hidden on home page and appliance repair services landing page */}
+                {!isBookingPage && !isServiceDetailPage && !hideMobileBookNow && (
                     <Link href="/book-appointment" className="block sm:hidden">
                         <motion.button
                             whileHover={{ scale: 1.05 }}

@@ -9,7 +9,7 @@ const SUPPORTED_CITIES = [
     { name: 'Hyderabad', lat: 17.3850, lng: 78.4867, state: 'Telangana', aliases: ['hyderabad', 'secunderabad', 'cyberabad'] },
     { name: 'Bengaluru', lat: 12.9716, lng: 77.5946, state: 'Karnataka', aliases: ['bengaluru', 'bangalore'] },
     { name: 'Chennai', lat: 13.0827, lng: 80.2707, state: 'Tamil Nadu', aliases: ['chennai', 'madras'] },
-    { name: 'Vijayawada', lat: 16.5062, lng: 80.6480, state: 'Andhra Pradesh', aliases: ['vijayawada', 'bezawada'] },
+    { name: 'Vijayawada', lat: 16.5062, lng: 80.6480, state: 'Andhra Pradesh', aliases: ['vijayawada', 'bezawada', 'nunna', 'ntr', 'mogalrajapuram', 'bhavanipuram', 'gunadala', 'auto nagar', 'gollapudi', 'ramavarappadu'] },
     { name: 'Vizag', lat: 17.6868, lng: 83.2185, state: 'Andhra Pradesh', aliases: ['vizag', 'visakhapatnam', 'waltair'] },
     { name: 'Mumbai', lat: 19.0760, lng: 72.8777, state: 'Maharashtra', aliases: ['mumbai', 'bombay', 'navi mumbai', 'thane'] },
     { name: 'Pune', lat: 18.5204, lng: 73.8567, state: 'Maharashtra', aliases: ['pune', 'poona', 'pimpri'] },
@@ -470,13 +470,19 @@ class LocationManager {
                         let postalCode = '';
                         let state = '';
 
+                        let candidates = [];
                         if (place.address_components) {
                             for (const component of place.address_components) {
                                 if (component.types.includes('locality')) {
-                                    city = component.long_name;
+                                    candidates.push(component.long_name);
+                                    if (!city) city = component.long_name;
                                 }
                                 if (component.types.includes('sublocality') || component.types.includes('neighborhood')) {
                                     area = component.long_name;
+                                    candidates.push(component.long_name);
+                                }
+                                if (component.types.includes('administrative_area_level_2') || component.types.includes('administrative_area_level_3')) {
+                                    candidates.push(component.long_name);
                                 }
                                 if (component.types.includes('postal_code')) {
                                     postalCode = component.long_name;
@@ -487,8 +493,20 @@ class LocationManager {
                             }
                         }
 
-                        const matched = matchCityByName(city);
-                        const resolvedCity = matched ? matched.name : (city || findClosestSupportedCity(lat, lng).name);
+                        // Try matching any candidate component against supported operating cities
+                        let matched = null;
+                        for (const cand of candidates) {
+                            matched = matchCityByName(cand);
+                            if (matched) break;
+                        }
+
+                        // Fallback: check closest supported city within 45km radius
+                        const closest = findClosestSupportedCity(lat, lng);
+                        if (!matched && closest && closest.distanceKm <= 45) {
+                            matched = closest;
+                        }
+
+                        const resolvedCity = matched ? matched.name : (city || closest.name);
                         const shortAddress = area ? `${area}, ${resolvedCity}` : resolvedCity;
 
                         const locationData = {

@@ -144,24 +144,14 @@ export function LocationBar({ theme = {} }) {
         }
     };
 
-    const handleCityClick = async (cityName) => {
-        // Instant city selection (0ms latency)
+    const handleCityClick = (cityName) => {
+        // Authoritative city selection
         if (setCityLocation) {
             setCityLocation(cityName);
         }
         setIsOpen(false);
         setSearchQuery('');
         setSearchResults([]);
-
-        // Optionally refine with Google Places if active
-        try {
-            const results = await searchLocation(cityName);
-            if (results && results.length > 0 && results[0]?.place_id) {
-                await setManualLocation(results[0].place_id);
-            }
-        } catch (err) {
-            // Silently ignore, location is already set
-        }
     };
 
     return (

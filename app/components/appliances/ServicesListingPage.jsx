@@ -119,6 +119,8 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         let body = {
           lattitude: location.lat,
           longitude: location.lng,
+          cityName: location.city || '',
+          city: location.city || '',
         };
 
         if (slug) {

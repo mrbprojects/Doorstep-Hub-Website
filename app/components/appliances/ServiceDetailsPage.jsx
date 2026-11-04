@@ -225,7 +225,9 @@ export function ServiceDetailsPage({
           body: JSON.stringify({
             subcategoryId: subCategoryId,
             lattitude: location.lat,
-            longitude: location.lng
+            longitude: location.lng,
+            cityName: location.city || '',
+            city: location.city || '',
           })
         });
 

@@ -3,15 +3,7 @@ import nextDynamic from 'next/dynamic';
 import HeroSection from '@/components/landing/HeroSection';
 import { redirect } from 'next/navigation';
 
-// Dynamically load below-the-fold sections with SSR enabled so crawlers receive complete HTML
-const BookingServices = nextDynamic(() => import('@/components/landing/BookingServices').then(m => m.BookingServices));
-const NearbyServiceCenters = nextDynamic(() => import('@/components/landing/NearbyServiceCenters').then(m => m.NearbyServiceCenters));
-const PremiumPGHostels = nextDynamic(() => import('@/components/landing/PremiumPGHostels').then(m => m.PremiumPGHostels));
-const RecommendedHostels = nextDynamic(() => import('@/components/landing/RecommendedHostels').then(m => m.RecommendedHostels));
-const LatestReligiousServices = nextDynamic(() => import('@/components/landing/LatestReligiousServices').then(m => m.LatestReligiousServices));
-const RecommendedReligious = nextDynamic(() => import('@/components/landing/RecommendedReligious').then(m => m.RecommendedReligious));
-const LatestSpaServices = nextDynamic(() => import('@/components/landing/LatestSpaServices').then(m => m.LatestSpaServices));
-const RecommendedSpaSalon = nextDynamic(() => import('@/components/landing/RecommendedSpaSalon').then(m => m.RecommendedSpaSalon));
+// Dynamically load below-the-fold sections with SSR enabled
 const KnowledgeSection = nextDynamic(() => import('@/components/landing/KnowledgeSection').then(m => m.KnowledgeSection));
 const AppDownload = nextDynamic(() => import('@/components/landing/AppDownload').then(m => m.AppDownload));
 const HomeHowItWorksSection = nextDynamic(() => import('@/components/landing/HomeHowItWorksSection').then(m => m.HomeHowItWorksSection));

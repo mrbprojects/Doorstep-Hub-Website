@@ -83,6 +83,22 @@ export function AppInstallBanner() {
     return () => clearTimeout(timer);
   }, [pathname, promotion]);
 
+  // Synchronize banner visibility with body class and custom event for floating elements
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (isVisible) {
+      document.body.classList.add('has-app-install-banner');
+      window.dispatchEvent(new CustomEvent('app-banner-change', { detail: { isVisible: true } }));
+    } else {
+      document.body.classList.remove('has-app-install-banner');
+      window.dispatchEvent(new CustomEvent('app-banner-change', { detail: { isVisible: false } }));
+    }
+    return () => {
+      document.body.classList.remove('has-app-install-banner');
+      window.dispatchEvent(new CustomEvent('app-banner-change', { detail: { isVisible: false } }));
+    };
+  }, [isVisible]);
+
   if (!mounted || !promotion || !isVisible) return null;
 
   const deepLinks = resolveDeepLinkUrls(promotion, pathname);

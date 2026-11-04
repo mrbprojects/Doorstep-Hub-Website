@@ -58,7 +58,15 @@ export function LocationProvider({ children }) {
         } catch (err) {
             console.warn('GPS detection failed, keeping existing or fallback location:', err);
             setError(err.message || 'Location permission denied');
-            // If GPS failed, silently try IP fallback rather than leaving blank
+            
+            // Preserve user's existing manual city selection if present
+            const existingSaved = locationManager.getSavedLocation();
+            if (existingSaved && existingSaved.city) {
+                setLocation(existingSaved);
+                return existingSaved;
+            }
+
+            // Only fallback to IP if there is no saved location at all
             try {
                 const ipLocation = await locationManager.detectWithIP();
                 setLocation(ipLocation);
@@ -95,18 +103,38 @@ export function LocationProvider({ children }) {
     }, []);
 
     /**
-     * Automatic location detection on page load:
-     * Prompts for browser location permission (GPS).
-     * If user denies permission or GPS times out, seamlessly falls back to IP detection.
+     * Privacy-friendly location detection on page load:
+     * 1. Preserves existing selected city from localStorage.
+     * 2. If permission was already explicitly granted in browser, reuses GPS detection.
+     * 3. If permission is unset ('prompt') or denied, does NOT pop up a GPS prompt automatically.
+     *    Instead, seamlessly falls back to silent IP city detection so the visitor can browse freely.
+     * 4. Full browser GPS permission prompt is only invoked when the visitor explicitly clicks
+     *    "Use Current Location" in the location selector.
      */
     const detectLocation = useCallback(async () => {
         try {
-            if (typeof window !== 'undefined' && 'geolocation' in navigator) {
-                return await detectWithGPS();
+            // First check if user already has a valid saved location
+            const existingSaved = locationManager.getSavedLocation();
+            if (existingSaved && existingSaved.city) {
+                setLocation(existingSaved);
+                return existingSaved;
             }
+
+            if (typeof window !== 'undefined' && navigator.permissions?.query) {
+                try {
+                    const perm = await navigator.permissions.query({ name: 'geolocation' });
+                    if (perm.state === 'granted') {
+                        return await detectWithGPS();
+                    }
+                } catch (e) {
+                    // permissions.query not supported in all browsers
+                }
+            }
+
+            // Unset or denied permission: Use non-intrusive IP detection without browser prompt
             return await detectWithIP();
         } catch (err) {
-            console.warn('GPS detection declined or unavailable, falling back to IP:', err);
+            console.warn('Initial location detection fallback:', err);
             return await detectWithIP();
         }
     }, [detectWithGPS, detectWithIP]);

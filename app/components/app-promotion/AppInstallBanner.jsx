@@ -199,3 +199,4 @@ export function AppInstallBanner() {
     </AnimatePresence>
   );
 }
+

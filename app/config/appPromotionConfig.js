@@ -131,3 +131,4 @@ export function resolveDeepLinkUrls(appConfig, currentPath = '/', queryParams = 
         iosAppStore: appConfig.ios.appStoreUrl,
     };
 }
+

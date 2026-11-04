@@ -68,6 +68,10 @@ export const metadata = {
     contact: '+91 8886688666',
     'X-UA-Compatible': 'ie=edge',
   },
+  itunes: {
+    appId: '6475340236',
+    appArgument: 'https://doorstephub.com',
+  },
   icons: {
     icon: '/d-hub-logo.png',
     shortcut: '/d-hub-logo.png',

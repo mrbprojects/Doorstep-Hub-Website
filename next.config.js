@@ -21,6 +21,14 @@ const nextConfig = {
   async headers() {
     const headersList = [
       {
+        source: '/.well-known/:path*',
+        headers: [
+          { key: 'Content-Type', value: 'application/json' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+      {
         source: '/:path*',
         headers: [
           // HSTS: after first visit the browser uses HTTPS directly — no round-trip

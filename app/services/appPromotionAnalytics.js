@@ -93,3 +93,4 @@ export function trackAppPromotionEvent(eventName, {
         // Silently catch to prevent any user impact
     }
 }
+

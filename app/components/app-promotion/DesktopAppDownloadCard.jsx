@@ -117,3 +117,4 @@ export function DesktopAppDownloadCard({ forcedAppType = null, className = '' })
     </div>
   );
 }
+

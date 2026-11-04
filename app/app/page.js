@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
     ShieldCheck,
@@ -24,7 +25,8 @@ import {
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 
-export default function AppDownloadPage() {
+function AppDownloadContent() {
+    const searchParams = useSearchParams();
     const [partnerLinks, setPartnerLinks] = useState({
         android: 'https://play.google.com/store/apps/details?id=com.doorstephub.partner',
         ios: 'https://apps.apple.com/in/app/doorstep-hub-partner/id6504071357'
@@ -68,6 +70,33 @@ export default function AppDownloadPage() {
 
         fetchSettings();
     }, []);
+
+    // Strict QR / URL parameter routing for mobile scans & deep links
+    useEffect(() => {
+        const type = searchParams.get('type');
+        if (!type) return;
+
+        // Strict whitelist: Only 'partner' and 'customer' allowed (no open redirect)
+        if (type !== 'partner' && type !== 'customer') return;
+
+        const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+        const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+
+        if (isMobile) {
+            if (type === 'partner') {
+                window.location.href = isIOS ? partnerLinks.ios : partnerLinks.android;
+            } else {
+                window.location.href = isIOS ? customerLinks.ios : customerLinks.android;
+            }
+        } else {
+            // Desktop: smoothly scroll into view of the selected panel
+            const targetId = type === 'partner' ? 'partner-app' : 'customer-app';
+            const el = document.getElementById(targetId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }, [searchParams, partnerLinks, customerLinks]);
 
     // Customer App Benefits
     const customerBenefits = [
@@ -170,7 +199,7 @@ export default function AppDownloadPage() {
                     {/* ============================================================ */}
                     {/* PANEL 1: CUSTOMER APP PROMOTION */}
                     {/* ============================================================ */}
-                    <section className="relative rounded-[24px] sm:rounded-[36px] bg-gradient-to-br from-[#EEFAF6] via-[#F4FBF9] to-[#E8F8F3] border border-[#CDEAE2] p-5 sm:p-8 lg:p-10 shadow-sm overflow-hidden">
+                    <section id="customer-app" className="relative rounded-[24px] sm:rounded-[36px] bg-gradient-to-br from-[#EEFAF6] via-[#F4FBF9] to-[#E8F8F3] border border-[#CDEAE2] p-5 sm:p-8 lg:p-10 shadow-sm overflow-hidden">
                         
                         {/* Decorative background mint blobs */}
                         <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#008C80]/5 rounded-full blur-3xl pointer-events-none" />
@@ -450,7 +479,7 @@ export default function AppDownloadPage() {
                     {/* ============================================================ */}
                     {/* PANEL 2: SERVICE PARTNER APP PROMOTION */}
                     {/* ============================================================ */}
-                    <section className="relative rounded-[24px] sm:rounded-[36px] bg-gradient-to-br from-[#FCFAF4] via-[#FDF9ED] to-[#FAF6EA] border border-[#EFE5D2] p-5 sm:p-8 lg:p-10 shadow-sm overflow-hidden">
+                    <section id="partner-app" className="relative rounded-[24px] sm:rounded-[36px] bg-gradient-to-br from-[#FCFAF4] via-[#FDF9ED] to-[#FAF6EA] border border-[#EFE5D2] p-5 sm:p-8 lg:p-10 shadow-sm overflow-hidden">
                         
                         {/* Decorative background warm blobs */}
                         <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#D97706]/5 rounded-full blur-3xl pointer-events-none" />
@@ -611,6 +640,14 @@ export default function AppDownloadPage() {
 
             <Footer />
         </div>
+    );
+}
+
+export default function AppDownloadPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#F8FCFB]" />}>
+            <AppDownloadContent />
+        </Suspense>
     );
 }
 

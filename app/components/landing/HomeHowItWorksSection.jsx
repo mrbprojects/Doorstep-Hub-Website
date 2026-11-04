@@ -43,10 +43,10 @@ export function HomeHowItWorksSection() {
       <div className="absolute top-1/4 -right-20 w-80 h-80 bg-[#00796F]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-[#EAFBF7] rounded-full blur-2xl pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-          {/* Left Column (65-70% on desktop) */}
-          <div className="lg:col-span-8 flex flex-col justify-center">
+          {/* Left Column (Cards & Copy) */}
+          <div className="lg:col-span-7 xl:col-span-8 flex flex-col justify-center">
             {/* Eyebrow Label */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -133,14 +133,14 @@ export function HomeHowItWorksSection() {
             </div>
           </div>
 
-          {/* Right Column: Woman Illustration (30-35% on desktop) */}
-          <div className="lg:col-span-4 relative flex items-center justify-center lg:justify-end mt-4 lg:mt-0">
+          {/* Right Column: Woman Illustration */}
+          <div className="lg:col-span-5 xl:col-span-4 relative flex items-center justify-center mt-6 lg:mt-0">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative w-full max-w-[340px] sm:max-w-[380px] lg:max-w-none flex flex-col items-center"
+              className="relative w-full max-w-[360px] sm:max-w-[400px] lg:max-w-[440px] flex flex-col items-center"
             >
               {/* Decorative Swirl Lines in background */}
               <div className="absolute -top-6 -right-2 pointer-events-none select-none opacity-40" aria-hidden="true">
@@ -151,14 +151,15 @@ export function HomeHowItWorksSection() {
               </div>
 
               {/* Main Illustration */}
-              <div className="relative w-full aspect-[310/250] flex items-center justify-center">
+              <div className="relative w-full aspect-[6/5] flex items-center justify-center">
                 <Image
                   src="/how-it-works-woman-trans.png"
                   alt="Young woman pointing to Doorstep Hub booking steps"
                   fill
-                  sizes="(max-width: 768px) 320px, (max-width: 1200px) 380px, 420px"
+                  sizes="(max-width: 768px) 360px, (max-width: 1200px) 440px, 480px"
                   className="object-contain object-bottom pointer-events-none select-none"
-                  priority={false}
+                  quality={95}
+                  priority
                 />
               </div>
             </motion.div>

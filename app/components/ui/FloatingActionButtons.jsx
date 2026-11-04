@@ -15,6 +15,7 @@ export function FloatingActionButtons() {
     useEffect(() => { setMounted(true); }, []);
     if (!mounted || !pathname) return null;
     const isBookingPage = pathname === '/book-appointment';
+    const isHomePage = pathname === '/';
 
     // Services to hide icons for
     const hideForServices = [
@@ -64,8 +65,8 @@ export function FloatingActionButtons() {
             {/* Bottom-right: Book Appointment (desktop) + Book Now pill (mobile) */}
             <div className="fixed bottom-6 right-4 sm:right-6 z-50 flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:gap-4">
 
-                {/* Book Appointment Button - Desktop only, hidden on booking page and service detail pages */}
-                {!isBookingPage && !isServiceDetailPage && (
+                {/* Book Appointment Button - Desktop only, hidden on booking page, home page, and service detail pages */}
+                {!isBookingPage && !isServiceDetailPage && !isHomePage && (
                     <Link href="/book-appointment" className="hidden sm:block">
                         <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -77,8 +78,8 @@ export function FloatingActionButtons() {
                     </Link>
                 )}
 
-                {/* Book Now — Mobile only compact pill, hidden on booking page and service detail pages */}
-                {!isBookingPage && !isServiceDetailPage && (
+                {/* Book Now — Mobile only compact pill, hidden on booking page, home page, and service detail pages */}
+                {!isBookingPage && !isServiceDetailPage && !isHomePage && (
                     <Link href="/book-appointment" className="block sm:hidden">
                         <motion.button
                             whileHover={{ scale: 1.05 }}

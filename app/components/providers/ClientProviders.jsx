@@ -6,6 +6,8 @@ import { GlobalAuthModal } from '@/components/auth/GlobalAuthModal';
 import { LeadResumeHandler } from '@/components/smart-leads/LeadResumeHandler';
 import { GlobalProgressBar } from '@/components/ui/GlobalProgressBar';
 import { GlobalLoaderProvider } from '@/context/GlobalLoaderContext';
+import { SmartAppBannerMeta } from '@/components/app-promotion/SmartAppBannerMeta';
+import { AppInstallBanner } from '@/components/app-promotion/AppInstallBanner';
 
 export function ClientProviders({ children }) {
     return (
@@ -14,7 +16,9 @@ export function ClientProviders({ children }) {
                 <GlobalProgressBar />
             </Suspense>
             <LeadResumeHandler />
+            <SmartAppBannerMeta />
             {children}
+            <AppInstallBanner />
             <Toaster
                 position="top-right"
                 toastOptions={{

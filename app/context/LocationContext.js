@@ -95,25 +95,18 @@ export function LocationProvider({ children }) {
     }, []);
 
     /**
-     * Non-blocking automatic location detection on page load
-     * If user already granted GPS permission, use GPS.
-     * Otherwise, use fast IP detection (<300ms) to avoid blocking the page with a browser prompt.
+     * Automatic location detection on page load:
+     * Prompts for browser location permission (GPS).
+     * If user denies permission or GPS times out, seamlessly falls back to IP detection.
      */
     const detectLocation = useCallback(async () => {
         try {
-            if (typeof window !== 'undefined' && navigator.permissions && navigator.permissions.query) {
-                try {
-                    const status = await navigator.permissions.query({ name: 'geolocation' });
-                    if (status.state === 'granted') {
-                        return await detectWithGPS();
-                    }
-                } catch (permErr) {
-                    // Query not supported for geolocation in some browsers
-                }
+            if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+                return await detectWithGPS();
             }
-            // Silent, fast IP detection
             return await detectWithIP();
         } catch (err) {
+            console.warn('GPS detection declined or unavailable, falling back to IP:', err);
             return await detectWithIP();
         }
     }, [detectWithGPS, detectWithIP]);

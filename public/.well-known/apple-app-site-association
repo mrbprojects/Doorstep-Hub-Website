@@ -1,0 +1,45 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "Z8UNCTCRRH.com.doorstephub.partner",
+        "paths": [
+          "/service-partner",
+          "/service-partner/*",
+          "/partner",
+          "/partner/*"
+        ]
+      },
+      {
+        "appID": "Z8UNCTCRRH.com.doorstephub.customers",
+        "paths": [
+          "NOT /service-partner",
+          "NOT /service-partner/*",
+          "NOT /partner",
+          "NOT /partner/*",
+          "NOT /api/*",
+          "NOT /admin/*",
+          "/",
+          "/appliances/*",
+          "/appliance-repair-services/*",
+          "/services/*",
+          "/spa-salon/*",
+          "/religious-services/*",
+          "/pghostels/*",
+          "/offers/*",
+          "/sell-buy/*",
+          "/book-now/*",
+          "/account/*",
+          "/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "Z8UNCTCRRH.com.doorstephub.customers",
+      "Z8UNCTCRRH.com.doorstephub.partner"
+    ]
+  }
+}

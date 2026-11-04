@@ -321,18 +321,18 @@ export function Header({ theme = {}, navItems = [] }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Left Side: Logo & Location Bar */}
-            <div className="flex items-center space-x-3 sm:space-x-5 flex-shrink-0">
-              <Link href="/">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-3.5 flex-shrink-0">
+              <Link href="/" className="flex-shrink-0">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="flex items-center relative group flex-shrink-0"
                 >
-                  <div className="relative w-24 sm:w-48 h-10 sm:h-16 overflow-hidden flex-shrink-0">
+                  <div className="relative h-10 sm:h-12 lg:h-14 aspect-[1.24/1] overflow-hidden flex-shrink-0">
                     <Image
                       src={globalSettings?.applicaionLogo ? (globalSettings.applicaionLogo.startsWith('http') ? globalSettings.applicaionLogo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com'}/${globalSettings.applicaionLogo.replace(/^\/+/, '')}`) : "/d-hub-logo.png"}
                       alt={globalSettings?.applicationName || "Doorstep Hub Logo"}
                       fill
-                      sizes="(max-width: 640px) 96px, 192px"
+                      sizes="(max-width: 640px) 50px, (max-width: 1024px) 60px, 72px"
                       className="object-contain object-left transition-all duration-300"
                       priority
                     />
@@ -341,7 +341,7 @@ export function Header({ theme = {}, navItems = [] }) {
               </Link>
 
               {/* Location Bar beside Logo */}
-              <div id="location-bar">
+              <div id="location-bar" className="flex-shrink-0">
                 <LocationBar theme={currentTheme} />
               </div>
             </div>

@@ -55,22 +55,16 @@ export function AppInstallBanner() {
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || window.innerWidth <= 1024;
     setIsDesktop(!isMobile);
 
-    // Check dismissal status in localStorage (7 days expiry)
+    // Clear any previously persisted dismissal so banner shows on every refresh and page navigation
     try {
-      const dismissData = localStorage.getItem(promotion.dismissKey);
-      if (dismissData) {
-        const parsed = JSON.parse(dismissData);
-        const daysPassed = (Date.now() - parsed.timestamp) / (1000 * 60 * 60 * 24);
-        if (daysPassed < promotion.dismissDays) {
-          setIsVisible(false);
-          return;
-        }
+      if (promotion.dismissKey) {
+        localStorage.removeItem(promotion.dismissKey);
       }
     } catch (e) {
       // LocalStorage access restricted in private mode
     }
 
-    // Delayed presentation (1.5 seconds) to prioritize core page content
+    // Delayed presentation (1 second) to prioritize core page content
     const timer = setTimeout(() => {
       setIsVisible(true);
       trackAppPromotionEvent(PROMOTION_EVENTS.IMPRESSION, {
@@ -78,7 +72,7 @@ export function AppInstallBanner() {
         pagePath: pathname,
         placement: isMobile ? 'mobile_bottom_banner' : 'desktop_bottom_banner',
       });
-    }, 1500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [pathname, promotion]);
@@ -108,13 +102,6 @@ export function AppInstallBanner() {
   const handleDismiss = (e) => {
     e.stopPropagation();
     setIsVisible(false);
-
-    try {
-      localStorage.setItem(
-        promotion.dismissKey,
-        JSON.stringify({ timestamp: Date.now(), dismissed: true })
-      );
-    } catch (err) {}
 
     trackAppPromotionEvent(PROMOTION_EVENTS.DISMISS, {
       appType: promotion.id,

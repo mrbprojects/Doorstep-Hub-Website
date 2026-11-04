@@ -46,7 +46,7 @@ export default async function SellBuySellerPage({ params }) {
   if (profile) {
     const sellerName = profile?.displayName || profile?.userId?.name || 'Verified Seller';
     let rawImageUrl = profile?.avatar || profile?.userId?.profilePic || '';
-    const IMAGE_BASE = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com').replace(/\/+$/, '');
+    const IMAGE_BASE = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
     if (rawImageUrl && !rawImageUrl.startsWith('http')) {
       rawImageUrl = `${IMAGE_BASE}/${rawImageUrl.replace(/^\//, '')}`;
     }

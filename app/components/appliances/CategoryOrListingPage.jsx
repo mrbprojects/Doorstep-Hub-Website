@@ -324,7 +324,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
 
     if (viewType === 'listing') {
         return (
-            <AppliancePageShell>
+            <AppliancePageShell includeStandardSections={false}>
                 <ServicesListingPage
                     slug={slug}
                     category={categoryData?.categorySlug || categorySlug}

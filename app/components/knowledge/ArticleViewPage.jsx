@@ -46,7 +46,7 @@ export function ArticleViewPage({ slug, initialArticle = null, initialRelated = 
                             title: foundArticle.title,
                             category: foundArticle.subcategoryId?.name || foundArticle.categoryId?.name || 'General',
                             readTime: foundArticle.readTime ? `${foundArticle.readTime} min read` : '3 min read',
-                            image: foundArticle.coverImage?.url ? encodeURI(`https://devapis.doorstephub.com${foundArticle.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
+                            image: foundArticle.coverImage?.url ? encodeURI(`https://api.doorstephub.com${foundArticle.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
                             content: fullContent,
                             author: foundArticle.author || 'Doorstep Hub',
                             date: formattedDate,
@@ -58,7 +58,7 @@ export function ArticleViewPage({ slug, initialArticle = null, initialRelated = 
                             id: item._id,
                             title: item.title,
                             category: item.subcategoryId?.name || 'General',
-                            image: item.coverImage?.url ? encodeURI(`https://devapis.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
+                            image: item.coverImage?.url ? encodeURI(`https://api.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
                             slug: item.slug,
                             readTime: `${item.readTime} min read`
                         }));

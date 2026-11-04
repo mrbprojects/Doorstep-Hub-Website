@@ -636,12 +636,12 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
 
         return (
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                whileHover={isClickable ? { y: -8 } : {}}
+                whileHover={isClickable ? { y: -6 } : {}}
                 className={`group ${isClickable ? 'cursor-pointer' : 'select-none'} relative ${featured ? 'md:col-span-2' : ''}`}
             >
-                <div className={`bg-white rounded-3xl overflow-hidden shadow-lg border-2 border-gray-100 transition-all duration-300 ${isClickable ? 'hover:shadow-2xl hover:border-[#037166]/30' : 'blur-[2px] opacity-80'}`}>
+                <div className={`bg-white rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-200/90 transition-all duration-300 flex flex-col justify-between ${isClickable ? 'hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)] hover:border-[#00796B]/50' : 'blur-[2px] opacity-80'}`}>
                     {!isClickable && (
                         <div className="absolute inset-0 z-50 flex items-center justify-center">
                             <div className="bg-black/60 px-6 py-2 rounded-full backdrop-blur-md">
@@ -649,54 +649,54 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                             </div>
                         </div>
                     )}
-                    <div className="relative h-48 sm:h-64 overflow-hidden">
+
+                    {/* Top Image Area */}
+                    <div className="relative h-44 sm:h-52 overflow-hidden bg-gray-50 shrink-0 border-b border-gray-100">
                         <div
-                            className={`absolute inset-0 bg-cover bg-center ${isClickable ? 'group-hover:scale-110' : ''} transition-transform duration-500`}
+                            className={`absolute inset-0 bg-cover bg-center ${isClickable ? 'group-hover:scale-105' : ''} transition-transform duration-700`}
                             style={{ backgroundImage: `url(${listing.image})` }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
 
-                        <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex flex-wrap gap-1.5 sm:gap-2">
-                            {listing.badges.map((badge, i) => (
+                        {/* Top Left: Badges */}
+                        <div className="absolute top-2.5 left-2.5 z-20 flex flex-wrap gap-1">
+                            {listing.badges.slice(0, 2).map((badge, i) => (
                                 <span
                                     key={i}
-                                    className="px-2 py-0.5 sm:px-3 sm:py-1 bg-white/90 backdrop-blur-sm rounded-full text-[9px] sm:text-xs font-semibold text-gray-900"
+                                    className="px-2 py-0.5 bg-black/65 backdrop-blur-md rounded-md text-[10px] font-bold text-white border border-white/10 uppercase tracking-wider"
                                 >
                                     {badge}
                                 </span>
                             ))}
                         </div>
 
-                        <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.2, type: 'spring' }}
-                            className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-gradient-to-br from-[#037166] to-[#025951] text-white px-2 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg flex items-center space-x-1 sm:space-x-1.5"
-                        >
-                            <Award className="w-3 h-3 sm:w-4 h-4" />
-                            <span className="font-bold text-[10px] sm:text-base">{listing.matchScore}%</span>
-                            <span className="text-[10px] hidden sm:inline">match</span>
-                        </motion.div>
+                        {/* Top Right: Match Score */}
+                        <div className="absolute top-2.5 right-2.5 z-20 bg-[#00796B] text-white px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 font-bold text-[10px] sm:text-xs">
+                            <Award className="w-3 h-3 text-amber-300" />
+                            <span>{listing.matchScore}%</span>
+                            <span className="hidden sm:inline">match</span>
+                        </div>
 
                         {isNearby && (
-                            <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-[#037166] text-white rounded-full text-sm font-semibold flex items-center space-x-1 shadow-lg">
-                                <MapPin className="w-3.5 h-3.5" />
+                            <div className="absolute bottom-2.5 left-2.5 z-20 px-2 py-0.5 bg-[#00796B] text-white rounded-md text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                                <MapPin className="w-3 h-3" />
                                 <span>{listing.distance} km away</span>
                             </div>
                         )}
 
+                        {/* Bottom Right: Quick Save & Compare buttons */}
                         {isClickable && (
-                            <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex space-x-1.5">
+                            <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center gap-1.5">
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         toggleSave(listing.id);
                                     }}
-                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+                                    className="w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white backdrop-blur-md rounded-full flex items-center justify-center transition-colors shadow-sm cursor-pointer"
+                                    aria-label="Save"
                                 >
                                     <Heart
-                                        className={`w-4 h-4 sm:w-5 h-5 transition-all ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-600'
-                                            }`}
+                                        className={`w-3.5 h-3.5 transition-all ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
                                     />
                                 </button>
                                 <button
@@ -704,61 +704,64 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                         e.stopPropagation();
                                         toggleCompare(listing.id);
                                     }}
-                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm rounded-full text-[10px] sm:text-sm font-bold transition-all shadow-lg ${isComparing
-                                        ? 'bg-[#037166] text-white'
+                                    className={`px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold transition-all shadow-sm cursor-pointer ${isComparing
+                                        ? 'bg-[#00796B] text-white'
                                         : 'bg-white/90 text-gray-900 hover:bg-white'
                                         }`}
                                 >
-                                    {isComparing ? '✓' : 'Compare'}
+                                    {isComparing ? '✓ Comparing' : 'Compare'}
                                 </button>
                             </div>
                         )}
                     </div>
 
-                    <div className="p-3 sm:p-6 flex flex-col h-full" onClick={() => isClickable && router.push(`/pghostels/hostel/${listing.slug || listing.id}`)}>
-                        <div className="mb-2 sm:mb-4">
-                            <h3 className="text-base sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 group-hover:text-[#037166] transition-colors line-clamp-1">
-                                {listing.name}
-                            </h3>
-                            <div className="flex items-center text-gray-500 text-[10px] sm:text-sm">
-                                <MapPin className="w-3 h-3 sm:w-4 h-4 mr-1 text-[#037166]/60" />
+                    {/* Card Content */}
+                    <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between" onClick={() => isClickable && router.push(`/pghostels/hostel/${listing.slug || listing.id}`)}>
+                        <div>
+                            {/* Title & Rating */}
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                                <h3 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-[#00796B] transition-colors leading-snug line-clamp-1">
+                                    {listing.name}
+                                </h3>
+                                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 rounded-md shrink-0">
+                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                    <span className="font-bold text-gray-900 text-xs">{listing.rating}</span>
+                                </div>
+                            </div>
+
+                            {/* Location */}
+                            <p className="flex items-center text-gray-500 text-xs line-clamp-1 mb-2.5">
+                                <MapPin className="w-3.5 h-3.5 mr-1 text-[#00796B] shrink-0" />
                                 <span className="truncate">{listing.location}</span>
+                            </p>
+
+                            {/* Amenities Micro-chips */}
+                            <div className="flex flex-wrap gap-1.5 mb-3.5">
+                                {listing.amenities.slice(0, 3).map((amenity, i) => {
+                                    const Icon = amenityIcons[amenity];
+                                    return (
+                                        <span
+                                            key={i}
+                                            className="px-2 py-0.5 bg-gray-50 rounded-md flex items-center gap-1 text-[10px] sm:text-[11px] text-gray-600 border border-gray-100 font-medium"
+                                        >
+                                            {Icon && <Icon className="w-3 h-3 text-[#00796B]" />}
+                                            <span>{amenity}</span>
+                                        </span>
+                                    );
+                                })}
+                                {listing.amenities.length > 3 && (
+                                    <span className="text-[10px] text-gray-400 self-center">+{listing.amenities.length - 3}</span>
+                                )}
                             </div>
                         </div>
 
-                        <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
-                            <div className="flex items-center space-x-1 px-1.5 py-0.5 sm:px-2 sm:py-1 bg-amber-50 rounded-lg">
-                                <Star className="w-3 h-3 sm:w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
-                                <span className="font-bold text-gray-900 text-xs sm:text-base">{listing.rating}</span>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-                            {listing.amenities.slice(0, 3).map((amenity, i) => {
-                                const Icon = amenityIcons[amenity];
-                                return (
-                                    <div
-                                        key={i}
-                                        className="px-2 py-1 bg-gray-50 rounded-lg flex items-center space-x-1 text-[10px] sm:text-xs text-gray-600 border border-gray-100"
-                                    >
-                                        {Icon && <Icon className="w-3 h-3 sm:w-3.5 h-3.5" />}
-                                        <span>{amenity}</span>
-                                    </div>
-                                );
-                            })}
-                            {listing.amenities.length > 3 && (
-                                <span className="text-[10px] text-gray-400 flex items-center">+{listing.amenities.length - 3} more</span>
-                            )}
-                        </div>
-
-
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-gray-50 mt-auto">
-                            <div className="min-w-0">
-                                <div className="text-[10px] sm:text-xs text-gray-400 italic uppercase tracking-wider font-bold mb-0.5">Starts From</div>
-                                <div className="flex items-baseline space-x-0.5">
-                                    {/* <span className='text-[#037166]'>starts from</span> */}
-                                    <span className="text-xl sm:text-2xl font-black text-gray-900">{listing.monthlyPrice.toLocaleString('en-IN')}</span>
-                                    {/* <span className="text-[10px] sm:text-xs text-gray-400">/mo</span> */}
+                        {/* Pricing & Action */}
+                        <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-gray-100 mt-auto">
+                            <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block leading-tight">Starts From</span>
+                                <div className="flex items-baseline gap-1 mt-0.5">
+                                    <span className="text-base sm:text-lg font-black text-gray-900 leading-tight">₹{listing.monthlyPrice.toLocaleString('en-IN')}</span>
+                                    <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium">{listing.monthlyPrice < 1000 ? '/ day' : '/ mo'}</span>
                                 </div>
                             </div>
 
@@ -768,16 +771,10 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                                     if (isClickable) router.push(`/pghostels/hostel/${listing.slug || listing.id}`);
                                 }}
                                 disabled={!isClickable}
-                                className={`w-11 h-11 sm:w-auto sm:h-auto px-0 sm:px-6 py-0 sm:py-3 rounded-full sm:rounded-xl font-bold shrink-0 transition-all flex items-center justify-center gap-1.5 ${isClickable
-                                    ? 'bg-transparent text-white shadow-none active:scale-95'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    }`}
+                                className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-[#00796B] to-[#009688] hover:opacity-95 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md transition-all flex items-center gap-1 shrink-0 cursor-pointer"
                             >
-                                {isClickable && (
-                                    <span className="inline-flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#037166] to-[#025951] text-white shadow-md">
-                                        <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4" />
-                                    </span>
-                                )}
+                                <span>Book Stay</span>
+                                <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
@@ -800,98 +797,150 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
     } : null;
 
     return (
-        <div className="min-h-screen bg-transparent pb-16">
+        <div className="min-h-screen bg-slate-50/50 pb-16">
             {schemaData && (
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
                 />
             )}
-            <div className="bg-[#E2E6E6]/80 border-b border-[#123F4A] pt-16 sm:pt-20 pb-10 sm:pb-12 relative overflow-hidden">
-                <div className="absolute inset-0 bg-grid-gray-200/50 [mask-image:linear-gradient(0deg,white,transparent)]" />
-                <div className="max-w-7xl mx-auto px-4 relative z-10">
-                    <button
-                        onClick={() => router.push('/pghostels')}
-                        className="mb-6 sm:mb-8 mt-5 sm:mt-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-200 hover:shadow-lg transition-all text-gray-700 hover:text-[#037166]"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
+
+            {/* HERO BANNER SECTION (DOORSTEP HUB APPROVED TEAL GRADIENT) */}
+            <div className="relative bg-gradient-to-br from-[#00473e] via-[#01655b] to-[#003932] pt-24 sm:pt-28 pb-12 sm:pb-14 overflow-hidden">
+                {/* Decorative Background Concentric Circles */}
+                <svg
+                    className="absolute -top-10 -right-10 w-60 h-60 sm:w-72 sm:h-72 pointer-events-none opacity-20 text-teal-200"
+                    viewBox="0 0 200 200"
+                    fill="none"
+                >
+                    <circle cx="100" cy="100" r="85" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" />
+                    <circle cx="100" cy="100" r="65" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="100" cy="100" r="45" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
+                </svg>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    {/* Back Button */}
+                    <div className="mb-3">
+                        <button
+                            onClick={() => router.push('/pghostels')}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-gray-900 hover:bg-slate-100 transition-all text-xs font-bold shadow-md cursor-pointer"
+                        >
+                            <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>Back</span>
+                        </button>
+                    </div>
+
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-gray-900"
                     >
-                        <h1 className="text-xl sm:text-4xl font-black mb-1 sm:mb-2 tracking-tight">
-                            {subcategoryOverride?.name || "PGs matched for you"}
+                        {/* Eyebrow */}
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="w-6 h-1 bg-[#f59e0b] rounded-full" />
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-200">
+                                Doorstep Hub • PG & Hostels
+                            </span>
+                        </div>
+
+                        {/* Heading */}
+                        <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2">
+                            {subcategoryOverride?.name || "AC Dormitory Rooms & Booking"}
                         </h1>
-                        <p className="text-gray-600 text-sm sm:text-lg mb-4 font-medium">
-                            {searchQuery ? `Results for "${searchQuery}"` : 'Based on your preferences + location'}
+
+                        {/* Yellow Accent Underline */}
+                        <div className="w-16 h-1 bg-[#f59e0b] rounded-full mb-3" />
+
+                        {/* Subtitle */}
+                        <p className="text-white/90 text-xs sm:text-sm md:text-base max-w-2xl font-medium leading-relaxed mb-4">
+                            {searchQuery ? `Verified results matching "${searchQuery}"` : 'Book verified AC dormitory beds, student hostels, and co-living stays with zero brokerage and transparent pricing.'}
                         </p>
 
-                        <div className="flex flex-wrap gap-2">
-                            {filterChips.map((chip, i) => (
-                                <span
-                                    key={i}
-                                    className="px-4 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-bold text-gray-700 flex items-center space-x-2 shadow-sm"
-                                >
-                                    <span>{chip}</span>
-                                    <button className="hover:bg-gray-100 rounded-full p-0.5 transition-colors">
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            ))}
+                        {/* Trust Pills / Filter Chips */}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                            {filterChips.length > 0 ? (
+                                filterChips.map((chip, i) => (
+                                    <span
+                                        key={i}
+                                        className="px-3 py-1 bg-white/15 backdrop-blur-md border border-white/20 rounded-full text-xs font-bold text-white flex items-center gap-1.5 shadow-xs"
+                                    >
+                                        <span>{chip}</span>
+                                        <button onClick={() => updateFilter('roomType', '')} className="hover:bg-white/20 rounded-full p-0.5 transition-colors">
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </span>
+                                ))
+                            ) : (
+                                <>
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold">
+                                        <Shield className="w-3 h-3 text-teal-300" />
+                                        <span>Verified Properties</span>
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold">
+                                        <Zap className="w-3 h-3 text-amber-300" />
+                                        <span>Instant Confirmation</span>
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold">
+                                        <Wifi className="w-3 h-3 text-teal-300" />
+                                        <span>WiFi & Food Available</span>
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold">
+                                        <Sparkles className="w-3 h-3 text-teal-300" />
+                                        <span>Zero Brokerage</span>
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </motion.div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 -mt-6 relative z-10">
+            {/* FLOATING SEARCH & FILTER BAR */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-7 relative z-20">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl shadow-xl p-4 border border-gray-100"
+                    className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-2.5 sm:p-3 border border-gray-100 flex items-center gap-2 sm:gap-3"
                 >
-                    <div className="flex items-center space-x-4">
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <Input
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    setSearchQuery(val);
-                                    const currentParams = new URLSearchParams(searchParams.toString());
-                                    if (val) currentParams.set('query', val);
-                                    else currentParams.delete('query');
-                                    router.replace(`${pathname}?${currentParams.toString()}`);
-                                }}
-                                placeholder="Search by area, landmark, hostel name..."
-                                className="pl-12 h-12 bg-gray-50 border-gray-200 text-black placeholder:text-gray-400"
-                            />
-                        </div>
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <button className="flex items-center space-x-2 p-3 sm:px-6 sm:py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors shrink-0">
-                                    <Sliders className="w-5 h-5" />
-                                    <span className="hidden md:inline font-medium">Filters</span>
-                                </button>
-                            </SheetTrigger>
-                            <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto custom-scrollbar">
-                                <SheetHeader className="pb-6 border-b border-gray-100">
-                                    <SheetTitle className="text-2xl font-black text-gray-900 flex items-center gap-2">
-                                        <Filter className="w-5 h-5 text-[#037166]" />
-                                        Filters
-                                    </SheetTitle>
-                                </SheetHeader>
-                                <div className="mt-6">
-                                    <FilterPanel showTitle={false} />
-                                </div>
-                            </SheetContent>
-                        </Sheet>
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchQuery(val);
+                                const currentParams = new URLSearchParams(searchParams.toString());
+                                if (val) currentParams.set('query', val);
+                                else currentParams.delete('query');
+                                router.replace(`${pathname}?${currentParams.toString()}`);
+                            }}
+                            placeholder="Search by area, landmark, hostel name..."
+                            className="pl-10 h-11 bg-gray-50 border-gray-200 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 rounded-xl focus:border-[#00796B]"
+                        />
                     </div>
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <button className="flex items-center gap-1.5 px-3.5 py-2.5 sm:px-5 sm:py-2.5 bg-gray-100 hover:bg-[#00796B] hover:text-white text-gray-700 rounded-xl transition-all font-bold text-xs sm:text-sm shrink-0 cursor-pointer">
+                                <Sliders className="w-4 h-4" />
+                                <span>Filters</span>
+                            </button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="w-[300px] sm:w-[360px] overflow-y-auto custom-scrollbar bg-white">
+                            <SheetHeader className="pb-4 border-b border-gray-100">
+                                <SheetTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <Filter className="w-4 h-4 text-[#00796B]" />
+                                    <span>Filter Stays</span>
+                                </SheetTitle>
+                            </SheetHeader>
+                            <div className="mt-4">
+                                <FilterPanel showTitle={false} />
+                            </div>
+                        </SheetContent>
+                    </Sheet>
                 </motion.div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            {/* MAIN CONTENT AREA */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {fetchError && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
                         <p className="text-red-700 text-sm font-medium">Failed to load PG listings. Please check your connection.</p>
@@ -899,17 +948,18 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                     </div>
                 )}
 
-                {sortedListings.length > 0 && !searchQuery && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-                        <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#037166] to-[#025951] rounded-lg sm:rounded-xl flex items-center justify-center">
-                                <Sparkles className="w-4 h-4 sm:w-6 h-6 text-white" />
+                {/* Show Recommended ONLY if more than 5 listings to avoid repeating the exact same cards */}
+                {sortedListings.length > 5 && !searchQuery && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+                        <div className="flex items-center space-x-2 sm:space-x-3 mb-4">
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#00796B] to-[#004d40] rounded-xl flex items-center justify-center shadow-xs">
+                                <Sparkles className="w-4 h-4 text-white" />
                             </div>
-                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Recommended for you</h2>
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Recommended Stays for You</h2>
                         </div>
                         <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 xl:grid-cols-3 sm:px-0 sm:mx-0 sm:pb-0">
                             {recommendedListings.map((listing) => (
-                                <div key={listing.id} className="w-[300px] sm:w-auto flex-shrink-0">
+                                <div key={listing.id} className="w-[280px] sm:w-auto shrink-0">
                                     <PGCard listing={listing} />
                                 </div>
                             ))}
@@ -917,39 +967,51 @@ export function PGListingsPageContent({ subcategoryOverride = null }) {
                     </motion.div>
                 )}
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 text-black shadow-sm">
-                    <div className="flex items-center justify-between gap-4">
-                        <TabsList className="bg-white border border-gray-200 p-1 shadow-sm flex-1 sm:flex-none">
-                            <TabsTrigger value="all" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white px-4 sm:px-6 text-xs sm:text-sm flex-1 sm:flex-none">All ({sortedListings.length})</TabsTrigger>
-                            <TabsTrigger value="nearby" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#037166] data-[state=active]:to-[#025951] data-[state=active]:text-white px-4 sm:px-6 text-xs sm:text-sm flex-1 sm:flex-none">Nearby</TabsTrigger>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                    {/* Header Controls: Tabs & Count */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-gray-200/80">
+                        <TabsList className="bg-white border border-gray-200 p-1 rounded-xl shadow-xs inline-flex">
+                            <TabsTrigger value="all" className="data-[state=active]:bg-[#00796B] data-[state=active]:text-white px-4 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all">
+                                All Stays ({sortedListings.length})
+                            </TabsTrigger>
+                            <TabsTrigger value="nearby" className="data-[state=active]:bg-[#00796B] data-[state=active]:text-white px-4 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all">
+                                Nearby
+                            </TabsTrigger>
                         </TabsList>
+
+                        <span className="text-xs text-gray-500 font-medium">
+                            Showing <strong className="text-gray-900 font-bold">{sortedListings.length}</strong> available stays
+                        </span>
                     </div>
 
-                    <div className="flex flex-col xl:flex-row gap-6 xl:gap-8">
-                        <div className="hidden xl:block w-80 flex-shrink-0">
-                            <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28 overflow-hidden">
+                    <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 items-start">
+                        {/* Desktop Sidebar Filters */}
+                        <div className="hidden xl:block w-72 shrink-0">
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/90 sticky top-24 overflow-hidden">
                                 <FilterPanel />
                             </div>
                         </div>
 
-                        <div className="flex-1">
+                        {/* Listings Grid */}
+                        <div className="flex-1 w-full">
                             {loading ? (
-                                <div className="grid md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                     {[...Array(6)].map((_, i) => (
-                                        <div key={i} className="animate-pulse">
-                                            <div className="bg-gray-200 h-64 rounded-2xl mb-4" />
+                                        <div key={i} className="animate-pulse bg-white rounded-2xl p-4 border border-gray-200">
+                                            <div className="bg-gray-200 h-44 rounded-xl mb-4" />
                                             <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                                            <div className="h-3 bg-gray-100 rounded w-1/2" />
                                         </div>
                                     ))}
                                 </div>
                             ) : sortedListings.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
                                     {sortedListings.map((listing) => (
                                         <PGCard key={listing.id} listing={listing} isNearby={activeTab === 'nearby'} />
                                     ))}
                                 </div>
                             ) : (
-                                <EmptyState icon="search" title="No results found" description="Try adjusting your filters." actionLabel="Reset Filters" onAction={() => { setPriceRange([0, 50000]); setMinRating(0); setSearchQuery(''); router.push(pathname); }} className="bg-white rounded-3xl border border-gray-100 shadow-sm" />
+                                <EmptyState icon="search" title="No matching stays found" description="Try adjusting your budget or room type filters." actionLabel="Reset Filters" onAction={() => { setPriceRange([0, 50000]); setMinRating(0); setSearchQuery(''); router.push(pathname); }} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8" />
                             )}
                         </div>
                     </div>

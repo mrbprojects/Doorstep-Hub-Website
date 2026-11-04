@@ -125,7 +125,7 @@ const nextConfig = {
     deviceSizes: [375, 640, 750, 828, 1080, 1200, 1440, 1920],
     // Explicit image sizes used by next/image with a fixed width.
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    domains: ['images.unsplash.com', 'api.dicebear.com', 'api.doorstephub.com', 'devapis.doorstephub.com'],
+    domains: ['images.unsplash.com', 'api.dicebear.com', 'api.doorstephub.com'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -141,7 +141,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'devapis.doorstephub.com',
+        hostname: 'api.doorstephub.com',
       },
     ],
   },

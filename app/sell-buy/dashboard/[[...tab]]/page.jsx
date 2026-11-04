@@ -1119,7 +1119,7 @@ export default function MarketplaceDashboardPage() {
                                 className={`w-full h-full object-cover ${isSold ? 'grayscale opacity-75' : ''}`}
                                 onError={(e) => {
                                   e.currentTarget.onerror = null;
-                                  e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                                  e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                                 }}
                               />
                               {isSold && (
@@ -1266,7 +1266,7 @@ export default function MarketplaceDashboardPage() {
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
                                 e.currentTarget.onerror = null;
-                                e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                                e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                               }}
                             />
                             <button
@@ -1627,7 +1627,7 @@ export default function MarketplaceDashboardPage() {
                   className="w-14 h-14 object-cover rounded-xl border border-slate-200 shrink-0"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                    e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                   }}
                 />
                 <div className="min-w-0 flex-1">

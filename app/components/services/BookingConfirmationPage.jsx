@@ -45,7 +45,7 @@ function areCitiesMatching(cityA, cityB) {
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  'https://devapis.doorstephub.com/v1/dhubApi';
+  'https://api.doorstephub.com/v1/dhubApi';
 
 export function BookingConfirmationPage({
   address,
@@ -77,7 +77,7 @@ export function BookingConfirmationPage({
       if (!token) return;
       setWalletLoading(true);
       try {
-        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/wallet/balance', {
+        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/wallet/balance', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

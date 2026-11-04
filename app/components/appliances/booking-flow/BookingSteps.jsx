@@ -255,7 +255,7 @@ export function BookingSteps({
                         <div className="w-[42%] min-w-[220px] h-full bg-white flex-shrink-0 relative overflow-hidden">
                           {service.image ? (
                             <img loading="lazy" decoding="async" 
-                              src={service.isAuthorized ? `https://devapis.doorstephub.com/${service.image}` : `https://devapis.doorstephub.com/${service.image}`} 
+                              src={service.isAuthorized ? `https://api.doorstephub.com/${service.image}` : `https://api.doorstephub.com/${service.image}`} 
                               alt={service.serviceName} 
                               className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" 
                             />

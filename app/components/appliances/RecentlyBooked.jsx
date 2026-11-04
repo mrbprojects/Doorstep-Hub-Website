@@ -74,14 +74,14 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
 
   // Shimmer Skeleton Card (6-column grid item)
   const ShimmerRecentCard = () => (
-    <div className="w-full h-[250px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm animate-pulse flex flex-col justify-between">
-      <div className="relative h-32 bg-white/5" />
+    <div className="w-full h-[250px] rounded-2xl overflow-hidden bg-white border border-gray-200/90 shadow-sm animate-pulse flex flex-col justify-between">
+      <div className="relative h-32 bg-gray-100 flex-shrink-0" />
       <div className="p-3.5 space-y-2.5 flex-1 flex flex-col justify-between">
         <div className="space-y-1.5">
-          <div className="h-4 w-3/4 bg-white/10 rounded" />
-          <div className="h-3 w-1/2 bg-white/5 rounded" />
+          <div className="h-4 w-3/4 bg-gray-200 rounded" />
+          <div className="h-3 w-1/2 bg-gray-100 rounded" />
         </div>
-        <div className="h-8 w-full bg-[#037166]/20 rounded-xl mt-auto" />
+        <div className="h-8 w-full bg-[#00796B]/15 rounded-xl mt-auto" />
       </div>
     </div>
   );
@@ -89,16 +89,16 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
   // Loading state (6 per row, total 12)
   if (loading) {
     return (
-      <section className="py-8 relative overflow-hidden">
+      <section className="py-8 sm:py-10 lg:py-12 relative overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
-          <div className="mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-3">
-              <TrendingUp className="w-3 h-3 text-[#04a99d]" />
-              <h6 className="text-xs font-medium text-[#04a99d]">TRENDING NOW</h6>
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00796B]/10 border border-[#00796B]/20 mb-2.5">
+              <TrendingUp className="w-3.5 h-3.5 text-[#00796B]" />
+              <span className="text-xs font-bold text-[#00796B] tracking-wider uppercase">TRENDING NOW</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 text-white">Explore Our Recently Booked Services</h2>
-            <p className="text-white/60 text-sm sm:text-base">See what services your neighbors are booking right now</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 text-gray-900 tracking-tight">Explore Our Recently Booked Services</h2>
+            <p className="text-slate-600 text-sm sm:text-base">See what services your neighbors are booking right now</p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-4">
@@ -121,10 +121,10 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
         />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-16">
-            <p className="text-white/60 mb-4">{error || 'No recent bookings available'}</p>
+            <p className="text-slate-500 mb-4">{error || 'No recent bookings available'}</p>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/10 border border-white/20 text-white text-sm hover:bg-white/20 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#00796B] text-white text-xs font-semibold hover:bg-[#00605A] transition-all"
             >
               Refresh Page
             </button>
@@ -150,16 +150,16 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#037166]/10 border border-[#037166]/20 mb-2.5"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00796B]/10 border border-[#00796B]/20 mb-2.5"
             >
-              <TrendingUp className="w-3 h-3 text-[#04a99d]" />
-              <h6 className="text-xs font-semibold text-[#04a99d] tracking-wider uppercase">TRENDING NOW</h6>
+              <TrendingUp className="w-3.5 h-3.5 text-[#00796B]" />
+              <h6 className="text-xs font-bold text-[#00796B] tracking-wider uppercase">TRENDING NOW</h6>
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-gray-900"
+              className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 text-gray-900 tracking-tight"
             >
               Explore Our Recently Booked Services
             </motion.h2>
@@ -168,7 +168,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-slate-600 text-sm sm:text-base max-w-2xl"
+              className="text-slate-600 text-sm sm:text-base max-w-2xl leading-relaxed"
             >
               See what services your neighbors are booking right now
             </motion.p>
@@ -179,12 +179,12 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="self-start sm:self-end flex-shrink-0"
+              className="self-start sm:self-end shrink-0"
             >
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-2.5 sm:px-7 sm:py-3 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-semibold text-xs sm:text-sm shadow-md shadow-[#037166]/30 hover:shadow-lg hover:shadow-[#037166]/50 transition-all inline-flex items-center gap-2"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-6 py-2.5 sm:px-7 sm:py-3 rounded-full bg-gradient-to-r from-[#00796B] to-[#009688] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#00796B]/20 hover:shadow-lg hover:shadow-[#00796B]/40 hover:opacity-95 transition-all inline-flex items-center gap-2"
                 onClick={onViewAll}
               >
                 <span>View All Services</span>
@@ -217,10 +217,10 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                   }
                 }}
               >
-                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/60 shadow-lg hover:shadow-[#037166]/20 transition-all duration-300 flex flex-col justify-between backdrop-blur-sm">
+                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white border border-gray-200/90 hover:border-[#00796B]/50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col justify-between">
                   
                   {/* Service Image */}
-                  <div className="relative h-32 sm:h-36 overflow-hidden bg-slate-900 flex-shrink-0">
+                  <div className="relative h-32 sm:h-36 overflow-hidden bg-gray-50 shrink-0 border-b border-gray-100">
                     <img
                       loading="lazy"
                       decoding="async"
@@ -232,26 +232,18 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-transparent to-black/30" />
 
                     {/* Category Name Tag */}
                     {service.categoryName && (
-                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[9px] sm:text-[10px] font-bold text-[#5eead4] truncate max-w-[110px]">
+                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[9px] sm:text-[10px] font-bold text-[#5eead4] truncate max-w-[110px] shadow-xs">
                         {service.categoryName}
                       </span>
                     )}
-
-                    {/* Hover Glow */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      className="absolute inset-0 bg-gradient-to-t from-[#037166]/30 to-transparent pointer-events-none"
-                    />
                   </div>
 
-                  {/* Card Content - Description Hidden */}
+                  {/* Card Content - Crisp Visible Text */}
                   <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
-                    <h4 className="text-xs sm:text-[13px] font-bold text-white mb-3 group-hover:text-[#5eead4] transition-colors line-clamp-2 leading-snug">
+                    <h4 className="text-xs sm:text-[13px] font-bold text-gray-900 mb-3 group-hover:text-[#00796B] transition-colors line-clamp-2 leading-snug">
                       {service.title}
                     </h4>
 
@@ -262,19 +254,12 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                         e.stopPropagation();
                         onServiceClick?.(service.id, service.categoryName, service.subcategoryName, service.slug);
                       }}
-                      className="mt-auto w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#04a99d] hover:to-[#037166] text-white text-[11px] sm:text-xs font-bold shadow-md shadow-[#037166]/20 hover:shadow-lg hover:shadow-[#037166]/40 transition-all active:scale-95 group-hover:scale-[1.02]"
+                      className="mt-auto w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-gradient-to-r from-[#00796B] to-[#009688] hover:opacity-95 text-white text-[11px] sm:text-xs font-bold shadow-xs transition-all active:scale-95 group-hover:scale-[1.02]"
                     >
                       <span>Book Service</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                   </div>
-
-                  {/* Glass Border on Hover */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    className="absolute inset-0 rounded-2xl border-2 border-[#037166]/50 pointer-events-none"
-                  />
                 </div>
               </motion.div>
             );
@@ -284,4 +269,3 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
     </section>
   );
 }
-

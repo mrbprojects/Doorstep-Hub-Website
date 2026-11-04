@@ -113,7 +113,7 @@ export function AddressPage({
   useEffect(() => {
     const fetchAppLinks = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi'}/app/get_global_settings`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi'}/app/get_global_settings`);
         const data = await res.json();
         if (data.success && data.policy) {
           setAppLinks({

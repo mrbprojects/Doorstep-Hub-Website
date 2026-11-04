@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, ExternalLink, Download, Smartphone, QrCode } from 'lucide-react';
 import { getAppPromotionForRoute, resolveDeepLinkUrls } from '@/config/appPromotionConfig';
 import { trackAppPromotionEvent, PROMOTION_EVENTS } from '@/services/appPromotionAnalytics';
+import { GooglePlayLogo, AppleLogo } from './StoreLogos';
 
 /**
  * Clean QR Code representation pointing to the app's smart link
@@ -204,7 +205,7 @@ export function AppInstallBanner() {
 
             {/* Action CTAs */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* Desktop Direct Store Shortcuts */}
+              {/* Desktop Direct Store Shortcuts - Prominently Highlighted */}
               {isDesktop && (
                 <div className="hidden lg:flex items-center gap-2 mr-1">
                   {promotion.android.available && (
@@ -212,10 +213,11 @@ export function AppInstallBanner() {
                       href={promotion.android.playStoreUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-[11px] font-semibold transition-all"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 text-slate-800 text-[11px] font-bold shadow-2xs hover:shadow-xs transition-all group"
+                      title="Get Doorstep Hub on Google Play"
                     >
-                      <img src="/googleplay.png" alt="Google Play" className="w-3.5 h-3.5 object-contain" />
-                      <span>Google Play</span>
+                      <GooglePlayLogo className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
+                      <span className="leading-none text-slate-900 font-extrabold">Google Play</span>
                     </a>
                   )}
                   {promotion.ios.available && (
@@ -223,10 +225,11 @@ export function AppInstallBanner() {
                       href={promotion.ios.appStoreUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-[11px] font-semibold transition-all"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 text-slate-800 text-[11px] font-bold shadow-2xs hover:shadow-xs transition-all group"
+                      title="Download Doorstep Hub on App Store"
                     >
-                      <img src="/ios.jpg" alt="App Store" className="w-3.5 h-3.5 object-contain rounded-xs" />
-                      <span>App Store</span>
+                      <AppleLogo className="w-4 h-4 text-slate-900 shrink-0 transition-transform group-hover:scale-110" />
+                      <span className="leading-none text-slate-900 font-extrabold">App Store</span>
                     </a>
                   )}
                 </div>
@@ -277,61 +280,95 @@ export function AppInstallBanner() {
         </motion.aside>
       </AnimatePresence>
 
-      {/* Desktop-Friendly Scan to Download QR Modal */}
+      {/* Redesigned QR Modal with Highlighted Android & iOS Logos */}
       <AnimatePresence>
         {showQrModal && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm"
             onClick={() => setShowQrModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              initial={{ scale: 0.94, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 12 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-[#E3EEEB] flex flex-col items-center text-center"
+              className="relative bg-white rounded-3xl p-6 sm:p-7 max-w-sm sm:max-w-md w-full shadow-2xl border border-teal-100 flex flex-col items-center text-center overflow-hidden"
             >
+              {/* Teal Top Accent Ribbon */}
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#004D49] via-[#007367] to-[#00B8A9]" />
+
+              {/* Close Button */}
               <button
                 type="button"
                 onClick={() => setShowQrModal(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Close QR Modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
 
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#007367]/10 to-[#037166]/20 border border-[#007367]/20 flex items-center justify-center mb-3 shadow-xs">
-                <img src={promotion.icon} alt={promotion.name} className="w-8 h-8 object-contain" />
+              {/* App Icon */}
+              <div className="relative mt-1 mb-2">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#007367]/15 to-[#00B8A9]/20 border border-[#007367]/25 flex items-center justify-center p-2.5 shadow-sm">
+                  <img src={promotion.icon} alt={promotion.name} className="w-full h-full object-contain" />
+                </div>
               </div>
 
-              <h3 className="text-lg font-black text-gray-900 leading-snug">
-                {promotion.name}
-              </h3>
-              <p className="text-xs text-gray-500 mt-1 mb-4 max-w-xs leading-relaxed">
+              {/* Title & Badge */}
+              <div className="flex items-center gap-1.5 mb-1">
+                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+                  {promotion.name}
+                </h3>
+                <span className="text-[10px] uppercase font-black px-1.5 py-0.5 rounded-md bg-[#EAFBF7] text-[#007367] border border-[#007367]/25">
+                  {promotion.id === 'partner' ? 'Partner App' : 'Free App'}
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-500 max-w-xs leading-relaxed mb-4">
                 Scan the QR code with your smartphone camera to download & open directly on your mobile device.
               </p>
 
-              <SimpleQrCode value={qrTargetUrl} size={150} />
+              {/* QR Code Container with Highlighted Border */}
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-b from-slate-50 to-white border-2 border-teal-200/80 shadow-inner flex flex-col items-center w-full max-w-[240px]">
+                <SimpleQrCode value={qrTargetUrl} size={150} />
 
-              <div className="flex items-center gap-1.5 mt-3 text-[11px] font-semibold text-gray-500">
-                <QrCode className="w-3.5 h-3.5 text-[#007367]" />
-                <span>Point your phone camera to scan</span>
+                <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-bold text-[#007367]">
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Point your phone camera to scan</span>
+                </div>
               </div>
 
-              <div className="w-full h-px bg-gray-100 my-4" />
+              {/* Divider with Platform Label */}
+              <div className="relative my-4 w-full flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <span className="relative bg-white px-3 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  OR DOWNLOAD DIRECTLY
+                </span>
+              </div>
 
-              {/* Direct Store Links */}
-              <div className="flex items-center justify-center gap-2.5 w-full">
+              {/* Highlighted Android & iOS Store Action Buttons */}
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 w-full">
                 {promotion.android.available && (
                   <a
                     href={promotion.android.playStoreUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-[11px] font-bold transition-all shadow-xs"
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] active:scale-[0.98] border border-slate-800 text-white shadow-md hover:shadow-lg transition-all text-left group"
                   >
-                    <img src="/googleplay.png" alt="Google Play" className="w-3.5 h-3.5 object-contain" />
-                    <span>Google Play</span>
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/15 transition-colors">
+                      <GooglePlayLogo className="w-5 h-5 shrink-0" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="block text-[9px] uppercase font-bold text-slate-400 leading-none tracking-wider">
+                        GET IT ON
+                      </span>
+                      <span className="block text-xs sm:text-[13px] font-black text-white leading-tight mt-0.5 truncate">
+                        Google Play
+                      </span>
+                    </div>
                   </a>
                 )}
                 {promotion.ios.available && (
@@ -339,10 +376,19 @@ export function AppInstallBanner() {
                     href={promotion.ios.appStoreUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-[11px] font-bold transition-all shadow-xs"
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] active:scale-[0.98] border border-slate-800 text-white shadow-md hover:shadow-lg transition-all text-left group"
                   >
-                    <img src="/ios.jpg" alt="App Store" className="w-3.5 h-3.5 object-contain rounded-xs" />
-                    <span>App Store</span>
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/15 transition-colors">
+                      <AppleLogo className="w-5 h-5 fill-white text-white shrink-0" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="block text-[9px] uppercase font-bold text-slate-400 leading-none tracking-wider">
+                        Download on
+                      </span>
+                      <span className="block text-xs sm:text-[13px] font-black text-white leading-tight mt-0.5 truncate">
+                        App Store
+                      </span>
+                    </div>
                   </a>
                 )}
               </div>

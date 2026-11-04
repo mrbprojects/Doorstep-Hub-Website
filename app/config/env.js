@@ -31,11 +31,32 @@ export const DEFAULT_PLACEHOLDER_IMAGE = `${IMAGE_BASE_URL}/uploads/thumbn_ph_im
  */
 export function getImageUrl(path, fallback = DEFAULT_PLACEHOLDER_IMAGE) {
   if (!path) return fallback;
-  if (path.startsWith('blob:') || path.startsWith('http://') || path.startsWith('https://')) {
-    return path.replace(/([^:]\/)\/+/g, '$1');
+
+  let cleanUrl = String(path).trim();
+  if (!cleanUrl) return fallback;
+
+  // Replace any stale or dead devapis.doorstephub.com URLs with live production IMAGE_BASE_URL
+  if (cleanUrl.includes('devapis.doorstephub.com')) {
+    cleanUrl = cleanUrl.replace(/https?:\/\/devapis\.doorstephub\.com/g, IMAGE_BASE_URL);
   }
-  const cleanPath = String(path).replace(/^\/+/, '');
-  return `${IMAGE_BASE_URL}/${cleanPath}`;
+
+  if (cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
+    return cleanUrl;
+  }
+
+  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+    try {
+      const parsed = new URL(cleanUrl);
+      parsed.pathname = encodeURI(decodeURI(parsed.pathname));
+      return parsed.toString();
+    } catch {
+      return cleanUrl.replace(/([^:]\/)\/+/g, '$1');
+    }
+  }
+
+  const cleanPath = cleanUrl.replace(/^\/+/, '');
+  const encodedPath = encodeURI(decodeURI(cleanPath));
+  return `${IMAGE_BASE_URL}/${encodedPath}`;
 }
 
 export default {

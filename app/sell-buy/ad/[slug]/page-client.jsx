@@ -522,7 +522,7 @@ export default function AdDetailPage() {
                   onClick={() => { setLightboxIndex(activeImageIndex); setLightboxOpen(true); }}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                    e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                   }}
                 />
                 {/* Expand hint */}
@@ -600,7 +600,7 @@ export default function AdDetailPage() {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                          e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                         }}
                       />
                     </button>
@@ -1216,7 +1216,7 @@ export default function AdDetailPage() {
               src={getImageUrl(imagesList[lightboxIndex])}
               alt={`Image ${lightboxIndex + 1}`}
               className="max-w-full max-h-full object-contain select-none animate-in fade-in duration-200"
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'; }}
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'; }}
             />
             {/* Prev */}
             {lightboxIndex > 0 && (
@@ -1256,7 +1256,7 @@ export default function AdDetailPage() {
                     src={getImageUrl(img)}
                     alt={`thumb ${idx + 1}`}
                     className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'; }}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg'; }}
                   />
                 </button>
               ))}

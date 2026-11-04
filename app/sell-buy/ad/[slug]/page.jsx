@@ -47,7 +47,7 @@ export default async function SellBuyAdPage({ params }) {
 
   if (listing) {
     let rawImageUrl = listing.coverImage || (listing.images && listing.images.length > 0 ? listing.images[0] : '');
-    const IMAGE_BASE = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com').replace(/\/+$/, '');
+    const IMAGE_BASE = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
     if (rawImageUrl && !rawImageUrl.startsWith('http')) {
       rawImageUrl = `${IMAGE_BASE}/${rawImageUrl.replace(/^\//, '')}`;
     }

@@ -3,7 +3,7 @@ import { registerUrlEntry, markLegacyRedirect, rebuildRegistryFromInventory } fr
 import { getStaticSitemapEntries, SITEMAP_CHUNK_SIZE } from './sitemapManager.js';
 
 const BASE_URL = 'https://doorstephub.com';
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 const IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || API_BASE_URL.replace(/\/v1\/dhubApi$/, '')).replace(/\/$/, '');
 
 async function fetchAPI(endpoint, body = null, method = 'POST', attempts = 3) {

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { QrCode, Smartphone, ArrowRight, ShieldCheck, Star } from 'lucide-react';
 import { getAppPromotionForRoute } from '@/config/appPromotionConfig';
 import { trackAppPromotionEvent, PROMOTION_EVENTS } from '@/services/appPromotionAnalytics';
+import { GooglePlayLogo, AppleLogo } from './StoreLogos';
 
 /**
  * Generates an SVG QR Code representation pointing to the target URL
@@ -81,7 +82,7 @@ export function DesktopAppDownloadCard({ forcedAppType = null, className = '' })
                 onClick={() => handleStoreClick('android', promotion.android.playStoreUrl)}
                 className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-semibold shadow-xs transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
-                <img src="/googleplay.png" alt="Google Play" className="w-4 h-4 object-contain" />
+                <GooglePlayLogo className="w-5 h-5 shrink-0" />
                 <div className="flex flex-col text-left">
                   <span className="text-[9px] uppercase tracking-wider text-gray-400">GET IT ON</span>
                   <span className="text-xs font-bold leading-none">Google Play</span>
@@ -95,7 +96,7 @@ export function DesktopAppDownloadCard({ forcedAppType = null, className = '' })
                 onClick={() => handleStoreClick('ios', promotion.ios.appStoreUrl)}
                 className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-semibold shadow-xs transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
-                <img src="/ios.jpg" alt="Apple App Store" className="w-4 h-4 object-contain rounded-xs" />
+                <AppleLogo className="w-5 h-5 fill-white text-white shrink-0" />
                 <div className="flex flex-col text-left">
                   <span className="text-[9px] uppercase tracking-wider text-gray-400">Download on the</span>
                   <span className="text-xs font-bold leading-none">App Store</span>

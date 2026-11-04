@@ -605,7 +605,7 @@ function SubscriptionPlansSection({ isPartnerLoggedIn = false }) {
     let isMounted = true;
     const fetchPlans = async () => {
       try {
-        const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+        const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
         const res = await fetch(`${API_BASE_URL}/app/applience-repairs-website/get_subscription_plans`);
         const data = await res.json();
         if (isMounted && data.success && Array.isArray(data.data) && data.data.length > 0) {

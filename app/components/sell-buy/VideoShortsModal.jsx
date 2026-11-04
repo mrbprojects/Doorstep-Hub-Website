@@ -425,7 +425,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                            e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                           }}
                         />
                       </div>
@@ -467,7 +467,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+                            e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                           }}
                         />
                       </div>

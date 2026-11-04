@@ -4,7 +4,7 @@
  */
 
 const BASE_URL = 'https://doorstephub.com';
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
 
 export const SITEMAP_CHUNK_SIZE = 1000;
 

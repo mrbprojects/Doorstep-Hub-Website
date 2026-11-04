@@ -6,7 +6,7 @@ export const getSocket = () => {
   if (typeof window === 'undefined') return null;
 
   if (!socket) {
-    const SOCKET_URL = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com').replace(/\/+$/, '');
+    const SOCKET_URL = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
     const token = localStorage.getItem('auth_token') || '';
 
     socket = io(SOCKET_URL, {

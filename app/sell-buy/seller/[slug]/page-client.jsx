@@ -19,7 +19,7 @@ export default function SellerProfileClient({ params }) {
     async function loadSellerData() {
       setLoading(true);
       try {
-        const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+        const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
         
         // Extract raw 24-hex ObjectId if slug is formatted like "name-6a844ebde..."
         const idMatch = String(slug).match(/([0-9a-fA-F]{24})$/);

@@ -41,7 +41,7 @@ export default async function KnowledgeBase() {
                     title: item.title,
                     category: item.subcategoryId?.name || item.categoryId?.name || item.serviceId?.name || 'General',
                     readTime: item.readTime ? `${item.readTime} min read` : '3 min read',
-                    image: item.coverImage?.url ? encodeURI(`https://devapis.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
+                    image: item.coverImage?.url ? encodeURI(`https://api.doorstephub.com${item.coverImage.url}`) : 'https://images.unsplash.com/photo-1582498674105-ad104fcc5784?w=800',
                     summary: item.summary ? item.summary.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...' : (item.description?.substring(0, 160) || '') + '...',
                     author: item.author || 'Doorstep Hub',
                     date: formattedDate,

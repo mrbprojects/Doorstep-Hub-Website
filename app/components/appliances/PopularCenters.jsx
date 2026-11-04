@@ -71,11 +71,11 @@ export function PopularCenters({ onStoreClick }) {
             id: center._id,
             slug: center.slug,
             image: center.banner_image
-              ? `https://devapis.doorstephub.com/${center.banner_image}`
+              ? `https://api.doorstephub.com/${center.banner_image}`
               : center.logo
-                ? `https://devapis.doorstephub.com/${center.logo}`
+                ? `https://api.doorstephub.com/${center.logo}`
                 : center.image
-                  ? `https://devapis.doorstephub.com/${center.image}`
+                  ? `https://api.doorstephub.com/${center.image}`
                   : 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80',
             name: center.name,
             location: center.cityName && center.stateName ? `${center.cityName}, ${center.stateName}` : (center.address || 'Unknown Location'),

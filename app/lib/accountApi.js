@@ -279,7 +279,7 @@ export async function sendAccountDeletionOtp(mobileNumber) {
 export function resolveMediaUrl(path = '') {
     if (!path) return '';
     if (String(path).startsWith('http')) return path;
-    const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://devapis.doorstephub.com';
+    const base = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com';
     return `${base.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`;
 }
 

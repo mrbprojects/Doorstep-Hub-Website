@@ -1,6 +1,6 @@
 import { isBookNowFlatServiceSlug } from '@/lib/applianceRepairSlugs';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi';
 
 function getSessionId() {
   if (typeof window === 'undefined') return '';

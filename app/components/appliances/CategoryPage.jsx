@@ -93,7 +93,7 @@ export function CategoryPage({ slug, initialData }) {
   useEffect(() => {
     const fetchAppLinks = async () => {
       try {
-        const res = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/get_global_settings');
+        const res = await fetch('https://api.doorstephub.com/v1/dhubApi/app/get_global_settings');
         const data = await res.json();
         if (data.success && data.policy) {
           setAppLinks({
@@ -150,7 +150,7 @@ export function CategoryPage({ slug, initialData }) {
 
       setLoading(true);
       try {
-        const response = await fetch('https://devapis.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
+        const response = await fetch('https://api.doorstephub.com/v1/dhubApi/app/applience-repairs-website/getsubcategorysbycategoryid', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -318,7 +318,7 @@ export function CategoryPage({ slug, initialData }) {
         {categoryImage && (
           <div className="absolute inset-0 z-0">
             <img loading="lazy" decoding="async"
-              src={`https://devapis.doorstephub.com/${categoryImage}`}
+              src={`https://api.doorstephub.com/${categoryImage}`}
               alt={categoryMetadata.categoryName}
               className="w-full h-full object-cover opacity-10"
             />
@@ -483,7 +483,7 @@ export function CategoryPage({ slug, initialData }) {
                           <div className="relative w-28 sm:w-36 md:w-40 shrink-0 h-full overflow-hidden bg-slate-100">
                             {subCategory.image ? (
                               <img loading="lazy" decoding="async"
-                                src={`https://devapis.doorstephub.com/${subCategory.image}`}
+                                src={`https://api.doorstephub.com/${subCategory.image}`}
                                 alt={subCategory.name}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                               />

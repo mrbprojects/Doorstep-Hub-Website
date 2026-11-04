@@ -14,7 +14,7 @@ export function RegistrationSuccessPage({ onClose, isNewUser = true }) {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devapis.doorstephub.com/v1/dhubApi'}/app/get_global_settings`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi'}/app/get_global_settings`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });

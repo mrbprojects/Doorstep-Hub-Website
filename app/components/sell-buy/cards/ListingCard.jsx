@@ -163,7 +163,7 @@ export function ListingCard({ listing }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://devapis.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
+              e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
             }}
           />
         ) : (

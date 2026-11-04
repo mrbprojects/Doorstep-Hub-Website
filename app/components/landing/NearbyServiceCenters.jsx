@@ -6,6 +6,7 @@ import { MapPin, Navigation, Star, Phone, Clock, Loader2, ArrowRight, Check } fr
 import { GoogleMap, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, FLOAT_PANE } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
+import { getImageUrl } from '@/config/env';
 
 // Stable constants — defined outside component so they never re-create on render
 const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
@@ -186,14 +187,8 @@ export function NearbyServiceCenters() {
               address: service.address || service.cityName || 'Hyderabad',
               lat: (() => { const r = parseFloat(service?.lattitude || service?.latitude); const g = parseFloat(service?.longitude); return (!isNaN(r) && r !== 0 && !isNaN(g)) ? r : location.lat + latOffset; })(),
               lng: (() => { const r = parseFloat(service?.lattitude || service?.latitude); const g = parseFloat(service?.longitude); return (!isNaN(r) && r !== 0 && !isNaN(g)) ? g : location.lng + lngOffset; })(),
-              image: service.image && !service.image.startsWith('u')
-                ? (service.image.startsWith('http') ? service.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`)
-                : (service.image && service.image.startsWith('http'))
-                  ? service.image
-                  : FALLBACK_SERVICE_IMAGES[index % FALLBACK_SERVICE_IMAGES.length],
-              logo: service.logo
-                ? (service.logo.startsWith('http') ? service.logo : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}`)
-                : null,
+              image: service.image ? getImageUrl(service.image) : null,
+              logo: service.logo ? getImageUrl(service.logo) : null,
             };
           });
 
@@ -266,7 +261,9 @@ export function NearbyServiceCenters() {
   // ─── Service Card Sub-component ──────────────────────────────────────────────
   const ServiceCard = ({ service, actualIndex }) => {
     const isActive = selectedService === actualIndex;
-    const cardImage = service.image || service.logo || '/servicecenterpointlogo.png';
+    const fallbackImg = FALLBACK_SERVICE_IMAGES[actualIndex % FALLBACK_SERVICE_IMAGES.length];
+    // Prioritize actual partner logo first, then shop image, then fallback
+    const cardImage = service.logo || service.image || fallbackImg;
 
     return (
       <motion.div
@@ -291,7 +288,7 @@ export function NearbyServiceCenters() {
         )}
         <div className="flex items-start gap-3.5 sm:gap-4">
           {/* Store Image / Logo */}
-          <div className="relative w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 shadow-xs mt-0.5">
+          <div className="relative w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-2xl overflow-hidden bg-slate-50 border border-slate-200 shrink-0 shadow-xs mt-0.5 flex items-center justify-center">
             <img
               src={cardImage}
               alt={service.name}
@@ -299,7 +296,12 @@ export function NearbyServiceCenters() {
               decoding="async"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = '/servicecenterpointlogo.png';
+                // Graceful multi-tier fallback: service.image -> fallback stock image
+                if (service.image && e.currentTarget.src !== service.image) {
+                  e.currentTarget.src = service.image;
+                } else {
+                  e.currentTarget.src = fallbackImg;
+                }
               }}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />

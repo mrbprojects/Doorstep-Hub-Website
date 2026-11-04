@@ -192,7 +192,7 @@ function BookNowPageContent() {
     </div>
   );
 
-  const imageUrl = service.image?.startsWith('http') ? service.image : `https://devapis.doorstephub.com/${service.image}`;
+  const imageUrl = service.image?.startsWith('http') ? service.image : `https://api.doorstephub.com/${service.image}`;
 
   return (
     <div className="min-h-screen bg-white">

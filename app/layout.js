@@ -148,6 +148,7 @@ export default function RootLayout({ children }) {
           id="google-maps-script"
           src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=__onGoogleMapsLoaded&v=quarterly&loading=async`}
           strategy="afterInteractive"
+          async
         />
 
         {/* Google AdSense Script Loader for Eligible Public Routes */}

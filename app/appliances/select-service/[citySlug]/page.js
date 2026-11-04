@@ -70,7 +70,7 @@ function CategoryPageContent() {
         
         setCategories(cats.map(c => ({
           ...c,
-          image: c.image ? `https://devapis.doorstephub.com/${c.image}` : null,
+          image: c.image ? `https://api.doorstephub.com/${c.image}` : null,
         })));
       } catch (e) {
         console.error(e);

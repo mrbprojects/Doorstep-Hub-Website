@@ -19,7 +19,7 @@ export const GOOGLE_MAPS_API_KEY = (
   process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || ''
 ).trim();
 
-export const GOOGLE_MAPS_SCRIPT_URL = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+export const GOOGLE_MAPS_SCRIPT_URL = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
 
 export const DEFAULT_PLACEHOLDER_IMAGE = `${IMAGE_BASE_URL}/uploads/thumbn_ph_image/default_image.jpg`;
 

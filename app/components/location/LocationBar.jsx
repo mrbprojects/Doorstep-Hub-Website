@@ -6,11 +6,13 @@ import { MapPin, ChevronDown, Search, Crosshair, X, Loader2 } from 'lucide-react
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocation } from '@/hooks/useLocation';
 import { fetchCities } from '@/lib/api';
+import { getImageUrl } from '@/config/env';
 
 // Fallback static icons (used only when API image is missing)
 const CITY_ICONS = {
     'Hyderabad': '/Hyderabad.png',
     'Bangalore': '/Banglore.png',
+    'Bengaluru': '/Banglore.png',
     'Mumbai': '/Mumbai.png',
     'Chennai': '/chennai.png',
     'Vijayawada': '/Vijayawada.png',
@@ -27,7 +29,7 @@ const FALLBACK_CITIES = [
 ];
 
 export function LocationBar({ theme = {} }) {
-    const { location, detectWithGPS, searchLocation, setManualLocation, loading, error } = useLocation();
+    const { location, detectWithGPS, searchLocation, setManualLocation, setCityLocation, loading, error } = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -48,12 +50,12 @@ export function LocationBar({ theme = {} }) {
         fetchCities()
             .then((citiesData) => {
                 if (citiesData && citiesData.length > 0) {
-                    // Map API response exactly as ApplianceBookingFlow does
+                    // Map API response with authoritative getImageUrl helper
                     const mapped = citiesData.map((c) => ({
                         id: c._id,
                         name: c.name,
                         icon: c.image
-                            ? (c.image.startsWith('http') ? c.image : `https://devapis.doorstephub.com${c.image}`)
+                            ? getImageUrl(c.image)
                             : (CITY_ICONS[c.name] || null),
                     }));
                     setAvailableCities(mapped);
@@ -143,16 +145,22 @@ export function LocationBar({ theme = {} }) {
     };
 
     const handleCityClick = async (cityName) => {
-        setIsSearching(true);
+        // Instant city selection (0ms latency)
+        if (setCityLocation) {
+            setCityLocation(cityName);
+        }
+        setIsOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+
+        // Optionally refine with Google Places if active
         try {
             const results = await searchLocation(cityName);
-            if (results && results.length > 0) {
-                await handleSelectLocation(results[0]);
+            if (results && results.length > 0 && results[0]?.place_id) {
+                await setManualLocation(results[0].place_id);
             }
         } catch (err) {
-            console.error('City search failed:', err);
-        } finally {
-            setIsSearching(false);
+            // Silently ignore, location is already set
         }
     };
 
@@ -283,16 +291,30 @@ export function LocationBar({ theme = {} }) {
                                                             onClick={() => handleCityClick(city.name)}
                                                             className={`flex flex-col items-center overflow-hidden rounded-xl border border-gray-100 transition-all focus:outline-none bg-white hover:border-[#037166] hover:bg-[#037166]/5 group shadow-sm hover:shadow-md`}
                                                         >
-                                                            <div className="w-full h-12 bg-white flex items-center justify-center overflow-hidden border-b border-gray-50">
+                                                            <div className="w-full h-12 bg-white flex items-center justify-center overflow-hidden border-b border-gray-50 relative">
                                                                 {city.icon ? (
-                                                                    <img loading="lazy" decoding="async"
+                                                                    <img
+                                                                        loading="lazy"
+                                                                        decoding="async"
                                                                         src={city.icon}
                                                                         alt={city.name}
+                                                                        onError={(e) => {
+                                                                            const fallback = CITY_ICONS[city.name];
+                                                                            if (fallback && e.currentTarget.getAttribute('data-tried') !== 'true') {
+                                                                                e.currentTarget.setAttribute('data-tried', 'true');
+                                                                                e.currentTarget.src = fallback;
+                                                                            } else {
+                                                                                e.currentTarget.style.display = 'none';
+                                                                                const fallbackIcon = e.currentTarget.parentElement?.querySelector('.city-fallback-pin');
+                                                                                if (fallbackIcon) fallbackIcon.style.display = 'flex';
+                                                                            }
+                                                                        }}
                                                                         className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
                                                                     />
-                                                                ) : (
+                                                                ) : null}
+                                                                <div className={`city-fallback-pin ${city.icon ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}>
                                                                     <MapPin className="w-4 h-4 text-[#037166]" />
-                                                                )}
+                                                                </div>
                                                             </div>
                                                             <div className={`w-full py-2 px-1 bg-gray-50 group-hover:bg-[#037166]/10 transition-colors`}>
                                                                 <span className={`text-[10px] font-bold uppercase tracking-tight truncate block text-center text-gray-600 group-hover:text-[#037166]`}>{city.name}</span>

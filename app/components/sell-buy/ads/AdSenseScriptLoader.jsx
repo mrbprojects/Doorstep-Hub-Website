@@ -21,7 +21,8 @@ export function AdSenseScriptLoader() {
     script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CONFIG.clientId}`;
     script.async = true;
     script.crossOrigin = 'anonymous';
-    document.head.appendChild(script);
+    const target = document.body || document.head;
+    target.appendChild(script);
   }, [isEligible]);
 
   return null;

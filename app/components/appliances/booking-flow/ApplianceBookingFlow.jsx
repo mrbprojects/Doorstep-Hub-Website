@@ -6,6 +6,7 @@ import { CityWiseCenters } from './CityWiseCenters';
 import { FranchiseSection } from './FranchiseSection';
 import { cities as mockCities } from './data';
 import { fetchCities } from '@/lib/api';
+import { getImageUrl } from '@/config/env';
 import { buildApplianceRepairCityPublicPath } from '@/lib/applianceRepairSlugs';
 
 export function ApplianceBookingFlow() {
@@ -38,7 +39,7 @@ export function ApplianceBookingFlow() {
           centers: c.serviceCenterCount || 0,
           area: c.state_name || "Service Area",
           icon: c.image 
-            ? (c.image.startsWith('http') ? c.image : `https://devapis.doorstephub.com${c.image}`)
+            ? getImageUrl(c.image)
             : null,
           id: c._id,
           lat: c.latitude,

@@ -3,16 +3,71 @@
 import { LOCATION_CONFIG } from '@/config/locationConfig';
 
 /**
- * Production-Grade Location Manager
- * Implements Swiggy/Airbnb-style location detection with strict UX rules
- * 
- * Priority Order:
- * 1. localStorage (instant)
- * 2. User-initiated GPS (explicit action only)
- * 3. IP-based fallback (silent, no popup)
- * 4. Manual search selection
+ * Supported Doorstep Hub Operating Cities & Reference Coordinates
  */
+const SUPPORTED_CITIES = [
+    { name: 'Hyderabad', lat: 17.3850, lng: 78.4867, state: 'Telangana', aliases: ['hyderabad', 'secunderabad', 'cyberabad'] },
+    { name: 'Bengaluru', lat: 12.9716, lng: 77.5946, state: 'Karnataka', aliases: ['bengaluru', 'bangalore'] },
+    { name: 'Chennai', lat: 13.0827, lng: 80.2707, state: 'Tamil Nadu', aliases: ['chennai', 'madras'] },
+    { name: 'Vijayawada', lat: 16.5062, lng: 80.6480, state: 'Andhra Pradesh', aliases: ['vijayawada', 'bezawada'] },
+    { name: 'Vizag', lat: 17.6868, lng: 83.2185, state: 'Andhra Pradesh', aliases: ['vizag', 'visakhapatnam', 'waltair'] },
+    { name: 'Mumbai', lat: 19.0760, lng: 72.8777, state: 'Maharashtra', aliases: ['mumbai', 'bombay', 'navi mumbai', 'thane'] },
+    { name: 'Pune', lat: 18.5204, lng: 73.8567, state: 'Maharashtra', aliases: ['pune', 'poona', 'pimpri'] },
+    { name: 'Tirupati', lat: 13.6288, lng: 79.4192, state: 'Andhra Pradesh', aliases: ['tirupati', 'tirumala'] },
+    { name: 'Delhi', lat: 28.6139, lng: 77.2090, state: 'Delhi', aliases: ['delhi', 'new delhi', 'noida', 'gurgaon', 'gurugram', 'ghaziabad', 'faridabad'] },
+    { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714, state: 'Gujarat', aliases: ['ahmedabad', 'gandhinagar'] },
+    { name: 'Coimbatore', lat: 11.0168, lng: 76.9558, state: 'Tamil Nadu', aliases: ['coimbatore', 'kovai'] },
+    { name: 'Kochi', lat: 9.9312, lng: 76.2673, state: 'Kerala', aliases: ['kochi', 'cochin', 'ernakulam'] },
+    { name: 'Khammam', lat: 17.2473, lng: 80.1514, state: 'Telangana', aliases: ['khammam'] },
+    { name: 'Amaravati', lat: 16.5735, lng: 80.3575, state: 'Andhra Pradesh', aliases: ['amaravati', 'guntur'] }
+];
 
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function findClosestSupportedCity(lat, lng) {
+    if (!lat || !lng) return SUPPORTED_CITIES[0];
+    let closest = SUPPORTED_CITIES[0];
+    let minDistance = Infinity;
+
+    for (const city of SUPPORTED_CITIES) {
+        const dist = calculateDistanceKm(lat, lng, city.lat, city.lng);
+        if (dist < minDistance) {
+            minDistance = dist;
+            closest = city;
+        }
+    }
+    return { ...closest, distanceKm: minDistance };
+}
+
+function matchCityByName(name) {
+    if (!name) return null;
+    const clean = String(name).trim().toLowerCase();
+    for (const city of SUPPORTED_CITIES) {
+        if (city.name.toLowerCase() === clean || city.aliases.some(a => clean.includes(a))) {
+            return city;
+        }
+    }
+    return null;
+}
+
+/**
+ * Production-Grade Location Manager
+ * Implements Swiggy/Airbnb-style location detection:
+ * 1. Instant cached location (0ms)
+ * 2. Silent IP auto-detection (<300ms)
+ * 3. High-precision GPS on user gesture
+ * 4. Fallback closest-city matching (never fails)
+ */
 class LocationManager {
     constructor() {
         this.geocoder = null;
@@ -20,10 +75,6 @@ class LocationManager {
         this.placesService = null;
     }
 
-    /**
-     * Initialize Google Maps services
-     * Why: Lazy loading prevents blocking page render
-     */
     initializeGoogleServices() {
         if (typeof window === 'undefined') return;
 
@@ -32,28 +83,12 @@ class LocationManager {
                 if (!this.geocoder && window.google.maps.Geocoder) {
                     this.geocoder = new window.google.maps.Geocoder();
                 }
-
-                // Handle different availability of library namespaces
-                if (window.google.maps.places) {
-                    if (!this.autocompleteService && window.google.maps.places.AutocompleteService) {
-                        this.autocompleteService = new window.google.maps.places.AutocompleteService();
-                    }
-                    if (!this.placesService && window.google.maps.places.PlacesService) {
-                        const dummyNode = document.createElement('div');
-                        this.placesService = new window.google.maps.places.PlacesService(dummyNode);
-                    }
-                }
             } catch (e) {
-                console.warn("Google Maps services initialization warning:", e);
+                // Silently handle
             }
         }
     }
 
-    /**
-     * Get saved location from localStorage
-     * Why: Instant retrieval, no async needed
-     * Returns: LocationData | null
-     */
     getSavedLocation() {
         if (typeof window === 'undefined') return null;
 
@@ -62,22 +97,15 @@ class LocationManager {
             if (!stored) return null;
 
             const parsed = JSON.parse(stored);
-
-            // Check if cache is still fresh or if it's a persistent source
             if (this.isLocationFresh(parsed)) {
                 return parsed;
             }
 
-            // For IP-based locations, we can return them but flag them as expired
-            // However, to keep it simple, we'll let LocationContext handle the refresh
-            // We won't ruthlessly delete MANUAL or GPS locations.
-            if (parsed.source === LOCATION_CONFIG.SOURCES.MANUAL || parsed.source === LOCATION_CONFIG.SOURCES.GPS) {
-                // Return them anyway so they don't get lost, update timestamp to prevent constant refreshing
-                return this.saveLocation(parsed, parsed.source);
+            // If stale but valid, renew timestamp to avoid sudden UI jarring
+            if (parsed && parsed.city && parsed.lat && parsed.lng) {
+                return this.saveLocation(parsed, parsed.source || LOCATION_CONFIG.SOURCES.STORAGE);
             }
 
-            // Cache expired for IP, clear it and allow re-detection
-            this.clearLocation();
             return null;
         } catch (error) {
             console.error('Error reading saved location:', error);
@@ -85,35 +113,26 @@ class LocationManager {
         }
     }
 
-    /**
-     * Check if cached location is still valid
-     * Why: Prevent stale data
-     */
     isLocationFresh(locationData) {
         if (!locationData || !locationData.timestamp) return false;
-
-        // Explicit manual selections never expire
         if (locationData.source === LOCATION_CONFIG.SOURCES.MANUAL) return true;
 
         const age = Date.now() - locationData.timestamp;
         return age < LOCATION_CONFIG.CACHE_DURATION;
     }
 
-    /**
-     * Save location to localStorage
-     * Why: Persist across page reloads and sessions
-     */
     saveLocation(data, source) {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined') return data;
 
         const locationData = {
             ...data,
-            source,
+            source: source || data?.source || LOCATION_CONFIG.SOURCES.DEFAULT,
             timestamp: Date.now()
         };
 
         try {
             localStorage.setItem(LOCATION_CONFIG.STORAGE_KEY, JSON.stringify(locationData));
+            window.dispatchEvent(new Event('location-updated'));
             return locationData;
         } catch (error) {
             console.error('Error saving location:', error);
@@ -121,117 +140,117 @@ class LocationManager {
         }
     }
 
-    /**
-     * Clear saved location
-     * Why: Allow users to reset their location
-     */
     clearLocation() {
         if (typeof window === 'undefined') return;
-
         try {
             localStorage.removeItem(LOCATION_CONFIG.STORAGE_KEY);
+            window.dispatchEvent(new Event('location-updated'));
         } catch (error) {
             console.error('Error clearing location:', error);
         }
     }
 
-    /**
-     * Reverse geocode coordinates to address
-     * Why: Convert GPS coordinates to human-readable location
-     */
     async reverseGeocode(lat, lng) {
         this.initializeGoogleServices();
 
-        if (!this.geocoder) {
-            throw new Error('Google Maps not loaded');
+        // If Geocoder is not loaded yet, wait up to 2 seconds for google-maps-loaded event
+        if (!this.geocoder && typeof window !== 'undefined') {
+            await new Promise((resolve) => {
+                if (window.google?.maps?.Geocoder) {
+                    this.initializeGoogleServices();
+                    return resolve();
+                }
+                const handler = () => {
+                    this.initializeGoogleServices();
+                    resolve();
+                };
+                window.addEventListener('google-maps-loaded', handler, { once: true });
+                setTimeout(resolve, 2000);
+            });
         }
 
-        return new Promise((resolve, reject) => {
-            this.geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    const result = results[0];
-                    let city = '';
-                    let area = '';
-                    let neighborhood = '';
-                    let houseNumber = '';
-                    let postalCode = '';
-                    let state = '';
-
-                    // Variables to store multi-part components
-                    let houseParts = [];
-                    let areaParts = [];
-
-                    // Extract city, area, postal code, and state from address components
-                    for (const component of result.address_components) {
-                        const types = component.types;
-                        const name = component.long_name;
-
-                        if (types.includes('locality')) {
-                            city = name;
+        // Try Google Maps Geocoder if available
+        if (this.geocoder) {
+            try {
+                const geoResult = await new Promise((resolve, reject) => {
+                    this.geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                        if (status === 'OK' && results && results[0]) {
+                            resolve(results[0]);
+                        } else {
+                            reject(new Error(`Geocoding status: ${status}`));
                         }
-
-                        // Capture all levels of sublocality and neighborhood for area
-                        if (types.includes('sublocality') || types.includes('sublocality_level_1') ||
-                            types.includes('sublocality_level_2') || types.includes('sublocality_level_3') ||
-                            types.includes('neighborhood') || types.includes('route')) {
-                            if (!areaParts.includes(name)) {
-                                areaParts.push(name);
-                            }
-                        }
-
-                        // Capture specific building/plot details
-                        if (types.includes('premise') || types.includes('subpremise') ||
-                            types.includes('street_number') || types.includes('point_of_interest') ||
-                            types.includes('room') || types.includes('floor')) {
-                            // Avoid duplicates in house parts
-                            if (!houseParts.includes(name)) {
-                                houseParts.push(name);
-                            }
-                        }
-
-                        if (types.includes('postal_code')) {
-                            postalCode = name;
-                        }
-                        if (types.includes('administrative_area_level_1')) {
-                            state = name;
-                        }
-                    }
-
-                    // Process specialized components
-                    // In India, sometimes the order is reversed in components, so we might want to reverse houseParts
-                    // but usually, more specific is first.
-                    const finalHouse = houseParts.join(', ');
-                    const finalArea = Array.from(new Set(areaParts)).join(', '); // Remove duplicates
-
-                    const shortAddress = finalArea ? `${finalArea.split(',')[0]}, ${city}` : city || result.formatted_address.split(',')[0];
-
-                    resolve({
-                        lat,
-                        lng,
-                        city,
-                        area: finalArea,
-                        flat: finalHouse, // Auto-fill Plot/House details
-                        postalCode,
-                        state,
-                        address: result.formatted_address,
-                        shortAddress
                     });
-                } else {
-                    reject(new Error(`Geocoding failed: ${status}`));
+                });
+
+                let city = '';
+                let area = '';
+                let houseNumber = '';
+                let postalCode = '';
+                let state = '';
+                const areaParts = [];
+                const houseParts = [];
+
+                for (const component of geoResult.address_components) {
+                    const types = component.types;
+                    const name = component.long_name;
+
+                    if (types.includes('locality')) {
+                        city = name;
+                    }
+                    if (types.includes('sublocality') || types.includes('neighborhood') || types.includes('route')) {
+                        if (!areaParts.includes(name)) areaParts.push(name);
+                    }
+                    if (types.includes('premise') || types.includes('subpremise') || types.includes('street_number')) {
+                        if (!houseParts.includes(name)) houseParts.push(name);
+                    }
+                    if (types.includes('postal_code')) {
+                        postalCode = name;
+                    }
+                    if (types.includes('administrative_area_level_1')) {
+                        state = name;
+                    }
                 }
-            });
-        });
+
+                const finalHouse = houseParts.join(', ');
+                const finalArea = Array.from(new Set(areaParts)).join(', ');
+                const matched = matchCityByName(city);
+                const resolvedCity = matched ? matched.name : (city || findClosestSupportedCity(lat, lng).name);
+                const shortAddress = finalArea ? `${finalArea.split(',')[0]}, ${resolvedCity}` : resolvedCity;
+
+                return {
+                    lat,
+                    lng,
+                    city: resolvedCity,
+                    area: finalArea || resolvedCity,
+                    flat: finalHouse,
+                    postalCode,
+                    state,
+                    address: geoResult.formatted_address || `${resolvedCity}, ${state}, India`,
+                    shortAddress
+                };
+            } catch (geocodeErr) {
+                console.warn('Google Geocoder failed, using closest supported city fallback:', geocodeErr);
+            }
+        }
+
+        // Guaranteed Fallback: Calculate closest supported operating city
+        const closest = findClosestSupportedCity(lat, lng);
+        return {
+            lat,
+            lng,
+            city: closest.name,
+            area: closest.name,
+            flat: '',
+            postalCode: '',
+            state: closest.state,
+            address: `${closest.name}, ${closest.state}, India`,
+            shortAddress: closest.name
+        };
     }
 
-    /**
-     * Detect location using GPS
-     * Why: User-initiated only, never auto-trigger
-     * Returns: Promise<LocationData>
-     */
     async detectWithGPS() {
-        // Check if geolocation is supported
         if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-            throw new Error('Geolocation not supported');
+            throw new Error('Geolocation not supported by browser');
         }
 
         return new Promise((resolve, reject) => {
@@ -242,20 +261,28 @@ class LocationManager {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     clearTimeout(timeoutId);
-
                     try {
                         const { latitude, longitude } = position.coords;
                         const data = await this.reverseGeocode(latitude, longitude);
                         const savedData = this.saveLocation(data, LOCATION_CONFIG.SOURCES.GPS);
                         resolve(savedData);
                     } catch (error) {
-                        reject(error);
+                        const closest = findClosestSupportedCity(position.coords.latitude, position.coords.longitude);
+                        const fallbackData = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            city: closest.name,
+                            area: closest.name,
+                            shortAddress: closest.name,
+                            address: `${closest.name}, ${closest.state}, India`,
+                            state: closest.state
+                        };
+                        const savedData = this.saveLocation(fallbackData, LOCATION_CONFIG.SOURCES.GPS);
+                        resolve(savedData);
                     }
                 },
                 (error) => {
                     clearTimeout(timeoutId);
-
-                    // Handle different error types
                     let errorMessage = 'GPS detection failed';
                     if (error.code === error.PERMISSION_DENIED) {
                         errorMessage = 'Location permission denied';
@@ -264,71 +291,125 @@ class LocationManager {
                     } else if (error.code === error.TIMEOUT) {
                         errorMessage = 'GPS timeout';
                     }
-
                     reject(new Error(errorMessage));
                 },
                 {
                     enableHighAccuracy: true,
                     timeout: LOCATION_CONFIG.GPS_TIMEOUT,
-                    maximumAge: 0
+                    maximumAge: 60000
                 }
             );
         });
     }
 
-    /**
-     * Detect location using IP address
-     * Why: Silent fallback when GPS fails or unavailable
-     * Returns: Promise<LocationData>
-     */
     async detectWithIP() {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const fetchWithTimeout = async (url, timeoutMs = 3500) => {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timer);
+                return res;
+            } catch (e) {
+                clearTimeout(timer);
+                throw e;
+            }
+        };
 
-        try {
-            // ipwho.is is very CORS friendly and reliable
-            const response = await fetch('https://ipwho.is/', {
-                method: 'GET',
-                signal: controller.signal
-            });
+        // Multi-provider silent IP detection
+        const providers = [
+            async () => {
+                const res = await fetchWithTimeout('https://ipwho.is/', 3500);
+                if (!res.ok) throw new Error('ipwho.is HTTP error');
+                const data = await res.json();
+                if (!data || !data.success) throw new Error('ipwho.is unsuccessful');
+                const matched = matchCityByName(data.city);
+                const city = matched ? matched.name : (data.city || 'Hyderabad');
+                return {
+                    lat: Number(data.latitude) || 17.3850,
+                    lng: Number(data.longitude) || 78.4867,
+                    city,
+                    area: data.region || city,
+                    postalCode: data.postal || '',
+                    state: data.region || '',
+                    address: `${city}, ${data.region || ''}, India`,
+                    shortAddress: city
+                };
+            },
+            async () => {
+                const res = await fetchWithTimeout('https://ipinfo.io/json', 3500);
+                if (!res.ok) throw new Error('ipinfo.io HTTP error');
+                const data = await res.json();
+                if (!data || !data.loc) throw new Error('ipinfo.io incomplete');
+                const [latStr, lngStr] = (data.loc || '').split(',');
+                const lat = parseFloat(latStr) || 17.3850;
+                const lng = parseFloat(lngStr) || 78.4867;
+                const matched = matchCityByName(data.city);
+                const city = matched ? matched.name : (data.city || findClosestSupportedCity(lat, lng).name);
+                return {
+                    lat,
+                    lng,
+                    city,
+                    area: data.region || city,
+                    postalCode: data.postal || '',
+                    state: data.region || '',
+                    address: `${city}, ${data.region || ''}, India`,
+                    shortAddress: city
+                };
+            }
+        ];
 
-            clearTimeout(timeoutId);
-
-            if (!response.ok) throw new Error('IP API failed');
-            const data = await response.json();
-
-            // Mapping for ipwho.is
-            const locationData = {
-                lat: Number(data.latitude),
-                lng: Number(data.longitude),
-                city: data.city || '',
-                area: data.region || '',
-                postalCode: data.postal || '',
-                state: data.region || '',
-                address: data.city ? `${data.city}, ${data.region || ''}` : '',
-                shortAddress: data.city || ''
-            };
-
-            if (!locationData.lat || !locationData.lng) throw new Error('Incomplete IP location data');
-
-            return this.saveLocation(locationData, LOCATION_CONFIG.SOURCES.IP);
-        } catch (error) {
-            clearTimeout(timeoutId);
-            console.error('IP detection failure:', error);
-            // IP detection failed, intentionally throw so caller handles empty state
-            throw new Error('IP detection failed, no fallback location provided.');
+        for (const provider of providers) {
+            try {
+                const loc = await provider();
+                if (loc && loc.city && loc.lat && loc.lng) {
+                    return this.saveLocation(loc, LOCATION_CONFIG.SOURCES.IP);
+                }
+            } catch (err) {
+                // Try next provider
+            }
         }
+
+        // Final fallback: Default location (Hyderabad)
+        return this.saveLocation(LOCATION_CONFIG.DEFAULT_LOCATION, LOCATION_CONFIG.SOURCES.DEFAULT);
     }
 
-    /**
-     * Search for locations using Google Places Autocomplete
-     * Why: Enable manual location selection without GPS
-     * Returns: Promise<Prediction[]>
-     */
-    async searchLocation(query) {
-        this.initializeGoogleServices();
+    setManualCity(cityName) {
+        const matched = matchCityByName(cityName) || {
+            name: cityName,
+            lat: 17.3850,
+            lng: 78.4867,
+            state: ''
+        };
 
-        if (!query || !this.autocompleteService) {
+        const locationData = {
+            lat: matched.lat,
+            lng: matched.lng,
+            city: matched.name,
+            area: matched.name,
+            postalCode: '',
+            state: matched.state,
+            address: `${matched.name}, ${matched.state ? matched.state + ', ' : ''}India`,
+            shortAddress: matched.name
+        };
+
+        return this.saveLocation(locationData, LOCATION_CONFIG.SOURCES.MANUAL);
+    }
+
+    async searchLocation(query) {
+        if (!query || typeof window === 'undefined') {
+            return [];
+        }
+
+        if (!this.autocompleteService && window.google?.maps?.places?.AutocompleteService) {
+            try {
+                this.autocompleteService = new window.google.maps.places.AutocompleteService();
+            } catch (e) {
+                return [];
+            }
+        }
+
+        if (!this.autocompleteService) {
             return [];
         }
 
@@ -339,13 +420,13 @@ class LocationManager {
             };
 
             this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
-                if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+                if (status === window.google?.maps?.places?.PlacesServiceStatus?.OK && predictions) {
                     resolve(
                         predictions.map((p) => ({
                             description: p.description,
                             place_id: p.place_id,
-                            main_text: p.structured_formatting.main_text,
-                            secondary_text: p.structured_formatting.secondary_text
+                            main_text: p.structured_formatting?.main_text || p.description,
+                            secondary_text: p.structured_formatting?.secondary_text || ''
                         }))
                     );
                 } else {
@@ -355,13 +436,19 @@ class LocationManager {
         });
     }
 
-    /**
-     * Set location manually from search selection
-     * Why: Allow users to override auto-detection
-     * Returns: Promise<LocationData>
-     */
     async setManualLocation(placeId) {
-        this.initializeGoogleServices();
+        if (typeof window === 'undefined') {
+            throw new Error('Window not available');
+        }
+
+        if (!this.placesService && window.google?.maps?.places?.PlacesService) {
+            try {
+                const dummyNode = document.createElement('div');
+                this.placesService = new window.google.maps.places.PlacesService(dummyNode);
+            } catch (e) {
+                // Ignore
+            }
+        }
 
         if (!this.placesService) {
             throw new Error('Google Maps not loaded');
@@ -374,7 +461,7 @@ class LocationManager {
                     fields: ['name', 'formatted_address', 'geometry', 'address_components']
                 },
                 (place, status) => {
-                    if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+                    if (status === window.google?.maps?.places?.PlacesServiceStatus?.OK && place) {
                         const lat = place.geometry.location.lat();
                         const lng = place.geometry.location.lng();
 
@@ -400,13 +487,15 @@ class LocationManager {
                             }
                         }
 
-                        const shortAddress = area ? `${area}, ${city}` : city || place.name;
+                        const matched = matchCityByName(city);
+                        const resolvedCity = matched ? matched.name : (city || findClosestSupportedCity(lat, lng).name);
+                        const shortAddress = area ? `${area}, ${resolvedCity}` : resolvedCity;
 
                         const locationData = {
                             lat,
                             lng,
-                            city,
-                            area,
+                            city: resolvedCity,
+                            area: area || resolvedCity,
                             postalCode,
                             state,
                             address: place.formatted_address,
@@ -424,5 +513,4 @@ class LocationManager {
     }
 }
 
-// Export singleton instance
 export const locationManager = new LocationManager();

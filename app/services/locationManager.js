@@ -214,18 +214,19 @@ class LocationManager {
                 const finalHouse = houseParts.join(', ');
                 const finalArea = Array.from(new Set(areaParts)).join(', ');
                 const matched = matchCityByName(city);
-                const resolvedCity = matched ? matched.name : (city || findClosestSupportedCity(lat, lng).name);
-                const shortAddress = finalArea ? `${finalArea.split(',')[0]}, ${resolvedCity}` : resolvedCity;
+                const resolvedCity = matched ? matched.name : (city || '');
+                const shortAddress = finalArea ? `${finalArea.split(',')[0]}, ${resolvedCity || city}` : (resolvedCity || city);
 
                 return {
                     lat,
                     lng,
                     city: resolvedCity,
+                    isServiceable: Boolean(matched),
                     area: finalArea || resolvedCity,
                     flat: finalHouse,
                     postalCode,
                     state,
-                    address: geoResult.formatted_address || `${resolvedCity}, ${state}, India`,
+                    address: geoResult.formatted_address || `${resolvedCity || city}, ${state}, India`,
                     shortAddress
                 };
             } catch (geocodeErr) {
@@ -500,19 +501,15 @@ class LocationManager {
                             if (matched) break;
                         }
 
-                        // Fallback: check closest supported city within 45km radius
-                        const closest = findClosestSupportedCity(lat, lng);
-                        if (!matched && closest && closest.distanceKm <= 45) {
-                            matched = closest;
-                        }
-
-                        const resolvedCity = matched ? matched.name : (city || closest.name);
-                        const shortAddress = area ? `${area}, ${resolvedCity}` : resolvedCity;
+                        // Preserve actual locality without silently substituting an unrelated nearest city
+                        const resolvedCity = matched ? matched.name : (city || '');
+                        const shortAddress = area ? `${area}, ${resolvedCity || city}` : (resolvedCity || city);
 
                         const locationData = {
                             lat,
                             lng,
                             city: resolvedCity,
+                            isServiceable: Boolean(matched),
                             area: area || resolvedCity,
                             postalCode,
                             state,

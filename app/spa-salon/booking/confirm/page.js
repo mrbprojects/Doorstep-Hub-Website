@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
+import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 
 export default function SpaConfirmPage() {
     const router = useRouter();
@@ -37,8 +38,8 @@ export default function SpaConfirmPage() {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');
         if (status === 'success') {
-            setPaymentStatus('success');
-            clearCart();
+            const urlOrderId = urlParams.get('orderId') || '';
+            const urlTxnid = urlParams.get('txnid') || '';
 
             let pendingBooking = {};
             try { pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}'); } catch (e) {}
@@ -46,17 +47,41 @@ export default function SpaConfirmPage() {
                 try { pendingBooking = JSON.parse(localStorage.getItem('spa_last_booking') || '{}'); } catch (e) {}
             }
 
-            const orderId = urlParams.get('orderId') || pendingBooking.orderId || '';
+            const orderId = urlOrderId || pendingBooking.orderId || '';
+            const txnid = urlTxnid || pendingBooking.txnid || '';
             const date = urlParams.get('date') || pendingBooking.bookedDate || '';
             const time = urlParams.get('time') || pendingBooking.bookedTime || '';
             const paid = pendingBooking.paid || '0';
             const remaining = pendingBooking.remaining || '0';
 
-            sessionStorage.removeItem('pending_booking');
+            const proceedSuccess = () => {
+                setPaymentStatus('success');
+                clearCart();
+                sessionStorage.removeItem('pending_booking');
+                toast.success('Payment successful! Booking confirmed.');
+                trackBookingCompleted(orderId, { vertical: 'spa-salon' });
+                router.push(`/spa-salon/thank-you?orderId=${encodeURIComponent(orderId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&paid=${encodeURIComponent(paid)}&remaining=${encodeURIComponent(remaining)}`);
+            };
 
-            toast.success('Payment successful! Booking confirmed.');
-            trackBookingCompleted(orderId, { vertical: 'spa-salon' });
-            router.push(`/spa-salon/thank-you?orderId=${encodeURIComponent(orderId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&paid=${encodeURIComponent(paid)}&remaining=${encodeURIComponent(remaining)}`);
+            if (token && (orderId || txnid)) {
+                verifyBookingPaymentStatus(token, { orderId, txnid })
+                    .then((verification) => {
+                        if (verification.isPaid) {
+                            proceedSuccess();
+                        } else if (verification.status === 'pending' || verification.status === 'payment_pending') {
+                            setPaymentStatus('pending');
+                            toast.info('Payment is pending confirmation. Your cart is preserved.');
+                        } else {
+                            setPaymentStatus('failure');
+                            toast.error('Payment verification failed.');
+                        }
+                    })
+                    .catch(() => {
+                        proceedSuccess();
+                    });
+            } else {
+                proceedSuccess();
+            }
         } else if (status === 'failure' || status === 'cancelled' || status === 'cancel') {
             setPaymentStatus('failure');
             toast.error('Payment was cancelled or could not be completed. You can try again or choose Pay After Service.');
@@ -64,7 +89,7 @@ export default function SpaConfirmPage() {
                 window.history.replaceState({}, '', window.location.pathname);
             }
         }
-    }, [clearCart, router]);
+    }, [clearCart, router, token]);
 
 
 

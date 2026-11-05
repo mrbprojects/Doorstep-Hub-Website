@@ -324,7 +324,7 @@ export async function verifyBookingPaymentStatus(token, { orderId, txnid } = {})
                 if (txnRes.ok) {
                     const data = await parseResponse(txnRes);
                     if (data?.success) {
-                        const isPaid = Boolean(data.paid || ['paid', 'completed'].includes(String(data.status || '').toLowerCase()));
+                        const isPaid = Boolean(data.paid || ['paid', 'completed', 'partial'].includes(String(data.status || '').toLowerCase()));
                         return {
                             success: true,
                             isPaid,
@@ -351,7 +351,7 @@ export async function verifyBookingPaymentStatus(token, { orderId, txnid } = {})
             if (orderRes.ok) {
                 const data = await parseResponse(orderRes);
                 if (data?.success) {
-                    const isPaid = Boolean(data.isPaid || ['paid', 'completed'].includes(String(data.paymentStatus || '').toLowerCase()));
+                    const isPaid = Boolean(data.isPaid || ['paid', 'completed', 'partial'].includes(String(data.paymentStatus || '').toLowerCase()));
                     return {
                         success: true,
                         isPaid,
@@ -373,7 +373,7 @@ export async function verifyBookingPaymentStatus(token, { orderId, txnid } = {})
                 const order = data?.data?.order || data?.data?.booking || data?.order || data?.booking || data?.data || data;
                 if (order && (order._id || order.orderId)) {
                     const paymentStatus = String(order.paymentStatus || '').toLowerCase();
-                    const isPaid = ['paid', 'completed'].includes(paymentStatus);
+                    const isPaid = ['paid', 'completed', 'partial'].includes(paymentStatus);
                     return {
                         success: true,
                         isPaid,

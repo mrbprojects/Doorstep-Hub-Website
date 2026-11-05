@@ -21,7 +21,7 @@ async function verifyBookingPaymentStatusMock(token, { orderId, txnid } = {}, mo
             if (txnRes.ok) {
                 const data = await txnRes.json();
                 if (data?.success) {
-                    const isPaid = Boolean(data.paid || ['paid', 'completed'].includes(String(data.status || '').toLowerCase()));
+                    const isPaid = Boolean(data.paid || ['paid', 'completed', 'partial'].includes(String(data.status || '').toLowerCase()));
                     return {
                         success: true,
                         isPaid,
@@ -43,7 +43,7 @@ async function verifyBookingPaymentStatusMock(token, { orderId, txnid } = {}, mo
             if (orderRes.ok) {
                 const data = await orderRes.json();
                 if (data?.success) {
-                    const isPaid = Boolean(data.isPaid || ['paid', 'completed'].includes(String(data.paymentStatus || '').toLowerCase()));
+                    const isPaid = Boolean(data.isPaid || ['paid', 'completed', 'partial'].includes(String(data.paymentStatus || '').toLowerCase()));
                     return {
                         success: true,
                         isPaid,

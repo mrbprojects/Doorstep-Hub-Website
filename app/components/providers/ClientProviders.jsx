@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Toaster } from 'sonner';
 import { GlobalAuthModal } from '@/components/auth/GlobalAuthModal';
 import { LeadResumeHandler } from '@/components/smart-leads/LeadResumeHandler';
@@ -10,6 +10,33 @@ import { SmartAppBannerMeta } from '@/components/app-promotion/SmartAppBannerMet
 import { AppInstallBanner } from '@/components/app-promotion/AppInstallBanner';
 
 export function ClientProviders({ children }) {
+    useEffect(() => {
+        // Automatically recover from stale chunks after a build or deployment
+        const handleChunkError = (event) => {
+            const err = event?.error || event?.reason;
+            const message = String(err?.message || event?.message || '');
+            if (
+                err?.name === 'ChunkLoadError' ||
+                message.includes('Loading chunk') ||
+                message.includes('Loading CSS chunk') ||
+                message.includes('Failed to fetch dynamically imported module')
+            ) {
+                const lastReload = sessionStorage.getItem('chunk_error_reload');
+                const now = Date.now();
+                if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+                    sessionStorage.setItem('chunk_error_reload', String(now));
+                    window.location.reload();
+                }
+            }
+        };
+
+        window.addEventListener('error', handleChunkError);
+        window.addEventListener('unhandledrejection', handleChunkError);
+        return () => {
+            window.removeEventListener('error', handleChunkError);
+            window.removeEventListener('unhandledrejection', handleChunkError);
+        };
+    }, []);
     return (
         <GlobalLoaderProvider>
             <Suspense fallback={null}>

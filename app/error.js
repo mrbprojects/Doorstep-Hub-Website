@@ -4,10 +4,26 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
 export default function Error({ error, reset }) {
+    const isChunkError =
+        error?.name === 'ChunkLoadError' ||
+        error?.message?.includes('Loading chunk') ||
+        error?.message?.includes('Loading CSS chunk') ||
+        error?.message?.includes('Failed to fetch dynamically imported module');
+
     useEffect(() => {
         // Log the error to an error reporting service
         console.error('Runtime Error:', error);
-    }, [error]);
+
+        // Auto-recover if client was on an older build chunk hash
+        if (isChunkError && typeof window !== 'undefined') {
+            const lastReload = sessionStorage.getItem('chunk_error_reload');
+            const now = Date.now();
+            if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+                sessionStorage.setItem('chunk_error_reload', String(now));
+                window.location.reload();
+            }
+        }
+    }, [error, isChunkError]);
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 text-center">
@@ -18,21 +34,31 @@ export default function Error({ error, reset }) {
                     </svg>
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong!</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {isChunkError ? 'App Update Available' : 'Something went wrong!'}
+                </h2>
                 <p className="text-gray-500 mb-8">
-                    We encountered an unexpected error. Don't worry, it's not you - it's us.
+                    {isChunkError
+                        ? 'A new version of Doorstep Hub has been deployed. Please refresh to load the latest update.'
+                        : "We encountered an unexpected error. Don't worry, it's not you - it's us."}
                 </p>
 
                 <div className="space-y-3">
                     <Button
-                        onClick={() => reset()}
+                        onClick={() => {
+                            if (isChunkError && typeof window !== 'undefined') {
+                                window.location.reload();
+                            } else {
+                                reset();
+                            }
+                        }}
                         className="w-full bg-[#037166] hover:bg-[#025951] text-white rounded-xl py-6 text-lg font-semibold"
                     >
-                        Try Again
+                        {isChunkError ? 'Refresh Page' : 'Try Again'}
                     </Button>
                     <Button
                         variant="ghost"
-                        onClick={() => window.location.href = '/'}
+                        onClick={() => (window.location.href = '/')}
                         className="w-full text-gray-500 hover:text-gray-900"
                     >
                         Go to Home

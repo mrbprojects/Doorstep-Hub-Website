@@ -1,4 +1,5 @@
-import KnowledgeBase, { metadata, revalidate } from '../knowledge/page';
+import KnowledgeBase, { metadata } from '../knowledge/page';
 
-export { metadata, revalidate };
+export const revalidate = 3600;
+export { metadata };
 export default KnowledgeBase;

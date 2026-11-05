@@ -1,4 +1,5 @@
-import KnowledgeArticle, { generateMetadata, revalidate } from '../../knowledge/[slug]/page';
+import KnowledgeArticle, { generateMetadata } from '../../knowledge/[slug]/page';
 
-export { generateMetadata, revalidate };
+export const revalidate = 3600;
+export { generateMetadata };
 export default KnowledgeArticle;

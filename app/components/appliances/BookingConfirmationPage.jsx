@@ -71,6 +71,11 @@ export function BookingConfirmationPage({
   const [locationMismatch, setLocationMismatch] = useState(null);
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [verificationError, setVerificationError] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
@@ -300,11 +305,12 @@ export function BookingConfirmationPage({
     return allTimeSlots;
   };
 
-  const availableDates = getAvailableDates();
-  const availableTimesForSelectedDate = getAvailableTimes(selectedDate);
+  const availableDates = mounted ? getAvailableDates() : [];
+  const availableTimesForSelectedDate = mounted ? getAvailableTimes(selectedDate) : [];
 
   // Set initial default date based on availability or pending booking
   useEffect(() => {
+    if (!mounted) return;
     let pendingDate = null;
     let pendingTime = null;
 
@@ -337,7 +343,7 @@ export function BookingConfirmationPage({
         }
       }
     }
-  }, []);
+  }, [mounted]);
 
   // Reset time when date changes, but not if we just restored it
   const isInitialMount = useRef(true);
@@ -758,7 +764,7 @@ export function BookingConfirmationPage({
                 {availableDates.length === 0 ? (
                   <p className="text-gray-500 text-xs">No dates available at this time</p>
                 ) : (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                  <div suppressHydrationWarning className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
                     {availableDates.map((date) => {
                       const isSelected = selectedDate === date.value;
                       return (

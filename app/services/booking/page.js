@@ -1,8 +1,16 @@
 'use client';
 
-import { BookingConfirmationPage } from '@/components/services/BookingConfirmationPage';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+
+const BookingConfirmationPage = dynamic(
+    () => import('@/components/services/BookingConfirmationPage').then((mod) => mod.BookingConfirmationPage),
+    {
+        ssr: false,
+        loading: () => <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>
+    }
+);
 
 function BookingContent() {
     const router = useRouter();
@@ -26,8 +34,6 @@ function BookingContent() {
         />
     );
 }
-
-import { Suspense } from 'react';
 
 export default function BookingRoute() {
     return (

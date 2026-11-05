@@ -1,8 +1,16 @@
 'use client';
 
-import { BookingConfirmationPage } from '@/components/appliances/BookingConfirmationPage';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
+
+const BookingConfirmationPage = dynamic(
+    () => import('@/components/appliances/BookingConfirmationPage').then((mod) => mod.BookingConfirmationPage),
+    {
+        ssr: false,
+        loading: () => <div className="min-h-screen bg-white" />
+    }
+);
 
 function BookingContent() {
     const router = useRouter();

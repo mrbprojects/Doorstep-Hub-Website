@@ -69,6 +69,11 @@ export function BookingConfirmationPage({
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | 'pending' | null
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [verificationError, setVerificationError] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
@@ -301,11 +306,12 @@ export function BookingConfirmationPage({
     return allTimeSlots;
   };
 
-  const availableDates = getAvailableDates();
-  const availableTimesForSelectedDate = getAvailableTimes(selectedDate);
+  const availableDates = mounted ? getAvailableDates() : [];
+  const availableTimesForSelectedDate = mounted ? getAvailableTimes(selectedDate) : [];
 
   // Set initial default date based on availability
   useEffect(() => {
+    if (!mounted) return;
     const dates = getAvailableDates();
     if (dates.length > 0) {
       const todayValue = dates[0].value;
@@ -317,7 +323,7 @@ export function BookingConfirmationPage({
         setSelectedDate(dates[1].value);
       }
     }
-  }, []);
+  }, [mounted]);
 
   // Reset time when date changes
   useEffect(() => {

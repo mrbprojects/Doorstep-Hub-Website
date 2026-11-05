@@ -62,6 +62,8 @@ export async function getCompleteImageInventory(providedInventory = null) {
                         title: group === 'sell-buy' ? 'Doorstep Hub Sell & Buy Listing Image' : 'Doorstep Hub Page Image',
                         caption: group === 'sell-buy' ? 'Verified marketplace listing on Doorstep Hub' : 'Doorstep Hub page image',
                         alt: group === 'sell-buy' ? 'Doorstep Hub Sell & Buy listing image' : 'Doorstep Hub image',
+                        width: page.imageWidth || 800,
+                        height: page.imageHeight || 600,
                         format: detectImageFormat(normalizedUrl),
                         isModernFormat: isModernFormat(detectImageFormat(normalizedUrl)),
                         position: index + 1

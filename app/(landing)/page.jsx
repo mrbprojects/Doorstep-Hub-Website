@@ -20,11 +20,12 @@ export default async function Home() {
     try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi';
         const response = await fetch(`${baseUrl}/app/applience-repairs-website/get-website-screen-settings`, {
-            cache: 'no-store'
+            cache: 'no-store',
+            signal: AbortSignal.timeout(3000)
         });
         if (response.ok) {
             const data = await response.json();
-            if (data.success && data.data && typeof data.data.homescreen === 'boolean') {
+            if (data && data.success && data.data && typeof data.data.homescreen === 'boolean') {
                 showHomeScreen = data.data.homescreen;
             }
         }

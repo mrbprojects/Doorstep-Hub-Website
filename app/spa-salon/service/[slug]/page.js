@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 
 const SpaServiceDetailPage = dynamic(
@@ -5,6 +7,6 @@ const SpaServiceDetailPage = dynamic(
     { ssr: false }
 );
 
-export default function Page({ slugOverride = null }) {
-    return <SpaServiceDetailPage slugOverride={slugOverride} />;
+export default function Page({ params, searchParams }) {
+    return <SpaServiceDetailPage params={params} searchParams={searchParams} />;
 }

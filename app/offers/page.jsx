@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Ticket, Search, Copy, Check, ArrowRight, ShieldCheck, Info, X } from 'lucide-react';
 import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
 
-export const SERVICE_ID_ROUTES = {
+const SERVICE_ID_ROUTES = {
   '683daaa8f261c1548bdf7442': { name: 'Appliance Service', path: '/appliance-repair-services' },
   '695250aa57bb211ca094e5fd': { name: 'Religious Services', path: '/religious-services' },
   '69524fb157bb211ca094e5ee': { name: 'PG & Hostels', path: '/pghostels' },
@@ -15,7 +15,7 @@ export const SERVICE_ID_ROUTES = {
   '6a7db000a9d92694336007a0': { name: 'Sell & Buy', path: '/sell-buy' },
 };
 
-export function getServiceDestination(offer) {
+function getServiceDestination(offer) {
   if (offer?.targetUrl && typeof offer.targetUrl === 'string' && offer.targetUrl.startsWith('/')) {
     return offer.targetUrl;
   }
@@ -51,7 +51,7 @@ export function getServiceDestination(offer) {
   return '/appliance-repair-services';
 }
 
-export function getEligibleDestinations(offer) {
+function getEligibleDestinations(offer) {
   const destinations = [];
   const rawServiceIds = Array.isArray(offer?.serviceId) ? offer.serviceId : offer?.serviceId ? [offer.serviceId] : [];
 

@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 
 const NewHostelDetailPage = dynamic(
@@ -5,6 +7,6 @@ const NewHostelDetailPage = dynamic(
     { ssr: false }
 );
 
-export default function Page({ slugOverride = null }) {
-    return <NewHostelDetailPage slugOverride={slugOverride} />;
+export default function Page({ params, searchParams }) {
+    return <NewHostelDetailPage params={params} searchParams={searchParams} />;
 }

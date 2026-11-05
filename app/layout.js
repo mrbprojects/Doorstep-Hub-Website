@@ -16,7 +16,7 @@ import { GOOGLE_MAPS_API_KEY, IMAGE_BASE_URL } from './config/env';
 import { AdSenseScriptLoader } from './components/sell-buy/ads/AdSenseScriptLoader';
 
 // const InitialLocationModal = dynamic(() => import('./components/location/InitialLocationModal').then(m => m.InitialLocationModal), { ssr: false });
-const FloatingActionButtons = dynamic(() => import('./components/ui/FloatingActionButtons').then(m => m.FloatingActionButtons), { ssr: false });
+import { FloatingActionButtons } from './components/ui/FloatingActionButtons';
 
 const ubuntu = Ubuntu({
   subsets: ['latin'],

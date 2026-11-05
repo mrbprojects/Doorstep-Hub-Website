@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 
 const ServiceDetailsPage = dynamic(() => import('@/components/services/ServiceDetailsPage').then(m => m.ServiceDetailsPage), { ssr: false });

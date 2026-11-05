@@ -119,6 +119,7 @@ const nextConfig = {
     // ─── CDN / format configuration ──────────────────────────────────────
     // Serve AVIF first (50-60% smaller than JPEG), fall back to WebP.
     formats: ['image/avif', 'image/webp'],
+    qualities: [75, 95],
     // Cache optimised images on disk / CDN for 24 h (default is 60 s).
     minimumCacheTTL: 86400,
     // Responsive breakpoints matching Tailwind's default screens.

@@ -4,7 +4,7 @@ import { AddressPage } from '@/components/services/AddressPage';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
 
-export function AddressRouteContent() {
+function AddressRouteContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [selectedAddress, setSelectedAddress] = useState(null);

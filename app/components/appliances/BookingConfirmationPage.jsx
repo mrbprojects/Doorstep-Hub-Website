@@ -115,9 +115,11 @@ export function BookingConfirmationPage({
     // 3. Check if returning from Easebuzz payment gateway
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
-    if (status === 'success') {
+    const pendingBookingRaw = sessionStorage.getItem('pending_booking');
+
+    if (status === 'success' && pendingBookingRaw) {
       setPaymentStatus('success');
-      // Payment confirmed — now safe to clear cart and localStorage
+      // Payment confirmed via gateway redirect with verified pending session — safe to clear cart and localStorage
       clearCart();
       localStorage.removeItem('booking_package_details');
       localStorage.removeItem('last_service_id');
@@ -125,6 +127,7 @@ export function BookingConfirmationPage({
       toast.success('Payment successful! Booking confirmed.');
     } else if (status === 'failure') {
       setPaymentStatus('failure');
+      sessionStorage.removeItem('pending_booking');
       toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
     }
   }, [token, isAuthenticated]);

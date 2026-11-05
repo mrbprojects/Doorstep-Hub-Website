@@ -710,14 +710,30 @@ export function BookingConfirmationPage({
                 Service Address
               </h4>
               {address ? (
-                <div className="p-4 rounded-lg bg-white/5">
-                  <h6 className="text-white font-medium mb-1">{address.name}</h6>
-                  <p className="text-white/80">{address.flat}, {address.area}</p>
-                  <p className="text-white/60">{address.cityName || address.city}, {address.postalCode}</p>
+                <div className="p-4 rounded-lg bg-white/5 flex items-start justify-between">
+                  <div>
+                    <h6 className="text-white font-medium mb-1">{address.name}</h6>
+                    <p className="text-white/80">{address.flat}, {address.area}</p>
+                    <p className="text-white/60">{address.cityName || address.city}, {address.postalCode}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/services/address')}
+                    className="text-xs font-semibold text-[#04a99d] hover:underline"
+                  >
+                    Change
+                  </button>
                 </div>
               ) : (
-                <div className="p-4 rounded-lg bg-white/5">
-                  <p className="text-white/60">No address selected</p>
+                <div className="p-4 rounded-lg bg-white/5 flex items-center justify-between">
+                  <p className="text-white/60 text-sm">No address selected</p>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/services/address')}
+                    className="px-3 py-1.5 rounded-lg bg-[#04a99d] text-white text-xs font-semibold hover:bg-[#038b81] transition-all"
+                  >
+                    Select Address
+                  </button>
                 </div>
               )}
             </motion.div>

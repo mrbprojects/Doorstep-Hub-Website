@@ -113,12 +113,18 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');
-        if (status === 'success') {
+        const pendingRaw = sessionStorage.getItem('pending_booking');
+        if (status === 'success' && pendingRaw) {
             setPaymentStatus('success');
-            // Payment confirmed — now safe to clear cart
+            // Payment confirmed via gateway redirect with verified pending session — safe to clear cart
             clearCart();
 
-            const pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
+            let pendingBooking = {};
+            try {
+                pendingBooking = JSON.parse(pendingRaw);
+            } catch (e) {
+                console.error('Failed to parse pending booking', e);
+            }
             sessionStorage.removeItem('pending_booking');
 
             toast.success('Payment successful! Booking confirmed.');
@@ -133,6 +139,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             }
         } else if (status === 'failure') {
             setPaymentStatus('failure');
+            sessionStorage.removeItem('pending_booking');
             router.push('/services/payment-failed');
         }
     }, [clearCart, onSuccess, bookingCost]);

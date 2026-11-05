@@ -349,7 +349,15 @@ export function BookingConfirmationPage({
         quantity: Number(item.quantity) || 1
       })).filter(rate => rate.name);
 
-      const currentUrl = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}${window.location.pathname}` : '';
+      const getTrustedBaseUrl = () => {
+        if (typeof window === 'undefined') return 'https://doorstephub.com';
+        const hostname = window.location.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return `${window.location.protocol}//${window.location.host}`;
+        }
+        return 'https://doorstephub.com';
+      };
+      const currentUrl = `${getTrustedBaseUrl()}${typeof window !== 'undefined' ? window.location.pathname : '/appliances/booking'}`;
 
       const bookingData = {
         serviceId: serviceId,
@@ -362,9 +370,9 @@ export function BookingConfirmationPage({
         timezone: dateTimeInfo.timezone,
         totalAmount: priceValidation.value.toString(),
         selectedServiceRates: selectedServiceRates,
-        returnUrl: currentUrl || undefined,
-        surl: currentUrl ? `${currentUrl}?status=success` : undefined,
-        furl: currentUrl ? `${currentUrl}?status=failure` : undefined
+        returnUrl: currentUrl,
+        surl: `${currentUrl}?status=success`,
+        furl: `${currentUrl}?status=failure`
       };
 
       // Preflight validation: Verify customer address city matches provider location if provider is specified

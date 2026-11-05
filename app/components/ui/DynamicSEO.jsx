@@ -20,12 +20,14 @@ export function DynamicSEO() {
 
                 // 2. Updated Canonical (stripping query params by using pathname)
                 let linkCanonical = document.querySelector('link[rel="canonical"]');
-                if (!linkCanonical) {
+                if (linkCanonical) {
+                    linkCanonical.setAttribute('href', canonicalUrl);
+                } else {
                     linkCanonical = document.createElement('link');
                     linkCanonical.rel = "canonical";
+                    linkCanonical.setAttribute('href', canonicalUrl);
                     document.head.appendChild(linkCanonical);
                 }
-                linkCanonical.setAttribute('href', canonicalUrl);
                 console.log(`[SEO] Setting Canonical: ${canonicalUrl}`);
 
                 // 3. Dynamic API Mapping
@@ -73,22 +75,26 @@ export function DynamicSEO() {
 
                     // Update Description
                     let metaDescription = document.querySelector('meta[name="description"]');
-                    if (!metaDescription) {
+                    if (metaDescription) {
+                        if (description) metaDescription.content = description;
+                    } else if (description) {
                         metaDescription = document.createElement('meta');
                         metaDescription.name = "description";
+                        metaDescription.content = description;
                         document.head.appendChild(metaDescription);
                     }
-                    if (description) metaDescription.content = description;
 
                     // Update Keywords
                     let metaKeywords = document.querySelector('meta[name="keywords"]');
-                    if (!metaKeywords) {
+                    const keywordsStr = Array.isArray(keywords) ? keywords.join(', ') : keywords;
+                    if (metaKeywords) {
+                        if (keywordsStr) metaKeywords.content = keywordsStr;
+                    } else if (keywordsStr) {
                         metaKeywords = document.createElement('meta');
                         metaKeywords.name = "keywords";
+                        metaKeywords.content = keywordsStr;
                         document.head.appendChild(metaKeywords);
                     }
-                    const keywordsStr = Array.isArray(keywords) ? keywords.join(', ') : keywords;
-                    if (keywordsStr) metaKeywords.content = keywordsStr;
                 }
             } catch (error) {
                 console.error("Error updating global SEO:", error);

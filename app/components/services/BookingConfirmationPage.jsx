@@ -287,6 +287,8 @@ export function BookingConfirmationPage({
       // Format date/time with timezone
       const dateTimeInfo = formatDateTimeWithTimezone(selectedDate, selectedTime);
 
+      const currentUrl = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}${window.location.pathname}` : '';
+
       const bookingData = {
         serviceId: serviceId,
         serviceAddressId: address._id || address.id,
@@ -296,7 +298,10 @@ export function BookingConfirmationPage({
         bookedTime: selectedTime,
         bookedDateTime: dateTimeInfo.iso, // ISO 8601 format with timezone
         timezone: dateTimeInfo.timezone,
-        totalAmount: priceValidation.value.toString()
+        totalAmount: priceValidation.value.toString(),
+        returnUrl: currentUrl || undefined,
+        surl: currentUrl ? `${currentUrl}?status=success` : undefined,
+        furl: currentUrl ? `${currentUrl}?status=failure` : undefined
       };
 
       // Preflight location verification: Verify customer address city matches provider location

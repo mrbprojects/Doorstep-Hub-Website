@@ -348,6 +348,8 @@ export function BookingConfirmationPage({
         quantity: Number(item.quantity) || 1
       })).filter(rate => rate.name);
 
+      const currentUrl = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}${window.location.pathname}` : '';
+
       const bookingData = {
         serviceId: serviceId,
         serviceAddressId: address._id || address.id,
@@ -358,7 +360,10 @@ export function BookingConfirmationPage({
         bookedDateTime: dateTimeInfo.iso,
         timezone: dateTimeInfo.timezone,
         totalAmount: priceValidation.value.toString(),
-        selectedServiceRates: selectedServiceRates
+        selectedServiceRates: selectedServiceRates,
+        returnUrl: currentUrl || undefined,
+        surl: currentUrl ? `${currentUrl}?status=success` : undefined,
+        furl: currentUrl ? `${currentUrl}?status=failure` : undefined
       };
 
       // Preflight validation: Verify customer address city matches provider location if provider is specified

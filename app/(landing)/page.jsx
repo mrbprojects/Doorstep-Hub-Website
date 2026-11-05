@@ -13,18 +13,24 @@ const HomeExclusiveOffersSection = nextDynamic(() => import('@/components/landin
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-    let showHomeScreen = false;
+    // Default to true so the approved Doorstep Hub homepage is always displayed
+    // even during local development, build time, or backend network timeouts.
+    let showHomeScreen = true;
 
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi';
+        const response = await fetch(`${baseUrl}/app/applience-repairs-website/get-website-screen-settings`, {
             cache: 'no-store'
         });
-        const data = await response.json();
-        if (data.success && data.data) {
-            showHomeScreen = data.data.homescreen;
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data && typeof data.data.homescreen === 'boolean') {
+                showHomeScreen = data.data.homescreen;
+            }
         }
     } catch (error) {
-        console.error("Error fetching screen settings:", error);
+        // Network or API failure: keep approved homepage active
+        showHomeScreen = true;
     }
 
     if (!showHomeScreen) {

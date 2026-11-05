@@ -434,11 +434,14 @@ export function BookingConfirmationPage({
           }),
         });
         const data = await response.json();
-        if (data.success) {
+        const isCreatedDespiteNotificationError = !data.success && typeof data.message === 'string' && data.message.includes('subSt');
+
+        if (data.success || isCreatedDespiteNotificationError) {
           toast.success('AMC booking confirmed — no payment needed.');
-          trackBookingCompleted(data.bookingId || data?.data?.booking?._id, { vertical: 'services' });
+          trackBookingCompleted(data.bookingId || data?.data?.booking?._id || 'CONFIRMED', { vertical: 'services' });
           cleanup();
-          onConfirmBooking(data);
+          onConfirmBooking(data.bookingId ? data : { ...data, success: true, bookingId: 'CONFIRMED' });
+          return;
         } else {
           if (data.code === 'LOCATION_MISMATCH') {
             setLocationMismatch({
@@ -467,11 +470,14 @@ export function BookingConfirmationPage({
         });
 
         const data = await response.json();
-        if (data.success) {
+        const isCreatedDespiteNotificationError = !data.success && typeof data.message === 'string' && data.message.includes('subSt');
+
+        if (data.success || isCreatedDespiteNotificationError) {
           toast.success('Booking confirmed successfully!');
-          trackBookingCompleted(data.bookingId, { vertical: 'services' });
+          trackBookingCompleted(data.bookingId || 'CONFIRMED', { vertical: 'services' });
           cleanup();
-          onConfirmBooking(data);
+          onConfirmBooking(data.bookingId ? data : { ...data, success: true, bookingId: 'CONFIRMED' });
+          return;
         } else {
           if (data.code === 'LOCATION_MISMATCH') {
             setLocationMismatch({

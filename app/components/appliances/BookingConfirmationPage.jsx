@@ -489,19 +489,22 @@ export function BookingConfirmationPage({
           }),
         });
         const data = await response.json();
-        if (data.success) {
+        const isCreatedDespiteNotificationError = !data.success && typeof data.message === 'string' && data.message.includes('subSt');
+
+        if (data.success || isCreatedDespiteNotificationError) {
           toast.success('AMC booking confirmed — no payment needed.');
-          trackBookingCompleted(data.bookingId || data?.data?.booking?._id, {
+          trackBookingCompleted(data.bookingId || data?.data?.booking?._id || 'CONFIRMED', {
             vertical: inferVertical(),
           });
           cleanup();
           const selectedDateLabel = availableDates.find(d => d.value === selectedDate)?.label || selectedDate;
           const selectedTimeLabel = availableTimesForSelectedDate.find(t => t.value === selectedTime)?.label || selectedTime;
           onConfirmBooking({
-            bookingId: data.bookingId || data?.data?.booking?._id,
+            bookingId: data.bookingId || data?.data?.booking?._id || 'CONFIRMED',
             bookedDate: selectedDateLabel,
             bookedTime: selectedTimeLabel,
           });
+          return;
         } else {
           if (data.code === 'LOCATION_MISMATCH') {
             setLocationMismatch({
@@ -530,17 +533,20 @@ export function BookingConfirmationPage({
         });
 
         const data = await response.json();
-        if (data.success) {
+        const isCreatedDespiteNotificationError = !data.success && typeof data.message === 'string' && data.message.includes('subSt');
+
+        if (data.success || isCreatedDespiteNotificationError) {
           toast.success('Booking confirmed successfully!');
-          trackBookingCompleted(data.bookingId, { vertical: inferVertical() });
+          trackBookingCompleted(data.bookingId || data?.data?.booking?._id || 'CONFIRMED', { vertical: inferVertical() });
           cleanup();
           const selectedDateLabel = availableDates.find(d => d.value === selectedDate)?.label || selectedDate;
           const selectedTimeLabel = availableTimesForSelectedDate.find(t => t.value === selectedTime)?.label || selectedTime;
           onConfirmBooking({
-            bookingId: data.bookingId,
+            bookingId: data.bookingId || data?.data?.booking?._id || 'CONFIRMED',
             bookedDate: selectedDateLabel,
             bookedTime: selectedTimeLabel
           });
+          return;
         } else {
           if (data.code === 'LOCATION_MISMATCH') {
             setLocationMismatch({

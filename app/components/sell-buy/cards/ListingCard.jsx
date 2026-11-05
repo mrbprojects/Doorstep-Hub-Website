@@ -23,7 +23,9 @@ function formatTimeAgo(dateStr) {
 
 export function ListingCard({ listing }) {
   const { user, token: authContextToken } = useAuth() || {};
-  
+  const [liked, setLiked] = useState(listing?.is_liked || false);
+  const [loading, setLoading] = useState(false);
+
   if (!listing) return null;
 
   const {
@@ -38,8 +40,6 @@ export function ListingCard({ listing }) {
   } = listing;
 
   const listingId = _id || id;
-  const [liked, setLiked] = useState(is_liked || false);
-  const [loading, setLoading] = useState(false);
 
   const displayTitle = title || name || 'Untitled Item';
   const displayImage = coverImage || image || images?.[0] || gallery_images?.[0]?.image;

@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 import { AnimatePresence } from 'motion/react';
+import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 
 function areCitiesMatching(cityA, cityB) {
   if (!cityA || !cityB) return true;
@@ -109,40 +110,67 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         return null;
     };
 
-    // On mount: check if returning from Easebuzz payment gateway
+    // On mount: check if returning from Easebuzz payment gateway authoritatively
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');
+        if (!status) return;
+
         const pendingRaw = sessionStorage.getItem('pending_booking');
-        if (status === 'success' && pendingRaw) {
-            setPaymentStatus('success');
-            // Payment confirmed via gateway redirect with verified pending session — safe to clear cart
-            clearCart();
-
-            let pendingBooking = {};
-            try {
-                pendingBooking = JSON.parse(pendingRaw);
-            } catch (e) {
-                console.error('Failed to parse pending booking', e);
+        if (!pendingRaw) {
+            if (status === 'success') {
+                console.warn('[Payment] Blocked unverified success callback: No pending booking session found');
             }
-            sessionStorage.removeItem('pending_booking');
-
-            toast.success('Payment successful! Booking confirmed.');
-
-            if (onSuccess) {
-                onSuccess({
-                    bookingId: pendingBooking.orderId,
-                    bookedDate: pendingBooking.bookedDate,
-                    bookedTime: pendingBooking.bookedTime,
-                    amount: bookingCost
-                }, 'ONLINE');
-            }
-        } else if (status === 'failure') {
-            setPaymentStatus('failure');
-            sessionStorage.removeItem('pending_booking');
-            router.push('/services/payment-failed');
+            return;
         }
-    }, [clearCart, onSuccess, bookingCost]);
+
+        let pending = {};
+        try {
+            pending = JSON.parse(pendingRaw);
+        } catch (e) {
+            console.error('Failed to parse pending booking', e);
+        }
+
+        const orderRef = pending.orderId || urlParams.get('orderId');
+        const txnRef = pending.txnid || urlParams.get('txnid');
+
+        if (!orderRef && !txnRef) {
+            console.warn('[Payment] Blocked unverified callback: Missing orderId and txnid references');
+            return;
+        }
+
+        if (!token) return;
+
+        verifyBookingPaymentStatus(token, { orderId: orderRef, txnid: txnRef })
+            .then((verification) => {
+                if (verification.isPaid) {
+                    setPaymentStatus('success');
+                    clearCart();
+                    sessionStorage.removeItem('pending_booking');
+                    toast.success('Payment verified! Booking confirmed.');
+                    if (onSuccess) {
+                        onSuccess({
+                            bookingId: verification.orderId || orderRef,
+                            bookedDate: pending.bookedDate,
+                            bookedTime: pending.bookedTime,
+                            amount: bookingCost
+                        }, 'ONLINE');
+                    }
+                } else if (verification.status === 'pending' || verification.status === 'payment_pending') {
+                    setPaymentStatus('pending');
+                    toast.info('Payment is pending confirmation from bank. Your cart is preserved.');
+                } else {
+                    setPaymentStatus('failure');
+                    sessionStorage.removeItem('pending_booking');
+                    toast.error('Payment failed or was cancelled. Your booking details are preserved in cart.');
+                    router.push('/services/payment-failed');
+                }
+            })
+            .catch((err) => {
+                console.error('[Payment] Verification error:', err);
+                toast.error('Unable to verify payment with server. Your cart is preserved.');
+            });
+    }, [clearCart, onSuccess, bookingCost, token, router]);
 
     // Check authentication on mount
     useEffect(() => {
@@ -297,7 +325,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                         bookedDate,
                         bookedTime,
                         address: selectedAddress,
-                        orderId: data.bookingId || data.orderId || null
+                        orderId: data.bookingId || data.orderId || null,
+                        txnid: data.txnid || null
                     }));
 
                     // Redirect to Easebuzz payment gateway with access_key

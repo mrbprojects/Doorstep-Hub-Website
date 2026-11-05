@@ -11,6 +11,7 @@ import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'motion/react';
+import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 
 function areCitiesMatching(cityA, cityB) {
   if (!cityA || !cityB) return true;
@@ -95,24 +96,65 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         }
     }, [token, selectedAddress?._id, selectedAddress?.addressLineOne, selectedAddress?.phone]);
 
-    // On mount: check if returning from Easebuzz payment gateway
+    // On mount: check if returning from Easebuzz payment gateway authoritatively
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');
-        if (status === 'success') {
-            setPaymentStatus('success');
-            // Payment confirmed — now safe to clear cart
-            clearCart();
-            sessionStorage.removeItem('pending_booking');
-            toast.success('Payment successful! Booking confirmed.');
-        } else if (status === 'failure') {
-            setPaymentStatus('failure');
-            toast.error('Payment failed. Redirecting to cart for retry...');
-            setTimeout(() => {
-                router.push('/appliances/cart');
-            }, 2000);
+        if (!status) return;
+
+        const pendingRaw = sessionStorage.getItem('pending_booking');
+        if (!pendingRaw) {
+            if (status === 'success') {
+                console.warn('[Payment] Blocked unverified success callback: No pending booking session found');
+            }
+            return;
         }
-    }, [router, clearCart]);
+
+        let pending = {};
+        try {
+            pending = JSON.parse(pendingRaw);
+        } catch (e) {
+            console.error('Failed to parse pending booking', e);
+        }
+
+        const orderRef = pending.orderId || urlParams.get('orderId');
+        const txnRef = pending.txnid || urlParams.get('txnid');
+
+        if (!orderRef && !txnRef) {
+            console.warn('[Payment] Blocked unverified callback: Missing orderId and txnid references');
+            return;
+        }
+
+        if (!token) return;
+
+        verifyBookingPaymentStatus(token, { orderId: orderRef, txnid: txnRef })
+            .then((verification) => {
+                if (verification.isPaid) {
+                    setPaymentStatus('success');
+                    clearCart();
+                    sessionStorage.removeItem('pending_booking');
+                    toast.success('Payment verified! Booking confirmed.');
+                    if (onSuccess) {
+                        onSuccess({
+                            bookingId: verification.orderId || orderRef,
+                            bookedDate: pending.bookedDate,
+                            bookedTime: pending.bookedTime,
+                            amount: bookingCost
+                        }, 'ONLINE');
+                    }
+                } else if (verification.status === 'pending' || verification.status === 'payment_pending') {
+                    setPaymentStatus('pending');
+                    toast.info('Payment is pending confirmation from bank. Your cart is preserved.');
+                } else {
+                    setPaymentStatus('failure');
+                    toast.error('Payment failed or was cancelled. Your booking details are preserved in cart.');
+                }
+            })
+            .catch((err) => {
+                console.error('[Payment] Verification error:', err);
+                toast.error('Unable to verify payment with server. Your cart is preserved.');
+            });
+    }, [router, clearCart, token, onSuccess, bookingCost]);
 
     // Fetch Wallet Balance
     useEffect(() => {
@@ -337,7 +379,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                         bookedDate,
                         bookedTime,
                         address: selectedAddress,
-                        orderId: data.bookingId || data.orderId || null
+                        orderId: data.bookingId || data.orderId || null,
+                        txnid: data.txnid || null
                     }));
 
                     // Redirect to Easebuzz payment gateway with access_key

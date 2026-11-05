@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Wallet, Truck, Info, Shield } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Wallet, Truck, Info, Shield, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
@@ -13,6 +13,7 @@ import { generateIdempotencyKey, formatDateTimeWithTimezone, validatePrice } fro
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
+import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 
 function normalizeCityString(cityName) {
   if (!cityName) return '';
@@ -65,13 +66,91 @@ export function BookingConfirmationPage({
   const [walletData, setWalletData] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
   const [locationMismatch, setLocationMismatch] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | 'pending' | null
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [verificationError, setVerificationError] = useState(null);
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
   const processingRef = useRef(false);
   const idempotencyKeyRef = useRef(null);
 
-  // Fetch Wallet Balance
+  const performPaymentVerification = React.useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const statusParam = urlParams.get('status');
+
+    if (!statusParam) return;
+
+    const pendingRaw = sessionStorage.getItem('pending_booking');
+    if (!pendingRaw) {
+      if (statusParam === 'success') {
+        console.warn('[Payment] Blocked unverified success callback: No pending booking session found in storage');
+      }
+      return;
+    }
+
+    let pending = {};
+    try {
+      pending = JSON.parse(pendingRaw);
+    } catch (e) {
+      console.error('Failed to parse pending booking', e);
+    }
+
+    const orderRef = pending.orderId || urlParams.get('orderId');
+    const txnRef = pending.txnid || urlParams.get('txnid');
+
+    if (!orderRef && !txnRef) {
+      console.warn('[Payment] Blocked unverified callback: Missing orderId and txnid references');
+      return;
+    }
+
+    if (!token || !isAuthenticated) {
+      setVerificationError('Please sign in to verify your payment status.');
+      return;
+    }
+
+    setVerifyingPayment(true);
+    setVerificationError(null);
+
+    try {
+      const verification = await verifyBookingPaymentStatus(token, { orderId: orderRef, txnid: txnRef });
+
+      if (verification.isPaid) {
+        setPaymentStatus('success');
+        clearCart();
+        localStorage.removeItem('booking_package_details');
+        localStorage.removeItem('last_service_id');
+        sessionStorage.removeItem('pending_booking');
+        toast.success('Payment verified! Booking confirmed.');
+        if (onConfirmBooking) {
+          onConfirmBooking({
+            orderId: verification.orderId || orderRef,
+            bookedDate: pending.bookedDate,
+            bookedTime: pending.bookedTime
+          });
+        }
+      } else if (verification.status === 'pending' || verification.status === 'payment_pending') {
+        setPaymentStatus('pending');
+        toast.info('Payment is being confirmed by your bank. Please wait a moment or click recheck.');
+      } else if (verification.status === 'failed' || verification.status === 'missed' || statusParam === 'failure' || statusParam === 'cancelled') {
+        setPaymentStatus('failure');
+        toast.error('Payment was not completed by the bank. Your booking details are preserved — please try again.');
+      } else if (verification.status === 'unauthorized' || verification.status === 'not_found') {
+        setVerificationError('Unable to verify booking for this account. Please verify with Doorstep Hub support.');
+        setPaymentStatus('failure');
+      } else {
+        setVerificationError('Could not confirm payment status with server. Please click below to recheck.');
+      }
+    } catch (err) {
+      console.error('[Payment] Verification error:', err);
+      setVerificationError('Network error during verification. Please click below to recheck.');
+    } finally {
+      setVerifyingPayment(false);
+    }
+  }, [token, isAuthenticated, clearCart, onConfirmBooking]);
+
+  // Fetch Wallet Balance and verify return
   useEffect(() => {
     const fetchWalletBalance = async () => {
       if (!token) return;
@@ -97,7 +176,9 @@ export function BookingConfirmationPage({
     if (isAuthenticated) {
       fetchWalletBalance();
     }
-  }, [token, isAuthenticated]);
+
+    performPaymentVerification();
+  }, [token, isAuthenticated, performPaymentVerification]);
 
   React.useEffect(() => {
     const stored = localStorage.getItem('booking_package_details');
@@ -429,9 +510,17 @@ export function BookingConfirmationPage({
             duration: 2000
           });
 
-          // Fixed Easebuzz URL format
+          // Save booking state to sessionStorage so it survives the redirect
+          // DO NOT clear localStorage/cart here — data must be preserved until payment is confirmed
+          sessionStorage.setItem('pending_booking', JSON.stringify({
+            bookedDate: selectedDate,
+            bookedTime: selectedTime,
+            address,
+            orderId: data.bookingId || data.orderId || null,
+            txnid: data.txnid || null
+          }));
+
           const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
-          cleanup();
           window.location.href = easebuzzUrl;
         } else {
           if (data.code === 'LOCATION_MISMATCH') {

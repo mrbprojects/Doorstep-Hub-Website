@@ -13,6 +13,7 @@ import { generateIdempotencyKey, formatDateTimeWithTimezone, validatePrice } fro
 import { inferVertical, trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
+import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 
 function normalizeCityString(cityName) {
   if (!cityName) return '';
@@ -66,13 +67,90 @@ export function BookingConfirmationPage({
   const [walletData, setWalletData] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
   const [directBookingItems, setDirectBookingItems] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+  const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | 'pending' | null
   const [locationMismatch, setLocationMismatch] = useState(null);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [verificationError, setVerificationError] = useState(null);
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
   const processingRef = useRef(false);
   const idempotencyKeyRef = useRef(null);
+
+  const performPaymentVerification = React.useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const statusParam = urlParams.get('status');
+
+    if (!statusParam) return;
+
+    const pendingRaw = sessionStorage.getItem('pending_booking');
+    if (!pendingRaw) {
+      if (statusParam === 'success') {
+        console.warn('[Payment] Blocked unverified success callback: No pending booking session found in storage');
+      }
+      return;
+    }
+
+    let pending = {};
+    try {
+      pending = JSON.parse(pendingRaw);
+    } catch (e) {
+      console.error('Failed to parse pending booking', e);
+    }
+
+    const orderRef = pending.orderId || urlParams.get('orderId');
+    const txnRef = pending.txnid || urlParams.get('txnid');
+
+    if (!orderRef && !txnRef) {
+      console.warn('[Payment] Blocked unverified callback: Missing orderId and txnid references');
+      return;
+    }
+
+    if (!token || !isAuthenticated) {
+      setVerificationError('Please sign in to verify your payment status.');
+      return;
+    }
+
+    setVerifyingPayment(true);
+    setVerificationError(null);
+
+    try {
+      const verification = await verifyBookingPaymentStatus(token, { orderId: orderRef, txnid: txnRef });
+
+      if (verification.isPaid) {
+        setPaymentStatus('success');
+        clearCart();
+        localStorage.removeItem('booking_package_details');
+        localStorage.removeItem('last_service_id');
+        sessionStorage.removeItem('pending_booking');
+        toast.success('Payment verified! Booking confirmed.');
+        if (onConfirmBooking) {
+          onConfirmBooking({
+            orderId: verification.orderId || orderRef,
+            bookedDate: pending.bookedDate,
+            bookedTime: pending.bookedTime
+          });
+        }
+      } else if (verification.status === 'pending' || verification.status === 'payment_pending') {
+        setPaymentStatus('pending');
+        toast.info('Payment is being confirmed by your bank. Please wait a moment or click recheck.');
+      } else if (verification.status === 'failed' || verification.status === 'missed' || statusParam === 'failure' || statusParam === 'cancelled') {
+        setPaymentStatus('failure');
+        toast.error('Payment was not completed by the bank. Your booking details are preserved — please try again.');
+      } else if (verification.status === 'unauthorized' || verification.status === 'not_found') {
+        setVerificationError('Unable to verify booking for this account. Please verify with Doorstep Hub support.');
+        setPaymentStatus('failure');
+      } else {
+        setVerificationError('Could not confirm payment status with server. Please click below to recheck.');
+      }
+    } catch (err) {
+      console.error('[Payment] Verification error:', err);
+      setVerificationError('Network error during verification. Please click below to recheck.');
+    } finally {
+      setVerifyingPayment(false);
+    }
+  }, [token, isAuthenticated, clearCart, onConfirmBooking]);
 
   React.useEffect(() => {
     // 1. Load saved booking items from localStorage
@@ -112,25 +190,9 @@ export function BookingConfirmationPage({
       fetchWalletBalance();
     }
 
-    // 3. Check if returning from Easebuzz payment gateway
-    const urlParams = new URLSearchParams(window.location.search);
-    const status = urlParams.get('status');
-    const pendingBookingRaw = sessionStorage.getItem('pending_booking');
-
-    if (status === 'success' && pendingBookingRaw) {
-      setPaymentStatus('success');
-      // Payment confirmed via gateway redirect with verified pending session — safe to clear cart and localStorage
-      clearCart();
-      localStorage.removeItem('booking_package_details');
-      localStorage.removeItem('last_service_id');
-      sessionStorage.removeItem('pending_booking');
-      toast.success('Payment successful! Booking confirmed.');
-    } else if (status === 'failure') {
-      setPaymentStatus('failure');
-      sessionStorage.removeItem('pending_booking');
-      toast.error('Payment failed or was cancelled. Your booking details are preserved — please try again.');
-    }
-  }, [token, isAuthenticated]);
+    // 3. Authoritatively verify payment with backend
+    performPaymentVerification();
+  }, [token, isAuthenticated, performPaymentVerification]);
 
   const cartItems = (directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || []);
 
@@ -524,7 +586,8 @@ export function BookingConfirmationPage({
             bookedDate: selectedDate,
             bookedTime: selectedTime,
             address,
-            orderId: data.bookingId || data.orderId || null
+            orderId: data.bookingId || data.orderId || null,
+            txnid: data.txnid || null
           }));
 
           const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
@@ -609,6 +672,55 @@ export function BookingConfirmationPage({
 
       {/* Main Content Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+        {/* Verification Status Banners */}
+        {verifyingPayment && (
+          <div className="mb-4 p-4 rounded-2xl bg-teal-50 border border-teal-200 flex items-center gap-3">
+            <Loader2 className="w-5 h-5 text-[#037166] animate-spin flex-shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-[#037166]">Verifying Payment with Server</p>
+              <p className="text-xs text-gray-600">Please wait while we authoritatively confirm your transaction with the bank.</p>
+            </div>
+          </div>
+        )}
+
+        {verificationError && !verifyingPayment && (
+          <div className="mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Info className="w-5 h-5 text-amber-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-bold text-amber-800">Payment Verification Pending</p>
+                <p className="text-xs text-gray-600">{verificationError}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={performPaymentVerification}
+              className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-all flex-shrink-0"
+            >
+              <span>Retry Verification</span>
+            </button>
+          </div>
+        )}
+
+        {paymentStatus === 'pending' && !verifyingPayment && (
+          <div className="mb-4 p-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-bold text-blue-800">Payment Processing at Bank</p>
+                <p className="text-xs text-gray-600">Your bank is confirming the transaction. Your booking and cart items remain safely preserved.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={performPaymentVerification}
+              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-all flex-shrink-0"
+            >
+              <span>Recheck Status</span>
+            </button>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-12 gap-5 lg:gap-6 items-start">
           {/* Left Column: Form Cards */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-4">

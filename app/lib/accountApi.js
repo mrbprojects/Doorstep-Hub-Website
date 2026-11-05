@@ -301,4 +301,97 @@ export async function payPlatformFee(token, bookingId, { paymentMethod = 'ONLINE
     return parseResponse(response);
 }
 
+/**
+ * Authoritatively verifies booking payment status with backend.
+ * Uses authenticated orderId and txnid references; never trusts client-only parameters.
+ */
+export async function verifyBookingPaymentStatus(token, { orderId, txnid } = {}) {
+    if (!token) {
+        return { success: false, status: 'unauthorized', message: 'Authentication required to verify payment' };
+    }
+    if (!orderId && !txnid) {
+        return { success: false, status: 'missing_reference', message: 'No booking or transaction reference found' };
+    }
+
+    try {
+        // Priority 1: Check by txnid if available (this also invokes live backend Easebuzz reconciliation if needed)
+        if (txnid) {
+            try {
+                const txnRes = await fetch(`${API_BASE}/app/service-cart/payment-status/${encodeURIComponent(txnid)}`, {
+                    headers: bearerHeaders(token, null),
+                    cache: 'no-store'
+                });
+                if (txnRes.ok) {
+                    const data = await parseResponse(txnRes);
+                    if (data?.success) {
+                        const isPaid = Boolean(data.paid || ['paid', 'completed'].includes(String(data.status || '').toLowerCase()));
+                        return {
+                            success: true,
+                            isPaid,
+                            status: isPaid ? 'paid' : (data.status || 'pending'),
+                            orderId: data.orderId || orderId,
+                            totalAmount: data.totalAmount,
+                            reconciled: Boolean(data.reconciled)
+                        };
+                    }
+                } else if (txnRes.status === 401 || txnRes.status === 403) {
+                    return { success: false, status: 'unauthorized', message: 'Session expired or unauthorized' };
+                }
+            } catch (txnErr) {
+                console.warn('payment-status by txnid failed, falling back to orderId check', txnErr);
+            }
+        }
+
+        // Priority 2: Check by orderId
+        if (orderId) {
+            const orderRes = await fetch(`${API_BASE}/app/service-cart/payment-status-by-order/${encodeURIComponent(orderId)}`, {
+                headers: bearerHeaders(token, null),
+                cache: 'no-store'
+            });
+            if (orderRes.ok) {
+                const data = await parseResponse(orderRes);
+                if (data?.success) {
+                    const isPaid = Boolean(data.isPaid || ['paid', 'completed'].includes(String(data.paymentStatus || '').toLowerCase()));
+                    return {
+                        success: true,
+                        isPaid,
+                        status: isPaid ? 'paid' : (data.paymentStatus || data.orderStatus || 'pending'),
+                        orderId: data.orderId || orderId
+                    };
+                }
+            } else if (orderRes.status === 401 || orderRes.status === 403) {
+                return { success: false, status: 'unauthorized', message: 'Session expired or unauthorized' };
+            }
+
+            // Fallback: Fetch order details directly via get-order-detail-by-booking-id
+            const detailRes = await fetch(`${API_BASE}/app/service-cart/get-order-detail-by-booking-id/${encodeURIComponent(orderId)}`, {
+                headers: bearerHeaders(token, null),
+                cache: 'no-store'
+            });
+            if (detailRes.ok) {
+                const data = await parseResponse(detailRes);
+                const order = data?.data?.order || data?.data?.booking || data?.order || data?.booking || data?.data || data;
+                if (order && (order._id || order.orderId)) {
+                    const paymentStatus = String(order.paymentStatus || '').toLowerCase();
+                    const isPaid = ['paid', 'completed'].includes(paymentStatus);
+                    return {
+                        success: true,
+                        isPaid,
+                        status: isPaid ? 'paid' : (order.paymentStatus || order.status || 'pending'),
+                        orderId: order.orderId || order._id
+                    };
+                }
+            } else if (detailRes.status === 401 || detailRes.status === 403) {
+                return { success: false, status: 'unauthorized', message: 'Session expired or unauthorized' };
+            }
+        }
+
+        return { success: false, status: 'not_found', message: 'Payment record not found for this account' };
+    } catch (err) {
+        console.error('Error verifying payment status:', err);
+        return { success: false, status: 'network_error', message: err?.message || 'Unable to connect to verification server' };
+    }
+}
+
+
 

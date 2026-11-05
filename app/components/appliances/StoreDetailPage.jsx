@@ -1221,7 +1221,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
       "latitude": centerData.lattitude || centerData.latitude,
       "longitude": centerData.longitude || centerData.longitude
     },
-    "url": typeof window !== 'undefined' ? window.location.href : '',
+    "url": centerData?.slug ? `https://doorstephub.com/service-list/${centerData.slug}` : 'https://doorstephub.com',
     "telephone": centerData.phone || "+918886688666",
     "areaServed": centerData.cityName || centerData.city || "",
     "serviceType": centerData.speciality || "Appliance Repair Services",

@@ -22,7 +22,14 @@ export function SmartAppBannerMeta() {
     let metaTag = document.querySelector('meta[name="apple-itunes-app"]');
 
     if (!promotion || !promotion.ios?.appStoreId) {
-      if (metaTag) metaTag.remove();
+      // Safely disable the banner without detaching the DOM node.
+      // Calling metaTag.remove() detaches the element from document.head,
+      // breaking React's HostSingleton fiber tree and causing:
+      // "TypeError: Cannot read properties of null (reading 'removeChild')"
+      // during route transitions away from excluded pages (e.g. /services/payment-failed).
+      if (metaTag) {
+        metaTag.removeAttribute('content');
+      }
       return;
     }
 

@@ -19,7 +19,14 @@ function BookingContent() {
     return (
         <BookingConfirmationPage
             address={address}
-            onBack={() => router.back()}
+            onBack={() => {
+                if (typeof window !== 'undefined' && window.history.length > 2) {
+                    router.back();
+                } else {
+                    router.push('/appliances/address');
+                }
+            }}
+            onChangeAddress={() => router.push('/appliances/address')}
             onConfirmBooking={(data) => {
                 router.push(`/appliances/thank-you?date=${data?.bookedDate || ''}&time=${data?.bookedTime || ''}`);
             }}

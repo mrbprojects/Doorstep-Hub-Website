@@ -50,6 +50,7 @@ const API_BASE =
 export function BookingConfirmationPage({
   address,
   onBack,
+  onChangeAddress,
   onConfirmBooking,
 }) {
   const router = useRouter();
@@ -937,15 +938,13 @@ export function BookingConfirmationPage({
                     <p className="text-[11px] text-gray-500">Technician will visit this location</p>
                   </div>
                 </div>
-                {onBack && (
-                  <button
-                    type="button"
-                    onClick={onBack}
-                    className="text-xs font-bold text-[#037166] hover:text-[#025a51] hover:underline transition-colors"
-                  >
-                    Change Address
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={onChangeAddress || onBack || (() => router.push('/appliances/address'))}
+                  className="text-xs font-bold text-[#037166] hover:text-[#025a51] hover:underline transition-colors"
+                >
+                  Change Address
+                </button>
               </div>
 
               {(() => {
@@ -953,15 +952,13 @@ export function BookingConfirmationPage({
                   return (
                     <div className="p-3.5 rounded-xl bg-gray-50 border border-dashed border-gray-300 text-center">
                       <p className="text-xs text-gray-500 mb-2">No service address selected</p>
-                      {onBack && (
-                        <button
-                          type="button"
-                          onClick={onBack}
-                          className="px-3 py-1.5 rounded-lg bg-[#037166] text-white text-xs font-semibold hover:bg-[#025a51] transition-all"
-                        >
-                          Select Address
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={onChangeAddress || onBack || (() => router.push('/appliances/address'))}
+                        className="px-3 py-1.5 rounded-lg bg-[#037166] text-white text-xs font-semibold hover:bg-[#025a51] transition-all"
+                      >
+                        Select Address
+                      </button>
                     </div>
                   );
                 }

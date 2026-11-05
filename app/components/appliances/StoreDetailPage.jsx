@@ -506,9 +506,29 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
           const center = data.nearByServiceCenters?.[0] || data.data || data.serviceCenter;
           setCenterData(center);
 
-          // If we still don't have a resolved provider ID, extract it from center data
-          if (center?._id) {
-            setResolvedProviderId(prev => prev || center._id);
+          // If we still don't have a resolved provider ID, extract it from center data or services
+          const centerId = center?._id || center?.id || (Array.isArray(data.services) && data.services[0]?.providerId);
+          if (centerId) {
+            setResolvedProviderId(prev => prev || centerId);
+          }
+
+          // Immediately map and populate services from data.services if available
+          if (Array.isArray(data.services) && data.services.length > 0) {
+            const mappedInitialServices = data.services.map(s => ({
+              id: s._id || s.id,
+              name: s.name || s.title,
+              description: s.description || s.bio,
+              price: s.price || s.minFare || s.inspectionCost || 0,
+              image: s.image || s.logo,
+              rating: s.rating || 4.5,
+              totalOrders: s.totalOrders || 0,
+              duration: s.duration || '60 mins',
+              subcategoryName: s.subcategoryName,
+              subcategoryId: s.subcategoryId || s.subCategoryId || null,
+              categoryId: s.categoryId || s.bookingCategoryId || null,
+              bannerImages: s.banner_images || []
+            }));
+            setServices(mappedInitialServices);
           }
 
 

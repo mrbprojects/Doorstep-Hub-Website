@@ -585,17 +585,38 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     <MapPin className="w-5 h-5 text-[#04a99d]" />
                                     <span>Service Address</span>
                                 </h4>
-                                {onBack && (
-                                    <button type="button" onClick={onBack} className="text-xs font-semibold text-[#037166] hover:text-[#025a51] hover:underline transition-colors">
-                                        Change Address
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (typeof onBack === 'function') {
+                                            onBack();
+                                        } else {
+                                            router.push('/services/address');
+                                        }
+                                    }}
+                                    className="text-xs font-semibold text-[#037166] hover:text-[#025a51] hover:underline transition-colors"
+                                >
+                                    Change Address
+                                </button>
                             </div>
                             {(() => {
                                 const currentAddr = fullAddress || selectedAddress;
                                 if (!currentAddr) return (
                                     <div className="p-4 rounded-xl bg-gray-50 border border-dashed border-gray-300 text-center">
-                                        <p className="text-xs text-gray-500">No service address selected</p>
+                                        <p className="text-xs text-gray-500 mb-2">No service address selected</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (typeof onBack === 'function') {
+                                                    onBack();
+                                                } else {
+                                                    router.push('/services/address');
+                                                }
+                                            }}
+                                            className="px-3 py-1.5 rounded-lg bg-[#037166] text-white text-xs font-semibold hover:bg-[#025a51] transition-all"
+                                        >
+                                            Select Address
+                                        </button>
                                     </div>
                                 );
                                 const clean = (v) => (!v || String(v).trim().toUpperCase() === 'N/A' || String(v).trim().toUpperCase() === 'UNDEFINED' || String(v).trim().toUpperCase() === 'NULL' ? null : String(v).trim());

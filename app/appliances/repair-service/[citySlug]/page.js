@@ -194,7 +194,8 @@ function FaqSection({ faqs, activeIndex, onToggle }) {
 function CategoryPageContent() {
   const router = useRouter();
   const params = useParams();
-  const citySlug = params.citySlug;
+  const rawCitySlug = params?.citySlug;
+  const citySlug = (Array.isArray(rawCitySlug) ? rawCitySlug[0] : rawCitySlug) || '';
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -250,27 +251,30 @@ function CategoryPageContent() {
   }, []);
 
   useEffect(() => {
+    if (!citySlug) return;
     (async () => {
       try {
         setLoading(true);
         const [cities, cats] = await Promise.all([fetchCities(), fetchCategories()]);
 
-        const match = cities.find(
+        const match = Array.isArray(cities) ? cities.find(
           (c) =>
             (c.slug || c.name || '').toLowerCase().replace(/\s+/g, '-') ===
             citySlug.toLowerCase(),
-        );
-        setSelectedCity(match || { name: citySlug, slug: citySlug });
+        ) : null;
+        setSelectedCity(match || { name: citySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), slug: citySlug });
 
         setCategories(
-          cats.map((c) => ({
-            ...c,
-            image: c.image
-              ? c.image.startsWith('http')
-                ? c.image
-                : `https://api.doorstephub.com/${c.image.replace(/^\//, '')}`
-              : null,
-          })),
+          Array.isArray(cats)
+            ? cats.map((c) => ({
+                ...c,
+                image: c.image
+                  ? c.image.startsWith('http')
+                    ? c.image
+                    : `https://api.doorstephub.com/${c.image.replace(/^\//, '')}`
+                  : null,
+              }))
+            : []
         );
       } catch (e) {
         console.error(e);

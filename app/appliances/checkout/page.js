@@ -75,7 +75,7 @@ function CheckoutContent() {
         <>
             <ServiceCartCheckoutPage
                 selectedAddress={selectedAddress}
-                onBack={() => router.back()}
+                onBack={() => router.push('/appliances/address')}
                 onSuccess={(data) => {
                     router.push(`/appliances/thank-you?orderId=${data?.bookingId || data?.orderId || ''}&date=${data?.bookedDate || ''}&time=${data?.bookedTime || ''}`);
                 }}

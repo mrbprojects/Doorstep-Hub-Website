@@ -298,42 +298,36 @@ export function getFallbackMetadata(path) {
     }
 
     // 2. Spa & Salon Services
-    if (normalizedPath.startsWith('/spa-salon/')) {
-        const subPath = normalizedPath.replace('/spa-salon/', '');
-        if (subPath) {
-            const name = slugToTitle(subPath);
-            return {
-                title: `${name} | Premium Spa & Salon Services at Home - Doorstep Hub`,
-                description: `Book professional ${name} services at home. Relax and rejuvenate with our certified beauticians and therapists. Call 8886688666 to book!`,
-                keywords: [subPath, 'spa at home', 'doorstep salon', 'beauty services near me']
-            };
-        }
+    if (normalizedPath === '/spa-salon' || normalizedPath.startsWith('/spa-salon/')) {
+        const subPath = normalizedPath.replace(/^\/spa-salon\/?/, '');
+        const name = subPath ? slugToTitle(subPath) : 'Spa & Salon';
+        return {
+            title: subPath ? `${name} | Premium Spa & Salon Services at Home - Doorstep Hub` : `Premium Spa & Salon Services at Home | Doorstep Hub`,
+            description: `Book professional ${name} services at home. Relax and rejuvenate with our certified beauticians and therapists. Call 8886688666 to book!`,
+            keywords: [subPath || 'spa salon', 'spa at home', 'doorstep salon', 'beauty services near me']
+        };
     }
 
     // 3. Religious / Puja Services
-    if (normalizedPath.startsWith('/religious-services/')) {
-        const subPath = normalizedPath.replace('/religious-services/', '');
-        if (subPath) {
-            const name = slugToTitle(subPath);
-            return {
-                title: `${name} | Book Pandits & Pujas Online - Doorstep Hub`,
-                description: `Book experienced pandits/purohits online for ${name}. We provide high quality puja items and perform rituals with devotion at your home.`,
-                keywords: [subPath, 'book pandit online', 'online puja booking', 'purohit services']
-            };
-        }
+    if (normalizedPath === '/religious-services' || normalizedPath.startsWith('/religious-services/')) {
+        const subPath = normalizedPath.replace(/^\/religious-services\/?/, '');
+        const name = subPath ? slugToTitle(subPath) : 'Puja & Religious';
+        return {
+            title: subPath ? `${name} | Book Pandits & Pujas Online - Doorstep Hub` : `Book Pandits & Puja Services Online | Doorstep Hub`,
+            description: `Book experienced pandits/purohits online for ${name}. We provide high quality puja items and perform rituals with devotion at your home.`,
+            keywords: [subPath || 'religious services', 'book pandit online', 'online puja booking', 'purohit services']
+        };
     }
 
     // 4. PG & Hostels
-    if (normalizedPath.startsWith('/pghostels/')) {
-        const subPath = normalizedPath.replace('/pghostels/', '');
-        if (subPath) {
-            const name = slugToTitle(subPath);
-            return {
-                title: `${name} | Premium PG & Hostels - Doorstep Hub`,
-                description: `Explore premium PG and Hostels: ${name}. Safe, hygienic food, high-speed WiFi, laundry, and affordable monthly stays near you.`,
-                keywords: [subPath, 'pg near me', 'hostels near me', 'paying guest stay']
-            };
-        }
+    if (normalizedPath === '/pghostels' || normalizedPath.startsWith('/pghostels/')) {
+        const subPath = normalizedPath.replace(/^\/pghostels\/?/, '');
+        const name = subPath ? slugToTitle(subPath) : 'PG & Hostels';
+        return {
+            title: subPath ? `${name} | Premium PG & Hostels - Doorstep Hub` : `Find Best PG & Hostels Near You | Doorstep Hub`,
+            description: `Explore premium PG and Hostels: ${name}. Safe, hygienic food, high-speed WiFi, laundry, and affordable monthly stays near you.`,
+            keywords: [subPath || 'pghostels', 'pg near me', 'hostels near me', 'paying guest stay']
+        };
     }
 
     // 5. Nearby / Book Now Route: /nearby/service-slug/city-slug or /nearby/service-slug

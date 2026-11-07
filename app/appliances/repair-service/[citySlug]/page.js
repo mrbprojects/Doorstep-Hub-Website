@@ -88,15 +88,17 @@ function CategoryIconBadge({ slug }) {
 
 function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onActiveBannerChange }) {
   return (
-    <section className="relative z-10 w-full bg-[#eef2f1] pt-28 sm:pt-32 pb-2">
+    <section className="relative z-10 w-full bg-[#eef2f1] pt-24 sm:pt-28 md:pt-32 pb-3">
       <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <div
-          className={`relative overflow-hidden rounded-2xl bg-[#071018] sm:rounded-[20px] ${
-            bannerLoading ? 'h-[150px] sm:h-[170px]' : 'h-[150px] sm:h-[170px] md:h-[180px]'
+          className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#037166]/20 bg-[#024039] shadow-xl transition-all duration-300 ${
+            bannerLoading
+              ? 'h-[180px] sm:h-[240px] md:h-[300px]'
+              : 'h-[180px] min-[480px]:h-[220px] sm:h-[260px] md:h-[300px] lg:h-[340px]'
           }`}
         >
           {bannerLoading ? (
-            <div className="h-full w-full animate-pulse bg-[#1a2630]" />
+            <div className="h-full w-full animate-pulse bg-gradient-to-r from-[#02332e] via-[#037166]/40 to-[#02332e]" />
           ) : banners.length > 0 ? (
             <ApplianceServiceBannerCarousel
               banners={banners}
@@ -105,21 +107,30 @@ function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onAct
             />
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center px-4 text-center">
-              <h1 className="text-lg font-bold text-white sm:text-xl md:text-2xl">
+              <h1 className="text-xl font-black text-white sm:text-2xl md:text-3xl tracking-tight">
                 Appliance Repair Services
               </h1>
-              <p className="mt-1 text-xs font-medium text-white/70 sm:text-sm">in {cityLabel}</p>
+              <p className="mt-1.5 text-xs font-semibold text-white/80 sm:text-sm">in {cityLabel}</p>
             </div>
           )}
 
+          {/* Elegant Back Button */}
           <button
             type="button"
             onClick={onBack}
-            className="absolute left-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#037166] shadow-md backdrop-blur-sm transition hover:bg-white sm:left-4 sm:top-4 sm:h-10 sm:w-10"
+            className="absolute left-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[#037166] shadow-md backdrop-blur-md transition-all hover:bg-white hover:scale-105 active:scale-95 sm:left-4 sm:top-4 sm:h-10 sm:w-10 border border-white/60"
             aria-label="Go back"
           >
             <ChevronLeft size={20} />
           </button>
+
+          {/* Contextual City Badge */}
+          {cityLabel && (
+            <div className="absolute right-3 top-3 z-20 hidden min-[420px]:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 text-[#037166] text-xs font-bold shadow-md backdrop-blur-md border border-white/60 sm:right-4 sm:top-4">
+              <span className="w-2 h-2 rounded-full bg-[#037166] animate-pulse" />
+              <span>{cityLabel}</span>
+            </div>
+          )}
         </div>
       </div>
     </section>

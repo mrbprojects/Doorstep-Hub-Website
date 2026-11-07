@@ -9,7 +9,8 @@ export function DynamicSEO() {
     useEffect(() => {
         if (!pathname) return;
 
-        const updateSEO = async () => {
+        // Defer client-side SEO mutations until after React 19 hydration settles
+        const timer = setTimeout(async () => {
             try {
                 // 1. Path Normalization
                 const currentPath = pathname === '/' ? '/' : pathname.replace(/\/$/, "");
@@ -19,14 +20,17 @@ export function DynamicSEO() {
                 // 2. Updated Canonical (stripping query params by using pathname)
                 let linkCanonical = document.querySelector('link[rel="canonical"]');
                 if (linkCanonical) {
-                    linkCanonical.setAttribute('href', canonicalUrl);
+                    if (linkCanonical.getAttribute('href') !== canonicalUrl) {
+                        linkCanonical.setAttribute('href', canonicalUrl);
+                        console.log(`[SEO] Setting Canonical: ${canonicalUrl}`);
+                    }
                 } else {
                     linkCanonical = document.createElement('link');
                     linkCanonical.rel = "canonical";
                     linkCanonical.setAttribute('href', canonicalUrl);
                     document.head.appendChild(linkCanonical);
+                    console.log(`[SEO] Setting Canonical: ${canonicalUrl}`);
                 }
-                console.log(`[SEO] Setting Canonical: ${canonicalUrl}`);
 
                 // 3. Dynamic API Mapping
                 let seoData = null;
@@ -69,12 +73,16 @@ export function DynamicSEO() {
                     const { title, description, keywords } = seoData;
 
                     // Update Title
-                    if (title) document.title = title;
+                    if (title && document.title !== title) {
+                        document.title = title;
+                    }
 
                     // Update Description
                     let metaDescription = document.querySelector('meta[name="description"]');
                     if (metaDescription) {
-                        if (description) metaDescription.content = description;
+                        if (description && metaDescription.getAttribute('content') !== description) {
+                            metaDescription.setAttribute('content', description);
+                        }
                     } else if (description) {
                         metaDescription = document.createElement('meta');
                         metaDescription.name = "description";
@@ -86,7 +94,9 @@ export function DynamicSEO() {
                     let metaKeywords = document.querySelector('meta[name="keywords"]');
                     const keywordsStr = Array.isArray(keywords) ? keywords.join(', ') : keywords;
                     if (metaKeywords) {
-                        if (keywordsStr) metaKeywords.content = keywordsStr;
+                        if (keywordsStr && metaKeywords.getAttribute('content') !== keywordsStr) {
+                            metaKeywords.setAttribute('content', keywordsStr);
+                        }
                     } else if (keywordsStr) {
                         metaKeywords = document.createElement('meta');
                         metaKeywords.name = "keywords";
@@ -97,9 +107,9 @@ export function DynamicSEO() {
             } catch (error) {
                 console.error("Error updating global SEO:", error);
             }
-        };
+        }, 150);
 
-        updateSEO();
+        return () => clearTimeout(timer);
     }, [pathname]);
 
     return null;

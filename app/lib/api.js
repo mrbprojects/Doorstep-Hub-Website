@@ -331,24 +331,28 @@ export async function fetchAllBrands(categoryId = '', searchQuery = '') {
  * @returns {Promise<Array>} Array of service objects
  */
 export async function fetchServicesByBrand(brandName) {
-    const response = await fetch(`${API_BASE_URL}/app/brands/brand/${encodeURIComponent(brandName.toLowerCase())}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const response = await fetch(`${API_BASE_URL}/app/brands/brand/${encodeURIComponent(brandName.toLowerCase())}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        if (!response.ok) {
+            return [];
+        }
+
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.services)) {
+            return data.services;
+        }
+
+        return [];
+    } catch {
+        return [];
     }
-
-    const data = await response.json();
-
-    if (data.success && Array.isArray(data.services)) {
-        return data.services;
-    }
-
-    throw new Error(data.message || 'Failed to fetch services for brand');
 }
 
 /**

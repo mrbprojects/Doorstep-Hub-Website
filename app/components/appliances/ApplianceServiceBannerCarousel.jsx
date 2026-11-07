@@ -42,7 +42,7 @@ export function ApplianceServiceBannerCarousel({
 
   useEffect(() => {
     if (!emblaApi || banners.length <= 1) return undefined;
-    const timer = setInterval(() => emblaApi.scrollNext(), 4000);
+    const timer = setInterval(() => emblaApi.scrollNext(), 5000);
     return () => clearInterval(timer);
   }, [emblaApi, banners.length]);
 
@@ -53,27 +53,42 @@ export function ApplianceServiceBannerCarousel({
       <div ref={emblaRef} className="h-full w-full overflow-hidden">
         <div className="flex h-full">
           {banners.map((banner) => (
-            <div key={banner.id} className="h-full min-w-0 shrink-0 grow-0 basis-full">
-              <img
-                src={banner.imageUrl}
-                alt={banner.title || `Appliance Repair Services in ${cityLabel}`}
-                className="h-full w-full bg-[#071018] object-contain object-center"
-              />
+            <div key={banner.id} className="relative h-full min-w-0 shrink-0 grow-0 basis-full overflow-hidden">
+              {/* Ambient blurred backdrop so wide screens never show empty black sidebars */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+                <img
+                  src={banner.imageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-full w-full object-cover blur-2xl opacity-40 scale-125 saturate-150"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#024039]/70 via-[#037166]/30 to-[#024039]/70" />
+                <div className="absolute inset-0 bg-black/15" />
+              </div>
+
+              {/* Main crisp centered banner image */}
+              <div className="relative z-10 flex h-full w-full items-center justify-center p-1.5 sm:p-2.5 md:p-3">
+                <img
+                  src={banner.imageUrl}
+                  alt={banner.title || `Appliance Repair Services in ${cityLabel}`}
+                  className="h-full w-auto max-w-full object-contain object-center rounded-xl sm:rounded-2xl shadow-lg transition-transform duration-500 hover:scale-[1.01]"
+                />
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       {banners.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 sm:bottom-4">
+        <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 sm:bottom-4">
           {banners.map((banner, index) => (
             <button
               key={`dot-${banner.id}`}
               type="button"
               aria-label={`Go to banner ${index + 1}`}
               onClick={() => emblaApi?.scrollTo(index)}
-              className={`h-1.5 rounded-full transition-all ${
-                index === selectedIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
+              className={`rounded-full transition-all duration-300 ${
+                index === selectedIndex ? 'w-6 h-2 bg-white shadow-xs' : 'w-2 h-2 bg-white/50 hover:bg-white/80'
               }`}
             />
           ))}

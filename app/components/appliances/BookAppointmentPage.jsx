@@ -1169,10 +1169,10 @@ export function BookAppointmentPage() {
                                 </div>
                             </div>
 
-                            {/* CHOOSE DATE */}
+                            {/* CHOOSE Day & Date */}
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2.5">
-                                    Choose Date
+                                    Choose Day & Date
                                 </label>
                                 {availableDates.length === 0 ? (
                                     <p className="text-gray-500 text-xs">No dates available at this time</p>
@@ -1186,8 +1186,8 @@ export function BookAppointmentPage() {
                                                     type="button"
                                                     onClick={() => handleDateSelect(date.value)}
                                                     className={`px-2 py-2.5 sm:py-3 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border cursor-pointer ${isSelected
-                                                            ? 'bg-[#007F70] text-white border-[#007F70] shadow-sm ring-2 ring-[#007F70]/20'
-                                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#007F70]/60'
+                                                        ? 'bg-[#007F70] text-white border-[#007F70] shadow-sm ring-2 ring-[#007F70]/20'
+                                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#007F70]/60'
                                                         }`}
                                                 >
                                                     <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
@@ -1230,8 +1230,8 @@ export function BookAppointmentPage() {
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, bookingTime: slot.value }))}
                                                     className={`px-3.5 py-3 rounded-xl text-xs sm:text-[13px] font-semibold transition-all flex items-center justify-between border cursor-pointer ${isSelected
-                                                            ? 'bg-[#007F70] text-white border-[#007F70] shadow-sm ring-2 ring-[#007F70]/20'
-                                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#007F70]/60'
+                                                        ? 'bg-[#007F70] text-white border-[#007F70] shadow-sm ring-2 ring-[#007F70]/20'
+                                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#007F70]/60'
                                                         }`}
                                                 >
                                                     <span className="flex items-center gap-2">

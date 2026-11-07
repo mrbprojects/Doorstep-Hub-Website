@@ -14,16 +14,16 @@ import { AnimatePresence } from 'motion/react';
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 
 function areCitiesMatching(cityA, cityB) {
-  if (!cityA || !cityB) return true;
-  const clean = (c) => String(typeof c === 'object' ? (c?.name || '') : c || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-  const a = clean(cityA);
-  const b = clean(cityB);
-  if (!a || !b) return true;
-  if (a === b) return true;
-  const hyderabadGroup = ['hyderabad', 'secunderabad', 'cyberabad'];
-  if (hyderabadGroup.includes(a) && hyderabadGroup.includes(b)) return true;
-  if (a.includes(b) || b.includes(a)) return true;
-  return false;
+    if (!cityA || !cityB) return true;
+    const clean = (c) => String(typeof c === 'object' ? (c?.name || '') : c || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+    const a = clean(cityA);
+    const b = clean(cityB);
+    if (!a || !b) return true;
+    if (a === b) return true;
+    const hyderabadGroup = ['hyderabad', 'secunderabad', 'cyberabad'];
+    if (hyderabadGroup.includes(a) && hyderabadGroup.includes(b)) return true;
+    if (a.includes(b) || b.includes(a)) return true;
+    return false;
 }
 
 export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) {
@@ -92,7 +92,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                         }
                     }
                 })
-                .catch(() => {});
+                .catch(() => { });
         }
     }, [token, selectedAddress?._id, selectedAddress?.addressLineOne, selectedAddress?.phone]);
 
@@ -523,7 +523,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             {/* Date Selection */}
                             <div className="mb-4">
                                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
-                                    Choose Date
+                                    Choose Day & Date
                                 </label>
                                 {availableDates.length === 0 ? (
                                     <p className="text-gray-500 text-xs">No dates available at this time</p>
@@ -536,11 +536,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                                     key={date.value}
                                                     type="button"
                                                     onClick={() => setBookedDate(date.value)}
-                                                    className={`px-2 py-2 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border ${
-                                                        isSelected
+                                                    className={`px-2 py-2 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border ${isSelected
                                                             ? 'bg-gradient-to-br from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
                                                             : 'bg-gray-50 hover:bg-white text-gray-700 hover:text-gray-900 border-gray-200 hover:border-[#037166]/50'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <span className={`text-[11px] font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
                                                         {date.label.split(' ')[0]}
@@ -581,11 +580,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                                     key={time.value}
                                                     type="button"
                                                     onClick={() => setBookedTime(time.value)}
-                                                    className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border ${
-                                                        isSelected
+                                                    className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border ${isSelected
                                                             ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
                                                             : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#037166]/50'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <span className="flex items-center gap-1.5">
                                                         <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#037166]'}`} />
@@ -632,11 +630,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             key={option.value}
                                             type="button"
                                             onClick={() => setTechnicianPreference(option.value)}
-                                            className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                                                isSelected
+                                            className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${isSelected
                                                     ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                                                     : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs font-bold">{option.label}</span>
@@ -681,11 +678,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 <button
                                     type="button"
                                     onClick={() => setPaymentMethod('ONLINE')}
-                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                                        paymentMethod === 'ONLINE'
+                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'ONLINE'
                                             ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                                             : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2.5">
@@ -712,11 +708,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 <button
                                     type="button"
                                     onClick={() => setPaymentMethod('COD')}
-                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                                        paymentMethod === 'COD'
+                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'COD'
                                             ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                                             : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2.5">
@@ -748,11 +743,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         }
                                         setPaymentMethod('WALLET');
                                     }}
-                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                                        paymentMethod === 'WALLET'
+                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'WALLET'
                                             ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                                             : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2.5">
@@ -1072,11 +1066,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         type="button"
                                         onClick={handleCheckout}
                                         disabled={loading || !bookedDate || !bookedTime}
-                                        className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${
-                                            loading || !bookedDate || !bookedTime
+                                        className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${loading || !bookedDate || !bookedTime
                                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 : 'bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#025a51] hover:to-[#038e83] text-white hover:shadow-md hover:shadow-[#037166]/20 active:scale-[0.99]'
-                                        }`}
+                                            }`}
                                     >
                                         {loading ? (
                                             <>

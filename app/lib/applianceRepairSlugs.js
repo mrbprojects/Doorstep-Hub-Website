@@ -116,21 +116,7 @@ export function isApplianceCategorySlug(slug = '') {
 export function isValidCitySlug(slug = '') {
     const s = String(slug || '').trim().toLowerCase();
     if (!s || RESERVED_CITY_SLUGS.has(s)) return false;
-    // Disallow service/repair/installation slugs from masquerading as cities
-    if (
-        s.endsWith('-services') ||
-        s.endsWith('-service') ||
-        s.endsWith('-repair') ||
-        s.endsWith('-repairs') ||
-        s.endsWith('-installation') ||
-        s.endsWith('-cleaning') ||
-        s.endsWith('-maintenance') ||
-        s.endsWith('-uninstallation')
-    ) {
-        return false;
-    }
-    if (KNOWN_CITIES.has(s)) return true;
-    return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s);
+    return KNOWN_CITIES.has(s);
 }
 
 /** Compare city objects or strings by normalized slug/name */

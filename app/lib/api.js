@@ -331,28 +331,28 @@ export async function fetchAllBrands(categoryId = '', searchQuery = '') {
  * @returns {Promise<Array>} Array of service objects
  */
 export async function fetchServicesByBrand(brandName) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/app/brands/brand/${encodeURIComponent(brandName.toLowerCase())}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+    const response = await fetch(`${API_BASE_URL}/app/brands/brand/${encodeURIComponent(brandName.toLowerCase())}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
 
-        if (!response.ok) {
+    if (!response.ok) {
+        if (response.status === 404) {
+            // Brand has no legacy direct services; return empty list so caller falls back to authorized services
             return [];
         }
-
-        const data = await response.json();
-
-        if (data.success && Array.isArray(data.services)) {
-            return data.services;
-        }
-
-        return [];
-    } catch {
-        return [];
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
+
+    const data = await response.json();
+
+    if (data.success && Array.isArray(data.services)) {
+        return data.services;
+    }
+
+    return [];
 }
 
 /**

@@ -451,7 +451,23 @@ export function getFallbackMetadata(path) {
         };
     }
 
-    // 10. General Single Slug Fallback (e.g. /double-door-refrigerator-noise-repair-problems, /geyser-repair-service)
+    // 10. 2-Segment Appliance Sub-service Fallback (e.g. /ac-repair-services/ac-installation-services)
+    const twoSegmentMatch = normalizedPath.match(/^\/([a-z0-9-]+)\/([a-z0-9-]+)$/i);
+    if (twoSegmentMatch && !normalizedPath.startsWith('/sell-buy/') && !normalizedPath.startsWith('/services/')) {
+        const catSlug = twoSegmentMatch[1];
+        const subSlug = twoSegmentMatch[2];
+        const subName = slugToTitle(subSlug.replace(/-services$/i, ''));
+        const catAsset = getApplianceCategoryAsset(catSlug);
+        const catName = catAsset?.categoryName || slugToTitle(catSlug.replace(/-services$/i, ''));
+        return {
+            title: `${subName} | ${catName} | Doorstep Hub`,
+            description: `Book professional ${subName} with expert doorstep service at Doorstep Hub. Certified technicians, transparent pricing, genuine spare parts, and complete warranty.`,
+            keywords: [subSlug, `${subName} service`, `${catName} repair`, 'doorstep service'],
+            image: catAsset?.image || `${BASE_URL}/electric-appliance.png`
+        };
+    }
+
+    // 11. General Single Slug Fallback (e.g. /double-door-refrigerator-noise-repair-problems, /geyser-repair-service)
     const singleSlug = normalizedPath.replace(/^\//, '');
     if (singleSlug && !singleSlug.includes('/')) {
         const name = slugToTitle(singleSlug);
@@ -622,9 +638,12 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
     // Ensure image alt text is accurate to page title
     finalImageObj.alt = title;
 
+    // Avoid duplicate template suffix if title already includes branding
+    const finalTitle = title.includes('Doorstep Hub') ? { absolute: title } : title;
+
     return {
         metadataBase: new URL(BASE_URL),
-        title,
+        title: finalTitle,
         description,
         keywords,
         alternates: {

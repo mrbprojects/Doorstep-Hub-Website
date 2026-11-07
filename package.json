@@ -77,7 +77,7 @@
     "dev:isolated": "NEXT_BUILD_DIR=.next-dev next dev --webpack -p 3001",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "seo:reconcile-urls": "node scripts/reconcile-urls.js",
     "seo:validate-sitemaps": "node scripts/validate-sitemaps.js",
     "seo:audit-url-counts": "node scripts/audit-url-counts.js",

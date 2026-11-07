@@ -151,24 +151,7 @@ export function HomeExclusiveOffersSection() {
     let isMounted = true;
 
     async function loadOffers() {
-      // 1. Try website-optimized endpoint first (no-store for real-time admin sync)
-      try {
-        const res = await fetch(`${API_BASE_URL}/website/exclusive-offers`, {
-          cache: 'no-store',
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (isMounted && json?.data && Array.isArray(json.data) && json.data.length > 0) {
-            setOffers(json.data);
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Could not fetch from /website/exclusive-offers, trying /app/products/getactiveoffers:', err);
-      }
-
-      // 2. Fallback to active offers endpoint
+      // 1. Fetch active offers from authoritative endpoint
       try {
         const res = await fetch(`${API_BASE_URL}/app/products/getactiveoffers`, {
           method: 'POST',

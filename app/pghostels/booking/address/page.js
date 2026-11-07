@@ -43,6 +43,7 @@ function PGAddressContent() {
         return { cityName: 'Hyderabad', stateName: 'Telangana' };
     };
 
+    const [mounted, setMounted] = useState(false);
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -50,6 +51,10 @@ function PGAddressContent() {
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     const [newAddress, setNewAddress] = useState({
         name: '', phone: '', type: 'Home', area: '', flat: '',
         postalCode: '', addressLineOne: '', addressLineTwo: '',
@@ -363,6 +368,14 @@ function PGAddressContent() {
         if (lower.includes('work') || lower.includes('office')) return Briefcase;
         return MapPin;
     };
+
+    if (!mounted) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-[#037166]" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 overflow-x-hidden pb-32 pt-20">

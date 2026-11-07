@@ -65,6 +65,7 @@ function ReligiousAddressContent() {
     const packageId = searchParams.get('packageId');
     const addons = searchParams.get('addons');
 
+    const [mounted, setMounted] = useState(false);
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -72,6 +73,10 @@ function ReligiousAddressContent() {
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     const [newAddress, setNewAddress] = useState({
         name: '',
         phone: '',
@@ -442,6 +447,14 @@ function ReligiousAddressContent() {
         if (lower.includes('work') || lower.includes('office')) return Briefcase;
         return MapPin;
     };
+
+    if (!mounted) {
+        return (
+            <div className="min-h-screen bg-[var(--off-white)] flex items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-[var(--saffron)]" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen pt-16 sm:pt-20 pb-28 bg-[var(--off-white)]">

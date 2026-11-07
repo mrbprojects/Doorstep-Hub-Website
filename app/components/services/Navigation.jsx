@@ -58,6 +58,7 @@ export function Navigation({ onLogoClick, onCartClick, cartItemCount = 0 }) {
               width={32}
               height={32}
               priority
+              unoptimized
               className="object-contain"
             />
             {/* <span className="bg-gradient-to-r from-[#037166] to-[#04a99d] bg-clip-text text-transparent leading-none">

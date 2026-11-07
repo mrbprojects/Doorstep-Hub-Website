@@ -85,6 +85,7 @@ export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
                   fill
                   sizes="192px"
                   className="object-contain "
+                  unoptimized
                 />
               </div>
               {/* <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent whitespace-nowrap -ml-2 mr-6">

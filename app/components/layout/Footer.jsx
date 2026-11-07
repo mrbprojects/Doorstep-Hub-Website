@@ -658,6 +658,7 @@ export function Footer({ theme = {} }) {
                     sizes="224px"
                     className="object-contain object-left cursor-pointer"
                     onClick={() => router.push('/')}
+                    unoptimized
                   />
                 </div>
                 {/* About text below logo */}

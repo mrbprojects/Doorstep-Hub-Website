@@ -335,6 +335,7 @@ export function Header({ theme = {}, navItems = [] }) {
                       sizes="(max-width: 640px) 50px, (max-width: 1024px) 60px, 72px"
                       className="object-contain object-left transition-all duration-300"
                       priority
+                      unoptimized
                     />
                   </div>
                 </motion.div>

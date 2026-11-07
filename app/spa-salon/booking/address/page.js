@@ -26,6 +26,7 @@ function SpaAddressContent() {
     const packageId = searchParams.get('packageId');
     const addons = searchParams.get('addons');
 
+    const [mounted, setMounted] = useState(false);
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -33,6 +34,10 @@ function SpaAddressContent() {
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // GPS / Map state
     const [gpsLoading, setGpsLoading] = useState(false);
@@ -452,6 +457,14 @@ function SpaAddressContent() {
 
     // Map iframe URL
     const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.01},${mapCoords.lat - 0.01},${mapCoords.lng + 0.01},${mapCoords.lat + 0.01}&layer=mapnik&marker=${mapCoords.lat},${mapCoords.lng}`;
+
+    if (!mounted) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-[#C06C84]" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen pt-20 pb-32 bg-gray-50">

@@ -112,6 +112,7 @@ export function Navigation() {
               width={140}
               height={40}
               priority
+              unoptimized
               className="object-contain h-10 w-auto"
             />
           </motion.button>

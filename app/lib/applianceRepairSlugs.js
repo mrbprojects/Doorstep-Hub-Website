@@ -55,9 +55,81 @@ export const RESERVED_CITY_SLUGS = new Set([
     'all-services',
 ]);
 
+export const KNOWN_CITIES = new Set([
+    'hyderabad', 'secunderabad', 'cyberabad',
+    'bangalore', 'bengaluru',
+    'chennai', 'madras',
+    'vijayawada', 'bezawada', 'nunna',
+    'vizag', 'visakhapatnam', 'waltair',
+    'mumbai', 'bombay', 'navi-mumbai', 'thane',
+    'pune', 'poona', 'pimpri',
+    'tirupati', 'tirumala',
+    'delhi', 'new-delhi', 'noida', 'gurgaon', 'gurugram', 'ghaziabad', 'faridabad',
+    'ahmedabad', 'gandhinagar',
+    'coimbatore', 'kovai',
+    'kochi', 'cochin', 'ernakulam',
+    'khammam', 'amaravati', 'guntur',
+    'kakinada', 'rajahmundry', 'nellore', 'eluru', 'warangal',
+    'kurnool', 'kadapa', 'anantapur', 'mysore', 'madurai', 'trichy', 'salem',
+    'surat', 'vadodara', 'rajkot', 'nagpur', 'nashik', 'aurangabad', 'solapur', 'kolhapur',
+    'jaipur', 'lucknow', 'kanpur', 'chandigarh', 'indore', 'bhopal', 'patna', 'kolkata',
+    'calcutta', 'bhubaneswar', 'cuttack', 'raipur', 'ranchi', 'guwahati', 'agra', 'varanasi',
+    'meerut', 'allahabad', 'prayagraj', 'bareilly', 'aligarh', 'moradabad', 'saharanpur',
+    'gorakhpur', 'faizabad', 'jhansi', 'dehradun', 'haridwar', 'shimla', 'amritsar', 'jalandhar',
+    'ludhiana', 'patiala', 'bathinda', 'jammu', 'srinagar', 'jodhpur', 'udaipur', 'kota',
+    'bikaner', 'ajmer', 'gwalior', 'jabalpur', 'ujjain', 'mangalore', 'mangaluru', 'hubli',
+    'hubballi', 'belgaum', 'belagavi', 'dharwad', 'bellary', 'ballari', 'davangere',
+    'shivamogga', 'shimoga', 'tumkur', 'tumakuru', 'gulbarga', 'kalaburagi', 'bidar', 'hospet',
+    'udupi', 'karwar', 'hassan', 'kozhikode', 'calicut', 'thrissur', 'kollam', 'alappuzha',
+    'palakkad', 'kannur', 'tirunelveli', 'tiruppur', 'erode', 'vellore', 'thoothukudi',
+    'dindigul', 'thanjavur', 'ranipet', 'sivakasi', 'karur', 'hosur', 'nagercoil', 'kanchipuram',
+    'karimnagar', 'nizamabad', 'ramagundam', 'mahbubnagar', 'nalgonda', 'adilabad', 'suryapet',
+    'miryalaguda', 'siddipet', 'ongole', 'machilipatnam', 'tenali', 'proddatur', 'chittoor',
+    'hindupur', 'bhimavaram', 'madanapalle', 'guntakal', 'dharmavaram', 'gudivada',
+    'narasaraopet', 'tadipatri', 'chilakaluripet'
+]);
+
+export function isKnownCitySlug(slug = '') {
+    const s = String(slug || '').trim().toLowerCase();
+    if (!s || RESERVED_CITY_SLUGS.has(s)) return false;
+    return KNOWN_CITIES.has(s);
+}
+
+export function isApplianceCategorySlug(slug = '') {
+    const s = String(slug || '').trim().toLowerCase();
+    if (!s) return false;
+    if (
+        s === 'appliance-repair-services' ||
+        s === 'appliance-repair-service' ||
+        s === 'appliances-repair-services' ||
+        s === 'appliances-repair-service'
+    ) {
+        return true;
+    }
+    const core = s.replace(/-services?$/, '');
+    if (CATEGORY_PUBLIC_PART_PATTERN.test(core) || CATEGORY_PUBLIC_PART_PATTERN.test(s)) {
+        return true;
+    }
+    return false;
+}
+
 export function isValidCitySlug(slug = '') {
     const s = String(slug || '').trim().toLowerCase();
     if (!s || RESERVED_CITY_SLUGS.has(s)) return false;
+    // Disallow service/repair/installation slugs from masquerading as cities
+    if (
+        s.endsWith('-services') ||
+        s.endsWith('-service') ||
+        s.endsWith('-repair') ||
+        s.endsWith('-repairs') ||
+        s.endsWith('-installation') ||
+        s.endsWith('-cleaning') ||
+        s.endsWith('-maintenance') ||
+        s.endsWith('-uninstallation')
+    ) {
+        return false;
+    }
+    if (KNOWN_CITIES.has(s)) return true;
     return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s);
 }
 
@@ -464,12 +536,7 @@ export function isNearbyServiceSlug(slug = '', registryOrBrandSlugs = null, serv
 export function isBookNowFlatServiceSlug(slug = '') {
     const s = String(slug || '').trim().toLowerCase();
     if (!isNearbyServiceSlug(s)) return false;
-    if (
-        s === 'appliance-repair-services' ||
-        s === 'appliance-repair-service' ||
-        s === 'appliances-repair-services' ||
-        s === 'appliances-repair-service'
-    ) {
+    if (isApplianceCategorySlug(s)) {
         return false;
     }
     if (s.startsWith('book-')) return true;
@@ -482,7 +549,7 @@ export function isBookNowFlatServiceSlug(slug = '') {
 }
 
 /**
- * Parse /{serviceSlug}/{citySlug} for book-now (excludes registered brand listing slugs).
+ * Parse /{serviceSlug}/{citySlug} for book-now (excludes registered brand listing slugs and 2-segment category/service paths).
  */
 export function parseBookNowCityFlatPath(normalizedPath = '', brandSlugs = null) {
     const parts = String(normalizedPath || '').replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
@@ -490,12 +557,7 @@ export function parseBookNowCityFlatPath(normalizedPath = '', brandSlugs = null)
 
     const [serviceSlug, citySlug] = parts;
     const normalizedServiceSlug = serviceSlug.toLowerCase();
-    if (
-        normalizedServiceSlug === 'appliance-repair-services' ||
-        normalizedServiceSlug === 'appliance-repair-service' ||
-        normalizedServiceSlug === 'appliances-repair-services' ||
-        normalizedServiceSlug === 'appliances-repair-service'
-    ) {
+    if (isApplianceCategorySlug(normalizedServiceSlug)) {
         return null;
     }
     const registry = normalizeSlugRegistry(brandSlugs);
@@ -507,7 +569,13 @@ export function parseBookNowCityFlatPath(normalizedPath = '', brandSlugs = null)
     if (isBrand) {
         return null;
     }
-    if (!isBookNowFlatServiceSlug(serviceSlug) || !isValidCitySlug(citySlug)) return null;
+    // The second segment must be a recognized city and not a subservice or category
+    if (!isKnownCitySlug(citySlug)) {
+        if (!isValidCitySlug(citySlug) || isApplianceCategorySlug(citySlug)) {
+            return null;
+        }
+    }
+    if (!isBookNowFlatServiceSlug(serviceSlug)) return null;
 
     return {
         serviceSlug: serviceSlug.toLowerCase(),
@@ -540,12 +608,7 @@ export function parseNearbyBookNowPath(normalizedPath = '', brandSlugs = null) {
 
     const [, serviceSlug, citySlug] = parts;
     const normalizedServiceSlug = serviceSlug.toLowerCase();
-    if (
-        normalizedServiceSlug === 'appliance-repair-services' ||
-        normalizedServiceSlug === 'appliance-repair-service' ||
-        normalizedServiceSlug === 'appliances-repair-services' ||
-        normalizedServiceSlug === 'appliances-repair-service'
-    ) {
+    if (isApplianceCategorySlug(normalizedServiceSlug)) {
         return null;
     }
     if (!isNearbyServiceSlug(serviceSlug, brandSlugs) || !isValidCitySlug(citySlug)) return null;

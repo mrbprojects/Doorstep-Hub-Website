@@ -558,7 +558,7 @@ export function HeroSection() {
                 {/* Customer Mobile */}
                 <div className="relative w-[120px] sm:w-[150px] h-full">
                   <Image
-                    src="/hero-customer.png?v=2"
+                    src="/hero-customer.png"
                     alt="Customer using phone"
                     fill
                     className="object-contain object-bottom"
@@ -593,7 +593,7 @@ export function HeroSection() {
             {/* Customer Real Image */}
             <div className="relative w-full h-[360px] xl:h-[410px] flex items-end justify-center">
               <Image
-                src="/hero-customer.png?v=2"
+                src="/hero-customer.png"
                 alt="Customer booking Doorstep Hub services on her phone"
                 fill
                 priority

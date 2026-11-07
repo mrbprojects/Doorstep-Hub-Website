@@ -167,10 +167,10 @@ export function LocationBar({ theme = {} }) {
                 <MapPin className="w-4 h-4 text-[#008C80] fill-[#008C80] shrink-0" />
                 <div className="flex flex-col items-start min-w-[90px] max-w-[150px]">
                     <span className="text-[9px] uppercase tracking-wider font-semibold text-gray-400 leading-tight">
-                        {location ? 'YOUR LOCATION' : 'LOCATION'}
+                        {mounted && location ? 'YOUR LOCATION' : 'LOCATION'}
                     </span>
                     <span className="text-xs font-bold truncate w-full text-left text-[#0F1B3D] leading-tight mt-0.5">
-                        {loading ? 'Detecting...' : location ? (location.city || location.shortAddress) : 'Select location'}
+                        {mounted ? (loading ? 'Detecting...' : location ? (location.city || location.shortAddress) : 'Select location') : 'Select location'}
                     </span>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#008C80] transition-colors" />
@@ -187,7 +187,7 @@ export function LocationBar({ theme = {} }) {
             >
                 <MapPin className="w-3.5 h-3.5 text-[#008C80] fill-[#008C80] shrink-0" />
                 <span className="truncate max-w-[80px] sm:max-w-[110px] text-[11px] font-bold text-[#0F1B3D]">
-                    {loading ? '...' : location ? (location.city || location.shortAddress) : 'Select'}
+                    {mounted ? (loading ? '...' : location ? (location.city || location.shortAddress) : 'Select') : 'Select'}
                 </span>
                 <ChevronDown className="w-3 h-3 text-gray-400 shrink-0" />
             </motion.button>

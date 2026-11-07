@@ -229,7 +229,7 @@ async function getDynamicSlugs() {
     return inFlightDynamicSlugsPromise;
 }
 
-export async function middleware(request) {
+export async function proxy(request) {
     const { pathname } = request.nextUrl;
 
     // 1. Skip static assets and root
@@ -398,6 +398,9 @@ export async function middleware(request) {
 
     return NextResponse.next();
 }
+
+export const middleware = proxy;
+export default proxy;
 
 export const config = {
     matcher: [

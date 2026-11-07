@@ -18,7 +18,8 @@ async function getCategoryData(slug) {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = params;
+  const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+  const slug = resolvedParams?.slug || '';
   const category = await getCategoryData(slug);
   const categoryName = category?.name || slugToTitle(slug);
 
@@ -35,8 +36,9 @@ export async function generateMetadata({ params }) {
   return metadata;
 }
 
-export default function SellBuyCategoryPage({ params }) {
-  const slug = params.slug;
+export default async function SellBuyCategoryPage({ params }) {
+  const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+  const slug = resolvedParams?.slug || '';
   
   const jsonLd = {
     '@context': 'https://schema.org',

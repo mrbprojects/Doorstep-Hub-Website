@@ -146,7 +146,12 @@ export function BookAppointmentPage() {
     const [currentStep, setCurrentStep] = useState(0);
     const [agreed, setAgreed] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const idempotencyKey = useRef(`book-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    const idempotencyKey = useRef(null);
+    useEffect(() => {
+        if (!idempotencyKey.current) {
+            idempotencyKey.current = `book-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        }
+    }, []);
 
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', phone: '', email: '',

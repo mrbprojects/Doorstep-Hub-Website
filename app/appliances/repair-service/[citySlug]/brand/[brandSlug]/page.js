@@ -5,7 +5,8 @@ import { fetchSlugRegistry } from '@/lib/slugRegistry';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
-    const { citySlug, brandSlug } = params;
+    const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+    const { citySlug, brandSlug } = resolvedParams || {};
     const registry = await fetchSlugRegistry();
     if (!isFlatBrandListingSlug(brandSlug, registry)) {
         return { title: 'Doorstep Hub' };
@@ -17,7 +18,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function FlatBrandServicePage({ params }) {
-    const { brandSlug } = params;
+    const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+    const { brandSlug } = resolvedParams || {};
     const registry = await fetchSlugRegistry();
     if (!isFlatBrandListingSlug(brandSlug, registry)) {
         notFound();

@@ -126,22 +126,7 @@ export default function OffersPage() {
     let isMounted = true;
 
     async function loadAllOffers() {
-      // 1. Try website offers endpoint
-      try {
-        const res = await fetch(`${API_BASE_URL}/website/offers`, { cache: 'no-store' });
-        if (res.ok) {
-          const json = await res.json();
-          if (isMounted && json?.data && Array.isArray(json.data) && json.data.length > 0) {
-            setOffers(json.data);
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Could not fetch /website/offers, trying active offers:', err);
-      }
-
-      // 2. Fallback to active offers endpoint
+      // Fetch active offers directly from authoritative endpoint
       try {
         const res = await fetch(`${API_BASE_URL}/app/products/getactiveoffers`, {
           method: 'POST',
@@ -154,6 +139,7 @@ export default function OffersPage() {
           const json = await res.json();
           const groups = json?.data?.generalOffers || json?.data || [];
           const flattened = [];
+          const now = new Date();
 
           if (Array.isArray(groups)) {
             groups.forEach((group) => {
@@ -161,86 +147,39 @@ export default function OffersPage() {
               const svcId = group.serviceId;
               if (Array.isArray(group.offers)) {
                 group.offers.forEach((sub) => {
-                  flattened.push({
-                    ...sub,
-                    serviceName: [svcName],
-                    serviceId: svcId ? [svcId] : [],
-                  });
+                  const isStartDateValid = !sub.startDate || new Date(sub.startDate) <= now;
+                  const isEndDateValid = !sub.endDate || new Date(sub.endDate) >= now;
+                  if (isStartDateValid && isEndDateValid) {
+                    flattened.push({
+                      ...sub,
+                      serviceName: [svcName],
+                      serviceId: svcId ? [svcId] : [],
+                    });
+                  }
                 });
               } else if (group._id && (group.title || group.couponCode)) {
-                flattened.push(group);
+                const isStartDateValid = !group.startDate || new Date(group.startDate) <= now;
+                const isEndDateValid = !group.endDate || new Date(group.endDate) >= now;
+                if (isStartDateValid && isEndDateValid) {
+                  flattened.push(group);
+                }
               }
             });
           }
 
-          if (isMounted && flattened.length > 0) {
+          if (isMounted) {
             setOffers(flattened);
             setLoading(false);
             return;
           }
         }
       } catch (err) {
-        console.warn('Fallback error fetching active offers:', err);
+        console.warn('Error fetching active offers:', err);
       }
 
-      // 3. Fallback mock if completely offline
+      // Safe fallback: never show fabricated or hardcoded offers
       if (isMounted) {
-        setOffers([
-          {
-            _id: 'default-1',
-            title: 'Up to 5% Discount on ₹1499',
-            description: 'Get flat 5% extra discount on all appliance repairs with a minimum order value of ₹1499.',
-            image: 'uploads/offers/upto_5_Discount_on_1499-.webp',
-            couponCode: 'WELCOME25',
-            discountType: 'percentage',
-            discountValue: 5,
-            maxDiscountAmount: 200,
-            minOrderAmount: 1499,
-            serviceId: ['683daaa8f261c1548bdf7442'],
-            serviceName: ['Appliance Service'],
-            targetUrl: '/appliance-repair-services',
-          },
-          {
-            _id: 'default-2',
-            title: 'Pandit Booking Special Discount',
-            description: 'Flat 10% discount on all religious pooja and pandit bookings across Hyderabad.',
-            image: 'uploads/offers/1779110337668-Pandit Booking Discount.png',
-            couponCode: 'POOJA10',
-            discountType: 'percentage',
-            discountValue: 10,
-            maxDiscountAmount: 300,
-            minOrderAmount: 999,
-            serviceId: ['695250aa57bb211ca094e5fd'],
-            serviceName: ['Religious Services'],
-            targetUrl: '/religious-services',
-          },
-          {
-            _id: 'default-3',
-            title: 'Hostel & PG Welcome Offer',
-            description: 'Flat ₹500 off on first month advance booking for verified premium hostels & PGs.',
-            image: 'uploads/service/1780375226268-Pg_and_Hostels.webp',
-            couponCode: 'HOSTEL500',
-            discountType: 'fixed',
-            discountValue: 500,
-            minOrderAmount: 4999,
-            serviceId: ['69524fb157bb211ca094e5ee'],
-            serviceName: ['PG & Hostels'],
-            targetUrl: '/pghostels',
-          },
-          {
-            _id: 'default-4',
-            title: 'Salon & Grooming Special Discount',
-            description: 'Flat 15% discount on unisex salon, hair spa and grooming services.',
-            image: 'uploads/service/Unisex_Salon_Petcare.webp',
-            couponCode: 'SALON15',
-            discountType: 'percentage',
-            discountValue: 15,
-            minOrderAmount: 799,
-            serviceId: ['69524f4a57bb211ca094e5e6'],
-            serviceName: ['Unisex & Pet Saloons'],
-            targetUrl: '/spa-salon',
-          },
-        ]);
+        setOffers([]);
         setLoading(false);
       }
     }

@@ -18,11 +18,20 @@ function isUsableBannerPath(path) {
  * Home / hero carousel banners — same API as customer app (homeService.getBanners).
  * POST /app/servicedoc/getallserviceBanners → services[].bannerImage
  */
-export async function fetchServiceBanners() {
+export async function fetchServiceBanners(token) {
     try {
+        const tokenVal = token || (typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('user_token')) : null);
+        if (!tokenVal) {
+            // Endpoint strictly requires an authenticated session; return empty for guest visitors
+            return [];
+        }
+
         const response = await fetch(`${API_BASE_URL}/app/servicedoc/getallserviceBanners`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenVal}`
+            },
             body: JSON.stringify({}),
         });
 

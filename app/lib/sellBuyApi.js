@@ -119,6 +119,7 @@ export const fetchSellBuyListingBySlug = async (slug) => {
 export const fetchFeaturedSections = async () => {
   try {
     const res = await fetch(`${API_BASE}/sell-buy/get-featured-section`, { cache: 'no-store' });
+    if (!res.ok) return [];
     const data = await res.json();
     if (data.error === false && Array.isArray(data.data)) return data.data;
     if (data.success && Array.isArray(data.data)) return data.data;

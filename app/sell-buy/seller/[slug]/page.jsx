@@ -17,7 +17,8 @@ async function getSellerProfile(slug) {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = params;
+  const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+  const slug = resolvedParams?.slug || '';
   const data = await getSellerProfile(slug);
   const profile = data?.profile;
 
@@ -37,7 +38,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function SellBuySellerPage({ params }) {
-  const { slug } = params;
+  const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+  const slug = resolvedParams?.slug || '';
   const data = await getSellerProfile(slug);
   const profile = data?.profile;
 

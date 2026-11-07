@@ -1,8 +1,9 @@
 import { getSEOMetadata, slugToTitle, getCityAsset, getApplianceCategoryAsset } from '@/lib/seo';
 
 export async function generateMetadata({ params }) {
-  const citySlug = params?.citySlug || '';
-  const categorySlug = params?.categorySlug || '';
+  const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+  const citySlug = resolvedParams?.citySlug || '';
+  const categorySlug = resolvedParams?.categorySlug || '';
   const cityAsset = getCityAsset(citySlug);
   const categoryAsset = getApplianceCategoryAsset(categorySlug);
   const cityName = cityAsset?.name || slugToTitle(citySlug);

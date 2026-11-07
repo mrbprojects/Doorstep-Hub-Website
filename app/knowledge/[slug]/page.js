@@ -57,7 +57,9 @@ async function getArticleData(slug) {
 }
 
 export async function generateMetadata({ params }) {
-    const data = await getArticleData(params.slug);
+    const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+    const slug = resolvedParams?.slug || '';
+    const data = await getArticleData(slug);
     if (!data || !data.article) {
         return {
             title: 'Knowledge Base Article | Doorstep Hub',
@@ -72,12 +74,12 @@ export async function generateMetadata({ params }) {
         title: `${article.title} | Doorstep Hub`,
         description: cleanDesc,
         alternates: {
-            canonical: `https://doorstephub.com/knowledge/${params.slug}`,
+            canonical: `https://doorstephub.com/knowledge/${slug}`,
         },
         openGraph: {
             title: article.title,
             description: cleanDesc,
-            url: `https://doorstephub.com/knowledge/${params.slug}`,
+            url: `https://doorstephub.com/knowledge/${slug}`,
             type: 'article',
             publishedTime: article.isoDate,
             images: [
@@ -100,10 +102,12 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function KnowledgeArticle({ params }) {
-    const data = await getArticleData(params.slug);
+    const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+    const slug = resolvedParams?.slug || '';
+    const data = await getArticleData(slug);
 
     if (!data || !data.article) {
-        return <ArticleViewPage slug={params.slug} />;
+        return <ArticleViewPage slug={slug} />;
     }
 
     const { article, related } = data;

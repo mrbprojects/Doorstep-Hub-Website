@@ -15,7 +15,8 @@ async function getListingDetails(slug) {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = params;
+  const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+  const slug = resolvedParams?.slug || '';
   const data = await getListingDetails(slug);
   const listing = data?.listing;
 
@@ -39,7 +40,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function SellBuyAdPage({ params }) {
-  const { slug } = params;
+  const resolvedParams = (params && typeof params.then === 'function') ? await params : params;
+  const slug = resolvedParams?.slug || '';
   const data = await getListingDetails(slug);
   const listing = data?.listing;
 

@@ -13,9 +13,7 @@ export function DynamicSEO() {
             try {
                 // 1. Path Normalization
                 const currentPath = pathname === '/' ? '/' : pathname.replace(/\/$/, "");
-                const origin = (typeof window !== 'undefined' && window.location.hostname !== 'localhost')
-                    ? 'https://doorstephub.com'
-                    : (typeof window !== 'undefined' ? window.location.origin : 'https://doorstephub.com');
+                const origin = 'https://doorstephub.com';
                 const canonicalUrl = `${origin}${currentPath}`;
 
                 // 2. Updated Canonical (stripping query params by using pathname)

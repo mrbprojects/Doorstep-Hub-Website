@@ -399,7 +399,6 @@ export async function proxy(request) {
     return NextResponse.next();
 }
 
-export const middleware = proxy;
 export default proxy;
 
 export const config = {

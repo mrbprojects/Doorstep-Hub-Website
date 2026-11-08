@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
-import { HelpCircle, PlusCircle, ShieldCheck, Tag } from 'lucide-react';
+import { HelpCircle, PlusCircle } from 'lucide-react';
 
 export default function HelpPage() {
   const FAQS = [

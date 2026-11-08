@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Star, Award, ArrowRight, TrendingUp, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocationContext } from '../../context/LocationContext';
@@ -9,7 +10,7 @@ export function PopularCenters({ onStoreClick }) {
   const { location } = useLocationContext();
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   const scrollRef = React.useRef(null);
 
   const scrollCards = (direction) => {
@@ -243,14 +244,14 @@ export function PopularCenters({ onStoreClick }) {
 
                   {/* Image */}
                   <div className="relative h-40 xl:h-36 overflow-hidden bg-[#0a0a0a]">
-                    <img loading="lazy" decoding="async"
+                    <Image
                       src={center.image}
                       alt={center.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80';
                       }}
-                    />
+                     width={500} height={300} />
                     {/* Rating Badge - Bottom Left Flush */}
                     <div className="absolute bottom-0 left-0 z-20">
                       <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10 text-white">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Star, MapPin, Wifi, Utensils, Bed, ChevronRight, ChevronLeft, Flame, Sparkles } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
@@ -163,11 +164,11 @@ export function NearbyHostelsSection({ router }) {
 
                         {/* Landmark Sketch & Handwritten Callout */}
                         <div className="hidden md:flex items-center gap-1.5 relative">
-                            <img
+                            <Image
                                 src="/pghostels/landmark_charminar.png"
                                 alt="Hyderabad Landmark"
                                 className="h-9 w-auto object-contain mix-blend-multiply opacity-90"
-                            />
+                             width={500} height={300} />
                             <div className="flex flex-col items-start -mt-1">
                                 <span className="text-[11.5px] font-semibold text-[#00796F] italic tracking-tight font-serif whitespace-nowrap">
                                     Find great stays near you!

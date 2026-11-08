@@ -1,6 +1,6 @@
 import nextConfig from 'eslint-config-next';
 
-export default [
+const eslintConfig = [
   {
     ignores: [
       '.next/**',
@@ -19,6 +19,7 @@ export default [
   {
     files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],
     rules: {
+      "no-undef": "error",
       "react/no-unescaped-entities": "warn",
       "no-unused-vars": "warn",
       "@next/next/no-img-element": "warn",
@@ -37,3 +38,5 @@ export default [
     }
   }
 ];
+
+export default eslintConfig;

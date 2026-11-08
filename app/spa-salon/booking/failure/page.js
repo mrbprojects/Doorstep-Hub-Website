@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { XCircle, Home, RefreshCcw, HelpCircle } from 'lucide-react';
@@ -8,19 +8,29 @@ import { XCircle, Home, RefreshCcw, HelpCircle } from 'lucide-react';
 export default function SpaFailurePage() {
     const router = useRouter();
 
+    const getTargetDestination = useCallback(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = sessionStorage.getItem('last_checkout_url');
+                if (saved && saved.startsWith('/') && !saved.includes('failure')) return saved;
+            } catch {}
+        }
+        return '/spa-salon/booking/confirm';
+    }, []);
+
+    const handleRetry = useCallback(() => {
+        router.push(getTargetDestination());
+    }, [getTargetDestination, router]);
+
     useEffect(() => {
         const timer = setTimeout(() => {
             handleRetry();
         }, 5000);
         return () => clearTimeout(timer);
-    }, []);
-
-    const handleRetry = () => {
-        router.push('/spa-salon/cart');
-    };
+    }, [handleRetry]);
 
     const handleBackToHome = () => {
-        router.push('/spa-salon');
+        router.push(getTargetDestination());
     };
 
     return (
@@ -48,11 +58,11 @@ export default function SpaFailurePage() {
                     >
                         <h1 className="text-3xl font-bold text-white mb-2">Payment Failed</h1>
                         <p className="text-white/60 mb-2">
-                            We couldn't process your payment for Spa & Salon services. Don't worry, no amount has been deducted.
+                            We couldn&apos;t process your payment for Spa & Salon services. Don&apos;t worry, no amount has been deducted.
                         </p>
                         <p className="text-sm text-red-500 font-medium mb-8 flex items-center justify-center gap-2">
                             <RefreshCcw className="w-4 h-4 animate-spin" />
-                            Redirecting to cart for retry in 5 seconds...
+                            Redirecting to your booking in 5 seconds...
                         </p>
 
                         {/* Error Info Card */}

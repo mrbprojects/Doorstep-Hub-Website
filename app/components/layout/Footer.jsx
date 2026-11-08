@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, ChevronRight } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
@@ -223,7 +223,12 @@ export function Footer({ theme = {} }) {
   const [professionalServices, setProfessionalServices] = useState([]);
   const [sellBuyGroups, setSellBuyGroups] = useState([]);
   const [cities, setCities] = useState([]);
-  const [globalSettings, setGlobalSettings] = useState(null);
+  const [globalSettings, setGlobalSettings] = useState(() => globalPolicy || null);
+  const [prevGlobalPolicy, setPrevGlobalPolicy] = useState(globalPolicy);
+  if (globalPolicy && prevGlobalPolicy !== globalPolicy) {
+    setPrevGlobalPolicy(globalPolicy);
+    setGlobalSettings(globalPolicy);
+  }
   const [serviceSlugs, setServiceSlugs] = useState({
     appliances: 'appliances',
     religious: 'religious-services',
@@ -235,9 +240,7 @@ export function Footer({ theme = {} }) {
   const [hoveredSocial, setHoveredSocial] = useState(null);
 
   useEffect(() => {
-    if (globalPolicy) {
-      setGlobalSettings(globalPolicy);
-    } else {
+    if (!globalPolicy) {
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`)
         .then((res) => res.json())
         .then((data) => {
@@ -320,33 +323,7 @@ export function Footer({ theme = {} }) {
     },
   ];
 
-  const dynamicQuickLinks = footerLinks.Quicklinks.map(link => {
-    if (
-      (link.name === 'Customer Android App' || link.name === 'Download Android App') &&
-      (globalSettings?.customerAndroidAppLink || globalSettings?.playStore)
-    ) {
-      return { ...link, href: globalSettings.customerAndroidAppLink || globalSettings.playStore };
-    }
-    if (
-      (link.name === 'Customer iOS App' || link.name === 'Download iOS App') &&
-      (globalSettings?.customerIosAppLink || globalSettings?.appStore)
-    ) {
-      return { ...link, href: globalSettings.customerIosAppLink || globalSettings.appStore };
-    }
-    if (
-      (link.name === 'Service Partner Android App' || link.name === 'Download Partner Android App') &&
-      (globalSettings?.vendorAndroidAppLink || globalSettings?.partnerAndroidAppLink)
-    ) {
-      return { ...link, href: globalSettings.vendorAndroidAppLink || globalSettings.partnerAndroidAppLink };
-    }
-    if (
-      (link.name === 'Service Partner iOS App' || link.name === 'Download Partner iOS App') &&
-      (globalSettings?.vendorIosAppLink || globalSettings?.partnerIosAppLink)
-    ) {
-      return { ...link, href: globalSettings.vendorIosAppLink || globalSettings.partnerIosAppLink };
-    }
-    return link;
-  });
+  
 
   const dynamicSocialLinks = socialLinks.map(social => {
     const socialLabel = (social.label || '').toLowerCase();
@@ -359,9 +336,10 @@ export function Footer({ theme = {} }) {
   });
 
   // Used for SUBCATEGORY item links (shows services inside the subcategory)
-  const getProfessionalLink = (serviceName, sub, category) => {
+  const getProfessionalLink = (serviceName, sub) => {
+    if (!sub) return '#';
     const slug = sub.slug || sub._id;
-    const lowerService = serviceName.toLowerCase();
+    const lowerService = (serviceName || '').toLowerCase();
 
     if (lowerService.includes('spa') || lowerService.includes('salon') || lowerService.includes('saloon') || lowerService.includes('unisex') || lowerService.includes('pet')) {
       return `/${serviceSlugs.spa}/${slug}`;
@@ -377,8 +355,9 @@ export function Footer({ theme = {} }) {
 
   // Used for CATEGORY heading links (shows subcategories to pick from)
   const getProfessionalCategoryLink = (serviceName, category) => {
+    if (!category) return '#';
     const slug = category.slug || category._id;
-    const lowerService = serviceName.toLowerCase();
+    const lowerService = (serviceName || '').toLowerCase();
 
     if (lowerService.includes('spa') || lowerService.includes('salon') || lowerService.includes('saloon') || lowerService.includes('unisex') || lowerService.includes('pet')) {
       return `/${serviceSlugs.spa}/${slug}`;
@@ -673,7 +652,7 @@ export function Footer({ theme = {} }) {
               <div className="space-y-4">
 
                 <a
-                  href={`mailto:${globalSettings?.email}`}
+                  href={`mailto:${globalSettings?.email || 'help@doorstephub.com'}`}
                   className={`flex items-center gap-3 ${t.textMuted} ${t.textLinkHover} transition-colors group`}
                 >
                   <div className={`w-8 h-8 rounded-lg ${t.iconBg} flex items-center justify-center flex-shrink-0 ${t.iconHoverBg} transition-colors`}>
@@ -687,7 +666,7 @@ export function Footer({ theme = {} }) {
               <div className="space-y-4">
 
                 <a
-                  href={`mailto:${globalSettings?.email2}`}
+                  href={`mailto:${globalSettings?.email2 || 'help@doorstephub.com'}`}
                   className={`flex items-center gap-3 ${t.textMuted} ${t.textLinkHover} transition-colors group`}
                 >
                   <div className={`w-8 h-8 rounded-lg ${t.iconBg} flex items-center justify-center flex-shrink-0 ${t.iconHoverBg} transition-colors`}>

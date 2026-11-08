@@ -1,4 +1,4 @@
-import { API_BASE_URL, IMAGE_BASE_URL, SITE_URL as BASE_URL, getImageUrl } from '../config/env.js';
+import { API_BASE_URL, IMAGE_BASE_URL, SITE_URL as BASE_URL } from '../config/env.js';
 
 /**
  * Capitalizes words from a slug (e.g., ac-repair -> AC Repair, guguloth-raju -> Guguloth Raju)
@@ -555,7 +555,7 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
                             resolvedImageObj = getSocialPreviewImage(listing);
                         }
                     }
-                } catch (e) { }
+                } catch { }
             } else if (!sub.includes('/')) {
                 // Category page
                 const catName = slugToTitle(sub);
@@ -588,7 +588,7 @@ export async function getSEOMetadata(rawPath, defaultFallback = null) {
                         resolvedImageObj = getSocialPreviewImage(catData);
                     }
                 }
-            } catch (catErr) {
+            } catch {
                 // Ignore and fall through
             }
         }

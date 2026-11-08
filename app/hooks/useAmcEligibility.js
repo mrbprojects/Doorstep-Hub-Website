@@ -20,41 +20,56 @@ export function useAmcEligibility({
     .replace(/\D/g, '')
     .slice(-10);
 
+  const sid = serviceId ? String(serviceId) : '';
+  const canCheck = Boolean(enabled && isAuthenticated && (userId || phone) && sid);
+
   const [loading, setLoading] = useState(false);
   const [eligibility, setEligibility] = useState(null);
+
+  const [prevCanCheck, setPrevCanCheck] = useState(canCheck);
+  if (prevCanCheck !== canCheck) {
+    setPrevCanCheck(canCheck);
+    if (!canCheck) {
+      setEligibility(null);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
 
-    const sid = serviceId ? String(serviceId) : '';
-    if (!enabled || !isAuthenticated || (!userId && !phone) || !sid) {
-      setEligibility(null);
-      setLoading(false);
+    if (!canCheck) {
       return undefined;
     }
 
-    setLoading(true);
     (async () => {
-      const result = await checkAmcEligibility({
-        userId,
-        phone: phone || undefined,
-        serviceId: sid,
-        categoryId: categoryId ? String(categoryId) : undefined,
-        subcategoryId: subcategoryId ? String(subcategoryId) : undefined,
-        token,
-      });
-      if (!cancelled) {
-        const show =
-          result?.amcApplicable || result?.limitExhausted ? result : null;
-        setEligibility(show);
-        setLoading(false);
+      try {
+        const result = await checkAmcEligibility({
+          userId,
+          phone: phone || undefined,
+          serviceId: sid,
+          categoryId: categoryId ? String(categoryId) : undefined,
+          subcategoryId: subcategoryId ? String(subcategoryId) : undefined,
+          token,
+        });
+        if (!cancelled) {
+          const show =
+            result?.amcApplicable || result?.limitExhausted ? result : null;
+          setEligibility(show);
+        }
+      } catch {
+        if (!cancelled) setEligibility(null);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [enabled, isAuthenticated, userId, phone, serviceId, categoryId, subcategoryId, token]);
+  }, [canCheck, userId, phone, sid, categoryId, subcategoryId, token]);
 
   return {
     loading,

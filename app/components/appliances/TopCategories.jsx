@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ChevronRight, MapPin } from 'lucide-react';
@@ -20,18 +21,7 @@ function resolveImage(src) {
   return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${src}`;
 }
 
-function CategoryListSkeleton() {
-  return (
-    <div className="space-y-4">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div
-          key={`list-skeleton-${index}`}
-          className="h-[84px] rounded-[30px] border border-[#eef0f2] bg-white/90 animate-pulse"
-        />
-      ))}
-    </div>
-  );
-}
+
 
 function ServiceGridSkeleton() {
   return (
@@ -46,7 +36,7 @@ function ServiceGridSkeleton() {
   );
 }
 
-export function TopCategories({ onViewAll }) {
+export function TopCategories({}) {
   const initialVisibleCount = 15;
   const router = useRouter();
   const { location } = useLocationContext();
@@ -60,47 +50,6 @@ export function TopCategories({ onViewAll }) {
   const [showAllVisibleCards, setShowAllVisibleCards] = useState(false);
 
   const categoryListRef = useRef(null);
-  const [offsetY, setOffsetY] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (!isDesktop) {
-      setOffsetY(0);
-      return;
-    }
-    const container = categoryListRef.current;
-    if (!container) return;
-
-    const buttons = container.querySelectorAll('button');
-    if (!buttons || buttons.length === 0) return;
-
-    let activeButton = null;
-    if (showAllSubcategories) {
-      activeButton = buttons[0];
-    } else {
-      activeButton = container.querySelector(`[data-slug="${activeCategorySlug}"]`);
-    }
-
-    if (activeButton) {
-      const parent = container.parentElement;
-      const parentRect = parent ? parent.getBoundingClientRect() : container.getBoundingClientRect();
-      const buttonRect = activeButton.getBoundingClientRect();
-      const relativeTop = buttonRect.top - parentRect.top;
-      setOffsetY(relativeTop);
-    } else {
-      setOffsetY(0);
-    }
-  }, [activeCategorySlug, showAllSubcategories, categories, isDesktop]);
 
   useEffect(() => {
     let isMounted = true;
@@ -150,7 +99,7 @@ export function TopCategories({ onViewAll }) {
     return () => {
       isMounted = false;
     };
-  }, [location?.lat, location?.lng]);
+  }, [location]);
 
   useEffect(() => {
     let isMounted = true;
@@ -401,13 +350,11 @@ export function TopCategories({ onViewAll }) {
                             }`}
                         >
                           {category.image && (
-                            <img
-                              loading="lazy"
-                              decoding="async"
+                            <Image
                               src={category.image}
                               alt={category.name}
                               className="h-5 w-5 rounded-full object-cover flex-shrink-0"
-                            />
+                             width={400} height={400} />
                           )}
                           <span className="whitespace-nowrap">{category.name}</span>
                         </button>
@@ -467,7 +414,7 @@ export function TopCategories({ onViewAll }) {
                             <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${isActive ? 'border-[#b7ddd8] bg-white shadow-sm' : 'border-[#eceff1] bg-[#f9fafb]'
                               }`}>
                               {category.image ? (
-                                <img loading="lazy" decoding="async" src={category.image} alt={category.name} className="h-11 w-11 rounded-xl object-cover" />
+                                <Image src={category.image} alt={category.name} className="h-11 w-11 rounded-xl object-cover"  width={500} height={300} />
                               ) : (
                                 <span className="text-lg font-bold text-[#037166]">{category.name?.charAt(0)}</span>
                               )}
@@ -517,14 +464,12 @@ export function TopCategories({ onViewAll }) {
                       >
                         <div className="absolute inset-0 bg-gradient-to-br from-[#0c5c53] via-[#004d40] to-[#102033]" />
                         {subCategory.image ? (
-                          <img
-                            loading={index < 16 ? 'eager' : 'lazy'}
-                            decoding="async"
+                          <Image
                             src={subCategory.image}
                             alt={subCategory.name}
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
+                           width={500} height={300} />
                         ) : (
                           <div className="absolute inset-0 bg-gradient-to-br from-[#0f766e] to-[#1f2937]" />
                         )}

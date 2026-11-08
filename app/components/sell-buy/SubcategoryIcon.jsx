@@ -135,7 +135,7 @@ export function getSubcategoryIconComponent(iconName, subName = '') {
 
 export function SubcategoryIcon({ icon, name, className = 'w-4 h-4' }) {
   const IconComp = getSubcategoryIconComponent(icon, name);
-  return <IconComp className={className} />;
+  return React.createElement(IconComp, { className });
 }
 
 export default SubcategoryIcon;

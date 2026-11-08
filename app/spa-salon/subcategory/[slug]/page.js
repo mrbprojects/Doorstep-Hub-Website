@@ -1,19 +1,20 @@
 'use client';
 
 import { useState, useEffect, Suspense, useMemo } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Star, Clock, ChevronRight, ShieldCheck, Heart, Filter, X, MapPin, Search, Sliders } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight, Heart, Filter, X, MapPin, Search, Sliders } from 'lucide-react';
 import { Button } from '@/components/pghostels/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useLocationContext } from '@/context/LocationContext';
 import { Slider } from '@/components/pghostels/ui/slider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/pghostels/ui/input';
-import { isObjectId, resolveParam } from '@/utils/slugHelper';
+import {  resolveParam } from '@/utils/slugHelper';
 
 function SpaSubCategoryContent() {
+    const SERVICE_SLUG = 'spa-salon';
     const router = useRouter();
     const params = useParams();
     const slugOrId = params.slug || params.id;
@@ -21,9 +22,9 @@ function SpaSubCategoryContent() {
     const pathname = usePathname();
     const categoryName = searchParams.get('category') || 'Services';
     const subCategoryName = searchParams.get('name') || 'Service List';
-    const categoryUniqueId = searchParams.get('categoryId') || null;
+    
 
-    const { location, detectLocation } = useLocationContext();
+    const { location } = useLocationContext();
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
@@ -35,8 +36,34 @@ function SpaSubCategoryContent() {
     const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // Filter State
-    const [priceRange, setPriceRange] = useState([0, 5000]);
-    const [minRating, setMinRating] = useState(0);
+    const [priceRange, setPriceRange] = useState(() => {
+        const minP = searchParams.get('minPrice');
+        const maxP = searchParams.get('maxPrice');
+        return minP && maxP ? [parseInt(minP), parseInt(maxP)] : [0, 5000];
+    });
+    const [minRating, setMinRating] = useState(() => {
+        const rating = searchParams.get('minRating');
+        return rating ? parseFloat(rating) : 0;
+    });
+
+    const [prevSearchParamsStr, setPrevSearchParamsStr] = useState(searchParams.toString());
+    const currentParamsStr = searchParams.toString();
+    if (prevSearchParamsStr !== currentParamsStr) {
+        setPrevSearchParamsStr(currentParamsStr);
+        const catId = searchParams.get('categoryId');
+        if (catId && catId !== expandedCategory) {
+            setExpandedCategory(catId);
+        }
+        const minP = searchParams.get('minPrice');
+        const maxP = searchParams.get('maxPrice');
+        if (minP && maxP) {
+            setPriceRange([parseInt(minP), parseInt(maxP)]);
+        }
+        const rating = searchParams.get('minRating');
+        if (rating) {
+            setMinRating(parseFloat(rating));
+        }
+    }
 
     const sortOptions = [
         'Recommended',
@@ -47,21 +74,6 @@ function SpaSubCategoryContent() {
     const [sortBy, setSortBy] = useState('Recommended');
 
     const SERVICE_ID = '69524f4a57bb211ca094e5e6';
-
-    // Sync state with URL params on navigation
-    useEffect(() => {
-        const catId = searchParams.get('categoryId');
-        if (catId && catId !== expandedCategory) {
-            setExpandedCategory(catId);
-        }
-
-        const minP = searchParams.get('minPrice');
-        const maxP = searchParams.get('maxPrice');
-        if (minP && maxP) setPriceRange([parseInt(minP), parseInt(maxP)]);
-
-        const rating = searchParams.get('minRating');
-        if (rating) setMinRating(parseFloat(rating));
-    }, [searchParams]);
 
     // Update URL when filters change
     useEffect(() => {
@@ -79,7 +91,7 @@ function SpaSubCategoryContent() {
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [priceRange, minRating]);
+    }, [priceRange, minRating, pathname, router, searchParams]);
 
     // Fetch Categories
     useEffect(() => {
@@ -203,7 +215,7 @@ function SpaSubCategoryContent() {
             fetchServices();
         }, 500);
         return () => clearTimeout(timer);
-    }, [slugOrId, location, priceRange, minRating, searchQuery, sortBy]);
+    }, [slugOrId, location, priceRange, minRating, searchQuery, sortBy, searchParams]);
 
     const sortedServices = useMemo(() => {
         let result = [...services];
@@ -213,7 +225,7 @@ function SpaSubCategoryContent() {
         return result;
     }, [services, minRating]);
 
-    const FilterPanel = ({ showTitle = true }) => {
+    const renderFilterPanel = (showTitle = true) => {
         return (
             <div className="space-y-6 text-black">
                 {showTitle && (
@@ -417,7 +429,7 @@ function SpaSubCategoryContent() {
                                 </SheetTitle>
                             </SheetHeader>
                             <div className="mt-6">
-                                <FilterPanel showTitle={false} />
+                                {renderFilterPanel(false)}
                             </div>
                         </SheetContent>
                     </Sheet>
@@ -428,7 +440,7 @@ function SpaSubCategoryContent() {
                 <div className="flex gap-10">
                     <div className="hidden lg:block w-80 flex-shrink-0">
                         <div className="bg-white rounded-[20px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28">
-                            <FilterPanel />
+                            {renderFilterPanel(true)}
                         </div>
                     </div>
 
@@ -483,11 +495,11 @@ function SpaSubCategoryContent() {
                                     >
                                         <div className="relative h-48 overflow-hidden">
                                             {service.image ? (
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={service.image}
                                                     alt={service.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                />
+                                                 width={500} height={300} />
                                             ) : (
                                                 <div className="w-full h-full bg-gray-50 flex items-center justify-center">
                                                     <Heart className="w-12 h-12 text-[#C06C84]/10" />

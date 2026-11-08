@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { MapPin, ChevronDown, Search, Crosshair, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocation } from '@/hooks/useLocation';
 import { fetchCities } from '@/lib/api';
 import { getImageUrl } from '@/config/env';
+import { useMounted } from '@/hooks/useMounted';
 
 // Fallback static icons (used only when API image is missing)
 const CITY_ICONS = {
@@ -28,27 +30,25 @@ const FALLBACK_CITIES = [
     { name: 'Pune', icon: '/pune.png' },
 ];
 
-export function LocationBar({ theme = {} }) {
-    const { location, detectWithGPS, searchLocation, setManualLocation, setCityLocation, loading, error } = useLocation();
+export function LocationBar() {
+    const { location, detectWithGPS, searchLocation, setManualLocation, setCityLocation, loading } = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
-    const [mounted, setMounted] = useState(false);
+    const mounted = useMounted();
     const [availableCities, setAvailableCities] = useState([]);
     const [loadingCities, setLoadingCities] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Load cities from API whenever modal opens — same logic as ApplianceBookingFlow.jsx
     useEffect(() => {
         if (!isOpen) return;
-        setLoadingCities(true);
+        let isCancelled = false;
         fetchCities()
             .then((citiesData) => {
+                if (isCancelled) return;
+                setLoadingCities(false);
                 if (citiesData && citiesData.length > 0) {
                     // Map API response with authoritative getImageUrl helper
                     const mapped = citiesData.map((c) => ({
@@ -68,21 +68,6 @@ export function LocationBar({ theme = {} }) {
             })
             .finally(() => setLoadingCities(false));
     }, [isOpen]);
-
-    // Default Dark Theme (Fallback)
-    const defaultTheme = {
-        bgScrolled: 'bg-[#0a0a0a]/80',
-        textMain: 'text-gray-300',
-        textHover: 'text-[#037166]',
-        border: 'border-[#037166]/20',
-        buttonBg: 'bg-[#1a1a1a]',
-    };
-
-    const t = typeof theme === 'object' && Object.keys(theme).length > 0 ? theme : defaultTheme;
-
-    const accentClass = t.textHover.replace('text-', '');
-    const accentText = t.textHover;
-    const accentBorder = t.border;
 
     // Auto-search as user types (Debounced)
     useEffect(() => {
@@ -158,7 +143,7 @@ export function LocationBar({ theme = {} }) {
         <>
             {/* Desktop Navbar Trigger */}
             <motion.button
-                onClick={() => setIsOpen(true)}
+                onClick={() => { setIsOpen(true); setLoadingCities(true); }}
                 data-location-trigger
                 className="hidden lg:flex items-center space-x-2.5 px-3.5 py-1.5 rounded-[14px] bg-white border border-[#008C80]/30 shadow-xs hover:border-[#008C80] transition-all group mr-2 focus:outline-none"
                 whileHover={{ scale: 1.02 }}
@@ -178,7 +163,7 @@ export function LocationBar({ theme = {} }) {
 
             {/* Mobile / Compact Trigger */}
             <motion.button
-                onClick={() => setIsOpen(true)}
+                onClick={() => { setIsOpen(true); setLoadingCities(true); }}
                 data-location-trigger-mobile
                 className="flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-[#008C80]/30 shadow-2xs hover:border-[#008C80] text-xs font-bold text-[#0F1B3D] focus:outline-none shrink-0"
                 whileHover={{ scale: 1.02 }}
@@ -283,9 +268,7 @@ export function LocationBar({ theme = {} }) {
                                                         >
                                                             <div className="w-full h-12 bg-white flex items-center justify-center overflow-hidden border-b border-gray-50 relative">
                                                                 {city.icon ? (
-                                                                    <img
-                                                                        loading="lazy"
-                                                                        decoding="async"
+                                                                    <Image
                                                                         src={city.icon}
                                                                         alt={city.name}
                                                                         onError={(e) => {
@@ -300,7 +283,7 @@ export function LocationBar({ theme = {} }) {
                                                                             }
                                                                         }}
                                                                         className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
-                                                                    />
+                                                                     width={500} height={300} />
                                                                 ) : null}
                                                                 <div className={`city-fallback-pin ${city.icon ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}>
                                                                     <MapPin className="w-4 h-4 text-[#037166]" />
@@ -338,7 +321,7 @@ export function LocationBar({ theme = {} }) {
 
                                     {searchResults.length === 0 && searchQuery && !isSearching && (
                                         <div className="text-center py-8 text-gray-500 text-sm italic">
-                                            No results found for "{searchQuery}"
+                                            No results found for &quot;{searchQuery}&quot;
                                         </div>
                                     )}
                                 </div>

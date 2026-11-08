@@ -46,10 +46,7 @@ let slugCache = {
 
 const CACHE_DURATION = 1000 * 60 * 10; // 10 minutes
 
-let brandSlugCache = {
-    slugs: new Set(DEFAULT_BRAND_SLUGS),
-    timestamp: 0,
-};
+
 
 let slugRegistryCache = {
     registry: createSlugRegistry({ brandSlugs: DEFAULT_BRAND_SLUGS }),
@@ -96,7 +93,7 @@ async function getSlugRegistry() {
                             if (slug && !brandSlugs.includes(slug)) brandSlugs.push(slug);
                         });
                     }
-                } catch (e) {
+                } catch {
                     // Ignore body consumption issues
                 }
             }
@@ -111,14 +108,13 @@ async function getSlugRegistry() {
                             if (slug) serviceSlugs.push(slug);
                         });
                     }
-                } catch (e) {
+                } catch {
                     // Ignore body consumption issues
                 }
             }
 
-            const registry = createSlugRegistry({ brandSlugs, serviceSlugs });
+            const registry = createSlugRegistry({ serviceSlugs });
             slugRegistryCache = { registry, timestamp: now };
-            brandSlugCache = { slugs: registry.brandSlugs, timestamp: now };
             return registry;
         } catch (error) {
             console.error('Middleware slug registry fetch failed:', error);
@@ -136,10 +132,7 @@ async function getSlugRegistry() {
     return inFlightRegistryPromise;
 }
 
-async function getBrandSlugSet() {
-    const registry = await getSlugRegistry();
-    return registry?.brandSlugs instanceof Set ? registry.brandSlugs : new Set(DEFAULT_BRAND_SLUGS);
-}
+
 
 let inFlightDynamicSlugsPromise = null;
 
@@ -192,7 +185,7 @@ async function getDynamicSlugs() {
                             }
                             return mapping;
                         }
-                    } catch (e) {
+                    } catch {
                         // Silently fail individual fetches
                     }
                     return null;
@@ -305,7 +298,7 @@ export async function proxy(request) {
         }
 
         const slugRegistry = (await getSlugRegistry()) || createSlugRegistry();
-        const brandSlugs = slugRegistry?.brandSlugs instanceof Set ? slugRegistry.brandSlugs : new Set();
+        
 
         if (pathname.startsWith('/service-list/book-now/')) {
             const legacySlug = normalizedPath.replace(/^service-list\/book-now\//, '').split('/')[0];

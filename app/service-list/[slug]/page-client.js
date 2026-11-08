@@ -49,14 +49,10 @@ const footerTheme = {
 
 import { Suspense } from 'react';
 
-function ServiceCenterContent() {
+function ServiceCenterContent({ initialSlug = '' }) {
     const params = useParams();
     const searchParams = useSearchParams();
-    const slug = (Array.isArray(params?.slug) ? params.slug[0] : params?.slug) || (
-        typeof window !== 'undefined'
-            ? window.location.pathname.replace(/^\/+|\/+$/g, '').replace(/\/service-list$/, '').split('/').pop()
-            : ''
-    );
+    const slug = initialSlug || (Array.isArray(params?.slug) ? params.slug[0] : params?.slug) || '';
     const serviceId = searchParams.get('serviceId');
 
     return (
@@ -71,10 +67,11 @@ function ServiceCenterContent() {
     );
 }
 
-export default function ServiceCenterDetailPageClient() {
+export default function ServiceCenterDetailPageClient({ params }) {
+    const initialSlug = params?.slug || '';
     return (
         <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a]" />}>
-            <ServiceCenterContent />
+            <ServiceCenterContent initialSlug={initialSlug} />
         </Suspense>
     );
 }

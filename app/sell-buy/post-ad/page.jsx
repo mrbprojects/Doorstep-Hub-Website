@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
@@ -83,18 +83,19 @@ export default function PostAdPage() {
         const parentCats = cats.filter((c) => !c.parent_id && !c.parentId);
         const list = parentCats.length > 0 ? parentCats : cats;
         setCategories(list);
-        if (!formData.categoryId) {
+        setFormData((prev) => {
+          if (prev.categoryId) return prev;
           const firstCat = list[0];
           const firstCatId = String(firstCat?.id || firstCat?._id || '');
           const firstSubcats = firstCat?.subcategories || [];
-          setFormData((prev) => ({
+          return {
             ...prev,
             categoryId: firstCatId,
             categoryName: firstCat?.name || '',
             subcategoryId: firstSubcats.length > 0 ? String(firstSubcats[0]?.id || firstSubcats[0]?._id || '') : '',
             subcategoryName: firstSubcats.length > 0 ? firstSubcats[0]?.name || '' : '',
-          }));
-        }
+          };
+        });
       }
     });
   }, []);
@@ -275,7 +276,7 @@ export default function PostAdPage() {
           const parsedUser = JSON.parse(userStr);
           userId = parsedUser?._id || parsedUser?.id || '';
           userEmail = parsedUser?.email || '';
-        } catch (e) {}
+        } catch {}
       }
 
       const fd = new FormData();
@@ -427,7 +428,7 @@ export default function PostAdPage() {
                       }`}
                     >
                       {cat.image ? (
-                        <img src={getImageUrl(cat.image)} alt={cat.name} className="w-10 h-10 object-contain mb-2 rounded-xl" />
+                        <Image src={getImageUrl(cat.image)} alt={cat.name} className="w-10 h-10 object-contain mb-2 rounded-xl"  width={40} height={40} />
                       ) : (
                         <Grid className="w-8 h-8 mb-2" />
                       )}
@@ -481,13 +482,13 @@ export default function PostAdPage() {
                               }`}
                             >
                               {sub.image ? (
-                                <img
+                                <Image
                                   src={getImageUrl(sub.image)}
                                   alt={sub.name}
                                   className={`w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full transition-transform ${
                                     isSubSelected ? 'brightness-110' : 'group-hover:scale-110'
                                   }`}
-                                />
+                                 width={500} height={300} />
                               ) : (
                                 <SubcategoryIcon
                                   icon={sub.icon}
@@ -717,11 +718,11 @@ export default function PostAdPage() {
                         {billCopyPreview ? (
                           <div className="flex items-center gap-4">
                             <div className="relative group">
-                              <img
+                              <Image
                                 src={billCopyPreview}
                                 alt="Bill Copy Preview"
                                 className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl border-2 border-emerald-500 shadow-sm"
-                              />
+                               width={96} height={96} />
                               <button
                                 type="button"
                                 onClick={() => {
@@ -981,11 +982,11 @@ export default function PostAdPage() {
                           Bill: {formData.billCopy === 'Available' ? 'Available' : 'Not Available'}
                         </span>
                         {billCopyPreview && (
-                          <img
+                          <Image
                             src={billCopyPreview}
                             alt="Bill Copy Thumbnail"
                             className="w-7 h-7 object-cover rounded-md border border-emerald-300 ml-1"
-                          />
+                           width={28} height={28} />
                         )}
                       </div>
                     </>

@@ -15,7 +15,7 @@ function getEnvVariable(key, fallback = '') {
             const match = content.match(new RegExp(`${key}=(.+)`));
             if (match) return match[1].trim();
         }
-    } catch (e) {}
+    } catch {}
     return fallback;
 }
 
@@ -66,7 +66,7 @@ export function normalizeAndValidateUrl(url) {
         parsed.hash = '';
 
         return parsed.toString();
-    } catch (e) {
+    } catch {
         return null;
     }
 }
@@ -75,7 +75,7 @@ export function normalizeAndValidateUrl(url) {
  * Submits a list of URLs to IndexNow with exponential backoff retry.
  * Non-blocking operation.
  */
-export async function submitToIndexNow(urls, eventType = 'PAGE_UPDATED') {
+export async function submitToIndexNow(urls, ) {
     if (!INDEXNOW_ENABLED) {
         return { success: false, reason: 'IndexNow disabled by configuration' };
     }
@@ -123,13 +123,13 @@ export async function submitToIndexNow(urls, eventType = 'PAGE_UPDATED') {
  * Submits every supplied URL, splitting large sitemap inventories into the
  * maximum batch size accepted by IndexNow.
  */
-export async function submitAllToIndexNow(urls, eventType = 'SITEMAP_RECONCILIATION') {
+export async function submitAllToIndexNow(urls, ) {
     const uniqueUrls = [...new Set((Array.isArray(urls) ? urls : [urls]).filter(Boolean))];
     const batches = [];
 
     for (let start = 0; start < uniqueUrls.length; start += INDEXNOW_BATCH_SIZE) {
         const batch = uniqueUrls.slice(start, start + INDEXNOW_BATCH_SIZE);
-        batches.push(await submitToIndexNow(batch, eventType));
+        batches.push(await submitToIndexNow(batch));
     }
 
     const submittedCount = batches.reduce((total, result) => total + (result?.count || 0), 0);

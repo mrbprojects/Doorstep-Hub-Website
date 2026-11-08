@@ -8,6 +8,7 @@ import { GlobalProgressBar } from '@/components/ui/GlobalProgressBar';
 import { GlobalLoaderProvider } from '@/context/GlobalLoaderContext';
 import { SmartAppBannerMeta } from '@/components/app-promotion/SmartAppBannerMeta';
 import { AppInstallBanner } from '@/components/app-promotion/AppInstallBanner';
+import { ContinueBookingFloatingCard } from '@/components/booking-recovery/ContinueBookingFloatingCard';
 
 export function ClientProviders({ children }) {
     useEffect(() => {
@@ -45,6 +46,7 @@ export function ClientProviders({ children }) {
             <LeadResumeHandler />
             <SmartAppBannerMeta />
             {children}
+            <ContinueBookingFloatingCard />
             <AppInstallBanner />
             <Toaster
                 position="top-right"

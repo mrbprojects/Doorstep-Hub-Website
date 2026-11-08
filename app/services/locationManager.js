@@ -83,7 +83,7 @@ class LocationManager {
                 if (!this.geocoder && window.google.maps.Geocoder) {
                     this.geocoder = new window.google.maps.Geocoder();
                 }
-            } catch (e) {
+            } catch {
                 // Silently handle
             }
         }
@@ -183,8 +183,8 @@ class LocationManager {
                 });
 
                 let city = '';
-                let area = '';
-                let houseNumber = '';
+                
+                
                 let postalCode = '';
                 let state = '';
                 const areaParts = [];
@@ -267,7 +267,7 @@ class LocationManager {
                         const data = await this.reverseGeocode(latitude, longitude);
                         const savedData = this.saveLocation(data, LOCATION_CONFIG.SOURCES.GPS);
                         resolve(savedData);
-                    } catch (error) {
+                    } catch {
                         const closest = findClosestSupportedCity(position.coords.latitude, position.coords.longitude);
                         const fallbackData = {
                             lat: position.coords.latitude,
@@ -366,7 +366,7 @@ class LocationManager {
                 if (loc && loc.city && loc.lat && loc.lng) {
                     return this.saveLocation(loc, LOCATION_CONFIG.SOURCES.IP);
                 }
-            } catch (err) {
+            } catch {
                 // Try next provider
             }
         }
@@ -405,7 +405,7 @@ class LocationManager {
         if (!this.autocompleteService && window.google?.maps?.places?.AutocompleteService) {
             try {
                 this.autocompleteService = new window.google.maps.places.AutocompleteService();
-            } catch (e) {
+            } catch {
                 return [];
             }
         }
@@ -446,7 +446,7 @@ class LocationManager {
             try {
                 const dummyNode = document.createElement('div');
                 this.placesService = new window.google.maps.places.PlacesService(dummyNode);
-            } catch (e) {
+            } catch {
                 // Ignore
             }
         }

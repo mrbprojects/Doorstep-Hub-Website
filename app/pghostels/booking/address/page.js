@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { isObjectId } from '@/utils/slugHelper';
-import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Search } from 'lucide-react';
+import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { trackLeadEvent } from '@/lib/leadTracking';
 import { useAuth } from '@/context/AuthContext';
@@ -13,20 +13,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { locationManager } from '@/services/locationManager';
-import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
+import { LocationMismatchModal } from '@/components/shared/LocationMismatchModal';
+import { useMounted } from '@/hooks/useMounted';
 
 function PGAddressContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user, token, isAuthenticated } = useAuth();
-    const { addToCart, clearCart } = useServiceCart();
+    const { } = useServiceCart();
 
     const providerId = searchParams.get('providerId');
     const providerSlug = searchParams.get('providerSlug');
     const providerParam = providerSlug || providerId;
     const [providerResolvedId, setProviderResolvedId] = useState(providerParam);
-    const packageId = searchParams.get('packageId');
-    const addons = searchParams.get('addons');
+    
+    
 
     // BUG-11 FIX: Read user's city/state from stored location data
     const getDefaultCityState = () => {
@@ -43,7 +44,7 @@ function PGAddressContent() {
         return { cityName: 'Hyderabad', stateName: 'Telangana' };
     };
 
-    const [mounted, setMounted] = useState(false);
+    const mounted = useMounted();
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -51,10 +52,6 @@ function PGAddressContent() {
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
     const [newAddress, setNewAddress] = useState({
         name: '', phone: '', type: 'Home', area: '', flat: '',
         postalCode: '', addressLineOne: '', addressLineTwo: '',
@@ -73,8 +70,8 @@ function PGAddressContent() {
                 try {
                     const results = await locationManager.searchLocation(newAddress.cityName);
                     setCitySuggestions(results);
-                } catch (error) {
-                    console.error('City search failed:', error);
+                } catch {
+                    console.error('City search failed:');
                 } finally {
                     setIsSearchingCity(false);
                 }
@@ -101,8 +98,8 @@ function PGAddressContent() {
                 longitude: details.lng
             }));
             setCitySuggestions([]);
-        } catch (error) {
-            console.error('Failed to set city from suggestion:', error);
+        } catch {
+            console.error('Failed to set city from suggestion:');
         } finally {
             setIsSearchingCity(false);
         }
@@ -155,7 +152,7 @@ function PGAddressContent() {
                     setGpsLoading(false);
                 }
             },
-            (error) => {
+            () => {
                 setGpsLoading(false);
                 toast.error('Failed to get location. Please enter manually.');
             },
@@ -187,31 +184,36 @@ function PGAddressContent() {
     }, [token, selectedAddress]);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchAddresses();
-        } else {
+        let isCancelled = false;
+        if (isAuthenticated && token) {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (isCancelled) return;
+                    if (data.success) {
+                        setAddresses(data.data || []);
+                        setSelectedAddress(prev => {
+                            if (!prev && data.data?.length > 0) {
+                                return data.data.find(a => a.defaultAddress) || data.data[0];
+                            }
+                            return prev;
+                        });
+                    }
+                })
+                .catch(() => {
+                    if (!isCancelled) toast.error('Failed to load addresses');
+                });
+        } else if (!isAuthenticated) {
             const timer = setTimeout(() => {
-                if (!isAuthenticated) setShowAuthModal(true);
+                setShowAuthModal(true);
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [isAuthenticated, fetchAddresses]);
-
-    // Auto-fill user details from profile if authenticated
-    useEffect(() => {
-        if (isAuthenticated && user && showAddForm && !editingAddress) {
-            setNewAddress(prev => {
-                const updates = {};
-                if (!prev.name) updates.name = user.name || '';
-                if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-
-                if (Object.keys(updates).length > 0) {
-                    return { ...prev, ...updates };
-                }
-                return prev;
-            });
-        }
-    }, [isAuthenticated, user, showAddForm, editingAddress]);
+        return () => { isCancelled = true; };
+    }, [isAuthenticated, token]);
 
     const handleAddOrUpdateAddress = async () => {
         if (!newAddress.name || !newAddress.phone || !newAddress.area || !newAddress.flat || !newAddress.postalCode) {
@@ -291,7 +293,7 @@ function PGAddressContent() {
                 const store = data?.storeData?.[0];
                 const id = store?._id || store?.providerId;
                 setProviderResolvedId(id || providerParam);
-            } catch (e) {
+            } catch {
                 console.warn('Could not resolve provider slug to id for PG booking address; using slug');
                 setProviderResolvedId(providerParam);
             }
@@ -505,7 +507,7 @@ function PGAddressContent() {
                             setEditingAddress(null);
                             const { cityName, stateName } = getDefaultCityState();
                             setNewAddress({
-                                name: '', phone: '', type: 'Home', area: '', flat: '',
+                                name: user?.name || '', phone: user?.mobile || user?.phone || '', type: 'Home', area: '', flat: '',
                                 postalCode: '', addressLineOne: '', addressLineTwo: '',
                                 stateName, cityName, defaultAddress: false
                             });

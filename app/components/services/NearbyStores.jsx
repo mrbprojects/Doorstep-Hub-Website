@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { MapPin, Navigation, Star, Phone, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { GoogleMap, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, FLOAT_PANE } from '@react-google-maps/api';
+import { GoogleMap, Marker, OverlayViewF, FLOAT_PANE } from '@react-google-maps/api';
 import { useLocation } from '@/hooks/useLocation';
 import { toast } from 'sonner';
 
@@ -60,9 +61,10 @@ export function NearbyServiceCenters({ onViewAll }) {
   const mapRef = React.useRef(null);
 
   // Lock the initial center so GoogleMap's center prop never changes after mount
-  const initialCenterRef = React.useRef(null);
-  if (location && !initialCenterRef.current) {
-    initialCenterRef.current = { lat: location.lat, lng: location.lng };
+  // Store initial center in state so GoogleMap's `center` prop never changes after mount
+  const [initialCenter, setInitialCenter] = useState(() => (location ? { lat: location.lat, lng: location.lng } : null));
+  if (location && !initialCenter) {
+    setInitialCenter({ lat: location.lat, lng: location.lng });
   }
 
   // ── Fetch nearest service centers ───────────────────────────────────────────
@@ -226,10 +228,10 @@ export function NearbyServiceCenters({ onViewAll }) {
             )}
 
             {/* GoogleMap always stays mounted — only markers swap on state change */}
-            {isMapsLoaded && initialCenterRef.current && (
+            {isMapsLoaded && initialCenter && (
               <GoogleMap
                 mapContainerStyle={MAP_CONTAINER_STYLE}
-                center={initialCenterRef.current}
+                center={initialCenter}
                 zoom={mapZoom}
                 options={MAP_OPTIONS}
                 onLoad={handleMapLoad}
@@ -340,7 +342,7 @@ export function NearbyServiceCenters({ onViewAll }) {
                 <span>Your Location</span>
               </div>
               <div className="flex items-center gap-2">
-                <img loading="lazy" decoding="async" src="/servicecenterpointlogo.png" alt="center" className="w-4 h-4 object-contain" />
+                <Image src="/servicecenterpointlogo.png" alt="center" className="w-4 h-4 object-contain"  width={16} height={16} />
                 <span>Service Center</span>
               </div>
               <div className="flex items-center gap-2">

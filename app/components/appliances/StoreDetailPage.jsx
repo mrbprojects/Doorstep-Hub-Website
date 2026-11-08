@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { GoogleMap, Marker, OverlayViewF, FLOAT_PANE } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import {
   ArrowLeft,
   Star,
   MapPin,
   Clock,
-  Phone,
   Award,
   CheckCircle,
   Shield,
@@ -17,8 +17,7 @@ import {
   Calendar,
   X,
   Check,
-  Sparkles,
-  ThumbsUp, CheckCheck, Loader2, Store,
+  Sparkles, CheckCheck, Loader2, Store,
   VerifiedIcon,
   Smartphone,
   Download,
@@ -223,8 +222,13 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Service Rates');
   const [lightboxIndex, setLightboxIndex] = useState(null);
-  const [reviewsToShow, setReviewsToShow] = useState(3);
-  const [selectedPackages, setSelectedPackages] = useState([]);
+  const [reviewsToShow] = useState(3);
+  const [selectedPackages, setSelectedPackages] = useState(() => (serviceId ? [serviceId] : []));
+  const [prevServiceId, setPrevServiceId] = useState(serviceId);
+  if (serviceId && prevServiceId !== serviceId) {
+    setPrevServiceId(serviceId);
+    setSelectedPackages((prev) => (prev.includes(serviceId) ? prev : [serviceId]));
+  }
   const [faqActiveIndex, setFaqActiveIndex] = useState(null);
 
   // API data state
@@ -242,19 +246,12 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   // Subcategory filtering states
   const [subcategories, setSubcategories] = useState([]);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('all');
-  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+  const [, setLoadingSubcategories] = useState(false);
+  const [, setLoadingAddons] = useState(false);
 
   // Tabs scroll reference and logic
   const tabsRef = useRef(null);
-  const scrollTabs = (direction) => {
-    if (tabsRef.current) {
-      const scrollAmount = 200;
-      tabsRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
+  
 
   // Subcategory horizontal scroll ref & state
   const subcatScrollRef = useRef(null);
@@ -286,112 +283,14 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   const [currentService, setCurrentService] = useState(null);
   const [addonsData, setAddonsData] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
-  const [loadingAddons, setLoadingAddons] = useState(false);
 
   // Get service cart functions from context
   const { addToCart: addToServiceCart, clearCart } = useServiceCart();
   // Get user's real location
   const { location, isMapsLoaded } = useLocationContext();
 
-  // Fetch subcategories once resolvedProviderId is determined
-  useEffect(() => {
-    const fetchSubcategories = async () => {
-      if (!resolvedProviderId) return;
-      setLoadingSubcategories(true);
-      try {
-        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_subcategories/${resolvedProviderId}`;
-        console.log('Fetching subcategories from:', url);
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          console.log('Subcategories loaded:', data);
-          if (data.success) {
-            const list = data.subcategories || data.data || [];
-            setSubcategories(list);
-            if (list.length > 0) {
-              const firstId = list[0].subcategoryId || list[0]._id || list[0].id;
-              setSelectedSubcategoryId(firstId);
-              // Trigger the service load for this subcategory by default
-              handleSubcategoryTabChange(firstId);
-            } else {
-              // No subcategories, show all services
-              setSelectedSubcategoryId('all');
-              handleSubcategoryTabChange('all');
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching subcategories:', error);
-      } finally {
-        setLoadingSubcategories(false);
-      }
-    };
-
-    fetchSubcategories();
-  }, [resolvedProviderId]);
-
-  // Load all appliance repair subcategories dynamically for the exploration carousel
-  useEffect(() => {
-    let isMounted = true;
-    const loadDynamicSubcategories = async () => {
-      try {
-        const cats = await fetchCategories(location);
-        if (!isMounted || !Array.isArray(cats) || cats.length === 0) return;
-
-        const results = await Promise.allSettled(
-          cats.slice(0, 10).map((cat) =>
-            fetchSubcategoriesByCategorySlug(cat.slug, location).then((subs) => ({
-              catName: cat.name,
-              catSlug: cat.slug,
-              subs,
-            }))
-          )
-        );
-
-        if (!isMounted) return;
-        const merged = [];
-        const badgeList = ['Popular', 'Quick Fix', 'Seasonal Deal', 'Fast Support', 'Expert Care', 'Essential', 'Top Rated', 'Verified'];
-        const iconList = ['📺', '❄️', '🧺', '🧊', '🍲', '💧', '💨', '🔥', '⚡', '🌬️', '🍽️', '🔋'];
-        let idx = 0;
-
-        results.forEach((res) => {
-          if (res.status === 'fulfilled' && Array.isArray(res.value?.subs)) {
-            res.value.subs.forEach((sub) => {
-              merged.push({
-                _id: sub._id,
-                title: sub.name,
-                subtitle: sub.title || sub.description || `Expert doorstep repair & service for ${sub.name}`,
-                icon: sub.image ? (
-                  <img
-                    src={sub.image.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image}`}
-                    alt={sub.name}
-                    className="w-7 h-7 object-contain rounded-lg"
-                  />
-                ) : iconList[idx % iconList.length],
-                badge: badgeList[idx % badgeList.length],
-                href: sub.slug ? `/${sub.slug}` : `/appliance-repairs`,
-              });
-              idx++;
-            });
-          }
-        });
-
-        if (merged.length > 0) {
-          setDynamicApplianceSubcategories(merged);
-        }
-      } catch (err) {
-        console.error('Failed to load dynamic appliance subcategories:', err);
-      }
-    };
-
-    loadDynamicSubcategories();
-    return () => {
-      isMounted = false;
-    };
-  }, [location?.lat, location?.lng]);
-
   // Handle subcategory filtering
-  const handleSubcategoryTabChange = async (subcatId) => {
+  const handleSubcategoryTabChange = useCallback(async (subcatId) => {
     setSelectedSubcategoryId(subcatId);
     setLoading(true);
     try {
@@ -430,7 +329,104 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [resolvedProviderId, storeId]);
+
+  // Fetch subcategories once resolvedProviderId is determined
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (!resolvedProviderId) return;
+      setLoadingSubcategories(true);
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_subcategories/${resolvedProviderId}`;
+        console.log('Fetching subcategories from:', url);
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Subcategories loaded:', data);
+          if (data.success) {
+            const list = data.subcategories || data.data || [];
+            setSubcategories(list);
+            if (list.length > 0) {
+              const firstId = list[0].subcategoryId || list[0]._id || list[0].id;
+              setSelectedSubcategoryId(firstId);
+              // Trigger the service load for this subcategory by default
+              handleSubcategoryTabChange(firstId);
+            } else {
+              // No subcategories, show all services
+              setSelectedSubcategoryId('all');
+              handleSubcategoryTabChange('all');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+      } finally {
+        setLoadingSubcategories(false);
+      }
+    };
+
+    fetchSubcategories();
+  }, [resolvedProviderId, handleSubcategoryTabChange]);
+
+  // Load all appliance repair subcategories dynamically for the exploration carousel
+  useEffect(() => {
+    let isMounted = true;
+    const loadDynamicSubcategories = async () => {
+      try {
+        const cats = await fetchCategories(location);
+        if (!isMounted || !Array.isArray(cats) || cats.length === 0) return;
+
+        const results = await Promise.allSettled(
+          cats.slice(0, 10).map((cat) =>
+            fetchSubcategoriesByCategorySlug(cat.slug, location).then((subs) => ({
+              catName: cat.name,
+              catSlug: cat.slug,
+              subs,
+            }))
+          )
+        );
+
+        if (!isMounted) return;
+        const merged = [];
+        const badgeList = ['Popular', 'Quick Fix', 'Seasonal Deal', 'Fast Support', 'Expert Care', 'Essential', 'Top Rated', 'Verified'];
+        const iconList = ['📺', '❄️', '🧺', '🧊', '🍲', '💧', '💨', '🔥', '⚡', '🌬️', '🍽️', '🔋'];
+        let idx = 0;
+
+        results.forEach((res) => {
+          if (res.status === 'fulfilled' && Array.isArray(res.value?.subs)) {
+            res.value.subs.forEach((sub) => {
+              merged.push({
+                _id: sub._id,
+                title: sub.name,
+                subtitle: sub.title || sub.description || `Expert doorstep repair & service for ${sub.name}`,
+                icon: sub.image ? (
+                  <Image
+                    src={sub.image.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image}`}
+                    alt={sub.name}
+                    className="w-7 h-7 object-contain rounded-lg"
+                   width={28} height={28} />
+                ) : iconList[idx % iconList.length],
+                badge: badgeList[idx % badgeList.length],
+                href: sub.slug ? `/${sub.slug}` : `/appliance-repairs`,
+              });
+              idx++;
+            });
+          }
+        });
+
+        if (merged.length > 0) {
+          setDynamicApplianceSubcategories(merged);
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic appliance subcategories:', err);
+      }
+    };
+
+    loadDynamicSubcategories();
+    return () => {
+      isMounted = false;
+    };
+  }, [location]);
 
   // Fetch service center details from API
   useEffect(() => {
@@ -598,14 +594,6 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
   // Keep users on the detail route if center data is temporarily unavailable.
   // The previous forced redirect caused valid slug detail views to bounce to home.
 
-  // Pre-select serviceId if provided
-  useEffect(() => {
-    if (serviceId && services.length > 0) {
-      if (!selectedPackages.includes(serviceId)) {
-        setSelectedPackages([serviceId]);
-      }
-    }
-  }, [serviceId, services]);
 
   // Get center data or use fallback
   const center = centerData || {
@@ -1018,7 +1006,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     className="inline-flex items-center justify-center w-40 sm:w-44 h-12 sm:h-14 bg-gradient-to-br from-[#037166] to-[#04a99d] rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all overflow-hidden border border-[#037166]/30 p-2"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain brightness-0 invert opacity-95" loading="lazy" />
+                    <Image src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain brightness-0 invert opacity-95"  width={500} height={300} />
                   </a>
 
                   <a
@@ -1028,7 +1016,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     className="inline-flex items-center justify-center w-40 sm:w-44 h-12 sm:h-14 bg-gradient-to-br from-[#037166] to-[#04a99d] rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all overflow-hidden border border-[#9ecbc3] p-2"
                     title="Download on App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-full w-auto object-contain brightness-0 invert opacity-95" loading="lazy" />
+                    <Image src="/apple2.png" alt="App Store" className="h-full w-auto object-contain brightness-0 invert opacity-95"  width={500} height={300} />
                   </a>
 
                   <div className="flex items-center gap-2 pl-2">
@@ -1271,14 +1259,12 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
             {/* CARD 1: BANNER IMAGE CARD */}
             <div className="relative w-full h-28 sm:h-44 lg:h-[230px] rounded-2xl border border-gray-100 shadow-lg overflow-hidden bg-white flex items-center justify-center">
               {bannerImage ? (
-                <img
+                <Image
                   src={bannerImage}
                   alt={center.business_name}
                   className="w-full h-full object-cover"
                   fetchpriority="high"
-                  loading="eager"
-                  decoding="sync"
-                />
+                 width={500} height={300} />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   <Sparkles className="w-12 h-12 text-[#037166]/10" />
@@ -1293,14 +1279,14 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                   <div className="relative flex-shrink-0">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white flex items-center justify-center">
                       {(center.logo || center.image) ? (
-                        <img loading="lazy" decoding="async"
+                        <Image
                           src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${(center.logo || center.image).startsWith('/') ? (center.logo || center.image).slice(1) : (center.logo || center.image)}`}
                           alt={`${businessName} Logo`}
                           className="w-full h-full object-contain bg-white"
                           onError={(e) => {
                             e.target.src = 'https://images.unsplash.com/photo-1667503779301-3120a323859a?auto=format&fit=crop&q=80';
                           }}
-                        />
+                         width={500} height={300} />
                       ) : (
                         <div className="w-full h-full bg-gray-50 flex items-center justify-center">
                           <Store className="w-7 h-7 text-[#037166]/20" />
@@ -1362,7 +1348,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       className="flex items-center justify-center w-24 sm:w-28 md:w-32 h-9 sm:h-10 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5"
                       title="Get it on Google Play"
                     >
-                      <img src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain" loading="lazy" decoding="async" />
+                      <Image src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain"  width={500} height={300} />
                     </a>
                     <a
                       href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
@@ -1371,7 +1357,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       className="flex items-center justify-center w-24 sm:w-28 md:w-32 h-9 sm:h-10 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5"
                       title="Download on the App Store"
                     >
-                      <img src="/apple2.png" alt="App Store" className="h-full w-auto object-contain" loading="lazy" decoding="async" />
+                      <Image src="/apple2.png" alt="App Store" className="h-full w-auto object-contain"  width={500} height={300} />
                     </a>
                     <a
                       href={whatsappLink}
@@ -1381,11 +1367,11 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       title="Chat on WhatsApp"
                       aria-label="Chat on WhatsApp"
                     >
-                      <img loading="lazy" decoding="async"
+                      <Image
                         src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
                         alt="WhatsApp"
                         className="w-4 sm:w-5 h-4 sm:h-5"
-                      />
+                       width={500} height={300} />
                     </a>
                   </div>
                 </div>
@@ -1536,9 +1522,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                     >
                       {/* Service Image */}
                       <div className="relative w-full h-32 sm:h-36 overflow-hidden bg-gray-50 flex-shrink-0">
-                        <img
-                          loading="lazy"
-                          decoding="async"
+                        <Image
                           src={resolveServiceImageUrl(service.image, service.name, service.subcategoryName)}
                           alt={service.name || 'Service Rate Card'}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -1546,7 +1530,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = getServiceFallbackImage(service.name, service.subcategoryName);
                           }}
-                        />
+                         width={500} height={300} />
 
                         {/* Selected Tag */}
                         {selectedPackages.includes(service.id) && (
@@ -1716,7 +1700,7 @@ export function StoreDetailPage({ storeId, serviceId, onBack }) {
                       onClick={() => setLightboxIndex(index)}
                       className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100 shadow-sm"
                     >
-                      <img src={image} alt={`${businessName} Work ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                      <Image src={image} alt={`${businessName} Work ${index + 1}`} className="w-full h-full object-cover"  width={500} height={300} />
                     </motion.div>
                   ))
                 ) : (

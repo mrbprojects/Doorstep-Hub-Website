@@ -29,7 +29,7 @@ export default async function Home() {
                 showHomeScreen = data.data.homescreen;
             }
         }
-    } catch (error) {
+    } catch {
         // Network or API failure: keep approved homepage active
         showHomeScreen = true;
     }

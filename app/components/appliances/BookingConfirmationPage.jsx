@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Info, Wallet, HelpCircle, Shield, Home, Briefcase, ShieldCheck, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, Sparkles, CreditCard, Info, Wallet, Shield, Home, Briefcase, ShieldCheck, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
@@ -14,6 +14,7 @@ import { inferVertical, trackBookingCompleted, trackPaymentStarted } from '@/lib
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
+import { useMounted } from '@/hooks/useMounted';
 
 function normalizeCityString(cityName) {
   if (!cityName) return '';
@@ -48,6 +49,67 @@ const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   'https://api.doorstephub.com/v1/dhubApi';
 
+// Service window: 9 AM to 9 PM (9:00 to 21:00)
+const SERVICE_END_HOUR = 21;
+const BUFFER_HOURS = 3;
+
+function getAvailableDates() {
+  const now = new Date();
+  const dates = [];
+  const todayCutoff = new Date();
+  todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0);
+  const startDayIndex = now > todayCutoff ? 1 : 0;
+  for (let i = 0; i < 7; i++) {
+    const offset = startDayIndex + i;
+    const date = new Date();
+    date.setDate(now.getDate() + offset);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const value = `${yyyy}-${mm}-${dd}`;
+
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    const dayLabel = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : dayName;
+    const dateLabel = monthDay;
+    const fullLabel = offset === 0 ? `Today, ${monthDay}` : offset === 1 ? `Tomorrow, ${monthDay}` : `${dayName}, ${monthDay}`;
+
+    dates.push({
+      value,
+      dayLabel,
+      dateLabel,
+      label: fullLabel,
+    });
+  }
+  return dates;
+}
+
+function getAvailableTimes(selectedDateValue) {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  const allTimeSlots = [
+    { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9, endHour: 11 },
+    { label: '11:00 AM - 01:00 PM', value: '11:00', startHour: 11, endHour: 13 },
+    { label: '01:00 PM - 03:00 PM', value: '13:00', startHour: 13, endHour: 15 },
+    { label: '03:00 PM - 05:00 PM', value: '15:00', startHour: 15, endHour: 17 },
+    { label: '05:00 PM - 07:00 PM', value: '17:00', startHour: 17, endHour: 19 },
+    { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19, endHour: 21 },
+  ];
+  if (selectedDateValue === todayStr) {
+    const currentHour = now.getHours();
+    const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS;
+    if (currentHour >= cutoffHour) return [];
+    return allTimeSlots.filter(slot => slot.startHour >= currentHour + BUFFER_HOURS);
+  }
+  return allTimeSlots;
+}
+
 export function BookingConfirmationPage({
   address,
   onBack,
@@ -57,25 +119,65 @@ export function BookingConfirmationPage({
   const router = useRouter();
   const { user, token, isAuthenticated } = useAuth();
   const { cartItems: contextCartItems, cartData, clearCart } = useServiceCart();
-  const contextCartTotal = cartData?.finalAmount || 0;
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
+
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const pending = sessionStorage.getItem('pending_booking');
+        if (pending) {
+          const parsed = JSON.parse(pending);
+          if (parsed.bookedDate) return parsed.bookedDate;
+        }
+      } catch { /* ignore */ }
+    }
+    const dates = getAvailableDates();
+    if (dates.length > 0) {
+      const todayValue = dates[0].value;
+      const todayTimes = getAvailableTimes(todayValue);
+      if (todayTimes.length > 0) return todayValue;
+      if (dates.length > 1) return dates[1].value;
+    }
+    return '';
+  });
+  const [selectedTime, setSelectedTime] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const pending = sessionStorage.getItem('pending_booking');
+        if (pending) {
+          const parsed = JSON.parse(pending);
+          if (parsed.bookedTime) return parsed.bookedTime;
+        }
+      } catch { /* ignore */ }
+    }
+    return '';
+  });
+  const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
+  if (selectedDate !== prevSelectedDate) {
+    setPrevSelectedDate(selectedDate);
+    setSelectedTime('');
+  }
   const [technicianPreference, setTechnicianPreference] = useState('any');
   const [isConfirming, setIsConfirming] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('online');
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletData, setWalletData] = useState(null);
-  const [walletLoading, setWalletLoading] = useState(false);
-  const [directBookingItems, setDirectBookingItems] = useState(null);
+  const [, setWalletLoading] = useState(false);
+  const [directBookingItems] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('booking_package_details');
+      if (stored) {
+        const items = JSON.parse(stored);
+        return Array.isArray(items) ? items : [items];
+      }
+    } catch { /* ignore */ }
+    return null;
+  });
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | 'pending' | null
   const [locationMismatch, setLocationMismatch] = useState(null);
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [verificationError, setVerificationError] = useState(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
@@ -117,6 +219,7 @@ export function BookingConfirmationPage({
       return;
     }
 
+    await Promise.resolve();
     setVerifyingPayment(true);
     setVerificationError(null);
 
@@ -158,18 +261,7 @@ export function BookingConfirmationPage({
   }, [token, isAuthenticated, clearCart, onConfirmBooking]);
 
   React.useEffect(() => {
-    // 1. Load saved booking items from localStorage
-    const stored = localStorage.getItem('booking_package_details');
-    if (stored) {
-      try {
-        const items = JSON.parse(stored);
-        setDirectBookingItems(Array.isArray(items) ? items : [items]);
-      } catch (e) {
-        console.error('Failed to parse direct booking items');
-      }
-    }
-
-    // 2. Load wallet balance
+    // Load wallet balance
     const fetchWalletBalance = async () => {
       if (!token || !isAuthenticated) return;
       setWalletLoading(true);
@@ -196,10 +288,15 @@ export function BookingConfirmationPage({
     }
 
     // 3. Authoritatively verify payment with backend
-    performPaymentVerification();
+    Promise.resolve().then(() => {
+      performPaymentVerification();
+    });
   }, [token, isAuthenticated, performPaymentVerification]);
 
-  const cartItems = (directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || []);
+  const cartItems = useMemo(
+    () => ((directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || [])),
+    [directBookingItems, contextCartItems]
+  );
 
   // Use the platform fees once per booking (not summed per item)
   const rawBookingCost = cartItems.length > 0 ? Number(cartItems[0].bookingCost || 0) : 0;
@@ -230,131 +327,17 @@ export function BookingConfirmationPage({
   const amcApplies = amcApplicable && paymentMethod === 'amc';
   const bookingCost = amcApplies ? 0 : rawBookingCost;
   const total = bookingCost;
-  const tax = 0;
 
-  useEffect(() => {
+  const [prevAmcApplicable, setPrevAmcApplicable] = useState(amcApplicable);
+  if (prevAmcApplicable !== amcApplicable) {
+    setPrevAmcApplicable(amcApplicable);
     if (!amcApplicable && paymentMethod === 'amc') {
       setPaymentMethod('online');
     }
-  }, [amcApplicable, paymentMethod]);
-
-  // Service window: 9 AM to 9 PM (9:00 to 21:00)
-  const SERVICE_START_HOUR = 9;
-  const SERVICE_END_HOUR = 21;
-  const BUFFER_HOURS = 3;
-
-  // Smart date availability logic
-  const getAvailableDates = () => {
-    const now = new Date();
-    const dates = [];
-
-    // Check cutoff time (6 PM) for today
-    const todayCutoff = new Date();
-    todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0); // 18:00 (6 PM)
-
-    // Determine starting day index (0 = Today, 1 = Tomorrow)
-    const startDayIndex = (now > todayCutoff) ? 1 : 0; // If past 6 PM, start from tomorrow
-
-    // Generate 7 days of availability
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() + startDayIndex + i);
-
-      // Calculate the actual offset for labeling
-      const actualOffset = startDayIndex + i;
-
-      dates.push({
-        value: date.toISOString().split('T')[0],
-        label: actualOffset === 0 ? 'Today' : actualOffset === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric'
-        }),
-      });
-    }
-    return dates;
-  };
-
-  // Smart time slot availability based on selected date
-  const getAvailableTimes = (selectedDateValue) => {
-    const now = new Date();
-    const selectedDate = new Date(selectedDateValue);
-
-    // Time slots (2-hour windows)
-    const allTimeSlots = [
-      { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9, endHour: 11 },
-      { label: '11:00 AM - 01:00 PM', value: '11:00', startHour: 11, endHour: 13 },
-      { label: '01:00 PM - 03:00 PM', value: '13:00', startHour: 13, endHour: 15 },
-      { label: '03:00 PM - 05:00 PM', value: '15:00', startHour: 15, endHour: 17 },
-      { label: '05:00 PM - 07:00 PM', value: '17:00', startHour: 17, endHour: 19 },
-      { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19, endHour: 21 },
-    ];
-
-    // If today and past cutoff time, filter available slots
-    if (selectedDate.toDateString() === now.toDateString()) {
-      const currentHour = now.getHours();
-      const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS; // 6 PM cutoff
-
-      if (currentHour >= cutoffHour) {
-        return []; // No slots available today
-      }
-
-      return allTimeSlots.filter(slot => slot.startHour > currentHour);
-    }
-
-    return allTimeSlots;
-  };
+  }
 
   const availableDates = mounted ? getAvailableDates() : [];
   const availableTimesForSelectedDate = mounted ? getAvailableTimes(selectedDate) : [];
-
-  // Set initial default date based on availability or pending booking
-  useEffect(() => {
-    if (!mounted) return;
-    let pendingDate = null;
-    let pendingTime = null;
-
-    try {
-      const pendingData = sessionStorage.getItem('pending_booking');
-      if (pendingData) {
-        const parsed = JSON.parse(pendingData);
-        if (parsed.bookedDate) pendingDate = parsed.bookedDate;
-        if (parsed.bookedTime) pendingTime = parsed.bookedTime;
-      }
-    } catch (e) {
-      console.error('Failed to parse pending booking', e);
-    }
-
-    const dates = getAvailableDates();
-    if (dates.length > 0) {
-      if (pendingDate && dates.some(d => d.value === pendingDate)) {
-        setSelectedDate(pendingDate);
-        if (pendingTime) {
-          setSelectedTime(pendingTime);
-        }
-      } else {
-        const todayValue = dates[0].value;
-        const todayTimes = getAvailableTimes(todayValue);
-
-        if (todayTimes.length > 0) {
-          setSelectedDate(todayValue);
-        } else if (dates.length > 1) {
-          setSelectedDate(dates[1].value);
-        }
-      }
-    }
-  }, [mounted]);
-
-  // Reset time when date changes, but not if we just restored it
-  const isInitialMount = useRef(true);
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      // Don't reset time on the very first render if we restored it
-      return;
-    }
-    setSelectedTime('');
-  }, [selectedDate]);
 
   const handleConfirm = async () => {
     // Prevent duplicate clicks (race condition protection)
@@ -601,10 +584,13 @@ export function BookingConfirmationPage({
             orderId: data.bookingId || data.orderId || null,
             txnid: data.txnid || null
           }));
+          try {
+            sessionStorage.setItem('last_checkout_url', currentUrl || (window.location.pathname + window.location.search));
+          } catch {}
 
           const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
           // Redirect — cleanup will happen on return when ?status=success is detected
-          window.location.href = easebuzzUrl;
+          window.location.assign(easebuzzUrl);
         } else {
           if (data.code === 'LOCATION_MISMATCH') {
             setLocationMismatch({
@@ -765,7 +751,7 @@ export function BookingConfirmationPage({
               {/* Date Selection */}
               <div className="mb-4">
                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
-                  Choose Date
+                  Choose Day & Date
                 </label>
                 {availableDates.length === 0 ? (
                   <p className="text-gray-500 text-xs">No dates available at this time</p>
@@ -778,17 +764,16 @@ export function BookingConfirmationPage({
                           key={date.value}
                           type="button"
                           onClick={() => setSelectedDate(date.value)}
-                          className={`px-2 py-2 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border ${
-                            isSelected
+                          className={`px-2 py-2 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border ${isSelected
                               ? 'bg-gradient-to-br from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
                               : 'bg-gray-50 hover:bg-white text-gray-700 hover:text-gray-900 border-gray-200 hover:border-[#037166]/50'
-                          }`}
+                            }`}
                         >
                           <span className={`text-[11px] font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                            {date.label.split(' ')[0]}
+                            {date.dayLabel || (date.label ? date.label.split(',')[0] : '')}
                           </span>
-                          <span className={`text-[10px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
-                            {date.label.split(' ').slice(1).join(' ') || date.value.slice(5)}
+                          <span className={`text-[10px] font-medium ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                            {date.dateLabel || (date.label ? date.label.split(',')[1]?.trim() : date.value.slice(5))}
                           </span>
                         </button>
                       );
@@ -823,11 +808,10 @@ export function BookingConfirmationPage({
                           key={time.value}
                           type="button"
                           onClick={() => setSelectedTime(time.value)}
-                          className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border ${
-                            isSelected
+                          className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border ${isSelected
                               ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
                               : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#037166]/50'
-                          }`}
+                            }`}
                         >
                           <span className="flex items-center gap-1.5">
                             <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#037166]'}`} />
@@ -874,11 +858,10 @@ export function BookingConfirmationPage({
                       key={option.value}
                       type="button"
                       onClick={() => setTechnicianPreference(option.value)}
-                      className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                        isSelected
+                      className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${isSelected
                           ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                           : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold">{option.label}</span>
@@ -934,11 +917,10 @@ export function BookingConfirmationPage({
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('amc')}
-                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between col-span-full ${
-                      paymentMethod === 'amc'
+                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between col-span-full ${paymentMethod === 'amc'
                         ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                         : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2.5">
@@ -965,11 +947,10 @@ export function BookingConfirmationPage({
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('online')}
-                  className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                    paymentMethod === 'online'
+                  className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'online'
                       ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                       : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2.5">
@@ -998,11 +979,10 @@ export function BookingConfirmationPage({
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('wallet')}
-                  className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                    paymentMethod === 'wallet'
+                  className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'wallet'
                       ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
                       : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2.5">
@@ -1305,11 +1285,10 @@ export function BookingConfirmationPage({
                     type="button"
                     onClick={handleConfirm}
                     disabled={isConfirming || !selectedDate || !selectedTime}
-                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${
-                      isConfirming || !selectedDate || !selectedTime
+                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${isConfirming || !selectedDate || !selectedTime
                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#025a51] hover:to-[#038e83] text-white hover:shadow-md hover:shadow-[#037166]/20 active:scale-[0.99]'
-                    }`}
+                      }`}
                   >
                     {isConfirming ? (
                       <>

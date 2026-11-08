@@ -1,60 +1,56 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Check, Loader2, Sparkles } from 'lucide-react';
+import { X, Check, Loader2, Sparkles } from 'lucide-react';
 
 export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, onContinue, prefetchedAddons }) {
-    const [addons, setAddons] = useState([]);
+    const [addons, setAddons] = useState(() => prefetchedAddons || []);
     const [selectedAddons, setSelectedAddons] = useState([]);
     const [loading, setLoading] = useState(!prefetchedAddons);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        if (isOpen && providerId && selectedPackageId) {
-            if (prefetchedAddons) {
-                setAddons(prefetchedAddons);
-                setLoading(false);
-            } else {
-                fetchAddons();
-            }
-        } else {
-            // Reset state when closed
-            setAddons([]);
-            setSelectedAddons([]);
-            setLoading(true);
+    const [prevPrefetched, setPrevPrefetched] = useState(prefetchedAddons);
+    if (prevPrefetched !== prefetchedAddons) {
+        setPrevPrefetched(prefetchedAddons);
+        if (prefetchedAddons) {
+            setAddons(prefetchedAddons);
+            setLoading(false);
         }
-    }, [isOpen, providerId, selectedPackageId, prefetchedAddons]);
+    }
 
-    const fetchAddons = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
+    useEffect(() => {
+        let isCancelled = false;
+        if (isOpen && providerId && selectedPackageId && !prefetchedAddons) {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     serviceIds: [selectedPackageId],
                     professionalProviderId: providerId
                 })
-            });
-            const data = await response.json();
-
-            if (data.success && data.data && data.data.length > 0) {
-                // The API returns an array of objects, each containing an 'addons' array.
-                // We'll flatten this if there are multiple serviceIds, but here we only send one.
-                const allAddons = data.data.flatMap(item => item.addons || []);
-                setAddons(allAddons);
-            } else {
-                setAddons([]);
-            }
-        } catch (err) {
-            console.error("Error fetching add-ons:", err);
-            setError("Failed to load add-ons.");
-        } finally {
-            setLoading(false);
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (isCancelled) return;
+                    if (data.success && data.data && data.data.length > 0) {
+                        setAddons(data.data.flatMap(item => item.addons || []));
+                    } else {
+                        setAddons([]);
+                    }
+                })
+                .catch(err => {
+                    if (isCancelled) return;
+                    console.error("Error fetching add-ons:", err);
+                    setError("Failed to load add-ons.");
+                })
+                .finally(() => {
+                    if (!isCancelled) setLoading(false);
+                });
         }
-    };
+        return () => { isCancelled = true; };
+    }, [isOpen, providerId, selectedPackageId, prefetchedAddons]);
 
     const toggleAddon = (addonId) => {
         setSelectedAddons(prev =>
@@ -141,11 +137,11 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, on
                                                     {/* Image or Icon */}
                                                     <div className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 ${isSelected ? 'ring-2 ring-[#037166] ring-offset-2' : 'bg-gray-100'}`}>
                                                         {addon.image ? (
-                                                            <img loading="lazy" decoding="async"
+                                                            <Image
                                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addon.image}`}
                                                                 alt={addon.childServiceName}
                                                                 className="w-full h-full object-cover"
-                                                            />
+                                                             width={500} height={300} />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
                                                                 <Sparkles className="w-6 h-6" />

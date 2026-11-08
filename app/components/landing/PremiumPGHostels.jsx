@@ -1,11 +1,56 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+
 import { motion } from 'motion/react';
 import { Building2, Wifi, Coffee, Shield, Bed, Users, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useRouter } from 'next/navigation';
+
+const SkeletonCard = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="relative w-[240px] shrink-0 overflow-hidden rounded-3xl border border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] shadow-2xl xl:w-auto"
+  >
+    {/* Skeleton Image */}
+    <div className="relative h-36 overflow-hidden">
+      <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+    </div>
+
+    {/* Skeleton Content */}
+    <div className="p-4">
+      {/* Title */}
+      <div className="h-12 w-3/4 mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+
+      {/* Location */}
+      <div className="flex justify-between mb-3 text-xs">
+        <div className="h-4 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        <div className="h-4 w-24 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+      </div>
+
+      {/* Price & Button Block */}
+      <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-[#037166]/20 p-2 bg-[#037166]/5">
+        <div className="w-24">
+          <div className="h-3 w-16 mb-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          <div className="h-4 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        </div>
+        <div className="h-7 w-16 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
+      </div>
+
+      {/* Amenities */}
+      <div className="grid grid-cols-2 gap-2">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg">
+            <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+            <div className="h-3 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </motion.div>
+);
 
 const dummyHostels = [
   {
@@ -85,7 +130,7 @@ export function PremiumPGHostels() {
         const data = await response.json();
 
         if (data.success && data.hostels && data.hostels.length > 0) {
-          const mappedHostels = data.hostels.map((hostel, index) => {
+          const mappedHostels = data.hostels.map((hostel) => {
             let displayedAmenities = hostel.amenities && hostel.amenities.length > 0
               ? hostel.amenities.map(a => (typeof a === 'object' && a.title ? a.title : a))
               : (hostel.otherAmenities || "")
@@ -180,52 +225,6 @@ export function PremiumPGHostels() {
       behavior: 'smooth',
     });
   };
-
-  // Skeleton Shimmer Component
-  const SkeletonCard = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative w-[240px] shrink-0 overflow-hidden rounded-3xl border border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] shadow-2xl xl:w-auto"
-    >
-      {/* Skeleton Image */}
-      <div className="relative h-36 overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-      </div>
-
-      {/* Skeleton Content */}
-      <div className="p-4">
-        {/* Title */}
-        <div className="h-12 w-3/4 mb-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
-
-        {/* Location */}
-        <div className="flex justify-between mb-3 text-xs">
-          <div className="h-4 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          <div className="h-4 w-24 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-        </div>
-
-        {/* Price & Button Block */}
-        <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-[#037166]/20 p-2 bg-[#037166]/5">
-          <div className="w-24">
-            <div className="h-3 w-16 mb-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-            <div className="h-4 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          </div>
-          <div className="h-7 w-16 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
-        </div>
-
-        {/* Amenities */}
-        <div className="grid grid-cols-2 gap-2">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg">
-              <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-              <div className="h-3 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
 
   const amenityIcons = {
     'High-Speed WiFi': Wifi,

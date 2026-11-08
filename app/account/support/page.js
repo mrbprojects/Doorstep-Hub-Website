@@ -31,8 +31,20 @@ export default function SupportTicketsPage() {
     }, [token]);
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token) return;
+        let active = true;
+        fetchSupportTickets(token)
+            .then((res) => {
+                if (active) setTickets(res?.userRequest || []);
+            })
+            .catch((e) => console.error('Failed to load support tickets:', e))
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, [token]);
 
     return (
         <div className="space-y-6">

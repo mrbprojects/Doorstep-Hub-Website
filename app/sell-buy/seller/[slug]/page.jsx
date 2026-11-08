@@ -11,7 +11,7 @@ async function getSellerProfile(slug) {
     if (!res.ok) return null;
     const json = await res.json();
     return json.success ? json.data : null;
-  } catch (err) {
+  } catch {
     return null;
   }
 }

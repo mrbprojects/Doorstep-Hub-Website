@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Wrench, Search, Loader2, MapPin, Snowflake, Monitor, Tv, Waves, Droplets, Flame, Microwave, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wrench, Search, Loader2, MapPin, Snowflake, Monitor, Tv, Waves, Droplets, Flame, Microwave } from 'lucide-react';
 import { fetchCategories, fetchCities } from '@/lib/api';
 
 const CATEGORY_ICONS = {
@@ -17,37 +18,7 @@ const CATEGORY_ICONS = {
   'microwave': Microwave
 };
 
-function StepBar({ step }) {
-  const steps = ['Category', 'Brand', 'Service'];
-  return (
-    <div className="flex items-center gap-0 mb-10">
-      {steps.map((label, i) => {
-        const idx = i + 1;
-        const done = step > idx;
-        const active = step === idx;
-        return (
-          <React.Fragment key={label}>
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300 ${
-                done ? 'bg-[#037166] border-[#037166] text-white' :
-                active ? 'bg-white border-[#037166] text-[#037166]' :
-                'bg-white border-gray-200 text-gray-300'
-              }`}>
-                {done ? <CheckCircle2 size={18} /> : idx}
-              </div>
-              <span className={`text-xs font-black uppercase tracking-widest hidden sm:block transition-colors ${
-                active ? 'text-[#037166]' : done ? 'text-[#037166]/70' : 'text-gray-300'
-              }`}>{label}</span>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={`flex-1 mx-4 h-0.5 transition-all duration-300 ${done ? 'bg-[#037166]' : 'bg-gray-100'}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-}
+
 
 function CategoryPageContent() {
   const router = useRouter();
@@ -146,7 +117,7 @@ function CategoryPageContent() {
               >
                 <div className="h-44 overflow-hidden bg-gray-50">
                   {cat.image ? (
-                    <img loading="lazy" decoding="async" src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
+                    <Image src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"  width={500} height={300} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Wrench size={32} className="text-gray-300" />

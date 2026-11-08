@@ -14,7 +14,6 @@
 export function calculateSEOScore(pageData = {}) {
     const {
         statusCode = 200,
-        url = '',
         canonical = '',
         title = '',
         description = '',

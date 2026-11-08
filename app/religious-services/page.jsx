@@ -1,16 +1,16 @@
 'use client';
 
 import { useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, useInView } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  Sparkles, Flame, Home as HomeIcon, User,
+  Sparkles, Flame, User,
   Calendar, Shield, Award, Heart,
-  MapPin, Star, Clock, CheckCircle, ArrowRight, Zap,
+  MapPin, Star, CheckCircle, ArrowRight,
   Mountain, Waves, Wind
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -482,11 +482,11 @@ export default function ReligiousServicesPage() {
                   className="flex items-center justify-center w-28 sm:w-34 h-9 sm:h-11 rounded-2xl bg-[#DF5D31] shadow-md hover:shadow-lg transition-all overflow-hidden group"
                   title="Get it on Google Play"
                 >
-                  <img loading="lazy" decoding="async" 
+                  <Image 
                     src="/andriod1.png" 
                     alt="Google Play" 
                     className="h-full w-full object-cover brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" 
-                  />
+                   width={500} height={300} />
                 </motion.a>
 
                 {/* App Store Button */}
@@ -499,11 +499,11 @@ export default function ReligiousServicesPage() {
                   className="flex items-center justify-center w-28 sm:w-34 h-9 sm:h-11 rounded-2xl bg-[#DF5D31] shadow-md hover:shadow-lg transition-all overflow-hidden group"
                   title="Download on the App Store"
                 >
-                  <img loading="lazy" decoding="async" 
+                  <Image 
                     src="/apple2.png" 
                     alt="App Store" 
                     className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" 
-                  />
+                   width={500} height={300} />
                 </motion.a>
               </div>
             </motion.div>
@@ -642,7 +642,7 @@ export default function ReligiousServicesPage() {
             {/* Image Circle */}
             <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--saffron)]/10 to-[var(--temple-red)]/10 group-hover:scale-110 transition-transform shadow-sm flex-shrink-0">
               {service.image ? (
-                <img loading="lazy" decoding="async"
+                <Image
                   src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                   alt={service.serviceName}
                   className="h-full w-full object-cover"
@@ -650,7 +650,7 @@ export default function ReligiousServicesPage() {
                     e.target.style.display = 'none';
                     e.target.parentElement.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg class="h-8 w-8 text-[var(--saffron)]" ...></svg></div>';
                   }}
-                />
+                 width={500} height={300} />
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
                   <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-[var(--saffron)]" />
@@ -737,11 +737,11 @@ export default function ReligiousServicesPage() {
                       }}
                     >
                       <div className="relative h-40 sm:h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                        <img loading="lazy" decoding="async"
+                        <Image
                           src={service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                           alt={service.business_name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
+                         width={500} height={300} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                       </div>
                       <CardContent className="p-4 sm:p-5 flex flex-col flex-1">
@@ -880,12 +880,12 @@ export default function ReligiousServicesPage() {
                     >
                       <Card className="overflow-hidden group cursor-pointer border border-gray-100 hover:border-[var(--saffron)]/30 transition-all flex flex-col h-full shadow-xs hover:shadow-md" onClick={() => router.push(`/religious-services/${ritual.slug || ritual._id}`)}>
                         <div className="relative h-40 sm:h-44 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                          <img loading="lazy" decoding="async"
+                          <Image
                             src={ritual.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${ritual.image}` : 'https://images.unsplash.com/photo-1599030859770-940e6a970d4d?auto=format&fit=crop&w=600&q=80'}
                             alt={ritual.serviceName}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                          />
+                           width={500} height={300} />
                           <div className="hidden absolute inset-0 items-center justify-center">
                             <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--saffron)]" />
                           </div>

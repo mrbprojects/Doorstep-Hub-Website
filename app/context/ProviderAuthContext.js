@@ -17,32 +17,66 @@ export function useProviderAuth() {
 }
 
 export function ProviderAuthProvider({ children }) {
-    const [session, setSession] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [session, setSession] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            return getStoredProviderSession() || null;
+        } catch {
+            return null;
+        }
+    });
+    const [loading, setLoading] = useState(() => {
+        if (typeof window === 'undefined') return true;
+        try {
+            const stored = getStoredProviderSession();
+            return !!stored?.token;
+        } catch {
+            return false;
+        }
+    });
 
     const hydrate = useCallback(async () => {
         const stored = getStoredProviderSession();
         if (!stored?.token) {
-            setSession(null);
-            setLoading(false);
             return;
         }
-        setSession(stored);
         try {
             const profile = await getProviderProfile(stored.token, stored.userId);
             const next = { ...stored, profile };
             saveStoredProviderSession(next);
             setSession(next);
         } catch {
-            setSession(stored);
+            // Keep stored session
         } finally {
             setLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        hydrate();
-    }, [hydrate]);
+        let isMounted = true;
+        const stored = getStoredProviderSession();
+        if (stored?.token) {
+            (async () => {
+                try {
+                    const profile = await getProviderProfile(stored.token, stored.userId);
+                    if (isMounted) {
+                        const next = { ...stored, profile };
+                        saveStoredProviderSession(next);
+                        setSession(next);
+                    }
+                } catch {
+                    // Keep stored session
+                } finally {
+                    if (isMounted) {
+                        setLoading(false);
+                    }
+                }
+            })();
+        }
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const loginSession = useCallback((data) => {
         saveStoredProviderSession(data);

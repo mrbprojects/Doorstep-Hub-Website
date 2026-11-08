@@ -5,23 +5,18 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { trackBookingCompleted } from '@/lib/leadTracking';
 
-function ThankYouContent() {
-    const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState(null);
-
-    useEffect(() => {
+function getInitialBookingDetails(searchParams) {
+    if (typeof window === 'undefined') return null;
+    try {
         const savedAddress = sessionStorage.getItem('selected_address');
         const sessionAddress = savedAddress ? JSON.parse(savedAddress) : null;
 
-        // Check for CRM pending booking in sessionStorage
         const crmPendingRaw = sessionStorage.getItem('crm_pending_booking');
         const crmPending = crmPendingRaw ? JSON.parse(crmPendingRaw) : null;
 
-        // Prioritize URL params for social/redirect cases, fallback to sessionStorage
         const rawOrderId = searchParams.get('orderId') || crmPending?.bookingId || '';
         const urlAddress = searchParams.get('address') || crmPending?.address || '';
 
-        // Format Date if it exists
         const rawDate = searchParams.get('date') || crmPending?.date || sessionStorage.getItem('last_booking_date');
         let formattedDate = rawDate || 'Confirmed';
 
@@ -31,13 +26,9 @@ function ThankYouContent() {
             formattedDate = `${day} ${months[parseInt(month) - 1]} ${year}`;
         }
 
-        // Clean up duplicated address parts from URL
         let cleanAddress = urlAddress;
         if (urlAddress) {
-            // Split by comma to get all segments
-            const segments = urlAddress.split(',').map(s => s.trim()).filter(s => s);
-
-            // Remove consecutive duplicate segments
+            const segments = urlAddress.split(',').map(s => s.trim()).filter(Boolean);
             const uniqueSegments = [];
             for (let i = 0; i < segments.length; i++) {
                 if (i === 0 || segments[i] !== segments[i - 1]) {
@@ -45,7 +36,6 @@ function ThankYouContent() {
                 }
             }
 
-            // Also check for repeated patterns (e.g., "A, B, C, A, B, C")
             let finalSegments = uniqueSegments;
             for (let patternLength = 1; patternLength <= Math.floor(uniqueSegments.length / 2); patternLength++) {
                 const midPoint = Math.floor(uniqueSegments.length / 2);
@@ -74,11 +64,10 @@ function ThankYouContent() {
         const timeSlot = searchParams.get('time') || crmPending?.time || sessionStorage.getItem('last_booking_time') || '';
         const serviceName = crmPending?.subcategory || crmPending?.category || '';
 
-        // If rawOrderId is a 24-char MongoDB ObjectId, format a clean customer ID:
         const isMongoId = /^[a-f\d]{24}$/i.test(rawOrderId);
         const initialDisplayId = isMongoId ? `DH-${rawOrderId.slice(-8).toUpperCase()}` : rawOrderId;
 
-        setBookingDetails({
+        return {
             orderId: initialDisplayId,
             rawOrderId: rawOrderId,
             date: formattedDate,
@@ -86,9 +75,18 @@ function ThankYouContent() {
             address: displayAddress,
             serviceName: serviceName,
             referalCode: searchParams.get('referalCode') || '',
-        });
+        };
+    } catch {
+        return null;
+    }
+}
 
-        // Try to fetch verified server booking details if available
+function ThankYouContent() {
+    const searchParams = useSearchParams();
+    const [bookingDetails, setBookingDetails] = useState(() => getInitialBookingDetails(searchParams));
+
+    useEffect(() => {
+        const rawOrderId = searchParams.get('orderId') || bookingDetails?.rawOrderId;
         if (rawOrderId) {
             const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
             if (apiBase) {
@@ -99,11 +97,11 @@ function ThankYouContent() {
                             const b = json.data;
                             setBookingDetails(prev => ({
                                 ...prev,
-                                orderId: b.orderId || prev.orderId,
-                                date: b.date || prev.date,
-                                time: b.time || prev.time,
-                                address: b.address || prev.address,
-                                serviceName: b.serviceName || prev.serviceName,
+                                orderId: b.orderId || prev?.orderId,
+                                date: b.date || prev?.date,
+                                time: b.time || prev?.time,
+                                address: b.address || prev?.address,
+                                serviceName: b.serviceName || prev?.serviceName,
                                 status: b.status || 'confirmed',
                                 paymentStatus: b.paymentStatus || 'paid',
                             }));
@@ -111,15 +109,15 @@ function ThankYouContent() {
                     })
                     .catch(() => {});
             }
-        }
-
-        if (rawOrderId) {
             trackBookingCompleted(rawOrderId, { vertical: 'services' });
         }
 
-        // Clear booking session data after successful creation
-        sessionStorage.removeItem('pg_booking_data');
-    }, [searchParams]);
+        try {
+            sessionStorage.removeItem('pg_booking_data');
+        } catch {
+            /* ignore */
+        }
+    }, [searchParams, bookingDetails?.rawOrderId]);
 
     return <ThankYouPage bookingDetails={bookingDetails} />;
 }

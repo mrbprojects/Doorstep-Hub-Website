@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Camera, Loader2, Save, User } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,25 +27,28 @@ export default function PartnerProfilePage() {
         experience: '',
     });
 
-    useEffect(() => {
-        if (!profile) return;
-        const fullName = profile.name || `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
-        setForm({
-            name: fullName,
-            email: profile.email || '',
-            phone: profile.phone || profile.mobile || profile.whatsappNumber || '',
-            address: profile.address || '',
-            bio: profile.bio || '',
-            experience: profile.experience || '',
-        });
-        if (profile.image) {
-            setPreview(
-                profile.image.startsWith('http')
-                    ? profile.image
-                    : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${profile.image}`
-            );
+    const [prevProfile, setPrevProfile] = useState(profile);
+    if (profile !== prevProfile) {
+        setPrevProfile(profile);
+        if (profile) {
+            const fullName = profile.name || `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+            setForm({
+                name: fullName,
+                email: profile.email || '',
+                phone: profile.phone || profile.mobile || profile.whatsappNumber || '',
+                address: profile.address || '',
+                bio: profile.bio || '',
+                experience: profile.experience || '',
+            });
+            if (profile.image) {
+                setPreview(
+                    profile.image.startsWith('http')
+                        ? profile.image
+                        : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${profile.image}`
+                );
+            }
         }
-    }, [profile]);
+    }
 
     const handleImage = (e) => {
         const file = e.target.files?.[0];
@@ -97,7 +101,7 @@ export default function PartnerProfilePage() {
                 <div className="flex flex-col sm:flex-row items-center gap-6">
                     <div className="relative">
                         <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center">
-                            {preview ? <img src={preview} alt="Profile" className="w-full h-full object-cover" /> : <User className="w-10 h-10 text-white" />}
+                            {preview ? <Image src={preview} alt="Profile" className="w-full h-full object-cover"  width={500} height={300} /> : <User className="w-10 h-10 text-white" />}
                         </div>
                         <button type="button" onClick={() => fileRef.current?.click()} className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#037166] text-white flex items-center justify-center">
                             <Camera className="w-4 h-4" />

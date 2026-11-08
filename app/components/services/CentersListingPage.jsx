@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ArrowLeft, Star, MapPin, Filter, X, Store, RotateCcw } from 'lucide-react';
@@ -185,11 +186,11 @@ export function CentersListingPage({ category, subCategory, childCategoryId }) {
                                         <div className="flex flex-col md:flex-row h-full">
                                             {/* Image */}
                                             <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400'}
                                                     alt={center.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                />
+                                                 width={500} height={300} />
                                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a1a1a]/60" />
                                                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-bold">
                                                     Open Now

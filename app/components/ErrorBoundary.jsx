@@ -8,7 +8,7 @@ class ErrorBoundary extends React.Component {
         this.state = { hasError: false, error: null, errorInfo: null };
     }
 
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError() {
         return { hasError: true };
     }
 
@@ -27,7 +27,7 @@ class ErrorBoundary extends React.Component {
 
     handleReset = () => {
         this.setState({ hasError: false, error: null, errorInfo: null });
-        window.location.href = '/';
+        window.location.href = window.location.origin;
     };
 
     render() {
@@ -46,7 +46,7 @@ class ErrorBoundary extends React.Component {
                         </h1>
 
                         <p className="text-gray-600 mb-6">
-                            We're sorry for the inconvenience. An unexpected error occurred.
+                            We&apos;re sorry for the inconvenience. An unexpected error occurred.
                         </p>
 
                         {process.env.NODE_ENV === 'development' && this.state.error && (

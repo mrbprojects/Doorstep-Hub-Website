@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {  useRef, useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Camera, Loader2, Save, User, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -31,7 +32,9 @@ export default function ProfilePage() {
         formData.email.trim().toLowerCase() !== initialEmail
     );
 
-    useEffect(() => {
+    const [prevUser, setPrevUser] = useState(user);
+    if (user !== prevUser) {
+        setPrevUser(user);
         if (user) {
             setFormData({
                 name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
@@ -49,7 +52,7 @@ export default function ProfilePage() {
                 );
             }
         }
-    }, [user]);
+    }
 
     const handleEmailChange = (newEmail) => {
         setFormData((prev) => ({ ...prev, email: newEmail }));
@@ -203,7 +206,7 @@ export default function ProfilePage() {
                     <div className="relative">
                         <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center">
                             {previewImage ? (
-                                <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
+                                <Image src={previewImage} alt="Profile" className="w-full h-full object-cover"  width={500} height={300} unoptimized />
                             ) : (
                                 <User className="w-10 h-10 text-white" />
                             )}

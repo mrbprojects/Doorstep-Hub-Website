@@ -19,16 +19,12 @@ export function SmartAppBannerMeta() {
     if (typeof document === 'undefined') return;
 
     const promotion = getAppPromotionForRoute(pathname);
-    let metaTag = document.querySelector('meta[name="apple-itunes-app"]');
+    const metaTag = document.querySelector('meta[name="apple-itunes-app"]');
 
     if (!promotion || !promotion.ios?.appStoreId) {
-      // Safely disable the banner without detaching the DOM node.
-      // Calling metaTag.remove() detaches the element from document.head,
-      // breaking React's HostSingleton fiber tree and causing:
-      // "TypeError: Cannot read properties of null (reading 'removeChild')"
-      // during route transitions away from excluded pages (e.g. /services/payment-failed).
-      if (metaTag) {
-        metaTag.removeAttribute('content');
+      // Safely clear content attribute without detaching the node from document.head
+      if (metaTag && metaTag.getAttribute('content')) {
+        metaTag.setAttribute('content', '');
       }
       return;
     }
@@ -37,13 +33,11 @@ export function SmartAppBannerMeta() {
     const universalUrl = `https://doorstephub.com${pathname || '/'}`;
     const content = `app-id=${appStoreId}, app-argument=${universalUrl}`;
 
-    if (!metaTag) {
-      metaTag = document.createElement('meta');
-      metaTag.name = 'apple-itunes-app';
-      document.head.appendChild(metaTag);
+    if (metaTag) {
+      if (metaTag.getAttribute('content') !== content) {
+        metaTag.setAttribute('content', content);
+      }
     }
-
-    metaTag.content = content;
   }, [pathname]);
 
   return null;

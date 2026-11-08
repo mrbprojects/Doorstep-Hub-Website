@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { MapPin, ShoppingCart, ChevronDown, Menu, X, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -125,11 +126,11 @@ export function SpaSalonNavbar() {
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-[#C06C84]/10 hover:text-[#C06C84] transition-all overflow-hidden border border-transparent hover:border-[#C06C84]/20"
                         >
                             {isAuthenticated && user?.image ? (
-                                <img loading="lazy" decoding="async"
+                                <Image
                                     src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                                     alt={user.name}
                                     className="w-full h-full object-cover rounded-full"
-                                />
+                                 width={400} height={400} />
                             ) : (
                                 <User className="w-5 h-5 text-gray-600" />
                             )}

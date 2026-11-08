@@ -5,11 +5,8 @@ import { motion } from 'motion/react';
 import {
     Gift,
     Share2,
-    TrendingUp,
-    Users,
     Clock,
     CheckCircle2,
-    XCircle,
     Loader2,
     AlertTriangle,
     Send,
@@ -29,36 +26,38 @@ export default function PartnerAmcReferralPage() {
     const [customerPhone, setCustomerPhone] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const loadData = async () => {
-        if (!token) return;
-        setLoading(true);
-        try {
-            const [configRes, referralsRes] = await Promise.all([
-                getAmcReferralConfig(token).catch((err) => {
-                    console.error('Error fetching config:', err);
-                    return null;
-                }),
-                getMyAmcReferrals(token).catch((err) => {
-                    console.error('Error fetching referrals:', err);
-                    return null;
-                })
-            ]);
-
-            if (configRes?.success && configRes?.data) {
-                setConfig(configRes.data);
-            }
-            if (referralsRes?.success && referralsRes?.data) {
-                setReferrals(referralsRes.data);
-            }
-        } catch (err) {
-            toast.error('Failed to load referral details');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
-        loadData();
+        if (!token) return;
+        let active = true;
+        Promise.all([
+            getAmcReferralConfig(token).catch((err) => {
+                console.error('Error fetching config:', err);
+                return null;
+            }),
+            getMyAmcReferrals(token).catch((err) => {
+                console.error('Error fetching referrals:', err);
+                return null;
+            })
+        ])
+            .then(([configRes, referralsRes]) => {
+                if (!active) return;
+                if (configRes?.success && configRes?.data) {
+                    setConfig(configRes.data);
+                }
+                if (referralsRes?.success && referralsRes?.data) {
+                    setReferrals(referralsRes.data);
+                }
+            })
+            .catch(() => {
+                if (active) toast.error('Failed to load referral details');
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+        return () => {
+            active = false;
+        };
     }, [token]);
 
     const handleReferSubmit = async (e) => {

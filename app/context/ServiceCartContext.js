@@ -10,6 +10,8 @@ import { isObjectId } from '@/utils/slugHelper';
 
 const ServiceCartContext = createContext();
 
+const SERVICE_CATEGORIES = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
+
 export const useServiceCart = () => useContext(ServiceCartContext);
 
 export const ServiceCartProvider = ({ children }) => {
@@ -21,8 +23,7 @@ export const ServiceCartProvider = ({ children }) => {
     const [cartError, setCartError] = useState(false);
     const { location } = useLocationContext();
     const pathname = usePathname();
-    const [currentServiceFlow, setCurrentServiceFlow] = useState(null);
-    const serviceCategories = ['spa-salon', 'appliances', 'services', 'religious-services', 'pghostels', 'pg-hostel', 'religious'];
+    const currentServiceFlowRef = React.useRef(null);
 
     // Refs to hold latest values without triggering re-renders in the effect
     const cartItemsRef = React.useRef(cartItems);
@@ -62,11 +63,39 @@ export const ServiceCartProvider = ({ children }) => {
     }, [token, isAuthenticated]);
 
     useEffect(() => {
-        fetchCart();
-    }, [fetchCart]);
+        let isCancelled = false;
+        if (!isAuthenticated || !token) return;
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/get`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (isCancelled) return;
+                console.log("🛒 fetchCart Response:", data);
+                if (data.success) {
+                    setCartItems(data.cart?.items || []);
+                    setCartData(data.cart || null);
+                    setCartError(false);
+                } else {
+                    setCartError(true);
+                }
+            })
+            .catch(error => {
+                if (isCancelled) return;
+                console.error('Error fetching service cart:', error);
+                setCartError(true);
+            })
+            .finally(() => {
+                if (!isCancelled) setLoading(false);
+            });
+        return () => { isCancelled = true; };
+    }, [token, isAuthenticated]);
 
 
-    const addToCart = async (providerId, itemId, itemType = 'service', quantity = 1, parentServiceId = null, providerType = 'regular', suppressToast = false) => {
+    const addToCart = async (providerId, itemId, itemType = 'service', quantity = 1, parentServiceId = null, providerType = 'regular', ) => {
         if (!isAuthenticated) {
             toast.error('Please login to add items to cart');
             openAuthModal(); // Trigger the auth modal
@@ -227,18 +256,19 @@ export const ServiceCartProvider = ({ children }) => {
     useEffect(() => {
         const segments = pathname.split('/').filter(Boolean);
         const isPaymentErrorPage = segments.includes('payment-failed') || segments.includes('failure');
-        const match = serviceCategories.find(cat => segments.includes(cat));
+        const match = SERVICE_CATEGORIES.find(cat => segments.includes(cat));
 
         // 1. Check for Service Flow Change
         // Ignore "services" as a flow change if we are on a payment failure page, 
         // as that route is used for general error handling.
         // Also ignore flow changes between 'services' and 'appliances' because they share the same cart natively
+        const currentFlow = currentServiceFlowRef.current;
         const isFlowChanged = match && 
-                             currentServiceFlow && 
-                             currentServiceFlow !== match && 
+                             currentFlow && 
+                             currentFlow !== match && 
                              !isPaymentErrorPage &&
-                             !(currentServiceFlow === 'services' && match === 'appliances') &&
-                             !(currentServiceFlow === 'appliances' && match === 'services');
+                             !(currentFlow === 'services' && match === 'appliances') &&
+                             !(currentFlow === 'appliances' && match === 'services');
 
         // 2. Check for Location Change (compare against ref — no setState involved)
         const hasLocationChanged = locationLat != null && lastLocationRef.current != null && (
@@ -247,7 +277,7 @@ export const ServiceCartProvider = ({ children }) => {
         );
 
         if (isFlowChanged || hasLocationChanged) {
-            console.log(`🛒 Context Change Detected! Flow: ${currentServiceFlow}->${match}, Location changed: ${hasLocationChanged}. Clearing cart...`);
+            console.log(`🛒 Context Change Detected! Flow: ${currentFlow}->${match}, Location changed: ${hasLocationChanged}. Clearing cart...`);
             if (cartItemsRef.current.length > 0 && clearCartRef.current) {
                 clearCartRef.current(true);
             }
@@ -255,12 +285,12 @@ export const ServiceCartProvider = ({ children }) => {
 
         // Update tracking: write to ref (no state update = no re-render)
         // Only update flow if it's a valid service category and NOT a payment error page
-        if (match && !isPaymentErrorPage) setCurrentServiceFlow(match);
+        if (match && !isPaymentErrorPage) currentServiceFlowRef.current = match;
         if (locationLat != null) {
             lastLocationRef.current = { lat: locationLat, lng: locationLng };
         }
 
-    }, [pathname, locationLat, locationLng, currentServiceFlow]);
+    }, [pathname, locationLat, locationLng]);
     // ↑ lastLocation removed — it's now a ref, so no need in deps
 
     return (

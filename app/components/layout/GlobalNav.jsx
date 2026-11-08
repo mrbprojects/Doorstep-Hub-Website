@@ -3,21 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Search, User, Home, Briefcase, Calendar, MapPin, Tag, ChevronRight, ShoppingCart } from 'lucide-react';
+import { Menu, X, Search, Home, Briefcase, MapPin, Tag, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { useCart } from '@/context/CartContext';
-import { useServiceCart } from '@/context/ServiceCartContext';
+
+
 import { LocationBar } from '@/components/location/LocationBar';
 
-export function GlobalNav({ currentPage = 'home', breadcrumbs, onCartClick }) {
-  const { cartItems: productCartItems } = useCart();
-  const { cartItems: serviceCartItems } = useServiceCart();
+export function GlobalNav({ currentPage = 'home', breadcrumbs }) {
+  
+  
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSettings, setGlobalSettings] = useState(null);
 
-  const cartItemsCount = (productCartItems?.length || 0) + (serviceCartItems?.length || 0);
+  
 
   const handleNavigation = (href) => {
     router.push(href);

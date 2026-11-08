@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -195,9 +196,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                   
                   {/* Service Image */}
                   <div className="relative h-32 sm:h-36 overflow-hidden bg-slate-900 flex-shrink-0">
-                    <img
-                      loading="lazy"
-                      decoding="async"
+                    <Image
                       src={service.image}
                       alt={service.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -205,7 +204,7 @@ export function RecentlyBooked({ onServiceClick, onViewAll }) {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
                       }}
-                    />
+                     width={500} height={300} />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-transparent to-black/30" />
 
                     {/* Category Tag */}

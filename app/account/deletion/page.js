@@ -31,7 +31,9 @@ export default function AccountDeletionPage() {
 
     const otp = otpValues.join('');
 
-    useEffect(() => {
+    const [prevUser, setPrevUser] = useState(user);
+    if (user !== prevUser) {
+        setPrevUser(user);
         if (user) {
             setFormData((prev) => ({
                 ...prev,
@@ -40,7 +42,7 @@ export default function AccountDeletionPage() {
                 mobileNumber: (user.phone || user.mobile || '').replace(/\D/g, '').slice(-10),
             }));
         }
-    }, [user]);
+    }
 
     const triggerSendOtp = async (phone) => {
         if (!phone || phone.length !== 10) return;
@@ -71,7 +73,7 @@ export default function AccountDeletionPage() {
         if (phone.length === 10 && lastOtpMobile.current !== phone && !sendingOtp) {
             triggerSendOtp(phone);
         }
-    }, [formData.mobileNumber]);
+    }, [formData.mobileNumber, sendingOtp]);
 
     const handleOtpChange = (index, value) => {
         const val = value.replace(/[^0-9]/g, '');

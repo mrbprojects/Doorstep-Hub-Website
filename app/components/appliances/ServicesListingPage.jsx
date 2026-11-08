@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
-  ArrowLeft,
+  
   Star,
   MapPin,
   Filter,
@@ -15,7 +15,6 @@ import {
   ChevronRight,
   ShieldCheck,
   Home,
-  Shield,
   Heart,
   Truck,
   Receipt,
@@ -23,7 +22,6 @@ import {
   Tv,
   Volume2,
   Cpu,
-  Power,
   Wrench,
   Sparkles,
   Calendar,
@@ -106,7 +104,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   // Dynamic city from location context
   const cityName = useLocationContext()?.location?.city || (isLaptop ? 'Hyderabad' : 'Vijayawada');
 
-  useEffect(() => {
+  const [prevCategoryKey, setPrevCategoryKey] = useState(() => `${category || ''}__${subCategory || ''}`);
+  const currentCategoryKey = `${category || ''}__${subCategory || ''}`;
+  if (prevCategoryKey !== currentCategoryKey) {
+    setPrevCategoryKey(currentCategoryKey);
     if (subCategory) setPageTitle(subCategory);
     if (category) {
       if (category.toLowerCase().includes('tv')) {
@@ -119,7 +120,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
         setCategoryName(category);
       }
     }
-  }, [category, subCategory]);
+  }
 
   const toggleFavorite = (id, e) => {
     e.stopPropagation();
@@ -127,7 +128,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
       const next = prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id];
       try {
         localStorage.setItem('dhub_favorite_partners', JSON.stringify(next));
-      } catch (err) {}
+      } catch {}
       return next;
     });
   };
@@ -188,7 +189,26 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     };
 
     fetchServices();
-  }, [subCategoryId, childCategoryId, currentSlug, location?.lat, location?.lng, location?.city, minRating, cityName, isLaptop]);
+  }, [subCategoryId, childCategoryId, currentSlug, location?.lat, location?.lng, location?.city, minRating, cityName, isLaptop, subCategory]);
+
+  const fetchSubcategories = useCallback(async (catId, catSlug) => {
+    if (fetchedCatsRef.current.has(catId) || categorySubcats[catId]) return;
+    fetchedCatsRef.current.add(catId);
+
+    try {
+      const response = await fetch(`${API_BASE}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: catSlug })
+      });
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setCategorySubcats(prev => ({ ...prev, [catId]: data.data }));
+      }
+    } catch (e) {
+      console.error("Error fetching subcats:", e);
+    }
+  }, [categorySubcats]);
 
   // Fetch All Categories for Sidebar
   useEffect(() => {
@@ -229,26 +249,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     };
 
     fetchAllCategories();
-  }, [location?.lat, location?.lng, isLaptop, isTv, category]);
-
-  const fetchSubcategories = async (catId, catSlug) => {
-    if (fetchedCatsRef.current.has(catId) || categorySubcats[catId]) return;
-    fetchedCatsRef.current.add(catId);
-
-    try {
-      const response = await fetch(`${API_BASE}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: catSlug })
-      });
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
-        setCategorySubcats(prev => ({ ...prev, [catId]: data.data }));
-      }
-    } catch (e) {
-      console.error("Error fetching subcats:", e);
-    }
-  };
+  }, [location?.lat, location?.lng, isLaptop, isTv, category, fetchSubcategories]);
 
   const handleRatingChange = (rating) => {
     const newRating = rating === minRating ? 0 : rating;
@@ -317,13 +318,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     }
   };
 
-  const handleBack = () => {
-    if (categorySlug) {
-      router.push(`/${categorySlug}`);
-    } else {
-      router.push('/appliances');
-    }
-  };
+  
 
   // Dynamic description & fallback FAQs
   const pageDescription = customDescription
@@ -905,9 +900,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             <span className="absolute top-1 left-1 px-2 py-0.5 rounded-full bg-[#00796B] text-white text-[9px] font-bold shadow-xs z-10">
                               Open Now
                             </span>
-                            <img
-                              loading="lazy"
-                              decoding="async"
+                            <Image
                               src={centerImg ? imageLoader({ src: centerImg }) : '/servicecenterpointlogo.png'}
                               alt={center.business_name || center.name || 'Service Partner'}
                               className="w-full h-full object-contain p-2"
@@ -915,7 +908,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = '/servicecenterpointlogo.png';
                               }}
-                            />
+                             width={500} height={300} />
                           </div>
 
                           {/* Details */}
@@ -1023,9 +1016,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                       >
                         {/* Top Image: Clean 16:10 aspect with subtle zoom */}
                         <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-gray-50 border-b border-gray-100">
-                          <img
-                            loading="lazy"
-                            decoding="async"
+                          <Image
                             src={serviceImg ? imageLoader({ src: serviceImg }) : '/electric-appliance.png'}
                             alt={service.name || 'Service'}
                             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
@@ -1033,7 +1024,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                               e.currentTarget.onerror = null;
                               e.currentTarget.src = '/electric-appliance.png';
                             }}
-                          />
+                           width={500} height={300} />
                           {/* Rating Pill overlay (Google Material style) */}
                           <div className="absolute top-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md text-white text-[11px] font-semibold shadow-xs">
                             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
@@ -1092,9 +1083,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                             </div>
 
                             <button
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push('/book-appointment');
+                                router.push(`/${service.slug || 'book-appointment'}`);
                               }}
                               className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#e89117] to-[#00796B] text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
                             >

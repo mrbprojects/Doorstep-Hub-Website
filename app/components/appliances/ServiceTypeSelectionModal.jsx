@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Store, X } from 'lucide-react';
+import { ShieldCheck, X } from 'lucide-react';
 
 export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
     if (!isOpen) return null;
@@ -71,7 +71,7 @@ export function ServiceTypeSelectionModal({ isOpen, onClose, onSelect }) {
 
                     {/* Footer */}
                     <div className="p-6 bg-gray-50/50 border-t border-gray-50 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                        Doorstep Hub • India's Trusted Doorstep Service Provider
+                        Doorstep Hub • India&apos;s Trusted Doorstep Service Provider
                     </div>
                 </motion.div>
             </div>

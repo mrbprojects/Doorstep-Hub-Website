@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
-import { Search, Star, MapPin, Clock, Heart, ChevronLeft, SlidersHorizontal } from 'lucide-react';
+import { Search, Star, MapPin, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function FeaturedPackagesPage() {
@@ -189,11 +190,11 @@ function StoreListingCard({ store, index, router }) {
             className="bg-white rounded-2xl overflow-hidden border border-[#E8ECF2] cursor-pointer group shadow-lg hover:shadow-xl transition-all h-[480px] flex flex-col"
         >
             <div className="relative h-56 overflow-hidden">
-                <img loading="lazy" decoding="async"
+                <Image
                     src={store.image}
                     alt={store.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                 width={500} height={300} />
                 {store.rating > 0 && (
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
                         <Star className="w-3.5 h-3.5 fill-[#C06C84] text-[#C06C84]" />

@@ -1,14 +1,27 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Star, MapPin, ArrowRight, Filter, X, Loader2, Search } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, ArrowRight, Filter, X, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 
+const ShimmerGrid = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="group">
+                <div className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
+                    <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
 export function ServiceCentersListingPage() {
     const router = useRouter();
-    const { location } = useLocation();
+    const { location, detectLocation } = useLocation();
     const [stores, setStores] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedRating, setSelectedRating] = useState(null);
@@ -98,20 +111,6 @@ export function ServiceCentersListingPage() {
     const handleStoreClick = (storeId) => {
         const store = stores.find(s => s.id === storeId);
         router.push(`/service-list/${store?.slug || storeId}`);
-    };
-
-    const ShimmerGrid = () => {
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="group">
-                        <div className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
-                            <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
     };
 
     return (
@@ -269,14 +268,14 @@ export function ServiceCentersListingPage() {
                                         >
                                             <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full flex flex-col">
                                                 <div className="relative h-32 sm:h-36 overflow-hidden bg-[#eaf5f2]">
-                                                    <img loading="lazy" decoding="async"
+                                                    <Image
                                                         src={store.bannerImage || store.logo || store.image}
                                                         alt={`${store.name} logo`}
                                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                         onError={(e) => {
                                                             e.currentTarget.src = store.logo || store.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400';
                                                         }}
-                                                    />
+                                                     width={500} height={300} />
                                                     {/* Rating Badge - Bottom Left Flush */}
                                                     <div className="absolute bottom-0 left-0 z-20">
                                                         <div className="flex items-center gap-1 px-3 py-1.5 rounded-tr-xl bg-black/60 backdrop-blur-md border-t border-r border-white/10">

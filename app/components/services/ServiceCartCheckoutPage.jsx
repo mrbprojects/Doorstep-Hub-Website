@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Home, Briefcase } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, User, Loader2, Home, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -11,6 +11,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 import { AnimatePresence } from 'motion/react';
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
+import { useMounted } from '@/hooks/useMounted';
 
 function areCitiesMatching(cityA, cityB) {
   if (!cityA || !cityB) return true;
@@ -40,24 +41,27 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [technicianPreference, setTechnicianPreference] = useState('any');
-    const [walletBalance, setWalletBalance] = useState(0);
+    const [, setWalletBalance] = useState(0);
     const [walletLimits, setWalletLimits] = useState({
         minWalletUsageOrderAmount: 0,
         maxWalletUsageOrderAmount: 0,
         minWalletUsageEnabled: false,
         maxWalletUsageEnabled: false,
     });
-    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+    const [, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
     const [fullAddress, setFullAddress] = useState(selectedAddress);
+    const [prevSelectedAddress, setPrevSelectedAddress] = useState(selectedAddress);
+    if (prevSelectedAddress !== selectedAddress) {
+        setPrevSelectedAddress(selectedAddress);
+        if (selectedAddress) {
+            setFullAddress(selectedAddress);
+        }
+    }
     const [locationMismatch, setLocationMismatch] = useState(null);
 
     const providerCity = cartData?.provider?.cityName;
     const userCity = fullAddress?.cityName || selectedAddress?.cityName;
     const isLocationMismatch = Boolean(providerCity && userCity && !areCitiesMatching(userCity, providerCity));
-
-    useEffect(() => {
-        if (selectedAddress) setFullAddress(selectedAddress);
-    }, [selectedAddress]);
 
     // Ensure complete address details even if sessionStorage had partial snapshot
     useEffect(() => {
@@ -163,7 +167,11 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     setPaymentStatus('failure');
                     sessionStorage.removeItem('pending_booking');
                     toast.error('Payment failed or was cancelled. Your booking details are preserved in cart.');
-                    router.push('/services/payment-failed');
+                    const currentCheckoutUrl = window.location.pathname + window.location.search;
+                    try {
+                        sessionStorage.setItem('last_checkout_url', currentCheckoutUrl);
+                    } catch {}
+                    router.push(`/services/payment-failed?returnUrl=${encodeURIComponent(currentCheckoutUrl)}`);
                 }
             })
             .catch((err) => {
@@ -173,14 +181,15 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     }, [clearCart, onSuccess, bookingCost, token, router]);
 
     // Check authentication on mount
-    useEffect(() => {
+    const [prevAuth, setPrevAuth] = useState(isAuthenticated);
+    if (prevAuth !== isAuthenticated) {
+        setPrevAuth(isAuthenticated);
         if (!isAuthenticated) {
             setShowAuthModal(true);
         }
-    }, [isAuthenticated]);
+    }
 
     // Service window: 9 AM to 9 PM (9:00 to 21:00)
-    const SERVICE_START_HOUR = 9;
     const SERVICE_END_HOUR = 21;
     const BUFFER_HOURS = 3;
 
@@ -188,27 +197,36 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const getAvailableDates = () => {
         const now = new Date();
         const dates = [];
-        let startDate = new Date(now);
 
         // Check if today is still available (current time + 3hr buffer < 9 PM)
         const todayCutoff = new Date();
         todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0); // 6 PM cutoff
 
-        if (now > todayCutoff) {
-            // Skip today, start from tomorrow
-            startDate.setDate(startDate.getDate() + 1);
-        }
+        // If current time is past cutoff (e.g. 6 PM onwards), today has no slots; start from tomorrow
+        const startOffset = now > todayCutoff ? 1 : 0;
 
-        for (let i = (now > todayCutoff ? 1 : 0); i < 7; i++) {
-            const date = new Date(startDate);
-            date.setDate(date.getDate() + i);
+        for (let i = 0; i < 7; i++) {
+            const offset = startOffset + i;
+            const date = new Date();
+            date.setDate(now.getDate() + offset);
+
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const value = `${yyyy}-${mm}-${dd}`;
+
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const dayLabel = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : dayName;
+            const dateLabel = monthDay;
+            const fullLabel = offset === 0 ? `Today, ${monthDay}` : offset === 1 ? `Tomorrow, ${monthDay}` : `${dayName}, ${monthDay}`;
+
             dates.push({
-                value: date.toISOString().split('T')[0],
-                label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric'
-                }),
+                value,
+                dayLabel,
+                dateLabel,
+                label: fullLabel,
             });
         }
         return dates;
@@ -217,7 +235,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     // Smart time slot availability based on selected date
     const getAvailableTimes = (selectedDateValue) => {
         const now = new Date();
-        const selectedDate = new Date(selectedDateValue);
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
 
         // Time slots (2-hour windows)
         const allTimeSlots = [
@@ -230,7 +251,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         ];
 
         // If today and past cutoff time, filter available slots
-        if (selectedDate.toDateString() === now.toDateString()) {
+        if (selectedDateValue === todayStr) {
             const currentHour = now.getHours();
             const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS; // 6 PM cutoff
 
@@ -238,30 +259,35 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 return []; // No slots available today
             }
 
-            return allTimeSlots.filter(slot => slot.startHour > currentHour);
+            return allTimeSlots.filter(slot => slot.startHour >= currentHour + BUFFER_HOURS);
         }
 
         return allTimeSlots;
     };
 
-    const availableDates = getAvailableDates();
-    const availableTimesForSelectedDate = getAvailableTimes(bookedDate);
+    const mounted = useMounted();
+    const availableDates = mounted ? getAvailableDates() : [];
+    const selectedBookedDate = bookedDate || (availableDates[0]?.value ?? '');
+    const availableTimesForSelectedDate = mounted ? getAvailableTimes(selectedBookedDate) : [];
+    const selectedBookedTime = bookedTime || (availableTimesForSelectedDate[0]?.value ?? '');
 
     // Reset time when date changes
-    useEffect(() => {
+    const [prevBookedDate, setPrevBookedDate] = useState(bookedDate);
+    if (prevBookedDate !== bookedDate) {
+        setPrevBookedDate(bookedDate);
         setBookedTime('');
-    }, [bookedDate]);
+    }
 
     const handleCheckout = async () => {
         if (!selectedAddress) {
             toast.error('Please select an address');
             return;
         }
-        if (!bookedDate) {
+        if (!selectedBookedDate) {
             toast.error('Please select a date');
             return;
         }
-        if (!bookedTime) {
+        if (!selectedBookedTime) {
             toast.error('Please select a time');
             return;
         }
@@ -297,37 +323,52 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
                 : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 
+            const currentCheckoutUrl = window.location.pathname + window.location.search;
+            try {
+                sessionStorage.setItem('last_checkout_url', currentCheckoutUrl);
+            } catch {}
+
+            const isProfessional = cartData?.providerType === 'professional' ||
+                cartData?.provider?.providerType === 'professional' ||
+                cartItems.some(i => i.providerType === 'professional');
+            const checkoutProviderType = isProfessional ? 'professional' : (cartData?.providerType || 'regular');
+
+            const payload = {
+                serviceAddressId: selectedAddress._id || selectedAddress.id,
+                bookedDate: selectedBookedDate,
+                bookedTime: selectedBookedTime,
+                paymentMethod,
+                paymentOption: 'FULL',
+                providerType: checkoutProviderType,
+                sourceOfLead: 'website',
+                returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
+                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
+                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed`
+            };
+
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    serviceAddressId: selectedAddress._id,
-                    bookedDate,
-                    bookedTime,
-                    paymentMethod,
-                    sourceOfLead: 'website',
-                    returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
-                    surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                    furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=cancelled`
-                })
+                body: JSON.stringify(payload)
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
             console.log('💳 Checkout Response:', data);
 
-            if (data.success) {
+            if (response.ok && data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
                     // Save pending booking details to sessionStorage before redirect
                     sessionStorage.setItem('pending_booking', JSON.stringify({
-                        bookedDate,
-                        bookedTime,
+                        bookedDate: selectedBookedDate,
+                        bookedTime: selectedBookedTime,
                         address: selectedAddress,
                         orderId: data.bookingId || data.orderId || null,
                         txnid: data.txnid || null
                     }));
+                    sessionStorage.setItem('last_checkout_url', currentCheckoutUrl);
 
                     // Redirect to Easebuzz payment gateway with access_key
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
@@ -453,7 +494,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         <button
                                             key={date.value}
                                             onClick={() => setBookedDate(date.value)}
-                                            className={`p-4 rounded-xl font-medium transition-all ${bookedDate === date.value
+                                            className={`p-4 rounded-xl font-medium transition-all ${(bookedDate || selectedBookedDate) === date.value
                                                 ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
                                                 : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                                                 }`}
@@ -478,7 +519,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             </h4>
                             {availableTimesForSelectedDate.length === 0 ? (
                                 <p className="text-white/70 text-sm">
-                                    {bookedDate
+                                    {selectedBookedDate
                                         ? 'No time slots available for selected date'
                                         : 'Please select a date first'
                                     }
@@ -489,7 +530,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         <button
                                             key={time.value}
                                             onClick={() => setBookedTime(time.value)}
-                                            className={`p-4 rounded-xl font-medium transition-all ${bookedTime === time.value
+                                            className={`p-4 rounded-xl font-medium transition-all ${(bookedTime || selectedBookedTime) === time.value
                                                 ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white shadow-lg shadow-[#037166]/30'
                                                 : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                                                 }`}
@@ -721,14 +762,14 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             )}
 
                             {/* Selected Date/Time Preview */}
-                            {bookedDate && bookedTime && (
+                            {selectedBookedDate && selectedBookedTime && (
                                 <div className="p-4 rounded-lg bg-[#037166]/10 border border-[#037166]/20 mb-6">
                                     <p className="text-white/80 text-sm mb-2">Scheduled for:</p>
                                     <p className="text-white font-medium">
-                                        {availableDates.find(d => d.value === bookedDate)?.label}
+                                        {availableDates.find(d => d.value === selectedBookedDate)?.label}
                                     </p>
                                     <p className="text-white font-medium">
-                                        {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
+                                        {availableTimesForSelectedDate.find(t => t.value === selectedBookedTime)?.label}
                                     </p>
                                 </div>
                             )}
@@ -738,8 +779,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={handleCheckout}
-                                disabled={loading || !bookedDate || !bookedTime}
-                                className={`w-full px-6 py-4 rounded-xl font-medium text-lg transition-all ${loading || !bookedDate || !bookedTime
+                                disabled={loading || !selectedBookedDate || !selectedBookedTime}
+                                className={`w-full px-6 py-4 rounded-xl font-medium text-lg transition-all ${loading || !selectedBookedDate || !selectedBookedTime
                                     ? 'bg-white/20 text-white/60 cursor-not-allowed'
                                     : 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white hover:shadow-lg hover:shadow-[#037166]/40'
                                     }`}
@@ -757,7 +798,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                             </motion.button>
 
                             <p className="text-white/60 text-xs text-center mt-4">
-                                You'll receive a confirmation email and SMS
+                                You&apos;ll receive a confirmation email and SMS
                             </p>
                         </motion.div>
                     </div>

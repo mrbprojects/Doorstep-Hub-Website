@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Home, Download, Share2, Sparkles } from 'lucide-react';
@@ -7,7 +8,7 @@ import { CheckCircle2, Home, Download, Share2, Sparkles } from 'lucide-react';
 export default function SuccessPage() {
     const router = useRouter();
 
-    const bookingId = `SPA${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const [bookingId] = useState(() => `SPA${Math.random().toString(36).substring(2, 11).toUpperCase()}`);
 
     const handleBackToHome = () => {
         router.push('/spa-salon');

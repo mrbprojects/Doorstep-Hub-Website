@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
+import { useMounted } from '@/hooks/useMounted';
 
 // Known top-level section prefixes (not service detail slugs)
 const KNOWN_SECTIONS = [
@@ -21,13 +22,11 @@ const KNOWN_SECTIONS = [
 ];
 
 export function FloatingActionButtons() {
-    const [mounted, setMounted] = useState(false);
+    const mounted = useMounted();
     const [hasBanner, setHasBanner] = useState(false);
     const pathname = usePathname();
 
     useEffect(() => {
-        setMounted(true);
-
         const checkBanner = () => {
             if (typeof document !== 'undefined') {
                 setHasBanner(document.body.classList.contains('has-app-install-banner'));

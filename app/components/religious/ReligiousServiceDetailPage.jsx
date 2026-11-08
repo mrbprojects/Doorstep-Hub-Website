@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
-    ArrowLeft, Star, TrendingUp, DollarSign, Wifi, Utensils, Shirt, Zap,
-    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X,
-    Calendar, Flower2, Loader2, CheckCircle, ChevronRight, ChevronLeft
+    ArrowLeft, Star, DollarSign, Wifi, Utensils, Shirt, Zap,
+    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, Flower2, Loader2, CheckCircle, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
-import Slider from 'react-slick';
+import 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/religious/AddonsModal';
@@ -31,39 +31,42 @@ const amenityIcons = {
 };
 
 export default function ReligiousServiceDetailPage({ slugOverride = null }) {
-    const params = useParams();
     const router = useRouter();
+    const params = useParams();
+    
     const slugOrId = slugOverride || params.slug || params.id;
     const searchParams = useSearchParams();
 
-    const [context, setContext] = useState({
-        subcategoryId: searchParams.get('subcategoryId'),
-        subCategoryName: searchParams.get('subCategoryName'),
-        categoryName: searchParams.get('categoryName'),
-        categoryId: searchParams.get('categoryId')
-    });
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
+    const [context] = useState(() => {
+        const initial = {
+            subcategoryId: searchParams.get('subcategoryId'),
+            subCategoryName: searchParams.get('subCategoryName'),
+            categoryName: searchParams.get('categoryName'),
+            categoryId: searchParams.get('categoryId')
+        };
+        if (typeof window === 'undefined') return initial;
+        try {
             const stored = sessionStorage.getItem('religious_service_context');
             if (stored) {
                 const parsed = JSON.parse(stored);
-                setContext(prev => ({
-                    ...prev,
-                    subcategoryId: parsed.subcategoryId || prev.subcategoryId,
-                    subCategoryName: parsed.subCategoryName || prev.subCategoryName,
-                    categoryName: parsed.categoryName || prev.categoryName,
-                    categoryId: parsed.categoryId || prev.categoryId
-                }));
+                return {
+                    subcategoryId: parsed.subcategoryId || initial.subcategoryId,
+                    subCategoryName: parsed.subCategoryName || initial.subCategoryName,
+                    categoryName: parsed.categoryName || initial.categoryName,
+                    categoryId: parsed.categoryId || initial.categoryId
+                };
             }
+        } catch {
+            // ignore
         }
-    }, []);
+        return initial;
+    });
 
     const { subcategoryId } = context;
 
     const [activeTab, setActiveTab] = useState('portfolio');
-    const { scrollY } = useScroll();
-    const headerOpacity = useTransform(scrollY, [0, 300], [1, 0.8]);
+    
+    
 
     const [serviceData, setServiceData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -179,7 +182,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
             }
         };
         fetchServiceData();
-    }, [slugOrId]);
+    }, [slugOrId, router]);
 
     useEffect(() => {
         const run = async () => {
@@ -357,87 +360,157 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                 </motion.button>
 
                 {/* ── Hero 3-Card Section ────────────────────────────────────────────── */}
-                {/* Mobile: stack → Tablet: 2-col → Desktop: 3-col */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)_240px] gap-3 sm:gap-4 items-start mb-4 sm:mb-6"
+                    className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-stretch mb-4 sm:mb-6"
                 >
-                    {/* CARD 1: Banner Image — spans both tablet cols so it gets full width on tablet */}
-                    <div className="relative w-full h-48 sm:h-56 lg:h-[220px] sm:col-span-2 lg:col-span-1 rounded-2xl overflow-hidden border border-[var(--saffron)]/30 shadow-lg bg-white">
-                        <img
-                            src={serviceData.mainImage || serviceData.logo}
-                            alt={serviceData.name}
-                            loading="eager"
-                            decoding="sync"
-                            fetchPriority="high"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
+                    {/* CARD 1: Properly Fitted Sacred Banner/Logo Image */}
+                    <div className="md:col-span-4 lg:col-span-4 rounded-2xl overflow-hidden border border-amber-200/70 shadow-md bg-stone-950 relative flex items-center justify-center min-h-[220px] sm:min-h-[240px] group">
+                        {/* Ambient blurred backdrop so any aspect ratio fills naturally without harsh borders */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            <Image
+                                src={serviceData.mainImage || serviceData.logo}
+                                alt={serviceData.name}
+                                fill
+                                className="object-cover blur-lg opacity-40 scale-110"
+                                aria-hidden="true"
+                            />
+                            <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" />
+                        </div>
 
-                    {/* CARD 2: Store Info */}
-                    <div className="relative w-full min-w-0 bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg">
-                        <h1 className="break-words text-lg sm:text-xl font-extrabold text-[var(--deep-charcoal)] leading-tight">
-                            {serviceData.name}
-                        </h1>
-                        <div className="flex items-start gap-1.5 mt-1.5 text-xs text-gray-600">
-                            <MapPin className="w-3.5 h-3.5 text-[var(--saffron)] shrink-0 mt-0.5" />
-                            <span>{serviceData.location}</span>
+                        {/* Unclipped, 100% visible sharp image */}
+                        <div className="relative w-full h-full min-h-[220px] sm:min-h-[240px] flex items-center justify-center p-3">
+                            <Image
+                                src={serviceData.mainImage || serviceData.logo}
+                                alt={serviceData.name}
+                                fill
+                                priority
+                                className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                                sizes="(max-width: 768px) 100vw, 420px"
+                            />
                         </div>
-                        <div className="flex items-center gap-1.5 mt-2">
-                            <Star className="w-3.5 h-3.5 fill-[var(--saffron)] text-[var(--saffron)] shrink-0" />
-                            <span className="font-bold text-xs sm:text-sm text-gray-900">{serviceData.rating}</span>
-                            <span className="text-[11px] text-gray-500 ml-1">Starts from ₹{serviceData.basePrice}</span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2 mt-3">
-                            <a
-                                href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
-                                target="_blank" rel="noopener noreferrer"
-                                className="flex items-center justify-center w-24 sm:w-28 h-9 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5"
-                                title="Get it on Google Play"
-                            >
-                                <img src="/andriod1.png" alt="Google Play" loading="lazy" decoding="async" className="h-full w-auto object-contain" />
-                            </a>
-                            <a
-                                href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
-                                target="_blank" rel="noopener noreferrer"
-                                className="flex items-center justify-center w-24 sm:w-28 h-9 rounded-full bg-[#DEF2EF] hover:bg-[#cbece6] transition-all border border-[#9ecbc3]/50 shadow-sm overflow-hidden p-0.5"
-                                title="Download on the App Store"
-                            >
-                                <img src="/apple2.png" alt="App Store" loading="lazy" decoding="async" className="h-full w-auto object-contain" />
-                            </a>
+
+                        {/* Spiritual Badge */}
+                        <div className="absolute top-3 left-3 z-10 pointer-events-none">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-amber-400/40 text-[10px] font-bold text-amber-300 tracking-wide shadow-sm">
+                                <Sparkles className="w-3 h-3 text-amber-400" />
+                                Vedic Services
+                            </span>
                         </div>
                     </div>
 
-                    {/* CARD 3: Puja Booking Hours */}
-                    <div className="relative w-full min-w-0 bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 shadow-lg">
-                        {/* Header */}
-                        <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-gray-100">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[var(--saffron)]/10 flex items-center justify-center shrink-0">
-                                <Clock className="w-4 h-4 text-[var(--saffron)]" />
+                    {/* CARD 2: Store Info with Perfect Alignment & Typography */}
+                    <div className="md:col-span-5 lg:col-span-5 bg-white border border-amber-200/70 rounded-2xl p-4 sm:p-5 shadow-md flex flex-col justify-between min-h-[220px] sm:min-h-[240px]">
+                        <div>
+                            {/* Badges */}
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-[var(--saffron)] border border-amber-200 text-[11px] font-extrabold uppercase tracking-wider">
+                                    <Flower2 className="w-3 h-3" />
+                                    Pooja & Vedic Rituals
+                                </span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold">
+                                    <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                    Verified Priest
+                                </span>
                             </div>
-                            <div className="min-w-0">
-                                <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 leading-tight truncate">Puja Booking Hours</h3>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+
+                            {/* Title */}
+                            <h1 className="text-lg sm:text-xl font-extrabold text-[var(--deep-charcoal)] leading-tight tracking-tight">
+                                {serviceData.name}
+                            </h1>
+
+                            {/* Location */}
+                            <div className="flex items-start gap-1.5 mt-2 text-xs sm:text-[13px] text-gray-600">
+                                <MapPin className="w-3.5 h-3.5 text-[var(--saffron)] shrink-0 mt-0.5" />
+                                <span className="line-clamp-2 leading-relaxed">{serviceData.location}</span>
+                            </div>
+                        </div>
+
+                        {/* Pricing & Ratings */}
+                        <div>
+                            <div className="pt-2.5 mt-2.5 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500 text-white font-extrabold text-xs shadow-xs">
+                                        <Star className="w-3 h-3 fill-white" />
+                                        <span>{serviceData.rating}</span>
+                                    </div>
+                                    <span className="text-xs text-gray-500 font-medium">
+                                        {serviceData.orders > 0 ? `${serviceData.orders}+ Ceremonies` : 'Highly Rated'}
                                     </span>
-                                    <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Open Now</span>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block leading-none">Starting At</span>
+                                    <span className="text-sm sm:text-base font-black text-emerald-700 leading-tight">
+                                        ₹{serviceData.basePrice}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* App Download Pills */}
+                            <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center gap-2">
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0 mr-1">Book on App:</span>
+                                <a
+                                    href={globalSettings?.customerAndroidAppLink || "https://play.google.com/store/apps/details?id=com.doorstephub.customer"}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center h-7 px-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all shadow-xs"
+                                    title="Get it on Google Play"
+                                >
+                                    <Image src="/andriod1.png" alt="Google Play" className="h-4 w-auto object-contain" width={70} height={20} />
+                                </a>
+                                <a
+                                    href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center h-7 px-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all shadow-xs"
+                                    title="Download on the App Store"
+                                >
+                                    <Image src="/apple2.png" alt="App Store" className="h-4 w-auto object-contain" width={70} height={20} />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CARD 3: Puja Booking Hours — Equal Height & Cohesive Design */}
+                    <div className="md:col-span-3 lg:col-span-3 bg-white border border-amber-200/70 rounded-2xl p-4 sm:p-5 shadow-md flex flex-col justify-between min-h-[220px] sm:min-h-[240px]">
+                        <div>
+                            {/* Header */}
+                            <div className="flex items-center justify-between pb-2.5 border-b border-gray-100">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                                        <Clock className="w-4 h-4 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 leading-tight">Puja Booking Hours</h3>
+                                    </div>
+                                </div>
+                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
+                                    <span className="relative flex h-1.5 w-1.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                    </span>
+                                    Open Now
+                                </span>
+                            </div>
+
+                            {/* Hours Details */}
+                            <div className="space-y-2 mt-2.5">
+                                <div className="bg-amber-50/40 rounded-xl p-2 border border-amber-100">
+                                    <span className="text-gray-500 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Monday - Saturday</span>
+                                    <span className="text-gray-900 font-extrabold text-xs sm:text-[13px] block">06:00 AM - 09:00 PM</span>
+                                </div>
+                                <div className="bg-amber-50/40 rounded-xl p-2 border border-amber-100">
+                                    <span className="text-gray-500 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Sunday</span>
+                                    <span className="text-gray-900 font-extrabold text-xs sm:text-[13px] block">06:00 AM - 10:00 PM</span>
                                 </div>
                             </div>
                         </div>
-                        {/* Hours */}
-                        <div className="space-y-2">
-                            <div>
-                                <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Monday - Saturday</span>
-                                <span className="text-gray-800 font-extrabold text-xs sm:text-sm block">06:00 AM - 09:00 PM</span>
-                            </div>
-                            <div className="h-px w-full bg-gray-100" />
-                            <div>
-                                <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Sunday</span>
-                                <span className="text-gray-800 font-extrabold text-xs sm:text-sm block">06:00 AM - 10:00 PM</span>
-                            </div>
+
+                        {/* Bottom Tag */}
+                        <div className="mt-2.5 pt-2 border-t border-gray-100 text-center">
+                            <span className="text-[11px] text-amber-800 font-semibold inline-flex items-center gap-1">
+                                <Sparkles className="w-3 h-3 text-[var(--saffron)]" />
+                                Doorstep Vedic Specialist
+                            </span>
                         </div>
                     </div>
                 </motion.div>
@@ -465,7 +538,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                 className="py-2 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-[var(--saffron)] data-[state=active]:to-[var(--temple-red)] data-[state=active]:text-white rounded-xl flex items-center justify-center shadow-sm"
                             >
                                 <MapPin className="w-4 h-4 mr-1.5 shrink-0" />
-                                Shortly Aboutus
+                                About Provider
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -540,13 +613,11 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                                         {/* Thumbnail */}
                                                         <div className="w-28 sm:w-36 shrink-0 bg-gray-100 relative self-stretch min-h-[110px]">
                                                             {pkg.image ? (
-                                                                <img
+                                                                <Image
                                                                     src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image}`}
                                                                     alt={pkg.name}
-                                                                    loading="lazy"
-                                                                    decoding="async"
                                                                     className="absolute inset-0 w-full h-full object-cover"
-                                                                />
+                                                                 width={500} height={300} />
                                                             ) : (
                                                                 <div className="flex items-center justify-center h-full text-gray-300">
                                                                     <Flower2 className="w-8 h-8 opacity-30" />
@@ -757,7 +828,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                             onClick={() => setRateCardImageIndex(idx)}
                                             className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[var(--saffron)] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                         >
-                                            <img loading="lazy" decoding="async" src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} className="w-full h-full object-cover" alt="" />
+                                            <Image src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} className="w-full h-full object-cover" alt=""  width={500} height={300} />
                                         </button>
                                     ))}
                                 </div>

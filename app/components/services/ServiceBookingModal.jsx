@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronRight, ArrowLeft, CheckCircle, Search, Loader2, Sparkles } from 'lucide-react';
+import { X, ChevronRight, ArrowLeft, Search, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocationContext } from '@/context/LocationContext';
 
@@ -16,41 +17,45 @@ export function ServiceBookingModal({ isOpen, onClose }) {
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Reset state when modal opens/closes
-    useEffect(() => {
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+    if (prevIsOpen !== isOpen) {
+        setPrevIsOpen(isOpen);
         if (isOpen) {
             setStep(1);
             setSelectedCategory(null);
             setSubCategories([]);
             setSearchQuery('');
-            fetchCategories();
         }
-    }, [isOpen]);
+    }
 
-    const fetchCategories = async () => {
-        setLoading(true);
-        try {
+    useEffect(() => {
+        let isCancelled = false;
+        if (isOpen) {
             const body = location?.lat && location?.lng
                 ? { lattitude: location.lat, longitude: location.lng }
                 : {};
-
-            // Using the same endpoint as Hero.jsx
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getallcategorys`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
-            });
-
-            const data = await response.json();
-            if (data.success && data.data) {
-                setCategories(data.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch categories:', error);
-        } finally {
-            setLoading(false);
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (isCancelled) return;
+                    if (data.success && data.data) {
+                        setCategories(data.data);
+                    }
+                })
+                .catch(error => {
+                    if (isCancelled) return;
+                    console.error('Failed to fetch categories:', error);
+                })
+                .finally(() => {
+                    if (!isCancelled) setLoading(false);
+                });
         }
-    };
+        return () => { isCancelled = true; };
+    }, [isOpen, location]);
 
     const handleCategorySelect = async (category) => {
         setSelectedCategory(category);
@@ -193,11 +198,11 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                             className="group flex items-center gap-4 p-4 rounded-xl bg-[#1a1a1a] border border-[#333] hover:border-[#037166] hover:bg-[#037166]/10 transition-all text-left"
                                         >
                                             <div className="w-12 h-12 rounded-lg bg-[#222] overflow-hidden flex-shrink-0 border border-[#333] group-hover:border-[#037166]/30">
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${cat.image}`}
                                                     alt={cat.name}
                                                     className="w-full h-full object-cover"
-                                                />
+                                                 width={500} height={300} />
                                             </div>
                                             <div className="flex-1">
                                                 <h4 className="font-semibold text-white group-hover:text-[#04a99d] transition-colors">{cat.name}</h4>
@@ -217,7 +222,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                             className="group flex items-center gap-4 p-4 rounded-xl bg-[#1a1a1a] border border-[#333] hover:border-[#037166] hover:bg-[#037166]/10 transition-all text-left"
                                         >
                                             <div className="w-12 h-12 rounded-lg bg-[#222] overflow-hidden flex-shrink-0 border border-[#333] group-hover:border-[#037166]/30">
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={sub.image?.startsWith('http') ? sub.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${sub.image}`}
                                                     alt={sub.name}
                                                     className="w-full h-full object-cover"
@@ -225,7 +230,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
                                                         e.target.style.display = 'none';
                                                         e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/></svg></div>';
                                                     }}
-                                                />
+                                                 width={500} height={300} />
                                             </div>
                                             <div className="flex-1">
                                                 <h4 className="font-semibold text-white group-hover:text-[#04a99d] transition-colors">{sub.name}</h4>
@@ -240,10 +245,10 @@ export function ServiceBookingModal({ isOpen, onClose }) {
 
                         {/* Empty States */}
                         {!loading && step === 1 && filteredCategories.length === 0 && (
-                            <div className="text-center py-10 text-gray-500">No categories found matching "{searchQuery}"</div>
+                            <div className="text-center py-10 text-gray-500">No categories found matching &quot;{searchQuery}&quot;</div>
                         )}
                         {!loading && step === 2 && filteredSubCategories.length === 0 && (
-                            <div className="text-center py-10 text-gray-500">No services found matching "{searchQuery}"</div>
+                            <div className="text-center py-10 text-gray-500">No services found matching &quot;{searchQuery}&quot;</div>
                         )}
                     </div>
 

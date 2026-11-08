@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Calendar, ChevronRight, Clock, Loader2, Package, RefreshCw } from 'lucide-react';
@@ -68,18 +69,16 @@ export default function MyBookingsPage() {
         async (targetPage = 1, append = false) => {
             if (!token) return;
 
-            if (targetPage === 1 && !append) {
-                setLoading(true);
-            } else {
+            if (append) {
                 setLoadingMore(true);
             }
-            setError('');
 
             try {
                 const res = await fetchMyOrders(token, { page: targetPage, limit: 20 });
                 setOrders((prev) => (append ? [...prev, ...res.orders] : res.orders));
                 setPagination(res.pagination);
                 setPage(targetPage);
+                setError('');
             } catch (e) {
                 console.error('Failed to load bookings:', e);
                 setError(e?.message || 'Failed to load bookings');
@@ -92,15 +91,36 @@ export default function MyBookingsPage() {
         [token]
     );
 
+    const isBookingsLoading = authLoading || (Boolean(token) && loading);
+
     useEffect(() => {
-        if (authLoading) return;
-        if (!token) {
-            setLoading(false);
-            setOrders([]);
-            return;
-        }
-        loadOrders(1, false);
-    }, [authLoading, token, loadOrders]);
+        if (authLoading || !token) return;
+        let active = true;
+        fetchMyOrders(token, { page: 1, limit: 20 })
+            .then((res) => {
+                if (active) {
+                    setOrders(res.orders);
+                    setPagination(res.pagination);
+                    setPage(1);
+                    setError('');
+                }
+            })
+            .catch((e) => {
+                if (active) {
+                    console.error('Failed to load bookings:', e);
+                    setError(e?.message || 'Failed to load bookings');
+                    setOrders([]);
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoading(false);
+                }
+            });
+        return () => {
+            active = false;
+        };
+    }, [authLoading, token]);
 
     const ordersWithStatus = useMemo(
         () =>
@@ -181,7 +201,7 @@ export default function MyBookingsPage() {
                 </div>
             )}
 
-            {loading || authLoading ? (
+            {isBookingsLoading ? (
                 <div className="flex justify-center py-20">
                     <Loader2 className="w-8 h-8 animate-spin text-[#037166]" />
                 </div>
@@ -244,11 +264,11 @@ export default function MyBookingsPage() {
                                     <div className="flex gap-4">
                                         <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0">
                                             {imageUrl ? (
-                                                <img
+                                                <Image
                                                     src={imageUrl}
                                                     alt={serviceName}
                                                     className="w-full h-full object-cover"
-                                                />
+                                                 width={500} height={300} />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
                                                     <Package className="w-6 h-6 text-gray-400" />

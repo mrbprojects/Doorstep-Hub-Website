@@ -1,11 +1,43 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+
 import { motion } from 'motion/react';
-import { Heart, Users, Star, Check, Home, Wifi, Shield, Building2, Bed, Coffee, Flame, Scroll, Flower2, Utensils, Bell, Clock, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import {  Users, Wifi, Shield, Building2, Bed, Coffee, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useRouter } from 'next/navigation';
+
+const SkeletonCard = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="relative flex w-[240px] shrink-0 flex-col overflow-hidden rounded-3xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] shadow-2xl xl:w-auto"
+  >
+    {/* Skeleton Image */}
+    <div className="relative h-36 overflow-hidden">
+      <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
+    </div>
+
+    {/* Skeleton Content */}
+    <div className="p-4 flex-1 flex flex-col justify-between">
+      {/* Title */}
+      <div className="mb-2">
+        <div className="h-6 w-3/4 mb-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+      </div>
+
+      {/* Amenities */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center space-x-2 rounded-lg bg-[#1a1a1a]/50 p-2">
+            <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+            <div className="h-3 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </motion.div>
+);
 
 export function RecommendedHostels() {
   const router = useRouter();
@@ -37,7 +69,7 @@ export function RecommendedHostels() {
         const data = await response.json();
 
         if (data.success && data.hostels) {
-          const mappedHostels = data.hostels.map((hostel, index) => {
+          const mappedHostels = data.hostels.map((hostel) => {
             let displayedAmenities = [];
             if (hostel.amenities && hostel.amenities.length > 0 && hostel.amenities[0].title !== 'test') {
               displayedAmenities = hostel.amenities.map(a => a.title);
@@ -129,39 +161,6 @@ export function RecommendedHostels() {
       behavior: 'smooth',
     });
   };
-
-  // Skeleton Shimmer Component
-  const SkeletonCard = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative flex w-[240px] shrink-0 flex-col overflow-hidden rounded-3xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#1a1410] shadow-2xl xl:w-auto"
-    >
-      {/* Skeleton Image */}
-      <div className="relative h-36 overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
-      </div>
-
-      {/* Skeleton Content */}
-      <div className="p-4 flex-1 flex flex-col justify-between">
-        {/* Title */}
-        <div className="mb-2">
-          <div className="h-6 w-3/4 mb-1 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
-        </div>
-
-        {/* Amenities */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center space-x-2 rounded-lg bg-[#1a1a1a]/50 p-2">
-              <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-              <div className="h-3 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
 
   if (loading) {
     return (
@@ -469,7 +468,7 @@ export function RecommendedHostels() {
             { icon: Heart, label: 'Satisfaction Rate', value: '4.8/5' },
             { icon: Users, label: 'Happy Residents', value: '2.5K+' },
             { icon: Home, label: 'Safe Locations', value: '50+' },
-          ].map((indicator, index) => (
+          ].map((indicator) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, scale: 0.8 }}

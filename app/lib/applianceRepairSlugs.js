@@ -258,7 +258,7 @@ export const FLAT_BRAND_INTERNAL_SEGMENT = 'brand';
 /** Internal placeholder when public URL has no city segment (city from user location) */
 export const FLAT_BRAND_AUTO_CITY = '_location';
 
-const FLAT_BRAND_LISTING_SUFFIX = /-repair-service-center$/i;
+
 
 function normalizeSlugRegistry(registryOrBrandSlugs = null, serviceSlugs = null) {
     if (registryOrBrandSlugs && typeof registryOrBrandSlugs.isBrandPage === 'function') {

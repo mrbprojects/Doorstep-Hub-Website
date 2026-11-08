@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Calendar, CreditCard, Loader2, RefreshCw, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
@@ -87,8 +88,31 @@ export default function PartnerSubscriptionPage() {
     }, [token]);
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token) return;
+        let activeMount = true;
+        Promise.all([
+            getSubscriptionPlans(token),
+            getSubscriptionHistory(token),
+        ]).then(([plansRes, historyRes]) => {
+            if (!activeMount) return;
+            const rawHistory = parseList(historyRes, 'history');
+            const hasActivePaid = rawHistory.some(
+                (h) => String(h.status || '').toLowerCase() === 'active' &&
+                       !['free', 'trial', 'welcome_bonus'].includes(String(h.type || '').toLowerCase())
+            );
+            const sanitizedHistory = hasActivePaid
+                ? rawHistory.filter(
+                      (h) => !['free', 'trial', 'welcome_bonus'].includes(String(h.type || '').toLowerCase()) &&
+                             !String(h.plansName || h.planName || '').toLowerCase().includes('welcome plan')
+                  )
+                : rawHistory;
+            setPlans(parseList(plansRes));
+            setHistory(sanitizedHistory);
+        }).finally(() => {
+            if (activeMount) setLoading(false);
+        });
+        return () => { activeMount = false; };
+    }, [token]);
 
     const handleWalletPurchase = async (planId) => {
         setPurchasing(planId);
@@ -184,11 +208,11 @@ export default function PartnerSubscriptionPage() {
                                     <div className="flex flex-col h-full w-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                         {plan.image ? (
                                             <div className="relative h-36 bg-gray-100 shrink-0">
-                                                <img
+                                                <Image
                                                     src={resolveProviderMediaUrl(plan.image)}
                                                     alt={plan.name}
                                                     className="w-full h-full object-cover"
-                                                />
+                                                 width={500} height={300} />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                                             </div>
                                         ) : (

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { Star } from 'lucide-react';
 
 export function SellerCard({ seller }) {
@@ -10,7 +9,7 @@ export function SellerCard({ seller }) {
   if (!seller) return null;
 
   const {
-    slug = 'seller-profile',
+    
     name,
     location = 'Bangalore, KA',
     rating = 4.8,

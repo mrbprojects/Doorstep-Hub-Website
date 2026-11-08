@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
@@ -15,18 +16,15 @@ import {
   fetchSellerVerificationStatus,
   updateSellBuyListing,
   fetchSellBuyFavorites,
-  toggleFavorite,
   removeFavorite,
 } from '@/lib/sellBuyApi';
 import {
   Tag,
   Heart,
   MessageSquare,
-  DollarSign,
   ShieldCheck,
   Eye,
   PlusCircle,
-  TrendingUp,
   User,
   LogOut,
   Lock,
@@ -35,16 +33,10 @@ import {
   ExternalLink,
   CheckCircle,
   Upload,
-  FileText,
   X,
   AlertCircle,
   BadgeCheck,
   Check,
-  Trash2,
-  Image as ImageIcon,
-  Star,
-  Sparkles,
-  ThumbsUp,
   Camera,
   Pencil,
 } from 'lucide-react';
@@ -71,38 +63,64 @@ export default function MarketplaceDashboardPage() {
   const [savingProfile, setSavingProfile] = useState(false);
 
   const tabParam = params?.tab?.[0] || 'listings';
-  const getInitialTab = () => {
-    if (tabParam === 'my-ads') return 'listings';
-    if (tabParam === 'favorites') return 'favorites';
-    if (tabParam === 'profile') return 'profile';
-    return 'listings';
-  };
+  const resolvedInitialTab = tabParam === 'my-ads' ? 'listings' : (tabParam === 'favorites' ? 'favorites' : (tabParam === 'profile' ? 'profile' : 'listings'));
 
-  const [activeTab, setActiveTab] = useState(getInitialTab());
-
-  // Keep state synced if URL changes
-  useEffect(() => {
-    setActiveTab(getInitialTab());
-  }, [tabParam]);
+  const [activeTab, setActiveTab] = useState(resolvedInitialTab);
+  const [prevTab, setPrevTab] = useState(resolvedInitialTab);
+  if (prevTab !== resolvedInitialTab) {
+    setPrevTab(resolvedInitialTab);
+    setActiveTab(resolvedInitialTab);
+  }
 
   const [userListings, setUserListings] = useState([]);
   const [loadingListings, setLoadingListings] = useState(true);
   const [isPostAdModalOpen, setIsPostAdModalOpen] = useState(false);
   const [editingAd, setEditingAd] = useState(null);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
-  const [clientToken, setClientToken] = useState(null);
-  const [localUser, setLocalUser] = useState(null);
+  const [clientToken] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    try { return localStorage.getItem('auth_token'); } catch { return null; }
+  });
+  const [localUser, setLocalUser] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('user_details') || localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
 
   // Dynamic user saved favorites
-  const [savedFavorites, setSavedFavorites] = useState([]);
-  const [unreadChatsCount, setUnreadChatsCount] = useState(0);
+  const [savedFavorites, setSavedFavorites] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const favsStr = localStorage.getItem('sell_buy_favorites');
+      if (favsStr) {
+        const parsed = JSON.parse(favsStr);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [unreadChatsCount] = useState(0);
 
   // OLX-Style Seller KYC State
-  const [kycData, setKycData] = useState({
-    status: 'NOT_SUBMITTED', // 'NOT_SUBMITTED' | 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED'
-    idType: 'AADHAAR',
-    idNumber: '',
-    fullName: '',
+  const [kycData, setKycData] = useState(() => {
+    const base = {
+      status: 'NOT_SUBMITTED', // 'NOT_SUBMITTED' | 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED'
+      idType: 'AADHAAR',
+      idNumber: '',
+      fullName: '',
+    };
+    if (typeof window !== 'undefined') {
+      try {
+        const kycStr = localStorage.getItem('seller_kyc_data');
+        if (kycStr) {
+          const parsed = JSON.parse(kycStr);
+          if (parsed?.status) return { ...base, ...parsed };
+        }
+      } catch {}
+    }
+    return base;
   });
 
   // Real File Upload States (Saved in Local Uploads Directory)
@@ -113,38 +131,8 @@ export default function MarketplaceDashboardPage() {
 
   const [submittingKyc, setSubmittingKyc] = useState(false);
 
-  // Client-side authentication & persistent state initialization
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const tok = localStorage.getItem('auth_token');
-      setClientToken(tok);
-      const storedUser = localStorage.getItem('user_details') || localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          setLocalUser(JSON.parse(storedUser));
-        } catch (e) {
-          /* ignore JSON error */
-        }
-      }
-
-      // Load Saved Favorites
-      const favsStr = localStorage.getItem('sell_buy_favorites') || localStorage.getItem('favorites');
-      if (favsStr) {
-        try {
-          const parsed = JSON.parse(favsStr);
-          if (Array.isArray(parsed)) setSavedFavorites(parsed);
-        } catch (e) {}
-      }
-
-      // Load cached local KYC status
-      const kycStr = localStorage.getItem('seller_kyc_data');
-      if (kycStr) {
-        try {
-          const parsed = JSON.parse(kycStr);
-          if (parsed?.status) setKycData((prev) => ({ ...prev, ...parsed }));
-        } catch (e) {}
-      }
-
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams.get('kyc') === 'open') {
         // Clean the ?kyc=open from URL immediately so refresh doesn't re-open it
@@ -158,20 +146,17 @@ export default function MarketplaceDashboardPage() {
           try {
             const parsed2 = JSON.parse(kycStr2);
             cachedStatus = parsed2?.status || 'NOT_SUBMITTED';
-          } catch (e) {}
+          } catch {}
         }
         if (cachedStatus === 'NOT_SUBMITTED' || cachedStatus === 'REJECTED') {
-          setIsKycModalOpen(true);
-        } else {
-          // Already submitted or approved — just show a toast
-          if (cachedStatus === 'SUBMITTED' || cachedStatus === 'UNDER_REVIEW') {
-            setTimeout(() => {
-              // toast is called after mount; dynamically importing to avoid SSR issues
-              import('sonner').then(({ toast }) => {
-                toast.info('Your account is under review. Once approved, we will let you know via email.', { duration: 6000 });
-              });
-            }, 500);
-          }
+          setTimeout(() => setIsKycModalOpen(true), 100);
+        } else if (cachedStatus === 'SUBMITTED' || cachedStatus === 'UNDER_REVIEW') {
+          setTimeout(() => {
+            // toast is called after mount; dynamically importing to avoid SSR issues
+            import('sonner').then(({ toast }) => {
+              toast.info('Your account is under review. Once approved, we will let you know via email.', { duration: 6000 });
+            });
+          }, 500);
         }
       }
     }
@@ -230,44 +215,32 @@ export default function MarketplaceDashboardPage() {
     loadUserListings();
   }, [isAuthenticated, currentUserId]);
 
-  // Load favorites from API and local storage
-  const loadUserFavorites = async () => {
-    let activeFavs = [];
-    try {
-      const favsStr = localStorage.getItem('sell_buy_favorites');
-      if (favsStr) {
-        const parsed = JSON.parse(favsStr);
-        if (Array.isArray(parsed)) activeFavs = parsed;
-      }
-    } catch (e) {}
-
-    if (currentUserId) {
+  useEffect(() => {
+    let ignore = false;
+    async function syncFavs() {
+      if (!currentUserId) return;
       try {
         const apiFavs = await fetchSellBuyFavorites(currentUserId, authToken);
-        if (Array.isArray(apiFavs)) {
-          activeFavs = apiFavs;
+        if (!ignore && Array.isArray(apiFavs)) {
+          setSavedFavorites(apiFavs);
+          try {
+            localStorage.setItem('sell_buy_favorites', JSON.stringify(apiFavs));
+          } catch {}
         }
       } catch (e) {
         console.error('Error fetching favorites:', e);
       }
     }
-
-    setSavedFavorites(activeFavs);
-    try {
-      localStorage.setItem('sell_buy_favorites', JSON.stringify(activeFavs));
-    } catch (e) {}
-  };
-
-  useEffect(() => {
-    loadUserFavorites();
+    syncFavs();
 
     const handleFavUpdated = () => {
-      loadUserFavorites();
+      syncFavs();
     };
 
     window.addEventListener('favorites-updated', handleFavUpdated);
     window.addEventListener('storage', handleFavUpdated);
     return () => {
+      ignore = true;
       window.removeEventListener('favorites-updated', handleFavUpdated);
       window.removeEventListener('storage', handleFavUpdated);
     };
@@ -285,7 +258,7 @@ export default function MarketplaceDashboardPage() {
     setSavedFavorites(updated);
     try {
       localStorage.setItem('sell_buy_favorites', JSON.stringify(updated));
-    } catch (e) {}
+    } catch {}
 
     // 2. Call backend delete endpoint
     const dbListingId = item._id || item.id;
@@ -456,7 +429,7 @@ export default function MarketplaceDashboardPage() {
           localStorage.setItem('user_details', JSON.stringify(parsed));
           localStorage.setItem('user', JSON.stringify(parsed));
           setLocalUser(parsed);
-        } catch (err) {}
+        } catch {}
       }
 
       setIsProfileModalOpen(false);
@@ -840,14 +813,14 @@ export default function MarketplaceDashboardPage() {
                         title="Click to update profile photo"
                       >
                         {hasCustomAvatar ? (
-                          <img
+                          <Image
                             src={getImageUrl(rawAvatar)}
                             alt={activeUser?.name || 'Seller'}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                             }}
-                          />
+                           width={500} height={300} />
                         ) : null}
                         <span style={{ display: hasCustomAvatar ? 'none' : 'flex' }} className="w-full h-full items-center justify-center font-black">
                           {activeUser?.name?.[0]?.toUpperCase() || <User className="w-7 h-7 text-white/90" />}
@@ -1113,7 +1086,7 @@ export default function MarketplaceDashboardPage() {
                         >
                           <div className="flex items-center gap-4">
                             <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 shrink-0">
-                              <img
+                              <Image
                                 src={getImageUrl(item.images?.[0] || item.coverImage || item.image)}
                                 alt={item.title || item.name}
                                 className={`w-full h-full object-cover ${isSold ? 'grayscale opacity-75' : ''}`}
@@ -1121,7 +1094,7 @@ export default function MarketplaceDashboardPage() {
                                   e.currentTarget.onerror = null;
                                   e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                                 }}
-                              />
+                               width={500} height={300} />
                               {isSold && (
                                 <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center">
                                   <span className="text-[9px] font-black text-white uppercase tracking-wider bg-rose-600 px-1.5 py-0.5 rounded shadow">
@@ -1260,7 +1233,7 @@ export default function MarketplaceDashboardPage() {
                           className="group bg-white rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all overflow-hidden flex flex-col justify-between"
                         >
                           <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-                            <img
+                            <Image
                               src={getImageUrl(fav.image || fav.images?.[0] || fav.coverImage)}
                               alt={fav.title || fav.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -1268,7 +1241,7 @@ export default function MarketplaceDashboardPage() {
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                               }}
-                            />
+                             width={500} height={300} />
                             <button
                               type="button"
                               onClick={() => handleRemoveFavorite(fav)}
@@ -1493,11 +1466,11 @@ export default function MarketplaceDashboardPage() {
                     />
                     {docFrontPreview ? (
                       <div className="relative border-2 border-[#037166] rounded-md p-2 bg-emerald-50/50 flex flex-col items-center justify-center text-center h-32 overflow-hidden group">
-                        <img
+                        <Image
                           src={docFrontPreview}
                           alt="Front ID Preview"
                           className="w-full h-20 object-cover rounded-xs border border-slate-200"
-                        />
+                         width={500} height={300} />
                         <div className="flex items-center justify-between w-full mt-1.5 px-1">
                           <span className="text-[10px] font-extrabold text-[#037166] truncate max-w-[100px]">
                             ✓ {docFrontFile?.name || 'Front Photo'}
@@ -1533,11 +1506,11 @@ export default function MarketplaceDashboardPage() {
                     />
                     {docBackPreview ? (
                       <div className="relative border-2 border-[#037166] rounded-md p-2 bg-emerald-50/50 flex flex-col items-center justify-center text-center h-32 overflow-hidden group">
-                        <img
+                        <Image
                           src={docBackPreview}
                           alt="Back ID Preview"
                           className="w-full h-20 object-cover rounded-xs border border-slate-200"
-                        />
+                         width={500} height={300} />
                         <div className="flex items-center justify-between w-full mt-1.5 px-1">
                           <span className="text-[10px] font-extrabold text-[#037166] truncate max-w-[100px]">
                             ✓ {docBackFile?.name || 'Back Photo'}
@@ -1621,7 +1594,7 @@ export default function MarketplaceDashboardPage() {
             <div className="p-6 space-y-4">
               {/* Product preview card */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 flex items-center gap-3.5">
-                <img
+                <Image
                   src={getImageUrl(selectedSoldItem.images?.[0] || selectedSoldItem.coverImage || selectedSoldItem.image)}
                   alt={selectedSoldItem.title || selectedSoldItem.name}
                   className="w-14 h-14 object-cover rounded-xl border border-slate-200 shrink-0"
@@ -1629,7 +1602,7 @@ export default function MarketplaceDashboardPage() {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                   }}
-                />
+                 width={56} height={56} />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-slate-900 truncate">
                     {selectedSoldItem.title || selectedSoldItem.name}
@@ -1714,14 +1687,14 @@ export default function MarketplaceDashboardPage() {
                 <div className="relative group">
                   <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#037166] to-[#025951] text-white font-black text-3xl flex items-center justify-center shadow-lg border-2 border-white ring-2 ring-slate-100">
                     {profileImgPreview ? (
-                      <img
+                      <Image
                         src={profileImgPreview}
                         alt="Profile Preview"
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
-                      />
+                       width={500} height={300} />
                     ) : (
                       <span>{nameInput?.[0]?.toUpperCase() || <User className="w-9 h-9 text-white/90" />}</span>
                     )}

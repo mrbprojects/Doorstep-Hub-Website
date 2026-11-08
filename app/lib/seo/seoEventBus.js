@@ -27,7 +27,7 @@ export const SEO_EVENTS = {
  * @param {object} payload - Information about the affected page/entity
  */
 export async function emitSEOEvent(eventName, payload = {}) {
-    const { url, oldUrl, entityType, entityId } = payload;
+    const { url, oldUrl } = payload;
 
     // Asynchronous background execution
     setImmediate(async () => {

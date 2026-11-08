@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, ShoppingCart, Loader2, Tag, Scissors, Sparkles, Info, ShieldCheck, AlertTriangle, Store, Zap } from 'lucide-react';
+import { ArrowLeft, Trash2, ShoppingCart, Loader2, Scissors, Sparkles, ShieldCheck, AlertTriangle, Zap } from 'lucide-react';
 import { useServiceCart } from '@/context/ServiceCartContext';
 
 export function SpaCartPage({
@@ -154,11 +155,11 @@ export function SpaCartPage({
                                         <div className="flex gap-6">
                                             {/* Image - More compact */}
                                             <div className="w-24 h-24 rounded-2xl overflow-hidden bg-[#6D1357]/5 flex-shrink-0 relative border border-[#C06C84]/10">
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={item.itemImage ? `https://api.doorstephub.com/${item.itemImage}` : `https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg`}
                                                     alt={item.itemName}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                                />
+                                                 width={500} height={300} />
                                             </div>
 
                                             {/* Service Info */}

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { ArrowLeft, Star, MapPin, Clock, DollarSign, Filter, X, Zap, RotateCcw, ChevronDown, ChevronRight, Folder } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Filter, X, RotateCcw, ChevronDown, ChevronRight } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
 import DOMPurify from 'dompurify';
 
@@ -135,7 +136,7 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     };
 
     fetchServices();
-  }, [subCategoryId, childCategoryId, location?.lat, location?.lng, minRating]);
+  }, [subCategoryId, childCategoryId, location?.lat, location?.lng, location?.city, minRating]);
 
   // Fetch Categories for Sidebar
   useEffect(() => {
@@ -168,11 +169,10 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
   }, [location?.lat, location?.lng]);
 
   // Helper to fetch subcategories
-  const fetchSubcategories = async (catId, slug) => {
+  const fetchSubcategories = useCallback(async (catId, slug) => {
     // If already fetched or fetching, skip
     if (categorySubcats[catId] || loadingSubcats[catId]) return;
 
-    setLoadingSubcats(prev => ({ ...prev, [catId]: true }));
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
         method: 'POST',
@@ -189,22 +189,42 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     } finally {
       setLoadingSubcats(prev => ({ ...prev, [catId]: false }));
     }
-  };
+  }, [categorySubcats, loadingSubcats]);
+
+  const [prevAutoCategory, setPrevAutoCategory] = useState(null);
+  const activeCat = allCategories.find(c => c.name === category);
+  if (activeCat && prevAutoCategory !== activeCat._id) {
+    setPrevAutoCategory(activeCat._id);
+    setExpandedCategory(activeCat._id);
+  }
 
   // Auto-expand active category and fetch subcategories
   useEffect(() => {
+    let cancelled = false;
     if (allCategories.length > 0 && category) {
-      const activeCat = allCategories.find(c => c.name === category);
-      if (activeCat) {
-        // Only if not already manually interacted (simple check: if expanded is null or different? 
-        // Actually best to just enforce it matches current context on load/change)
-        if (expandedCategory !== activeCat._id) {
-          setExpandedCategory(activeCat._id);
-        }
-        fetchSubcategories(activeCat._id, activeCat.slug);
+      const cat = allCategories.find(c => c.name === category);
+      if (cat && !categorySubcats[cat._id]) {
+        (async () => {
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/getsubcategorysbycategoryid`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ slug: cat.slug })
+            });
+            const data = await response.json();
+            if (!cancelled && data.success && data.data) {
+              setCategorySubcats(prev => ({ ...prev, [cat._id]: data.data }));
+            }
+          } catch (error) {
+            console.error("Error fetching subcategories:", error);
+          }
+        })();
       }
     }
-  }, [allCategories, category]);
+    return () => {
+      cancelled = true;
+    };
+  }, [allCategories, category, categorySubcats]);
 
   const handleCategoryExpand = (catId) => {
     if (expandedCategory === catId) {
@@ -225,6 +245,9 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
     setFilterOpen(false);
   };
 
+  // Local filtering as fallback/additional layer
+  const filteredServices = services.filter(s => (s.rating || 0) >= minRating);
+  const filteredCenters = centers.filter(c => (c.rating || 0) >= minRating);
 
   return (
     <motion.div
@@ -495,11 +518,11 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                         <div className="flex flex-col relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                           {/* Image */}
                           <div className="relative h-48 overflow-hidden">
-                            <img loading="lazy" decoding="async"
+                            <Image
                               src={service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'} // Fallback image
                               alt={service.name}
                               className="w-full h-full object-cover transition-transform duration-700"
-                            />
+                             width={500} height={300} />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
 
 
@@ -613,11 +636,11 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
                           <div className="flex flex-col md:flex-row h-full">
                             {/* Image */}
                             <div className="relative w-full md:w-72 h-48 md:h-full overflow-hidden flex-shrink-0">
-                              <img loading="lazy" decoding="async"
+                              <Image
                                 src={center.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.logo}` : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${center.image}`}
                                 alt={center.name}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                              />
+                               width={500} height={300} />
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a1a1a]/60" />
 
                               {/* Open Badge */}

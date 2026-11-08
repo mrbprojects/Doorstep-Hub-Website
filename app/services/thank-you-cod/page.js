@@ -1,29 +1,30 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { CheckCircle, Calendar, MapPin, Sparkles, ArrowRight, Wallet } from 'lucide-react';
+import { CheckCircle, Calendar, MapPin, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 function ThankYouCodContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState({ date: '', time: '', address: '' });
-
-    useEffect(() => {
-        const savedAddress = sessionStorage.getItem('selected_address');
-        const sessionAddress = savedAddress ? JSON.parse(savedAddress) : null;
-
-        const urlAddress = searchParams.get('address');
-        const displayAddress = urlAddress || (sessionAddress ? `${sessionAddress.flat}, ${sessionAddress.area}, ${sessionAddress.cityName}` : '');
-
-        setBookingDetails({
-            date: searchParams.get('date') || 'Confirmed',
-            time: searchParams.get('time') || '',
-            address: displayAddress
-        });
-    }, [searchParams]);
+    const [bookingDetails] = useState(() => {
+        if (typeof window === 'undefined') return { date: '', time: '', address: '' };
+        try {
+            const savedAddress = sessionStorage.getItem('selected_address');
+            const sessionAddress = savedAddress ? JSON.parse(savedAddress) : null;
+            const urlAddress = searchParams.get('address');
+            const displayAddress = urlAddress || (sessionAddress ? `${sessionAddress.flat}, ${sessionAddress.area}, ${sessionAddress.cityName}` : '');
+            return {
+                date: searchParams.get('date') || 'Confirmed',
+                time: searchParams.get('time') || '',
+                address: displayAddress
+            };
+        } catch {
+            return { date: '', time: '', address: '' };
+        }
+    });
 
     return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">

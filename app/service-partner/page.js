@@ -552,13 +552,15 @@ function PlanSkeleton() {
 }
 
 function SubscriptionPlansSection({ isPartnerLoggedIn = false }) {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(isPartnerLoggedIn);
+  const [prevPartnerLoggedIn, setPrevPartnerLoggedIn] = useState(isPartnerLoggedIn);
+  if (prevPartnerLoggedIn !== isPartnerLoggedIn) {
+    setPrevPartnerLoggedIn(isPartnerLoggedIn);
+    setIsLoggedIn(isPartnerLoggedIn);
+  }
   const [apiPlans, setApiPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(true);
-
-  useEffect(() => {
-    setIsLoggedIn(isPartnerLoggedIn);
-  }, [isPartnerLoggedIn]);
 
   useEffect(() => {
     let isMounted = true;
@@ -651,7 +653,7 @@ function SubscriptionPlansSection({ isPartnerLoggedIn = false }) {
     if (typeof window !== 'undefined') {
       const session = getStoredProviderSession();
       if (session?.token && session?.profile) {
-        window.location.href = '/partner/dashboard/subscription';
+        router.push('/partner/dashboard/subscription');
       } else {
         localStorage.setItem('pending_subscription_plan', planTitle);
         window.dispatchEvent(new CustomEvent('partner:open-login'));

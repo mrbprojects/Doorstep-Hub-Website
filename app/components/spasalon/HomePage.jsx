@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
-import { Star, MapPin, Clock, Heart,PawPrint ,Scissors ,ShieldCheck ,Clock3 ,CalendarCheck2 , ChevronRight, Sparkles, Award, Users, BookOpen } from 'lucide-react';
+import { Star, MapPin,PawPrint  ,ShieldCheck ,Clock3 ,CalendarCheck2 , ChevronRight, Sparkles, Award, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { QuestionnaireModal } from './QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
-import Image from 'next/image';
 import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
 import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 import { AppDownload } from '@/components/landing/AppDownload';
@@ -64,15 +64,15 @@ export function HomePage() {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
-    const [subcategories, setSubcategories] = useState([]);
-    const [loadingSubcategories, setLoadingSubcategories] = useState(true);
+    const [, setSubcategories] = useState([]);
+    const [, setLoadingSubcategories] = useState(true);
+    const [, setGlobalSettings] = useState(null);
 
     // Featured Packages State
     const [featuredPackages, setFeaturedPackages] = useState([]);
     const [loadingFeatured, setLoadingFeatured] = useState(true);
     const [nearbyCenters, setNearbyCenters] = useState([]);
     const [loadingNearby, setLoadingNearby] = useState(true);
-    const [globalSettings, setGlobalSettings] = useState(null);
     const nearbyScrollRef = useRef(null);
     const bookedScrollRef = useRef(null);
     const featuredScrollRef = useRef(null);
@@ -249,7 +249,7 @@ export function HomePage() {
         fetchFeaturedPackages();
         fetchNearbyCenters();
         fetchGlobalSettings();
-    }, []);
+    }, [location?.coords?.latitude, location?.coords?.longitude]);
 
     useEffect(() => {
         if (!location) {
@@ -444,11 +444,11 @@ export function HomePage() {
                             rel="noopener noreferrer"
                             className="flex h-10 sm:h-11 items-center justify-center rounded-xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] px-3 shadow-md hover:shadow-lg transition-all"
                         >
-                            <img loading="lazy" decoding="async"
+                            <Image
                                 src="/apple2.png"
                                 alt="App Store"
                                 className="h-8 sm:h-9 object-contain brightness-0 invert"
-                            />
+                             width={500} height={300} />
                         </motion.a>
 
                         {/* Play Store */}
@@ -460,11 +460,11 @@ export function HomePage() {
                             rel="noopener noreferrer"
                             className="flex h-10 sm:h-11 items-center justify-center rounded-xl bg-gradient-to-r from-[#7b1c63] to-[#d06297] px-3 shadow-md hover:shadow-lg transition-all"
                         >
-                            <img loading="lazy" decoding="async"
+                            <Image
                                 src="/andriod1.png"
                                 alt="Google Play"
                                 className="h-8 sm:h-9 object-contain brightness-0 invert"
-                            />
+                             width={500} height={300} />
                         </motion.a>
                     </div>
                 </div>
@@ -526,11 +526,11 @@ export function HomePage() {
               <div className="relative mx-auto h-[230px] w-full max-w-[340px] sm:h-[340px] sm:max-w-[480px] lg:h-[440px] lg:w-[580px]">
 
                 {/* Main Generated Right Image */}
-                <img loading="lazy" decoding="async"
+                <Image
                   src="/right-side-image.png"
                   alt="Salon and Pet Grooming"
                   className="h-full w-full object-contain"
-                />
+                 width={500} height={300} />
 
                 {/* Floating Hair Salon Card */}
                 <motion.div initial={false}
@@ -919,22 +919,9 @@ export function HomePage() {
 }
 
 // Helper Components
-function StatCard({ icon, value, label }) {
-    return (
-        <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="text-center"
-        >
-            <div className="w-12 h-12 bg-gradient-to-r from-[#C06C84]/20 to-[#6C5CE7]/20 rounded-xl flex items-center justify-center text-[#C06C84] mx-auto mb-2">
-                {icon}
-            </div>
-            <p className="text-2xl font-bold text-[#0F172A]">{value}</p>
-            <h6 className="text-sm text-[#64748B]">{label}</h6>
-        </motion.div>
-    );
-}
 
-function PackageCard({ package: pkg, index, router }) {
+
+function PackageCard({ package: pkg, router }) {
     return (
         <motion.div
             whileHover={{ y: -8 }}
@@ -942,14 +929,14 @@ function PackageCard({ package: pkg, index, router }) {
             className="bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden border border-[#f5edf3] cursor-pointer group shadow-md hover:shadow-xl transition-all h-full flex flex-col"
         >
             <div className="relative h-44 sm:h-52 overflow-hidden bg-gray-100">
-                <img loading="lazy" decoding="async"
+                <Image
                     src={pkg.image}
                     alt={pkg.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
                     }}
-                />
+                 width={500} height={300} />
                 {/* Rating Badge on Image */}
                 <div className="absolute bottom-0 left-0 bg-[#C06C84] text-white px-2.5 py-1 rounded-tr-xl flex items-center gap-1 text-xs font-bold shadow-md">
                     <Star className="w-3 h-3 fill-current" />
@@ -992,14 +979,14 @@ function RecentlyBookedCard({ package: pkg, router }) {
             className="bg-white/80 backdrop-blur-md rounded-xl overflow-hidden border border-[#f5edf3] cursor-pointer shadow-sm hover:shadow-md transition-all h-full flex flex-col"
         >
             <div className="relative h-36 sm:h-40 bg-gray-100">
-                <img loading="lazy" decoding="async"
+                <Image
                     src={pkg.image}
                     alt={pkg.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1540555700478-4be289aefeba?auto=format&fit=crop&q=80&w=800';
                     }}
-                />
+                 width={500} height={300} />
                 {/* Rating Badge on Image */}
                 <div className="absolute bottom-0 left-0 bg-[#C06C84] text-white px-2 py-0.5 rounded-tr-lg flex items-center gap-0.5 text-[10px] font-bold shadow-sm">
                     <Star className="w-2.5 h-2.5 fill-current" />
@@ -1033,7 +1020,7 @@ function RecentlyBookedCard({ package: pkg, router }) {
     );
 }
 
-function NearbyCenterCard({ center, index, router }) {
+function NearbyCenterCard({ center, router }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
@@ -1041,14 +1028,14 @@ function NearbyCenterCard({ center, index, router }) {
             className="bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden border border-[#f5edf3] cursor-pointer group hover:shadow-xl transition-all h-full flex flex-col"
         >
             <div className="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
-                <img loading="lazy" decoding="async"
+                <Image
                     src={center.image}
                     alt={center.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1544161515-436cead60470?auto=format&fit=crop&q=80&w=800';
                     }}
-                />
+                 width={500} height={300} />
             </div>
 
             <div className="p-3.5 sm:p-5 flex flex-col flex-1 justify-between">
@@ -1081,58 +1068,8 @@ function NearbyCenterCard({ center, index, router }) {
     );
 }
 
-function MoodCard({ mood, service, image, color, router }) {
-    return (
-        <motion.div
-            whileHover={{ scale: 1.05 }}
-            onClick={() => router.push('/spa-salon')}
-            className="relative h-80 rounded-2xl overflow-hidden cursor-pointer group"
-        >
-            <img loading="lazy" decoding="async"
-                src={image}
-                alt={service}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-            <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <div
-                    className="inline-block px-4 py-2 rounded-full text-white text-sm mb-3 self-start"
-                    style={{ backgroundColor: color }}
-                >
-                    {mood}
-                </div>
-                <h4 className="text-2xl font-bold text-white">{service}</h4>
-            </div>
-        </motion.div>
-    );
-}
 
-function BlogCard({ title, image, readTime }) {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            whileHover={{ y: -5 }}
-            className="bg-white/30 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 cursor-pointer shadow-md hover:shadow-lg transition-all"
-        >
-            <div className="relative h-48 overflow-hidden">
-                <img loading="lazy" decoding="async"
-                    src={image}
-                    alt={title}
-                    className="w-full h-full object-cover"
-                />
-            </div>
-            <div className="p-6">
-                <h4 className="text-xl font-semibold text-[#0F172A] mb-3">{title}</h4>
-                <div className="flex items-center gap-2 text-[#64748B]">
-                    <BookOpen className="w-4 h-4" />
-                    <span className="text-sm">{readTime}</span>
-                </div>
-            </div>
-        </motion.div>
-    );
-}
+
 
 

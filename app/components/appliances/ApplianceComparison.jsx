@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Check, Home, CheckCircle, IndianRupee, Wrench } from 'lucide-react';
+import {  Home, CheckCircle, IndianRupee, Wrench } from 'lucide-react';
 
 const comparisonData = [
   {
@@ -96,7 +96,7 @@ export function ApplianceComparison() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {comparisonData.map((row, index) => (
+                {comparisonData.map((row) => (
                   <tr 
                     key={row.experience}
                     className="hover:bg-slate-50/70 transition-colors"

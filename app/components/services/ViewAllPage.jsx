@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RatingFilter } from './RatingFilter';
+import Image from 'next/image';
+
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Star, MapPin, Zap, ArrowRight, Filter, X } from 'lucide-react';
 import { fetchFeaturedServices, imageLoader } from '@/lib/api';
@@ -15,6 +16,22 @@ const DEFAULT_APP_LINKS = {
     'https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share',
 };
 
+const ShimmerGrid = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className="group">
+        <div className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
+          <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
+          <div className="absolute inset-0 flex items-end p-8">
+            <div className="h-8 w-48 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 export function ViewAllPage({
   type,
   onBack,
@@ -27,7 +44,13 @@ export function ViewAllPage({
   const [featuredServices, setFeaturedServices] = useState([]);
   const [recentServices, setRecentServices] = useState([]);
   const [stores, setStores] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const isAsyncType = type === 'categories' || type === 'stores' || type === 'featured' || type === 'recent';
+  const [isLoading, setIsLoading] = useState(() => Boolean(isAsyncType));
+  const [prevType, setPrevType] = useState(type);
+  if (prevType !== type) {
+    setPrevType(type);
+    if (!isAsyncType) setIsLoading(false);
+  }
   const [selectedRating, setSelectedRating] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const { location, detectLocation } = useLocation();
@@ -35,24 +58,6 @@ export function ViewAllPage({
 
   const handleRatingSelect = (rating) => {
     setSelectedRating(rating === selectedRating ? null : rating);
-  };
-
-  const ShimmerGrid = () => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="group">
-            <div className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
-              <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
-              <div className="absolute inset-0 flex items-end p-8">
-                <div className="h-8 w-48 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   useEffect(() => {
@@ -184,8 +189,6 @@ export function ViewAllPage({
         }
       };
       fetchRecentServices();
-    } else {
-      setIsLoading(false);
     }
   }, [type, location]);
 
@@ -298,13 +301,11 @@ export function ViewAllPage({
                     className="flex h-12 w-36 sm:w-40 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 hover:scale-105 active:scale-95"
                     title="Get it on Google Play"
                   >
-                    <img
-                      loading="lazy"
-                      decoding="async"
+                    <Image
                       src="/andriod1.png"
                       alt="Google Play"
                       className="h-full w-full object-cover opacity-95 brightness-0 invert"
-                    />
+                     width={500} height={300} />
                   </a>
 
                   <a
@@ -314,13 +315,11 @@ export function ViewAllPage({
                     className="flex h-12 w-36 sm:w-40 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 hover:scale-105 active:scale-95"
                     title="Download on App Store"
                   >
-                    <img
-                      loading="lazy"
-                      decoding="async"
+                    <Image
                       src="/apple2.png"
                       alt="App Store"
                       className="h-full w-full object-cover opacity-95 brightness-0 invert"
-                    />
+                     width={500} height={300} />
                   </a>
                 </div>
 
@@ -446,11 +445,11 @@ export function ViewAllPage({
                       <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 shadow-lg hover:shadow-[#037166]/20 transition-all duration-300 overflow-hidden">
                         {/* Image Section */}
                           <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
-                            <img loading="lazy" decoding="async"
+                            <Image
                               src={category.image}
                               alt={category.title}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
+                             width={500} height={300} />
                           </div>
 
                         {/* Content Section */}
@@ -503,7 +502,7 @@ export function ViewAllPage({
                     >
                       <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full overflow-hidden">
                         <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
-                            <img loading="lazy" decoding="async"
+                            <Image
                               src={imageLoader({ src: service.mainImage || service.image })}
                               alt={service.serviceName || 'Featured Service'}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -511,7 +510,7 @@ export function ViewAllPage({
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
                               }}
-                            />
+                             width={500} height={300} />
                           <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-[9px] font-bold flex items-center gap-1 shadow-lg">
                             <Zap className="w-2.5 h-2.5" />
                             {service.serviceDelhiveryType || 'Featured'}
@@ -561,11 +560,11 @@ export function ViewAllPage({
                     >
                       <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full">
                         <div className="relative h-48 overflow-hidden">
-                          <img loading="lazy" decoding="async"
+                          <Image
                             src={store.image}
                             alt={store.name}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
+                           width={500} height={300} />
                         </div>
                         <div className="p-6">
                           <h4 className="text-xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-1">
@@ -603,11 +602,11 @@ export function ViewAllPage({
                     >
                       <div className="relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
                         <div className="relative h-48 overflow-hidden">
-                          <img loading="lazy" decoding="async"
+                          <Image
                             src={service.image}
                             alt={service.title}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
+                           width={500} height={300} />
                           <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10">
                             <Star className="w-4 h-4 text-[#04a99d] fill-[#04a99d]" />
                             <span className="text-sm font-medium text-white">4.8</span>

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Script from 'next/script';
 import { usePathname } from 'next/navigation';
 import { ADSENSE_CONFIG, isAdSenseEligiblePath } from '@/config/adsense';
 

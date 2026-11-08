@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
+import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
-    ArrowLeft, Star, TrendingUp, DollarSign, Wifi, Utensils, Shirt, Zap,
-    Car, Shield, Camera, MessageSquare, Sparkles, MapPin, Clock, Check, X, ChevronRight, Home, ChevronLeft,
-    Bed, CheckCircle2, ShieldCheck, Layers, Eye, Share2, Heart, SlidersHorizontal, Grid, List,
-    PhoneCall, Headphones, Navigation, Filter, Info, ChevronDown, ExternalLink, Users, User, Lock, Sparkle
+    ArrowLeft, Star, Wifi, Utensils, Shirt, Zap,
+    Car, Shield, Camera, Sparkles, MapPin, Check, X, ChevronRight, Home, ChevronLeft,
+    Bed, CheckCircle2, ShieldCheck, Layers, Eye, Share2, Heart, Grid, List, Headphones, Navigation, Filter, Info, Users, Lock, Sparkle
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
-import Slider from 'react-slick';
+import { Tabs, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
+import 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { AddonsModal } from '@/components/pghostels/AddonsModal';
@@ -200,8 +200,8 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
 
     const [activeTab, setActiveTab] = useState('roomTypes');
     const [viewingRateCard, setViewingRateCard] = useState(null);
-    const [rateCardImageIndex, setRateCardImageIndex] = useState(0);
-    const [viewingGalleryIndex, setViewingGalleryIndex] = useState(null);
+    const [, setRateCardImageIndex] = useState(0);
+    const [, setGlobalSettings] = useState(null);
 
     const [hostelData, setHostelData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -211,7 +211,6 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
     const [showAddonsModal, setShowAddonsModal] = useState(false);
     const [addonsData, setAddonsData] = useState(null);
     const [isCheckingAddons, setIsCheckingAddons] = useState(false);
-    const [globalSettings, setGlobalSettings] = useState(null);
     const { addToCart, clearCart } = useServiceCart();
 
     // Photo Gallery Active Index
@@ -344,7 +343,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
         };
 
         fetchHostelData();
-    }, [slugOrId]);
+    }, [slugOrId, router]);
 
     useEffect(() => {
         const fetchSubcategories = async () => {
@@ -391,20 +390,21 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
     }, [loading, fetchError, hostelData, router]);
 
     // Unique Room Types extracted from actual packages
+    const hostelPackages = hostelData?.packages;
     const dynamicRoomTypes = useMemo(() => {
-        if (!hostelData?.packages) return [];
+        if (!hostelPackages) return [];
         const map = new Map();
-        hostelData.packages.forEach(pkg => {
+        hostelPackages.forEach(pkg => {
             const key = getRoomTypeName(pkg, subcategories);
             const count = (map.get(key) || 0) + 1;
             map.set(key, count);
         });
         return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
-    }, [hostelData?.packages, subcategories]);
+    }, [hostelPackages, subcategories]);
 
     // Dynamic Amenity counts for filter
     const dynamicAmenityFilters = useMemo(() => {
-        if (!hostelData?.packages) return [];
+        if (!hostelPackages) return [];
         const list = [
             { id: 'ac', label: 'AC Room', icon: Sparkles },
             { id: 'wifi', label: 'WiFi', icon: Wifi },
@@ -417,7 +417,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
         ];
 
         return list.map(item => {
-            const count = hostelData.packages.filter(pkg => {
+            const count = hostelPackages.filter(pkg => {
                 const roomType = getRoomTypeName(pkg, subcategories).toLowerCase();
                 const text = `${pkg.name || ''} ${pkg.description || ''} ${roomType}`.toLowerCase();
                 if (item.id === 'ac') return text.includes('ac') && !text.includes('non-ac') && !text.includes('non ac');
@@ -429,12 +429,12 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
             }).length;
             return { ...item, count };
         });
-    }, [hostelData?.packages, subcategories]);
+    }, [hostelPackages, subcategories]);
 
     // Filter and Sort Packages
     const filteredPackages = useMemo(() => {
-        if (!hostelData?.packages) return [];
-        let list = [...hostelData.packages];
+        if (!hostelPackages) return [];
+        let list = [...hostelPackages];
 
         // 1. Room Type Filter
         if (selectedRoomTypes.length > 0 && !selectedRoomTypes.includes('all')) {
@@ -491,7 +491,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
         }
 
         return list;
-    }, [hostelData?.packages, subcategories, selectedRoomTypes, selectedStayType, selectedAmenities, priceRange, sortBy]);
+    }, [hostelPackages, subcategories, selectedRoomTypes, selectedStayType, selectedAmenities, priceRange, sortBy]);
 
     // Reset All Filters
     const handleResetFilters = () => {
@@ -560,7 +560,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                 await navigator.clipboard.writeText(window.location.href);
                 toast.success('Link copied to clipboard!');
             }
-        } catch (e) {
+        } catch {
             await navigator.clipboard.writeText(window.location.href);
             toast.success('Link copied to clipboard!');
         }
@@ -762,14 +762,12 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                     <div className="lg:col-span-6 flex flex-col gap-3">
                         {/* Main Large Image Container */}
                         <div className="relative w-full h-[320px] sm:h-[400px] rounded-3xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200/80 group">
-                            <img
-                                loading="lazy"
-                                decoding="async"
+                            <Image
                                 src={propertyPhotos[selectedHeroImageIndex] || propertyPhotos[0]}
                                 alt={hostelData.name}
                                 onError={(e) => { e.currentTarget.src = FALLBACK_ROOM_IMAGES[0]; }}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
-                            />
+                             width={500} height={300} />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />
 
                             {/* Top-Left Verified Hostel Pill */}
@@ -827,14 +825,12 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                             : 'opacity-70 hover:opacity-100'
                                     }`}
                                 >
-                                    <img
-                                        loading="lazy"
-                                        decoding="async"
+                                    <Image
                                         src={photo}
                                         alt={`Thumbnail ${pIdx + 1}`}
                                         className="w-full h-full object-cover"
                                         onError={(e) => { e.currentTarget.src = FALLBACK_ROOM_IMAGES[pIdx % FALLBACK_ROOM_IMAGES.length]; }}
-                                    />
+                                     width={500} height={300} />
                                 </button>
                             ))}
 
@@ -843,14 +839,12 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                 onClick={() => setActiveTab('gallery')}
                                 className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-900 group transition-all cursor-pointer"
                             >
-                                <img
-                                    loading="lazy"
-                                    decoding="async"
+                                <Image
                                     src={propertyPhotos[4] || propertyPhotos[0]}
                                     alt="More photos"
                                     className="w-full h-full object-cover opacity-40 group-hover:opacity-30 group-hover:scale-105 transition-all"
                                     onError={(e) => { e.currentTarget.src = FALLBACK_ROOM_IMAGES[0]; }}
-                                />
+                                 width={500} height={300} />
                                 <div className="absolute inset-0 flex items-center justify-center text-white font-extrabold text-xs sm:text-sm">
                                     +{Math.max(propertyPhotos.length - 4, 1)} Photos
                                 </div>
@@ -1285,9 +1279,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                                 >
                                                     {/* 1. LEFT: ROOM IMAGE (~27% width, 20% reduced height) */}
                                                     <div className="relative w-full md:w-[27%] h-44 sm:h-48 md:h-auto md:min-h-[170px] bg-gray-100 overflow-hidden shrink-0">
-                                                        <img
-                                                            loading="lazy"
-                                                            decoding="async"
+                                                        <Image
                                                             src={cardImg}
                                                             alt={pkg.name}
                                                             onError={(e) => {
@@ -1297,7 +1289,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                                                 }
                                                             }}
                                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                        />
+                                                         width={500} height={300} />
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/15 pointer-events-none" />
 
                                                         {/* Stay Badge Top-Left */}
@@ -1493,14 +1485,12 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                                 }`}
                                             >
                                                 <div className="relative w-full h-40 bg-gray-100 overflow-hidden">
-                                                    <img
-                                                        loading="lazy"
-                                                        decoding="async"
+                                                    <Image
                                                         src={cardImg}
                                                         alt={pkg.name}
                                                         onError={(e) => { e.currentTarget.src = FALLBACK_ROOM_IMAGES[0]; }}
                                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    />
+                                                     width={500} height={300} />
                                                     <div className="absolute top-2.5 left-2.5 z-10">
                                                         <span className="px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wide bg-[#00796F] text-white">
                                                             {roomTag}
@@ -1608,13 +1598,11 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                                     className="relative aspect-video rounded-2xl overflow-hidden bg-gray-100 shadow-sm group cursor-pointer"
                                     onClick={() => setSelectedHeroImageIndex(idx)}
                                 >
-                                    <img
-                                        loading="lazy"
-                                        decoding="async"
+                                    <Image
                                         src={img}
                                         alt={`Hostel photo ${idx + 1}`}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
+                                     width={500} height={300} />
                                 </div>
                             ))}
                         </div>
@@ -1664,14 +1652,12 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
                 <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4">
                     {/* Left: Property Thumbnail & Name */}
                     <div className="flex items-center gap-3 min-w-0">
-                        <img
-                            loading="lazy"
-                            decoding="async"
+                        <Image
                             src={propertyPhotos[0] || FALLBACK_ROOM_IMAGES[0]}
                             alt={hostelData.name}
                             className="w-12 h-12 rounded-xl object-cover border border-gray-200 shrink-0 hidden sm:block"
                             onError={(e) => { e.currentTarget.src = FALLBACK_ROOM_IMAGES[0]; }}
-                        />
+                         width={48} height={48} />
                         <div className="min-w-0">
                             <h4 className="font-black text-[#102033] text-sm sm:text-base truncate">
                                 {hostelData.name}
@@ -1764,11 +1750,11 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
 
                             {/* Main Image in Modal */}
                             <div className="flex-1 overflow-hidden bg-gray-950 flex items-center justify-center p-4 min-h-[320px]">
-                                <img
+                                <Image
                                     src={resolveRateCardImage(viewingRateCard, 0, hostelData.images)}
                                     alt={viewingRateCard.name}
                                     className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-2xl"
-                                />
+                                 width={500} height={300} />
                             </div>
 
                             {/* Modal Footer with Select Button */}

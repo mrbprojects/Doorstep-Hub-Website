@@ -18,7 +18,7 @@ type CarouselProps = {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
-  setApi?: (api: CarouselApi) => void;
+  setApi?: React.Dispatch<React.SetStateAction<CarouselApi | undefined>>;
 };
 
 type CarouselContextProps = {
@@ -95,11 +95,13 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return;
-    onSelect(api);
+    api.on("init", onSelect);
     api.on("reInit", onSelect);
     api.on("select", onSelect);
 
     return () => {
+      api?.off("init", onSelect);
+      api?.off("reInit", onSelect);
       api?.off("select", onSelect);
     };
   }, [api, onSelect]);

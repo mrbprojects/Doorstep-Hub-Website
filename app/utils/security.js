@@ -325,7 +325,7 @@ export const validatePrice = (price) => {
     return { valid: true, value: rounded };
 };
 
-export default {
+const securityUtils = {
     generateIdempotencyKey,
     sanitizeInput,
     sanitizeHTML,
@@ -342,3 +342,5 @@ export default {
     safeClone,
     validatePrice
 };
+
+export default securityUtils;

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, Briefcase, Sparkles, Smartphone, ArrowRight } from 'lucide-react';
+import { User, Briefcase } from 'lucide-react';
 import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 
 export default function PolicyRoleBar({ activeTab, setActiveTab, pageTitle = 'Policy' }) {

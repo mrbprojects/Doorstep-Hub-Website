@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Mail, Send, CheckCircle2 } from 'lucide-react';
 
@@ -35,7 +36,7 @@ export function Newsletter() {
         setIsError(true);
         setMessage(data.message || 'Subscription failed. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setIsError(true);
       setMessage('Network error. Please try again later.');
     } finally {
@@ -72,7 +73,7 @@ export function Newsletter() {
         setIsError(true);
         setMessage(data.message || 'Invalid OTP. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setIsError(true);
       setMessage('Verification failed. Please try again.');
     } finally {
@@ -209,11 +210,11 @@ export function Newsletter() {
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -top-12 -left-4 md:top-10 md:left-4 w-20 h-20 md:w-28 md:h-28 rounded-[2.5rem] bg-white border border-gray-100 flex items-center justify-center p-5 shadow-2xl shadow-gray-200/50"
         >
-          <img loading="lazy" decoding="async"
+          <Image
             src="/electric-appliance.png"
             alt="Repair Service"
             className="w-full h-full object-contain filter grayscale-[0.2] group-hover:grayscale-0 transition-all"
-          />
+           width={500} height={300} />
         </motion.div>
 
         <motion.div
@@ -224,11 +225,11 @@ export function Newsletter() {
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -top-12 -right-4 md:top-10 md:right-4 w-20 h-20 md:w-28 md:h-28 rounded-[2.5rem] bg-white border border-gray-100 flex items-center justify-center p-5 shadow-2xl shadow-gray-200/50"
         >
-          <img loading="lazy" decoding="async"
+          <Image
             src="/fridge-storage.png"
             alt="Fridge Service"
             className="w-full h-full object-contain filter grayscale-[0.2] group-hover:grayscale-0 transition-all"
-          />
+           width={500} height={300} />
         </motion.div>
       </div>
     </section>

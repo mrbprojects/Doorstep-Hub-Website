@@ -39,7 +39,7 @@ export default function SellBuyAboutPage() {
             About Sell & Buy
           </h1>
           <p className="text-xs sm:text-base text-emerald-50 max-w-2xl font-medium leading-relaxed">
-            Welcome to D-Hub's local classified marketplace. Discover our story and what drives us to provide a 100% free and trusted platform for you.
+            Welcome to D-Hub&apos;s local classified marketplace. Discover our story and what drives us to provide a 100% free and trusted platform for you.
           </p>
         </div>
 

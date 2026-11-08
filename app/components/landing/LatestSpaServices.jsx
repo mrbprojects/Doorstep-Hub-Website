@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Sparkles, Award, CloudFog, HandHeart, Coffee, Flame, Droplets, Scissors, Palette, Wind, Crown, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, Award, CloudFog, HandHeart, Coffee, Flame, Droplets, Scissors, Palette, Wind, Crown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function LatestSpaServices() {

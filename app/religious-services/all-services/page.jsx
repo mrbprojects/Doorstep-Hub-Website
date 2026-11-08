@@ -1,27 +1,27 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import {
     ArrowLeft, Star, MapPin, Sparkles,
-    Search, SlidersHorizontal, ArrowRight,
-    CheckCircle, Shield, Award
+    Search, Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useLocationContext } from '@/context/LocationContext';
+import { useMounted } from '@/hooks/useMounted';
 
 function AllReligiousServicesContent() {
     const router = useRouter();
+    const mounted = useMounted();
     const { location, detectLocation } = useLocationContext();
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-
-    const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
     const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
 
     useEffect(() => {
@@ -113,7 +113,7 @@ function AllReligiousServicesContent() {
                         <div className="h-4 w-[1px] bg-gray-300 hidden sm:block"></div>
                         <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
                             <MapPin className="h-4 w-4 text-[var(--saffron)]" />
-                            <span>{location ? 'Showing results near you' : 'Showing all services'}</span>
+                            <span suppressHydrationWarning>{mounted && location ? 'Showing results near you' : 'Showing all services'}</span>
                         </div>
                     </div>
 
@@ -151,11 +151,11 @@ function AllReligiousServicesContent() {
                                     }}
                                 >
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                                        <img loading="lazy" decoding="async"
+                                        <Image
                                             src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                             alt={service.business_name}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                        />
+                                         width={500} height={300} />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
                                         <div className="absolute bottom-3 right-3">
                                             <Badge className="bg-white/90 backdrop-blur-sm text-[var(--saffron)] border-none shadow-sm px-2 py-0.5 text-xs font-bold">
@@ -213,7 +213,7 @@ function AllReligiousServicesContent() {
                             </div>
                             <h3 className="text-2xl font-extrabold text-[var(--deep-charcoal)] mb-3 px-6">No Sacred Services Found</h3>
                             <p className="text-[var(--muted-foreground)] max-w-md mx-auto mb-10 px-6">
-                                We couldn't find any services matching your search or in this location. Please try a different query or set your location.
+                                We couldn&apos;t find any services matching your search or in this location. Please try a different query or set your location.
                             </p>
                             <Button
                                 onClick={() => detectLocation()}

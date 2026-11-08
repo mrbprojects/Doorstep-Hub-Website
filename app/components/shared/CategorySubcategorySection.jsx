@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, useRef } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { ArrowRight, ChevronRight, MapPin } from 'lucide-react';
 
@@ -50,11 +51,19 @@ export function CategorySubcategorySection({
 }) {
   const initialVisibleCount = 15;
   const [categoryCounts, setCategoryCounts] = useState({});
-  const [activeCategorySlug, setActiveCategorySlug] = useState('');
+  const [activeCategorySlug, setActiveCategorySlug] = useState(() => categories[0]?.slug || categories[0]?._id || '');
   const [showAllSubcategories, setShowAllSubcategories] = useState(true);
   const [subCategories, setSubCategories] = useState([]);
   const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
   const [showAllVisibleCards, setShowAllVisibleCards] = useState(false);
+
+  const [prevCategories, setPrevCategories] = useState(categories);
+  if (prevCategories !== categories) {
+    setPrevCategories(categories);
+    if (!activeCategorySlug && categories.length > 0) {
+      setActiveCategorySlug(categories[0]?.slug || categories[0]?._id || '');
+    }
+  }
 
   const categoryListRef = useRef(null);
   const [offsetY, setOffsetY] = useState(0);
@@ -71,37 +80,18 @@ export function CategorySubcategorySection({
   }, []);
 
   useEffect(() => {
-    if (!isDesktop) {
-      setOffsetY(0);
-      return;
-    }
-    const container = categoryListRef.current;
-    if (!container) {
-      console.log('CategorySubcategorySection: container not found');
-      return;
-    }
-
-    if (showAllSubcategories) {
-      setOffsetY(0);
-      return;
-    }
-
-    const activeButton = container.querySelector(`[data-slug="${activeCategorySlug}"]`);
-
-    if (activeButton) {
-      setOffsetY(activeButton.offsetTop || 0);
-    } else {
-      console.log('CategorySubcategorySection: activeButton not found');
-      setOffsetY(0);
-    }
+    const timer = setTimeout(() => {
+      if (!isDesktop || showAllSubcategories) {
+        setOffsetY(0);
+        return;
+      }
+      const container = categoryListRef.current;
+      if (!container) return;
+      const activeButton = container.querySelector(`[data-slug="${activeCategorySlug}"]`);
+      setOffsetY(activeButton ? (activeButton.offsetTop || 0) : 0);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [activeCategorySlug, showAllSubcategories, categories, isDesktop, categoriesLoading]);
-
-  useEffect(() => {
-    if (!categories.length) return;
-    setActiveCategorySlug((current) => current || categories[0]?.slug || categories[0]?._id || '');
-    setShowAllSubcategories(true);
-    setShowAllVisibleCards(false);
-  }, [categories]);
 
   useEffect(() => {
     let active = true;
@@ -376,7 +366,7 @@ export function CategorySubcategorySection({
                         <div className="flex items-center gap-4">
                           <div className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border ${isActive ? theme.activeThumbClass : theme.thumbClass}`}>
                             {categoryImage ? (
-                              <img loading="lazy" decoding="async" src={categoryImage} alt={category.name} className="h-11 w-11 rounded-xl object-cover" />
+                              <Image src={categoryImage} alt={category.name} className="h-11 w-11 rounded-xl object-cover"  width={500} height={300} />
                             ) : (
                               <span className={`text-lg font-bold ${isActive ? theme.activeCategoryTextClass : theme.categoryAccentTextClass}`}>{category.name?.charAt(0)}</span>
                             )}
@@ -424,13 +414,11 @@ export function CategorySubcategorySection({
                       >
                         <div className={`absolute inset-0 ${theme.gridFallbackClass}`} />
                         {subCategory.image ? (
-                          <img
-                            loading="lazy"
-                            decoding="async"
+                          <Image
                             src={subCategory.image}
                             alt={subCategory.name}
                             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
+                           width={500} height={300} />
                         ) : null}
                         <div className={`absolute inset-0 ${theme.gridOverlayClass}`} />
                         <div className="absolute inset-x-0 bottom-0">

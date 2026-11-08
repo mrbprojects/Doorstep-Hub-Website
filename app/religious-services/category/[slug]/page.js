@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowLeft, ChevronRight, Sparkles, Flower2, Star, CheckCircle, MapPin } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Sparkles, Flower2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLocationContext } from '@/context/LocationContext';
-import { isObjectId, resolveParam } from '@/utils/slugHelper';
+import {  resolveParam } from '@/utils/slugHelper';
 
 const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
 const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
@@ -18,21 +19,23 @@ function ReligiousCategoryContent() {
     const slugOrId = params.slug || params.id;
     const searchParams = useSearchParams();
 
-    const [categoryNameFromStorage, setCategoryNameFromStorage] = useState('');
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
+    const [categoryNameFromStorage] = useState(() => {
+        if (typeof window === 'undefined') return '';
+        try {
             const data = sessionStorage.getItem('religious_category');
             if (data) {
                 const parsed = JSON.parse(data);
-                setCategoryNameFromStorage(parsed.name);
+                return parsed?.name || '';
             }
+        } catch {
+            return '';
         }
-    }, []);
+        return '';
+    });
 
     const categoryName = searchParams.get('name') || categoryNameFromStorage || (slugOrId ? slugOrId.replace(/-/g, ' ') : 'Category');
 
-    const { location, detectLocation } = useLocationContext();
+    const { location } = useLocationContext();
     const [subCategories, setSubCategories] = useState([]);
     const [services, setServices] = useState([]); // Fallback services
     const [loading, setLoading] = useState(true);
@@ -86,7 +89,7 @@ function ReligiousCategoryContent() {
                         const parsed = JSON.parse(savedService);
                         if (parsed?.id) serviceId = parsed.id;
                     }
-                } catch (e) { /* use fallback */ }
+                } catch { /* use fallback */ }
 
                 const servicesPayload = {
                     ...apiPayload,
@@ -217,11 +220,11 @@ function ReligiousCategoryContent() {
                                     <div className="relative h-56 rounded-[1.5rem] overflow-hidden mb-6 bg-gray-100">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                                         {subCat.image ? (
-                                            <img loading="lazy" decoding="async"
+                                            <Image
                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
                                                 alt={subCat.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                            />
+                                             width={500} height={300} />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center bg-[var(--off-white)]">
                                                 <Flower2 className="w-20 h-20 text-[var(--saffron)]/30" />
@@ -282,11 +285,11 @@ function ReligiousCategoryContent() {
                                     onClick={() => router.push(`/religious-services/${target}`)}
                                 >
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--warm-beige)] to-[var(--soft-cream)]">
-                                        <img loading="lazy" decoding="async"
+                                        <Image
                                             src={service.logo ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                             alt={service.business_name}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
+                                         width={500} height={300} />
                                     </div>
                                     <CardContent className="p-6">
                                         <h3 className="text-lg font-semibold text-[var(--deep-charcoal)] mb-2 group-hover:text-[var(--saffron)] transition-colors">
@@ -313,7 +316,7 @@ function ReligiousCategoryContent() {
         <div className="min-h-screen bg-[var(--off-white)] pt-24 pb-10 flex flex-col items-center justify-center">
             <div className="text-4xl mb-4">🙏</div>
             <h1 className="text-2xl font-bold text-[var(--deep-charcoal)]">No Services Found</h1>
-            <p className="text-gray-500 mt-2">We couldn't find any services for this category.</p>
+            <p className="text-gray-500 mt-2">We couldn&apos;t find any services for this category.</p>
             <Button variant="outline" className="mt-6" onClick={() => router.back()}>Go Back</Button>
         </div>
     );

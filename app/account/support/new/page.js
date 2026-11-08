@@ -1,10 +1,10 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowLeft, Hash, Loader2, Send, Tag, Upload } from 'lucide-react';
+import { ArrowLeft, Hash, Loader2, Send, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { createSupportTicket } from '@/lib/accountApi';
@@ -32,17 +32,19 @@ function CreateTicketForm() {
 
     const { token } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [title, setTitle] = useState('');
+    const [title, setTitle] = useState(() => (bookingIdParam ? `Issue with Booking #${bookingIdParam}` : ''));
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState(categoryParam || (bookingIdParam ? 'booking' : ''));
+    const [category, setCategory] = useState(() => (categoryParam || (bookingIdParam ? 'booking' : '')));
     const [attachment, setAttachment] = useState(null);
 
-    useEffect(() => {
+    const [prevBookingId, setPrevBookingId] = useState(bookingIdParam);
+    if (bookingIdParam !== prevBookingId) {
+        setPrevBookingId(bookingIdParam);
         if (bookingIdParam) {
             setTitle(`Issue with Booking #${bookingIdParam}`);
-            if (!category) setCategory('booking');
+            setCategory(prev => prev || 'booking');
         }
-    }, [bookingIdParam]);
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();

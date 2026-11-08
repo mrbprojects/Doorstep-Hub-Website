@@ -2,10 +2,53 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
 import { motion } from 'motion/react';
-import { Church, Calendar, MapPin, Users, Bell, Flame, User, Scroll, Flower2, Utensils, Home, Clock, BookOpen, Building2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import {  MapPin, Bell, Flame, User, Scroll, Flower2, Utensils, Home, Clock, BookOpen, Building2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+
+const SkeletonCard = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-2xl border border-[#037166]/20 bg-gradient-to-br from-[#1a1a1a]/70 to-[#1a0f1a]/70 backdrop-blur-xl shadow-2xl xl:w-auto"
+  >
+    {/* Skeleton Type Badge */}
+    <div className="absolute top-4 left-4 z-20 px-3 py-1.5 bg-gradient-to-r from-[#9b59b6]/40 via-[#037166]/40 to-[#9b59b6]/40 backdrop-blur-md rounded-full animate-shimmer">
+      <div className="h-4 w-20 bg-gradient-to-r from-white/30 via-white/50 to-white/30 rounded-full" />
+    </div>
+
+    {/* Skeleton Bell Icon */}
+    <div className="absolute top-4 right-4 z-20 h-10 w-10 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full animate-shimmer" />
+
+    {/* Skeleton Image */}
+    <div className="relative h-40 overflow-hidden">
+      <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
+    </div>
+
+    {/* Skeleton Content */}
+    <div className="p-4">
+      <div className="h-5 w-40 mb-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
+
+      <div className="space-y-2 mb-3">
+        <div className="flex items-center space-x-2 text-xs">
+          <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
+          <div className="h-3 w-32 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg border border-[#037166]/10">
+            <div className="w-3 h-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
+            <div className="h-2 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </motion.div>
+);
 
 export function LatestReligiousServices() {
   const router = useRouter();
@@ -139,50 +182,6 @@ export function LatestReligiousServices() {
     const amount = cardWidth + 16;
     scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
   };
-
-  // Skeleton Shimmer Component
-  const SkeletonCard = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-2xl border border-[#037166]/20 bg-gradient-to-br from-[#1a1a1a]/70 to-[#1a0f1a]/70 backdrop-blur-xl shadow-2xl xl:w-auto"
-    >
-      {/* Skeleton Type Badge */}
-      <div className="absolute top-4 left-4 z-20 px-3 py-1.5 bg-gradient-to-r from-[#9b59b6]/40 via-[#037166]/40 to-[#9b59b6]/40 backdrop-blur-md rounded-full animate-shimmer">
-        <div className="h-4 w-20 bg-gradient-to-r from-white/30 via-white/50 to-white/30 rounded-full" />
-      </div>
-
-      {/* Skeleton Bell Icon */}
-      <div className="absolute top-4 right-4 z-20 h-10 w-10 bg-[#037166]/20 backdrop-blur-md border border-[#037166]/30 rounded-full animate-shimmer" />
-
-      {/* Skeleton Image */}
-      <div className="relative h-40 overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
-      </div>
-
-      {/* Skeleton Content */}
-      <div className="p-4">
-        <div className="h-5 w-40 mb-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-lg animate-shimmer" />
-
-        <div className="space-y-2 mb-3">
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
-            <div className="h-3 w-32 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 mb-2">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center space-x-2 p-2 bg-[#1a1a1a]/50 rounded-lg border border-[#037166]/10">
-              <div className="w-3 h-3 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded-full animate-shimmer" />
-              <div className="h-2 w-12 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
 
   if (loading) {
     return (

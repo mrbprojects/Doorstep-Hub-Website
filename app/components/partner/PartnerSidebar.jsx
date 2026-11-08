@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
@@ -48,11 +49,11 @@ export function PartnerSidebar({ onNavigate }) {
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center overflow-hidden shrink-0">
                             {profile?.image ? (
-                                <img
+                                <Image
                                     src={profile.image.startsWith('http') ? profile.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${profile.image}`}
                                     alt={displayName}
                                     className="w-full h-full object-cover"
-                                />
+                                 width={500} height={300} />
                             ) : (
                                 <User className="w-5 h-5 text-white" />
                             )}

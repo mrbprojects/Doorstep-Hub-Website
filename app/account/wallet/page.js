@@ -28,6 +28,7 @@ import {
     fetchWalletBalance,
     fetchWalletTransactions,
     initiateWalletTopup,
+    fetchWalletTopupStatus,
 } from '@/lib/accountApi';
 
 const PRESET_AMOUNTS = [100, 200, 500, 1000, 2000];
@@ -185,6 +186,7 @@ export default function WalletPage() {
     const [topupAmount, setTopupAmount] = useState('500');
     const [topupLoading, setTopupLoading] = useState(false);
     const [copiedWalletId, setCopiedWalletId] = useState(false);
+    const [resultModal, setResultModal] = useState(null);
 
     const load = useCallback(
         async (isManualRefresh = false) => {
@@ -218,8 +220,92 @@ export default function WalletPage() {
     );
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token) return;
+        let active = true;
+        Promise.all([
+            fetchWalletBalance(token).catch(() => null),
+            fetchWalletTransactions(token).catch(() => null),
+        ])
+            .then(([balRes, txRes]) => {
+                if (!active) return;
+                if (balRes?.success && balRes.wallet) {
+                    setBalance(Number(balRes.wallet.currentBalance ?? 0));
+                    setWalletId(balRes.wallet.walletId || '');
+                }
+                if (txRes?.success) {
+                    setTransactions(normalizeTransactions(txRes));
+                }
+            })
+            .catch((err) => {
+                if (active) {
+                    console.error('Wallet load error:', err);
+                    toast.error('Failed to load wallet data');
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoading(false);
+                    setRefreshing(false);
+                }
+            });
+        return () => {
+            active = false;
+        };
+    }, [token]);
+
+    // Handle payment return status from Easebuzz gateway
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const status = params.get('status');
+        const txnid = params.get('txnid') || params.get('orderId');
+
+        if (!status) return;
+
+        window.history.replaceState({}, '', window.location.pathname);
+
+        if (status === 'success') {
+            if (token && txnid) {
+                fetchWalletTopupStatus(token, txnid).catch(() => null);
+            }
+            queueMicrotask(() => {
+                load(true);
+                setResultModal({
+                    type: 'success',
+                    title: 'Top-up Successful!',
+                    desc: 'Your wallet has been credited successfully.',
+                    txnid
+                });
+            });
+        } else if (status === 'cancelled' || status === 'cancel') {
+            queueMicrotask(() => {
+                setResultModal({
+                    type: 'cancelled',
+                    title: 'Payment Cancelled',
+                    desc: 'You cancelled the transaction at the payment gateway. No money was deducted from your account.',
+                    txnid
+                });
+            });
+        } else if (status === 'failure' || status === 'failed') {
+            queueMicrotask(() => {
+                setResultModal({
+                    type: 'failure',
+                    title: 'Top-up Failed',
+                    desc: 'Payment could not be completed by your bank/gateway. If any money was deducted, it will be refunded within 3-5 working days.',
+                    txnid
+                });
+            });
+        } else if (status === 'pending') {
+            queueMicrotask(() => {
+                setResultModal({
+                    type: 'pending',
+                    title: 'Payment Verification in Progress',
+                    desc: 'Your payment is being confirmed with the bank. Your balance will update automatically once verified.',
+                    txnid
+                });
+            });
+        }
+    }, [token, load]);
 
     // Copy Wallet ID
     const handleCopyWalletId = () => {
@@ -295,6 +381,9 @@ export default function WalletPage() {
             const returnUrl = typeof window !== 'undefined' ? `${window.location.origin}/account/wallet` : '';
             const res = await initiateWalletTopup(token, amt, returnUrl);
             if (res?.success && res.access_key) {
+                try {
+                    sessionStorage.setItem('last_checkout_url', '/account/wallet');
+                } catch {}
                 toast.success('Redirecting to secure Easebuzz payment gateway...');
                 const easebuzzUrl = res.paymentUrl || `https://pay.easebuzz.in/pay/${res.access_key}`;
                 window.location.href = easebuzzUrl;
@@ -883,6 +972,94 @@ export default function WalletPage() {
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* Gateway Result Modal */}
+                {resultModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+                            onClick={() => setResultModal(null)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                            className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden z-10 border border-gray-100 p-6 sm:p-7 text-center space-y-4"
+                        >
+                            <div className="mx-auto flex items-center justify-center">
+                                {resultModal.type === 'success' && (
+                                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                        <CheckCircle2 className="w-10 h-10" />
+                                    </div>
+                                )}
+                                {resultModal.type === 'cancelled' && (
+                                    <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                                        <XCircle className="w-10 h-10" />
+                                    </div>
+                                )}
+                                {resultModal.type === 'failure' && (
+                                    <div className="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                                        <XCircle className="w-10 h-10" />
+                                    </div>
+                                )}
+                                {resultModal.type === 'pending' && (
+                                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <Clock className="w-10 h-10" />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <h3 className="text-xl font-black text-gray-950">
+                                    {resultModal.title}
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                    {resultModal.desc}
+                                </p>
+                                {resultModal.txnid && (
+                                    <p className="text-[11px] font-mono text-gray-400 pt-1">
+                                        Ref: {resultModal.txnid}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="pt-2 flex items-center gap-2.5">
+                                {(resultModal.type === 'cancelled' || resultModal.type === 'failure') ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => setResultModal(null)}
+                                            className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs sm:text-sm hover:bg-gray-50 active:scale-95 transition-all"
+                                        >
+                                            Back to Wallet
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setResultModal(null);
+                                                setTopupModalOpen(true);
+                                            }}
+                                            className="flex-1 py-3 px-4 rounded-xl bg-[#037166] text-white font-extrabold text-xs sm:text-sm shadow-md hover:bg-[#025c53] active:scale-95 transition-all"
+                                        >
+                                            Retry Top-up
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setResultModal(null)}
+                                        className="w-full py-3 px-4 rounded-xl bg-[#037166] text-white font-extrabold text-xs sm:text-sm shadow-md hover:bg-[#025c53] active:scale-95 transition-all"
+                                    >
+                                        Back to Wallet
+                                    </button>
+                                )}
+                            </div>
                         </motion.div>
                     </div>
                 )}

@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Star, Clock, ChevronRight, ShieldCheck, Heart, Filter, X, MapPin, Search, Sliders, Sparkles, Award, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight, ShieldCheck, Filter, X, MapPin, Search, Sliders, Sparkles, Award, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/pghostels/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useLocationContext } from '@/context/LocationContext';
 import { Slider } from '@/components/pghostels/ui/slider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/pghostels/ui/input';
-import { isObjectId, resolveParam } from '@/utils/slugHelper';
+import {  resolveParam } from '@/utils/slugHelper';
 
 export default function SpaSubCategoryPage({ slugOverride = null, initialData = null }) {
     const router = useRouter();
@@ -23,7 +23,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
     const subCategoryName = searchParams.get('name') || initialData?.name || 'Service List';
     const categoryUniqueId = searchParams.get('categoryId') || initialData?.categoryId || null;
 
-    const { location, detectLocation } = useLocationContext();
+    const { location } = useLocationContext();
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
@@ -35,8 +35,15 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
     const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // Filter State
-    const [priceRange, setPriceRange] = useState([0, 5000]);
-    const [minRating, setMinRating] = useState(0);
+    const [priceRange, setPriceRange] = useState(() => {
+        const minP = searchParams.get('minPrice');
+        const maxP = searchParams.get('maxPrice');
+        return minP && maxP ? [parseInt(minP), parseInt(maxP)] : [0, 5000];
+    });
+    const [minRating, setMinRating] = useState(() => {
+        const rating = searchParams.get('minRating');
+        return rating ? parseFloat(rating) : 0;
+    });
 
     const sortOptions = [
         'Recommended',
@@ -50,19 +57,24 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
     const SERVICE_SLUG = 'spa-salon'; // Shared slug identifier
 
     // Sync state with URL params on navigation
-    useEffect(() => {
+    const [prevSearchParamsStr, setPrevSearchParamsStr] = useState(searchParams.toString());
+    const currentParamsStr = searchParams.toString();
+    if (prevSearchParamsStr !== currentParamsStr) {
+        setPrevSearchParamsStr(currentParamsStr);
         const catId = searchParams.get('categoryId');
         if (catId && catId !== expandedCategory) {
             setExpandedCategory(catId);
         }
-
         const minP = searchParams.get('minPrice');
         const maxP = searchParams.get('maxPrice');
-        if (minP && maxP) setPriceRange([parseInt(minP), parseInt(maxP)]);
-
+        if (minP && maxP) {
+            setPriceRange([parseInt(minP), parseInt(maxP)]);
+        }
         const rating = searchParams.get('minRating');
-        if (rating) setMinRating(parseFloat(rating));
-    }, [searchParams]);
+        if (rating) {
+            setMinRating(parseFloat(rating));
+        }
+    }
 
     // Update URL when filters change
     useEffect(() => {
@@ -222,7 +234,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
         return result;
     }, [services, minRating]);
 
-    const FilterPanel = ({ showTitle = true }) => {
+    const renderFilterPanel = (showTitle = true) => {
         return (
             <div className="space-y-6 text-gray-900">
                 {showTitle && (
@@ -490,7 +502,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                                 </SheetTitle>
                             </SheetHeader>
                             <div className="mt-5">
-                                <FilterPanel showTitle={false} />
+                                {renderFilterPanel(false)}
                             </div>
                         </SheetContent>
                     </Sheet>
@@ -501,7 +513,7 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                 <div className="flex gap-8">
                     <div className="hidden lg:block w-72 shrink-0">
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-150 sticky top-28">
-                            <FilterPanel />
+                            {renderFilterPanel(true)}
                         </div>
                     </div>
 
@@ -574,11 +586,11 @@ export default function SpaSubCategoryPage({ slugOverride = null, initialData = 
                                     >
                                         <div className="relative h-44 sm:h-48 overflow-hidden bg-gray-100">
                                             {service.image ? (
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={service.image}
                                                     alt={service.name}
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                />
+                                                 width={500} height={300} />
                                             ) : (
                                                 <div className="w-full h-full bg-gradient-to-br from-teal-50 to-slate-100 flex items-center justify-center">
                                                     <Sparkles className="w-10 h-10 text-teal-300" />

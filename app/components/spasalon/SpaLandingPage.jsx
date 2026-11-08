@@ -4,15 +4,12 @@ import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useInView } from 'motion/react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import {
-    Sparkles, Scissors, Wind, User,
-    Calendar, Shield, Award, Heart,
-    MapPin, Star, CheckCircle, ArrowRight
+    Sparkles, ArrowRight
 } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
-import { resolveParam } from '@/utils/slugHelper';
+
 import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
 
 // Section wrapper
@@ -50,7 +47,7 @@ export function SpaLandingPage() {
         if (!location) {
             detectWithIP().catch(err => console.log("Auto detect failed", err));
         }
-    }, [location]);
+    }, [location, detectWithIP]);
 
     // Fetch Categories
     useEffect(() => {
@@ -62,7 +59,7 @@ export function SpaLandingPage() {
                     try {
                         const sData = JSON.parse(selectedService);
                         serviceId = sData.id;
-                    } catch (e) { }
+                    } catch { }
                 }
 
                 // Use Real API

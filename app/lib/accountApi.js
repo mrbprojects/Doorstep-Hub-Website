@@ -166,12 +166,24 @@ export async function fetchWalletTransactions(token) {
 }
 
 export async function initiateWalletTopup(token, amount, returnUrl) {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://doorstephub.com';
+    const baseUrl = `${origin}/account/wallet`;
     const response = await fetch(`${API_BASE}/app/wallet/topup/initiate`, {
         method: 'POST',
         headers: bearerHeaders(token, 'application/json'),
         body: JSON.stringify({
             amount: Number(amount),
-            returnUrl: returnUrl || (typeof window !== 'undefined' ? `${window.location.origin}/account/wallet` : ''),
+            returnUrl: returnUrl || baseUrl,
+            cancelUrl: `${baseUrl}?status=cancelled`,
+            surl: `${baseUrl}?status=success`,
+            furl: `${baseUrl}?status=failure`,
+            websiteReturnUrl: baseUrl,
+            websiteCancelUrl: `${baseUrl}?status=cancelled`,
+            redirectUrl: baseUrl,
+            udf1: 'wallet_topup',
+            udf2: String(amount),
+            udf6: 'website',
+            udf7: 'doorstephub'
         }),
     });
     return parseResponse(response);

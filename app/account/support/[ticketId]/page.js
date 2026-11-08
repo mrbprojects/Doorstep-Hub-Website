@@ -51,8 +51,22 @@ export default function SupportTicketDetailPage() {
     }, [token, ticketId]);
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token || !ticketId) return;
+        let active = true;
+        fetchSupportTicketById(token, ticketId)
+            .then((res) => {
+                if (active && res?.success) {
+                    setTicket(res.supportTicket || res.data);
+                }
+            })
+            .catch((e) => console.error('Failed to load ticket:', e))
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, [token, ticketId]);
 
     const handleReply = async (e) => {
         e.preventDefault();
@@ -68,7 +82,7 @@ export default function SupportTicketDetailPage() {
             } else {
                 toast.error(res?.message || 'Failed to send reply');
             }
-        } catch (err) {
+        } catch {
             toast.error('Failed to send reply');
         } finally {
             setReplying(false);
@@ -88,7 +102,7 @@ export default function SupportTicketDetailPage() {
             } else {
                 toast.error(res?.message || 'Failed to close ticket');
             }
-        } catch (err) {
+        } catch {
             toast.error('Failed to close ticket');
         } finally {
             setClosing(false);

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { BookingModal } from '@/components/appliances/booking-flow/BookingModal';
-import { ChevronLeft, ChevronRight, Wrench, Cpu, MapPin, CheckCircle2, Search, Loader2, Monitor, Tv, Wind, Waves, Droplets, Flame, Microwave, Snowflake, Star, Clock, Shield, Award, ThumbsUp, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wrench, Cpu, MapPin, CheckCircle2, Search, Loader2, Monitor, Tv, Waves, Droplets, Flame, Microwave, Snowflake, Star, Clock, Shield, ArrowRight } from 'lucide-react';
 import { fetchCategories, fetchAllBrands, fetchServicesByBrand, fetchAuthorizedServices, fetchCities } from '@/lib/api';
 import { resolveBookNowNavigationPath } from '@/lib/applianceRepairSlugs';
 import { AmcServiceCoverage } from '@/components/amc/AmcServiceCoverage';
@@ -96,7 +97,7 @@ function CategoryStep({ categories, selected, onSelect, loading }) {
             >
               <div className="h-44 overflow-hidden bg-gray-50">
                 {cat.image ? (
-                  <img loading="lazy" decoding="async" src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" />
+                  <Image src={cat.image} alt={cat.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"  width={500} height={300} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Wrench size={32} className="text-gray-300" />
@@ -164,13 +165,13 @@ function BrandStep({ brands, selected, onSelect, loading }) {
             >
               <div className="h-24 flex items-center justify-center overflow-hidden p-3">
                 {(brand.image || brand.logo || brand.brandLogo) ? (
-                  <img loading="lazy" decoding="async"
+                  <Image
                     src={(brand.image || brand.logo || brand.brandLogo).startsWith('http') 
                       ? (brand.image || brand.logo || brand.brandLogo) 
                       : `https://api.doorstephub.com/${brand.image || brand.logo || brand.brandLogo}`}
                     alt={brand.name}
                     className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
-                  />
+                   width={500} height={300} />
                 ) : (
                   <div className={`text-xl font-black ${active ? 'text-[#037166]' : 'text-gray-200'}`}>
                     {(brand.name || brand)?.[0]?.toUpperCase()}
@@ -218,11 +219,11 @@ function ServiceStep({ services, onSelect, loading }) {
           <div className="flex h-full">
             <div className="w-44 flex-shrink-0 h-full bg-gray-50 overflow-hidden">
               {service.image ? (
-                <img loading="lazy" decoding="async"
+                <Image
                   src={`https://api.doorstephub.com/${service.image}`}
                   alt={service.serviceName}
                   className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110"
-                />
+                 width={500} height={300} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Wrench size={36} className="text-gray-200" />
@@ -270,7 +271,7 @@ function ServiceDetailStep({ service, category, onBook, loading }) {
         <div className="grid md:grid-cols-2">
           <div className="h-64 md:h-auto bg-gray-50 overflow-hidden flex items-center justify-center p-8">
             {service.image ? (
-              <img loading="lazy" decoding="async" src={`https://api.doorstephub.com/${service.image}`} alt={service.serviceName} className="max-h-full max-w-full object-contain" />
+              <Image src={`https://api.doorstephub.com/${service.image}`} alt={service.serviceName} className="max-h-full max-w-full object-contain"  width={500} height={300} />
             ) : (
               <Wrench size={64} className="text-gray-200" />
             )}
@@ -367,7 +368,6 @@ function SelectServiceCatchAllContent() {
   const [catLoading, setCatLoading] = useState(true);
   const [brandLoading, setBrandLoading] = useState(false);
   const [svcLoading, setSvcLoading] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   const [selectedCity, setSelectedCity] = useState(null);
   const [cityLoading, setCityLoading] = useState(true);

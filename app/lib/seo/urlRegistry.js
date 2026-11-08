@@ -27,7 +27,7 @@ function readRegistry() {
     try {
         ensureRegistry();
         return JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
-    } catch (e) {
+    } catch {
         return { urls: {} };
     }
 }

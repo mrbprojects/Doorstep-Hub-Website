@@ -1,35 +1,73 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { AlertCircle, RefreshCw, Home, XCircle, ShieldAlert, HeadphonesIcon } from 'lucide-react';
+import { RefreshCw, ArrowLeft, XCircle, ShieldAlert, HeadphonesIcon } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { inferVertical, trackPaymentFailed } from '@/lib/leadTracking';
 
 export function PaymentFailurePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [hasBookingData, setHasBookingData] = useState(false);
+
+    // Resolves the exact checkout screen where the user initiated payment
+    const getTargetDestination = useCallback(() => {
+        // 1. Explicit returnUrl or from query parameter
+        const returnUrlParam = searchParams.get('returnUrl') || searchParams.get('from');
+        if (returnUrlParam) {
+            try {
+                const decoded = decodeURIComponent(returnUrlParam);
+                if (decoded.startsWith('/') && !decoded.includes('payment-failed') && !decoded.includes('failure')) {
+                    return decoded;
+                }
+            } catch {
+                if (returnUrlParam.startsWith('/') && !returnUrlParam.includes('payment-failed')) {
+                    return returnUrlParam;
+                }
+            }
+        }
+
+        // 2. Saved in sessionStorage when payment was initiated
+        if (typeof window !== 'undefined') {
+            try {
+                const savedUrl = sessionStorage.getItem('last_checkout_url');
+                if (savedUrl && savedUrl.startsWith('/') && !savedUrl.includes('payment-failed') && !savedUrl.includes('failure')) {
+                    return savedUrl;
+                }
+            } catch {}
+        }
+
+        // 3. Fallback based on deepType or type query params
+        const type = searchParams.get('type') || searchParams.get('serviceType');
+        const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
+        if (deepType === 'PG Hostels') return '/pghostels/booking/confirm';
+        if (deepType === 'Spa Saloons') return '/spa-salon/booking/confirm';
+        if (deepType === 'Religious Services') return '/religious-services/booking/confirm';
+        if (type === 'professional' || type === 'verified-partner') return '/appliances/booking';
+        if (type === 'crm') return '/book-appointment';
+
+        // 4. Default to appliances checkout screen — never homepage
+        return '/appliances/checkout';
+    }, [searchParams]);
+
+    const handleRetry = useCallback(() => {
+        const target = getTargetDestination();
+        router.push(target);
+    }, [getTargetDestination, router]);
 
     useEffect(() => {
-        // Check if we have booking data to retry
-        const savedAddress = sessionStorage.getItem('selected_address');
-        const bookingDetails = sessionStorage.getItem('booking_package_details');
-
-        // Also check URL parameters for booking reference
+        // Restore booking reference parameters if present
         const orderId = searchParams.get('orderId');
         const serviceId = searchParams.get('serviceId');
         const date = searchParams.get('date');
         const time = searchParams.get('time');
         const addressParam = searchParams.get('address');
 
-        // If we have URL params, restore to sessionStorage
         if (orderId || serviceId) {
             if (date) sessionStorage.setItem('last_booking_date', date);
             if (time) sessionStorage.setItem('last_booking_time', time);
             if (addressParam) {
                 try {
-                    // Try to parse if it's JSON, otherwise use as string
                     const addressData = addressParam.startsWith('{')
                         ? JSON.parse(addressParam)
                         : { fullAddress: addressParam };
@@ -39,8 +77,6 @@ export function PaymentFailurePage() {
                 }
             }
         }
-
-        setHasBookingData(!!(savedAddress || bookingDetails || orderId || serviceId));
 
         trackPaymentFailed({
             vertical: inferVertical(),
@@ -53,48 +89,27 @@ export function PaymentFailurePage() {
             },
         });
 
-        // Auto-redirect after 5 seconds
+        // Auto-redirect after 5 seconds back to the booking / checkout screen
         const timer = setTimeout(() => {
             handleRetry();
         }, 5000);
         return () => clearTimeout(timer);
-    }, [searchParams]);
-
-    const handleRetry = () => {
-        const type = searchParams.get('type') || searchParams.get('serviceType');
-        const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
-
-        // Logic to redirect to the correct cart based on service type
-        if (deepType === 'PG Hostels') {
-            router.push('/pghostels');
-        } else if (deepType === 'Spa Saloons') {
-            router.push('/spa-salon');
-        } else if (deepType === 'Religious Services') {
-            router.push('/religious-services');
-        } else if (type === 'appliances') {
-            router.push('/appliances');
-        } else if (type === 'service-center') {
-            router.push('/appliance-repair-services');
-        } else if (type === 'verified-partner') {
-            router.push('/appliance-repair-services');
-        } else if (type === 'professional') {
-            router.push('/appliances/booking');
-        } else {
-            router.push('/');
-        }
-    };
+    }, [searchParams, handleRetry]);
 
     const getDestinationName = () => {
-        const type = searchParams.get('type') || searchParams.get('serviceType');
-        const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
-        if (deepType) return 'cart';
-        if (type === 'verified-partner') return 'services';
-        if (type === 'professional') return 'booking';
-        return 'home';
+        const target = getTargetDestination();
+        if (target.includes('checkout') || target.includes('confirm') || target.includes('booking')) {
+            return 'your booking screen';
+        }
+        if (target.includes('cart')) {
+            return 'cart';
+        }
+        return 'your booking screen';
     };
 
-    const handleGoHome = () => {
-        router.push('/');
+    const handleBackToServices = () => {
+        const target = getTargetDestination();
+        router.push(target);
     };
 
     return (
@@ -130,16 +145,16 @@ export function PaymentFailurePage() {
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
                         Payment Failed
                     </h1>
-                    <p className="text-xl text-white/80 mb-6">Oops! We couldn't process your transaction</p>
+                    <p className="text-xl text-white/80 mb-6">Oops! We couldn&apos;t process your transaction</p>
 
                     <div className="inline-flex flex-col items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 text-sm leading-relaxed max-w-md mx-auto">
                         <div className="flex items-center gap-2">
                             <ShieldAlert className="w-5 h-5 text-red-500 flex-shrink-0" />
-                            <p> Don't worry, <strong>no funds were deducted</strong> from your account.</p>
+                            <p> Don&apos;t worry, <strong>no funds were deducted</strong> from your account.</p>
                         </div>
                         <p className="text-red-400 font-medium mt-2 flex items-center gap-2">
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            Redirecting to {getDestinationName()} for retry in 5 seconds...
+                            Redirecting to {getDestinationName()} in 5 seconds...
                         </p>
                     </div>
                 </motion.div>
@@ -154,8 +169,8 @@ export function PaymentFailurePage() {
                     <h4 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4">Possible Reasons</h4>
                     <ul className="space-y-3">
                         {[
+                            'Payment cancelled on gateway',
                             'Insufficient funds in your account',
-                            'Unstable internet connection',
                             'Incorrect payment details or OTP',
                             'Bank server timeout or downtime'
                         ].map((reason, idx) => (
@@ -179,7 +194,7 @@ export function PaymentFailurePage() {
                         className="w-full py-4 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 transition-all hover:brightness-110"
                     >
                         <RefreshCw className="w-5 h-5" />
-                        Retry Payment
+                        Return to Booking Screen
                     </motion.button>
 
                     <motion.button
@@ -188,11 +203,11 @@ export function PaymentFailurePage() {
                         transition={{ delay: 0.6 }}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={handleGoHome}
+                        onClick={handleBackToServices}
                         className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
                     >
-                        <Home className="w-5 h-5" />
-                        Back to Homepage
+                        <ArrowLeft className="w-5 h-5" />
+                        Back to Booking Details
                     </motion.button>
                 </div>
 

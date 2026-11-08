@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ListingCard } from '@/components/sell-buy/cards/ListingCard';
 import { PostAdModal } from '@/components/sell-buy/PostAdModal';
@@ -15,16 +15,15 @@ import {
   fetchSellBuyListings,
   fetchFeaturedSections,
   fetchSliders,
-  fetchSystemSettings,
   getImageUrl,
 } from '@/lib/sellBuyApi';
-import { ChevronLeft, ChevronRight, MapPin, Search, Plus, Globe, Menu, ShoppingBag, Sparkles, Tag, ShieldCheck, Grid, Loader2, SearchX, X, ArrowRight, Navigation, ChevronDown, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, ShoppingBag, Sparkles, Tag, ShieldCheck, Grid, X, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
 import { ADSENSE_CONFIG } from '@/config/adsense';
 
 // ─── DUAL PROMOTIONAL BANNER SECTION (MATCHING CHOTA BETA REFERENCE) ──────────
-function DualBannerSection({ sliders, onPostAdClick }) {
+function DualBannerSection({ sliders }) {
   const bannerList = Array.isArray(sliders) && sliders.length > 0 ? sliders : [];
 
   if (bannerList.length === 0) return null;
@@ -40,7 +39,7 @@ function DualBannerSection({ sliders, onPostAdClick }) {
               key={banner._id || banner.id || index}
               className="relative rounded-3xl overflow-hidden shadow-lg border border-slate-100 flex items-center bg-slate-50"
             >
-              <img
+              <Image
                 src={getImageUrl(banner.image)}
                 alt={banner.title || "Promotional Banner"}
                 className="w-full h-auto block object-contain"
@@ -49,7 +48,7 @@ function DualBannerSection({ sliders, onPostAdClick }) {
                     e.currentTarget.parentElement.style.display = 'none';
                   }
                 }}
-              />
+               width={500} height={300} />
             </div>
           );
         })}
@@ -146,11 +145,11 @@ function PopularCategories({ categories, isLoading }) {
             {/* Outer Rounded Square Card Box (Steady without scale/border hover effects) */}
             <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gray-100/90 border border-gray-200/70 p-3.5 flex items-center justify-center">
               {cat.image ? (
-                <img
+                <Image
                   src={getImageUrl(cat.image)}
                   alt={cat.name}
                   className="w-full h-full object-contain rounded-xl"
-                />
+                 width={500} height={300} />
               ) : (
                 <div className="w-full h-full rounded-xl bg-white border border-gray-200/50 text-[#037166] flex items-center justify-center text-xl font-black shadow-sm">
                   {cat.name?.[0]?.toUpperCase()}
@@ -381,7 +380,7 @@ export default function SellBuyHomePage() {
       try {
         const parsed = JSON.parse(kycStr);
         kycStatus = parsed?.status || 'NOT_SUBMITTED';
-      } catch (e) {}
+      } catch {}
     }
 
     if (!token) {

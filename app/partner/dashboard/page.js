@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
@@ -165,18 +165,17 @@ export default function PartnerDashboardPage() {
         recentBookings: [],
     });
 
-    const loadDashboard = useCallback(async () => {
+    useEffect(() => {
         if (!token) return;
-        setLoading(true);
-        try {
-            const [kycRes, historyRes, ticketsRes, walletRes, bookingsRes] = await Promise.all([
-                checkKycStatus(token).catch(() => null),
-                getSubscriptionHistory(token).catch(() => null),
-                getProviderSupportTickets(token).catch(() => null),
-                getProviderWalletDetails(token).catch(() => null),
-                getProviderBookings(token).catch(() => null),
-            ]);
-
+        let activeMount = true;
+        Promise.all([
+            checkKycStatus(token).catch(() => null),
+            getSubscriptionHistory(token).catch(() => null),
+            getProviderSupportTickets(token).catch(() => null),
+            getProviderWalletDetails(token).catch(() => null),
+            getProviderBookings(token).catch(() => null),
+        ]).then(([kycRes, historyRes, ticketsRes, walletRes, bookingsRes]) => {
+            if (!activeMount) return;
             const kycStatus =
                 kycRes?.kyc_status ||
                 kycRes?.data?.kyc_status ||
@@ -230,14 +229,11 @@ export default function PartnerDashboardPage() {
                 completedLeadsCount,
                 recentBookings: allBookings.slice(0, 3),
             });
-        } finally {
-            setLoading(false);
-        }
+        }).finally(() => {
+            if (activeMount) setLoading(false);
+        });
+        return () => { activeMount = false; };
     }, [token, profile]);
-
-    useEffect(() => {
-        loadDashboard();
-    }, [loadDashboard]);
 
     const kyc = kycBadge(stats.kycStatus);
     const KycIcon = kyc.icon;

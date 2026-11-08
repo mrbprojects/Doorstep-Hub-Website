@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowLeft, ChevronRight, Sparkles, Flower, Star } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Sparkles, Flower } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocationContext } from '@/context/LocationContext';
-import { isObjectId, resolveParam } from '@/utils/slugHelper';
+import {  resolveParam } from '@/utils/slugHelper';
 
 function SpaCategoryContent() {
     const router = useRouter();
@@ -23,7 +24,7 @@ function SpaCategoryContent() {
         if (!location) {
             detectWithIP().catch(err => console.log("Auto detect failed", err));
         }
-    }, [location]);
+    }, [location, detectWithIP]);
 
     // Fetch Sub-Categories
     useEffect(() => {
@@ -158,11 +159,11 @@ function SpaCategoryContent() {
                                     <div className="relative h-56 rounded-[1.5rem] overflow-hidden mb-6 bg-gray-100">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
                                         {subCat.image ? (
-                                            <img loading="lazy" decoding="async"
+                                            <Image
                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
                                                 alt={subCat.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                            />
+                                             width={500} height={300} />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center bg-pink-50">
                                                 <Flower className="w-20 h-20 text-[#C06C84]/30" />

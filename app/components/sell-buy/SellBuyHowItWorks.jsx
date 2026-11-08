@@ -9,12 +9,7 @@ import {
   CheckCircle2, 
   Lightbulb, 
   ArrowRight,
-  Sparkles,
-  Search,
-  Tag,
-  ShoppingBag,
-  Handshake
-} from 'lucide-react';
+  Sparkles } from 'lucide-react';
 
 const steps = [
   {

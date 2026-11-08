@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import {
   ChevronLeft,
-  Search,
   Loader2,
   Snowflake,
   Monitor,
@@ -89,16 +89,16 @@ function CategoryIconBadge({ slug }) {
 function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onActiveBannerChange }) {
   return (
     <section className="relative z-10 w-full bg-[#eef2f1] pt-24 sm:pt-28 md:pt-32 pb-3">
-      <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1300px] px-3 sm:px-6 lg:px-8">
         <div
-          className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#037166]/20 bg-[#024039] shadow-xl transition-all duration-300 ${
+          className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#037166]/20 bg-gradient-to-br from-[#f0fdfa] via-white to-[#e6f7f5] shadow-lg transition-all duration-300 ${
             bannerLoading
               ? 'h-[180px] sm:h-[240px] md:h-[300px]'
-              : 'h-[180px] min-[480px]:h-[220px] sm:h-[260px] md:h-[300px] lg:h-[340px]'
+              : 'h-[180px] min-[480px]:h-[220px] sm:h-[260px] md:h-[300px] lg:h-[330px]'
           }`}
         >
           {bannerLoading ? (
-            <div className="h-full w-full animate-pulse bg-gradient-to-r from-[#02332e] via-[#037166]/40 to-[#02332e]" />
+            <div className="h-full w-full animate-pulse bg-gradient-to-r from-[#e6f4f1] via-[#d0ebe6] to-[#e6f4f1]" />
           ) : banners.length > 0 ? (
             <ApplianceServiceBannerCarousel
               banners={banners}
@@ -107,10 +107,10 @@ function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onAct
             />
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center px-4 text-center">
-              <h1 className="text-xl font-black text-white sm:text-2xl md:text-3xl tracking-tight">
+              <h1 className="text-xl font-black text-[#037166] sm:text-2xl md:text-3xl tracking-tight">
                 Appliance Repair Services
               </h1>
-              <p className="mt-1.5 text-xs font-semibold text-white/80 sm:text-sm">in {cityLabel}</p>
+              <p className="mt-1.5 text-xs font-semibold text-gray-600 sm:text-sm">in {cityLabel}</p>
             </div>
           )}
 
@@ -118,7 +118,7 @@ function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onAct
           <button
             type="button"
             onClick={onBack}
-            className="absolute left-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[#037166] shadow-md backdrop-blur-md transition-all hover:bg-white hover:scale-105 active:scale-95 sm:left-4 sm:top-4 sm:h-10 sm:w-10 border border-white/60"
+            className="absolute left-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[#037166] shadow-md backdrop-blur-md transition-all hover:bg-white hover:scale-105 active:scale-95 sm:left-4 sm:top-4 sm:h-10 sm:w-10 border border-[#037166]/15"
             aria-label="Go back"
           >
             <ChevronLeft size={20} />
@@ -126,7 +126,7 @@ function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onAct
 
           {/* Contextual City Badge */}
           {cityLabel && (
-            <div className="absolute right-3 top-3 z-20 hidden min-[420px]:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 text-[#037166] text-xs font-bold shadow-md backdrop-blur-md border border-white/60 sm:right-4 sm:top-4">
+            <div className="absolute right-3 top-3 z-20 hidden min-[420px]:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 text-[#037166] text-xs font-bold shadow-md backdrop-blur-md border border-[#037166]/15 sm:right-4 sm:top-4">
               <span className="w-2 h-2 rounded-full bg-[#037166] animate-pulse" />
               <span>{cityLabel}</span>
             </div>
@@ -210,7 +210,7 @@ function CategoryPageContent() {
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search] = useState('');
   const [selectedCity, setSelectedCity] = useState(null);
   const [faqActiveIndex, setFaqActiveIndex] = useState(null);
   const [banners, setBanners] = useState([]);
@@ -376,7 +376,7 @@ function CategoryPageContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#eef2f1] pb-8 sm:pb-16">
+    <div className="min-h-screen bg-[#eef2f1] pb-8 sm:pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
@@ -442,13 +442,11 @@ function CategoryPageContent() {
                   <div className="overflow-hidden rounded-[16px] bg-[#f3f6f5] shadow-md ring-1 ring-black/5 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-xl group-hover:ring-[#037166]/25 sm:rounded-[22px]">
                     <div className="aspect-square w-full overflow-hidden">
                       {cat.image ? (
-                        <img
-                          loading="lazy"
-                          decoding="async"
+                        <Image
                           src={cat.image}
                           alt={cat.name}
                           className="h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
-                        />
+                         width={500} height={300} />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-[#eef3f1]">
                           <Wrench size={32} className="text-[#037166]/30 group-hover:rotate-12 transition-transform duration-300 ease-out" />
@@ -490,13 +488,11 @@ function CategoryPageContent() {
                       title="Get it on Google Play"
                       aria-label="Get it on Google Play"
                     >
-                      <img
+                      <Image
                         src="/andriod1.png"
                         alt="Google Play"
                         className={APP_STORE_IMAGE_CLASS}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                       width={500} height={300} />
                     </a>
                     <a
                       href={appLinks.ios}
@@ -506,13 +502,11 @@ function CategoryPageContent() {
                       title="Download on the App Store"
                       aria-label="Download on the App Store"
                     >
-                      <img
+                      <Image
                         src="/apple2.png"
                         alt="App Store"
                         className={APP_STORE_IMAGE_CLASS}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                       width={500} height={300} />
                     </a>
                   </div>
                 </div>
@@ -541,7 +535,7 @@ function CategoryPageContent() {
           <PaymentMethodsSection />
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

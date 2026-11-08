@@ -473,8 +473,64 @@ export default function PartnerBookingsPage() {
     }, [token]);
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token) return;
+        let activeMount = true;
+        getProviderBookings(token)
+            .then((res) => {
+                if (!activeMount) return;
+                const payload = res?.data && !Array.isArray(res?.data) ? res.data : res;
+                const newRaw = Array.isArray(payload?.newbookings) ? payload.newbookings
+                    : Array.isArray(payload?.newBookings) ? payload.newBookings : [];
+                const completedRaw = Array.isArray(payload?.workIsCompleted) ? payload.workIsCompleted
+                    : Array.isArray(payload?.completedBookings) ? payload.completedBookings : [];
+                const cancelledRaw = Array.isArray(payload?.cancelledBookings) ? payload.cancelledBookings : [];
+                const lostRaw = Array.isArray(payload?.lostbookings) ? payload.lostbookings
+                    : Array.isArray(payload?.lostBookings) ? payload.lostBookings : [];
+
+                let rawList = Array.isArray(res) ? res
+                    : Array.isArray(res?.data) ? res.data
+                    : Array.isArray(res?.bookings) ? res.bookings
+                    : [...newRaw, ...completedRaw, ...cancelledRaw, ...lostRaw];
+
+                const allItems = [...rawList, ...newRaw, ...completedRaw, ...cancelledRaw, ...lostRaw];
+                const seen = new Set();
+                const unique = [];
+                for (const item of allItems) {
+                    if (!item) continue;
+                    const id = String(item._id || item.id || item.orderId || Math.random());
+                    if (!seen.has(id)) {
+                        seen.add(id);
+                        unique.push(item);
+                    }
+                }
+
+                const nL = [], aJ = [], cJ = [], canJ = [];
+                for (const item of unique) {
+                    const st = String(item?.status || '').toLowerCase().replace(/[\s_-]/g, '');
+                    const ls = String(item?.leadStatus || '').trim();
+                    if (['cancelledbyuser', 'cancelledbyprovider', 'rejectedbyprovider', 'cancelled', 'lost', 'rejected'].includes(st)) {
+                        canJ.push(item);
+                    } else if (['workiscompleted', 'completed', 'servicecompleted', 'bookingcompleted', 'closed'].includes(st)) {
+                        cJ.push(item);
+                    } else if (ls === 'Follow - Up' || ls === 'follow - up') {
+                        aJ.push(item);
+                    } else {
+                        nL.push(item);
+                    }
+                }
+                setNewLeads(nL);
+                setFollowUp(aJ);
+                setCompleted(cJ);
+                setCancelled(canJ);
+            })
+            .catch((e) => {
+                if (activeMount) setError(e?.message || 'Failed to load business leads');
+            })
+            .finally(() => {
+                if (activeMount) setLoading(false);
+            });
+        return () => { activeMount = false; };
+    }, [token]);
 
     const totalCount = newLeads.length + followUp.length + completed.length + cancelled.length;
 

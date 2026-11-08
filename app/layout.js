@@ -11,7 +11,6 @@ import { GlobalSettingsProvider } from './context/GlobalSettingsContext';
 import { ClientProviders } from './components/providers/ClientProviders';
 import ErrorBoundary from './components/ErrorBoundary';
 import { DynamicSEO } from './components/ui/DynamicSEO';
-import dynamic from 'next/dynamic';
 import { GOOGLE_MAPS_API_KEY, IMAGE_BASE_URL } from './config/env';
 import { AdSenseScriptLoader } from './components/sell-buy/ads/AdSenseScriptLoader';
 
@@ -124,7 +123,7 @@ export default function RootLayout({ children }) {
       </head>
       <body suppressHydrationWarning className={`${ubuntu.variable} font-ubuntu min-h-screen overflow-x-hidden`}>
         {/* Google Tag Manager (noscript) */}
-        <noscript dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P35XQW2B" height="0" width="0" style="display:none;visibility:hidden"></iframe>` }} />
+        <noscript suppressHydrationWarning dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P35XQW2B" height="0" width="0" style="display:none;visibility:hidden"></iframe>` }} />
         {/* End Google Tag Manager (noscript) */}
 
         {/*

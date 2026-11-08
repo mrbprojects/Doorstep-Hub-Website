@@ -89,7 +89,7 @@ export function trackAppPromotionEvent(eventName, {
         if (process.env.NODE_ENV === 'development') {
             console.log(`[AppPromotionAnalytics] ${eventName}`, payload);
         }
-    } catch (err) {
+    } catch {
         // Silently catch to prevent any user impact
     }
 }

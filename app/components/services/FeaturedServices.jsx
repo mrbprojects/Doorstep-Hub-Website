@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
-import { Star, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { Star, ArrowRight, Sparkles } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { fetchFeaturedServices, imageLoader } from '@/lib/api';
 
@@ -195,7 +196,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
 
                 {/* Image */}
                 <div className="relative h-56 overflow-hidden">
-                  <img loading="lazy" decoding="async"
+                  <Image
                     src={imageLoader({ src: service.mainImage || service.image })}
                     alt={service.serviceName || 'Featured Service'}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -203,7 +204,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
                     }}
-                  />
+                   width={500} height={300} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                   {/* Hover Glow */}

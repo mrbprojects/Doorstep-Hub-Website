@@ -26,7 +26,7 @@ async function fetchAPI(endpoint, body = null, method = 'POST', attempts = 3) {
             if (res.ok) {
                 return await res.json();
             }
-        } catch (e) {
+        } catch {
             if (i < attempts) {
                 await new Promise(r => setTimeout(r, 500 * i));
             }
@@ -228,7 +228,7 @@ export async function getFullSitemapInventory() {
     // 5. Appliance subcategory listing pages. These are sourced per published
     // category, so newly added subcategories are automatically added.
     const applianceSubcategories = await fetchApplianceSubcategories(categories);
-    applianceSubcategories.forEach(({ subcategory, category }) => {
+    applianceSubcategories.forEach(({ subcategory }) => {
         const slug = subcategory?.slug || (subcategory?.name ? subcategory.name.toLowerCase().replace(/\s+/g, '-') : '');
         if (!slug) return;
         const url = `${BASE_URL}/appliances/listing/${encodeURIComponent(slug)}`;

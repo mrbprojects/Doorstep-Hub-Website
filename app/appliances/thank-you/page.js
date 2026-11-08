@@ -5,22 +5,18 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { trackBookingCompleted } from '@/lib/leadTracking';
 
-function ThankYouContent() {
-    const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState(null);
-
-    useEffect(() => {
+function getInitialBookingDetails(searchParams) {
+    if (typeof window === 'undefined') return null;
+    try {
         const savedAddress = sessionStorage.getItem('selected_address');
         const sessionAddress = savedAddress ? JSON.parse(savedAddress) : null;
 
-        // Check for CRM pending booking in sessionStorage
         const crmPendingRaw = sessionStorage.getItem('crm_pending_booking');
         const crmPending = crmPendingRaw ? JSON.parse(crmPendingRaw) : null;
 
         const rawOrderId = searchParams.get('orderId') || crmPending?.bookingId || '';
         const urlAddress = searchParams.get('address') || crmPending?.address || '';
 
-        // Format Date if it exists
         const rawDate = searchParams.get('date') || crmPending?.date || sessionStorage.getItem('last_booking_date');
         let formattedDate = rawDate || 'Confirmed';
 
@@ -30,10 +26,9 @@ function ThankYouContent() {
             formattedDate = `${day} ${months[parseInt(month) - 1]} ${year}`;
         }
 
-        // Clean up duplicated address parts from URL
         let cleanAddress = urlAddress;
         if (urlAddress) {
-            const segments = urlAddress.split(',').map(s => s.trim()).filter(s => s);
+            const segments = urlAddress.split(',').map(s => s.trim()).filter(Boolean);
             const seen = new Set();
             const uniqueSegments = [];
 
@@ -48,7 +43,6 @@ function ThankYouContent() {
             cleanAddress = uniqueSegments.join(', ');
         }
 
-        // Use URL address if available (already cleaned), otherwise build from sessionStorage
         const displayAddress = cleanAddress
             ? cleanAddress
             : sessionAddress
@@ -61,7 +55,7 @@ function ThankYouContent() {
         const isMongoId = /^[a-f\d]{24}$/i.test(rawOrderId);
         const initialDisplayId = isMongoId ? `DH-${rawOrderId.slice(-8).toUpperCase()}` : rawOrderId;
 
-        setBookingDetails({
+        return {
             orderId: initialDisplayId,
             rawOrderId: rawOrderId,
             date: formattedDate,
@@ -69,8 +63,18 @@ function ThankYouContent() {
             address: displayAddress,
             serviceName: serviceName,
             referalCode: searchParams.get('referalCode') || ''
-        });
+        };
+    } catch {
+        return null;
+    }
+}
 
+function ThankYouContent() {
+    const searchParams = useSearchParams();
+    const [bookingDetails, setBookingDetails] = useState(() => getInitialBookingDetails(searchParams));
+
+    useEffect(() => {
+        const rawOrderId = searchParams.get('orderId') || bookingDetails?.rawOrderId;
         if (rawOrderId) {
             const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
             if (apiBase) {
@@ -81,11 +85,11 @@ function ThankYouContent() {
                             const b = json.data;
                             setBookingDetails(prev => ({
                                 ...prev,
-                                orderId: b.orderId || prev.orderId,
-                                date: b.date || prev.date,
-                                time: b.time || prev.time,
-                                address: b.address || prev.address,
-                                serviceName: b.serviceName || prev.serviceName,
+                                orderId: b.orderId || prev?.orderId,
+                                date: b.date || prev?.date,
+                                time: b.time || prev?.time,
+                                address: b.address || prev?.address,
+                                serviceName: b.serviceName || prev?.serviceName,
                                 status: b.status || 'confirmed',
                                 paymentStatus: b.paymentStatus || 'paid',
                             }));
@@ -93,12 +97,9 @@ function ThankYouContent() {
                     })
                     .catch(() => {});
             }
-        }
-
-        if (rawOrderId) {
             trackBookingCompleted(rawOrderId, { vertical: 'appliances' });
         }
-    }, [searchParams]);
+    }, [searchParams, bookingDetails?.rawOrderId]);
 
     return <ThankYouPage bookingDetails={bookingDetails} />;
 }

@@ -8,7 +8,7 @@ import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
 import { ListingCard, ListingGridSkeleton } from '@/components/sell-buy/cards/ListingCard';
 import { fetchSellBuyListings } from '@/lib/sellBuyApi';
 import { Search, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
+
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
@@ -71,7 +72,7 @@ export default function AllCategoriesPage() {
                   <div className="flex items-center gap-4 border-b border-slate-100 pb-4 mb-4">
                     <div className="w-14 h-14 rounded-2xl bg-[#037166]/10 text-[#037166] flex items-center justify-center shrink-0">
                       {cat.image ? (
-                        <img src={getImageUrl(cat.image)} alt={cat.name} className="w-8 h-8 object-contain" />
+                        <Image src={getImageUrl(cat.image)} alt={cat.name} className="w-8 h-8 object-contain"  width={32} height={32} />
                       ) : (
                         <SubcategoryIcon icon={cat.icon} name={cat.name} className="w-7 h-7" />
                       )}

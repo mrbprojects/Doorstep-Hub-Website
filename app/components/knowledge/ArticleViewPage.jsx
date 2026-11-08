@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Clock, Calendar, User, Share2, Facebook, Twitter, Linkedin, Link as LinkIcon, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, User, Share2, Facebook, Twitter, Linkedin, Link as LinkIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
@@ -75,7 +75,7 @@ export function ArticleViewPage({ slug, initialArticle = null, initialRelated = 
         if (slug) {
             fetchArticleData();
         }
-    }, [slug]);
+    }, [slug, initialArticle]);
 
     useEffect(() => {
         if (!loading && !article) {

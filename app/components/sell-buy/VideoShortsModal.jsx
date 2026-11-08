@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getImageUrl, fetchSellBuyListings } from '@/lib/sellBuyApi';
@@ -8,13 +9,8 @@ import {
   X,
   Heart,
   Share2,
-  Volume2,
-  VolumeX,
   ArrowUp,
   ArrowDown,
-  Play,
-  Pause,
-  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -22,13 +18,55 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
   const router = useRouter();
   const { user, token: authContextToken } = useAuth() || {};
 
-  const [items, setItems] = useState([]);
+  const getInitialList = () => {
+    let initialList = [];
+    if (allListings && allListings.length > 0) initialList = [...allListings];
+    if (listing) {
+      const exists = initialList.some((it) => (it.slug || it._id || it.id) === (listing.slug || listing._id || listing.id));
+      if (!exists) initialList = [listing, ...initialList];
+    }
+    return initialList;
+  };
+
+  const [items, setItems] = useState(getInitialList);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isMuted] = useState(false);
+  const [isPaused] = useState(false);
   const [activeImgIdx, setActiveImgIdx] = useState(0);
-  const [favoriteMap, setFavoriteMap] = useState({});
+  const [favoriteMap, setFavoriteMap] = useState(() => {
+    const list = getInitialList();
+    const favs = {};
+    list.forEach((it) => {
+      const id = it._id || it.id || it.slug;
+      if (id) favs[id] = !!it.is_liked || !!it.isFavorite;
+    });
+    return favs;
+  });
   const [favLoading, setFavLoading] = useState(false);
+
+  const [prevListing, setPrevListing] = useState(listing);
+  const [prevOpen, setPrevOpen] = useState(isOpen);
+  if (prevOpen !== isOpen || prevListing !== listing) {
+    setPrevOpen(isOpen);
+    setPrevListing(listing);
+    if (isOpen) {
+      const initialList = getInitialList();
+      setItems(initialList);
+      const favs = {};
+      initialList.forEach((it) => {
+        const id = it._id || it.id || it.slug;
+        if (id) favs[id] = !!it.is_liked || !!it.isFavorite;
+      });
+      setFavoriteMap(favs);
+      if (listing) {
+        const foundIdx = initialList.findIndex(
+          (it) => (it.slug || it._id || it.id) === (listing.slug || listing._id || listing.id)
+        );
+        setCurrentIndex(foundIdx >= 0 ? foundIdx : 0);
+      }
+      setActiveImgIdx(0);
+    }
+  }
 
   // Drag / swipe states for fluid touch scrolling like YouTube Shorts
   const [dragOffset, setDragOffset] = useState(0);
@@ -42,29 +80,6 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
   // Fetch all marketplace listings from different sellers
   useEffect(() => {
     if (!isOpen) return;
-
-    let initialList = [];
-    if (allListings && allListings.length > 0) {
-      initialList = [...allListings];
-    }
-    if (listing) {
-      const exists = initialList.some(
-        (it) => (it.slug || it._id || it.id) === (listing.slug || listing._id || listing.id)
-      );
-      if (!exists) {
-        initialList = [listing, ...initialList];
-      }
-    }
-
-    setItems(initialList);
-
-    // Initialize favorite map from items
-    const favs = {};
-    initialList.forEach((it) => {
-      const id = it._id || it.id || it.slug;
-      if (id) favs[id] = !!it.is_liked || !!it.isFavorite;
-    });
-    setFavoriteMap(favs);
 
     // Fetch diverse listings across all sellers from marketplace API
     fetchSellBuyListings({ limit: 50 }).then((res) => {
@@ -84,15 +99,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
         });
       }
     });
-
-    if (listing) {
-      const foundIdx = initialList.findIndex(
-        (it) => (it.slug || it._id || it.id) === (listing.slug || listing._id || listing.id)
-      );
-      setCurrentIndex(foundIdx >= 0 ? foundIdx : 0);
-    }
-    setActiveImgIdx(0);
-  }, [isOpen, listing, allListings]);
+  }, [isOpen, listing]);
 
   const currentItem = items[currentIndex] || listing;
 
@@ -211,7 +218,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
     if (!activeUser && typeof window !== 'undefined') {
       const stored = localStorage.getItem('user_details') || localStorage.getItem('user');
       if (stored) {
-        try { activeUser = JSON.parse(stored); } catch (err) {}
+        try { activeUser = JSON.parse(stored); } catch {}
       }
     }
 
@@ -292,7 +299,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
           text: `Check out ${currentItem.title || currentItem.name} on DoorstepHub!`,
           url: shareUrl,
         });
-      } catch (err) {}
+      } catch {}
     } else if (navigator.clipboard) {
       await navigator.clipboard.writeText(shareUrl);
       toast.success('Link copied to clipboard!');
@@ -419,7 +426,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
                       />
                     ) : (
                       <div className="relative w-full h-full flex items-center justify-center">
-                        <img
+                        <Image
                           src={itemImgSrc}
                           alt={item.title || 'Product'}
                           className="w-full h-full object-cover"
@@ -427,7 +434,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                           }}
-                        />
+                         width={500} height={300} />
                       </div>
                     )}
 
@@ -441,7 +448,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
                     <div className="flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-full overflow-hidden bg-[#037166] text-white flex items-center justify-center text-xs font-black ring-2 ring-white shrink-0 shadow-lg">
                         {itemSellerAvatar ? (
-                          <img src={getImageUrl(itemSellerAvatar)} alt={itemSellerName} className="w-full h-full object-cover" />
+                          <Image src={getImageUrl(itemSellerAvatar)} alt={itemSellerName} className="w-full h-full object-cover"  width={500} height={300} />
                         ) : (
                           <span>{itemSellerName?.[0]?.toUpperCase() || 'S'}</span>
                         )}
@@ -461,7 +468,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
                     >
                       {/* Flush Left Product Thumbnail */}
                       <div className="w-24 sm:w-28 bg-slate-200 shrink-0 relative overflow-hidden flex items-center justify-center">
-                        <img
+                        <Image
                           src={itemImgSrc}
                           alt={item.title}
                           className="w-full h-full object-cover"
@@ -469,7 +476,7 @@ export function VideoShortsModal({ isOpen, onClose, listing, allListings = [] })
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
                           }}
-                        />
+                         width={500} height={300} />
                       </div>
 
                       {/* Right Title & Big Cyan/Teal Price */}

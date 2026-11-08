@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ExternalLink, Download, Smartphone, QrCode } from 'lucide-react';
 import { getAppPromotionForRoute, resolveDeepLinkUrls } from '@/config/appPromotionConfig';
 import { trackAppPromotionEvent, PROMOTION_EVENTS } from '@/services/appPromotionAnalytics';
 import { GooglePlayLogo, AppleLogo } from './StoreLogos';
+import { useMounted } from '@/hooks/useMounted';
 
 /**
  * Clean QR Code representation pointing to the app's smart link
@@ -16,13 +18,12 @@ function SimpleQrCode({ value, size = 140 }) {
 
   return (
     <div className="bg-white p-3 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-center">
-      <img
+      <Image
         src={qrUrl}
         alt="Scan to Download App"
         width={size}
         height={size}
         className="rounded-lg"
-        loading="lazy"
       />
     </div>
   );
@@ -31,37 +32,46 @@ function SimpleQrCode({ value, size = 140 }) {
 export function AppInstallBanner() {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
-  const [deviceOS, setDeviceOS] = useState('other');
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [deviceOS] = useState(() => {
+    if (typeof window === 'undefined') return 'other';
+    const ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+    if (/Android/i.test(ua)) return 'android';
+    return 'other';
+  });
+  const [isDesktop] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent || '';
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || window.innerWidth <= 1024;
+    return !isMobile;
+  });
   const [showQrModal, setShowQrModal] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
   // 1. Resolve promotion configuration based on route
   const promotion = useMemo(() => getAppPromotionForRoute(pathname), [pathname]);
 
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    if (!promotion) setIsVisible(false);
+  }
+
   // 2. Detect OS & check dismissal preferences on mount
   useEffect(() => {
-    setMounted(true);
     if (!promotion) {
-      setIsVisible(false);
       return;
     }
 
     const ua = navigator.userAgent || '';
-    let os = 'other';
-    if (/iPhone|iPad|iPod/i.test(ua)) os = 'ios';
-    else if (/Android/i.test(ua)) os = 'android';
-    setDeviceOS(os);
-
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || window.innerWidth <= 1024;
-    setIsDesktop(!isMobile);
 
     // Clear any previously persisted dismissal so banner shows on every refresh and page navigation
     try {
       if (promotion.dismissKey) {
         localStorage.removeItem(promotion.dismissKey);
       }
-    } catch (e) {
+    } catch {
       // LocalStorage access restricted in private mode
     }
 
@@ -175,14 +185,14 @@ export function AppInstallBanner() {
             {/* App Icon + Title */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-gradient-to-br from-[#007367]/10 to-[#037166]/20 border border-[#007367]/20 flex items-center justify-center shrink-0 shadow-xs">
-                <img
+                <Image
                   src={promotion.icon}
                   alt={promotion.name}
                   className="w-8 h-8 object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
-                />
+                 width={32} height={32} />
                 <Smartphone className="w-5 h-5 text-[#007367] hidden" />
               </div>
 
@@ -311,7 +321,7 @@ export function AppInstallBanner() {
               {/* App Icon */}
               <div className="relative mt-1 mb-2">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#007367]/15 to-[#00B8A9]/20 border border-[#007367]/25 flex items-center justify-center p-2.5 shadow-sm">
-                  <img src={promotion.icon} alt={promotion.name} className="w-full h-full object-contain" />
+                  <Image src={promotion.icon} alt={promotion.name} className="w-full h-full object-contain"  width={500} height={300} />
                 </div>
               </div>
 

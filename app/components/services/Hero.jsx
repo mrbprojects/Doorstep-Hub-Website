@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { ArrowRight, Sparkles, Shield, Clock, Search, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLocationContext } from '@/context/LocationContext';
-import { ServicePreviewCard } from '@/components/appliances/ServicePreviewCard';
+
 
 export function Hero({ onViewServices, onBookService }) {
-  const router = useRouter();
+  
   const { location } = useLocationContext();
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setCategories] = useState([]);
+  const [, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {

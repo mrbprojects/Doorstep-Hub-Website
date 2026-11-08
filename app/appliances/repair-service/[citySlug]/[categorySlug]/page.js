@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, Loader2, MapPin, CheckCircle2, HelpCircle, ChevronDown, Star } from 'lucide-react';
+import { ChevronLeft, Loader2, MapPin, HelpCircle, ChevronDown, Star } from 'lucide-react';
 import { fetchAllBrands, fetchCities, fetchCategories } from '@/lib/api';
 import { buildFlatBrandCityPublicPath, getCityReviewers } from '@/lib/applianceRepairSlugs';
 import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
@@ -76,37 +77,7 @@ function FaqSection({ faqs, activeIndex, onToggle, cityName, categoryName }) {
   );
 }
 
-function StepBar({ step }) {
-  const steps = ['Category', 'Brand', 'Service'];
-  return (
-    <div className="flex items-center gap-0 mb-10">
-      {steps.map((label, i) => {
-        const idx = i + 1;
-        const done = step > idx;
-        const active = step === idx;
-        return (
-          <React.Fragment key={label}>
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300 ${
-                done ? 'bg-[#037166] border-[#037166] text-white' :
-                active ? 'bg-white border-[#037166] text-[#037166]' :
-                'bg-white border-gray-200 text-gray-300'
-              }`}>
-                {done ? <CheckCircle2 size={18} /> : idx}
-              </div>
-              <span className={`text-xs font-black uppercase tracking-widest hidden sm:block transition-colors ${
-                active ? 'text-[#037166]' : done ? 'text-[#037166]/70' : 'text-gray-300'
-              }`}>{label}</span>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={`flex-1 mx-4 h-0.5 transition-all duration-300 ${done ? 'bg-[#037166]' : 'bg-gray-100'}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-}
+
 
 function BrandPageContent() {
   const router = useRouter();
@@ -192,7 +163,7 @@ function BrandPageContent() {
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
       "name": `${selectedCategory?.name} Brand Services`,
-      "itemListElement": brands.slice(0, 15).map((brand, index) => ({
+      "itemListElement": brands.slice(0, 15).map((brand) => ({
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
@@ -210,7 +181,7 @@ function BrandPageContent() {
   );
 
   return (
-    <main className="min-h-screen bg-white pb-12 pt-20 sm:pt-22 sm:pb-8">
+    <div className="min-h-screen bg-white pb-12 pt-20 sm:pt-22 sm:pb-8">
       {/* SEO Schema */}
       <script
         type="application/ld+json"
@@ -287,13 +258,11 @@ function BrandPageContent() {
                 >
                   <div className="flex h-16 items-center justify-center overflow-hidden p-2.5 sm:h-20 md:h-24">
                     {logo ? (
-                      <img
-                        loading="lazy"
-                        decoding="async"
+                      <Image
                         src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
                         alt={brand.name}
                         className="h-full w-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-110"
-                      />
+                       width={500} height={300} />
                     ) : (
                       <div className="text-base font-black text-gray-200 sm:text-lg">
                         {(brand.name || brand)?.[0]?.toUpperCase()}
@@ -331,7 +300,7 @@ function BrandPageContent() {
 
         <PaymentMethodsSection />
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -392,7 +361,7 @@ function CustomerReviewsSection({ cityName, categoryName }) {
                 </div>
               </div>
               <p className="text-gray-600 text-sm leading-relaxed">
-                "{rev.body}"
+                &quot;{rev.body}&quot;
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#037166] font-medium">

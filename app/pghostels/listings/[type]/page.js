@@ -1,21 +1,20 @@
 'use client';
 
-import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams, useParams, usePathname } from 'next/navigation';
 import {
     MapPin, Star, Search, Sliders, Heart, TrendingUp, X, Wifi, Utensils,
-    Shirt, Zap, Shield, ChevronRight, Award, Sparkles, ArrowLeft, Filter,
-    CheckCircle, MessageSquare
+    Shirt, Zap, ChevronRight, Award, Sparkles, ArrowLeft, Filter
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/pghostels/ui/tabs';
 import { Input } from '@/components/pghostels/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
 import { Slider } from '@/components/pghostels/ui/slider';
-import { Checkbox } from '@/components/pghostels/ui/checkbox';
-import { Button } from '@/components/pghostels/ui/button';
+
+
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Badge } from '@/components/ui/badge';
+
 import { resolveParam } from '@/utils/slugHelper';
 
 const mockListings = [
@@ -135,7 +134,21 @@ function PGListingsContent() {
         moveIn: searchParams.get('moveIn') || ''
     };
 
-    const [priceRange, setPriceRange] = useState([0, 50000]);
+    const [priceRange, setPriceRange] = useState(() => {
+        const minP = searchParams.get('minPrice');
+        const maxP = searchParams.get('maxPrice');
+        if (minP && maxP) return [parseInt(minP), parseInt(maxP)];
+        const budget = searchParams.get('budget');
+        if (budget) {
+            if (budget.includes('-')) {
+                const parts = budget.split('-').map(Number);
+                if (!isNaN(parts[0]) && !isNaN(parts[1])) return parts;
+            } else if (budget === '15000+') {
+                return [15000, 50000];
+            }
+        }
+        return [0, 50000];
+    });
     const [savedItems, setSavedItems] = useState([]);
     const [compareList, setCompareList] = useState([]);
     const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '');
@@ -143,25 +156,64 @@ function PGListingsContent() {
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [usingFallback, setUsingFallback] = useState(false);
-    const [minRating, setMinRating] = useState(0);
+    const [minRating, setMinRating] = useState(() => {
+        const rating = searchParams.get('minRating');
+        return rating ? parseFloat(rating) : 0;
+    });
 
-    const [activeTab, setActiveTab] = useState('all');
+    const [activeTab, setActiveTab] = useState(() => {
+        if (params.type && (params.type === 'all' || params.type === 'nearby' || params.type === 'recommended')) {
+            return params.type === 'all' ? 'all' : params.type;
+        }
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem('pg_listings_last_tab');
+                if (saved === 'all' || saved === 'nearby') return saved;
+            } catch {}
+        }
+        return searchParams.get('lat') ? 'nearby' : 'all';
+    });
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
     const [expandedCategory, setExpandedCategory] = useState(searchParams.get('categorySlug') || searchParams.get('categoryId') || null);
     const [categoriesLoading, setCategoriesLoading] = useState(false);
 
-    // BUG-12 FIX: Restore last active tab from localStorage inside useEffect to avoid Hydration Error
-    useEffect(() => {
-        try {
-            const saved = localStorage.getItem('pg_listings_last_tab');
-            if (saved && (saved === 'all' || saved === 'nearby')) {
-                setActiveTab(saved);
-            } else if (searchParams.get('lat')) {
-                setActiveTab('nearby');
+    // Sync activeTab on params.type change
+    const [prevType, setPrevType] = useState(params.type);
+    if (prevType !== params.type) {
+        setPrevType(params.type);
+        if (params.type && (params.type === 'all' || params.type === 'nearby' || params.type === 'recommended')) {
+            setActiveTab(params.type === 'all' ? 'all' : params.type);
+        }
+    }
+
+    // Sync filters on searchParams change
+    const searchParamsStr = searchParams.toString();
+    const [prevSearchParamsStr, setPrevSearchParamsStr] = useState(searchParamsStr);
+    if (prevSearchParamsStr !== searchParamsStr) {
+        setPrevSearchParamsStr(searchParamsStr);
+        const query = searchParams.get('query');
+        if (query !== null) setSearchQuery(query);
+        const catId = searchParams.get('categorySlug') || searchParams.get('categoryId');
+        if (catId) setExpandedCategory(catId);
+        const minP = searchParams.get('minPrice');
+        const maxP = searchParams.get('maxPrice');
+        if (minP && maxP) {
+            setPriceRange([parseInt(minP), parseInt(maxP)]);
+        } else {
+            const budget = searchParams.get('budget');
+            if (budget) {
+                if (budget.includes('-')) {
+                    const parts = budget.split('-').map(Number);
+                    if (!isNaN(parts[0]) && !isNaN(parts[1])) setPriceRange(parts);
+                } else if (budget === '15000+') {
+                    setPriceRange([15000, 50000]);
+                }
             }
-        } catch { /* ignore */ }
-    }, []);
+        }
+        const rating = searchParams.get('minRating');
+        if (rating) setMinRating(parseFloat(rating));
+    }
 
     // PG Hostels Service ID (from PremiumHomePage) - You might want to move these to a config file
     const SERVICE_ID = '69524fb157bb211ca094e5ee';
@@ -225,59 +277,7 @@ function PGListingsContent() {
         };
     };
 
-
-    // Sync state with URL params on navigation
-    useEffect(() => {
-        const query = searchParams.get('query');
-        if (query !== null && query !== searchQuery) {
-            setSearchQuery(query);
-        }
-
-        const catId = searchParams.get('categorySlug') || searchParams.get('categoryId');
-        if (catId && catId !== expandedCategory) {
-            setExpandedCategory(catId);
-        }
-
-        // Sync price range and rating from URL if present
-        const minP = searchParams.get('minPrice');
-        const maxP = searchParams.get('maxPrice');
-
-        if (minP && maxP) {
-            const range = [parseInt(minP), parseInt(maxP)];
-            if (range[0] !== priceRange[0] || range[1] !== priceRange[1]) {
-                setPriceRange(range);
-            }
-        } else if (!minP && !maxP && !searchParams.get('budget')) {
-            setPriceRange([0, 50000]);
-        }
-
-        // Parse 'budget' param from Questionnaire
-        const budget = searchParams.get('budget');
-        if (budget) {
-            const budgetMap = {
-                '3-6k': [3000, 6000],
-                '6-10k': [6000, 10000],
-                '10-15k': [10000, 15000],
-                '15k+': [15000, 50000]
-            };
-            if (budgetMap[budget]) {
-                setPriceRange(budgetMap[budget]);
-            }
-        }
-
-        const rating = searchParams.get('minRating');
-        if (rating) {
-            const r = parseFloat(rating);
-            if (r !== minRating) setMinRating(r);
-        }
-    }, [searchParams]);
-
-    // Sync active tab with route param
-    useEffect(() => {
-        if (params.type && (params.type === 'all' || params.type === 'nearby' || params.type === 'recommended')) {
-            setActiveTab(params.type === 'all' ? 'all' : params.type);
-        }
-    }, [params.type]);
+    const searchParamsString = searchParams.toString();
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -337,7 +337,7 @@ function PGListingsContent() {
             fetchListings();
         }, 100); // Small debounce
         return () => clearTimeout(timer);
-    }, [searchParams.toString(), priceRange, minRating]); // Reliable change detection
+    }, [searchParams, searchParamsString, priceRange, minRating, searchQuery]); // Reliable change detection
 
     // Fetch Categories
     useEffect(() => {
@@ -420,7 +420,7 @@ function PGListingsContent() {
         }, 500); // 500ms debounce
 
         return () => clearTimeout(timer);
-    }, [priceRange, minRating]);
+    }, [priceRange, minRating, pathname, router, searchParams]);
 
     const toggleSave = (id) => {
         setSavedItems(prev =>
@@ -471,7 +471,7 @@ function PGListingsContent() {
         router.push(`${pathname}?${currentParams.toString()}`);
     };
 
-    const FilterPanel = ({ showTitle = true }) => (
+    const renderFilterPanel = (showTitle = true) => (
         <div className="space-y-6 text-black">
             {showTitle && (
                 <h4 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
@@ -713,13 +713,14 @@ function PGListingsContent() {
         </div>
     );
 
-    const PGCard = ({ listing, isNearby, featured }) => {
+    const renderPGCard = (listing, isNearby = false, featured = false) => {
         const isSaved = savedItems.includes(listing.id);
         const isComparing = compareList.includes(listing.id);
         const isClickable = !usingFallback;
 
         return (
             <motion.div
+                key={listing.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={isClickable ? { y: -8 } : {}}
@@ -986,7 +987,7 @@ function PGListingsContent() {
                                     </SheetTitle>
                                 </SheetHeader>
                                 <div className="mt-6">
-                                    <FilterPanel showTitle={false} />
+                                    {renderFilterPanel(false)}
                                 </div>
                             </SheetContent>
                         </Sheet>
@@ -1025,7 +1026,7 @@ function PGListingsContent() {
                         <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:px-0 sm:mx-0 sm:pb-0">
                             {recommendedListings.map((listing) => (
                                 <div key={listing.id} className="w-[300px] sm:w-auto flex-shrink-0">
-                                    <PGCard listing={listing} />
+                                    {renderPGCard(listing)}
                                 </div>
                             ))}
                         </div>
@@ -1090,7 +1091,7 @@ function PGListingsContent() {
                         {/* Desktop Filter Panel */}
                         <div className="hidden xl:block w-80 flex-shrink-0">
                             <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28 overflow-hidden">
-                                <FilterPanel />
+                                {renderFilterPanel(true)}
                             </div>
                         </div>
 
@@ -1109,9 +1110,7 @@ function PGListingsContent() {
                                     </div>
                                 ) : sortedListings.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                                        {sortedListings.map((listing) => (
-                                            <PGCard key={listing.id} listing={listing} />
-                                        ))}
+                                        {sortedListings.map((listing) => renderPGCard(listing))}
                                     </div>
                                 ) : (
                                     <EmptyState
@@ -1135,9 +1134,7 @@ function PGListingsContent() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                                         {sortedListings
                                             .sort((a, b) => a.distance - b.distance)
-                                            .map((listing) => (
-                                                <PGCard key={listing.id} listing={listing} isNearby />
-                                            ))}
+                                            .map((listing) => renderPGCard(listing, true))}
                                     </div>
                                 ) : (
                                     <EmptyState

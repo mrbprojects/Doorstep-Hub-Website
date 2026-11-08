@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, CheckCircle, User, Loader2, Scissors, Info, Banknote, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, CheckCircle, Loader2, Scissors, Info, Banknote, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -11,27 +11,87 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
+import { useMounted } from '@/hooks/useMounted';
+
+// Service window: 9 AM to 9 PM
+const SERVICE_END_HOUR = 21; // Spa might need less buffer than rituals
+
+const getAvailableDates = () => {
+    const now = new Date();
+    const dates = [];
+
+    // Start showing Today from 9 AM till 8 PM (1 hour before 9 PM close)
+    const todayLimit = new Date();
+    todayLimit.setHours(SERVICE_END_HOUR - 1, 0, 0, 0);
+
+    const startFromTomorrow = now > todayLimit;
+
+    for (let i = (startFromTomorrow ? 1 : 0); i < 10 + (startFromTomorrow ? 1 : 0); i++) {
+        const date = new Date();
+        date.setDate(now.getDate() + i);
+        dates.push({
+            value: date.toISOString().split('T')[0],
+            dayName: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short' }),
+            dayNumber: date.getDate().toString().padStart(2, '0'),
+            month: date.toLocaleDateString('en-US', { month: 'short' }),
+            fullLabel: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        });
+    }
+    return dates;
+};
+
+const getAvailableTimes = (selectedDateValue) => {
+    const now = new Date();
+    const selectedDate = new Date(selectedDateValue);
+
+    const allTimeSlots = [
+        { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9 },
+        { label: '11:00 AM - 01:00 PM', value: '11:00', startHour: 11 },
+        { label: '01:00 PM - 03:00 PM', value: '13:00', startHour: 13 },
+        { label: '03:00 PM - 05:00 PM', value: '15:00', startHour: 15 },
+        { label: '05:00 PM - 07:00 PM', value: '17:00', startHour: 17 },
+        { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19 },
+    ];
+
+    if (selectedDate.toDateString() === now.toDateString()) {
+        const currentHour = now.getHours();
+        return allTimeSlots.filter(slot => slot.startHour > currentHour + 1); // 1 hour buffer for same day
+    }
+
+    return allTimeSlots;
+};
 
 export default function SpaConfirmPage() {
     const router = useRouter();
     const { cartData, cartItems, loading: cartLoading, clearCart } = useServiceCart();
     const { token, isAuthenticated } = useAuth();
+    const mounted = useMounted();
 
-    const [selectedAddress, setSelectedAddress] = useState(null);
-    const [bookedDate, setBookedDate] = useState('');
+    const [selectedAddress] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            const saved = sessionStorage.getItem('selected_address');
+            return saved ? JSON.parse(saved) : null;
+        } catch {
+            return null;
+        }
+    });
+    const [bookedDate, setBookedDate] = useState(() => getAvailableDates()[0]?.value || '');
     const [bookedTime, setBookedTime] = useState('');
+    const [prevBookedDate, setPrevBookedDate] = useState(bookedDate);
+    if (prevBookedDate !== bookedDate) {
+        setPrevBookedDate(bookedDate);
+        setBookedTime('');
+    }
+
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
-    const [paymentOption, setPaymentOption] = useState('ADVANCE');
+    const [paymentOption] = useState('ADVANCE');
+    const [, setPaymentStatus] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const [paymentStatus, setPaymentStatus] = useState(null);
-    const [mounted, setMounted] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
     const addressLine1 = [selectedAddress?.flat, selectedAddress?.area].filter(Boolean).join(', ');
     const addressLine2 = [selectedAddress?.cityName, selectedAddress?.postalCode].filter(Boolean).join(', ');
-
-    // Mark client-side mount to avoid hydration mismatch with new Date()
-    useEffect(() => { setMounted(true); }, []);
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
@@ -42,9 +102,9 @@ export default function SpaConfirmPage() {
             const urlTxnid = urlParams.get('txnid') || '';
 
             let pendingBooking = {};
-            try { pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}'); } catch (e) {}
+            try { pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}'); } catch {}
             if (!pendingBooking.bookedDate) {
-                try { pendingBooking = JSON.parse(localStorage.getItem('spa_last_booking') || '{}'); } catch (e) {}
+                try { pendingBooking = JSON.parse(localStorage.getItem('spa_last_booking') || '{}'); } catch {}
             }
 
             const orderId = urlOrderId || pendingBooking.orderId || '';
@@ -83,7 +143,6 @@ export default function SpaConfirmPage() {
                 proceedSuccess();
             }
         } else if (status === 'failure' || status === 'cancelled' || status === 'cancel') {
-            setPaymentStatus('failure');
             toast.error('Payment was cancelled or could not be completed. You can try again or choose Pay After Service.');
             if (typeof window !== 'undefined') {
                 window.history.replaceState({}, '', window.location.pathname);
@@ -91,23 +150,12 @@ export default function SpaConfirmPage() {
         }
     }, [clearCart, router, token]);
 
-
-
     useEffect(() => {
-        const savedAddress = sessionStorage.getItem('selected_address');
-        if (savedAddress) {
-            setSelectedAddress(JSON.parse(savedAddress));
-        } else {
+        if (!selectedAddress) {
             toast.error("No address selected");
             router.push('/spa-salon/booking/address');
         }
-
-        // Auto-select first available date
-        const initialDates = getAvailableDates();
-        if (initialDates.length > 0) {
-            setBookedDate(initialDates[0].value);
-        }
-    }, [router]);
+    }, [selectedAddress, router]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -118,63 +166,9 @@ export default function SpaConfirmPage() {
         return () => clearTimeout(timer);
     }, [isAuthenticated]);
 
-    // Service window: 9 AM to 9 PM
-    const SERVICE_START_HOUR = 9;
-    const SERVICE_END_HOUR = 21;
-    const BUFFER_HOURS = 2; // Spa might need less buffer than rituals
-
-    const getAvailableDates = () => {
-        const now = new Date();
-        const dates = [];
-
-        // Start showing Today from 9 AM till 8 PM (1 hour before 9 PM close)
-        const todayLimit = new Date();
-        todayLimit.setHours(SERVICE_END_HOUR - 1, 0, 0, 0);
-
-        const startFromTomorrow = now > todayLimit;
-
-        for (let i = (startFromTomorrow ? 1 : 0); i < 10 + (startFromTomorrow ? 1 : 0); i++) {
-            const date = new Date();
-            date.setDate(now.getDate() + i);
-            dates.push({
-                value: date.toISOString().split('T')[0],
-                dayName: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short' }),
-                dayNumber: date.getDate().toString().padStart(2, '0'),
-                month: date.toLocaleDateString('en-US', { month: 'short' }),
-                fullLabel: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-            });
-        }
-        return dates;
-    };
-
-    const getAvailableTimes = (selectedDateValue) => {
-        const now = new Date();
-        const selectedDate = new Date(selectedDateValue);
-
-        const allTimeSlots = [
-            { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9 },
-            { label: '11:00 AM - 01:00 PM', value: '11:00', startHour: 11 },
-            { label: '01:00 PM - 03:00 PM', value: '13:00', startHour: 13 },
-            { label: '03:00 PM - 05:00 PM', value: '15:00', startHour: 15 },
-            { label: '05:00 PM - 07:00 PM', value: '17:00', startHour: 17 },
-            { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19 },
-        ];
-
-        if (selectedDate.toDateString() === now.toDateString()) {
-            const currentHour = now.getHours();
-            return allTimeSlots.filter(slot => slot.startHour > currentHour + 1); // 1 hour buffer for same day
-        }
-
-        return allTimeSlots;
-    };
-
     // Only compute dates/times on the client to avoid hydration mismatch
     const availableDates = mounted ? getAvailableDates() : [];
     const availableTimesForSelectedDate = mounted ? getAvailableTimes(bookedDate) : [];
-
-    useEffect(() => {
-        setBookedTime('');
-    }, [bookedDate]);
 
     const handleCheckout = async () => {
         if (!isAuthenticated) {
@@ -227,18 +221,38 @@ export default function SpaConfirmPage() {
 
         setLoading(true);
         try {
+            const origin = typeof window !== 'undefined'
+                ? `${window.location.protocol}//${window.location.host}`
+                : 'https://doorstephub.com';
+            const currentCheckoutPath = typeof window !== 'undefined' ? window.location.pathname : '/spa-salon/booking/confirm';
+            const cleanBaseUrl = `${origin}${currentCheckoutPath}`;
+
+            try {
+                sessionStorage.setItem('last_checkout_url', currentCheckoutPath + (typeof window !== 'undefined' ? window.location.search : ''));
+            } catch {}
+
             let payload = {
-                serviceAddressId: selectedAddress._id,
+                serviceAddressId: selectedAddress._id || selectedAddress.id,
                 bookedDate,
                 bookedTime,
                 paymentMethod,
                 paymentOption,
-                ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
+                ...(paymentOption === 'ADVANCE' ? { adv: true } : { adv: false }),
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
-                returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
-                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success&date=${encodeURIComponent(bookedDate)}&time=${encodeURIComponent(bookedTime)}`,
-                furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=cancelled`
+                returnUrl: cleanBaseUrl,
+                surl: `${cleanBaseUrl}?status=success`,
+                furl: `${origin}/services/payment-failed`,
+                udf1: String(selectedAddress._id || selectedAddress.id || '').slice(0, 50),
+                udf2: String(bookedDate || '').replace(/[^0-9-]/g, '').slice(0, 20),
+                udf3: String(bookedTime || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 20),
+                udf4: String(paymentOption || 'FULL').slice(0, 20),
+                udf5: String(checkoutProviderType || 'regular').slice(0, 20),
+                udf6: 'website',
+                udf7: 'doorstephub',
+                udf8: 'spasalon',
+                udf9: 'online',
+                udf10: 'none'
             };
 
             const endpoint = paymentMethod === 'ONLINE'
@@ -283,8 +297,11 @@ export default function SpaConfirmPage() {
                     if (selectedAddress) {
                         sessionStorage.setItem('selected_address', JSON.stringify(selectedAddress));
                     }
-                    try { localStorage.setItem('spa_last_booking', JSON.stringify(pendingData)); } catch (e) {}
+                    try { localStorage.setItem('spa_last_booking', JSON.stringify(pendingData)); } catch {}
 
+                    try {
+                        sessionStorage.setItem('last_checkout_url', window.location.pathname + window.location.search);
+                    } catch {}
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = easebuzzUrl;

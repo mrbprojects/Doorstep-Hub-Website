@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronRight, ChevronLeft, MapPin, Clock, DollarSign, User, Calendar, Layers } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { resolveParam } from '@/utils/slugHelper';
 import { useRouter } from 'next/navigation';
 
@@ -99,19 +99,20 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
         };
 
         fetchData();
-    }, [isOpen, selectedCat.id]);
+    }, [isOpen, selectedCat.id, selectedCat.name]);
 
     // Reset on close or when initialCategoryId changes (e.g. clicking different categories on home page)
-    useEffect(() => {
+    const [prevInitialId, setPrevInitialId] = useState(initialCategoryId);
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+    if (prevIsOpen !== isOpen || prevInitialId !== initialCategoryId) {
+        setPrevIsOpen(isOpen);
+        setPrevInitialId(initialCategoryId);
+        setSelectedCat({ id: initialCategoryId, name: initialCategoryName });
         if (!isOpen) {
-            setSelectedCat({ id: initialCategoryId, name: initialCategoryName });
             setAnswers({});
             setCurrentStep(0);
-        } else {
-            // Update selectedCat if props change while open
-            setSelectedCat({ id: initialCategoryId, name: initialCategoryName });
         }
-    }, [isOpen, initialCategoryId, initialCategoryName]);
+    }
 
     const handleAnswer = async (value) => {
         const currentQuestion = questions[currentStep];

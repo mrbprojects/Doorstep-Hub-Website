@@ -41,8 +41,24 @@ export default function PartnerSupportDetailPage() {
     }, [token, ticketId]);
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token || !ticketId) return;
+        let activeMount = true;
+        getProviderSupportTicket(token, ticketId)
+            .then((res) => {
+                if (activeMount) setTicket(res?.data || res?.ticket || res);
+            })
+            .catch((err) => {
+                console.error(err);
+                if (activeMount) {
+                    toast.error(err.message || 'Failed to load ticket');
+                    setTicket(null);
+                }
+            })
+            .finally(() => {
+                if (activeMount) setLoading(false);
+            });
+        return () => { activeMount = false; };
+    }, [token, ticketId]);
 
     const isClosed = !isProviderTicketOpen(ticket?.status);
 

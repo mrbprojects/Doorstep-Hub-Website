@@ -1,25 +1,27 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { motion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle2, Home, MapPin, Calendar, Wallet, Download, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CheckCircle2, Home, MapPin, Calendar, Wallet } from 'lucide-react';
+
 
 function SuccessCodContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState({ date: '', address: '' });
-
-    useEffect(() => {
-        const savedAddress = sessionStorage.getItem('selected_address');
-        const addressData = savedAddress ? JSON.parse(savedAddress) : null;
-
-        setBookingDetails({
-            date: searchParams.get('date') || 'TBD',
-            address: addressData ? `${addressData.flat}, ${addressData.area}, ${addressData.cityName}` : 'Selected PG location'
-        });
-    }, [searchParams]);
+    const [bookingDetails] = useState(() => {
+        if (typeof window === 'undefined') return { date: '', address: '' };
+        try {
+            const savedAddress = sessionStorage.getItem('selected_address');
+            const addressData = savedAddress ? JSON.parse(savedAddress) : null;
+            return {
+                date: searchParams.get('date') || 'TBD',
+                address: addressData ? `${addressData.flat}, ${addressData.area}, ${addressData.cityName}` : 'Selected PG location'
+            };
+        } catch {
+            return { date: 'TBD', address: 'Selected PG location' };
+        }
+    });
 
     const handleBackToHome = () => {
         router.push('/pghostels');

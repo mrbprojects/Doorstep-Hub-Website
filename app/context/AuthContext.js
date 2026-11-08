@@ -59,77 +59,16 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.removeItem('token_expiry_backup');
     }, []);
 
-    // Validate and restore token from localStorage
-    useEffect(() => {
-        const savedToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token_backup');
-        const savedExpiry = localStorage.getItem('token_expiry') || sessionStorage.getItem('token_expiry_backup');
-
-        if (savedToken) {
-            let expiryTime = savedExpiry ? parseInt(savedExpiry) : null;
-
-            // If expiry missing (e.g., after external redirect), restore a fresh expiry window
-            if (!expiryTime || Number.isNaN(expiryTime)) {
-                expiryTime = Date.now() + TOKEN_EXPIRY_TIME;
-                localStorage.setItem('token_expiry', expiryTime.toString());
-                sessionStorage.setItem('token_expiry_backup', expiryTime.toString());
-            }
-
-            // Restore token to localStorage if it only existed in sessionStorage
-            if (!localStorage.getItem('auth_token')) {
-                localStorage.setItem('auth_token', savedToken);
-            }
-
-            // Check if token is expired
-            if (Date.now() >= expiryTime) {
-                console.warn('Token expired, clearing session');
-                clearToken();
-                toast.error('Session expired. Please login again.');
-                setLoading(false);
-                return;
-            }
-
-            // Token is valid, restore session
-            setToken(savedToken);
-            setTokenExpiry(expiryTime);
-            fetchProfile(savedToken);
-
-            // Check if token needs refresh
-            if (Date.now() >= (expiryTime - TOKEN_REFRESH_THRESHOLD)) {
-                console.log('Token expiring soon, consider refreshing');
-                // Note: Implement token refresh API call here if backend supports it
-            }
-        } else {
-            setLoading(false);
+    const logout = useCallback(() => {
+        setUser(null);
+        clearToken();
+        if (sessionCheckInterval.current) {
+            clearInterval(sessionCheckInterval.current);
         }
+        toast.success('Logged out successfully');
     }, [clearToken]);
 
-    // Session monitoring - check token expiry every minute
-    useEffect(() => {
-        if (!token || !tokenExpiry) return;
-
-        sessionCheckInterval.current = setInterval(() => {
-            if (isTokenExpired()) {
-                console.warn('Token expired during session');
-                logout();
-                toast.error('Your session has expired. Please login again.');
-            } else if (shouldRefreshToken()) {
-                console.log('Token expiring soon');
-                // Show warning to user
-                const remainingTime = Math.floor((tokenExpiry - Date.now()) / (60 * 1000));
-                if (remainingTime <= 30 && remainingTime > 0) {
-                    toast.warning(`Your session will expire in ${remainingTime} minutes`);
-                }
-            }
-        }, 60000); // Check every minute
-
-        return () => {
-            if (sessionCheckInterval.current) {
-                clearInterval(sessionCheckInterval.current);
-            }
-        };
-    }, [token, tokenExpiry, isTokenExpired, shouldRefreshToken]);
-
-    const fetchProfile = async (authToken) => {
+    const fetchProfile = useCallback(async (authToken) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/user/profile`, {
                 headers: {
@@ -161,7 +100,84 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [logout]);
+
+    // Validate and restore token from localStorage
+    useEffect(() => {
+        const savedToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token_backup');
+        const savedExpiry = localStorage.getItem('token_expiry') || sessionStorage.getItem('token_expiry_backup');
+
+        if (savedToken) {
+            let expiryTime = savedExpiry ? parseInt(savedExpiry) : null;
+
+            // If expiry missing (e.g., after external redirect), restore a fresh expiry window
+            if (!expiryTime || Number.isNaN(expiryTime)) {
+                expiryTime = Date.now() + TOKEN_EXPIRY_TIME;
+                localStorage.setItem('token_expiry', expiryTime.toString());
+                sessionStorage.setItem('token_expiry_backup', expiryTime.toString());
+            }
+
+            // Restore token to localStorage if it only existed in sessionStorage
+            if (!localStorage.getItem('auth_token')) {
+                localStorage.setItem('auth_token', savedToken);
+            }
+
+            // Check if token is expired
+            if (Date.now() >= expiryTime) {
+                console.warn('Token expired, clearing session');
+                queueMicrotask(() => {
+                    clearToken();
+                    toast.error('Session expired. Please login again.');
+                    setLoading(false);
+                });
+                return;
+            }
+
+            // Token is valid, restore session
+            queueMicrotask(() => {
+                setToken(savedToken);
+                setTokenExpiry(expiryTime);
+                fetchProfile(savedToken);
+            });
+
+            // Check if token needs refresh
+            if (Date.now() >= (expiryTime - TOKEN_REFRESH_THRESHOLD)) {
+                console.log('Token expiring soon, consider refreshing');
+                // Note: Implement token refresh API call here if backend supports it
+            }
+        } else {
+            queueMicrotask(() => {
+                setLoading(false);
+            });
+        }
+    }, [clearToken, fetchProfile]);
+
+    // Session monitoring - check token expiry every minute
+    useEffect(() => {
+        if (!token || !tokenExpiry) return;
+
+        sessionCheckInterval.current = setInterval(() => {
+            if (isTokenExpired()) {
+                console.warn('Token expired during session');
+                logout();
+                toast.error('Your session has expired. Please login again.');
+            } else if (shouldRefreshToken()) {
+                console.log('Token expiring soon');
+                // Show warning to user
+                const remainingTime = Math.floor((tokenExpiry - Date.now()) / (60 * 1000));
+                if (remainingTime <= 30 && remainingTime > 0) {
+                    toast.warning(`Your session will expire in ${remainingTime} minutes`);
+                }
+            }
+        }, 60000); // Check every minute
+
+        return () => {
+            if (sessionCheckInterval.current) {
+                clearInterval(sessionCheckInterval.current);
+            }
+        };
+    }, [token, tokenExpiry, isTokenExpired, shouldRefreshToken, logout]);
+
 
     const loginWithWhatsApp = async (mobile) => {
         try {
@@ -264,7 +280,7 @@ export const AuthProvider = ({ children }) => {
     const loginWithGoogle = async () => {
         try {
             const { signInWithGoogle } = await import('@/config/firebase');
-            const { user, idToken } = await signInWithGoogle();
+            const { idToken } = await signInWithGoogle();
 
             console.log('🔥 Firebase Google Sign-In successful, calling backend API...');
 
@@ -296,7 +312,7 @@ export const AuthProvider = ({ children }) => {
     const loginWithApple = async () => {
         try {
             const { signInWithApple } = await import('@/config/firebase');
-            const { user, idToken } = await signInWithApple();
+            const { idToken } = await signInWithApple();
 
             console.log(' Firebase Apple Sign-In successful, calling backend API...');
 
@@ -368,15 +384,6 @@ export const AuthProvider = ({ children }) => {
             throw error;
         }
     };
-
-    const logout = useCallback(() => {
-        setUser(null);
-        clearToken();
-        if (sessionCheckInterval.current) {
-            clearInterval(sessionCheckInterval.current);
-        }
-        toast.success('Logged out successfully');
-    }, [clearToken]);
 
     // Global API error handler for 401 responses
     const handleApiError = useCallback((error, response) => {

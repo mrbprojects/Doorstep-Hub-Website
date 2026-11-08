@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Wrench, Loader2, MapPin, CheckCircle2, Star, HelpCircle, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wrench, Loader2, MapPin, Star, HelpCircle, ChevronDown } from 'lucide-react';
 import { fetchServicesByBrand, fetchAuthorizedServices, fetchAuthorizedServicesByFilters, fetchCities, fetchCategories, fetchAllBrands, resolveMediaUrl } from '@/lib/api';
 import {
   buildFlatBrandCityPublicPath,
@@ -83,37 +84,7 @@ function FaqSection({ faqs, activeIndex, onToggle, cityName, brandName }) {
   );
 }
 
-function StepBar({ step }) {
-  const steps = ['Category', 'Brand', 'Service'];
-  return (
-    <div className="flex items-center gap-0 mb-10">
-      {steps.map((label, i) => {
-        const idx = i + 1;
-        const done = step > idx;
-        const active = step === idx;
-        return (
-          <React.Fragment key={label}>
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300 ${
-                done ? 'bg-[#037166] border-[#037166] text-white' :
-                active ? 'bg-white border-[#037166] text-[#037166]' :
-                'bg-white border-gray-200 text-gray-300'
-              }`}>
-                {done ? <CheckCircle2 size={18} /> : idx}
-              </div>
-              <span className={`text-xs font-black uppercase tracking-widest hidden sm:block transition-colors ${
-                active ? 'text-[#037166]' : done ? 'text-[#037166]/70' : 'text-gray-300'
-              }`}>{label}</span>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={`flex-1 mx-4 h-0.5 transition-all duration-300 ${done ? 'bg-[#037166]' : 'bg-gray-100'}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-}
+
 
 function ServicePageContent() {
   const router = useRouter();
@@ -122,13 +93,14 @@ function ServicePageContent() {
   const { citySlug, categorySlug, brandSlug } = params;
 
   const isAutoCityRoute = citySlug === FLAT_BRAND_AUTO_CITY;
+  const locationCity = location?.city;
   const resolvedCitySlug = useMemo(() => {
     if (!isAutoCityRoute) return citySlug;
-    if (location?.city) {
-      return String(location.city).trim().toLowerCase().replace(/\s+/g, '-');
+    if (locationCity) {
+      return String(locationCity).trim().toLowerCase().replace(/\s+/g, '-');
     }
     return citySlug;
-  }, [isAutoCityRoute, citySlug, location?.city]);
+  }, [isAutoCityRoute, citySlug, locationCity]);
 
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -243,7 +215,7 @@ function ServicePageContent() {
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
       "name": `${selectedBrand?.name} Repair Services`,
-      "itemListElement": services.slice(0, 10).map((service, index) => ({
+      "itemListElement": services.slice(0, 10).map((service) => ({
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
@@ -341,11 +313,11 @@ function ServicePageContent() {
                   {/* Image section - Touching Top, Left, Bottom */}
                   <div className="w-24 sm:w-28 md:w-32 flex-shrink-0 h-full overflow-hidden bg-gray-50 border-r border-gray-100">
                     {service.image ? (
-                      <img loading="lazy" decoding="async"
+                      <Image
                         src={resolveMediaUrl(service.image)}
                         alt={service.serviceName}
                         className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                      />
+                       width={500} height={300} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Wrench size={24} className="text-gray-200" />

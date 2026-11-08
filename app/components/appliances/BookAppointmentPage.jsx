@@ -113,15 +113,18 @@ const getAvailableDates = () => {
         let dayLabel = '';
         let subLabel = '';
 
+        const monthDay = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+
         if (actualOffset === 0) {
             dayLabel = 'Today';
-            subLabel = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            subLabel = monthDay;
         } else if (actualOffset === 1) {
             dayLabel = 'Tomorrow';
-            subLabel = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            subLabel = monthDay;
         } else {
-            dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }) + ',';
-            subLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            dayLabel = dayName;
+            subLabel = monthDay;
         }
 
         dates.push({
@@ -153,14 +156,25 @@ export function BookAppointmentPage() {
         }
     }, []);
 
-    const [formData, setFormData] = useState({
-        firstName: '', lastName: '', phone: '', email: '',
-        websiteCityId: '', cityName: '',
-        websiteCategoryId: '', categoryName: '',
-        subcategoryId: '', subcategoryName: '',
-        address: '', flat: '', area: '', pincode: '', landmark: '',
-        latitude: '', longitude: '',
-        bookingDate: '', bookingTime: '', message: '',
+    const [formData, setFormData] = useState(() => {
+        const initialDates = getAvailableDates();
+        const initialDate = initialDates[0]?.value || '';
+        const initialTimes = getAvailableTimes(initialDate);
+        const initialTime = initialTimes[0]?.value || '';
+        return {
+            firstName: user?.firstName || user?.name?.split(' ')[0] || '',
+            lastName: user?.lastName || user?.name?.split(' ').slice(1).join(' ') || '',
+            phone: user?.phone || user?.mobile || '',
+            email: user?.email || '',
+            websiteCityId: '', cityName: '',
+            websiteCategoryId: '', categoryName: '',
+            subcategoryId: '', subcategoryName: '',
+            address: '', flat: '', area: '', pincode: '', landmark: '',
+            latitude: '', longitude: '',
+            bookingDate: initialDate,
+            bookingTime: initialTime,
+            message: '',
+        };
     });
 
     // Subcategories & Location state
@@ -209,17 +223,17 @@ export function BookAppointmentPage() {
     const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // Auto-fill profile details once authenticated
-    useEffect(() => {
-        if (user) {
-            setFormData(prev => ({
-                ...prev,
-                firstName: prev.firstName || user.firstName || user.name?.split(' ')[0] || '',
-                lastName: prev.lastName || user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
-                phone: prev.phone || user.phone || user.mobile || '',
-                email: prev.email || user.email || '',
-            }));
-        }
-    }, [user]);
+    const [prevUser, setPrevUser] = useState(user);
+    if (user && user !== prevUser) {
+        setPrevUser(user);
+        setFormData(prev => ({
+            ...prev,
+            firstName: prev.firstName || user.firstName || user.name?.split(' ')[0] || '',
+            lastName: prev.lastName || user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
+            phone: prev.phone || user.phone || user.mobile || '',
+            email: prev.email || user.email || '',
+        }));
+    }
 
     useEffect(() => {
         trackLeadEvent({ eventType: 'BOOKING_STARTED', vertical: 'crm' });
@@ -245,7 +259,13 @@ export function BookAppointmentPage() {
                     headers: { 'Content-Type': 'application/json' }
                 });
                 const data = await res.json();
-                if (data.success && data.data) setCities(data.data);
+                if (data.success && Array.isArray(data.data)) {
+                    // Filter out legacy static duplicate "Bangalore" in favor of dynamic "Bengaluru"
+                    const dynamicCities = data.data.filter(
+                        c => c.name && c.name.trim().toLowerCase() !== 'bangalore'
+                    );
+                    setCities(dynamicCities);
+                }
             } catch (err) {
                 console.error('Error fetching cities:', err);
             } finally {
@@ -256,8 +276,16 @@ export function BookAppointmentPage() {
     }, []);
 
     // Fetch categories when city changes
+    const [prevCityId, setPrevCityId] = useState(formData.websiteCityId);
+    if (prevCityId !== formData.websiteCityId) {
+        setPrevCityId(formData.websiteCityId);
+        if (!formData.websiteCityId) {
+            setCategories([]);
+        }
+    }
+
     useEffect(() => {
-        if (!formData.websiteCityId) { setCategories([]); return; }
+        if (!formData.websiteCityId) return;
         const fetchCategories = async () => {
             setCategoriesLoading(true);
             try {
@@ -277,12 +305,17 @@ export function BookAppointmentPage() {
     }, [formData.websiteCityId]);
 
     // Fetch subcategories when category changes
-    useEffect(() => {
+    const [prevCatId, setPrevCatId] = useState(formData.websiteCategoryId);
+    if (prevCatId !== formData.websiteCategoryId) {
+        setPrevCatId(formData.websiteCategoryId);
         if (!formData.websiteCategoryId) {
             setSubcategories([]);
             setFormData(prev => ({ ...prev, subcategoryId: '', subcategoryName: '' }));
-            return;
         }
+    }
+
+    useEffect(() => {
+        if (!formData.websiteCategoryId) return;
         const fetchSubcategories = async () => {
             setSubcategoriesLoading(true);
             try {
@@ -459,18 +492,21 @@ export function BookAppointmentPage() {
         }
     };
 
-    // Fetch Terms & Conditions
+    // Fetch Terms & Conditions from authoritative customer app policies endpoint
     useEffect(() => {
         if (showTermsModal && !termsContent) {
             const fetchTerms = async () => {
                 setTermsLoading(true);
                 try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-terms-and-conditions`, {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/products/privacy-policies?applicationType=customer%20app`, {
                         headers: { 'Content-Type': 'application/json' },
                     });
                     const data = await res.json();
                     if (data.success && data.data) {
-                        setTermsContent(data.data);
+                        const tc = typeof data.data === 'string'
+                            ? data.data
+                            : (data.data.termsAndConditions || data.data.content || '');
+                        setTermsContent({ termsAndConditions: tc });
                     }
                 } catch (err) {
                     console.error('Error fetching terms:', err);
@@ -484,35 +520,10 @@ export function BookAppointmentPage() {
 
     // Helpers
     const getMinDate = () => formatLocalDate(new Date());
-    const getFormattedDate = (offsetDays = 0) => {
-        const d = new Date();
-        d.setDate(d.getDate() + offsetDays);
-        return formatLocalDate(d);
-    };
+    
 
     const availableDates = useMemo(() => getAvailableDates(), []);
     const availableTimes = useMemo(() => getAvailableTimes(formData.bookingDate), [formData.bookingDate]);
-
-    // Initialize default booking date & time slot
-    useEffect(() => {
-        if (availableDates.length > 0) {
-            setFormData(prev => {
-                const isCurrentDateValid = availableDates.some(d => d.value === prev.bookingDate);
-                const targetDate = isCurrentDateValid ? prev.bookingDate : availableDates[0].value;
-                const times = getAvailableTimes(targetDate);
-                const isCurrentTimeValid = times.some(t => t.value === prev.bookingTime);
-                const targetTime = isCurrentTimeValid ? prev.bookingTime : (times[0]?.value || '');
-                if (targetDate === prev.bookingDate && targetTime === prev.bookingTime) {
-                    return prev;
-                }
-                return {
-                    ...prev,
-                    bookingDate: targetDate,
-                    bookingTime: targetTime,
-                };
-            });
-        }
-    }, [availableDates]);
 
     const handleDateSelect = (dateValue) => {
         const times = getAvailableTimes(dateValue);
@@ -593,9 +604,17 @@ export function BookAppointmentPage() {
         });
 
         try {
+            const rawAddress = formData.address || [formData.flat, formData.area, formData.landmark, formData.cityName, formData.pincode].filter(Boolean).join(', ');
+            // Easebuzz address1 parameter disallows non-ASCII and special unicode symbols (like ₹)
+            const cleanAddress = rawAddress
+                .replace(/[₹$€£]/g, '')
+                .replace(/[^a-zA-Z0-9\s,\-\/\.\#\:\(\)]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
             const payload = {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
+                firstName: (formData.firstName || '').replace(/[^a-zA-Z\s]/g, '').trim(),
+                lastName: (formData.lastName || '').replace(/[^a-zA-Z\s]/g, '').trim(),
                 email: formData.email,
                 phone: formData.phone,
                 websiteCityId: formData.websiteCityId,
@@ -605,11 +624,11 @@ export function BookAppointmentPage() {
                 categoryName: formData.categoryName,
                 subcategoryId: formData.subcategoryId || undefined,
                 subcategoryName: formData.subcategoryName || '',
-                address: formData.address || [formData.flat, formData.area, formData.landmark, formData.cityName, formData.pincode].filter(Boolean).join(', '),
-                flat: formData.flat || '',
-                area: formData.area || '',
-                pincode: formData.pincode || '',
-                landmark: formData.landmark || '',
+                address: cleanAddress,
+                flat: (formData.flat || '').replace(/[₹$€£]/g, '').trim(),
+                area: (formData.area || '').replace(/[₹$€£]/g, '').trim(),
+                pincode: (formData.pincode || '').replace(/\D/g, '').trim(),
+                landmark: (formData.landmark || '').replace(/[₹$€£]/g, '').trim(),
                 latitude: formData.latitude || '',
                 longitude: formData.longitude || '',
                 bookingDate: formData.bookingDate,
@@ -641,24 +660,28 @@ export function BookAppointmentPage() {
                     mobile: formData.phone,
                 });
                 toast.success('Redirecting to payment gateway...');
+                try {
+                    sessionStorage.setItem('last_checkout_url', '/book-appointment');
+                } catch {}
                 sessionStorage.setItem('crm_pending_booking', JSON.stringify({
                     name: `${formData.firstName} ${formData.lastName}`,
                     city: formData.cityName,
                     category: formData.categoryName,
                     subcategory: formData.subcategoryName,
-                    address: formData.address,
+                    address: cleanAddress,
                     date: formData.bookingDate,
                     time: formData.bookingTime,
                 }));
                 window.location.href = `https://pay.easebuzz.in/pay/${data.access_key}`;
             } else {
                 hideLoader();
-                toast.error(data.message || 'Payment initiation failed. Please try again.');
+                const errMsg = data.easebuzz?.error_desc || data.easebuzz?.data || data.message || 'Payment initiation failed. Please try again.';
+                toast.error(errMsg);
             }
         } catch (err) {
             hideLoader();
             console.error('Submit error:', err);
-            toast.error('Something went wrong. Please try again.');
+            toast.error('Something went wrong initiating payment. Please try again.');
         } finally {
             setSubmitting(false);
         }
@@ -902,9 +925,11 @@ export function BookAppointmentPage() {
                                             }}
                                         >
                                             <option value="">Select Your City</option>
-                                            {cities.map(c => (
-                                                <option key={c._id} value={c._id}>{c.name}</option>
-                                            ))}
+                                            {cities
+                                                .filter(c => c.name && c.name.trim().toLowerCase() !== 'bangalore')
+                                                .map(c => (
+                                                    <option key={c._id} value={c._id}>{c.name}</option>
+                                                ))}
                                         </select>
                                         <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                                         {citiesLoading && (
@@ -1140,15 +1165,11 @@ export function BookAppointmentPage() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    if (validateStep()) {
-                                        setCurrentStep(2);
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                    }
-                                }}
-                                className="px-4 py-2 rounded-lg bg-[#00594F] hover:bg-[#007F70] text-white font-bold text-xs whitespace-nowrap shadow-2xs transition-all active:scale-95 shrink-0"
+                                onClick={handleNext}
+                                className="px-4 py-2 rounded-lg bg-[#00594F] hover:bg-[#007F70] text-white font-bold text-xs whitespace-nowrap shadow-2xs transition-all active:scale-95 shrink-0 flex items-center gap-1.5"
                             >
-                                Pay Online Now
+                                <span>Continue to Schedule</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
@@ -1191,14 +1212,14 @@ export function BookAppointmentPage() {
                                                     type="button"
                                                     onClick={() => handleDateSelect(date.value)}
                                                     className={`px-2 py-2.5 sm:py-3 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border cursor-pointer ${isSelected
-                                                        ? 'bg-[#007F70] text-white border-[#007F70] shadow-sm ring-2 ring-[#007F70]/20'
-                                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#007F70]/60'
+                                                        ? 'bg-[#00594F] text-white border-[#00594F] shadow-sm ring-2 ring-[#00594F]/20'
+                                                        : 'bg-white hover:bg-gray-50 text-[#102B35] border-[#D9E5EB] hover:border-[#00594F]/60 shadow-2xs'
                                                         }`}
                                                 >
-                                                    <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                                                    <span className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : 'text-[#102B35]'}`}>
                                                         {date.dayLabel}
                                                     </span>
-                                                    <span className={`text-[11px] font-medium ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                                                    <span className={`text-[11px] font-semibold leading-tight ${isSelected ? 'text-emerald-100' : 'text-[#4B5563]'}`}>
                                                         {date.subLabel}
                                                     </span>
                                                 </button>
@@ -1215,7 +1236,7 @@ export function BookAppointmentPage() {
                                         Choose Time Slot
                                     </label>
                                     {formData.bookingTime && (
-                                        <span className="text-xs text-[#007F70] font-semibold">
+                                        <span className="text-xs text-[#00594F] font-semibold">
                                             2-Hour Arrival Window
                                         </span>
                                     )}
@@ -1235,12 +1256,12 @@ export function BookAppointmentPage() {
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, bookingTime: slot.value }))}
                                                     className={`px-3.5 py-3 rounded-xl text-xs sm:text-[13px] font-semibold transition-all flex items-center justify-between border cursor-pointer ${isSelected
-                                                        ? 'bg-[#007F70] text-white border-[#007F70] shadow-sm ring-2 ring-[#007F70]/20'
-                                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#007F70]/60'
+                                                        ? 'bg-[#00594F] text-white border-[#00594F] shadow-sm ring-2 ring-[#00594F]/20'
+                                                        : 'bg-white hover:bg-gray-50 text-[#102B35] border-[#D9E5EB] hover:border-[#00594F]/60 shadow-2xs'
                                                         }`}
                                                 >
                                                     <span className="flex items-center gap-2">
-                                                        <Clock className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-[#007F70]'}`} />
+                                                        <Clock className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-[#00594F]'}`} />
                                                         <span>{slot.label}</span>
                                                     </span>
                                                     {isSelected && <Check className="w-4 h-4 text-white shrink-0" />}
@@ -1411,14 +1432,19 @@ export function BookAppointmentPage() {
                                 {/* Address Info */}
                                 <div className="p-3 bg-gray-50 rounded-xl space-y-1.5 border border-gray-100">
                                     <p className="font-bold text-[#007F70] flex items-center gap-1 uppercase tracking-wide text-[10px]">
-                                        <MapPin className="w-3 h-3" /> Address
+                                        <MapPin className="w-3 h-3" /> Doorstep Address
                                     </p>
-                                    <p className="text-[#102B35] font-medium text-[11px] leading-tight line-clamp-2">
+                                    <p className="text-[#102B35] font-semibold text-xs leading-snug break-words">
                                         {[formData.flat, formData.area].filter(Boolean).join(', ') || formData.address}
                                     </p>
-                                    {formData.pincode && (
-                                        <p className="text-[#647B8D] text-[11px]">Pincode: {formData.pincode}</p>
+                                    {formData.landmark && (
+                                        <p className="text-[#647B8D] text-[11px] leading-tight">
+                                            <span className="font-medium text-gray-500">Landmark:</span> {formData.landmark}
+                                        </p>
                                     )}
+                                    <p className="text-[#647B8D] text-[11px] leading-tight font-medium">
+                                        {[formData.cityName, formData.pincode ? `Pincode: ${formData.pincode}` : ''].filter(Boolean).join(' • ')}
+                                    </p>
                                 </div>
 
                                 {/* Schedule Info */}
@@ -1710,14 +1736,18 @@ export function BookAppointmentPage() {
                                     <Loader2 className="w-8 h-8 text-[#007F70] animate-spin" />
                                     <p className="text-gray-500 font-medium text-xs">Loading content...</p>
                                 </div>
-                            ) : termsContent ? (
+                            ) : termsContent?.termsAndConditions ? (
                                 <div
                                     className="prose prose-sm max-w-none text-[#102B35]"
                                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(termsContent.termsAndConditions) }}
                                 />
                             ) : (
-                                <div className="text-center py-16 text-gray-500 text-xs">
-                                    Failed to load content. Please try again later.
+                                <div className="space-y-4 text-xs sm:text-sm text-[#102B35] leading-relaxed">
+                                    <h4 className="font-bold text-sm text-[#00594F]">Doorstep Hub Service Booking Terms &amp; Conditions</h4>
+                                    <p>1. <strong>Online Platform Fee:</strong> A non-refundable online booking fee of ₹{feesLoading ? '99' : platformFee}/- is collected to secure appointment scheduling and verified technician allocation.</p>
+                                    <p>2. <strong>Doorstep Inspection Fee:</strong> The standard doorstep inspection fee of ₹{feesLoading ? '175' : consultationFee}/- is payable directly to the technician after on-site diagnostic inspection.</p>
+                                    <p>3. <strong>Service Warranty:</strong> Eligible repair services include 30 to 90 days warranty on genuine replacement components and professional workmanship.</p>
+                                    <p>4. <strong>Safety &amp; Compliance:</strong> All doorstep service partners are background-verified and adhere to strict safety protocols.</p>
                                 </div>
                             )}
                         </div>

@@ -1,13 +1,14 @@
 import SearchResultsClient from './page-client';
 import { getSEOMetadata } from '@/lib/seo';
 
-export async function generateMetadata({ searchParams }) {
+export async function generateMetadata() {
   const metadata = await getSEOMetadata('/sell-buy/search');
   return metadata;
 }
 
-export default function SellBuySearchPage({ searchParams }) {
-  const query = searchParams?.query || searchParams?.search || '';
+export default async function SellBuySearchPage({ searchParams }) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const query = resolvedSearchParams?.query || resolvedSearchParams?.search || '';
   
   const jsonLd = {
     '@context': 'https://schema.org',

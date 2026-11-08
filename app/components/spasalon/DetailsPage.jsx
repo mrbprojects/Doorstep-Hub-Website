@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Star, MapPin, Clock, Heart, ChevronRight, Check } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, ChevronRight, Check } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/spasalon/ui/tabs';
 import { AddonsModal } from '@/components/spasalon/AddonsModal';
 import { isObjectId } from '@/utils/slugHelper';
@@ -162,11 +163,11 @@ export function DetailsPage() {
 
             {/* Hero Image */}
             <div className="relative h-[400px] overflow-hidden">
-                <img loading="lazy" decoding="async"
+                <Image
                     src={service.image}
                     alt={service.name}
                     className="w-full h-full object-cover"
-                />
+                 width={500} height={300} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             </div>
 
@@ -205,7 +206,7 @@ export function DetailsPage() {
                                     className="inline-flex items-center justify-center w-[75%] md:w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Get it on Google Play"
                                 >
-                                    <img src="/andriod1.png" alt="Google Play" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" loading="lazy" decoding="async" />
+                                    <Image src="/andriod1.png" alt="Google Play" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto"  width={500} height={300} />
                                 </a>
                                 <a
                                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
@@ -214,7 +215,7 @@ export function DetailsPage() {
                                     className="inline-flex items-center justify-center w-[75%] md:w-[220px] h-[60px] rounded-full bg-[#DEF2EF] shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                                     title="Download on the App Store"
                                 >
-                                    <img src="/apple2.png" alt="App Store" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto" loading="lazy" decoding="async" />
+                                    <Image src="/apple2.png" alt="App Store" className="h-[24px] w-auto max-w-[78%] object-contain block mx-auto"  width={500} height={300} />
                                 </a>
                             </div>
                         </div>
@@ -290,11 +291,11 @@ export function DetailsPage() {
                                             <div className="flex gap-4">
                                                 {/* Package Image */}
                                                 <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                                                    <img loading="lazy" decoding="async"
+                                                    <Image
                                                         src={pkg.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}` : service.image}
                                                         alt={pkg.name}
                                                         className="w-full h-full object-cover"
-                                                    />
+                                                     width={500} height={300} />
                                                 </div>
 
                                                 {/* Package Details */}
@@ -568,11 +569,11 @@ export function DetailsPage() {
                                         onClick={() => setRateCardImageIndex(idx)}
                                         className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[#C06C84] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                     >
-                                        <img loading="lazy" decoding="async"
+                                        <Image
                                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                             className="w-full h-full object-cover"
                                             alt=""
-                                        />
+                                         width={500} height={300} />
                                     </button>
                                 ))}
                             </div>

@@ -10,8 +10,8 @@ import { FeaturedServices } from '@/components/appliances/FeaturedServices';
 import { RecentlyBooked } from '@/components/appliances/RecentlyBooked';
 import { DownloadApp } from '@/components/appliances/DownloadApp';
 import { NearbyServiceCenters } from '@/components/landing/NearbyServiceCenters';
-import { NearbyServiceCenters as NearbyStores } from '@/components/appliances/NearbyStores';
-import { PopularCenters } from '@/components/appliances/PopularCenters';
+
+
 import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
 import { ApplianceBookingFlow } from '@/components/appliances/booking-flow/ApplianceBookingFlow';

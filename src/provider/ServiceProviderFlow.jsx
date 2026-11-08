@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Hero } from '@/components/Hero';
 import { TopCategories } from '@/components/TopCategories';
@@ -25,8 +25,7 @@ import { StoreDetailPage } from '@/components/StoreDetailPage';
 import { ViewAllPage } from '@/components/ViewAllPage';
 import { Toaster } from 'sonner';
 
-export default function ServiceProviderFlow({ serviceType = null }) {
-  const [scrollY, setScrollY] = useState(0);
+export default function ServiceProviderFlow() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
@@ -34,12 +33,6 @@ export default function ServiceProviderFlow({ serviceType = null }) {
   const [selectedStoreId, setSelectedStoreId] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);

@@ -25,7 +25,7 @@ export const getSocket = () => {
           const u = JSON.parse(userStr);
           const userId = u._id || u.id;
           if (userId) socket.emit('registerUser', userId);
-        } catch (e) {}
+        } catch {}
       }
     });
 

@@ -4,14 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, ChevronDown, ListFilter } from 'lucide-react';
 
 export function ArticleTableOfContents({ headings = [], variant = 'all' }) {
-    const [activeId, setActiveId] = useState('');
+    const [activeId, setActiveId] = useState(() => (headings && headings.length > 0 ? headings[0].id : ''));
     const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
         if (!headings || headings.length === 0) return;
-
-        // Set initial active heading
-        setActiveId(headings[0].id);
 
         const observer = new IntersectionObserver(
             (entries) => {

@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify';
 
 export function JobApplicationForm({ job: initialJob, isGeneralApplication = false, onClose }) {
     const [job, setJob] = useState(initialJob);
-    const [loadingDetails, setLoadingDetails] = useState(!isGeneralApplication);
+    const [loadingDetails, setLoadingDetails] = useState(() => Boolean(!isGeneralApplication && initialJob && initialJob._id));
     const [showForm, setShowForm] = useState(isGeneralApplication);
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -14,7 +14,6 @@ export function JobApplicationForm({ job: initialJob, isGeneralApplication = fal
     // Fetch Full Details if it's a specific job
     useEffect(() => {
         if (!initialJob || isGeneralApplication || !initialJob._id) {
-            setLoadingDetails(false);
             return;
         }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 export function GlobalProgressBar() {
@@ -11,7 +11,17 @@ export function GlobalProgressBar() {
     const timerRef = useRef(null);
     const safetyTimeoutRef = useRef(null);
 
-    const startLoading = () => {
+    const stopLoading = useCallback(() => {
+        setProgress(100);
+        if (timerRef.current) clearInterval(timerRef.current);
+        if (safetyTimeoutRef.current) clearTimeout(safetyTimeoutRef.current);
+        setTimeout(() => {
+            setLoading(false);
+            setProgress(0);
+        }, 300);
+    }, []);
+
+    const startLoading = useCallback(() => {
         setLoading(true);
         setProgress(25);
 
@@ -33,22 +43,18 @@ export function GlobalProgressBar() {
         safetyTimeoutRef.current = setTimeout(() => {
             stopLoading();
         }, 4000);
-    };
+    }, [stopLoading]);
 
-    const stopLoading = () => {
-        setProgress(100);
-        if (timerRef.current) clearInterval(timerRef.current);
-        if (safetyTimeoutRef.current) clearTimeout(safetyTimeoutRef.current);
-        setTimeout(() => {
-            setLoading(false);
-            setProgress(0);
-        }, 300);
-    };
+    const isFirstMount = useRef(true);
 
     // Route change triggers stopLoading
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
         stopLoading();
-    }, [pathname, searchParams]);
+    }, [pathname, searchParams, stopLoading]);
 
     // Global click listener for internal navigation and action buttons
     useEffect(() => {
@@ -96,7 +102,7 @@ export function GlobalProgressBar() {
             if (timerRef.current) clearInterval(timerRef.current);
             if (safetyTimeoutRef.current) clearTimeout(safetyTimeoutRef.current);
         };
-    }, []);
+    }, [startLoading, stopLoading]);
 
     if (!loading && progress === 0) return null;
 

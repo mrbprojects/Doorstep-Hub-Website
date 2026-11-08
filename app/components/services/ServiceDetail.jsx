@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, Users, DollarSign, Star, Play, ChevronRight, Calendar, X } from 'lucide-react';
 import { GlobalNav } from '@/components/layout/GlobalNav';
@@ -418,7 +419,7 @@ export function ServiceDetail() {
                     <div className="flex items-start space-x-4">
                       {/* Avatar */}
                       <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#037166]/30 flex-shrink-0">
-                        <img loading="lazy" decoding="async" src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
+                        <Image src={review.avatar} alt={review.name} className="w-full h-full object-cover"  width={500} height={300} />
                       </div>
 
                       <div className="flex-1">

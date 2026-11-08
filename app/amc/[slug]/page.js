@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'motion/react';
@@ -39,7 +40,36 @@ export default function AmcPlanDetailPage() {
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(() => ({
+    ...emptyForm,
+    name: user?.name || user?.fullName || '',
+    phone: String(user?.phone || user?.mobile || '').replace(/\D/g, '').slice(-10) || '',
+    email: user?.email || '',
+    city: user?.city || user?.cityName || user?.address?.cityName || user?.address?.city || '',
+    address: user?.address?.fullAddress || user?.address?.address || '',
+  }));
+  const [prevUser, setPrevUser] = useState(user);
+  if (user && user !== prevUser) {
+    setPrevUser(user);
+    setForm((prev) => ({
+      ...prev,
+      name: prev.name || user.name || user.fullName || '',
+      phone:
+        prev.phone ||
+        String(user.phone || user.mobile || '')
+          .replace(/\D/g, '')
+          .slice(-10) ||
+        '',
+      email: prev.email || user.email || '',
+      city:
+        prev.city ||
+        user.city ||
+        user.cityName ||
+        user.address?.cityName ||
+        user.address?.city ||
+        '',
+    }));
+  }
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState({ type: '', text: '' });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -94,27 +124,6 @@ export default function AmcPlanDetailPage() {
     };
   }, [authLoading, isAuthenticated, plan?._id, userId, phone, token]);
 
-  useEffect(() => {
-    if (!user) return;
-    setForm((prev) => ({
-      ...prev,
-      name: prev.name || user.name || user.fullName || '',
-      phone:
-        prev.phone ||
-        String(user.phone || user.mobile || '')
-          .replace(/\D/g, '')
-          .slice(-10) ||
-        '',
-      email: prev.email || user.email || '',
-      city:
-        prev.city ||
-        user.city ||
-        user.cityName ||
-        user.address?.cityName ||
-        user.address?.city ||
-        '',
-    }));
-  }, [user]);
 
   const save = useMemo(() => {
     if (!plan) return 0;
@@ -125,9 +134,10 @@ export default function AmcPlanDetailPage() {
     );
   }, [plan]);
 
+  const planQuestions = plan?.questions;
   const effectiveQuestions = useMemo(() => {
-    if (Array.isArray(plan?.questions) && plan.questions.length > 0) {
-      return plan.questions;
+    if (Array.isArray(planQuestions) && planQuestions.length > 0) {
+      return planQuestions;
     }
     return [
       {
@@ -145,7 +155,7 @@ export default function AmcPlanDetailPage() {
         required: true,
       },
     ];
-  }, [plan?.questions]);
+  }, [planQuestions]);
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -360,11 +370,11 @@ export default function AmcPlanDetailPage() {
 
               {/* Showcase Image */}
               <div className="w-full h-48 md:h-56 rounded-2xl overflow-hidden relative border border-[#cfe8e3] bg-white shadow-sm flex-shrink-0">
-                <img
+                <Image
                   src={getImageUrl(plan.image)}
                   alt={plan.name}
                   className="w-full h-full object-contain"
-                />
+                 width={500} height={300} />
               </div>
             </div>
           </motion.div>

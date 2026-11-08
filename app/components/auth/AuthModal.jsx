@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { X, Phone, ShieldCheck, Mail, User, LogOut, Camera, Chrome, Pencil, ChevronRight, Gift, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -23,18 +24,17 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
     const [previewImage, setPreviewImage] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [resendTimer, setResendTimer] = useState(0);
-    const [referralCode, setReferralCode] = useState('');
-    const [profileSavedForBooking, setProfileSavedForBooking] = useState(false);
-    const [showRequiredErrors, setShowRequiredErrors] = useState(false);
-
-    // Auto-fill referral code from URL ?ref= param
-    React.useEffect(() => {
+    const [referralCode, setReferralCode] = useState(() => {
+        if (typeof window === 'undefined') return '';
         try {
             const params = new URLSearchParams(window.location.search);
-            const ref = params.get('ref');
-            if (ref) setReferralCode(ref);
-        } catch (e) { }
-    }, []);
+            return params.get('ref') || '';
+        } catch {
+            return '';
+        }
+    });
+    const [profileSavedForBooking, setProfileSavedForBooking] = useState(false);
+    const [showRequiredErrors, setShowRequiredErrors] = useState(false);
     const fileInputRef = React.useRef(null);
     const profileToastShown = React.useRef(false);
 
@@ -59,14 +59,12 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
     }, []);
 
     const handleClose = React.useCallback(() => {
+        resetModalState();
         onClose?.();
-    }, [onClose]);
+    }, [onClose, resetModalState]);
 
     React.useEffect(() => {
-        if (!isOpen) {
-            resetModalState();
-            return;
-        }
+        if (!isOpen) return;
         let mounted = true;
         (async () => {
             const copy = await fetchOtpGateway();
@@ -135,15 +133,15 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
     }, [resendTimer]);
 
     // Initial load of profile data
-    React.useEffect(() => {
-        if (user) {
-            setProfileData({
-                name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                email: user.email || '',
-                phone: normalizePhone(user.phone || user.mobile || '')
-            });
-        }
-    }, [user, normalizePhone]);
+    const [prevUser, setPrevUser] = useState(user);
+    if (user && user !== prevUser) {
+        setPrevUser(user);
+        setProfileData({
+            name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+            email: user.email || '',
+            phone: normalizePhone(user.phone || user.mobile || '')
+        });
+    }
 
     // Default Dark Theme (Fallback)
     const defaultTheme = {
@@ -238,17 +236,21 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
         }
     };
 
+    const [prevStep, setPrevStep] = useState(step);
+    if (prevStep !== step) {
+        setPrevStep(step);
+        if (isAuthenticated && user && step === 'profile') {
+            const hasProfile = (user.name || user.firstName || user.lastName) && (user.phone || user.mobile);
+            if (!hasProfile && !profileSavedForBooking) {
+                setIsEditing(true);
+            }
+        }
+    }
+
     React.useEffect(() => {
         if (isAuthenticated && user && step === 'profile') {
             const hasProfile = (user.name || user.firstName || user.lastName) && (user.phone || user.mobile);
-            // Always re-seed profileData from the latest user object
-            setProfileData({
-                name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                email: user.email || '',
-                phone: normalizePhone(user.phone || user.mobile || '')
-            });
             if (!hasProfile && !profileSavedForBooking) {
-                setIsEditing(true);
                 if (!profileToastShown.current) {
                     toast.info('Please complete your profile to continue');
                     profileToastShown.current = true;
@@ -260,7 +262,7 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
                 }
             }
         }
-    }, [user, isAuthenticated, step, profileSavedForBooking, normalizePhone]);
+    }, [isAuthenticated, user, step, profileSavedForBooking]);
 
     const handleGoogleLogin = async () => {
         setLoading(true);
@@ -551,9 +553,12 @@ export function AuthModal({ isOpen, onClose, onContinue, theme = {} }) {
                                 <div className="relative group">
                                     <div className={`w-24 h-24 rounded-full border-2 border-opacity-50 ${borderColor} overflow-hidden ${inputBg}`}>
                                         {previewImage || user?.image ? (
-                                            <img loading="lazy" decoding="async"
+                                            <Image
                                                 src={previewImage || (user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`)}
-                                                alt={user.name}
+                                                alt={user?.name || 'User Profile'}
+                                                width={96}
+                                                height={96}
+                                                unoptimized
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, MapPin } from 'lucide-react';
@@ -188,11 +189,11 @@ export function TopCategories({ onViewAll }) {
                   >
                     <div className="relative w-56 sm:w-64 lg:w-[210px] h-48 sm:h-56 lg:h-72 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 backdrop-blur-sm">
                       <div className="absolute inset-0">
-                        <img loading="lazy" decoding="async"
+                        <Image
                           src={category.image}
                           alt={category.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
+                         width={500} height={300} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                       </div>
                       <motion.div

@@ -35,7 +35,7 @@ export function Newsletter() {
         setIsError(true);
         setMessage(data.message || 'Subscription failed. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setIsError(true);
       setMessage('Network error. Please try again later.');
     } finally {
@@ -72,7 +72,7 @@ export function Newsletter() {
         setIsError(true);
         setMessage(data.message || 'Invalid OTP. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setIsError(true);
       setMessage('Verification failed. Please try again.');
     } finally {

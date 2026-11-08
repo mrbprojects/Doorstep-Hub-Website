@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Clock,
     Calendar,
@@ -12,19 +12,27 @@ import {
 } from 'lucide-react';
 
 export function ArticleHeader({ article, category }) {
-    const [saved, setSaved] = useState(false);
-    const [copied, setCopied] = useState(false);
-
-    // Sync saved status from localStorage
-    useEffect(() => {
-        if (!article?.slug) return;
+    const [saved, setSaved] = useState(() => {
+        if (typeof window === 'undefined' || !article?.slug) return false;
         try {
             const savedList = JSON.parse(localStorage.getItem('dhub_saved_articles') || '[]');
-            setSaved(savedList.includes(article.slug));
+            return savedList.includes(article.slug);
         } catch {
-            // ignore
+            return false;
         }
-    }, [article?.slug]);
+    });
+    const [copied, setCopied] = useState(false);
+
+    const [prevSlug, setPrevSlug] = useState(article?.slug);
+    if (prevSlug !== article?.slug) {
+        setPrevSlug(article?.slug);
+        try {
+            const savedList = JSON.parse(localStorage.getItem('dhub_saved_articles') || '[]');
+            setSaved(savedList.includes(article?.slug));
+        } catch {
+            setSaved(false);
+        }
+    }
 
     const handleToggleSave = () => {
         if (!article?.slug) return;

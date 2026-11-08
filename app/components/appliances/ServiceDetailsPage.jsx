@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   ArrowLeft,
@@ -422,15 +423,16 @@ export function ServiceDetailsPage({
   }, [provider_rate_cards]);
 
   // Sanitized CKEditor backend HTML content
+  const storeDescription = storeData?.description;
   const sanitizedDescription = useMemo(() => {
-    if (!storeData?.description) return '';
-    const cleaned = cleanHtmlEntities(storeData.description);
+    if (!storeDescription) return '';
+    const cleaned = cleanHtmlEntities(storeDescription);
     return typeof window !== 'undefined'
       ? DOMPurify.sanitize(cleaned, {
           ADD_ATTR: ['target', 'href', 'src', 'alt', 'class', 'style']
         })
       : cleaned;
-  }, [storeData?.description]);
+  }, [storeDescription]);
 
   // Loading Skeleton State
   if (loading) {
@@ -642,13 +644,12 @@ export function ServiceDetailsPage({
                 <div className="absolute top-0 right-1/4 w-24 h-24 sm:w-28 sm:h-28 border border-teal-300/10 rounded-full pointer-events-none hidden sm:block" />
 
                 {/* Global Technician Image (+20% in mobile view) */}
-                <img
+                <Image
                   src="/technician-hero.png"
                   alt="Doorstep Hub Verified Professional Technician"
                   className="relative z-10 max-h-[195px] xs:max-h-[230px] sm:max-h-[250px] lg:max-h-[310px] w-auto object-contain object-bottom drop-shadow-2xl"
                   fetchPriority="high"
-                  loading="eager"
-                />
+                 width={500} height={300} />
               </div>
 
               {/* Benefit Indicators (Mobile view: positioned directly below the technician) */}
@@ -1019,13 +1020,11 @@ export function ServiceDetailsPage({
                 className="group cursor-pointer bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-[#037166]/50 hover:shadow-md transition-all"
               >
                 <div className="relative h-40 overflow-hidden bg-slate-100">
-                  <img
-                    loading="lazy"
-                    decoding="async"
+                  <Image
                     src={service.mainImage ? getImageUrl(service.mainImage) : '/placeholder-service.jpg'}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                   width={500} height={300} />
                   <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md">
                     <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                     <span className="text-white text-[10px] font-bold">{service.rating || '4.8'}</span>

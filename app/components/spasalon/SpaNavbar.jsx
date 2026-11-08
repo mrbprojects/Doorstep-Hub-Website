@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, User, Sparkles, Scissors } from 'lucide-react';
+import { ChevronDown, User, Scissors } from 'lucide-react';
 import { LocationBar } from '@/components/location/LocationBar';
 import { useAuth } from '@/context/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -129,11 +130,11 @@ export function SpaNavbar() {
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 hover:bg-[#C06C84]/10 text-gray-600 hover:text-[#C06C84] transition-all border border-gray-200 hover:border-[#C06C84]/30"
                     >
                         {isAuthenticated && user?.image ? (
-                            <img loading="lazy" decoding="async"
+                            <Image
                                 src={user.image}
                                 alt={user.name}
                                 className="w-full h-full object-cover rounded-full"
-                            />
+                             width={400} height={400} />
                         ) : (
                             <User className="w-5 h-5" />
                         )}

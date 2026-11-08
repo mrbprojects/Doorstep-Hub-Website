@@ -73,7 +73,7 @@ function SuccessContent() {
                     >
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h1>
                         <p className="text-gray-600 mb-8">
-                            Your PG booking has been successfully confirmed. We've sent the details to your email.
+                            Your PG booking has been successfully confirmed. We&apos;ve sent the details to your email.
                         </p>
 
                         {/* Booking ID Card */}
@@ -104,7 +104,7 @@ function SuccessContent() {
 
                         {/* What's Next */}
                         <div className="bg-gray-50 rounded-2xl p-6 mb-6 text-left">
-                            <h3 className="font-semibold text-gray-900 mb-3">What's Next?</h3>
+                            <h3 className="font-semibold text-gray-900 mb-3">What&apos;s Next?</h3>
                             <ul className="space-y-2 text-sm text-gray-600">
                                 <li className="flex items-start">
                                     <span className="w-1.5 h-1.5 bg-[#037166] rounded-full mt-2 mr-2 flex-shrink-0"></span>

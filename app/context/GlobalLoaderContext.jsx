@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wrench, Wind, Refrigerator, ShieldCheck, Zap } from 'lucide-react';
+import { Wrench, Wind, Refrigerator, ShieldCheck } from 'lucide-react';
 
 const GlobalLoaderContext = createContext({
     showLoader: () => {},

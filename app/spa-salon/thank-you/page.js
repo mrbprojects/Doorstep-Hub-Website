@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { CheckCircle, Calendar, MapPin, Sparkles, ArrowRight, Scissors } from 'lucide-react';
+import { CheckCircle, Calendar, MapPin, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { trackBookingCompleted } from '@/lib/leadTracking';
 
@@ -43,30 +43,29 @@ const formatCompleteAddress = (addr) => {
     return uniqueParts.join(', ');
 };
 
-function SpaThankYouContent() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState({
-        orderId: '',
-        date: '',
-        time: '',
-        paid: '0',
-        remaining: '0',
-        address: ''
-    });
-
-    useEffect(() => {
+function getInitialSpaBookingDetails(searchParams) {
+    if (typeof window === 'undefined') {
+        return {
+            orderId: '',
+            date: '',
+            time: '',
+            paid: '0',
+            remaining: '0',
+            address: ''
+        };
+    }
+    try {
         const rawSaved = sessionStorage.getItem('selected_address');
         let addressData = null;
         if (rawSaved) {
-            try { addressData = JSON.parse(rawSaved); } catch (e) {}
+            try { addressData = JSON.parse(rawSaved); } catch {}
         }
 
         let pending = {};
-        try { pending = JSON.parse(sessionStorage.getItem('pending_booking') || '{}'); } catch (e) {}
+        try { pending = JSON.parse(sessionStorage.getItem('pending_booking') || '{}'); } catch {}
 
         let lastLocal = {};
-        try { lastLocal = JSON.parse(localStorage.getItem('spa_last_booking') || '{}'); } catch (e) {}
+        try { lastLocal = JSON.parse(localStorage.getItem('spa_last_booking') || '{}'); } catch {}
 
         if (!addressData) {
             if (pending?.address) addressData = pending.address;
@@ -88,72 +87,68 @@ function SpaThankYouContent() {
         const resolvedRemaining = searchParams.get('remaining') || pending.remaining || lastLocal.remaining || '0';
 
         if (addressData) {
-            setBookingDetails({
+            return {
                 orderId: resolvedOrderId,
                 date: resolvedDate,
                 time: resolvedTime,
                 paid: resolvedPaid,
                 remaining: resolvedRemaining,
                 address: formatCompleteAddress(addressData)
-            });
-        } else {
-            const token = typeof window !== 'undefined'
-                ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
-                : null;
-
-            if (token) {
-                fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                        const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
-                        setBookingDetails({
-                            orderId: resolvedOrderId,
-                            date: resolvedDate,
-                            time: resolvedTime,
-                            paid: resolvedPaid,
-                            remaining: resolvedRemaining,
-                            address: formatCompleteAddress(defaultAddr)
-                        });
-                    } else {
-                        setBookingDetails({
-                            orderId: resolvedOrderId,
-                            date: resolvedDate,
-                            time: resolvedTime,
-                            paid: resolvedPaid,
-                            remaining: resolvedRemaining,
-                            address: 'Selected Address'
-                        });
-                    }
-                })
-                .catch(() => {
-                    setBookingDetails({
-                        orderId: resolvedOrderId,
-                        date: resolvedDate,
-                        time: resolvedTime,
-                        paid: resolvedPaid,
-                        remaining: resolvedRemaining,
-                        address: 'Selected Address'
-                    });
-                });
-            } else {
-                setBookingDetails({
-                    orderId: resolvedOrderId,
-                    date: resolvedDate,
-                    time: resolvedTime,
-                    paid: resolvedPaid,
-                    remaining: resolvedRemaining,
-                    address: 'Selected Address'
-                });
-            }
+            };
         }
 
-        if (resolvedOrderId) {
-            trackBookingCompleted(resolvedOrderId, { vertical: 'spa-salon' });
+        return {
+            orderId: resolvedOrderId,
+            date: resolvedDate,
+            time: resolvedTime,
+            paid: resolvedPaid,
+            remaining: resolvedRemaining,
+            address: 'Selected Address'
+        };
+    } catch {
+        return {
+            orderId: '',
+            date: '',
+            time: '',
+            paid: '0',
+            remaining: '0',
+            address: 'Selected Address'
+        };
+    }
+}
+
+function SpaThankYouContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [bookingDetails, setBookingDetails] = useState(() => getInitialSpaBookingDetails(searchParams));
+
+    useEffect(() => {
+        const rawSaved = sessionStorage.getItem('selected_address');
+        const token = typeof window !== 'undefined'
+            ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+            : null;
+
+        if (!rawSaved && token) {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
+                    setBookingDetails(prev => ({
+                        ...prev,
+                        address: formatCompleteAddress(defaultAddr)
+                    }));
+                }
+            })
+            .catch(() => {});
         }
-    }, [searchParams]);
+
+        if (bookingDetails.orderId) {
+            trackBookingCompleted(bookingDetails.orderId, { vertical: 'spa-salon' });
+        }
+    }, [searchParams, bookingDetails.orderId]);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -276,7 +271,7 @@ function SpaThankYouContent() {
                         >
                             <p className="text-[#6D1357] italic flex items-center justify-center gap-2">
                                 <Sparkles className="w-4 h-4" />
-                                "Beauty begins the moment you decide to be yourself."
+                                &quot;Beauty begins the moment you decide to be yourself.&quot;
                                 <Sparkles className="w-4 h-4" />
                             </p>
                         </motion.div>

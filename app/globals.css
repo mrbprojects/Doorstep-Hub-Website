@@ -852,6 +852,14 @@ html {
   color: var(--appliance-text-muted);
 }
 
+.appliance-global :is(.text-white, .\!text-white, [class~="text-white"], [class*="text-[#ffffff]"], [class*="text-[#fff]"]):not([class*="hover:"], [class*="group-hover:"]) {
+  color: #ffffff !important;
+}
+
+.thank-you-page-root :is(p, span, h1, h2, h3, h4, h5, h6, a, div):is(.text-white, .\!text-white, [class~="text-white"]):not([class*="hover:"], [class*="group-hover:"]) {
+  color: #ffffff !important;
+}
+
 .appliance-global section {
   background-color: transparent;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { Copy, Gift, IndianRupee, Loader2, MessageCircle, RefreshCw, Share2, Users } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,23 +26,38 @@ export default function ReferEarnPage() {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
 
-    const load = useCallback(async () => {
+    const load = useCallback(() => {
         if (!token) return;
         setLoading(true);
-        try {
-            const details = await fetchReferralDetails(token);
-            setData(details);
-        } catch (e) {
-            console.error('Failed to load referral details:', e);
-            toast.error('Failed to load referral details');
-        } finally {
-            setLoading(false);
-        }
+        fetchReferralDetails(token)
+            .then((details) => {
+                setData(details);
+            })
+            .catch((e) => {
+                console.error('Failed to load referral details:', e);
+                toast.error('Failed to load referral details');
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [token]);
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token) return;
+        let active = true;
+        fetchReferralDetails(token)
+            .then((details) => {
+                if (active) setData(details);
+            })
+            .catch((e) => {
+                console.error('Failed to load referral details:', e);
+                toast.error('Failed to load referral details');
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+        return () => { active = false; };
+    }, [token]);
 
     const referralCode =
         (String(data?.referralCode || user?.referalCode || user?.referralCode || user?.phone || '')

@@ -24,7 +24,7 @@ export async function GET(request, { params }) {
 
     try {
         if (groupName === 'images') {
-            const { manifest, images } = await getImageSitemapChunks();
+            const {  images } = await getImageSitemapChunks();
             const paginated = paginateEntries(images, requestedPage);
 
             if (requestedPage > paginated.totalChunks || requestedPage < 1) {

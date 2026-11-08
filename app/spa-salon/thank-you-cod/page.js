@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { CheckCircle, Calendar, MapPin, Sparkles, Scissors, ArrowRight, Wallet } from 'lucide-react';
+import {  Calendar, MapPin, Sparkles, Scissors, ArrowRight, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const clean = (val) => {
@@ -42,73 +42,74 @@ const formatCompleteAddress = (addr) => {
     return uniqueParts.join(', ');
 };
 
-function SpaThankYouCodContent() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [bookingDetails, setBookingDetails] = useState({ date: '', time: '', address: '' });
-
-    useEffect(() => {
+function getInitialSpaCodBookingDetails(searchParams) {
+    if (typeof window === 'undefined') {
+        return { date: '', time: '', address: '' };
+    }
+    try {
         const rawSaved = sessionStorage.getItem('selected_address');
         let addressData = null;
         if (rawSaved) {
-            try { addressData = JSON.parse(rawSaved); } catch (e) {}
+            try { addressData = JSON.parse(rawSaved); } catch {}
         }
         if (!addressData) {
             try {
                 const pending = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
                 if (pending?.address) addressData = pending.address;
-            } catch (e) {}
+            } catch {}
         }
 
         const dateParam = searchParams.get('date') || 'Date not set';
         const timeParam = searchParams.get('time') || '';
 
         if (addressData) {
-            setBookingDetails({
+            return {
                 date: dateParam,
                 time: timeParam,
                 address: formatCompleteAddress(addressData)
-            });
-        } else {
-            const token = typeof window !== 'undefined'
-                ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
-                : null;
+            };
+        }
 
-            if (token) {
-                fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                        const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
-                        setBookingDetails({
-                            date: dateParam,
-                            time: timeParam,
-                            address: formatCompleteAddress(defaultAddr)
-                        });
-                    } else {
-                        setBookingDetails({
-                            date: dateParam,
-                            time: timeParam,
-                            address: 'Selected Address'
-                        });
-                    }
-                })
-                .catch(() => {
+        return {
+            date: dateParam,
+            time: timeParam,
+            address: 'Selected Address'
+        };
+    } catch {
+        return { date: '', time: '', address: 'Selected Address' };
+    }
+}
+
+function SpaThankYouCodContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [bookingDetails, setBookingDetails] = useState(() => getInitialSpaCodBookingDetails(searchParams));
+
+    useEffect(() => {
+        const rawSaved = sessionStorage.getItem('selected_address');
+        const token = typeof window !== 'undefined'
+            ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+            : null;
+
+        if (!rawSaved && token) {
+            const dateParam = searchParams.get('date') || 'Date not set';
+            const timeParam = searchParams.get('time') || '';
+
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
                     setBookingDetails({
                         date: dateParam,
                         time: timeParam,
-                        address: 'Selected Address'
+                        address: formatCompleteAddress(defaultAddr)
                     });
-                });
-            } else {
-                setBookingDetails({
-                    date: dateParam,
-                    time: timeParam,
-                    address: 'Selected Address'
-                });
-            }
+                }
+            })
+            .catch(() => {});
         }
     }, [searchParams]);
 
@@ -179,7 +180,7 @@ function SpaThankYouCodContent() {
                     <div className="text-center mb-10 px-6">
                         <p className="text-[#C06C84] italic flex items-center justify-center gap-2">
                             <Sparkles className="w-4 h-4" />
-                            "You deserve this moment of self-care."
+                            &quot;You deserve this moment of self-care.&quot;
                         </p>
                     </div>
 

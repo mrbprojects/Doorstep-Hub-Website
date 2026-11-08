@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
@@ -8,16 +9,13 @@ import {
   Star,
   MapPin,
   Clock,
-  Phone,
-  Award,
   CheckCircle,
   Shield,
   Users,
   Calendar,
   X,
   Check,
-  Sparkles,
-  ThumbsUp, ChevronLeft, ChevronRight, MessageCircle
+  Sparkles, ChevronLeft, ChevronRight, MessageCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
@@ -82,7 +80,7 @@ const GREEN_DOT = {
   anchor: { x: 16, y: 32 },
 };
 
-export function StoreDetailPage({ storeId, serviceId }) {
+export function StoreDetailPage({ storeId }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('services');
   const [lightboxIndex, setLightboxIndex] = useState(null);
@@ -105,7 +103,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
   // Subcategory filtering states
   const [subcategories, setSubcategories] = useState([]);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('all');
-  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+  const [, setLoadingSubcategories] = useState(false);
 
   // Tabs scroll reference and logic
   const tabsRef = useRef(null);
@@ -118,6 +116,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
       });
     }
   };
+  
 
   // Addons popup state
   const [showAddonsPopup, setShowAddonsPopup] = useState(false);
@@ -128,6 +127,45 @@ export function StoreDetailPage({ storeId, serviceId }) {
 
   // Get service cart functions from context
   const { addToCart: addToServiceCart, clearCart } = useServiceCart();
+
+  // Handle subcategory filtering
+  const handleSubcategoryTabChange = useCallback(async (subcatId) => {
+    setSelectedSubcategoryId(subcatId);
+    setLoading(true);
+    try {
+      const providerId = resolvedProviderId || storeId;
+      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${providerId}`;
+      if (subcatId && subcatId !== 'all') {
+        url += `?subcategoryId=${subcatId}`;
+      }
+
+      console.log('Fetching services for subcategory:', subcatId, 'from:', url);
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          const rawServices = data.services || data.data?.services || [];
+          const mappedServices = rawServices.map(s => ({
+            id: s._id || s.id,
+            name: s.name || s.title,
+            description: s.description || s.bio,
+            price: s.price || s.minFare || s.inspectionCost || 0,
+            image: s.image || s.logo,
+            rating: s.rating || 4.5,
+            totalOrders: s.totalOrders || 0,
+            duration: s.duration || '60 mins',
+            subcategoryName: s.subcategoryName,
+            bannerImages: s.banner_images || []
+          }));
+          setServices(mappedServices);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching services for subcategory:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [resolvedProviderId, storeId]);
 
   // Fetch subcategories
   useEffect(() => {
@@ -165,47 +203,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
     };
 
     fetchSubcategories();
-  }, [storeId]);
-
-  // Handle subcategory filtering
-  const handleSubcategoryTabChange = async (subcatId) => {
-    setSelectedSubcategoryId(subcatId);
-    setLoading(true);
-    try {
-      const providerId = resolvedProviderId || storeId;
-      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service_center_services/${providerId}`;
-      if (subcatId && subcatId !== 'all') {
-        url += `?subcategoryId=${subcatId}`;
-      }
-
-      console.log('Fetching services for subcategory:', subcatId, 'from:', url);
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          const rawServices = data.services || data.data?.services || [];
-          const mappedServices = rawServices.map(s => ({
-            id: s._id || s.id,
-            name: s.name || s.title,
-            description: s.description || s.bio,
-            price: s.price || s.minFare || s.inspectionCost || 0,
-            image: s.image || s.logo,
-            rating: s.rating || 4.5,
-            totalOrders: s.totalOrders || 0,
-            duration: s.duration || '60 mins',
-            subcategoryName: s.subcategoryName,
-            bannerImages: s.banner_images || []
-          }));
-          setServices(mappedServices);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching filtered services:', error);
-      toast.error('Failed to load services for this subcategory');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [storeId, handleSubcategoryTabChange]);
 
   // Fetch service center details from API
   useEffect(() => {
@@ -313,7 +311,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
   const fetchServiceAddons = async (serviceId) => {
     setLoadingAddons(true);
     try {
-      console.log('Fetching addons for service:', serviceId);
+      console.log('Fetching addons for service:');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/service-addons`,
         {
@@ -432,31 +430,9 @@ export function StoreDetailPage({ storeId, serviceId }) {
     );
   };
 
-  const ShimmerServiceCard = () => (
-    <div className="h-80 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
-      <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-      <div className="h-48 bg-gray-800" />
-      <div className="p-6 space-y-3">
-        <div className="h-6 w-3/4 bg-gray-700 rounded animate-pulse" />
-        <div className="h-4 w-full bg-gray-700/50 rounded animate-pulse" />
-        <div className="h-10 w-full bg-gray-700 rounded-lg animate-pulse" />
-      </div>
-    </div>
-  );
+  
 
-  const ShimmerCenterCard = () => (
-    <div className="h-48 rounded-2xl bg-[#1a1a1a] border border-white/10 overflow-hidden relative">
-      <div className="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-      <div className="flex">
-        <div className="w-64 h-48 bg-gray-800" />
-        <div className="flex-1 p-6 space-y-4">
-          <div className="h-8 w-1/2 bg-gray-700 rounded animate-pulse" />
-          <div className="h-4 w-3/4 bg-gray-700/50 rounded animate-pulse" />
-          <div className="h-10 w-32 bg-gray-700 rounded-lg animate-pulse" />
-        </div>
-      </div>
-    </div>
-  );
+  
 
   return (
     <motion.div
@@ -482,12 +458,12 @@ export function StoreDetailPage({ storeId, serviceId }) {
           animate={{ opacity: 1, y: 0 }}
           className="relative h-[500px] rounded-3xl overflow-hidden mb-8 shadow-2xl"
         >
-          <img loading="lazy" decoding="async"
+          <Image
             src={bannerImage || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200'}
             alt="Service Center"
             className="w-full h-full object-cover"
             fetchpriority="high"
-          />
+           width={500} height={300} />
 
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -509,7 +485,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                     className="flex items-center justify-center w-[46%] md:w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
                     title="Get it on Google Play"
                   >
-                    <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert" loading="lazy" decoding="async" />
+                    <Image src="/andriod1.png" alt="Google Play" className="h-full w-full object-contain p-1.5 brightness-0 invert"  width={500} height={300} />
                   </a>
                   <a
                     href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
@@ -518,7 +494,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                     className="flex items-center justify-center w-[46%] md:w-32 h-10 bg-gradient-to-r from-[#037166] to-[#04a99d] rounded-full shadow-lg shadow-[#037166]/20 hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 overflow-hidden border border-white/10"
                     title="Download on the App Store"
                   >
-                    <img src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert" loading="lazy" decoding="async" />
+                    <Image src="/apple2.png" alt="App Store" className="h-full w-full object-contain p-1.5 brightness-0 invert"  width={500} height={300} />
                   </a>
                   <a
                     href={whatsappLink}
@@ -688,11 +664,11 @@ export function StoreDetailPage({ storeId, serviceId }) {
                       {/* Service Image */}
                       {service.image && (
                         <div className="relative h-48 overflow-hidden">
-                          <img loading="lazy" decoding="async"
+                          <Image
                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}`}
                             alt={service.name}
                             className="w-full h-full object-contain bg-white"
-                          />
+                           width={500} height={300} />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                           {/* Rating Badge */}
@@ -891,11 +867,11 @@ export function StoreDetailPage({ storeId, serviceId }) {
                       onClick={() => setLightboxIndex(index)}
                       className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer group"
                     >
-                      <img loading="lazy" decoding="async"
+                      <Image
                         src={image}
                         alt={`Portfolio ${index + 1}`}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+                       width={500} height={300} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
@@ -972,7 +948,7 @@ export function StoreDetailPage({ storeId, serviceId }) {
                           className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-[#037166] scale-110' : 'border-white/20 opacity-50 hover:opacity-80'
                             }`}
                         >
-                          <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                          <Image src={img} alt={`thumb-${i}`} className="w-full h-full object-cover"  width={500} height={300} />
                         </button>
                       ))}
                     </div>
@@ -1209,11 +1185,11 @@ export function StoreDetailPage({ storeId, serviceId }) {
                 <p className="text-white/60 text-sm mb-3">Selected Service:</p>
                 <div className="bg-white/5 border border-[#037166]/30 rounded-2xl p-4 flex items-center gap-4">
                   {addonsData.parentServiceImage && (
-                    <img loading="lazy" decoding="async"
+                    <Image
                       src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addonsData.parentServiceImage}`}
                       alt={addonsData.parentServiceName}
                       className="w-16 h-16 rounded-xl object-cover"
-                    />
+                     width={64} height={64} />
                   )}
                   <div className="flex-1">
                     <h3 className="text-white font-semibold mb-1">{addonsData.parentServiceName}</h3>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, ChevronDown, ChevronUp, User } from 'lucide-react';
+import { Menu, ChevronDown, ChevronUp } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { AccountSidebar } from '@/components/account/AccountSidebar';

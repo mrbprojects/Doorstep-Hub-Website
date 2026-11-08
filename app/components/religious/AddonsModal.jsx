@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Check, Loader2, Sparkles, Flower2 } from 'lucide-react';
+import { X, Check, Loader2, Flower2 } from 'lucide-react';
 
 export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, selectedPackageIds, onContinue }) {
     const [addons, setAddons] = useState([]);
@@ -10,49 +11,43 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, se
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const packageIds = Array.isArray(selectedPackageIds) && selectedPackageIds.length > 0
-        ? selectedPackageIds
-        : (selectedPackageId ? [selectedPackageId] : []);
-    const packageIdsKey = packageIds.join(',');
+    const packageIds = useMemo(() => (
+        Array.isArray(selectedPackageIds) && selectedPackageIds.length > 0
+            ? selectedPackageIds
+            : (selectedPackageId ? [selectedPackageId] : [])
+    ), [selectedPackageIds, selectedPackageId]);
 
     useEffect(() => {
+        let isCancelled = false;
         if (isOpen && providerId && packageIds.length > 0) {
-            fetchAddons();
-        } else {
-            // Reset state when closed
-            setAddons([]);
-            setSelectedAddons([]);
-            setLoading(true);
-        }
-    }, [isOpen, providerId, packageIdsKey]);
-
-    const fetchAddons = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-service-addons`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     serviceIds: packageIds,
                     professionalProviderId: providerId
                 })
-            });
-            const data = await response.json();
-
-            if (data.success && data.data && data.data.length > 0) {
-                const allAddons = data.data.flatMap(item => item.addons || []);
-                setAddons(allAddons);
-            } else {
-                setAddons([]);
-            }
-        } catch (err) {
-            console.error("Error fetching add-ons:", err);
-            setError("Failed to load add-ons.");
-        } finally {
-            setLoading(false);
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (isCancelled) return;
+                    if (data.success && data.data && data.data.length > 0) {
+                        setAddons(data.data.flatMap(item => item.addons || []));
+                    } else {
+                        setAddons([]);
+                    }
+                })
+                .catch(err => {
+                    if (isCancelled) return;
+                    console.error("Error fetching add-ons:", err);
+                    setError("Failed to load add-ons.");
+                })
+                .finally(() => {
+                    if (!isCancelled) setLoading(false);
+                });
         }
-    };
+        return () => { isCancelled = true; };
+    }, [isOpen, providerId, packageIds]);
 
     const toggleAddon = (addonId) => {
         setSelectedAddons(prev =>
@@ -138,11 +133,11 @@ export function AddonsModal({ isOpen, onClose, providerId, selectedPackageId, se
                                                     {/* Image or Icon */}
                                                     <div className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 ${isSelected ? 'ring-2 ring-[var(--saffron)] ring-offset-2' : 'bg-gray-100'}`}>
                                                         {addon.image ? (
-                                                            <img loading="lazy" decoding="async"
+                                                            <Image
                                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${addon.image}`}
                                                                 alt={addon.childServiceName}
                                                                 className="w-full h-full object-cover"
-                                                            />
+                                                             width={500} height={300} />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center bg-[var(--off-white)] text-[var(--saffron)]/40">
                                                                 <Flower2 className="w-6 h-6" />

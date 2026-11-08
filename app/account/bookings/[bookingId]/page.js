@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
@@ -8,7 +9,7 @@ import {
     CheckCircle, CreditCard, Tag, Layers, Building2, Receipt,
     ChevronDown, ChevronUp, AlertCircle, Home, Hash, Headphones, XCircle,
     AlertTriangle, Wallet, ShieldAlert, X, Wrench, MessageCircle, RefreshCw,
-    ShieldCheck, Download, FileText
+    ShieldCheck, Download
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -501,7 +502,7 @@ export default function BookingDetailPage() {
                 setWalletLoading(true);
                 const res = await fetchWalletBalance(token);
                 if (res?.success) setWalletBalance(res?.data?.balance ?? res?.balance ?? 0);
-            } catch (_) {}
+            } catch {}
             finally { setWalletLoading(false); }
         }
     };
@@ -527,6 +528,9 @@ export default function BookingDetailPage() {
                     websiteReturnUrl: currentUrl,
                     websiteCancelUrl: currentUrl
                 });
+                try {
+                    sessionStorage.setItem('last_checkout_url', window.location.pathname + window.location.search);
+                } catch {}
                 if (res?.success && (res?.access_key || res?.paymentUrl)) {
                     toast.loading('Redirecting to payment gateway...');
                     window.location.href = res.paymentUrl || `https://pay.easebuzz.in/pay/${res.access_key}`;
@@ -603,7 +607,7 @@ export default function BookingDetailPage() {
             } else {
                 toast.error(res?.message || 'Failed to cancel booking');
             }
-        } catch (e) {
+        } catch {
             toast.error('Failed to cancel booking. Please try again.');
         } finally {
             setCancelLoading(false);
@@ -614,7 +618,7 @@ export default function BookingDetailPage() {
         const finalReason = cancelReason === 'Other reason' ? customReason.trim() : cancelReason;
         setCancelLoading(true);
         try {
-            try { sessionStorage.setItem(`cancel_reason_${bookingId}`, finalReason); } catch (_) {}
+            try { sessionStorage.setItem(`cancel_reason_${bookingId}`, finalReason); } catch {}
             const res = await initiateCancellationFeePayment(token, bookingId, {
                 cancelledReason: finalReason,
                 websiteReturnUrl: `${window.location.origin}/account/bookings/${bookingId}?cancelled=gateway_paid`,
@@ -625,7 +629,7 @@ export default function BookingDetailPage() {
             } else {
                 toast.error(res?.message || 'Failed to initiate payment. Please try again.');
             }
-        } catch (e) {
+        } catch {
             toast.error('Failed to initiate payment. Please try again.');
         } finally {
             setCancelLoading(false);
@@ -648,9 +652,10 @@ export default function BookingDetailPage() {
         }
     }, [token, bookingId]);
 
+    const isOrderLoading = authLoading || (Boolean(token) && loading);
+
     useEffect(() => {
-        if (authLoading) return;
-        if (!token) { setLoading(false); return; }
+        if (authLoading || !token) return;
         loadOrder();
     }, [authLoading, token, loadOrder]);
 
@@ -837,7 +842,7 @@ export default function BookingDetailPage() {
                 </button>
             </div>
 
-            {loading || authLoading ? (
+            {isOrderLoading ? (
                 <div className="flex justify-center py-20">
                     <Loader2 className="w-8 h-8 animate-spin text-[#037166]" />
                 </div>
@@ -1116,7 +1121,7 @@ export default function BookingDetailPage() {
                                                 <div key={idx} className="flex gap-3 items-center py-3 first:pt-0 last:pb-0">
                                                     <div className="w-11 h-11 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
                                                         {imageUrl ? (
-                                                            <img src={imageUrl} alt={service.name} className="w-full h-full object-cover" />
+                                                            <Image src={imageUrl} alt={service.name} className="w-full h-full object-cover"  width={500} height={300} />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center">
                                                                 <Package className="w-5 h-5 text-gray-400" />

@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, SlidersHorizontal, Star, MapPin, Clock, Heart, ChevronLeft, Filter, ChevronRight, X, CheckCircle, Sliders } from 'lucide-react';
+import { Search, Star, MapPin, ChevronLeft, Filter, ChevronRight, X, Sliders } from 'lucide-react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useLocationContext } from '@/context/LocationContext';
 import { Input } from '@/components/pghostels/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
 import { Slider } from '@/components/pghostels/ui/slider';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Button } from '@/components/pghostels/ui/button';
-import { isObjectId, resolveParam } from '@/utils/slugHelper';
+
 
 
 
@@ -21,6 +21,18 @@ const filters = [
     'Price: High to Low',
     'Nearest First',
 ];
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+};
 
 export function ResultsPage() {
     const router = useRouter();
@@ -33,10 +45,20 @@ export function ResultsPage() {
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '');
     const [selectedFilter, setSelectedFilter] = useState('All Services');
-    const [showFilters, setShowFilters] = useState(true);
 
     // New state for filters
-    const [priceRange, setPriceRange] = useState([0, 50000]);
+    const [priceRange, setPriceRange] = useState(() => {
+        const budget = searchParams.get('budget');
+        if (budget) {
+            const budgetOpt = [
+                { value: '499-999', range: [499, 999] },
+                { value: '999-1999', range: [999, 1999] },
+                { value: '1999+', range: [1999, 50000] }
+            ].find(opt => opt.value === budget);
+            if (budgetOpt) return budgetOpt.range;
+        }
+        return [0, 50000];
+    });
     const [minRating, setMinRating] = useState(0);
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
@@ -44,7 +66,10 @@ export function ResultsPage() {
     const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // Sync state with URL params
-    useEffect(() => {
+    const [prevSearchParamsStr, setPrevSearchParamsStr] = useState(searchParams.toString());
+    const currentParamsStr = searchParams.toString();
+    if (prevSearchParamsStr !== currentParamsStr) {
+        setPrevSearchParamsStr(currentParamsStr);
         const query = searchParams.get('query') || searchParams.get('name') || '';
         setSearchQuery(query);
 
@@ -55,23 +80,18 @@ export function ResultsPage() {
                 { value: '999-1999', range: [999, 1999] },
                 { value: '1999+', range: [1999, 50000] }
             ].find(opt => opt.value === budget);
-            
             if (budgetOpt) {
                 setPriceRange(budgetOpt.range);
             }
         } else {
             setPriceRange([0, 50000]);
         }
-        
+
         const catFromUrl = searchParams.get('categoryId') || searchParams.get('categorySlug');
         if (catFromUrl) {
             setExpandedCategory(catFromUrl);
         }
-    }, [searchParams]);
-
-    useEffect(() => {
-        // No auto-detection, let the user trigger or wait for context
-    }, [location]);
+    }
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -221,7 +241,7 @@ export function ResultsPage() {
         return result;
     }, [services, minRating]);
 
-    const FilterPanel = ({ showTitle = true }) => {
+    const renderFilterPanel = (showTitle = true) => {
         return (
             <div className="space-y-6 text-black">
                 {showTitle && (
@@ -417,24 +437,7 @@ export function ResultsPage() {
         );
     };
 
-    const calculateDistance = (lat1, lon1, lat2, lon2) => {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    };
-
-    const filteredServices = services.filter(service => {
-        const matchesTab = activeTab === 'all' || (activeTab === 'nearby' && service.isNearby);
-        const matchesSearch = service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            service.provider.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesTab && matchesSearch;
-    });
+    
 
     return (
         <div className="min-h-screen bg-[#F6F7FB]">
@@ -515,7 +518,7 @@ export function ResultsPage() {
                                 </SheetTitle>
                             </SheetHeader>
                             <div className="mt-6">
-                                <FilterPanel showTitle={false} />
+                                {renderFilterPanel(false)}
                             </div>
                         </SheetContent>
                     </Sheet>
@@ -528,7 +531,7 @@ export function ResultsPage() {
                     {/* Desktop Sidebar */}
                     <div className="hidden lg:block w-80 flex-shrink-0">
                         <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28">
-                            <FilterPanel />
+                            {renderFilterPanel(true)}
                         </div>
                     </div>
 
@@ -648,32 +651,9 @@ export function ResultsPage() {
     );
 }
 
-function TabButton({ active, onClick, children }) {
-    return (
-        <button
-            onClick={onClick}
-            className={`relative px-6 py-3 rounded-lg font-medium transition-all ${active
-                ? 'text-white'
-                : 'text-[#64748B] hover:text-[#0F172A]'
-                }`}
-        >
-            {children}
-            {active && (
-                <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-[#C06C84] to-[#6C5CE7] rounded-lg -z-10"
-                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                />
-            )}
-            {!active && (
-                <div className="absolute inset-0 bg-[#F6F7FB] rounded-lg -z-10" />
-            )}
-        </button>
-    );
-}
+
 
 function ServiceCard({ service, index, router }) {
-    const [isWishlisted, setIsWishlisted] = useState(false);
 
     return (
         <motion.div
@@ -686,14 +666,14 @@ function ServiceCard({ service, index, router }) {
         >
             {/* Image */}
             <div className="relative h-56 overflow-hidden">
-                <img loading="lazy" decoding="async"
+                <Image
                     src={service.image}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&q=80&w=800';
                     }}
-                />
+                 width={500} height={300} />
 
                 {/* Wishlist Button */}
                 {/* <motion.button

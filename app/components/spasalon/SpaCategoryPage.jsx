@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowLeft, ChevronRight, Sparkles, Flower } from 'lucide-react';
@@ -18,19 +19,20 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
     const { location, detectWithIP } = useLocationContext();
     const [subCategories, setSubCategories] = useState(initialData?.subcategories || []);
     const [loading, setLoading] = useState(initialData?.subcategories ? false : true);
+    const hasInitialSubcats = useRef(Boolean(initialData?.subcategories?.length));
 
     useEffect(() => {
         if (!location) {
             detectWithIP().catch(err => console.log("Auto detect failed", err));
         }
-    }, [location]);
+    }, [location, detectWithIP]);
 
     // Fetch Sub-Categories
     useEffect(() => {
         const fetchData = async () => {
             if (!slugOrId) return;
             // If we already have subcategories from initialData, don't fetch again
-            if (subCategories && subCategories.length > 0) {
+            if (hasInitialSubcats.current) {
                 setLoading(false);
                 return;
             }
@@ -190,11 +192,11 @@ export default function SpaCategoryPage({ slugOverride = null, initialData = nul
                                         </div>
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                                         {subCat.image ? (
-                                            <img loading="lazy" decoding="async"
+                                            <Image
                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCat.image}`}
                                                 alt={subCat.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                            />
+                                             width={500} height={300} />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center bg-pink-50">
                                                 <Flower className="w-20 h-20 text-[#C06C84]/30" />

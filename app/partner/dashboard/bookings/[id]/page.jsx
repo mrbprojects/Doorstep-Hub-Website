@@ -229,8 +229,26 @@ export default function SingleLeadDetailsPage() {
     }, [token, bookingId]);
 
     useEffect(() => {
-        loadBooking();
-    }, [loadBooking]);
+        if (!token || !bookingId) return;
+        let activeMount = true;
+        getProviderBookingDetails(token, bookingId)
+            .then((data) => {
+                if (!activeMount) return;
+                if (data && (data._id || data.id || data.orderId)) {
+                    setBooking(data);
+                } else {
+                    setError('Booking details not found');
+                }
+            })
+            .catch((err) => {
+                console.error('Failed to load lead details:', err);
+                if (activeMount) setError(err.message || 'Failed to fetch lead details');
+            })
+            .finally(() => {
+                if (activeMount) setLoading(false);
+            });
+        return () => { activeMount = false; };
+    }, [token, bookingId]);
 
     if (loading) {
         return (
@@ -338,7 +356,7 @@ export default function SingleLeadDetailsPage() {
             a.rel = 'noopener noreferrer';
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
+            if (a.parentNode) a.parentNode.removeChild(a);
             toast.success('Download initiated');
         } catch {
             window.open(url, '_blank');

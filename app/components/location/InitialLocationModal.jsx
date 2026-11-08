@@ -1,19 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Crosshair, Search, Shield, Sparkles, Loader2, X } from 'lucide-react';
+import { MapPin, Crosshair, Search, Loader2, X } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
 
 export function InitialLocationModal() {
     const { location, detectWithGPS, isMapsLoaded, setManualLocation, searchLocation } = useLocationContext();
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(() => !location);
+    const [prevLocation, setPrevLocation] = useState(location);
+    if (prevLocation !== location) {
+        setPrevLocation(location);
+        setIsOpen(!location);
+    }
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
     const [view, setView] = useState('welcome'); // 'welcome', 'search'
-    const [showAllCities, setShowAllCities] = useState(false);
+    
 
     const ALL_CITIES = [
         'Hyderabad', 'Bangalore', 'Mumbai', 'Chennai', 'Vijayawada', 'Pune'
@@ -30,19 +36,9 @@ export function InitialLocationModal() {
         'Pune': '/pune.png'
     };
 
-    const displayedCities = showAllCities ? ALL_CITIES : ALL_CITIES.slice(0, 4);
+    
 
-    useEffect(() => {
-        // Show the modal when no location is saved.
-        // We no longer auto-fire GPS on page load — that caused unnecessary
-        // main-thread work (GPS prompt + IP fallback fetch) on every visit.
-        // The user explicitly clicks "Enable My Location" when ready.
-        if (!location) {
-            setIsOpen(true);
-        } else {
-            setIsOpen(false);
-        }
-    }, [location]);
+
 
     const handleDetect = async () => {
         setIsDetecting(true);
@@ -134,11 +130,11 @@ export function InitialLocationModal() {
                                     className="w-20 h-20 bg-[#037166]/10 rounded-full flex items-center justify-center mx-auto mb-4 relative"
                                 >
                                     <div className="absolute inset-0 bg-[#037166]/20 rounded-full animate-ping" />
-                                    <img loading="lazy" decoding="async" 
+                                    <Image 
                                         src="/servicecenterpointlogo.png" 
                                         alt="Location" 
                                         className="w-10 h-10 object-contain relative z-10"
-                                    />
+                                     width={40} height={40} />
                                 </motion.div>
 
                                 <h2 className="text-2xl font-bold font-ubuntu text-white mb-1">
@@ -191,11 +187,11 @@ export function InitialLocationModal() {
                                                 >
                                                     <div className="w-full h-16 sm:h-20 bg-white flex items-center justify-center overflow-hidden">
                                                         {CITY_ICONS[city] ? (
-                                                            <img loading="lazy" decoding="async" 
+                                                            <Image 
                                                                 src={CITY_ICONS[city]} 
                                                                 alt={city} 
                                                                 className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
-                                                            />
+                                                             width={500} height={300} />
                                                         ) : (
                                                             <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#04a99d]" />
                                                         )}
@@ -271,11 +267,11 @@ export function InitialLocationModal() {
                                                     >
                                                         <div className="w-full h-12 sm:h-14 bg-white flex items-center justify-center overflow-hidden">
                                                             {CITY_ICONS[city] ? (
-                                                                <img loading="lazy" decoding="async" 
+                                                                <Image 
                                                                     src={CITY_ICONS[city]} 
                                                                     alt={city} 
                                                                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
-                                                                />
+                                                                 width={500} height={300} />
                                                             ) : (
                                                                 <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#04a99d]" />
                                                             )}

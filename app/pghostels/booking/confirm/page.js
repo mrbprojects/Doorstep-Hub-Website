@@ -4,13 +4,13 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
-    ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet,
-    Truck, CheckCircle, Loader2, Building2, Info
+    ArrowLeft, MapPin, Calendar, CreditCard, CheckCircle, Loader2, Building2, Info
 } from 'lucide-react';
 
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useMounted } from '@/hooks/useMounted';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useRef } from 'react';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
@@ -31,30 +31,65 @@ const safeNum = (val, fallback = 0) => {
     return parseFloat(val) || fallback;
 };
 
+// Service window: 9 AM to 9 PM
+const SERVICE_END_HOUR = 21;
+
+function getAvailableDates() {
+    const now = new Date();
+    const dates = [];
+    const todayLimit = new Date();
+    todayLimit.setHours(SERVICE_END_HOUR - 1, 0, 0, 0);
+    const startFromTomorrow = now > todayLimit;
+
+    for (let i = (startFromTomorrow ? 1 : 0); i < 10 + (startFromTomorrow ? 1 : 0); i++) {
+        const date = new Date();
+        date.setDate(now.getDate() + i);
+
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const localDateStr = `${yyyy}-${mm}-${dd}`;
+
+        dates.push({
+            value: localDateStr,
+            dayName: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short' }),
+            dayNumber: dd,
+            month: date.toLocaleDateString('en-US', { month: 'short' }),
+        });
+    }
+    return dates;
+}
+
 function PGConfirmContent() {
     const router = useRouter();
     const { cartData, cartItems, loading: cartLoading, cartError, fetchCart, addToCart, clearCart } = useServiceCart();
     const { token, isAuthenticated } = useAuth();
 
-    const [selectedAddress, setSelectedAddress] = useState(null);
-    const [bookedDate, setBookedDate] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('ONLINE');
-    const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
+    const [selectedAddress] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            const savedAddress = sessionStorage.getItem('selected_address');
+            return savedAddress ? JSON.parse(savedAddress) : null;
+        } catch {
+            return null;
+        }
+    });
+    const [bookedDate, setBookedDate] = useState(() => {
+        const initialDates = getAvailableDates();
+        return initialDates[0]?.value || '';
+    });
+    const [paymentMethod] = useState('ONLINE');
+    const [paymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
-    const [paymentStatus, setPaymentStatus] = useState(null);
-    const [mounted, setMounted] = useState(false);
-
-    // Prevent hydration mismatch from new Date() during SSR
-    useEffect(() => { setMounted(true); }, []);
+    const mounted = useMounted();
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');
         if (status === 'success') {
-            setPaymentStatus('success');
             // Payment confirmed — now safe to clear cart
             clearCart();
 
@@ -65,7 +100,6 @@ function PGConfirmContent() {
             toast.success('Payment successful! Booking confirmed.');
             router.push(`/pghostels/booking/success?date=${pendingBooking.bookedDate || ''}&time=10:00&bookingId=${pendingBooking.bookingId || ''}`);
         } else if (status === 'failure') {
-            setPaymentStatus('failure');
             toast.error('Payment failed. Redirecting to cart for retry...');
             setTimeout(() => {
                 router.push('/pghostels/cart');
@@ -73,24 +107,12 @@ function PGConfirmContent() {
         }
     }, [clearCart, router]);
 
-    // Service window: 9 AM to 9 PM
-    const SERVICE_END_HOUR = 21;
-
     useEffect(() => {
-        const savedAddress = sessionStorage.getItem('selected_address');
-        if (savedAddress) {
-            setSelectedAddress(JSON.parse(savedAddress));
-        } else {
+        if (!selectedAddress) {
             toast.error('No address selected');
             router.push('/pghostels/booking/address');
         }
-
-        // Auto-select first available date
-        const initialDates = getAvailableDates();
-        if (initialDates.length > 0) {
-            setBookedDate(initialDates[0].value);
-        }
-    }, [router]);
+    }, [selectedAddress, router]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -118,35 +140,7 @@ function PGConfirmContent() {
                 toast.success('Booking details restored');
             } catch { console.warn('Cart restoration failed'); }
         })();
-    }, [isAuthenticated, cartLoading, cartItems.length]);
-
-
-    const getAvailableDates = () => {
-        const now = new Date();
-        const dates = [];
-        const todayLimit = new Date();
-        todayLimit.setHours(SERVICE_END_HOUR - 1, 0, 0, 0);
-        const startFromTomorrow = now > todayLimit;
-
-        for (let i = (startFromTomorrow ? 1 : 0); i < 10 + (startFromTomorrow ? 1 : 0); i++) {
-            const date = new Date();
-            date.setDate(now.getDate() + i);
-
-            // BUG-R2-09 FIX: Use local date instead of UTC to avoid timezone shift
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            const localDateStr = `${yyyy}-${mm}-${dd}`;
-
-            dates.push({
-                value: localDateStr,
-                dayName: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short' }),
-                dayNumber: dd,
-                month: date.toLocaleDateString('en-US', { month: 'short' }),
-            });
-        }
-        return dates;
-    };
+    }, [isAuthenticated, cartLoading, cartItems.length, addToCart]);
 
     // Only compute on client to avoid hydration mismatch
     const availableDates = mounted ? getAvailableDates() : [];
@@ -176,17 +170,38 @@ function PGConfirmContent() {
 
         setLoading(true);
         try {
+            const origin = typeof window !== 'undefined'
+                ? `${window.location.protocol}//${window.location.host}`
+                : 'https://doorstephub.com';
+            const currentCheckoutPath = typeof window !== 'undefined' ? window.location.pathname : '/pghostels/booking/confirm';
+            const cleanBaseUrl = `${origin}${currentCheckoutPath}`;
+
+            try {
+                sessionStorage.setItem('last_checkout_url', currentCheckoutPath + (typeof window !== 'undefined' ? window.location.search : ''));
+            } catch {}
+
             const payload = {
-                serviceAddressId: selectedAddress._id,
+                serviceAddressId: selectedAddress._id || selectedAddress.id,
                 bookedDate,
                 bookedTime: '10:00',
                 paymentMethod,
                 paymentOption,
-                ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
+                ...(paymentOption === 'ADVANCE' ? { adv: true } : { adv: false }),
                 sourceOfLead: 'website',
                 providerType: 'professional',
-                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed?type=professional&deepType=PG Hostels`
+                returnUrl: cleanBaseUrl,
+                surl: `${cleanBaseUrl}?status=success`,
+                furl: `${origin}/services/payment-failed`,
+                udf1: String(selectedAddress._id || selectedAddress.id || '').slice(0, 50),
+                udf2: String(bookedDate || '').replace(/[^0-9-]/g, '').slice(0, 20),
+                udf3: '1000',
+                udf4: String(paymentOption || 'FULL').slice(0, 20),
+                udf5: 'professional',
+                udf6: 'website',
+                udf7: 'doorstephub',
+                udf8: 'pghostels',
+                udf9: 'online',
+                udf10: 'none'
             };
 
             const endpoint = paymentMethod === 'ONLINE'
@@ -214,6 +229,9 @@ function PGConfirmContent() {
                         bookingId: data.bookingId || data.orderId || data._id || null
                     }));
 
+                    try {
+                        sessionStorage.setItem('last_checkout_url', window.location.pathname + window.location.search);
+                    } catch {}
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = `https://pay.easebuzz.in/pay/${data.access_key}`;
                 } else {

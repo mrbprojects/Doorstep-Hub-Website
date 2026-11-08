@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense, useMemo } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Star, MapPin, Sparkles, Filter, CheckCircle, Clock, Sliders, X, ChevronRight } from 'lucide-react';
@@ -10,9 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { useLocationContext } from '@/context/LocationContext';
 import { Slider } from '@/components/pghostels/ui/slider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/pghostels/ui/sheet';
-import { isObjectId, resolveParam } from '@/utils/slugHelper';
-
-const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
+import {  resolveParam } from '@/utils/slugHelper';
+import { useMounted } from '@/hooks/useMounted';
 const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
 
 function SubCategoryServicesContent() {
@@ -21,38 +21,85 @@ function SubCategoryServicesContent() {
     const slugOrId = params.slug || params.id;
     const searchParams = useSearchParams();
     const pathname = usePathname();
+    const mounted = useMounted();
 
     // Context from URL or Storage
-    const [context, setContext] = useState({
-        categoryName: searchParams.get('category') || 'Services',
-        subCategoryName: searchParams.get('name') || searchParams.get('subCategoryName') || 'Available Services',
-        categoryId: (searchParams.get('categoryId') && searchParams.get('categoryId') !== 'null') ? searchParams.get('categoryId') : null
+    const [context, setContext] = useState(() => {
+        const base = {
+            categoryName: searchParams.get('category') || 'Services',
+            subCategoryName: searchParams.get('name') || searchParams.get('subCategoryName') || 'Available Services',
+            categoryId: (searchParams.get('categoryId') && searchParams.get('categoryId') !== 'null') ? searchParams.get('categoryId') : null
+        };
+        if (typeof window !== 'undefined') {
+            try {
+                const stored = sessionStorage.getItem('religious_subcategory_context');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    base.categoryName = parsed.categoryName || base.categoryName;
+                    base.subCategoryName = parsed.subCategoryName || base.subCategoryName;
+                    base.categoryId = parsed.categoryId || base.categoryId;
+                }
+            } catch {}
+        }
+        return base;
     });
 
-    useEffect(() => {
+    const [priceRange, setPriceRange] = useState(() => {
+        const budget = searchParams.get('budget');
+        if (budget === '5000+') return [5000, 50000];
+        if (budget && budget.includes('-')) {
+            const [min, max] = budget.split('-').map(Number);
+            if (!isNaN(min) && !isNaN(max)) return [min, max];
+        }
         if (typeof window !== 'undefined') {
-            const stored = sessionStorage.getItem('religious_subcategory_context');
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                setContext(prev => ({
-                    ...prev,
-                    categoryName: parsed.categoryName || prev.categoryName,
-                    subCategoryName: parsed.subCategoryName || prev.subCategoryName,
-                    categoryId: parsed.categoryId || prev.categoryId
-                }));
-                if (parsed.budget && !searchParams.get('budget')) {
-                    if (parsed.budget === '5000+') {
-                        setPriceRange([5000, 50000]);
-                    } else if (parsed.budget.includes('-')) {
+            try {
+                const stored = sessionStorage.getItem('religious_subcategory_context');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.budget === '5000+') return [5000, 50000];
+                    if (parsed.budget && parsed.budget.includes('-')) {
                         const [min, max] = parsed.budget.split('-').map(Number);
-                        if (!isNaN(min) && !isNaN(max)) {
-                            setPriceRange([min, max]);
-                        }
+                        if (!isNaN(min) && !isNaN(max)) return [min, max];
                     }
                 }
-            }
+            } catch {}
         }
-    }, [searchParams]);
+        return [0, 100000];
+    });
+
+    const [minRating, setMinRating] = useState(() => {
+        const rating = searchParams.get('minRating');
+        return rating ? parseFloat(rating) : 0;
+    });
+
+    // Sync filters if searchParams change dynamically
+    const searchParamsStr = searchParams.toString();
+    const [prevSearchParamsStr, setPrevSearchParamsStr] = useState(searchParamsStr);
+    if (prevSearchParamsStr !== searchParamsStr) {
+        setPrevSearchParamsStr(searchParamsStr);
+        const budget = searchParams.get('budget');
+        const rating = searchParams.get('minRating');
+        if (budget === '5000+') {
+            setPriceRange([5000, 50000]);
+        } else if (budget && budget.includes('-')) {
+            const [min, max] = budget.split('-').map(Number);
+            if (!isNaN(min) && !isNaN(max)) setPriceRange([min, max]);
+        }
+        if (rating) {
+            setMinRating(parseFloat(rating));
+        }
+        const urlCat = searchParams.get('category');
+        const urlSub = searchParams.get('name') || searchParams.get('subCategoryName');
+        const urlId = searchParams.get('categoryId');
+        if (urlCat || urlSub || urlId) {
+            setContext(prev => ({
+                ...prev,
+                categoryName: urlCat || prev.categoryName,
+                subCategoryName: urlSub || prev.subCategoryName,
+                categoryId: (urlId && urlId !== 'null') ? urlId : prev.categoryId
+            }));
+        }
+    }
 
     const { categoryName, subCategoryName, categoryId } = context;
     const categoryUniqueId = categoryId;
@@ -60,55 +107,27 @@ function SubCategoryServicesContent() {
     const { location, detectWithIP } = useLocationContext();
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    const [priceRange, setPriceRange] = useState([0, 100000]);
-    const [minRating, setMinRating] = useState(0);
-
-    // Sync filters from URL
-    useEffect(() => {
-        const budget = searchParams.get('budget');
-        const rating = searchParams.get('minRating');
-
-        if (budget) {
-            if (budget === '5000+') {
-                setPriceRange([5000, 50000]);
-            } else if (budget.includes('-')) {
-                const [min, max] = budget.split('-').map(Number);
-                if (!isNaN(min) && !isNaN(max)) {
-                    setPriceRange([min, max]);
-                }
-            }
-        }
-        if (rating) {
-            setMinRating(parseFloat(rating));
-        }
-    }, [searchParams]);
 
     const [expandedCategory, setExpandedCategory] = useState(categoryUniqueId);
-    const [activeCategoryName, setActiveCategoryName] = useState(categoryName);
+    const [prevCategoryUniqueId, setPrevCategoryUniqueId] = useState(categoryUniqueId);
+    if (prevCategoryUniqueId !== categoryUniqueId) {
+        setPrevCategoryUniqueId(categoryUniqueId);
+        setExpandedCategory(categoryUniqueId);
+    }
+
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
 
-    useEffect(() => {
-        if (categoryUniqueId) {
-            setExpandedCategory(categoryUniqueId);
-            const currentCat = categories.find(c => (c.slug === categoryUniqueId || c._id === categoryUniqueId));
-            if (currentCat) {
-                setActiveCategoryName(currentCat.name);
-            }
-        }
-    }, [categoryUniqueId, categories]);
+    const currentCat = useMemo(() => {
+        return categories.find(c => (c.slug === categoryUniqueId || c._id === categoryUniqueId));
+    }, [categories, categoryUniqueId]);
+    const activeCategoryName = currentCat ? currentCat.name : categoryName;
 
     useEffect(() => {
         if (!location) {
             detectWithIP().catch(err => console.log("Auto detect failed", err));
         }
-    }, [location]);
+    }, [location, detectWithIP]);
 
     // Fetch Categories
     useEffect(() => {
@@ -190,7 +209,7 @@ function SubCategoryServicesContent() {
             }
         };
         fetchServices();
-    }, [location, slugOrId, categoryUniqueId, searchParams]);
+    }, [location, slugOrId, categoryUniqueId, searchParams, minRating, priceRange]);
 
     const filteredServices = useMemo(() => {
         return services.filter(service => {
@@ -205,7 +224,7 @@ function SubCategoryServicesContent() {
         });
     }, [services, priceRange, minRating]);
 
-    const FilterPanel = ({ className = "" }) => (
+    const renderFilterPanel = (className = "") => (
         <div className={`space-y-6 ${className}`}>
             <h4 className="text-xl font-black text-[var(--deep-charcoal)] mb-6 flex items-center gap-2">
                 <Filter className="w-5 h-5 text-[var(--saffron)]" />
@@ -225,7 +244,6 @@ function SubCategoryServicesContent() {
                                     if (expandedCategory === catTarget) setExpandedCategory(null);
                                     else {
                                         setExpandedCategory(catTarget);
-                                        setActiveCategoryName(cat.name);
                                     }
                                 }}
                                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all duration-300 ${
@@ -411,7 +429,7 @@ function SubCategoryServicesContent() {
                                         </SheetTitle>
                                     </SheetHeader>
                                     <div className="p-4 bg-[var(--off-white)]">
-                                        <FilterPanel />
+                                        {renderFilterPanel()}
                                     </div>
                                 </SheetContent>
                             </Sheet>
@@ -425,7 +443,7 @@ function SubCategoryServicesContent() {
                 <div className="flex flex-col lg:flex-row gap-8">
                     <div className="hidden lg:block w-80 shrink-0">
                         <div className="sticky top-28">
-                            <FilterPanel className="p-7 rounded-[32px] bg-white border border-orange-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden" />
+                            {renderFilterPanel("p-7 rounded-[32px] bg-white border border-orange-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden")}
                         </div>
                     </div>
 
@@ -481,10 +499,13 @@ function SubCategoryServicesContent() {
                                                 <div className="flex flex-col md:flex-row h-full">
                                                     {/* Image Section */}
                                                     <div className="relative w-full md:w-52 h-40 md:h-auto overflow-hidden shrink-0">
-                                                        <img loading="lazy" decoding="async"
+                                                        <Image
                                                             src={service.image ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.image}` : 'https://images.unsplash.com/photo-1762090420353-47d4a0b3f6af?auto=format&fit=crop&q=80'}
                                                             alt={service.business_name}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                            fill
+                                                            sizes="(max-width: 768px) 100vw, 208px"
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                            unoptimized
                                                         />
                                                         <div className="absolute inset-0 bg-black/5 md:hidden" />
                                                         

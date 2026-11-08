@@ -24,12 +24,13 @@ export const OptimizedImage = ({
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
 
-    // Update src if prop changes
-    useEffect(() => {
+    const [prevSrc, setPrevSrc] = useState(src);
+    if (prevSrc !== src) {
+        setPrevSrc(src);
         setImgSrc(src);
         setHasError(false);
         setIsLoading(true);
-    }, [src]);
+    }
 
     const handleLoad = (e) => {
         setIsLoading(false);
@@ -141,7 +142,7 @@ export const LazyBackgroundImage = ({
 }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [imgSrc, setImgSrc] = useState(null);
-    const [hasError, setHasError] = useState(false);
+    const [, setHasError] = useState(false);
     const divRef = useRef(null);
 
     useEffect(() => {

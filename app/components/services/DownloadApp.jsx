@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Smartphone, CheckCircle2, ArrowRight } from 'lucide-react';
 
@@ -85,7 +86,7 @@ export function DownloadApp() {
                   className="w-full min-h-[180px] flex items-center justify-between px-8 py-8 rounded-[2.5rem] bg-gradient-to-r from-[#3f7f77] to-[#62aca4] text-white shadow-2xl shadow-[#037166]/30 transition-all group"
                 >
                   <div className="flex flex-col items-start gap-5 text-left">
-                    <img src="/apple2.png" alt="App Store" className="h-9 w-auto object-contain brightness-0 invert opacity-95" loading="lazy" decoding="async" />
+                    <Image src="/apple2.png" alt="App Store" className="h-9 w-auto object-contain brightness-0 invert opacity-95"  width={500} height={300} />
                     <div>
                       <div className="text-2xl md:text-3xl font-semibold leading-tight text-white/90">Download on the</div>
                       <span className="text-4xl md:text-5xl font-bold leading-tight">App Store</span>
@@ -107,7 +108,7 @@ export function DownloadApp() {
                   className="w-full min-h-[180px] flex items-center justify-between px-8 py-8 rounded-[2.5rem] bg-gradient-to-r from-[#3f7f77] to-[#62aca4] text-white shadow-2xl shadow-[#037166]/30 transition-all group"
                 >
                   <div className="flex flex-col items-start gap-5 text-left">
-                    <img src="/andriod1.png" alt="Google Play" className="h-9 w-auto object-contain brightness-0 invert opacity-95" loading="lazy" decoding="async" />
+                    <Image src="/andriod1.png" alt="Google Play" className="h-9 w-auto object-contain brightness-0 invert opacity-95"  width={500} height={300} />
                     <div>
                       <div className="text-2xl md:text-3xl font-semibold leading-tight text-white/90">Get it on</div>
                       <span className="text-4xl md:text-5xl font-bold leading-tight">Google Play</span>

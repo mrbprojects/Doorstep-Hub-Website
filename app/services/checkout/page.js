@@ -2,18 +2,19 @@
 
 import { ServiceCartCheckoutPage } from '@/components/services/ServiceCartCheckoutPage';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export default function CheckoutRoute() {
     const router = useRouter();
-    const [selectedAddress, setSelectedAddress] = useState(null);
-
-    useEffect(() => {
-        const savedAddress = sessionStorage.getItem('selected_address');
-        if (savedAddress) {
-            setSelectedAddress(JSON.parse(savedAddress));
+    const [selectedAddress] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            const savedAddress = sessionStorage.getItem('selected_address');
+            return savedAddress ? JSON.parse(savedAddress) : null;
+        } catch {
+            return null;
         }
-    }, []);
+    });
 
     return (
         <ServiceCartCheckoutPage

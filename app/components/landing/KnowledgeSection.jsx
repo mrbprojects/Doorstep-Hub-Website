@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { BookOpen, Clock, ArrowRight } from 'lucide-react';
@@ -397,9 +397,9 @@ export function KnowledgeSection({
   exploreAllHref,
   className = '',
 }) {
-  const targetSlugs = resolveTargetSlugs(vertical, categorySlug);
+  const targetSlugs = useMemo(() => resolveTargetSlugs(vertical, categorySlug), [vertical, categorySlug]);
   const metaDefaults = getDefaultMetadata(targetSlugs);
-  const fallbackList = getFallbackArticles(targetSlugs);
+  const fallbackList = useMemo(() => getFallbackArticles(targetSlugs), [targetSlugs]);
 
   const [articles, setArticles] = useState(
     initialArticles && initialArticles.length >= 4 ? initialArticles.slice(0, 4) : fallbackList
@@ -503,7 +503,7 @@ export function KnowledgeSection({
 
     fetchArticles();
     return () => { isMounted = false; };
-  }, [vertical, categorySlug]);
+  }, [vertical, categorySlug, fallbackList, targetSlugs]);
 
   // Skeleton Card matching the 4-card grid
   const SkeletonCard = () => (

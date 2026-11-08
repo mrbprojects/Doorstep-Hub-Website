@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import {
   ArrowRight,
   Shield,
   Zap,
   Star,
-  Users,
   MessageCircle,
   Wrench,
 } from 'lucide-react';
@@ -215,13 +215,11 @@ export function Hero({ onViewServices, onBookService }) {
                 className="flex h-9 sm:h-10 w-28 sm:w-32 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
                 title="Get it on Google Play"
               >
-                <img
-                  loading="lazy"
-                  decoding="async"
+                <Image
                   src="/andriod1.png"
                   alt="Google Play"
                   className="h-full w-full object-cover opacity-95 brightness-0 invert"
-                />
+                 width={500} height={300} />
               </a>
 
               <a
@@ -231,13 +229,11 @@ export function Hero({ onViewServices, onBookService }) {
                 className="flex h-9 sm:h-10 w-28 sm:w-32 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
                 title="Download on App Store"
               >
-                <img
-                  loading="lazy"
-                  decoding="async"
+                <Image
                   src="/apple2.png"
                   alt="App Store"
                   className="h-full w-full object-cover opacity-95 brightness-0 invert"
-                />
+                 width={500} height={300} />
               </a>
             </motion.div>
 
@@ -255,11 +251,11 @@ export function Hero({ onViewServices, onBookService }) {
               <div className="absolute inset-4 rounded-full bg-gradient-to-tr from-[#037166]/15 via-[#04a99d]/10 to-transparent blur-3xl -z-10 pointer-events-none" />
 
               {/* 1st Image: Technician with Washing Machine, Refrigerator, Microwave, and Badges */}
-              <img
+              <Image
                 src="/appliance-hero-main.png"
                 alt="Doorstep Hub Verified Appliance Repair Technician & Appliances"
                 className="w-full h-full object-contain drop-shadow-[0_16px_32px_rgba(3,113,102,0.12)] hover:scale-[1.02] transition-transform duration-500 select-none"
-              />
+               width={500} height={300} />
             </motion.div>
           </div>
 

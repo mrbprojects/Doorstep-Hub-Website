@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import {
     CheckCircle,
     Home,
@@ -12,12 +12,10 @@ import {
     Sparkles,
     Gift,
     Copy,
-    Share2,
     Check,
     CalendarCheck,
     ShieldCheck,
     Wrench,
-    MessageCircle,
     Star,
     Radio,
     FileText
@@ -26,12 +24,32 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
+const WhatsAppSvg = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    </svg>
+);
+
+const GooglePlaySvg = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+        <path d="M3.608 1.636a1.442 1.442 0 0 0-.358.988v18.752c0 .385.127.733.358.988l.056.056 10.5-10.428v-.248L3.664 1.58l-.056.056Z" fill="#2196F3" />
+        <path d="M17.664 15.492l-3.5-3.48v-.248l3.5-3.48.08.046 4.148 2.357c1.184.673 1.184 1.774 0 2.447l-4.148 2.358-.08.046Z" fill="#FFC107" />
+        <path d="M14.244 11.764L3.608 22.364c.389.412 1.05.464 1.79.043l12.346-7.015-3.5-3.628Z" fill="#F44336" />
+        <path d="M14.244 11.764l3.5-3.628L5.398 1.121c-.74-.421-1.401-.369-1.79.043l10.636 10.6Z" fill="#4CAF50" />
+    </svg>
+);
+
+const AppleSvg = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.64-.78 1.08-1.86.96-2.84-.93.04-2.05.62-2.7 1.39-.58.67-1.08 1.76-.95 2.82 1.04.08 2.06-.59 2.69-1.37z" />
+    </svg>
+);
+
 export function ThankYouPage({ bookingDetails }) {
     const router = useRouter();
     const { user } = useAuth();
     const [copied, setCopied] = useState(false);
     const [idCopied, setIdCopied] = useState(false);
-    const [showSocials, setShowSocials] = useState(false);
     const [referAndEarnAmount, setReferAndEarnAmount] = useState('49');
     const [registrationBonus, setRegistrationBonus] = useState('99');
 
@@ -44,7 +62,7 @@ export function ThankYouPage({ bookingDetails }) {
                     if (data.policy.customerReferedAmount) setReferAndEarnAmount(data.policy.customerReferedAmount);
                     if (data.policy.referedAmount) setRegistrationBonus(data.policy.referedAmount);
                 }
-            } catch (e) { /* use defaults */ }
+            } catch { /* use defaults */ }
         };
         fetchGlobalSettings();
     }, []);
@@ -98,36 +116,8 @@ export function ThankYouPage({ bookingDetails }) {
         router.push('/account/bookings');
     };
 
-    const WhatsAppSvg = ({ className }) => (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-        </svg>
-    );
-
-    const GooglePlaySvg = ({ className }) => (
-        <svg viewBox="0 0 512 512" className={className}>
-            <path fill="#4285F4" d="M32.5 28.5L278.4 256 32.5 483.5c-4.4-4.4-6.5-10.5-6.5-17.5V46c0-7 2.1-13.1 6.5-17.5z" />
-            <path fill="#FBBC04" d="M362.4 177.6L278.4 256l84 78.4 46.2-26.4c13.2-7.5 21.4-21.6 21.4-36.8 0-15.2-8.2-29.3-21.4-36.8l-46.2-26.8z" />
-            <path fill="#EA4335" d="M278.4 256L32.5 28.5c6.3-6.3 15.6-8.5 24.5-3.4l242.4 138.4L278.4 256z" />
-            <path fill="#34A853" d="M278.4 256l21 12.5 242.4 138.4c-8.9 5.1-18.2 2.9-24.5-3.4L278.4 256z" />
-        </svg>
-    );
-
-    const AppleSvg = ({ className }) => (
-        <svg viewBox="0 0 170 170" fill="currentColor" className={className}>
-            <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.71-11.65-14.01-6.74-10.43-12.03-21.9-15.87-34.42-3.83-12.51-5.75-24.3-5.75-35.35 0-15.75 4.12-28.71 12.35-38.89 8.24-10.18 18.57-15.39 31-15.64 4.58 0 9.85 1.25 15.82 3.76 5.97 2.51 9.94 3.76 11.91 3.76 1.63 0 5.76-1.31 12.38-3.93 6.62-2.62 12.16-3.75 16.63-3.39 12.51.99 22.42 5.56 29.74 13.72-10.96 6.64-16.32 15.66-16.08 27.05.25 9.04 3.72 16.71 10.42 23.01 6.7 6.3 14.59 10.05 23.68 11.25-2.22 6.84-4.87 13.62-7.94 20.35zM119.22 31.84c0-7.72 2.76-14.89 8.28-21.52 5.53-6.63 12.35-10.32 20.47-11.08.13 1.01.19 1.83.19 2.45 0 7.47-2.92 14.75-8.77 21.84-5.84 7.08-12.78 10.95-20.81 11.61-.39-1.12-.59-2.22-.59-3.3z" />
-        </svg>
-    );
-
-    const socialIcons = [
-        { icon: WhatsAppSvg, text: 'WhatsApp', action: handleShareWhatsApp, color: 'hover:bg-[#25D366]' },
-        { icon: ({ className }) => <span className={`font-black ${className}`}>f</span>, text: 'Facebook', action: handleShareFacebook, color: 'hover:bg-[#1877F2]' },
-        { icon: ({ className }) => <span className={`font-black ${className}`}>X</span>, text: 'X (Twitter)', action: handleShareTwitter, color: 'hover:bg-black' },
-        { icon: ({ className }) => <span className={`font-black ${className}`}>in</span>, text: 'LinkedIn', action: handleShareLinkedin, color: 'hover:bg-[#0A66C2]' },
-    ];
-
     return (
-        <div className="min-h-screen bg-[#F4F7F9] py-6 sm:py-10 px-3.5 sm:px-6">
+        <div className="thank-you-page-root min-h-screen bg-[#F4F7F9] py-6 sm:py-10 px-3.5 sm:px-6">
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -149,7 +139,7 @@ export function ThankYouPage({ bookingDetails }) {
                         <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#007F70] shrink-0" />
                         <span>Booking Confirmed!</span>
                     </h1>
-                    <p className="text-xs sm:text-sm text-[#647B8D] max-w-xl mx-auto leading-relaxed">
+                    <p className="text-xs sm:text-sm text-[#374151] max-w-xl mx-auto leading-relaxed">
                         Your doorstep service appointment has been received successfully. We have sent the booking details & confirmation to your registered mobile number and email.
                     </p>
 
@@ -212,7 +202,7 @@ export function ThankYouPage({ bookingDetails }) {
                                             <Wrench className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#647B8D]">Booked Service</p>
+                                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#00594F]">Booked Service</p>
                                             <p className="text-xs sm:text-sm font-extrabold text-[#102B35] truncate">
                                                 {bookingDetails?.serviceName || 'Appliance Repair & Doorstep Service'}
                                             </p>
@@ -226,7 +216,7 @@ export function ThankYouPage({ bookingDetails }) {
                                                 <Calendar className="w-4 h-4" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[10px] font-bold uppercase tracking-wider text-[#647B8D]">Scheduled Date</p>
+                                                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#00594F]">Scheduled Date</p>
                                                 <p className="text-xs sm:text-sm font-extrabold text-[#102B35] truncate">
                                                     {bookingDetails?.date && bookingDetails.date !== 'Confirmed'
                                                         ? bookingDetails.date
@@ -240,7 +230,7 @@ export function ThankYouPage({ bookingDetails }) {
                                                 <Clock className="w-4 h-4" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[10px] font-bold uppercase tracking-wider text-[#647B8D]">Preferred Slot</p>
+                                                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#00594F]">Preferred Slot</p>
                                                 <p className="text-xs sm:text-sm font-extrabold text-[#007F70] truncate">
                                                     {bookingDetails?.time || '2-Hour Arrival Window'}
                                                 </p>
@@ -254,8 +244,8 @@ export function ThankYouPage({ bookingDetails }) {
                                             <MapPin className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#647B8D]">Doorstep Address</p>
-                                            <p className="text-xs sm:text-sm font-medium text-[#102B35] leading-relaxed">
+                                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#00594F]">Doorstep Address</p>
+                                            <p className="text-xs sm:text-sm font-bold text-[#102B35] leading-relaxed">
                                                 {bookingDetails?.address || 'Your verified doorstep service address'}
                                             </p>
                                         </div>
@@ -284,47 +274,47 @@ export function ThankYouPage({ bookingDetails }) {
                                 {/* Header */}
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shrink-0">
+                                        <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shrink-0">
                                             <Gift className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            <h3 className="text-base sm:text-lg font-black text-white leading-tight">Refer &amp; Earn</h3>
-                                            <p className="text-white/80 text-[11px]">Share your link. Earn real cash rewards.</p>
+                                            <h3 style={{ color: '#ffffff' }} className="text-base sm:text-lg font-black leading-tight !text-white">Refer &amp; Earn</h3>
+                                            <p style={{ color: '#ffffff' }} className="font-medium text-[11px] !text-white">Share your link. Earn real cash rewards.</p>
                                         </div>
                                     </div>
-                                    <span className="flex items-center gap-1 bg-yellow-400/20 border border-yellow-400/30 px-2.5 py-1 rounded-full text-yellow-300 text-[10px] font-bold">
-                                        <Sparkles className="w-3 h-3 text-yellow-300" />
+                                    <span className="flex items-center gap-1 bg-yellow-400 text-black px-2.5 py-1 rounded-full text-[10px] font-black shadow-sm">
+                                        <Sparkles className="w-3 h-3 text-black" />
                                         ₹{registrationBonus} Bonus
                                     </span>
                                 </div>
 
                                 {/* Dual Reward Tiles */}
                                 <div className="grid grid-cols-2 gap-2.5">
-                                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-                                        <p className="text-white/80 text-[10px] uppercase tracking-wider font-bold">You Earn</p>
-                                        <p className="text-2xl sm:text-3xl font-black text-white mt-0.5">₹{referAndEarnAmount}</p>
-                                        <p className="text-white/70 text-[10px] mt-0.5">after friend&apos;s 1st service</p>
+                                    <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/25 shadow-sm">
+                                        <p style={{ color: '#ffffff' }} className="text-[10px] uppercase tracking-wider font-extrabold !text-white">You Earn</p>
+                                        <p style={{ color: '#ffffff' }} className="text-2xl sm:text-3xl font-black mt-0.5 drop-shadow-sm !text-white">₹{referAndEarnAmount}</p>
+                                        <p style={{ color: '#ffffff' }} className="text-[10px] font-medium mt-0.5 !text-white">after friend&apos;s 1st service</p>
                                     </div>
-                                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-                                        <p className="text-white/80 text-[10px] uppercase tracking-wider font-bold">Friend Gets</p>
-                                        <p className="text-2xl sm:text-3xl font-black text-white mt-0.5">₹{registrationBonus}</p>
-                                        <p className="text-white/70 text-[10px] mt-0.5">on first registration</p>
+                                    <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/25 shadow-sm">
+                                        <p style={{ color: '#ffffff' }} className="text-[10px] uppercase tracking-wider font-extrabold !text-white">Friend Gets</p>
+                                        <p style={{ color: '#ffffff' }} className="text-2xl sm:text-3xl font-black mt-0.5 drop-shadow-sm !text-white">₹{registrationBonus}</p>
+                                        <p style={{ color: '#ffffff' }} className="text-[10px] font-medium mt-0.5 !text-white">on first registration</p>
                                     </div>
                                 </div>
 
                                 {/* Referral Link Bar */}
-                                <div className="bg-black/30 backdrop-blur-md rounded-xl p-3 border border-white/15 space-y-2">
+                                <div className="bg-black/40 backdrop-blur-md rounded-xl p-3 border border-white/25 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">Your Referral Link</p>
-                                            <p className="text-white text-xs font-mono font-bold truncate mt-0.5">{inviteLink}</p>
+                                            <p style={{ color: '#ffffff' }} className="text-[10px] font-extrabold uppercase tracking-wider !text-white">Your Referral Link</p>
+                                            <p style={{ color: '#ffffff' }} className="text-xs font-mono font-bold truncate mt-0.5 select-all !text-white">{inviteLink}</p>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={handleCopyLink}
-                                            className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all active:scale-95 border border-white/20 text-xs font-bold cursor-pointer shrink-0 flex items-center gap-1.5"
+                                            className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-white/90 text-[#00594F] transition-all active:scale-95 text-xs font-black cursor-pointer shrink-0 flex items-center gap-1.5 shadow-md"
                                         >
-                                            {copied ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
+                                            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" /> : <Copy className="w-3.5 h-3.5 text-[#00594F]" />}
                                             <span>{copied ? 'Copied' : 'Copy'}</span>
                                         </button>
                                     </div>
@@ -332,7 +322,7 @@ export function ThankYouPage({ bookingDetails }) {
 
                                 {/* Instant Share Buttons */}
                                 <div className="space-y-1.5 pt-1">
-                                    <p className="text-[11px] font-bold text-white/80 uppercase tracking-wider">Share Instantly Via</p>
+                                    <p style={{ color: '#ffffff' }} className="text-[11px] font-extrabold uppercase tracking-wider !text-white">Share Instantly Via</p>
                                     <div className="grid grid-cols-4 gap-2">
                                         <button
                                             type="button"
@@ -355,7 +345,7 @@ export function ThankYouPage({ bookingDetails }) {
                                         <button
                                             type="button"
                                             onClick={handleShareTwitter}
-                                            className="py-2 px-2.5 rounded-xl bg-black hover:bg-gray-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
+                                            className="py-2 px-2.5 rounded-xl bg-black hover:bg-gray-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer border border-white/20"
                                             title="Share on X / Twitter"
                                         >
                                             <span className="font-black text-sm">X</span>
@@ -396,24 +386,24 @@ export function ThankYouPage({ bookingDetails }) {
                                 <span>Top Rated Service App · 4.8 ★★★★★</span>
                             </div>
 
-                            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight">
+                            <h2 style={{ color: '#ffffff' }} className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight !text-white">
                                 Track Your Service Live on Doorstep Hub App
                             </h2>
 
-                            <p className="text-xs sm:text-sm text-gray-200 leading-relaxed">
+                            <p style={{ color: '#ffffff' }} className="text-xs sm:text-sm font-medium leading-relaxed !text-white">
                                 Get live technician GPS arrival updates, direct chat, one-click OTP verification, and download instant GST service invoices right from your mobile.
                             </p>
 
                             {/* Features list */}
                             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
-                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-200 bg-white/10 px-3 py-1 rounded-full border border-white/10">
-                                    <Radio className="w-3.5 h-3.5 text-[#0ABF83] animate-pulse" /> Live GPS Tracking
+                                <span style={{ color: '#ffffff' }} className="inline-flex items-center gap-1.5 text-xs font-bold bg-white/20 px-3.5 py-1.5 rounded-full border border-white/30 backdrop-blur-sm shadow-xs !text-white">
+                                    <Radio className="w-3.5 h-3.5 text-emerald-300 animate-pulse" /> Live GPS Tracking
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-200 bg-white/10 px-3 py-1 rounded-full border border-white/10">
-                                    <Smartphone className="w-3.5 h-3.5 text-[#0ABF83]" /> Real-Time Updates
+                                <span style={{ color: '#ffffff' }} className="inline-flex items-center gap-1.5 text-xs font-bold bg-white/20 px-3.5 py-1.5 rounded-full border border-white/30 backdrop-blur-sm shadow-xs !text-white">
+                                    <Smartphone className="w-3.5 h-3.5 text-emerald-300" /> Real-Time Updates
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-200 bg-white/10 px-3 py-1 rounded-full border border-white/10">
-                                    <FileText className="w-3.5 h-3.5 text-[#0ABF83]" /> Tax Invoices
+                                <span style={{ color: '#ffffff' }} className="inline-flex items-center gap-1.5 text-xs font-bold bg-white/20 px-3.5 py-1.5 rounded-full border border-white/30 backdrop-blur-sm shadow-xs !text-white">
+                                    <FileText className="w-3.5 h-3.5 text-emerald-300" /> Tax Invoices
                                 </span>
                             </div>
                         </div>
@@ -425,14 +415,17 @@ export function ThankYouPage({ bookingDetails }) {
                                 href="https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group/gp flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-black/90 hover:bg-black text-white border-2 border-white/25 hover:border-[#0ABF83] shadow-lg hover:shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer justify-center"
+                                style={{ backgroundColor: '#111827', borderColor: 'rgba(255, 255, 255, 0.4)' }}
+                                className="group/gp flex items-center gap-3.5 px-5 py-3.5 rounded-2xl text-white border-2 hover:border-white shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer justify-center"
                             >
-                                <GooglePlaySvg className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 drop-shadow-md group-hover/gp:scale-110 transition-transform" />
+                                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 shrink-0 shadow-md group-hover/gp:scale-110 transition-transform">
+                                    <GooglePlaySvg className="w-7 h-7 shrink-0" />
+                                </div>
                                 <div className="text-left">
-                                    <p className="text-[10px] sm:text-[11px] uppercase tracking-widest text-gray-400 font-semibold leading-none">
+                                    <p style={{ color: '#ffffff' }} className="text-[10px] sm:text-[11px] uppercase tracking-widest font-bold leading-none !text-white">
                                         GET IT ON
                                     </p>
-                                    <p className="text-base sm:text-lg font-black text-white tracking-wide leading-tight mt-0.5">
+                                    <p style={{ color: '#ffffff' }} className="text-base sm:text-lg font-black tracking-wide leading-tight mt-1 !text-white">
                                         Google Play
                                     </p>
                                 </div>
@@ -443,14 +436,17 @@ export function ThankYouPage({ bookingDetails }) {
                                 href="https://apps.apple.com/in/app/doorstep-hub/id6475340236"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group/ios flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-black/90 hover:bg-black text-white border-2 border-white/25 hover:border-[#0ABF83] shadow-lg hover:shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer justify-center"
+                                style={{ backgroundColor: '#111827', borderColor: 'rgba(255, 255, 255, 0.4)' }}
+                                className="group/ios flex items-center gap-3.5 px-5 py-3.5 rounded-2xl text-white border-2 hover:border-white shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer justify-center"
                             >
-                                <AppleSvg className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 text-white drop-shadow-md group-hover/ios:scale-110 transition-transform" />
+                                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 shrink-0 shadow-md group-hover/ios:scale-110 transition-transform">
+                                    <AppleSvg className="w-7 h-7 shrink-0 text-black" />
+                                </div>
                                 <div className="text-left">
-                                    <p className="text-[10px] sm:text-[11px] tracking-wide text-gray-400 font-semibold leading-none">
+                                    <p style={{ color: '#ffffff' }} className="text-[10px] sm:text-[11px] uppercase tracking-widest font-bold leading-none !text-white">
                                         Download on the
                                     </p>
-                                    <p className="text-base sm:text-lg font-black text-white tracking-wide leading-tight mt-0.5">
+                                    <p style={{ color: '#ffffff' }} className="text-base sm:text-lg font-black tracking-wide leading-tight mt-1 !text-white">
                                         App Store
                                     </p>
                                 </div>

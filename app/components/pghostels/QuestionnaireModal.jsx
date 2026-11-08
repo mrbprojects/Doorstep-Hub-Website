@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronRight, ChevronLeft, Bed, Utensils, Calendar, DollarSign, Check, Layers } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Bed, DollarSign, Check, Layers } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const staticQuestions = [
@@ -28,8 +28,10 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
     const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
     const [selectedCategoryName, setSelectedCategoryName] = useState(initialCategoryName);
 
-    // Reset state when modal opens/closes
-    useEffect(() => {
+    // Reset state when modal opens
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+    if (prevIsOpen !== isOpen) {
+        setPrevIsOpen(isOpen);
         if (isOpen) {
             setCurrentStep(0);
             setAnswers({});
@@ -54,7 +56,7 @@ export function QuestionnaireModal({ isOpen, onClose, categoryName: initialCateg
                 setQuestions(staticQuestions);
             }
         }
-    }, [isOpen, initialCategoryId, initialCategoryName, allCategories]);
+    }
 
     // Fetch Subcategories when category changes
     useEffect(() => {

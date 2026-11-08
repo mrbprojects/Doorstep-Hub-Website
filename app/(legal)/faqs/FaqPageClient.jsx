@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
     Home,
@@ -216,7 +216,7 @@ function FormattedAnswer({ answer, supportEmail, supportPhone }) {
 }
 
 export default function FaqPageClient({ initialFaqs = [] }) {
-    const router = useRouter();
+    
     const searchParams = useSearchParams();
 
     // URL State sync: ?role=partner or ?role=customer
@@ -229,6 +229,7 @@ export default function FaqPageClient({ initialFaqs = [] }) {
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
     const [activeIndex, setActiveIndex] = useState(0); // Open the first item by default like in reference
+    const hasUsedInitial = useRef(initialRole === 'customer app' && initialFaqs.length > 0);
 
     const { policy } = useGlobalSettings() || {};
 
@@ -251,8 +252,8 @@ export default function FaqPageClient({ initialFaqs = [] }) {
     // Fetch FAQs whenever activeTab changes
     useEffect(() => {
         // If already loaded initial customer FAQs on server
-        if (activeTab === 'customer app' && initialFaqs.length > 0 && faqs.length === initialFaqs.length) {
-            setLoading(false);
+        if (activeTab === 'customer app' && hasUsedInitial.current) {
+            hasUsedInitial.current = false;
             return;
         }
 
@@ -533,7 +534,7 @@ export default function FaqPageClient({ initialFaqs = [] }) {
                                 <div className="w-14 h-14 rounded-full bg-rose-50 text-rose-500 mx-auto flex items-center justify-center">
                                     <HelpCircle className="w-7 h-7" />
                                 </div>
-                                <h4 className="text-lg font-bold text-slate-900">We couldn't load FAQs right now</h4>
+                                <h4 className="text-lg font-bold text-slate-900">We couldn&apos;t load FAQs right now</h4>
                                 <p className="text-slate-500 text-sm leading-relaxed">
                                     {error}
                                 </p>
@@ -664,7 +665,7 @@ export default function FaqPageClient({ initialFaqs = [] }) {
                                 Still have questions?
                             </h3>
                             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                                Can't find the answer you're looking for? Reach out to our friendly support team for instant assistance.
+                                Can&apos;t find the answer you&apos;re looking for? Reach out to our friendly support team for instant assistance.
                             </p>
                         </div>
 

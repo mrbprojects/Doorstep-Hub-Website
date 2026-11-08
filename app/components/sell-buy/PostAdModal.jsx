@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { fetchSellBuyCategories, getImageUrl } from '@/lib/sellBuyApi';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_SCRIPT_URL } from '@/config/env';
 import {
@@ -76,6 +78,7 @@ const isElectronicsCategory = (categoryName, subcategoryName) => {
 };
 
 export function PostAdModal({ isOpen, onClose, initialData = null }) {
+  const router = useRouter();
   const isEditMode = Boolean(initialData?._id || initialData?.id);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -93,12 +96,11 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
   const [billCopyFile, setBillCopyFile] = useState(null);
   const [billCopyPreview, setBillCopyPreview] = useState(initialData?.billCopyImage || '');
   const [gpsLoading, setGpsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    try { return Boolean(localStorage.getItem('auth_token')); } catch { return true; }
+  });
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
-  const [indianStates, setIndianStates] = useState([]);
-  const [citiesForState, setCitiesForState] = useState([]);
-  const [citiesLoading, setCitiesLoading] = useState(false);
-  const [allIndianCities, setAllIndianCities] = useState([]);
   const [citySearchQuery, setCitySearchQuery] = useState(initialData?.location?.city || initialData?.city || '');
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
@@ -125,7 +127,9 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
     phone: initialData?.contactInfo?.phone || initialData?.phone || '',
   });
 
-  useEffect(() => {
+  const [prevInitialData, setPrevInitialData] = useState(initialData);
+  if (prevInitialData !== initialData) {
+    setPrevInitialData(initialData);
     if (initialData) {
       setFormData({
         categoryId: initialData?.categoryId?._id || initialData?.categoryId || initialData?.category?.id || '',
@@ -153,7 +157,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
         setBillCopyPreview(initialData.billCopyImage);
       }
     }
-  }, [initialData]);
+  }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -165,26 +169,24 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
 
   useEffect(() => {
     if (isOpen) {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      setIsLoggedIn(!!token);
-
       fetchSellBuyCategories().then((cats) => {
         if (cats && cats.length > 0) {
           const parentCats = cats.filter((c) => !c.parent_id && !c.parentId);
           const list = parentCats.length > 0 ? parentCats : cats;
           setCategories(list);
-          if (!formData.categoryId) {
+          setFormData((prev) => {
+            if (prev.categoryId) return prev;
             const firstCat = list[0];
             const firstCatId = String(firstCat?.id || firstCat?._id || '');
             const firstSubcats = firstCat?.subcategories || [];
-            setFormData((prev) => ({
+            return {
               ...prev,
               categoryId: firstCatId,
               categoryName: firstCat?.name || '',
               subcategoryId: firstSubcats.length > 0 ? String(firstSubcats[0]?.id || firstSubcats[0]?._id || '') : '',
               subcategoryName: firstSubcats.length > 0 ? firstSubcats[0]?.name || '' : '',
-            }));
-          }
+            };
+          });
         }
       });
 
@@ -327,10 +329,13 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
 
   // Auto-trigger GPS when user reaches Step 4 and city not yet filled
   useEffect(() => {
-    if (step === 4 && !formData.city && navigator.geolocation) {
-      handleDetectLocation();
+    if (step === 4 && !formData.city && typeof navigator !== 'undefined' && navigator.geolocation) {
+      const timer = setTimeout(() => {
+        handleDetectLocation();
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  }, [step]);
+  }, [step, formData.city]);
 
   const handleFileChange = (e) => {
     const incoming = Array.from(e.target.files || []);
@@ -360,7 +365,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
       const userStr = localStorage.getItem('user_details') || localStorage.getItem('user');
       let userId = '';
       if (userStr) {
-        try { userId = JSON.parse(userStr)?._id || JSON.parse(userStr)?.id || ''; } catch (e) {}
+        try { userId = JSON.parse(userStr)?._id || JSON.parse(userStr)?.id || ''; } catch {}
       }
 
       const fd = new FormData();
@@ -441,7 +446,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
         );
         onClose();
         if (typeof window !== 'undefined') {
-          window.location.href = '/sell-buy/dashboard';
+          router.push('/sell-buy/dashboard');
         }
       } else {
         toast.error(data.message || 'Failed to submit advertisement');
@@ -500,7 +505,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                 <button
                   onClick={() => {
                     handleResetAndClose();
-                    window.location.href = '/sell-buy/dashboard';
+                    router.push('/sell-buy/dashboard');
                   }}
                   className="bg-[#037166] hover:bg-[#025850] text-white font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-md"
                 >
@@ -596,7 +601,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                           }`}
                         >
                           {cat.image ? (
-                            <img src={getImageUrl(cat.image)} alt={cat.name} className="w-12 h-12 object-contain mb-1 rounded-lg" />
+                            <Image src={getImageUrl(cat.image)} alt={cat.name} className="w-12 h-12 object-contain mb-1 rounded-lg"  width={48} height={48} />
                           ) : (
                             <Grid className="w-10 h-10 mb-1" />
                           )}
@@ -650,13 +655,13 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                                   }`}
                                 >
                                   {sub.image ? (
-                                    <img
+                                    <Image
                                       src={getImageUrl(sub.image)}
                                       alt={sub.name}
                                       className={`w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full transition-transform ${
                                         isSubSelected ? 'brightness-110' : 'group-hover:scale-110'
                                       }`}
-                                    />
+                                     width={500} height={300} />
                                   ) : (
                                     <SubcategoryIcon
                                       icon={sub.icon}
@@ -882,11 +887,11 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                             {billCopyPreview ? (
                               <div className="flex items-center gap-3">
                                 <div className="relative group">
-                                  <img
+                                  <Image
                                     src={billCopyPreview}
                                     alt="Bill Copy Preview"
                                     className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border-2 border-emerald-500 shadow-sm"
-                                  />
+                                   width={80} height={80} />
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -997,13 +1002,13 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                       <div className="flex flex-wrap gap-2">
                         {imagePreviews.map((src, idx) => (
                           <div key={idx} className="relative group flex-shrink-0">
-                            <img
+                            <Image
                               src={src}
                               alt={`Preview ${idx + 1}`}
                               className={`w-16 h-16 object-cover rounded-lg border-2 transition-all ${
                                 idx === 0 ? 'border-[#037166] ring-2 ring-[#037166]/20' : 'border-slate-200'
                               }`}
-                            />
+                             width={500} height={300} />
                             {idx === 0 && (
                               <span className="absolute bottom-0.5 left-0.5 text-[7px] font-black bg-[#037166] text-white px-1 py-0.5 rounded leading-none">
                                 COVER
@@ -1230,11 +1235,11 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                         <div className="flex gap-2 overflow-x-auto pb-1">
                           {imagePreviews.map((src, i) => (
                             <div key={i} className="relative flex-shrink-0">
-                              <img
+                              <Image
                                 src={src}
                                 alt={`Preview ${i + 1}`}
                                 className="w-14 h-14 object-cover rounded-lg border border-slate-200"
-                              />
+                               width={56} height={56} />
                               {i === 0 && (
                                 <span className="absolute bottom-0.5 left-0.5 text-[7px] font-black bg-[#037166] text-white px-1 py-0.2 rounded">
                                   COVER
@@ -1305,11 +1310,11 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                               </div>
                             </div>
                             {billCopyPreview && (
-                              <img
+                              <Image
                                 src={billCopyPreview}
                                 alt="Bill Preview"
                                 className="w-9 h-9 object-cover rounded-lg border border-emerald-300 shrink-0"
-                              />
+                               width={36} height={36} />
                             )}
                           </div>
                         </>
@@ -1399,7 +1404,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                   setDraftKycModalOpen(false);
                   onClose();
                   if (typeof window !== 'undefined') {
-                    window.location.href = '/sell-buy/dashboard?kyc=open';
+                    router.push('/sell-buy/dashboard?kyc=open');
                   }
                 }}
                 className="w-full py-3.5 px-4 rounded-xl text-sm font-black text-white bg-[#037166] hover:bg-[#025951] shadow-lg shadow-[#037166]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
@@ -1413,7 +1418,7 @@ export function PostAdModal({ isOpen, onClose, initialData = null }) {
                   setDraftKycModalOpen(false);
                   onClose();
                   if (typeof window !== 'undefined') {
-                    window.location.href = '/sell-buy';
+                    router.push('/sell-buy');
                   }
                 }}
                 className="w-full py-3 px-4 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"

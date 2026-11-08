@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Home, Briefcase, CheckCircle, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Flower2 } from 'lucide-react';
+import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { trackLeadEvent } from '@/lib/leadTracking';
 import { useAuth } from '@/context/AuthContext';
@@ -12,11 +12,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { locationManager } from '@/services/locationManager';
-import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
+import { LocationMismatchModal } from '@/components/shared/LocationMismatchModal';
+import { useMounted } from '@/hooks/useMounted';
 
 const clean = (v) => {
     if (!v) return null;
-    const s = String(v).trim();
+    let s = String(v).trim().replace(/^[\s,]+|[\s,]+$/g, '').trim();
     if (!s || s.toUpperCase() === 'N/A' || s === ',' || s === '-') return null;
     return s;
 };
@@ -24,21 +25,30 @@ const clean = (v) => {
 const formatFullAddress = (addr) => {
     if (!addr) return { street: '', cityState: '', postalCode: '', hasDetails: false };
 
-    const streetParts = [
+    const rawParts = [
         clean(addr.flat),
         clean(addr.area),
         clean(addr.addressLineOne),
         clean(addr.addressLineTwo)
     ].filter(Boolean);
 
-    // Deduplicate identical parts (e.g. if flat or area is in addressLineOne)
-    const seen = new Set();
-    const uniqueStreet = streetParts.filter(part => {
-        const lower = part.toLowerCase();
-        if (seen.has(lower)) return false;
-        seen.add(lower);
-        return true;
-    });
+    // Deduplicate identical parts and parts already contained as substrings in longer parts
+    const filtered = [];
+    for (const part of rawParts) {
+        const lowerPart = part.toLowerCase();
+        const isDuplicateOrSubstring = filtered.some(existing => {
+            const lowerExisting = existing.toLowerCase();
+            return lowerExisting === lowerPart || lowerExisting.includes(lowerPart);
+        });
+        if (!isDuplicateOrSubstring) {
+            for (let i = filtered.length - 1; i >= 0; i--) {
+                if (lowerPart.includes(filtered[i].toLowerCase())) {
+                    filtered.splice(i, 1);
+                }
+            }
+            filtered.push(part);
+        }
+    }
 
     const cityParts = [
         clean(addr.cityName),
@@ -48,10 +58,10 @@ const formatFullAddress = (addr) => {
     const pin = clean(addr.postalCode);
 
     return {
-        street: uniqueStreet.join(', '),
+        street: filtered.join(', ').replace(/\s*,\s*,\s*/g, ', '),
         cityState: cityParts.join(', '),
         postalCode: pin,
-        hasDetails: uniqueStreet.length > 0 || cityParts.length > 0
+        hasDetails: filtered.length > 0 || cityParts.length > 0
     };
 };
 
@@ -65,7 +75,7 @@ function ReligiousAddressContent() {
     const packageId = searchParams.get('packageId');
     const addons = searchParams.get('addons');
 
-    const [mounted, setMounted] = useState(false);
+    const mounted = useMounted();
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -73,10 +83,6 @@ function ReligiousAddressContent() {
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
     const [newAddress, setNewAddress] = useState({
         name: '',
         phone: '',
@@ -104,8 +110,8 @@ function ReligiousAddressContent() {
                 try {
                     const results = await locationManager.searchLocation(newAddress.cityName);
                     setCitySuggestions(results);
-                } catch (error) {
-                    console.error('City search failed:', error);
+                } catch {
+                    console.error('City search failed:');
                 } finally {
                     setIsSearchingCity(false);
                 }
@@ -132,8 +138,8 @@ function ReligiousAddressContent() {
                 longitude: details.lng
             }));
             setCitySuggestions([]);
-        } catch (error) {
-            console.error('Failed to set city from suggestion:', error);
+        } catch {
+            console.error('Failed to set city from suggestion:');
         } finally {
             setIsSearchingCity(false);
         }
@@ -186,7 +192,7 @@ function ReligiousAddressContent() {
                     setGpsLoading(false);
                 }
             },
-            (error) => {
+            () => {
                 setGpsLoading(false);
                 toast.error('Failed to get location. Please enter manually.');
             },
@@ -213,8 +219,8 @@ function ReligiousAddressContent() {
                     setSelectedAddress(def);
                 }
             }
-        } catch (error) {
-            console.error('Error fetching addresses:', error);
+        } catch {
+            console.error('Error fetching addresses:');
             toast.error('Failed to load addresses');
         } finally {
             setLoading(false);
@@ -222,31 +228,36 @@ function ReligiousAddressContent() {
     }, [token, selectedAddress]);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchAddresses();
-        } else {
+        let isCancelled = false;
+        if (isAuthenticated && token) {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (isCancelled) return;
+                    if (data.success) {
+                        setAddresses(data.data || []);
+                        setSelectedAddress(prev => {
+                            if (!prev && data.data?.length > 0) {
+                                return data.data.find(a => a.defaultAddress) || data.data[0];
+                            }
+                            return prev;
+                        });
+                    }
+                })
+                .catch(() => {
+                    if (!isCancelled) toast.error('Failed to load addresses');
+                });
+        } else if (!isAuthenticated) {
             const timer = setTimeout(() => {
-                if (!isAuthenticated) setShowAuthModal(true);
+                setShowAuthModal(true);
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [isAuthenticated, fetchAddresses]);
-
-    // Auto-fill user details from profile if authenticated
-    useEffect(() => {
-        if (isAuthenticated && user && showAddForm && !editingAddress) {
-            setNewAddress(prev => {
-                const updates = {};
-                if (!prev.name) updates.name = user.name || '';
-                if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-
-                if (Object.keys(updates).length > 0) {
-                    return { ...prev, ...updates };
-                }
-                return prev;
-            });
-        }
-    }, [isAuthenticated, user, showAddForm, editingAddress]);
+        return () => { isCancelled = true; };
+    }, [isAuthenticated, token]);
 
     const handleAddOrUpdateAddress = async () => {
         if (!newAddress.name || !newAddress.phone || !newAddress.area || !newAddress.flat || !newAddress.postalCode) {
@@ -293,7 +304,7 @@ function ReligiousAddressContent() {
             } else {
                 toast.error(data.message || 'Action failed');
             }
-        } catch (error) {
+        } catch {
             toast.error('Error processing address');
         } finally {
             setLoading(false);
@@ -313,7 +324,7 @@ function ReligiousAddressContent() {
                 fetchAddresses();
                 if (selectedAddress?._id === id) setSelectedAddress(null);
             }
-        } catch (e) { toast.error('Failed to delete'); }
+        } catch { toast.error('Failed to delete'); }
         finally { setLoading(false); }
     };
 
@@ -415,8 +426,8 @@ function ReligiousAddressContent() {
             });
 
             router.push('/religious-services/booking/confirm');
-        } catch (error) {
-            console.error("Error adding to cart:", error);
+        } catch {
+            console.error("Error adding to cart:");
             toast.error("Failed to proceed. Please try again.");
         } finally {
             setLoading(false);
@@ -665,30 +676,30 @@ function ReligiousAddressContent() {
                                             <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">
                                                 {address.name || 'Recipient'}
                                                 {address.phone && (
-                                                    <span className="font-normal text-gray-500 text-xs"> • {address.phone}</span>
+                                                    <span className="font-semibold text-gray-700 text-xs"> • {address.phone}</span>
                                                 )}
                                             </p>
                                         </div>
 
                                         {/* Complete Street Address Details */}
                                         {street ? (
-                                            <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 mb-1.5">
+                                            <p className="text-xs sm:text-[13px] text-gray-800 font-medium leading-relaxed break-words mb-2">
                                                 {street}
                                             </p>
                                         ) : (
-                                            <p className="text-xs text-gray-400 italic mb-1.5">Street address not specified</p>
+                                            <p className="text-xs text-gray-400 italic mb-2">Street address not specified</p>
                                         )}
                                     </div>
 
                                     {/* Card Bottom: City, State, Pincode */}
                                     {(cityState || postalCode) && (
-                                        <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500 font-medium">
-                                            <div className="flex items-center gap-1 truncate text-gray-700">
-                                                <MapPin className="w-3 h-3 text-[var(--saffron)] shrink-0" />
-                                                <span className="truncate">{cityState || 'Location'}</span>
+                                        <div className="mt-2.5 pt-2.5 border-t border-gray-100 flex items-center justify-between text-xs text-gray-700 font-medium">
+                                            <div className="flex items-center gap-1.5 truncate text-gray-900">
+                                                <MapPin className="w-3.5 h-3.5 text-[var(--saffron)] shrink-0" />
+                                                <span className="font-semibold truncate">{cityState || 'Location'}</span>
                                             </div>
                                             {postalCode && (
-                                                <span className="text-gray-600 shrink-0 font-semibold bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
+                                                <span className="text-gray-900 shrink-0 font-bold bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded text-[11px]">
                                                     PIN: {postalCode}
                                                 </span>
                                             )}

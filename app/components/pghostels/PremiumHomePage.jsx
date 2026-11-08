@@ -1,51 +1,41 @@
 'use client';
 
-import React, { Fragment, useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, useScroll, useInView, AnimatePresence } from 'motion/react';
+import React, {  useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import Image from 'next/image';
+import { motion, useInView } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
     MapPin, Search, Users, Home, Bed, Sparkles, Star, ChevronRight, ChevronLeft,
-    Wifi, Utensils, Shirt, Check, TrendingUp, Shield, Clock, Heart,
-    Zap, Percent, Flame
+    Wifi, Utensils, Check,
+    Zap, Percent
 } from 'lucide-react';
 import { QuestionnaireModal } from '@/components/pghostels/QuestionnaireModal';
 import { useLocationContext } from '@/context/LocationContext';
 import { NearbyHostelsSection } from './NearbyHostelsSection';
 import { PGLifestyleSection } from './PGLifestyleSection';
-import { CategorySubcategorySection } from '@/components/shared/CategorySubcategorySection';
+
 import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
 import { AppDownload } from '@/components/landing/AppDownload';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app`;
 const SERVICE_ID = '69524fb157bb211ca094e5ee'; // PG Hostels Service ID
 
-const getImageUrl = (image) => {
-    if (!image) return '';
-    if (image.startsWith('http')) return image;
-    return `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${image}`;
-};
-
-const testimonials = [
-    { name: 'Priya Sharma', role: 'Software Engineer', review: 'Found my perfect PG in just 2 days! The verification process gave me confidence.', avatar: '👩‍💼', rating: 5 },
-    { name: 'Rahul Kumar', role: 'Student', review: 'Great amenities and transparent pricing. Highly recommended!', avatar: '👨‍🎓', rating: 5 },
-    { name: 'Sneha Patel', role: 'Designer', review: 'The co-living space is amazing. Made so many new friends here.', avatar: '👩‍🎨', rating: 5 },
-];
-
 
 
 export function PremiumHomePage() {
-    const router = useRouter();
-    const { location, detectWithGPS } = useLocationContext();
+    
+    const { location } = useLocationContext();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState({ id: '', name: '' });
+    const [selectedCategory] = useState({ id: '', name: '' });
     const [featuredHostels, setFeaturedHostels] = useState([]);
+    const router = useRouter();
     const [apiCategories, setApiCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { scrollY } = useScroll();
+    
     const heroRef = useRef(null);
     const categoriesRef = useRef(null);
     const isHeroInView = useInView(heroRef, { once: true });
-    const isCategoriesInView = useInView(categoriesRef, { once: true });
+    
 
     const [searchQuery, setSearchQuery] = useState('');
     const [globalSettings, setGlobalSettings] = useState(null);
@@ -122,18 +112,6 @@ export function PremiumHomePage() {
 
         fetchCategories();
         fetchGlobalSettings();
-    }, []);
-
-    const handleCategoryClick = useCallback((categoryId, categoryName, categorySlug) => {
-        if (categorySlug) {
-            router.push(`/pghostels/${categorySlug}`);
-        } else {
-            console.warn('Category slug is missing');
-        }
-    }, [router]);
-
-    const scrollToCategories = useCallback(() => {
-        categoriesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, []);
 
     const schemaData = useMemo(() => ({
@@ -360,11 +338,11 @@ export function PremiumHomePage() {
 
                                 {/* 10,000+ Happy Students */}
                                 <div className="flex items-center gap-2.5 pl-1 shrink-0">
-                                    <img
+                                    <Image
                                         src="/pghostels/student-avatars-transparent.png"
                                         alt="Happy Students"
                                         className="h-7 sm:h-8 w-auto object-contain"
-                                    />
+                                     width={500} height={300} />
                                     <div className="flex flex-col text-left leading-none">
                                         <span className="text-xs sm:text-sm font-extrabold text-[#102033]">10,000+</span>
                                         <span className="text-[10px] sm:text-[11px] font-medium text-[#64748B] mt-0.5">Happy Students</span>
@@ -381,11 +359,11 @@ export function PremiumHomePage() {
                             className="lg:col-span-6 xl:col-span-6 relative flex items-center justify-center lg:justify-end mt-2 lg:mt-0"
                         >
                             <div className="relative w-full flex justify-center lg:justify-end">
-                                <img
+                                <Image
                                     src="/pghostels/hero-pg-hostel-approved.jpg"
                                     alt="Doorstep Hub PG & Hostels - Find Your Perfect Stay"
                                     className="w-full max-w-[660px] lg:max-w-[760px] xl:max-w-[820px] h-auto object-contain block"
-                                />
+                                 width={500} height={300} />
                             </div>
                         </motion.div>
                     </div>
@@ -474,11 +452,11 @@ function TopDealsSection({ router }) {
 
                     {/* Right side handwritten callout with radiant sun rays */}
                     <div className="hidden sm:flex items-center relative self-start sm:self-end pb-1">
-                        <img
+                        <Image
                             src="/pghostels/callout_save_more_transparent.png"
                             alt="Save more on your stay!"
                             className="h-9 sm:h-11 w-auto object-contain"
-                        />
+                         width={500} height={300} />
                     </div>
                 </div>
 
@@ -494,11 +472,11 @@ function TopDealsSection({ router }) {
                         <div className="flex items-center gap-2.5 min-w-0 pr-1 h-full">
                             {/* Student cutout & house icon */}
                             <div className="relative shrink-0 flex items-center h-full">
-                                <img
+                                <Image
                                     src="/pghostels/girl_books_sharp.png"
                                     alt="Student"
                                     className="h-[95px] w-auto object-contain -ml-2 shrink-0 drop-shadow-sm select-none"
-                                />
+                                 width={500} height={300} />
                                 <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0 -ml-1 shadow-xs">
                                     <Home className="w-4 h-4 stroke-[2.5]" />
                                 </div>
@@ -552,11 +530,11 @@ function TopDealsSection({ router }) {
 
                         {/* Right: Food Bowls & Arrow */}
                         <div className="flex items-center gap-1.5 shrink-0 ml-1">
-                            <img
+                            <Image
                                 src="/pghostels/food_bowls_sharp.png"
                                 alt="Meals"
                                 className="h-14 sm:h-16 w-auto object-contain drop-shadow-sm select-none"
-                            />
+                             width={500} height={300} />
                             <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                                 <ChevronRight className="w-3.5 h-3.5 stroke-[2.5] text-[#E85B00]" />
                             </div>
@@ -572,11 +550,11 @@ function TopDealsSection({ router }) {
                     >
                         <div className="flex items-center gap-2.5 min-w-0 pr-1 h-full">
                             {/* Desk setup photo */}
-                            <img
+                            <Image
                                 src="/pghostels/laptop_desk_sharp.png"
                                 alt="Desk setup"
                                 className="h-[95px] w-auto object-contain -ml-2 shrink-0 drop-shadow-sm select-none"
-                            />
+                             width={500} height={300} />
 
                             {/* Text */}
                             <div className="min-w-0 flex flex-col justify-center">
@@ -637,11 +615,11 @@ function HowItWorksSection() {
                                 Choose your preferred type of stay<br />(Hostel, PG, Dormitory, etc.)
                             </p>
                         </div>
-                        <img
+                        <Image
                             src="/pghostels/step1_art_sharp.png"
                             alt="Select Category"
                             className="h-[125px] sm:h-[135px] w-auto object-contain -mr-1 shrink-0 select-none pointer-events-none"
-                        />
+                         width={500} height={300} />
                     </div>
 
                     {/* Dashed Arrow 1 */}
@@ -670,11 +648,11 @@ function HowItWorksSection() {
                                 View room images, amenities,<br />ratings and prices
                             </p>
                         </div>
-                        <img
+                        <Image
                             src="/pghostels/step2_art_sharp.png"
                             alt="Compare PGs and Hostels"
                             className="h-[125px] sm:h-[135px] w-auto object-contain -mr-1 shrink-0 select-none pointer-events-none"
-                        />
+                         width={500} height={300} />
                     </div>
 
                     {/* Dashed Arrow 2 */}
@@ -706,11 +684,11 @@ function HowItWorksSection() {
                                 Confirm your booking and<br />move in with confidence
                             </p>
                         </div>
-                        <img
+                        <Image
                             src="/pghostels/step3_art_sharp.png"
                             alt="Book & Move In"
                             className="h-[125px] sm:h-[135px] w-auto object-contain -mr-1 shrink-0 select-none pointer-events-none"
-                        />
+                         width={500} height={300} />
                     </div>
                 </div>
             </div>

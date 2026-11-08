@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { QrCode, Smartphone, ArrowRight, ShieldCheck, Star } from 'lucide-react';
+import { QrCode, Smartphone } from 'lucide-react';
 import { getAppPromotionForRoute } from '@/config/appPromotionConfig';
 import { trackAppPromotionEvent, PROMOTION_EVENTS } from '@/services/appPromotionAnalytics';
 import { GooglePlayLogo, AppleLogo } from './StoreLogos';
@@ -16,13 +17,12 @@ function SimpleQrCode({ value, size = 120 }) {
 
   return (
     <div className="bg-white p-2 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-center">
-      <img
+      <Image
         src={qrUrl}
         alt="Scan to Download App"
         width={size}
         height={size}
         className="rounded-lg"
-        loading="lazy"
       />
     </div>
   );

@@ -1,16 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import { motion } from 'motion/react';
 import {
   ArrowRight,
-  ChevronRight,
   Bed,
   Users,
   User,
   LayoutGrid,
-  Sparkles,
-  MapPin,
   Building2
 } from 'lucide-react';
 
@@ -86,21 +84,22 @@ export function PGLifestyleSection({
   categoriesLoading = false,
   fetchSubcategoriesForCategory,
   onSubcategoryClick,
-  onOpenCategory,
   onViewAll,
 }) {
   const [categoryCounts, setCategoryCounts] = useState({});
-  const [activeCategorySlug, setActiveCategorySlug] = useState('');
+  const [activeCategorySlug, setActiveCategorySlug] = useState(() => (categories.length > 0 ? (categories[0]?.slug || categories[0]?._id || '') : ''));
   const [showAllSubcategories, setShowAllSubcategories] = useState(true);
   const [subCategories, setSubCategories] = useState([]);
   const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
 
-  // Set default active category
-  useEffect(() => {
-    if (!categories.length) return;
-    setActiveCategorySlug((current) => current || categories[0]?.slug || categories[0]?._id || '');
-    setShowAllSubcategories(true);
-  }, [categories]);
+  const [prevCategoriesLen, setPrevCategoriesLen] = useState(categories.length);
+  if (prevCategoriesLen !== categories.length) {
+    setPrevCategoriesLen(categories.length);
+    if (categories.length > 0 && !activeCategorySlug) {
+      setActiveCategorySlug(categories[0]?.slug || categories[0]?._id || '');
+      setShowAllSubcategories(true);
+    }
+  }
 
   // Preload and cache subcategory counts
   useEffect(() => {
@@ -428,12 +427,11 @@ export function PGLifestyleSection({
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs overflow-hidden ${themedIcon.bg}`}>
                             {categoryImage ? (
-                              <img
+                              <Image
                                 src={categoryImage}
                                 alt={category.name}
                                 className="w-7 h-7 object-contain"
-                                loading="lazy"
-                              />
+                               width={28} height={28} />
                             ) : (
                               themedIcon.icon
                             )}
@@ -492,12 +490,11 @@ export function PGLifestyleSection({
                       className="group relative h-[190px] sm:h-[205px] xl:h-[215px] w-full rounded-[22px] overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_36px_rgba(0,121,111,0.18)] transition-all text-left bg-gray-900 border border-white/40 cursor-pointer"
                     >
                       {/* Background Accommodation Image */}
-                      <img
+                      <Image
                         src={imgSrc}
                         alt={subCategory.name}
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-                        loading="lazy"
-                      />
+                       width={500} height={300} />
 
                       {/* Dark Gradient Overlay for optimal readability */}
                       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(6,28,25,0.92)] via-[rgba(6,28,25,0.4)] to-transparent pointer-events-none" />

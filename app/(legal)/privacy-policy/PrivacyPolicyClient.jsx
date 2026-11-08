@@ -5,18 +5,13 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
     Shield,
-    FileText,
     Clock,
     Lock,
     Eye,
     Printer,
     ChevronRight,
-    Sparkles,
     AlertCircle,
-    Phone,
     Mail,
-    CreditCard,
-    HelpCircle,
     Database,
     Key,
     ExternalLink
@@ -34,8 +29,6 @@ export default function PrivacyPolicyClient({ initialContent }) {
     useEffect(() => {
         // If initialContent was already loaded for customer app on server, don't refetch on first mount
         if (activeTab === 'customer app' && initialContent) {
-            setContent(initialContent);
-            setLoading(false);
             return;
         }
 
@@ -214,13 +207,13 @@ export default function PrivacyPolicyClient({ initialContent }) {
                                     </p>
                                     <ul className="list-disc pl-5 space-y-2 text-sm text-slate-700">
                                         <li>
-                                            <strong>Third-Party Vendors &amp; Cookies:</strong> Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to Doorstep Hub or other websites on the Internet.
+                                            <strong>Third-Party Vendors &amp; Cookies:</strong> Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to Doorstep Hub or other websites on the Internet.
                                         </li>
                                         <li>
-                                            <strong>Advertising Cookies (DoubleClick / DART):</strong> Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our sites and/or other sites across the Internet.
+                                            <strong>Advertising Cookies (DoubleClick / DART):</strong> Google&apos;s use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our sites and/or other sites across the Internet.
                                         </li>
                                         <li>
-                                            <strong>User Opt-Out Rights:</strong> Users may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="text-[#037166] font-semibold underline hover:text-[#025951] inline-flex items-center gap-1">Google Ads Settings <ExternalLink className="w-3 h-3" /></a>. Alternatively, users can opt out of a third-party vendor's use of cookies for personalized advertising by visiting <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer" className="text-[#037166] font-semibold underline hover:text-[#025951] inline-flex items-center gap-1">www.aboutads.info <ExternalLink className="w-3 h-3" /></a>.
+                                            <strong>User Opt-Out Rights:</strong> Users may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="text-[#037166] font-semibold underline hover:text-[#025951] inline-flex items-center gap-1">Google Ads Settings <ExternalLink className="w-3 h-3" /></a>. Alternatively, users can opt out of a third-party vendor&apos;s use of cookies for personalized advertising by visiting <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer" className="text-[#037166] font-semibold underline hover:text-[#025951] inline-flex items-center gap-1">www.aboutads.info <ExternalLink className="w-3 h-3" /></a>.
                                         </li>
                                     </ul>
                                 </div>

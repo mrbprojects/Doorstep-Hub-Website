@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Star, ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchFeaturedServices, imageLoader } from '@/lib/api';
@@ -188,9 +189,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
 
                 {/* Service Image */}
                 <div className="relative h-44 sm:h-48 overflow-hidden bg-gray-50 shrink-0 border-b border-gray-100">
-                  <img
-                    loading="lazy"
-                    decoding="async"
+                  <Image
                     src={imageLoader({ src: service.mainImage || service.image })}
                     alt={service.serviceName || 'Featured Service'}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -198,7 +197,7 @@ export function FeaturedServices({ onViewAll, onServiceClick }) {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
                     }}
-                  />
+                   width={500} height={300} />
 
                   {/* Rating Badge - Bottom Left */}
                   <div className="absolute bottom-2 left-2 z-20">

@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchSystemSettings, getImageUrl, fetchSellBuyListings, fetchSellBuyCategories } from '@/lib/sellBuyApi';
 import { GOOGLE_MAPS_API_KEY } from '@/config/env';
-import { ChevronLeft, ChevronRight, MapPin, Search, Plus, Globe, Menu, ShoppingBag, Sparkles, Tag, ShieldCheck, Grid, Loader2, SearchX, X, ArrowRight, Navigation, ChevronDown, Check } from 'lucide-react';
+import {  ChevronRight, MapPin, Search, Plus, Menu, Grid, Loader2, SearchX, X, ArrowRight, Navigation, ChevronDown, Check } from 'lucide-react';
 import { PostAdModal } from '@/components/sell-buy/PostAdModal';
 
 export function SellBuyHeader({ categories: propCategories, onPostAdClick, settings: propSettings }) {
@@ -16,9 +16,17 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catDropdownOpen, setCatDropdownOpen] = useState(false);
   const [activeHoverCat, setActiveHoverCat] = useState(null);
-  const [authToken, setAuthToken] = useState(null);
+  const [authToken] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    try { return localStorage.getItem('auth_token'); } catch { return null; }
+  });
   const [systemSettings, setSystemSettings] = useState(propSettings || null);
-  const [categories, setCategories] = useState(propCategories || []);
+  const [categories, setCategories] = useState(() => (propCategories && propCategories.length > 0 ? propCategories : []));
+  const [prevPropCategories, setPrevPropCategories] = useState(propCategories);
+  if (prevPropCategories !== propCategories) {
+    setPrevPropCategories(propCategories);
+    if (propCategories && propCategories.length > 0) setCategories(propCategories);
+  }
   const [internalModalOpen, setInternalModalOpen] = useState(false);
 
   // Live Search States
@@ -29,19 +37,13 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
   const displayCategories = categories || [];
 
   // Location States
-  const [userLocation, setUserLocation] = useState('Hyderabad');
+  const [userLocation, setUserLocation] = useState(() => {
+    if (typeof window === 'undefined') return 'Hyderabad';
+    try { return localStorage.getItem('user_location') || 'Hyderabad'; } catch { return 'Hyderabad'; }
+  });
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [citySearchQuery, setCitySearchQuery] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const tok = localStorage.getItem('auth_token');
-      setAuthToken(tok);
-      const savedLoc = localStorage.getItem('user_location');
-      if (savedLoc) setUserLocation(savedLoc);
-    }
-  }, []);
 
   useEffect(() => {
     if (!systemSettings) {
@@ -52,14 +54,12 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
   }, [systemSettings]);
 
   useEffect(() => {
-    if (!propCategories || propCategories.length === 0) {
+    if (!categories || categories.length === 0) {
       fetchSellBuyCategories().then((res) => {
         if (res && res.length > 0) setCategories(res);
       });
-    } else {
-      setCategories(propCategories);
     }
-  }, [propCategories]);
+  }, [categories]);
 
   // Google Maps API Live Geocoding Function
   const handleDetectLocation = () => {
@@ -136,17 +136,12 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
   // Dynamic Live Search Effect (Debounced 300ms with Location Coordinates)
   useEffect(() => {
     const q = searchQuery.trim();
-    if (q.length < 2) {
-      setSearchResults([]);
-      setSearchPopoverOpen(false);
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchPopoverOpen(true);
+    if (q.length < 2) return;
 
     const timer = setTimeout(async () => {
       try {
+        setIsSearching(true);
+        setSearchPopoverOpen(true);
         const lat = typeof window !== 'undefined' ? localStorage.getItem('user_lat') : null;
         const lng = typeof window !== 'undefined' ? localStorage.getItem('user_lng') : null;
         const searchParams = { search: q, limit: 6 };
@@ -189,12 +184,11 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
         <div className="flex items-center gap-3 sm:gap-4 py-2.5 sm:py-3">
           {/* Dynamic DoorstepHub Logo from System Settings */}
           <Link href="/" className="flex-shrink-0 flex items-center">
-            <img
+            <Image
               src={logoUrl}
               alt="DoorstepHub Logo"
               className="h-11 sm:h-13 md:h-14 w-auto max-w-[180px] object-contain object-left block"
-              loading="eager"
-            />
+             width={500} height={300} />
           </Link>
 
           {/* Search Form & Dynamic Live Search Popover Container */}
@@ -216,7 +210,14 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
                   type="text"
                   placeholder="Search for cars, mobiles, property, electronics..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSearchQuery(val);
+                    if (val.trim().length < 2) {
+                      setSearchResults([]);
+                      setSearchPopoverOpen(false);
+                    }
+                  }}
                   onFocus={() => { if (searchQuery.trim().length >= 2) setSearchPopoverOpen(true); }}
                   className="flex-1 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none bg-transparent"
                 />
@@ -257,11 +258,11 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
                         onClick={() => setSearchPopoverOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-[#037166]/5 transition-colors group"
                       >
-                        <img
+                        <Image
                           src={getImageUrl(item.images?.[0] || item.coverImage || item.image)}
                           alt={item.name || item.title}
                           className="w-11 h-11 object-cover rounded-lg border border-slate-200 shrink-0"
-                        />
+                         width={44} height={44} />
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-xs text-slate-900 group-hover:text-[#037166] truncate">
                             {item.name || item.title}
@@ -318,7 +319,7 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
                           >
                             <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 border border-slate-200 bg-slate-100 flex items-center justify-center text-[10px] font-black text-[#037166]">
                               {cat.image ? (
-                                <img src={getImageUrl(cat.image)} alt={cat.name} className="w-full h-full object-cover" />
+                                <Image src={getImageUrl(cat.image)} alt={cat.name} className="w-full h-full object-cover"  width={500} height={300} />
                               ) : (
                                 cat.name?.[0]?.toUpperCase()
                               )}
@@ -493,7 +494,7 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
                         >
                           <div className="flex items-center gap-2.5">
                             {cat.image ? (
-                              <img src={getImageUrl(cat.image)} alt={cat.name} className="w-5 h-5 rounded-full object-cover shrink-0 border border-gray-200" />
+                              <Image src={getImageUrl(cat.image)} alt={cat.name} className="w-5 h-5 rounded-full object-cover shrink-0 border border-gray-200"  width={20} height={20} />
                             ) : (
                               <div className="w-5 h-5 rounded-full bg-[#037166]/10 text-[#037166] text-[10px] font-black flex items-center justify-center shrink-0">
                                 {cat.name?.[0]}
@@ -561,7 +562,7 @@ export function SellBuyHeader({ categories: propCategories, onPostAdClick, setti
                 >
                   <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200 bg-[#037166]/10 flex items-center justify-center text-xs font-black text-[#037166]">
                     {cat.image ? (
-                      <img src={getImageUrl(cat.image)} alt={cat.name} className="w-full h-full object-cover" />
+                      <Image src={getImageUrl(cat.image)} alt={cat.name} className="w-full h-full object-cover"  width={500} height={300} />
                     ) : (
                       cat.name?.[0]?.toUpperCase()
                     )}

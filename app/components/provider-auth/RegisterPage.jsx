@@ -62,6 +62,7 @@ function SelectField({
 }
 
 export function RegisterPage({ token, phone, onSubmit, loading, error }) {
+  const [formError, setFormError] = useState('');
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -79,7 +80,6 @@ export function RegisterPage({ token, phone, onSubmit, loading, error }) {
     cityId: '',
     cityName: '',
   });
-  const [formError, setFormError] = useState('');
   const [lists, setLists] = useState({
     services: stateModel(),
     categories: stateModel(),
@@ -90,7 +90,9 @@ export function RegisterPage({ token, phone, onSubmit, loading, error }) {
   });
 
   useEffect(() => {
-    setForm((prev) => ({ ...prev, phone }));
+    queueMicrotask(() => {
+      setForm((prev) => ({ ...prev, phone }));
+    });
   }, [phone]);
 
   function updateList(key, next) {
@@ -108,28 +110,38 @@ export function RegisterPage({ token, phone, onSubmit, loading, error }) {
   }, []);
 
   useEffect(() => {
-    loadList('services', getServices);
-    loadList('countries', () => getCountries(token));
+    queueMicrotask(() => {
+      loadList('services', getServices);
+      loadList('countries', () => getCountries(token));
+    });
   }, [loadList, token]);
 
   useEffect(() => {
     if (!form.serviceId) return;
-    loadList('categories', () => getCategories(form.serviceId));
+    queueMicrotask(() => {
+      loadList('categories', () => getCategories(form.serviceId));
+    });
   }, [form.serviceId, loadList]);
 
   useEffect(() => {
     if (!form.categoryId) return;
-    loadList('subcategories', () => getSubcategories(form.categoryId));
+    queueMicrotask(() => {
+      loadList('subcategories', () => getSubcategories(form.categoryId));
+    });
   }, [form.categoryId, loadList]);
 
   useEffect(() => {
     if (!form.countryId) return;
-    loadList('states', () => getStates(token, form.countryId));
+    queueMicrotask(() => {
+      loadList('states', () => getStates(token, form.countryId));
+    });
   }, [form.countryId, loadList, token]);
 
   useEffect(() => {
     if (!form.countryId || !form.stateId) return;
-    loadList('cities', () => getCities(token, form.countryId, form.stateId));
+    queueMicrotask(() => {
+      loadList('cities', () => getCities(token, form.countryId, form.stateId));
+    });
   }, [form.countryId, form.stateId, loadList, token]);
 
   function pick(name, labelName, options, value, resets, clearLists) {
@@ -304,7 +316,7 @@ export function RegisterPage({ token, phone, onSubmit, loading, error }) {
         />
       </div>
 
-      {error && !error.includes('User ID') ? <p className="text-xs text-red-400 font-medium">{error}</p> : null}
+      {(formError || (error && !error.includes('User ID'))) ? <p className="text-xs text-red-400 font-medium">{formError || error}</p> : null}
 
       <Button
         type="submit"

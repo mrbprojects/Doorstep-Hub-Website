@@ -12,7 +12,7 @@ async function getCategoryData(slug) {
       return json.data.find(c => c.slug === slug || c._id === slug) || null;
     }
     return null;
-  } catch (err) {
+  } catch {
     return null;
   }
 }

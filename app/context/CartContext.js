@@ -38,8 +38,30 @@ export const CartProvider = ({ children }) => {
     }, [token, isAuthenticated]);
 
     useEffect(() => {
-        fetchCart();
-    }, [fetchCart]);
+        let isCancelled = false;
+        if (!isAuthenticated || !token) return;
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/cart/get`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (isCancelled) return;
+                if (data.success && data.data) {
+                    setCartItems(data.data.items || []);
+                    setCartTotal(data.data.totalAmount || 0);
+                }
+            })
+            .catch(error => {
+                if (isCancelled) return;
+                console.error('Error fetching cart:', error);
+            })
+            .finally(() => {
+                if (!isCancelled) setLoading(false);
+            });
+        return () => { isCancelled = true; };
+    }, [token, isAuthenticated]);
 
     const addToCart = async (productId, storeId, quantity = 1) => {
         if (!isAuthenticated) {
@@ -62,7 +84,7 @@ export const CartProvider = ({ children }) => {
                 return true;
             }
             return false;
-        } catch (error) {
+        } catch {
             toast.error('Failed to add to cart');
             return false;
         }
@@ -83,7 +105,7 @@ export const CartProvider = ({ children }) => {
             if (data.success) {
                 await fetchCart();
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to remove from cart');
         }
     };
@@ -102,7 +124,7 @@ export const CartProvider = ({ children }) => {
                 setCartItems([]);
                 setCartTotal(0);
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to clear cart');
         }
     };

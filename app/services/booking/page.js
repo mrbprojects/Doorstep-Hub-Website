@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 
 const BookingConfirmationPage = dynamic(
     () => import('@/components/services/BookingConfirmationPage').then((mod) => mod.BookingConfirmationPage),
@@ -14,15 +14,15 @@ const BookingConfirmationPage = dynamic(
 
 function BookingContent() {
     const router = useRouter();
-    const [address, setAddress] = useState(null);
-
-    useEffect(() => {
-        // Get address from session storage or context
-        const savedAddress = sessionStorage.getItem('selected_address');
-        if (savedAddress) {
-            setAddress(JSON.parse(savedAddress));
+    const [address] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            const savedAddress = sessionStorage.getItem('selected_address');
+            return savedAddress ? JSON.parse(savedAddress) : null;
+        } catch {
+            return null;
         }
-    }, []);
+    });
 
     return (
         <BookingConfirmationPage

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, BadgeCheck, PhoneCall, CheckCircle2, ChevronRight, MapPin, AlertTriangle } from 'lucide-react';
+import { X, BadgeCheck, PhoneCall, ChevronRight, MapPin, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { actionTypes } from './data';
 import { useLocation } from '@/hooks/useLocation';
@@ -199,7 +199,12 @@ export function BookingModal({
   const [confirmed, setConfirmed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [displayCity, setDisplayCity] = useState(propCity);
+  const [displayCity, setDisplayCity] = useState(propCity || (location?.city ? { name: location.city } : null));
+  const [prevCityProps, setPrevCityProps] = useState({ propCity, city: location?.city });
+  if (prevCityProps.propCity !== propCity || prevCityProps.city !== location?.city) {
+    setPrevCityProps({ propCity, city: location?.city });
+    setDisplayCity(propCity || (location?.city ? { name: location.city } : null));
+  }
   const [cities, setCities] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -251,17 +256,6 @@ export function BookingModal({
     return `${serviceLabel} is not available in ${displayCity.name}. Please select another city.`;
   }, [serviceAvailableInCity, displayCity?.name, selectedService]);
 
-  // Sync displayCity with propCity or auto-detected location
-  useEffect(() => {
-    if (propCity) {
-      setDisplayCity(propCity);
-    } else if (location?.city) {
-      setDisplayCity({ name: location.city });
-    } else {
-      setDisplayCity(null);
-    }
-  }, [propCity, location]);
-
   useEffect(() => {
     if (!isOpen) return;
 
@@ -283,16 +277,23 @@ export function BookingModal({
     };
   }, [isOpen]);
 
+  const isCityCheckEligible = isOpen && currentStep === 2 && Boolean(displayCity) && Boolean(selectedService);
+  const [prevCheckEligible, setPrevCheckEligible] = useState(isCityCheckEligible);
+  if (prevCheckEligible !== isCityCheckEligible) {
+    setPrevCheckEligible(isCityCheckEligible);
+    if (!isCityCheckEligible) {
+      setServiceAvailableInCity(null);
+    }
+  }
+
   useEffect(() => {
     if (!isOpen || currentStep !== 2 || !displayCity || !selectedService) {
-      setServiceAvailableInCity(null);
       return;
     }
 
     let cancelled = false;
     (async () => {
       setCheckingAvailability(true);
-      setServiceAvailableInCity(null);
       try {
         const available = await verifyServiceAvailableInCity(selectedService, displayCity);
         if (!cancelled) setServiceAvailableInCity(available);
@@ -329,7 +330,9 @@ export function BookingModal({
   }, [confirmed, router, onClose]);
 
   // Reset state when opened with a new service
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setConfirmed(false);
       setRequirement("");
@@ -347,7 +350,7 @@ export function BookingModal({
         pincode: location?.postalCode || location?.pincode || '',
       });
     }
-  }, [isOpen, selectedService, user, location]);
+  }
 
   const handleConfirmBooking = async () => {
     if (locationMismatch) {

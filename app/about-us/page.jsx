@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import {
     MapPin, Phone, Mail, Facebook, Instagram, Linkedin,
     Twitter, Youtube, ExternalLink, Users, ShoppingBag, Briefcase, Star
 } from 'lucide-react';
-import Image from 'next/image';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { API_BASE_URL } from '@/config/env';
@@ -160,13 +160,11 @@ export default function AboutUsPage() {
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-[#037166]/15 to-[#04a99d]/10 rounded-3xl blur-2xl pointer-events-none" />
                                 <div className="relative rounded-3xl overflow-hidden border border-slate-200 shadow-xl shadow-slate-200/50 aspect-[4/3] sm:aspect-square md:aspect-[4/3] lg:aspect-square bg-slate-100">
-                                    <img
-                                        loading="lazy"
-                                        decoding="async"
+                                    <Image
                                         src="/Bharath.png"
                                         alt="Mr. Bharath Ch - Founder & CEO"
                                         className="w-full h-full object-cover rounded-3xl object-top"
-                                    />
+                                     width={500} height={300} />
                                 </div>
                             </motion.div>
                         </motion.div>

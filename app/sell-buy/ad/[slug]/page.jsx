@@ -1,6 +1,6 @@
 import AdDetailClient from './page-client';
 import { getSEOMetadata, getSocialPreviewImage } from '@/lib/seo';
-import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
+import { API_BASE_URL } from '@/config/env';
 
 // Helper to fetch ad details server-side for metadata
 async function getListingDetails(slug) {
@@ -9,7 +9,7 @@ async function getListingDetails(slug) {
     if (!res.ok) return null;
     const json = await res.json();
     return json.success ? json.data : null;
-  } catch (err) {
+  } catch {
     return null;
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
@@ -12,7 +13,6 @@ import {
   Zap,
   TrendingUp,
   Users,
-  Clock,
   CheckCircle,
   Smartphone,
   X,
@@ -33,7 +33,6 @@ const defaultTheme = {
 };
 
 // Popular subcategories (first 3 are featured)
-const featuredCount = 3;
 
 // Skeleton Loader Component
 function CategorySkeleton() {
@@ -64,7 +63,6 @@ const getCleanSubcategoryDescription = (sub) => {
 
 export function CategoryPage({ category, categoryId }) {
   const router = useRouter();
-  const [hoveredIndex, setHoveredIndex] = useState(null);
   const [subCategories, setSubCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryImage, setCategoryImage] = useState(null);
@@ -86,12 +84,12 @@ export function CategoryPage({ category, categoryId }) {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/get_global_settings`);
         const data = await res.json();
         if (data.success && data.policy) {
-          setAppLinks({
-            android: data.policy.customerAndroidAppLink || appLinks.android,
-            ios: data.policy.customerIosAppLink || appLinks.ios
-          });
+          setAppLinks(prev => ({
+            android: data.policy.customerAndroidAppLink || prev.android,
+            ios: data.policy.customerIosAppLink || prev.ios
+          }));
         }
-      } catch (e) { /* use defaults */ }
+      } catch { /* use defaults */ }
     };
     fetchAppLinks();
   }, []);
@@ -257,11 +255,11 @@ export function CategoryPage({ category, categoryId }) {
         {/* Category Image Background (if available from API) */}
         {categoryImage && (
           <div className="absolute inset-0 z-0">
-            <img loading="lazy" decoding="async"
+            <Image
               src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${categoryImage}`}
               alt={categoryMetadata.categoryName}
               className="w-full h-full object-cover opacity-10"
-            />
+             width={500} height={300} />
             <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/90 via-[#0a0a0a]/80 to-[#0a0a0a]" />
           </div>
         )}
@@ -395,7 +393,7 @@ export function CategoryPage({ category, categoryId }) {
                 <Users className="w-12 h-12 mx-auto opacity-20" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">No specific services found</h3>
-              <p className="text-white/50">We're expanding our services in this category. Check back soon!</p>
+              <p className="text-white/50">We&apos;re expanding our services in this category. Check back soon!</p>
             </motion.div>
             :
             <>
@@ -420,8 +418,6 @@ export function CategoryPage({ category, categoryId }) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 * index }}
                         whileHover={{ y: -6 }}
-                        onHoverStart={() => setHoveredIndex(index)}
-                        onHoverEnd={() => setHoveredIndex(null)}
                         onClick={() => handleSubCategoryClick(subCategory)}
                         className="group cursor-pointer relative h-40 sm:h-44 md:h-48 w-full"
                       >
@@ -429,11 +425,11 @@ export function CategoryPage({ category, categoryId }) {
                           {/* Left Side: Fixed Image Container */}
                           <div className="relative w-28 sm:w-36 md:w-40 shrink-0 h-full overflow-hidden bg-white/5">
                             {subCategory.image ? (
-                              <img loading="lazy" decoding="async"
+                              <Image
                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${subCategory.image}`}
                                 alt={subCategory.name}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
+                               width={500} height={300} />
                             ) : (
                               <div className="w-full h-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center">
                                 <svg
@@ -470,9 +466,9 @@ export function CategoryPage({ category, categoryId }) {
 
                             {/* Footer CTA */}
                             <div className="pt-2 border-t border-white/10 flex items-center justify-between mt-auto">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#037166]/20 text-[#04a99d] font-bold text-[11px] sm:text-xs group-hover:bg-[#037166] group-hover:text-white transition-all">
-                                View Services
-                                <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#00594F] group-hover:bg-[#037166] text-white font-bold text-xs shadow-xs transition-all">
+                                Book Service
+                                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                               </span>
                             </div>
                           </div>

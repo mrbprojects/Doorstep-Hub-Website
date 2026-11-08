@@ -8,14 +8,14 @@ import { SellBuyHowItWorks } from '@/components/sell-buy/SellBuyHowItWorks';
 import { ListingCard, ListingGridSkeleton } from '@/components/sell-buy/cards/ListingCard';
 import { fetchSellBuyListings } from '@/lib/sellBuyApi';
 import { Grid, ChevronRight, Search } from 'lucide-react';
-import { toast } from 'sonner';
+
 import { AdSenseUnit } from '@/components/sell-buy/ads/AdSenseUnit';
 import { ADSENSE_CONFIG } from '@/config/adsense';
 
 export default function CategoryClient({ slug }) {
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [categoryName, setCategoryName] = useState(slug.replace(/-/g, ' '));
+  const [categoryName] = useState(slug.replace(/-/g, ' '));
 
   useEffect(() => {
     async function loadCategory() {

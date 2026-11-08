@@ -3,8 +3,51 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Compass, Star, Clock, Heart, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import {  Star, Clock, BookOpen, Flame, User, Scroll, Flower2, Utensils, Home, Bell, Building2, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+
+const SkeletonCard = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-2xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] shadow-2xl xl:w-auto"
+  >
+    {/* Skeleton Image */}
+    <div className="relative h-40 overflow-hidden">
+      <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+
+      {/* Skeleton Rating Badge */}
+      <div className="absolute top-4 right-4 flex items-center space-x-2 rounded-full bg-[#037166]/40 px-3 py-1.5 backdrop-blur-md animate-shimmer">
+        <div className="w-4 h-4 bg-white/50 rounded-full" />
+        <div className="h-4 w-10 bg-white/30 rounded" />
+      </div>
+    </div>
+
+    {/* Skeleton Content */}
+    <div className="h-[160px] flex flex-col justify-between p-4">
+      {/* Title & Description */}
+      <div className="mb-4">
+        <div className="mb-3 h-6 w-4/5 rounded-lg bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+        <div className="mb-2 h-4 w-full rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+        <div className="mb-2 h-4 w-full rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+        <div className="h-4 w-3/4 rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
+      </div>
+
+      {/* Participants & CTA */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 animate-shimmer">
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-8 h-8 bg-gradient-to-br from-gray-700 via-gray-600 to-gray-700 rounded-full border-2 border-[#1a1a1a]" />
+            ))}
+          </div>
+          <div className="h-4 w-20 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded" />
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
 
 export function RecommendedReligious() {
   const router = useRouter();
@@ -57,7 +100,7 @@ export function RecommendedReligious() {
         const data = await response.json();
 
         if (data.success && data.services) {
-          const mappedJourneys = data.services.map((service, index) => {
+          const mappedJourneys = data.services.map((service) => {
             let displayedAmenities = [];
             if (service.amenities && service.amenities.length > 0) {
               displayedAmenities = service.amenities.map(a => a.title);
@@ -142,50 +185,6 @@ export function RecommendedReligious() {
     scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
   };
 
-  // Skeleton Shimmer Component
-  const SkeletonCard = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative h-full w-[240px] shrink-0 overflow-hidden rounded-2xl border-2 border-[#037166]/30 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f1a] shadow-2xl xl:w-auto"
-    >
-      {/* Skeleton Image */}
-      <div className="relative h-40 overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer rounded-t-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-
-        {/* Skeleton Rating Badge */}
-        <div className="absolute top-4 right-4 flex items-center space-x-2 rounded-full bg-[#037166]/40 px-3 py-1.5 backdrop-blur-md animate-shimmer">
-          <div className="w-4 h-4 bg-white/50 rounded-full" />
-          <div className="h-4 w-10 bg-white/30 rounded" />
-        </div>
-      </div>
-
-      {/* Skeleton Content */}
-      <div className="h-[160px] flex flex-col justify-between p-4">
-        {/* Title & Description */}
-        <div className="mb-4">
-          <div className="mb-3 h-6 w-4/5 rounded-lg bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
-          <div className="mb-2 h-4 w-full rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
-          <div className="mb-2 h-4 w-full rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
-          <div className="h-4 w-3/4 rounded bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
-        </div>
-
-        {/* Participants & CTA */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 animate-shimmer">
-            <div className="flex -space-x-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="w-8 h-8 bg-gradient-to-br from-gray-700 via-gray-600 to-gray-700 rounded-full border-2 border-[#1a1a1a]" />
-              ))}
-            </div>
-            <div className="h-4 w-20 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded" />
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-
   if (loading) {
     return (
       <section className="relative py-32 overflow-hidden">
@@ -261,7 +260,7 @@ export function RecommendedReligious() {
 
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-[#037166] via-[#9b59b6] to-[#037166] bg-clip-text text-transparent">
-              Recommended Pandit's
+              Recommended Pandit&apos;s
             </span>
           </h2>
 

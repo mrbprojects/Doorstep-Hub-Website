@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { AlertCircle, RefreshCw, CreditCard, XCircle, ArrowLeft } from 'lucide-react';
+import {  RefreshCw, CreditCard, XCircle, ArrowLeft } from 'lucide-react';
 
 export function PaymentFailureModal({ isOpen, onRetry, onChangeMethod, onClose }) {
     if (!isOpen) return null;
@@ -41,7 +41,7 @@ export function PaymentFailureModal({ isOpen, onRetry, onChangeMethod, onClose }
                         </h3>
 
                         <p className="text-white/60 mb-8 leading-relaxed">
-                            We couldn't process your payment. This might be due to insufficient funds or a network issue. You haven't been charged.
+                            We couldn&apos;t process your payment. This might be due to insufficient funds or a network issue. You haven&apos;t been charged.
                         </p>
 
                         <div className="space-y-3">

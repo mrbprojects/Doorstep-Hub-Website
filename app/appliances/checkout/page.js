@@ -10,16 +10,17 @@ import { toast } from 'sonner';
 function CheckoutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [selectedAddress, setSelectedAddress] = useState(null);
+    const [selectedAddress] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            const savedAddress = sessionStorage.getItem('selected_address');
+            return savedAddress ? JSON.parse(savedAddress) : null;
+        } catch {
+            return null;
+        }
+    });
     const [showFailureModal, setShowFailureModal] = useState(false);
     const { clearCart } = useServiceCart();
-
-    useEffect(() => {
-        const savedAddress = sessionStorage.getItem('selected_address');
-        if (savedAddress) {
-            setSelectedAddress(JSON.parse(savedAddress));
-        }
-    }, []);
 
     useEffect(() => {
         const status = searchParams.get('status');
@@ -58,11 +59,11 @@ function CheckoutContent() {
 
             router.push(`/appliances/thank-you?${params.toString()}`);
 
-        } else if (status === 'failure') {
-            toast.error('Payment failed. Redirecting to cart for retry...');
-            setTimeout(() => {
-                router.push('/appliances/cart');
-            }, 2000);
+        } else if (status === 'failure' || status === 'cancelled') {
+            toast.error('Payment was cancelled or failed. Your booking details are preserved.');
+            if (typeof window !== 'undefined') {
+                window.history.replaceState({}, '', window.location.pathname);
+            }
         }
     }, [searchParams, router, clearCart]);
 

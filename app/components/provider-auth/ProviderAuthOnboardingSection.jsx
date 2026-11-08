@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { MobileNumberPage } from './MobileNumberPage';
 import { OtpVerificationPage } from './OtpVerificationPage';
@@ -39,6 +41,7 @@ function normalizeId(value) {
 }
 
 export function ProviderAuthOnboardingSection() {
+  const router = useRouter();
   const [step, setStep] = useState('idle');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -151,7 +154,7 @@ export function ProviderAuthOnboardingSection() {
       setStep('success');
       toast.success('Login successful');
       if (typeof window !== 'undefined') {
-        window.location.href = '/partner/dashboard';
+        router.push('/partner/dashboard');
       }
       return true;
     } catch (err) {
@@ -380,11 +383,11 @@ return (
                     <div 
                       className="relative overflow-hidden rounded-[2rem] flex items-center justify-center"
                     >
-                      <img loading="lazy" decoding="async"
+                      <Image
                         src="/Join as a service partner.png"
                         alt="Join as a service partner"
                         className="max-h-[360px] sm:max-h-[420px] w-auto max-w-full object-contain object-center drop-shadow-[0_0_20px_rgba(4,169,157,0.35)] transition-transform duration-500 hover:scale-105"
-                      />
+                       width={500} height={300} />
                     </div>
                 </motion.div>
               </div>
@@ -554,13 +557,11 @@ return (
                       layoutId="partner-image"
                       className="relative w-full max-w-[260px] flex items-center justify-center rounded-3xl border border-[#e2ece9] bg-gradient-to-b from-[#f8fafc] to-white p-4 shadow-sm"
                     >
-                      <img
-                        loading="lazy"
-                        decoding="async"
+                      <Image
                         src="/service-partner-phone-image.webp"
                         alt="Service Partner App"
                         className="w-full h-auto object-contain object-center rounded-2xl"
-                      />
+                       width={500} height={300} />
                     </motion.div>
 
                     <div className="w-full space-y-4">

@@ -1,5 +1,5 @@
 import { ArticleViewPage } from '@/components/knowledge/ArticleViewPage';
-import { notFound } from 'next/navigation';
+
 
 export const revalidate = 3600;
 

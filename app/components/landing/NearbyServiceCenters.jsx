@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
-import { MapPin, Navigation, Star, Phone, Clock, Loader2, ArrowRight, Check } from 'lucide-react';
-import { GoogleMap, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, FLOAT_PANE } from '@react-google-maps/api';
+import {  Navigation, Star, Clock, Loader2, ArrowRight, Check } from 'lucide-react';
+import { GoogleMap, Marker, OverlayViewF, FLOAT_PANE } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 import { getImageUrl } from '@/config/env';
+import { useMounted } from '@/hooks/useMounted';
 
 // Stable constants — defined outside component so they never re-create on render
 const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
@@ -123,21 +125,20 @@ const mapOptions = {
 
 export function NearbyServiceCenters() {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useMounted();
   const { location, detectWithGPS, loading: contextLoading, isMapsLoaded } = useLocation();
   const [selectedService, setSelectedService] = useState(null);
   const [hoveredMarker, setHoveredMarker] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   const [mapZoom, setMapZoom] = useState(13);
   const mapRef = React.useRef(null);
   // Lock initial center so GoogleMap center prop never changes after mount
-  const initialCenterRef = React.useRef(null);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const [initialCenter, setInitialCenter] = useState(() => (location ? { lat: location.lat, lng: location.lng } : null));
+  if (!initialCenter && location) {
+    setInitialCenter({ lat: location.lat, lng: location.lng });
+  }
 
   // Fetch service centers
   useEffect(() => {
@@ -206,11 +207,6 @@ export function NearbyServiceCenters() {
 
     fetchNearestServiceCenters();
   }, [location, isClient]);
-
-  // Set initial center once
-  if (location && !initialCenterRef.current) {
-    initialCenterRef.current = { lat: location.lat, lng: location.lng };
-  }
 
   const handleMapLoad = useCallback((map) => { mapRef.current = map; }, []);
 
@@ -289,11 +285,9 @@ export function NearbyServiceCenters() {
         <div className="flex items-start gap-3.5 sm:gap-4">
           {/* Store Image / Logo */}
           <div className="relative w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-2xl overflow-hidden bg-slate-50 border border-slate-200 shrink-0 shadow-xs mt-0.5 flex items-center justify-center">
-            <img
+            <Image
               src={cardImage}
               alt={service.name}
-              loading="lazy"
-              decoding="async"
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 // Graceful multi-tier fallback: service.image -> fallback stock image
@@ -304,7 +298,7 @@ export function NearbyServiceCenters() {
                 }
               }}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+             width={500} height={300} />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -468,10 +462,10 @@ export function NearbyServiceCenters() {
             )}
 
             {/* GoogleMap rendered INLINE — never wrapped in useCallback component */}
-            {isMapsLoaded && initialCenterRef.current && (
+            {isMapsLoaded && initialCenter && (
               <GoogleMap
                 mapContainerStyle={MAP_CONTAINER_STYLE}
-                center={initialCenterRef.current}
+                center={initialCenter}
                 zoom={mapZoom}
                 options={mapOptions}
                 onLoad={handleMapLoad}
@@ -568,7 +562,7 @@ export function NearbyServiceCenters() {
             {/* Map legend */}
             <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-3 flex flex-col gap-2 text-xs text-white z-10 pointer-events-none">
               <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-400" /><span style={{ color: '#ffffff' }}>Your Location</span></div>
-              <div className="flex items-center gap-2"><img src="/servicecenterpointlogo.png" alt="c" loading="lazy" decoding="async" className="w-4 h-4 object-contain" /><span style={{ color: '#ffffff' }}>Service Center</span></div>
+              <div className="flex items-center gap-2"><Image src="/servicecenterpointlogo.png" alt="c" className="w-4 h-4 object-contain"  width={16} height={16} /><span style={{ color: '#ffffff' }}>Service Center</span></div>
               <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-400" /><span style={{ color: '#ffffff' }}>Selected</span></div>
             </div>
           </motion.div>
@@ -587,7 +581,7 @@ export function NearbyServiceCenters() {
                 <ServiceCard key={service.id} service={service} actualIndex={index} />
               ))
             ) : (
-              <div className="text-center py-10 text-gray-500">
+              <div className="text-center py-10 text-gray-500" suppressHydrationWarning>
                 {location ? 'No service centers found in your area.' : 'Please detect your location to find nearby centers.'}
               </div>
             )}

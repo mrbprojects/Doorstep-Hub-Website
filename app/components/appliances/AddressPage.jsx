@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, X, Trash2, Edit2, Loader2, Search, Crosshair, ShieldCheck, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
@@ -121,7 +122,7 @@ export function AddressPage({
             ios: data.policy.customerIosAppLink || data.policy.appStore || 'https://apps.apple.com/in/app/doorstep-hub-home-services/id6475340236'
           });
         }
-      } catch (e) {
+      } catch {
         // keep defaults
       }
     };
@@ -204,26 +205,32 @@ export function AddressPage({
     if (authLoading) return;
 
     if (isAuthenticated) {
-      fetchAddresses();
+      queueMicrotask(() => {
+        fetchAddresses();
+      });
     } else if (!authLoading && !isAuthenticated) {
       // Only show modal if NOT loading and NOT authenticated
-      setShowAuthModal(true);
+      queueMicrotask(() => {
+        setShowAuthModal(true);
+      });
     }
   }, [isAuthenticated, fetchAddresses, authLoading]);
 
   // Auto-fill user details from profile if authenticated
   useEffect(() => {
     if (isAuthenticated && user && showAddForm && !editingAddress) {
-      setNewAddress(prev => {
-        // Only update if current fields are empty to avoid overwriting user edits
-        const updates = {};
-        if (!prev.name) updates.name = user.name || '';
-        if (!prev.phone) updates.phone = user.mobile || user.phone || '';
+      queueMicrotask(() => {
+        setNewAddress(prev => {
+          // Only update if current fields are empty to avoid overwriting user edits
+          const updates = {};
+          if (!prev.name) updates.name = user.name || '';
+          if (!prev.phone) updates.phone = user.mobile || user.phone || '';
 
-        if (Object.keys(updates).length > 0) {
-          return { ...prev, ...updates };
-        }
-        return prev;
+          if (Object.keys(updates).length > 0) {
+            return { ...prev, ...updates };
+          }
+          return prev;
+        });
       });
     }
   }, [isAuthenticated, user, showAddForm, editingAddress]);
@@ -328,7 +335,7 @@ export function AddressPage({
       } else {
         toast.error(data.message || 'Action failed');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setLoading(false);
@@ -351,7 +358,7 @@ export function AddressPage({
         toast.success('Address deleted');
         fetchAddresses();
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete address');
     } finally {
       setLoading(false);
@@ -622,7 +629,7 @@ export function AddressPage({
                                         mapRef.current.setZoom(17);
                                       }
                                     }
-                                  } catch (e) {
+                                  } catch {
                                     toast.error("Failed to load location");
                                   }
                                 }}
@@ -1068,11 +1075,11 @@ export function AddressPage({
                     <p className="text-[11px] text-gray-600 mt-0.5">Access all services, track orders & manage daily needs.</p>
                   </div>
                   <div className="w-11 h-11 sm:w-11 sm:h-12 rounded-2xl bg-[] shadow-sm flex items-center justify-center p-2 flex-shrink-0 overflow-hidden">
-                    <img
+                    <Image
                       src="/d-hub-logo.png"
                       alt="Doorstep Hub"
                       className="w-full h-full object-contain brightness-0 invert"
-                    />
+                     width={500} height={300} />
                   </div>
                 </div>
 

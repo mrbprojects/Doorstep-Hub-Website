@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Search, Check, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import { MapPin, Check, ArrowRight } from 'lucide-react';
 
-export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuery, onSearchChange, loading }) {
+export function CityWiseCenters({ cities, selectedCity, onSelectCity, loading }) {
   const [isExpanded, setIsExpanded] = useState(false);
   // Local filtering is now disabled in favor of API search, 
   // but we keep the variable name to minimize changes to the JSX
@@ -77,7 +78,7 @@ export function CityWiseCenters({ cities, selectedCity, onSelectCity, searchQuer
                     {/* Image Area - Fits card height */}
                     <div className="w-18 sm:w-22 md:w-24 h-full flex-shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-105 p-1.5 flex items-center justify-center">
                       {city.icon ? (
-                        <img loading="lazy" decoding="async" src={city.icon} alt={city.name} className="w-full h-full object-contain object-center" />
+                        <Image src={city.icon} alt={city.name} className="w-full h-full object-contain object-center"  width={500} height={300} />
                       ) : (
                         <div className="w-full h-full bg-[#037166]/5 flex items-center justify-center rounded-xl">
                           <MapPin className="text-[#037166]" size={26} />

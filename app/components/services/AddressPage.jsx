@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Home, Briefcase, MapPin, Plus, Check, X, Trash2, Edit2, Loader2, Search, Crosshair } from 'lucide-react';
 import { toast } from 'sonner';
@@ -59,6 +59,7 @@ export function AddressPage({
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [, setDetectionSuccess] = useState(false);
   const [locationPermission, setLocationPermission] = useState('unknown');
   const [showPermissionBanner, setShowPermissionBanner] = useState(true);
 
@@ -79,9 +80,9 @@ export function AddressPage({
     }
   }, []);
 
-  const [newAddress, setNewAddress] = useState({
-    name: '',
-    phone: '',
+  const [newAddress, setNewAddress] = useState(() => ({
+    name: user?.name || '',
+    phone: user?.mobile || user?.phone || '',
     type: 'Home',
     area: '',
     flat: '',
@@ -95,8 +96,7 @@ export function AddressPage({
     longitude: contextLocation?.lng || "78.390456",
     stateId: "680cbb3d2d42e474f451ace3",
     cityId: "684d704faa93650a05d5ff47"
-  });
-  const [detectionSuccess, setDetectionSuccess] = useState(false);
+  }));
   const [hasAutoDetected, setHasAutoDetected] = useState(false);
   const [mapCenter, setMapCenter] = useState({
     lat: Number(contextLocation?.lat) || 17.450123,
@@ -171,29 +171,40 @@ export function AddressPage({
   }, [token, selectedAddress, onSelectAddress]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchAddresses();
-    } else {
-      setShowAuthModal(true);
-    }
-  }, [isAuthenticated, fetchAddresses]);
-
-  // Auto-fill user details from profile if authenticated
-  useEffect(() => {
-    if (isAuthenticated && user && showAddForm && !editingAddress) {
-      setNewAddress(prev => {
-        // Only update if current fields are empty to avoid overwriting user edits
-        const updates = {};
-        if (!prev.name) updates.name = user.name || '';
-        if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-        
-        if (Object.keys(updates).length > 0) {
-          return { ...prev, ...updates };
+    let isCancelled = false;
+    if (isAuthenticated && token) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-        return prev;
-      });
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (isCancelled) return;
+          if (data.success) {
+            setAddresses(data.data || []);
+            if (!selectedAddress && data.data?.length > 0) {
+              const defaultAddr = data.data.find(addr => addr.defaultAddress) || data.data[0];
+              onSelectAddress(defaultAddr);
+            }
+          }
+        })
+        .catch(error => {
+          if (!isCancelled) {
+            console.error('Error fetching addresses:', error);
+            toast.error('Failed to load addresses');
+          }
+        });
+    } else if (!isAuthenticated) {
+      const timer = setTimeout(() => {
+        setShowAuthModal(true);
+      }, 500);
+      return () => { isCancelled = true; clearTimeout(timer); };
     }
-  }, [isAuthenticated, user, showAddForm, editingAddress]);
+    return () => { isCancelled = true; };
+  }, [isAuthenticated, token, selectedAddress, onSelectAddress]);
 
   const handleAutoDetect = async () => {
     setIsLocating(true);
@@ -294,7 +305,7 @@ export function AddressPage({
       } else {
         toast.error(data.message || 'Action failed');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setLoading(false);
@@ -317,7 +328,7 @@ export function AddressPage({
         toast.success('Address deleted');
         fetchAddresses();
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete address');
     } finally {
       setLoading(false);
@@ -567,7 +578,7 @@ export function AddressPage({
                                           setShowAddForm(true);
                                         }
                                       }
-                                    } catch (e) {
+                                    } catch {
                                       toast.error("Failed to load location");
                                     }
                                   }}

@@ -163,7 +163,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
                             setViewType('category');
                             return;
                         }
-                    } catch (e) { /* try next candidate */ }
+                    } catch { /* try next candidate */ }
                 }
 
                 // 3. Resolve root-level appliance service center slugs.

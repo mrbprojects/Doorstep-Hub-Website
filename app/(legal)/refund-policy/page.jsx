@@ -5,18 +5,14 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
     CreditCard,
-    FileText,
-    Shield,
     Clock,
     RefreshCw,
-    CheckCircle2,
     Printer,
     ChevronRight,
     Sparkles,
     AlertCircle,
     Phone,
     Mail,
-    HelpCircle,
     Banknote
 } from 'lucide-react';
 import { API_BASE_URL } from '@/config/env';

@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
 import {
     ArrowLeft, Star, MapPin, Sparkles, Clock,
-    Users, Flame, Calendar, Filter, RefreshCw
+    Users, Flame, Calendar, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -72,7 +73,6 @@ function ReligiousCategoryContent() {
 
                 // Get religious services serviceId from localStorage, fallback to hardcoded ID
                 const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
-                const RELIGIOUS_SERVICE_SLUG = 'rituals-and-religious-services';
                 let serviceId = RELIGIOUS_SERVICE_ID;
                 try {
                     const savedService = localStorage.getItem('selectedService');
@@ -80,7 +80,7 @@ function ReligiousCategoryContent() {
                         const parsed = JSON.parse(savedService);
                         if (parsed?.id) serviceId = parsed.id;
                     }
-                } catch (e) { /* use fallback */ }
+                } catch { /* use fallback */ }
 
                 const response = await fetch(
                     `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/professional-services`,
@@ -254,7 +254,7 @@ function ReligiousCategoryContent() {
                                 >
                                     {/* Image */}
                                     <div className="relative h-52 overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50">
-                                        <img loading="lazy" decoding="async"
+                                        <Image
                                             src={
                                                 service.logo
                                                     ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.logo}`
@@ -262,7 +262,7 @@ function ReligiousCategoryContent() {
                                             }
                                             alt={service.business_name || 'Pandit'}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                        />
+                                         width={500} height={300} />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                                         {/* Rating badge */}
@@ -337,7 +337,7 @@ function ReligiousCategoryContent() {
                             No Pandits Found Nearby
                         </h3>
                         <p className="text-gray-500 max-w-md mb-8">
-                            We couldn't find any religious service providers in your area right now. Try a different location or browse all categories.
+                            We couldn&apos;t find any religious service providers in your area right now. Try a different location or browse all categories.
                         </p>
                         <div className="flex gap-3">
                             <Button

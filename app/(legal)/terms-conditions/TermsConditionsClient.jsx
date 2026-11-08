@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
-    FileText,
+    
     Shield,
     Clock,
     CheckCircle2,
@@ -15,7 +15,6 @@ import {
     Sparkles,
     Scale,
     AlertCircle,
-    Phone,
     Mail
 } from 'lucide-react';
 import { API_BASE_URL } from '@/config/env';
@@ -30,8 +29,6 @@ export default function TermsConditionsClient({ initialContent }) {
 
     useEffect(() => {
         if (activeTab === 'customer app' && initialContent) {
-            setContent(initialContent);
-            setLoading(false);
             return;
         }
 

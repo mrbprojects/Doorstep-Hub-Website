@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -414,15 +415,15 @@ export function HomeExclusiveOffersSection() {
               >
                 {/* 1. Real Promotional Banner Image */}
                 <div className="relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50">
-                  <img
+                  <Image
                     src={imgSrc}
                     alt={offer.title || 'Promotional Offer'}
+                    unoptimized
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
                     onError={(e) => {
                       e.currentTarget.src = `${IMAGE_BASE_URL}/uploads/thumbn_ph_image/default_image.jpg`;
                     }}
-                  />
+                   width={500} height={300} />
 
                   {/* Service Badge Overlaid */}
                   <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/95 backdrop-blur-xs text-[#00796F] border border-[#00796F]/20 shadow-xs">
@@ -602,14 +603,15 @@ export function HomeExclusiveOffersSection() {
 
               {/* Modal Banner Graphic */}
               <div className="relative aspect-[16/9] w-full bg-slate-100 overflow-hidden shrink-0">
-                <img
+                <Image
                   src={getImageUrl(selectedOfferModal.image)}
                   alt={selectedOfferModal.title}
+                  unoptimized
                   className="w-full h-full object-cover object-center"
                   onError={(e) => {
                     e.currentTarget.src = `${IMAGE_BASE_URL}/uploads/thumbn_ph_image/default_image.jpg`;
                   }}
-                />
+                 width={500} height={300} />
                 <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold bg-white/95 text-[#00796F] shadow-xs">
                   {Array.isArray(selectedOfferModal.serviceName)
                     ? selectedOfferModal.serviceName[0]

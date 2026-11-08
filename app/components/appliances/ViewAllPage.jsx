@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RatingFilter } from './RatingFilter';
+import Image from 'next/image';
+
 import { motion, AnimatePresence } from 'motion/react';
 import DOMPurify from 'dompurify';
 import { ArrowLeft, Star, MapPin, Zap, ArrowRight, Filter, X } from 'lucide-react';
@@ -16,6 +17,22 @@ const DEFAULT_APP_LINKS = {
     'https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share',
 };
 
+const ShimmerGrid = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className="group">
+        <div className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
+          <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
+          <div className="absolute inset-0 flex items-end p-8">
+            <div className="h-8 w-48 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 export function ViewAllPage({
   type,
   onBack,
@@ -28,7 +45,13 @@ export function ViewAllPage({
   const [featuredServices, setFeaturedServices] = useState([]);
   const [recentServices, setRecentServices] = useState([]);
   const [stores, setStores] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const isAsyncType = type === 'categories' || type === 'stores' || type === 'featured' || type === 'recent';
+  const [isLoading, setIsLoading] = useState(() => Boolean(isAsyncType));
+  const [prevType, setPrevType] = useState(type);
+  if (prevType !== type) {
+    setPrevType(type);
+    if (!isAsyncType) setIsLoading(false);
+  }
   const [selectedRating, setSelectedRating] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const { location, detectLocation } = useLocation();
@@ -36,24 +59,6 @@ export function ViewAllPage({
 
   const handleRatingSelect = (rating) => {
     setSelectedRating(rating === selectedRating ? null : rating);
-  };
-
-  const ShimmerGrid = () => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="group">
-            <div className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
-              <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 animate-shimmer" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
-              <div className="absolute inset-0 flex items-end p-8">
-                <div className="h-8 w-48 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 rounded animate-shimmer" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   useEffect(() => {
@@ -187,8 +192,6 @@ export function ViewAllPage({
         }
       };
       fetchRecentServices();
-    } else {
-      setIsLoading(false);
     }
   }, [type, location]);
 
@@ -301,13 +304,11 @@ export function ViewAllPage({
                     className="flex h-12 w-36 sm:w-40 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 hover:scale-105 active:scale-95"
                     title="Get it on Google Play"
                   >
-                    <img
-                      loading="lazy"
-                      decoding="async"
+                    <Image
                       src="/andriod1.png"
                       alt="Google Play"
                       className="h-full w-full object-cover opacity-95 brightness-0 invert"
-                    />
+                     width={500} height={300} />
                   </a>
 
                   <a
@@ -317,13 +318,11 @@ export function ViewAllPage({
                     className="flex h-12 w-36 sm:w-40 items-center justify-center overflow-hidden rounded-full border border-[#9ecbc3] bg-[#DEF2EF] shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 hover:scale-105 active:scale-95"
                     title="Download on App Store"
                   >
-                    <img
-                      loading="lazy"
-                      decoding="async"
+                    <Image
                       src="/apple2.png"
                       alt="App Store"
                       className="h-full w-full object-cover opacity-95 brightness-0 invert"
-                    />
+                     width={500} height={300} />
                   </a>
                 </div>
 
@@ -447,40 +446,37 @@ export function ViewAllPage({
                         onClick={() => onCategoryClick?.(category)}
                         className="group cursor-pointer"
                       >
-                        <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 shadow-lg hover:shadow-[#037166]/20 transition-all duration-300 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-white border border-gray-200 hover:border-[#037166] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                           {/* Image Section */}
                           <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
-                            <img loading="lazy" decoding="async"
+                            <Image
                               src={category.image}
                               alt={category.title}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
+                             width={500} height={300} />
                           </div>
 
                           {/* Content Section */}
                           <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">
                             <div>
-                              <div className="flex items-start justify-between mb-1 gap-2">
-                                <h4 className="text-lg font-bold text-white group-hover:text-[#04a99d] transition-colors truncate">
+                              <div className="flex items-start justify-between mb-1.5 gap-2">
+                                <h4 style={{ color: '#102B35' }} className="text-lg font-bold !text-[#102B35] group-hover:!text-[#00594F] transition-colors truncate">
                                   {category.title}
                                 </h4>
-                                <div className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded-lg border border-white/10 flex-shrink-0">
-                                  <Star className="w-3 h-3 fill-[#04a99d] text-[#04a99d]" />
-                                  <span className="text-white text-[10px] font-bold">{category.rating || '4.8'}</span>
+                                <div className="flex items-center gap-1 bg-[#E6F7F4] px-1.5 py-0.5 rounded-lg border border-[#B2E7DF] flex-shrink-0">
+                                  <Star className="w-3 h-3 fill-[#00594F] text-[#00594F]" />
+                                  <span style={{ color: '#00594F' }} className="!text-[#00594F] text-[10px] font-bold">{category.rating || '4.8'}</span>
                                 </div>
                               </div>
-                              <p className="text-white text-xs mb-2 line-clamp-1 italic font-medium">
-                                {category.totalOrders || '1.2k+'} Successfully Completed
-                              </p>
-                              <p className="text-white/90 text-[11px] line-clamp-1 leading-tight">
+                              <p style={{ color: '#4B5563' }} className="!text-[#4B5563] text-xs sm:text-[13px] line-clamp-2 leading-relaxed">
                                 {category.description || `Professional ${category.title} services by experts.`}
                               </p>
                             </div>
 
                             <div className="flex items-center justify-between mt-2">
-                              <div className="flex items-center gap-1.5 text-white/80 text-[9px]">
-                                <Zap className="w-3 h-3 text-[#04a99d]" />
-                                <span>Verified Services</span>
+                              <div className="flex items-center gap-1.5 !text-[#00594F] text-[9px] font-semibold">
+                                <Zap className="w-3 h-3 text-[#00594F]" />
+                                <span style={{ color: '#00594F' }}>Verified Services</span>
                               </div>
                               <button className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#037166] to-[#04a99d] text-white font-medium hover:shadow-lg transition-all text-[11px] flex items-center gap-1">
                                 Book
@@ -507,7 +503,7 @@ export function ViewAllPage({
                       >
                         <div className="flex flex-col sm:flex-row gap-4 p-2.5 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#037166]/50 transition-all duration-300 h-full overflow-hidden">
                           <div className="relative w-32 h-24 sm:w-40 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-[#0f1110]">
-                            <img loading="lazy" decoding="async"
+                            <Image
                               src={imageLoader({ src: service.mainImage || service.image })}
                               alt={service.serviceName || 'Featured Service'}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -515,7 +511,7 @@ export function ViewAllPage({
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
                               }}
-                            />
+                             width={500} height={300} />
                             <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-[9px] font-bold flex items-center gap-1 shadow-lg">
                               <Zap className="w-2.5 h-2.5" />
                               {service.serviceDelhiveryType || 'Featured'}
@@ -568,11 +564,11 @@ export function ViewAllPage({
                       >
                         <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-[#1a1a1a] border border-white/10 h-full">
                           <div className="relative h-48 overflow-hidden">
-                            <img loading="lazy" decoding="async"
+                            <Image
                               src={store.image}
                               alt={store.name}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
+                             width={500} height={300} />
                           </div>
                           <div className="p-6">
                             <h4 className="text-xl font-bold text-white mb-2 group-hover:text-[#04a99d] transition-colors line-clamp-1">
@@ -610,11 +606,11 @@ export function ViewAllPage({
                       >
                         <div className="relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 shadow-lg">
                           <div className="relative h-48 overflow-hidden">
-                            <img loading="lazy" decoding="async"
+                            <Image
                               src={service.image}
                               alt={service.title}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
+                             width={500} height={300} />
                             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10">
                               <Star className="w-4 h-4 text-[#04a99d] fill-[#04a99d]" />
                               <span className="text-sm font-medium text-white">4.8</span>

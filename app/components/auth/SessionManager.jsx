@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SessionExpiryModal } from '@/components/ui/SessionExpiryModal';
-import { toast } from 'sonner';
+
 
 export const SESSION_EVENT = 'session-expired';
 

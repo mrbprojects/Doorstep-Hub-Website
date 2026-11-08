@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { ArrowLeft, Star, MapPin, Clock, Filter, X, Zap, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Star, Filter, X, Zap, RotateCcw } from 'lucide-react';
 import { useLocationContext } from '@/context/LocationContext';
 
 export function PartnersListingPage({ category, subCategory, childCategoryId }) {
@@ -187,11 +188,11 @@ export function PartnersListingPage({ category, subCategory, childCategoryId }) 
                                     >
                                         <div className="relative h-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border border-white/10 hover:border-[#037166]/50 transition-all duration-300">
                                             <div className="relative h-48 overflow-hidden">
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={service.mainImage ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${service.mainImage}` : 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400'}
                                                     alt={service.name}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                />
+                                                 width={500} height={300} />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
                                                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-[#037166] to-[#04a99d] text-white text-xs font-bold flex items-center gap-1">
                                                     <Zap className="w-3 h-3" />

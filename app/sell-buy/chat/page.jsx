@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
-import { Search, Send, ShieldCheck, ShieldAlert, MapPin, Loader2, MessageSquare } from 'lucide-react';
+import { Search, Send, ShieldCheck, Loader2, MessageSquare } from 'lucide-react';
 import {
   fetchConversations,
   fetchMessages,
@@ -18,7 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function MarketplaceChatPage() {
   const searchParams = useSearchParams();
-  const sellerIdParam = searchParams.get('sellerId');
+  
   const listingIdParam = searchParams.get('listingId');
 
   const [conversations, setConversations] = useState([]);
@@ -28,85 +29,96 @@ export default function MarketplaceChatPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentUserId, setCurrentUserId] = useState('');
+  const { user } = useAuth() || {};
+
+  const [currentUserId, setCurrentUserId] = useState(() => {
+    if (user?._id || user?.id) return String(user._id || user.id);
+    if (typeof window !== 'undefined') {
+      try {
+        const userStr = localStorage.getItem('user_details') || localStorage.getItem('user');
+        if (userStr) {
+          const parsed = JSON.parse(userStr);
+          return String(parsed._id || parsed.id || '');
+        }
+      } catch {}
+    }
+    return '';
+  });
+
+  const [prevUser, setPrevUser] = useState(user);
+  if (prevUser !== user) {
+    setPrevUser(user);
+    const uid = user?._id || user?.id;
+    if (uid) setCurrentUserId(String(uid));
+  }
 
   const messagesEndRef = useRef(null);
 
-  const { user } = useAuth() || {};
-
-  // Initialize Current User ID
-  useEffect(() => {
-    let activeUser = user;
-    if (!activeUser && typeof window !== 'undefined') {
-      const userStr = localStorage.getItem('user_details') || localStorage.getItem('user');
-      if (userStr) {
-        try { activeUser = JSON.parse(userStr); } catch (e) {}
-      }
-    }
-    
-    if (activeUser) {
-      const uid = activeUser._id || activeUser.id || '';
-      setCurrentUserId(String(uid));
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
 
   // Load Conversations
   useEffect(() => {
-    loadConversations();
-  }, [currentUserId, sellerIdParam, listingIdParam]);
+    let ignore = false;
+    async function load() {
+      if (!currentUserId) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      let convs = await fetchConversations(currentUserId);
+      if (ignore) return;
 
-  const loadConversations = async () => {
-    if (!currentUserId) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    let convs = await fetchConversations(currentUserId);
-    
-    const sessionActiveConvId = sessionStorage.getItem('activeConvId');
-    const sessionActiveConvDataStr = sessionStorage.getItem('activeConvData');
-    
-    if (sessionActiveConvId) {
-      let existingConv = convs.find(c => String(c._id) === String(sessionActiveConvId));
-      
-      if (!existingConv && sessionActiveConvDataStr) {
+      const sessionActiveConvId = typeof window !== 'undefined' ? sessionStorage.getItem('activeConvId') : null;
+      const sessionActiveConvDataStr = typeof window !== 'undefined' ? sessionStorage.getItem('activeConvData') : null;
+
+      if (sessionActiveConvId) {
+        let existingConv = convs.find(c => String(c._id) === String(sessionActiveConvId));
+
+        if (!existingConv && sessionActiveConvDataStr) {
+          try {
+            const parsedData = JSON.parse(sessionActiveConvDataStr);
+            if (parsedData._id) {
+              existingConv = parsedData;
+              convs = [existingConv, ...convs];
+            }
+          } catch {}
+        }
+
+        if (existingConv) {
+          setActiveConv(existingConv);
+        } else if (convs && convs.length > 0) {
+          setActiveConv(convs[0]);
+        }
         try {
-          const parsedData = JSON.parse(sessionActiveConvDataStr);
-          if (parsedData._id) {
-            existingConv = parsedData;
+          sessionStorage.removeItem('activeConvId');
+          sessionStorage.removeItem('activeConvData');
+        } catch {}
+      } else if (listingIdParam) {
+        let existingConv = convs.find(c => String(c.listingId?._id || c.listingId) === String(listingIdParam));
+        if (!existingConv) {
+          const initRes = await getOrCreateConversation(currentUserId, listingIdParam);
+          if (initRes.success && initRes.data) {
+            existingConv = initRes.data;
             convs = [existingConv, ...convs];
           }
-        } catch(e) {}
+        }
+        if (existingConv) {
+          setActiveConv(existingConv);
+        }
+      } else if (convs && convs.length > 0) {
+        setActiveConv(prev => prev || convs[0]);
       }
 
-      if (existingConv) {
-        setActiveConv(existingConv);
-      } else if (convs && convs.length > 0) {
-        setActiveConv(convs[0]);
-      }
-      sessionStorage.removeItem('activeConvId');
-      sessionStorage.removeItem('activeConvData');
-    } else if (listingIdParam) {
-      let existingConv = convs.find(c => String(c.listingId?._id || c.listingId) === String(listingIdParam));
-      if (!existingConv) {
-        const initRes = await getOrCreateConversation(currentUserId, listingIdParam);
-        if (initRes.success && initRes.data) {
-          existingConv = initRes.data;
-          convs = [existingConv, ...convs];
-        }
-      }
-      if (existingConv) {
-        setActiveConv(existingConv);
-      }
-    } else if (convs && convs.length > 0 && !activeConv) {
-      setActiveConv(convs[0]);
+      setConversations(convs);
+      setLoading(false);
     }
-    
-    setConversations(convs);
-    setLoading(false);
-  };
+    load();
+    return () => { ignore = true; };
+  }, [currentUserId, listingIdParam]);
 
   // Load Messages when Active Conversation changes & setup Socket
   useEffect(() => {
@@ -162,12 +174,6 @@ export default function MarketplaceChatPage() {
       };
     }
   }, [activeConv?._id]);
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -276,11 +282,11 @@ export default function MarketplaceChatPage() {
                       }`}
                     >
                       <div className="relative w-11 h-11 rounded-md bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
-                        <img
+                        <Image
                           src={getImageUrl(coverImg)}
                           alt={listing.title || 'Listing'}
                           className="w-full h-full object-cover"
-                        />
+                         width={500} height={300} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
@@ -309,11 +315,11 @@ export default function MarketplaceChatPage() {
                 <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-xs">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-md bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
-                      <img
+                      <Image
                         src={getImageUrl(activeConv.listingId?.coverImage || activeConv.listingId?.images?.[0])}
                         alt="Listing"
                         className="w-full h-full object-cover"
-                      />
+                       width={500} height={300} />
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">

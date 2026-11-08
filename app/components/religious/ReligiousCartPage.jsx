@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, ShoppingCart, Loader2, Info, Flame, Sparkles, CheckCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Trash2, ShoppingCart, Loader2, Flame, CheckCircle, ShieldCheck } from 'lucide-react';
 import { useServiceCart } from '@/context/ServiceCartContext';
 
 export function ReligiousCartPage({
@@ -125,11 +126,11 @@ export function ReligiousCartPage({
                                         <div className="flex gap-6 items-start">
                                             {/* Image - Compact */}
                                             <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 border border-orange-50 shadow-sm group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={item.itemImage ? `https://api.doorstephub.com/${item.itemImage}` : `https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg`}
                                                     alt={item.itemName}
                                                     className="w-full h-full object-cover"
-                                                />
+                                                 width={500} height={300} />
                                             </div>
 
                                             {/* Service Info */}
@@ -156,7 +157,7 @@ export function ReligiousCartPage({
 
                                                 {item.description && (
                                                     <p className="text-gray-400 text-xs mb-4 line-clamp-1 italic leading-relaxed font-serif">
-                                                        "{item.description}"
+                                                        &quot;{item.description}&quot;
                                                     </p>
                                                 )}
 

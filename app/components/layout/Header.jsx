@@ -4,13 +4,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Search, User, ShoppingCart, ChevronRight } from 'lucide-react';
+import { Menu, X, User, ChevronRight, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LocationBar } from '../location/LocationBar';
 import { AuthModal } from '../auth/AuthModal';
 import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
-import { useServiceCart } from '@/context/ServiceCartContext';
+
+
 import { getStoredProviderSession } from '@/lib/providerAuthApi';
 import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 
@@ -21,12 +21,12 @@ export function Header({ theme = {}, navItems = [] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
-  const { cartItems: productCartItems } = useCart();
-  const { cartItems: serviceCartItems } = useServiceCart();
+  
+  
   const { policy: sharedGlobalPolicy } = useGlobalSettings() || {};
   const [activeDropdown, setActiveDropdown] = useState(null);
 
-  const cartItemsCount = (productCartItems?.length || 0) + (serviceCartItems?.length || 0);
+  
 
   // Default theme aligned with appliance service green palette
   const defaultTheme = {
@@ -63,8 +63,13 @@ export function Header({ theme = {}, navItems = [] }) {
     spa: 'spa-salon',
     pg: 'pghostels'
   });
-  const [showHomeScreen, setShowHomeScreen] = useState(false);
-  const [globalSettings, setGlobalSettings] = useState(null);
+  
+  const [globalSettings, setGlobalSettings] = useState(() => sharedGlobalPolicy || null);
+  const [prevSharedPolicy, setPrevSharedPolicy] = useState(sharedGlobalPolicy);
+  if (sharedGlobalPolicy && prevSharedPolicy !== sharedGlobalPolicy) {
+    setPrevSharedPolicy(sharedGlobalPolicy);
+    setGlobalSettings(sharedGlobalPolicy);
+  }
 
   // Fetch Slugs and Services for Navigation
   useEffect(() => {
@@ -77,14 +82,7 @@ export function Header({ theme = {}, navItems = [] }) {
           if (data.success && data.data?.home) {
             setServiceSlugs(prev => ({ ...prev, appliances: data.data.home }));
           }
-        } catch (e) { /* use default slug */ }
-
-        // 3. Fetch Screen Settings
-        const screenSettingsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/applience-repairs-website/get-website-screen-settings`);
-        const screenSettingsData = await screenSettingsResponse.json();
-        if (screenSettingsData.success && screenSettingsData.data?.homescreen) {
-          setShowHomeScreen(true);
-        }
+        } catch { /* use default slug */ }
 
         // 4. Global settings — reuse shared context when available
         if (sharedGlobalPolicy) {
@@ -154,9 +152,6 @@ export function Header({ theme = {}, navItems = [] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (sharedGlobalPolicy) setGlobalSettings(sharedGlobalPolicy);
-  }, [sharedGlobalPolicy]);
   const handleServiceClick = (item) => {
     let serviceData = null;
 
@@ -187,23 +182,7 @@ export function Header({ theme = {}, navItems = [] }) {
   };
 
   // Default Navigation (Landing Page) - Moved inside to be dynamic
-  const defaultNavItems = [
-    // { name: 'Appliance Services', href: `/${serviceSlugs.appliances}` },
-    ...(showHomeScreen ? [
-      { name: 'Religious Services', href: `/${serviceSlugs.religious}` },
-      { name: 'Spa Saloon', href: `/${serviceSlugs.spa}` },
-      { name: 'PG Hostels', href: `/${serviceSlugs.pg}` },
-    ] : []),
-    /*
-    {
-      name: 'More',
-      dropdown: [
-        { name: 'Become a Partner', href: '/partner' },
-        { name: 'Share Ride', href: '#share-ride' }
-      ]
-    }
-    */
-  ];
+  
 
   const isComingSoonNavItem = (item) => {
     return Boolean(item?.comingSoon);
@@ -213,13 +192,12 @@ export function Header({ theme = {}, navItems = [] }) {
   const isLandingPage = pathname === '/';
   const isHeaderSolid = isScrolled || !isLandingPage;
 
-  const rawMenuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : []);
-
   const menuItems = useMemo(() => {
+    const rawMenuItems = navItems.length > 0 ? navItems : (apiNavItems.length > 0 ? apiNavItems : []);
     const items = rawMenuItems
       .filter((item) => {
         const name = (item.name || '').toLowerCase();
-        const href = (item.href || '').toLowerCase();
+        
         // Keep only Become A Partner and App Download (hide faqs, careers, help center, contact us, services links, etc. on all pages)
         const isBecomePartner =
           name.includes('become a partner') ||
@@ -228,13 +206,13 @@ export function Header({ theme = {}, navItems = [] }) {
           name.includes('app download') ||
           name.includes('download app') ||
           name.includes('join us') ||
-          href === '/app';
+          (item.href || item.path) === '/app';
 
         return isBecomePartner || isAppDownload;
       })
       .map((item) => {
         const name = (item.name || '').toLowerCase();
-        const href = (item.href || '').toLowerCase();
+        
         const isBecomePartner =
           name.includes('become a partner') ||
           name.includes('become partner');
@@ -283,7 +261,7 @@ export function Header({ theme = {}, navItems = [] }) {
     }
 
     return result;
-  }, [rawMenuItems]);
+  }, [navItems, apiNavItems]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -304,7 +282,7 @@ export function Header({ theme = {}, navItems = [] }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isServicePage = pathname?.includes('/services') ||
+  //
     pathname?.includes('/listings') ||
     Object.values(serviceSlugs).some(slug => pathname?.includes(slug));
 
@@ -467,6 +445,17 @@ export function Header({ theme = {}, navItems = [] }) {
                 )}
               </motion.button> */}
 
+              {/* Notification Center Bell */}
+              <Link
+                href="/notifications"
+                title="Notifications"
+                aria-label="View notifications"
+                className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full ${currentTheme.buttonBg} hover:bg-[#037166]/10 border ${currentTheme.border} transition-all shadow-sm hover:shadow-md text-gray-700`}
+              >
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 hover:text-[#037166] transition-colors" />
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+              </Link>
+
               {/* Auth Button with Profile Indicator */}
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -497,11 +486,12 @@ export function Header({ theme = {}, navItems = [] }) {
                 className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full ${currentTheme.buttonBg} ${currentTheme.textHover ? `hover:bg-[${currentTheme.textHover.replace('text-', '').replace('[', '').replace(']', '')}]/10` : 'hover:bg-[#037166]/10'} border ${currentTheme.border} transition-all overflow-hidden shadow-md hover:shadow-lg`}
               >
                 {isAuthenticated && user?.image ? (
-                  <img loading="lazy" decoding="async"
+                  <Image
                     src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                     alt={user.name || 'User'}
+                    unoptimized
                     className="w-full h-full object-cover rounded-full"
-                  />
+                   width={400} height={400} />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#037166] to-[#04a99d] flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />

@@ -1,41 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, Search, Loader2, MapPin, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Search, Loader2, MapPin } from 'lucide-react';
 import { fetchAllBrands, fetchCities, fetchCategories } from '@/lib/api';
 
-function StepBar({ step }) {
-  const steps = ['Category', 'Brand', 'Service'];
-  return (
-    <div className="flex items-center gap-0 mb-10">
-      {steps.map((label, i) => {
-        const idx = i + 1;
-        const done = step > idx;
-        const active = step === idx;
-        return (
-          <React.Fragment key={label}>
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300 ${
-                done ? 'bg-[#037166] border-[#037166] text-white' :
-                active ? 'bg-white border-[#037166] text-[#037166]' :
-                'bg-white border-gray-200 text-gray-300'
-              }`}>
-                {done ? <CheckCircle2 size={18} /> : idx}
-              </div>
-              <span className={`text-xs font-black uppercase tracking-widest hidden sm:block transition-colors ${
-                active ? 'text-[#037166]' : done ? 'text-[#037166]/70' : 'text-gray-300'
-              }`}>{label}</span>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={`flex-1 mx-4 h-0.5 transition-all duration-300 ${done ? 'bg-[#037166]' : 'bg-gray-100'}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-}
+
 
 function BrandPageContent() {
   const router = useRouter();
@@ -176,11 +147,11 @@ function BrandPageContent() {
                 >
                   <div className="h-28 flex items-center justify-center overflow-hidden p-2">
                     {logo ? (
-                      <img loading="lazy" decoding="async"
+                      <Image
                         src={logo.startsWith('http') ? logo : `https://api.doorstephub.com/${logo}`}
                         alt={brand.name}
                         className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
-                      />
+                       width={500} height={300} />
                     ) : (
                       <div className="text-xl font-black text-gray-200">{(brand.name || brand)?.[0]?.toUpperCase()}</div>
                     )}

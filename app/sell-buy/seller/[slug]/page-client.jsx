@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
 import { ListingCard } from '@/components/sell-buy/cards/ListingCard';
-import { ShieldCheck, MapPin, Calendar, Box, Star, Phone, MessageSquare } from 'lucide-react';
+import { ShieldCheck, MapPin, Calendar, Box, Star, MessageSquare } from 'lucide-react';
 
 export default function SellerProfileClient({ params }) {
   const { slug } = params;
@@ -130,7 +130,7 @@ export default function SellerProfileClient({ params }) {
                   )}
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-4 h-4 text-slate-400" />
-                    <span>Member since {new Date(seller.createdAt || Date.now()).getFullYear()}</span>
+                    <span>Member since {seller.createdAt ? new Date(seller.createdAt).getFullYear() : '2025'}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-amber-500 fill-amber-500" />

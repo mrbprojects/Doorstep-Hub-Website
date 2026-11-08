@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, User } from 'lucide-react';
 import { LocationBar } from '@/components/location/LocationBar';
@@ -28,7 +29,7 @@ export function PGHostelNavbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const { user, isAuthenticated } = useAuth();
-    const router = useRouter();
+    
 
     useEffect(() => {
         const handleScroll = () => {
@@ -120,11 +121,11 @@ export function PGHostelNavbar() {
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-[#037166]/10 hover:text-[#037166] transition-all overflow-hidden border border-transparent hover:border-[#037166]/20"
                         >
                             {isAuthenticated && user?.image ? (
-                                <img loading="lazy" decoding="async"
+                                <Image
                                     src={user.image?.startsWith('http') ? user.image : `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${user.image}`}
                                     alt={user.name}
                                     className="w-full h-full object-cover rounded-full"
-                                />
+                                 width={400} height={400} />
                             ) : (
                                 <User className="w-5 h-5 text-gray-600" />
                             )}

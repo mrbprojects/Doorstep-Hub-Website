@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { Hero } from '@/components/appliances/Hero';
 import { TopCategories } from '@/components/appliances/TopCategories';
@@ -10,8 +9,8 @@ import { FeaturedServices } from '@/components/appliances/FeaturedServices';
 import { RecentlyBooked } from '@/components/appliances/RecentlyBooked';
 import { PromoBanner } from '@/components/appliances/PromoBanner';
 import { DownloadApp } from '@/components/appliances/DownloadApp';
-import { NearbyServiceCenters as NearbyStores } from '@/components/appliances/NearbyStores';
-import { PopularCenters } from '@/components/appliances/PopularCenters';
+
+
 import { KnowledgeSpace } from '@/components/appliances/KnowledgeSpace';
 import { Newsletter } from '@/components/appliances/Newsletter';
 import { Footer } from '@/components/layout/Footer';
@@ -31,10 +30,10 @@ import { Toaster } from 'sonner';
 
 import { useServiceCart } from '@/context/ServiceCartContext';
 
-export default function ServiceProviderFlow({ serviceType = null }) {
-  const router = useRouter();
-  const { cartItems, addToCart, removeFromCart } = useServiceCart();
-  const [scrollY, setScrollY] = useState(0);
+export default function ServiceProviderFlow() {
+  
+  const { cartItems, addToCart } = useServiceCart();
+  const [, setScrollY] = useState(0);
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -169,10 +168,7 @@ export default function ServiceProviderFlow({ serviceType = null }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleViewAllStores = () => {
-    // Navigate to the dedicated centers page
-    router.push('/appliances/centers');
-  };
+  
 
   const handleViewAllCategories = () => {
     setCurrentPage('viewAllCategories');

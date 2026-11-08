@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Wallet, Truck, Info, Shield, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle, Sparkles, CreditCard, Wallet, Info, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
@@ -13,6 +13,84 @@ import { generateIdempotencyKey, formatDateTimeWithTimezone, validatePrice } fro
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { useAmcEligibility } from '@/hooks/useAmcEligibility';
 import { AmcCoverageBanner } from '@/components/amc/AmcCoverageBanner';
+import { useMounted } from '@/hooks/useMounted';
+
+// Service window: 9 AM to 9 PM (9:00 to 21:00)
+const SERVICE_END_HOUR = 21;
+const BUFFER_HOURS = 3;
+
+// Smart date availability logic
+const getAvailableDates = () => {
+  const now = new Date();
+  const dates = [];
+
+  // Check cutoff time (6 PM) for today
+  const todayCutoff = new Date();
+  todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0); // 18:00 (6 PM)
+
+  // Determine starting day index (0 = Today, 1 = Tomorrow)
+  const startDayIndex = (now > todayCutoff) ? 1 : 0; // If past 6 PM, start from tomorrow
+
+  // Generate 7 days of availability
+  for (let i = 0; i < 7; i++) {
+    const offset = startDayIndex + i;
+    const date = new Date();
+    date.setDate(now.getDate() + offset);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const value = `${yyyy}-${mm}-${dd}`;
+
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    const dayLabel = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : dayName;
+    const dateLabel = monthDay;
+    const fullLabel = offset === 0 ? `Today, ${monthDay}` : offset === 1 ? `Tomorrow, ${monthDay}` : `${dayName}, ${monthDay}`;
+
+    dates.push({
+      value,
+      dayLabel,
+      dateLabel,
+      label: fullLabel,
+    });
+  }
+  return dates;
+};
+
+// Smart time slot availability based on selected date
+const getAvailableTimes = (selectedDateValue) => {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  // Time slots (2-hour windows)
+  const allTimeSlots = [
+    { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9, endHour: 11 },
+    { label: '11:00 AM - 01:00 PM', value: '11:00', startHour: 11, endHour: 13 },
+    { label: '01:00 PM - 03:00 PM', value: '13:00', startHour: 13, endHour: 15 },
+    { label: '03:00 PM - 05:00 PM', value: '15:00', startHour: 15, endHour: 17 },
+    { label: '05:00 PM - 07:00 PM', value: '17:00', startHour: 17, endHour: 19 },
+    { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19, endHour: 21 },
+  ];
+
+  // If today and past cutoff time, filter available slots
+  if (selectedDateValue === todayStr) {
+    const currentHour = now.getHours();
+    const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS; // 6 PM cutoff
+
+    if (currentHour >= cutoffHour) {
+      return []; // No slots available today
+    }
+
+    return allTimeSlots.filter(slot => slot.startHour >= currentHour + BUFFER_HOURS);
+  }
+
+  return allTimeSlots;
+};
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 
 function normalizeCityString(cityName) {
@@ -54,26 +132,45 @@ export function BookingConfirmationPage({
   onConfirmBooking,
 }) {
   const router = useRouter();
-  const { user, token, isAuthenticated } = useAuth();
-  const { cartItems: contextCartItems, cartTotal: contextCartTotal, clearCart } = useCart();
-  const [selectedDate, setSelectedDate] = useState('');
+  const { token, isAuthenticated } = useAuth();
+  const { cartItems: contextCartItems, clearCart } = useCart();
+  const mounted = useMounted();
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const dates = getAvailableDates();
+    if (dates.length > 0) {
+      const todayValue = dates[0].value;
+      const todayTimes = getAvailableTimes(todayValue);
+      if (todayTimes.length > 0) return todayValue;
+      if (dates.length > 1) return dates[1].value;
+    }
+    return '';
+  });
   const [selectedTime, setSelectedTime] = useState('');
+  const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
+  if (selectedDate !== prevSelectedDate) {
+    setPrevSelectedDate(selectedDate);
+    setSelectedTime('');
+  }
   const [technicianPreference, setTechnicianPreference] = useState('any');
   const [isConfirming, setIsConfirming] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('online');
-  const [directBookingItems, setDirectBookingItems] = useState(null);
+  const [directBookingItems] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('booking_package_details');
+      if (stored) {
+        const items = JSON.parse(stored);
+        return Array.isArray(items) ? items : [items];
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  });
   const [walletBalance, setWalletBalance] = useState(0);
-  const [walletData, setWalletData] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
+  const [, setWalletData] = useState(null);
   const [locationMismatch, setLocationMismatch] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | 'pending' | null
-  const [verifyingPayment, setVerifyingPayment] = useState(false);
-  const [verificationError, setVerificationError] = useState(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Race condition protection
   const [isProcessing, setIsProcessing] = useState(false);
@@ -111,18 +208,13 @@ export function BookingConfirmationPage({
     }
 
     if (!token || !isAuthenticated) {
-      setVerificationError('Please sign in to verify your payment status.');
       return;
     }
-
-    setVerifyingPayment(true);
-    setVerificationError(null);
 
     try {
       const verification = await verifyBookingPaymentStatus(token, { orderId: orderRef, txnid: txnRef });
 
       if (verification.isPaid) {
-        setPaymentStatus('success');
         clearCart();
         localStorage.removeItem('booking_package_details');
         localStorage.removeItem('last_service_id');
@@ -136,22 +228,12 @@ export function BookingConfirmationPage({
           });
         }
       } else if (verification.status === 'pending' || verification.status === 'payment_pending') {
-        setPaymentStatus('pending');
         toast.info('Payment is being confirmed by your bank. Please wait a moment or click recheck.');
       } else if (verification.status === 'failed' || verification.status === 'missed' || statusParam === 'failure' || statusParam === 'cancelled') {
-        setPaymentStatus('failure');
         toast.error('Payment was not completed by the bank. Your booking details are preserved — please try again.');
-      } else if (verification.status === 'unauthorized' || verification.status === 'not_found') {
-        setVerificationError('Unable to verify booking for this account. Please verify with Doorstep Hub support.');
-        setPaymentStatus('failure');
-      } else {
-        setVerificationError('Could not confirm payment status with server. Please click below to recheck.');
       }
     } catch (err) {
       console.error('[Payment] Verification error:', err);
-      setVerificationError('Network error during verification. Please click below to recheck.');
-    } finally {
-      setVerifyingPayment(false);
     }
   }, [token, isAuthenticated, clearCart, onConfirmBooking]);
 
@@ -185,22 +267,11 @@ export function BookingConfirmationPage({
     performPaymentVerification();
   }, [token, isAuthenticated, performPaymentVerification]);
 
-  React.useEffect(() => {
-    const stored = localStorage.getItem('booking_package_details');
-    if (stored) {
-      try {
-        const items = JSON.parse(stored);
-        setDirectBookingItems(Array.isArray(items) ? items : [items]);
-      } catch (e) {
-        console.error('Failed to parse direct booking items');
-      }
-    }
-  }, []);
-
-  const cartItems = (directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || []);
-  const subtotal = (directBookingItems && directBookingItems.length > 0)
-    ? directBookingItems.reduce((acc, item) => acc + (item.price || 0), 0)
-    : (contextCartTotal || 0);
+  const cartItems = useMemo(
+    () => ((directBookingItems && directBookingItems.length > 0) ? directBookingItems : (contextCartItems || [])),
+    [directBookingItems, contextCartItems]
+  );
+  
 
   const rawBookingCost = (directBookingItems && directBookingItems.length > 0)
     ? directBookingItems.reduce((acc, item) => acc + (item.bookingCost || 0), 0)
@@ -233,102 +304,18 @@ export function BookingConfirmationPage({
   const amcApplies = amcApplicable && paymentMethod === 'amc';
   const bookingCost = amcApplies ? 0 : rawBookingCost;
   const total = bookingCost;
-  const tax = 0;
 
-  useEffect(() => {
-    if (!amcApplicable && paymentMethod === 'amc') setPaymentMethod('online');
-  }, [amcApplicable, paymentMethod]);
+  const [prevAmcApplicable, setPrevAmcApplicable] = useState(amcApplicable);
+  if (prevAmcApplicable !== amcApplicable) {
+    setPrevAmcApplicable(amcApplicable);
+    if (!amcApplicable && paymentMethod === 'amc') {
+      setPaymentMethod('online');
+    }
+  }
 
   // Service window: 9 AM to 9 PM (9:00 to 21:00)
-  const SERVICE_START_HOUR = 9;
-  const SERVICE_END_HOUR = 21;
-  const BUFFER_HOURS = 3;
-
-  // Smart date availability logic
-  const getAvailableDates = () => {
-    const now = new Date();
-    const dates = [];
-
-    // Check cutoff time (6 PM) for today
-    const todayCutoff = new Date();
-    todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0); // 18:00 (6 PM)
-
-    // Determine starting day index (0 = Today, 1 = Tomorrow)
-    const startDayIndex = (now > todayCutoff) ? 1 : 0; // If past 6 PM, start from tomorrow
-
-    // Generate 7 days of availability
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() + startDayIndex + i);
-
-      // Calculate the actual offset for labeling
-      const actualOffset = startDayIndex + i;
-
-      dates.push({
-        value: date.toISOString().split('T')[0],
-        label: actualOffset === 0 ? 'Today' : actualOffset === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric'
-        }),
-      });
-    }
-    return dates;
-  };
-
-  // Smart time slot availability based on selected date
-  const getAvailableTimes = (selectedDateValue) => {
-    const now = new Date();
-    const selectedDate = new Date(selectedDateValue);
-
-    // Time slots (2-hour windows)
-    const allTimeSlots = [
-      { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9, endHour: 11 },
-      { label: '11:00 AM - 01:00 PM', value: '11:00', startHour: 11, endHour: 13 },
-      { label: '01:00 PM - 03:00 PM', value: '13:00', startHour: 13, endHour: 15 },
-      { label: '03:00 PM - 05:00 PM', value: '15:00', startHour: 15, endHour: 17 },
-      { label: '05:00 PM - 07:00 PM', value: '17:00', startHour: 17, endHour: 19 },
-      { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19, endHour: 21 },
-    ];
-
-    // If today and past cutoff time, filter available slots
-    if (selectedDate.toDateString() === now.toDateString()) {
-      const currentHour = now.getHours();
-      const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS; // 6 PM cutoff
-
-      if (currentHour >= cutoffHour) {
-        return []; // No slots available today
-      }
-
-      return allTimeSlots.filter(slot => slot.startHour > currentHour);
-    }
-
-    return allTimeSlots;
-  };
-
   const availableDates = mounted ? getAvailableDates() : [];
   const availableTimesForSelectedDate = mounted ? getAvailableTimes(selectedDate) : [];
-
-  // Set initial default date based on availability
-  useEffect(() => {
-    if (!mounted) return;
-    const dates = getAvailableDates();
-    if (dates.length > 0) {
-      const todayValue = dates[0].value;
-      const todayTimes = getAvailableTimes(todayValue);
-
-      if (todayTimes.length > 0) {
-        setSelectedDate(todayValue);
-      } else if (dates.length > 1) {
-        setSelectedDate(dates[1].value);
-      }
-    }
-  }, [mounted]);
-
-  // Reset time when date changes
-  useEffect(() => {
-    setSelectedTime('');
-  }, [selectedDate]);
 
   const handleConfirm = async () => {
     // Prevent duplicate clicks (race condition protection)
@@ -531,9 +518,12 @@ export function BookingConfirmationPage({
             orderId: data.bookingId || data.orderId || null,
             txnid: data.txnid || null
           }));
+          try {
+            sessionStorage.setItem('last_checkout_url', currentUrl || (window.location.pathname + window.location.search));
+          } catch {}
 
           const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
-          window.location.href = easebuzzUrl;
+          window.location.assign(easebuzzUrl);
         } else {
           if (data.code === 'LOCATION_MISMATCH') {
             setLocationMismatch({
@@ -977,7 +967,7 @@ export function BookingConfirmationPage({
               </motion.button>
 
               <p className="text-white/60 text-xs text-center mt-4">
-                You'll receive a confirmation email and SMS
+                You&apos;ll receive a confirmation email and SMS
               </p>
             </motion.div>
           </div>

@@ -35,7 +35,7 @@ function readStore() {
     try {
         const raw = fs.readFileSync(STORAGE_PATH, 'utf8');
         return JSON.parse(raw);
-    } catch (e) {
+    } catch {
         return { jobs: [], deduplicationMap: {} };
     }
 }

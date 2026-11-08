@@ -54,7 +54,7 @@ export function AdSenseUnit({
         (window.adsbygoogle = window.adsbygoogle || []).push({});
         isPushed.current = true;
       }
-    } catch (err) {
+    } catch {
       // Catch duplicate push in strict/dev mode
     }
   }, [isEligible, clientId, validSlot, isModalActive]);

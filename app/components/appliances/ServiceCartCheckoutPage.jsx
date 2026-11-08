@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, MapPin, Calendar, Clock, Info, CreditCard, Wallet, Truck, Sparkles, CheckCircle, User, Loader2, Plus, Minus, Home, Briefcase, ShieldCheck, Check, Banknote } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Sparkles, User, Loader2, Plus, Minus, Home, Briefcase, ShieldCheck, Check, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -12,6 +12,7 @@ import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'motion/react';
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
+import { useMounted } from '@/hooks/useMounted';
 
 function areCitiesMatching(cityA, cityB) {
     if (!cityA || !cityB) return true;
@@ -52,24 +53,27 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const [technicianPreference, setTechnicianPreference] = useState('any');
     const [walletBalance, setWalletBalance] = useState(0);
     const [walletData, setWalletData] = useState(null);
-    const [walletLoading, setWalletLoading] = useState(false);
     const [walletLimits, setWalletLimits] = useState({
         minWalletUsageOrderAmount: 0,
         maxWalletUsageOrderAmount: 0,
         minWalletUsageEnabled: false,
         maxWalletUsageEnabled: false,
     });
-    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+    const [, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
+    const [, setWalletLoading] = useState(false);
     const [fullAddress, setFullAddress] = useState(selectedAddress);
+    const [prevSelectedAddress, setPrevSelectedAddress] = useState(selectedAddress);
+    if (prevSelectedAddress !== selectedAddress) {
+        setPrevSelectedAddress(selectedAddress);
+        if (selectedAddress) {
+            setFullAddress(selectedAddress);
+        }
+    }
     const [locationMismatch, setLocationMismatch] = useState(null);
 
     const providerCity = cartData?.provider?.cityName;
     const userCity = fullAddress?.cityName || selectedAddress?.cityName;
     const isLocationMismatch = Boolean(providerCity && userCity && !areCitiesMatching(userCity, providerCity));
-
-    useEffect(() => {
-        if (selectedAddress) setFullAddress(selectedAddress);
-    }, [selectedAddress]);
 
     // Ensure 100% complete address details even if sessionStorage had a partial snapshot
     useEffect(() => {
@@ -203,14 +207,15 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     };
 
     // Check authentication on mount
-    useEffect(() => {
+    const [prevAuth, setPrevAuth] = useState(isAuthenticated);
+    if (prevAuth !== isAuthenticated) {
+        setPrevAuth(isAuthenticated);
         if (!authLoading && !isAuthenticated) {
             setShowAuthModal(true);
         }
-    }, [isAuthenticated, authLoading]);
+    }
 
     // Service window: 9 AM to 9 PM (9:00 to 21:00)
-    const SERVICE_START_HOUR = 9;
     const SERVICE_END_HOUR = 21;
     const BUFFER_HOURS = 3;
 
@@ -218,27 +223,36 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     const getAvailableDates = () => {
         const now = new Date();
         const dates = [];
-        let startDate = new Date(now);
 
         // Check if today is still available (current time + 3hr buffer < 9 PM)
         const todayCutoff = new Date();
         todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0); // 6 PM cutoff
 
-        if (now > todayCutoff) {
-            // Skip today, start from tomorrow
-            startDate.setDate(startDate.getDate() + 1);
-        }
+        // If current time is past cutoff (e.g. 6 PM onwards), today has no slots; start from tomorrow
+        const startOffset = now > todayCutoff ? 1 : 0;
 
-        for (let i = (now > todayCutoff ? 1 : 0); i < 7; i++) {
-            const date = new Date(startDate);
-            date.setDate(date.getDate() + i);
+        for (let i = 0; i < 7; i++) {
+            const offset = startOffset + i;
+            const date = new Date();
+            date.setDate(now.getDate() + offset);
+
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const value = `${yyyy}-${mm}-${dd}`;
+
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const dayLabel = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : dayName;
+            const dateLabel = monthDay;
+            const fullLabel = offset === 0 ? `Today, ${monthDay}` : offset === 1 ? `Tomorrow, ${monthDay}` : `${dayName}, ${monthDay}`;
+
             dates.push({
-                value: date.toISOString().split('T')[0],
-                label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric'
-                }),
+                value,
+                dayLabel,
+                dateLabel,
+                label: fullLabel,
             });
         }
         return dates;
@@ -247,7 +261,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
     // Smart time slot availability based on selected date
     const getAvailableTimes = (selectedDateValue) => {
         const now = new Date();
-        const selectedDate = new Date(selectedDateValue);
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
 
         // Time slots (2-hour windows)
         const allTimeSlots = [
@@ -260,7 +277,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
         ];
 
         // If today and past cutoff time, filter available slots
-        if (selectedDate.toDateString() === now.toDateString()) {
+        if (selectedDateValue === todayStr) {
             const currentHour = now.getHours();
             const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS; // 6 PM cutoff
 
@@ -268,19 +285,24 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 return []; // No slots available today
             }
 
-            return allTimeSlots.filter(slot => slot.startHour > currentHour);
+            return allTimeSlots.filter(slot => slot.startHour >= currentHour + BUFFER_HOURS);
         }
 
         return allTimeSlots;
     };
 
-    const availableDates = getAvailableDates();
-    const availableTimesForSelectedDate = getAvailableTimes(bookedDate);
+    const mounted = useMounted();
+    const availableDates = mounted ? getAvailableDates() : [];
+    const selectedBookedDate = bookedDate || (availableDates[0]?.value ?? '');
+    const availableTimesForSelectedDate = mounted ? getAvailableTimes(selectedBookedDate) : [];
+    const selectedBookedTime = bookedTime || (availableTimesForSelectedDate[0]?.value ?? '');
 
     // Reset time when date changes
-    useEffect(() => {
+    const [prevBookedDate, setPrevBookedDate] = useState(bookedDate);
+    if (prevBookedDate !== bookedDate) {
+        setPrevBookedDate(bookedDate);
         setBookedTime('');
-    }, [bookedDate]);
+    }
 
     const handleUpdateQuantity = async (item, delta) => {
         const newQuantity = (item.quantity || 1) + delta;
@@ -308,11 +330,11 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
             toast.error('Please select an address');
             return;
         }
-        if (!bookedDate) {
+        if (!selectedBookedDate) {
             toast.error('Please select a date');
             return;
         }
-        if (!bookedTime) {
+        if (!selectedBookedTime) {
             toast.error('Please select a time');
             return;
         }
@@ -344,11 +366,33 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
         setLoading(true);
 
-
         try {
             const endpoint = paymentMethod === 'ONLINE'
                 ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
                 : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
+
+            const currentCheckoutUrl = window.location.pathname + window.location.search;
+            try {
+                sessionStorage.setItem('last_checkout_url', currentCheckoutUrl);
+            } catch {}
+
+            const isProfessional = cartData?.providerType === 'professional' ||
+                cartData?.provider?.providerType === 'professional' ||
+                cartItems.some(i => i.providerType === 'professional');
+            const checkoutProviderType = isProfessional ? 'professional' : (cartData?.providerType || 'regular');
+
+            const payload = {
+                serviceAddressId: selectedAddress._id || selectedAddress.id,
+                bookedDate: selectedBookedDate,
+                bookedTime: selectedBookedTime,
+                paymentMethod,
+                paymentOption: 'FULL',
+                providerType: checkoutProviderType,
+                sourceOfLead: 'website',
+                returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
+                surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
+                furl: `${window.location.protocol}//${window.location.host}/services/payment-failed`
+            };
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -356,32 +400,24 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    serviceAddressId: selectedAddress._id,
-                    bookedDate,
-                    bookedTime,
-                    paymentMethod,
-                    sourceOfLead: 'website',
-                    returnUrl: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
-                    surl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=success`,
-                    furl: `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=cancelled`
-                })
+                body: JSON.stringify(payload)
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
             console.log('💳 Checkout Response:', data);
 
-            if (data.success) {
+            if (response.ok && data.success) {
                 if (paymentMethod === 'ONLINE' && data.access_key) {
                     // Save pending booking details to sessionStorage before redirect
                     // DO NOT clear cart here — data must survive the redirect
                     sessionStorage.setItem('pending_booking', JSON.stringify({
-                        bookedDate,
-                        bookedTime,
+                        bookedDate: selectedBookedDate,
+                        bookedTime: selectedBookedTime,
                         address: selectedAddress,
                         orderId: data.bookingId || data.orderId || null,
                         txnid: data.txnid || null
                     }));
+                    sessionStorage.setItem('last_checkout_url', currentCheckoutUrl);
 
                     // Redirect to Easebuzz payment gateway with access_key
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
@@ -513,7 +549,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         <p className="text-[11px] text-gray-500">Pick preferred appointment date and time</p>
                                     </div>
                                 </div>
-                                {bookedDate && bookedTime && (
+                                {selectedBookedDate && selectedBookedTime && (
                                     <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
                                         <Check className="w-3.5 h-3.5" /> Slot Picked
                                     </span>
@@ -530,22 +566,22 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 ) : (
                                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
                                         {availableDates.map((date) => {
-                                            const isSelected = bookedDate === date.value;
+                                            const isSelected = selectedBookedDate === date.value;
                                             return (
                                                 <button
                                                     key={date.value}
                                                     type="button"
                                                     onClick={() => setBookedDate(date.value)}
                                                     className={`px-2 py-2 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-0.5 border ${isSelected
-                                                            ? 'bg-gradient-to-br from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
-                                                            : 'bg-gray-50 hover:bg-white text-gray-700 hover:text-gray-900 border-gray-200 hover:border-[#037166]/50'
+                                                        ? 'bg-gradient-to-br from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
+                                                        : 'bg-gray-50 hover:bg-white text-gray-700 hover:text-gray-900 border-gray-200 hover:border-[#037166]/50'
                                                         }`}
                                                 >
                                                     <span className={`text-[11px] font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                                                        {date.label.split(' ')[0]}
+                                                        {date.dayLabel || (date.label ? date.label.split(',')[0] : '')}
                                                     </span>
-                                                    <span className={`text-[10px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
-                                                        {date.label.split(' ').slice(1).join(' ') || date.value.slice(5)}
+                                                    <span className={`text-[10px] font-medium ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                                                        {date.dateLabel || (date.label ? date.label.split(',')[1]?.trim() : date.value.slice(5))}
                                                     </span>
                                                 </button>
                                             );
@@ -560,7 +596,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider">
                                         Choose Time Slot
                                     </label>
-                                    {bookedTime && (
+                                    {selectedBookedTime && (
                                         <span className="text-[11px] text-[#037166] font-semibold">
                                             2-Hour Arrival Window
                                         </span>
@@ -569,20 +605,20 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
                                 {availableTimesForSelectedDate.length === 0 ? (
                                     <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 text-center text-xs text-gray-500">
-                                        {bookedDate ? 'No time slots available for this date. Please pick another date.' : 'Please select a date above to view available time slots'}
+                                        {selectedBookedDate ? 'No time slots available for this date. Please pick another date.' : 'Please select a date above to view available time slots'}
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                         {availableTimesForSelectedDate.map((time) => {
-                                            const isSelected = bookedTime === time.value;
+                                            const isSelected = selectedBookedTime === time.value;
                                             return (
                                                 <button
                                                     key={time.value}
                                                     type="button"
                                                     onClick={() => setBookedTime(time.value)}
                                                     className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border ${isSelected
-                                                            ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
-                                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#037166]/50'
+                                                        ? 'bg-gradient-to-r from-[#037166] to-[#04a99d] text-white border-[#037166] shadow-sm ring-2 ring-[#037166]/20'
+                                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-[#037166]/50'
                                                         }`}
                                                 >
                                                     <span className="flex items-center gap-1.5">
@@ -631,8 +667,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                             type="button"
                                             onClick={() => setTechnicianPreference(option.value)}
                                             className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${isSelected
-                                                    ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
-                                                    : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                                ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                                : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between">
@@ -679,8 +715,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     type="button"
                                     onClick={() => setPaymentMethod('ONLINE')}
                                     className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'ONLINE'
-                                            ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
-                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                        ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
@@ -709,8 +745,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     type="button"
                                     onClick={() => setPaymentMethod('COD')}
                                     className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'COD'
-                                            ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
-                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                        ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
@@ -744,8 +780,8 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                         setPaymentMethod('WALLET');
                                     }}
                                     className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'WALLET'
-                                            ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
-                                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                                        ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
+                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
@@ -1050,11 +1086,11 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                 </div>
 
                                 {/* Scheduled Slot Chip */}
-                                {bookedDate && bookedTime && (
+                                {selectedBookedDate && selectedBookedTime && (
                                     <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between">
                                         <span className="flex items-center gap-1.5 font-semibold">
                                             <Calendar className="w-3.5 h-3.5 text-emerald-700" />
-                                            {availableDates.find(d => d.value === bookedDate)?.label} • {availableTimesForSelectedDate.find(t => t.value === bookedTime)?.label}
+                                            {availableDates.find(d => d.value === selectedBookedDate)?.label} • {availableTimesForSelectedDate.find(t => t.value === selectedBookedTime)?.label}
                                         </span>
                                         <span className="text-[10px] font-bold uppercase bg-emerald-200/60 px-1.5 py-0.5 rounded text-emerald-800">Selected</span>
                                     </div>
@@ -1065,10 +1101,10 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     <button
                                         type="button"
                                         onClick={handleCheckout}
-                                        disabled={loading || !bookedDate || !bookedTime}
-                                        className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${loading || !bookedDate || !bookedTime
-                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                : 'bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#025a51] hover:to-[#038e83] text-white hover:shadow-md hover:shadow-[#037166]/20 active:scale-[0.99]'
+                                        disabled={loading || !selectedBookedDate || !selectedBookedTime}
+                                        className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 shadow-sm ${loading || !selectedBookedDate || !selectedBookedTime
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-[#037166] to-[#04a99d] hover:from-[#025a51] hover:to-[#038e83] text-white hover:shadow-md hover:shadow-[#037166]/20 active:scale-[0.99]'
                                             }`}
                                     >
                                         {loading ? (
@@ -1076,7 +1112,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                                 <Loader2 className="w-4 h-4 animate-spin" />
                                                 <span>Processing Booking...</span>
                                             </>
-                                        ) : !bookedDate || !bookedTime ? (
+                                        ) : !selectedBookedDate || !selectedBookedTime ? (
                                             <span>Select Date & Time Slot Above</span>
                                         ) : paymentMethod === 'COD' ? (
                                             <>

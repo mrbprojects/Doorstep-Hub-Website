@@ -321,7 +321,7 @@ export default function ContactUsClient({ initialSettings = null }) {
                             </h1>
 
                             <p className="text-slate-600 text-xs sm:text-sm lg:text-base leading-relaxed max-w-lg">
-                                Have a question, feedback, or need support? We're here to help. Reach out through any of the channels below and we'll get back to you promptly.
+                                Have a question, feedback, or need support? We&apos;re here to help. Reach out through any of the channels below and we&apos;ll get back to you promptly.
                             </p>
 
                             {/* Trust Points */}
@@ -545,10 +545,10 @@ export default function ContactUsClient({ initialSettings = null }) {
                                     <span>Support</span>
                                 </div>
                                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 tracking-tight">
-                                    We're Here to Help
+                                    We&apos;re Here to Help
                                 </h2>
                                 <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                                    Our team is available to assist you with any questions or concerns. Fill out the form and we'll respond as quickly as possible.
+                                    Our team is available to assist you with any questions or concerns. Fill out the form and we&apos;ll respond as quickly as possible.
                                 </p>
                             </div>
 

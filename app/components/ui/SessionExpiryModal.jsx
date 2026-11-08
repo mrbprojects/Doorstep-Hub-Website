@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { LogIn, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { isObjectId } from '@/utils/slugHelper';
-import { ArrowLeft, Home, CheckCircle, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Home, CheckCircle, Briefcase, MapPin, Plus, Check, Trash2, Edit2, Loader2, X, Navigation } from 'lucide-react';
 import { toast } from 'sonner';
 import { trackLeadEvent } from '@/lib/leadTracking';
 import { useAuth } from '@/context/AuthContext';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { locationManager } from '@/services/locationManager';
 import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
+import { useMounted } from '@/hooks/useMounted';
 
 function SpaAddressContent() {
     const router = useRouter();
@@ -26,7 +27,7 @@ function SpaAddressContent() {
     const packageId = searchParams.get('packageId');
     const addons = searchParams.get('addons');
 
-    const [mounted, setMounted] = useState(false);
+    const mounted = useMounted();
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -34,10 +35,6 @@ function SpaAddressContent() {
     const [editingAddress, setEditingAddress] = useState(null);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [locationMismatch, setLocationMismatch] = useState(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // GPS / Map state
     const [gpsLoading, setGpsLoading] = useState(false);
@@ -122,31 +119,36 @@ function SpaAddressContent() {
     }, [token, selectedAddress]);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchAddresses();
-        } else {
+        let isCancelled = false;
+        if (isAuthenticated && token) {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (isCancelled) return;
+                    if (data.success) {
+                        setAddresses(data.data || []);
+                        setSelectedAddress(prev => {
+                            if (!prev && data.data?.length > 0) {
+                                return data.data.find(a => a.defaultAddress) || data.data[0];
+                            }
+                            return prev;
+                        });
+                    }
+                })
+                .catch(() => {
+                    if (!isCancelled) toast.error('Failed to load addresses');
+                });
+        } else if (!isAuthenticated) {
             const timer = setTimeout(() => {
-                if (!isAuthenticated) setShowAuthModal(true);
+                setShowAuthModal(true);
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [isAuthenticated, fetchAddresses]);
-
-    // Auto-fill user details from profile if authenticated
-    useEffect(() => {
-        if (isAuthenticated && user && showAddForm && !editingAddress) {
-            setNewAddress(prev => {
-                const updates = {};
-                if (!prev.name) updates.name = user.name || '';
-                if (!prev.phone) updates.phone = user.mobile || user.phone || '';
-
-                if (Object.keys(updates).length > 0) {
-                    return { ...prev, ...updates };
-                }
-                return prev;
-            });
-        }
-    }, [isAuthenticated, user, showAddForm, editingAddress]);
+        return () => { isCancelled = true; };
+    }, [isAuthenticated, token]);
 
     // ── Auto-detect location ──────────────────────────────────────────
     const handleDetectLocation = () => {
@@ -256,7 +258,7 @@ function SpaAddressContent() {
             } else {
                 toast.error(data.message || 'Action failed');
             }
-        } catch (error) {
+        } catch {
             toast.error('Error processing address');
         } finally {
             setLoading(false);
@@ -276,7 +278,7 @@ function SpaAddressContent() {
                 fetchAddresses();
                 if (selectedAddress?._id === id) setSelectedAddress(null);
             }
-        } catch (e) { toast.error('Failed to delete'); }
+        } catch { toast.error('Failed to delete'); }
         finally { setLoading(false); }
     };
 
@@ -316,7 +318,7 @@ function SpaAddressContent() {
                         setLoading(false);
                         return;
                     }
-                } catch (e) {
+                } catch {
                     console.warn('Could not resolve provider slug during checkout, proceeding with slug');
                 }
             }
@@ -575,7 +577,7 @@ function SpaAddressContent() {
                         onClick={() => {
                             setEditingAddress(null);
                             setNewAddress({
-                                name: '', phone: '', type: 'Home', area: '', flat: '',
+                                name: user?.name || '', phone: user?.mobile || user?.phone || '', type: 'Home', area: '', flat: '',
                                 postalCode: '', addressLineOne: '', addressLineTwo: '',
                                 stateName: 'Telangana', cityName: 'Hyderabad', defaultAddress: false
                             });

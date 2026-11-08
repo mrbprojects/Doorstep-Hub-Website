@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, XCircle } from 'lucide-react';
@@ -12,20 +12,20 @@ function PaymentResultInner() {
   const slug = params.get('slug') || '';
   const success = status === 'success';
 
-  const [planName, setPlanName] = useState('');
-
-  useEffect(() => {
+  const [planName] = useState(() => {
+    if (typeof window === 'undefined') return '';
     try {
       const raw = sessionStorage.getItem('amc_pending_payment');
       if (raw) {
         const parsed = JSON.parse(raw);
-        setPlanName(parsed?.planName || '');
         sessionStorage.removeItem('amc_pending_payment');
+        return parsed?.planName || '';
       }
     } catch {
       /* ignore */
     }
-  }, []);
+    return '';
+  });
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-b from-[#eef8f6] via-white to-[#f8fafc]">

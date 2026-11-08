@@ -58,7 +58,7 @@ export default function Error({ error, reset }) {
                     </Button>
                     <Button
                         variant="ghost"
-                        onClick={() => (window.location.href = '/')}
+                        onClick={() => (window.location.href = window.location.origin)}
                         className="w-full text-gray-500 hover:text-gray-900"
                     >
                         Go to Home

@@ -5,11 +5,11 @@
  */
 
 import { getFullSitemapInventory } from './sitemapInventory.js';
-import { buildCanonicalUrl } from './canonicalManager.js';
+
 import { SITEMAP_CHUNK_SIZE } from './sitemapManager.js';
 
 const BASE_URL = 'https://doorstephub.com';
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.doorstephub.com/v1/dhubApi').replace(/\/$/, '');
+
 
 function normalizeImageUrl(url) {
     if (!url) return null;
@@ -47,7 +47,7 @@ export async function getCompleteImageInventory(providedInventory = null) {
 
         for (const page of pages) {
             const pageUrl = page.url;
-            const path = pageUrl.replace(BASE_URL, '') || '/';
+            
             const pageImages = [];
 
             // Preserve real uploaded media supplied by the page inventory. This is

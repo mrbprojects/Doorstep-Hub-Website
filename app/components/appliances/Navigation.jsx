@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
-import { Menu, X, ShoppingCart, User, AlertTriangle, AlertCircle, Wallet } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, Wallet } from 'lucide-react';
 import { LocationBar } from '@/components/location/LocationBar';
 
 export function Navigation() {
@@ -20,11 +20,19 @@ export function Navigation() {
   const cartItemsCount = (productCartItems?.length || 0) + (serviceCartItems?.length || 0);
   const isProfileIncomplete = user && (!user.name || !user.mobile);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeLink, setActiveLink] = useState('Home');
+  const activeLink = pathname === '/'
+    ? 'Home'
+    : pathname.includes('/appliances')
+    ? 'Popular Services'
+    : pathname.includes('/nearby')
+    ? 'Nearby Service Centers'
+    : pathname.includes('/selloldthings')
+    ? 'Sell Old Things'
+    : 'Home';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSettings, setGlobalSettings] = useState(null);
   const [walletBalance, setWalletBalance] = useState(0);
-  const [walletLoading, setWalletLoading] = useState(false);
+  const [, setWalletLoading] = useState(false);
 
   useEffect(() => {
     const fetchGlobalSettings = async () => {
@@ -69,12 +77,6 @@ export function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [user]);
 
-  useEffect(() => {
-    if (pathname === '/') setActiveLink('Home');
-    else if (pathname.includes('/appliances')) setActiveLink('Popular Services');
-    else if (pathname.includes('/nearby')) setActiveLink('Nearby Service Centers');
-    else if (pathname.includes('/selloldthings')) setActiveLink('Sell Old Things');
-  }, [pathname]);
 
   const links = [
     { name: 'Home', href: '/' },

@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 const BookingModal = dynamic(() => import('@/components/appliances/booking-flow/BookingModal').then(m => m.BookingModal), { ssr: false });
-import { ChevronLeft, Star, Clock, Shield, Award, ThumbsUp, ArrowRight, Loader2, Wrench, CheckCircle2, MapPin } from 'lucide-react';
+import { ChevronLeft, ArrowRight, Loader2, Wrench } from 'lucide-react';
 import { fetchCities, fetchCategories, fetchAllBrands } from '@/lib/api';
 import { parseBookNowCityFlatPath, parseNearbyBookNowPath } from '@/lib/applianceRepairSlugs';
 import { Header } from '@/components/layout/Header';
@@ -13,7 +14,7 @@ import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks
 import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
 import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
 import { API_BASE_URL, getImageUrl } from '@/config/env';
-import { motion } from 'motion/react';
+
 
 const appliancesTheme = {
   bgScrolled: 'bg-white/80',
@@ -187,7 +188,7 @@ function BookNowPageContent() {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
       <Wrench size={64} className="text-gray-100 mb-6" />
       <h1 className="text-2xl font-black text-gray-900 mb-2">Service Not Found</h1>
-      <p className="text-gray-500 mb-8 max-w-md">We couldn't find the service details for "{slug}".</p>
+      <p className="text-gray-500 mb-8 max-w-md">We couldn&apos;t find the service details for &quot;{slug}&quot;.</p>
       <button onClick={() => router.push('/appliances')} className="px-8 py-3 rounded-2xl bg-[#037166] text-white font-bold">Explore Other Services</button>
     </div>
   );
@@ -225,11 +226,11 @@ function BookNowPageContent() {
             >
               {service.image ? (
                 <div className="relative w-full z-10">
-                  <img loading="lazy" decoding="async" 
+                  <Image 
                     src={imageUrl} 
                     alt={service.serviceName} 
                     className="block w-full h-auto object-contain object-center"
-                  />
+                   width={500} height={300} />
                 </div>
               ) : (
                 <div className="aspect-[4/3] w-full flex items-center justify-center"><Wrench size={48} className="text-gray-200" /></div>

@@ -17,7 +17,7 @@ export default function FaqHeroIllustration() {
                 className="absolute top-1 sm:top-2 right-4 sm:right-6 z-20 flex flex-col items-center pointer-events-none"
             >
                 <span className="text-white text-xs sm:text-sm font-semibold tracking-wide drop-shadow-md font-sans italic" style={{ transform: 'rotate(-4deg)' }}>
-                    We're here to help!
+                    We&apos;re here to help!
                 </span>
                 {/* Curved Arrow Vector pointing down-left toward main bubble */}
                 <svg

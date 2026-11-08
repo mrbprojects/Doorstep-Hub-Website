@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
     X, ChevronRight, ChevronLeft, Check,
-    Flame, Users, Calendar, Clock, Sparkles, Star, Home as HomeIcon
+    Flame, Sparkles
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -20,35 +20,42 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
     const [subcategories, setSubcategories] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
 
-    useEffect(() => {
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+    if (prevIsOpen !== isOpen) {
+        setPrevIsOpen(isOpen);
         if (!isOpen) {
             setCurrentStep(0);
             setAnswers({});
             setSubcategories([]);
-        } else {
-            fetchCategories();
         }
-    }, [isOpen]);
+    }
 
-    const fetchCategories = async () => {
-        setLoadingData(true);
-        try {
+    useEffect(() => {
+        let isCancelled = false;
+        if (isOpen) {
             const RELIGIOUS_SERVICE_ID = '695250aa57bb211ca094e5fd';
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/professional-services-flow/public/categories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ serviceId: RELIGIOUS_SERVICE_ID })
-            });
-            const data = await response.json();
-            if (data.success && data.category) {
-                setCategories(data.category);
-            }
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-        } finally {
-            setLoadingData(false);
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (isCancelled) return;
+                    if (data.success && data.category) {
+                        setCategories(data.category);
+                    }
+                })
+                .catch(error => {
+                    if (isCancelled) return;
+                    console.error("Error fetching categories:", error);
+                })
+                .finally(() => {
+                    if (!isCancelled) setLoadingData(false);
+                });
         }
-    };
+        return () => { isCancelled = true; };
+    }, [isOpen]);
 
     const fetchSubcategories = async (categoryId) => {
         setLoadingData(true);
@@ -124,7 +131,7 @@ export function ReligiousQuestionnaireModal({ isOpen, onClose }) {
         // Use window.location.href for a foolproof redirect if router.push has issues in this context
         setTimeout(() => {
             console.log("🚀 Executing final redirect to:", targetUrl);
-            window.location.href = targetUrl;
+            router.push(targetUrl);
             onClose();
         }, 500);
     };

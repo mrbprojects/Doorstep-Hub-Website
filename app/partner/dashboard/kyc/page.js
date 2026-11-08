@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Loader2, RefreshCw, Save, Upload, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,7 +23,7 @@ function DocUpload({ label, name, preview, onChange }) {
             <label className={labelCls}>{label}</label>
             <label className="block border border-dashed border-[#123F4A] rounded-xl p-4 cursor-pointer hover:border-[#037166]/40 transition-all bg-gray-50">
                 {preview ? (
-                    <img src={preview} alt={label} className="w-full h-32 object-contain rounded-lg mb-2" />
+                    <Image src={preview} alt={label} className="w-full h-32 object-contain rounded-lg mb-2"  width={500} height={300} />
                 ) : (
                     <div className="flex flex-col items-center py-4 text-gray-400">
                         <Upload className="w-6 h-6 mb-2" />
@@ -52,7 +53,6 @@ export default function PartnerKycPage() {
                 checkKycStatus(token).catch(() => null),
                 getKyc(token).catch(() => null),
             ]);
-
             const status =
                 statusRes?.kyc_status ||
                 statusRes?.data?.kyc_status ||
@@ -77,8 +77,36 @@ export default function PartnerKycPage() {
     }, [token, profile]);
 
     useEffect(() => {
-        load();
-    }, [load]);
+        if (!token) return;
+        let active = true;
+        Promise.all([
+            checkKycStatus(token).catch(() => null),
+            getKyc(token).catch(() => null),
+        ]).then(([statusRes, kycRes]) => {
+            if (!active) return;
+            const status =
+                statusRes?.kyc_status ||
+                statusRes?.data?.kyc_status ||
+                profile?.kyc_status ||
+                'not_applied';
+            setKycStatus(status);
+
+            const data = kycRes?.result || kycRes?.data || kycRes || {};
+            setForm({
+                aadhar_number: data.aadhar_number || '',
+                pan_number: data.pan_number || '',
+            });
+            setPreviews({
+                aadhar_card_front: resolveProviderMediaUrl(data.aadhar_card_front),
+                aadhar_card_back: resolveProviderMediaUrl(data.aadhar_card_back),
+                pan_card_front: resolveProviderMediaUrl(data.pan_card_front),
+                pan_card_back: resolveProviderMediaUrl(data.pan_card_back),
+            });
+        }).finally(() => {
+            if (active) setLoading(false);
+        });
+        return () => { active = false; };
+    }, [token, profile]);
 
     const handleFile = (field) => (e) => {
         const file = e.target.files?.[0];

@@ -59,7 +59,7 @@ export function getImageUrl(path, fallback = DEFAULT_PLACEHOLDER_IMAGE) {
   return `${IMAGE_BASE_URL}/${encodedPath}`;
 }
 
-export default {
+const envConfig = {
   API_BASE_URL,
   IMAGE_BASE_URL,
   SITE_URL,
@@ -68,3 +68,5 @@ export default {
   DEFAULT_PLACEHOLDER_IMAGE,
   getImageUrl,
 };
+
+export default envConfig;

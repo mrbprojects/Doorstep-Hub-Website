@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Search, Filter, BookOpen, Clock, ArrowRight, User, TrendingUp } from 'lucide-react';
+
+import { Search, Clock, User, TrendingUp } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 export function KnowledgeListingPage({ initialArticles = [] }) {
-    const router = useRouter();
+    
     const [articles, setArticles] = useState(initialArticles);
     const [loading, setLoading] = useState(initialArticles.length === 0);
     const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +60,7 @@ export function KnowledgeListingPage({ initialArticles = [] }) {
         };
 
         fetchArticles();
-    }, []);
+    }, [initialArticles.length]);
 
     const filteredArticles = articles.filter(article => {
         const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

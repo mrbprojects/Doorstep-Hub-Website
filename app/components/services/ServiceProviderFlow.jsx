@@ -30,9 +30,9 @@ import { Toaster } from 'sonner';
 
 import { useCart } from '@/context/CartContext';
 
-export default function ServiceProviderFlow({ serviceType = null }) {
-  const { cartItems, addToCart, removeFromCart } = useCart();
-  const [scrollY, setScrollY] = useState(0);
+export default function ServiceProviderFlow() {
+  const { cartItems, addToCart } = useCart();
+  const [, setScrollY] = useState(0);
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);

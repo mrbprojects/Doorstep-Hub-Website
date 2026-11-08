@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowLeft, ChevronRight, Loader2, AlertCircle, Sparkles, Home } from 'lucide-react';
@@ -162,11 +163,11 @@ function PGSubcategoryContent() {
                                         <div className="relative mb-6 h-56 overflow-hidden rounded-[1.5rem] bg-[#eef3f2]">
                                             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/65 to-transparent" />
                                             {imageUrl ? (
-                                                <img loading="lazy" decoding="async"
+                                                <Image
                                                     src={imageUrl}
                                                     alt={sub.name}
                                                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                />
+                                                 width={500} height={300} />
                                             ) : (
                                                 <div className="flex h-full w-full items-center justify-center bg-[#eef3f2]">
                                                     <Home className="h-20 w-20 text-[#147469]/30" />

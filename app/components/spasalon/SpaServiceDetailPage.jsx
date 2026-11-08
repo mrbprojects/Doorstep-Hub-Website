@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import {
-    ArrowLeft, Star, DollarSign, Sparkles, MapPin, Check,
+    ArrowLeft, Star, Sparkles, MapPin, Check,
     Loader2, Flower, Scissors, ShieldCheck, Heart, Clock,
     ChevronRight, ChevronLeft, X
 } from 'lucide-react';
@@ -28,7 +29,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
     const params = useParams();
     const router = useRouter();
     const slugOrId = slugOverride || params.slug || params.id;
-    const searchParams = useSearchParams();
+    
 
     const [activeTab, setActiveTab] = useState('portfolio');
 
@@ -365,14 +366,12 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                 >
                     {/* CARD 1 — Banner Image */}
                     <div className="h-48 sm:h-56 lg:h-[220px] sm:col-span-2 lg:col-span-1 rounded-2xl overflow-hidden border border-[#6D1357]/20 shadow-xl">
-                        <img
+                        <Image
                             src={serviceData?.images?.[0] || ''}
                             alt={serviceData.name}
                             className="w-full h-full object-cover"
                             fetchPriority="high"
-                            loading="eager"
-                            decoding="sync"
-                        />
+                         width={500} height={300} />
                     </div>
 
                     {/* CARD 2 — Store Info */}
@@ -392,14 +391,14 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                 target="_blank" rel="noopener noreferrer"
                                 className="flex items-center justify-center w-24 sm:w-[140px] h-9 sm:h-[52px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40 overflow-hidden p-0.5"
                             >
-                                <img src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain" loading="lazy" decoding="async" />
+                                <Image src="/andriod1.png" alt="Google Play" className="h-full w-auto object-contain"  width={500} height={300} />
                             </a>
                             <a
                                 href={globalSettings?.customerIosAppLink || "https://apps.apple.com/in/app/doorstep-hub/id6475340236"}
                                 target="_blank" rel="noopener noreferrer"
                                 className="flex items-center justify-center w-24 sm:w-[140px] h-9 sm:h-[52px] rounded-3xl bg-[#DEF2EF] border border-[#9ecbc3]/40 overflow-hidden p-0.5"
                             >
-                                <img src="/apple2.png" alt="App Store" className="h-full w-auto object-contain" loading="lazy" decoding="async" />
+                                <Image src="/apple2.png" alt="App Store" className="h-full w-auto object-contain"  width={500} height={300} />
                             </a>
                         </div>
                     </div>
@@ -539,13 +538,11 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                                     {/* Thumbnail */}
                                                     <div className="w-28 sm:w-36 shrink-0 bg-gray-100 relative self-stretch min-h-[110px]">
                                                         {pkg.image ? (
-                                                            <img
+                                                            <Image
                                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${pkg.image[0]}`}
                                                                 alt={pkg.name}
                                                                 className="absolute inset-0 w-full h-full object-cover"
-                                                                loading="lazy"
-                                                                decoding="async"
-                                                            />
+                                                             width={500} height={300} />
                                                         ) : (
                                                             <div className="flex items-center justify-center h-full text-gray-300 min-h-[110px]">
                                                                 <Scissors className="w-8 h-8 opacity-20" />
@@ -756,7 +753,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                             onClick={() => setRateCardImageIndex(idx)}
                                             className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[#6D1357] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                         >
-                                            <img loading="lazy" decoding="async" src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} className="w-full h-full object-cover" alt="" />
+                                            <Image src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} className="w-full h-full object-cover" alt=""  width={500} height={300} />
                                         </button>
                                     ))}
                                 </div>

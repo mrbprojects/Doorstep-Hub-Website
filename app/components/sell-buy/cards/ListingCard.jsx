@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Heart } from 'lucide-react';
+import {  Heart } from 'lucide-react';
 import { getImageUrl } from '@/lib/sellBuyApi';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -35,7 +36,6 @@ export function ListingCard({ listing }) {
     image, coverImage, images, gallery_images,
     location, city,
     isFeatured, is_feature,
-    is_liked,
     created_at, createdAt,
   } = listing;
 
@@ -62,7 +62,7 @@ export function ListingCard({ listing }) {
     if (!activeUser && typeof window !== 'undefined') {
        const stored = localStorage.getItem('user_details') || localStorage.getItem('user');
        if (stored) {
-         try { activeUser = JSON.parse(stored); } catch(err) {}
+         try { activeUser = JSON.parse(stored); } catch {}
        }
     }
 
@@ -118,7 +118,7 @@ export function ListingCard({ listing }) {
           }
           localStorage.setItem('sell_buy_favorites', JSON.stringify(updatedFavs));
           window.dispatchEvent(new Event('favorites-updated'));
-        } catch (e) {}
+        } catch {}
 
         if (isFav) {
           toast.success('Added to wishlist');
@@ -157,7 +157,7 @@ export function ListingCard({ listing }) {
       {/* Image */}
       <div className="relative aspect-square w-full bg-gray-100 overflow-hidden z-10">
         {displayImage ? (
-          <img
+          <Image
             src={getImageUrl(displayImage)}
             alt={displayTitle}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -165,7 +165,7 @@ export function ListingCard({ listing }) {
               e.currentTarget.onerror = null;
               e.currentTarget.src = 'https://api.doorstephub.com/uploads/thumbn_ph_image/default_image.jpg';
             }}
-          />
+           width={500} height={300} />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
             <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

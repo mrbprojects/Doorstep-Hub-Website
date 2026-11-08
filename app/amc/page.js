@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { CheckCircle2, Shield, Sparkles } from 'lucide-react';
@@ -153,11 +154,11 @@ export default function AmcPlansPage() {
 
                 {/* Banner Image */}
                 <div className="w-full h-44 bg-slate-50 relative border-b border-[#cfe8e3] flex-shrink-0">
-                  <img
+                  <Image
                     src={getImageUrl(plan.image)}
                     alt={plan.name}
                     className="w-full h-full object-contain"
-                  />
+                   width={500} height={300} />
                 </div>
 
                 <div className="p-5 md:p-6 flex-grow flex flex-col">

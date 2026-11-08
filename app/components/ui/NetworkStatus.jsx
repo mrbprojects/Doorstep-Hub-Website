@@ -1,21 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useEffect } from 'react';
+
 import { WifiOff, Wifi } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function NetworkStatus() {
-    const [isOnline, setIsOnline] = useState(true);
-
     useEffect(() => {
-        // Initial check
-        if (typeof window !== 'undefined') {
-            setIsOnline(navigator.onLine);
-        }
-
         const handleOnline = () => {
-            setIsOnline(true);
             toast.success('Back online', {
                 icon: <Wifi className="w-4 h-4" />,
                 duration: 3000
@@ -23,7 +15,6 @@ export function NetworkStatus() {
         };
 
         const handleOffline = () => {
-            setIsOnline(false);
             toast.error('You are offline', {
                 icon: <WifiOff className="w-4 h-4" />,
                 duration: Infinity, // Keep until back online

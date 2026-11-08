@@ -109,8 +109,36 @@ export default function PartnerWalletPage() {
     }, [token]);
 
     useEffect(() => {
-        loadData();
-    }, [loadData]);
+        if (!token) return;
+        let activeMount = true;
+        Promise.all([
+            getProviderWalletDetails(token).catch(() => null),
+            getProviderWalletHistory(token).catch(() => null),
+        ]).then(([detailsRes, historyRes]) => {
+            if (!activeMount) return;
+            const profileData = detailsRes?.data || detailsRes || {};
+            setWalletData({
+                walletAmount: Number(profileData.walletAmount || profileData.wallet || 0),
+                walletId: profileData.walletId || '',
+            });
+
+            const histData = historyRes || {};
+            const creditList = Array.isArray(histData.creditTransactions) ? histData.creditTransactions : [];
+            const debitList = Array.isArray(histData.debitTransactions) ? histData.debitTransactions : [];
+
+            setCredits(creditList);
+            setDebits(debitList);
+        }).catch((err) => {
+            console.error('Failed to load wallet data:', err);
+            if (activeMount) toast.error('Unable to fetch latest wallet data');
+        }).finally(() => {
+            if (activeMount) {
+                setLoading(false);
+                setRefreshing(false);
+            }
+        });
+        return () => { activeMount = false; };
+    }, [token]);
 
     const handleCopy = (text, type = 'wallet') => {
         if (!text) return;

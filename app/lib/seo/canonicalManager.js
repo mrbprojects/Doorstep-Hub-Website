@@ -32,7 +32,7 @@ export function getCanonicalUrl(path = '') {
 
         // Return unified canonical target
         return `${BASE_URL}${cleanedPath}`;
-    } catch (e) {
+    } catch {
         return BASE_URL;
     }
 }

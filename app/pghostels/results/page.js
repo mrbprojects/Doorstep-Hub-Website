@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-    MapPin, Star, Search, Sliders, Heart, TrendingUp, X, Wifi, Utensils,
+    MapPin, Star, Search, Sliders, Heart, TrendingUp, Wifi, Utensils,
     Shirt, Zap, Award, Sparkles, ChevronRight, Check, ArrowLeft
 } from 'lucide-react';
 import { Input } from '@/components/pghostels/ui/input';
@@ -42,16 +42,16 @@ function PGResultsContent() {
     // State
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [, setError] = useState(null);
     const [savedItems, setSavedItems] = useState([]);
-    const [showNearby, setShowNearby] = useState(false);
-    const [error, setError] = useState(null);
+    const [showNearby] = useState(false);
 
     // Initial load
     useEffect(() => {
         if (!location) {
             detectWithIP().catch(err => console.log("Auto detect failed", err));
         }
-    }, [location]);
+    }, [location, detectWithIP]);
 
     // Fetch listings
     useEffect(() => {
@@ -71,7 +71,7 @@ function PGResultsContent() {
                         if (locationData?.lat) lat = locationData.lat;
                         if (locationData?.lng) lng = locationData.lng;
                     }
-                } catch (locErr) {
+                } catch {
                     console.warn('Could not read location from localStorage, using default');
                 }
 
@@ -133,7 +133,7 @@ function PGResultsContent() {
         };
 
         fetchListings();
-    }, [lookupId, location]); // Re-fetch when ID or location changes
+    }, [lookupId, location, budget, categoryId, categorySlug, duration, food, moveIn, roomType, subcategoryId, subcategorySlug]); // Re-fetch when ID or location changes
 
     const toggleSave = (id) => {
         setSavedItems(prev =>

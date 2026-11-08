@@ -1,26 +1,23 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import {
-    ArrowLeft, MapPin, Calendar, Clock, CreditCard, Wallet, Truck, Sparkles,
-    CheckCircle, User, Loader2, Info, Check, ShieldCheck, Phone, Home, Briefcase, ChevronRight, Banknote
+    ArrowLeft, MapPin, Calendar, Clock, CreditCard, Sparkles, User, Loader2, Info, Check, ShieldCheck, Home, Briefcase, ChevronRight, Banknote
 } from 'lucide-react';
 
 import { toast } from 'sonner';
 import { useServiceCart } from '@/context/ServiceCartContext';
 import { useAuth } from '@/context/AuthContext';
-import { Link } from 'next/link';
-// Assuming AuthModal is available globally or similar path
-// If not found, I will just omit it or use the standard one available
+import { useMounted } from '@/hooks/useMounted';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
 
 const clean = (v) => {
     if (!v) return null;
-    const s = String(v).trim();
+    let s = String(v).trim().replace(/^[\s,]+|[\s,]+$/g, '').trim();
     if (!s || s.toUpperCase() === 'N/A' || s === ',' || s === '-') return null;
     return s;
 };
@@ -28,20 +25,30 @@ const clean = (v) => {
 const formatFullAddress = (addr) => {
     if (!addr) return { street: '', cityState: '', postalCode: '', hasDetails: false };
 
-    const streetParts = [
+    const rawParts = [
         clean(addr.flat),
         clean(addr.area),
         clean(addr.addressLineOne),
         clean(addr.addressLineTwo)
     ].filter(Boolean);
 
-    const seen = new Set();
-    const uniqueStreet = streetParts.filter(part => {
-        const lower = part.toLowerCase();
-        if (seen.has(lower)) return false;
-        seen.add(lower);
-        return true;
-    });
+    // Deduplicate identical parts and parts already contained as substrings in longer parts
+    const filtered = [];
+    for (const part of rawParts) {
+        const lowerPart = part.toLowerCase();
+        const isDuplicateOrSubstring = filtered.some(existing => {
+            const lowerExisting = existing.toLowerCase();
+            return lowerExisting === lowerPart || lowerExisting.includes(lowerPart);
+        });
+        if (!isDuplicateOrSubstring) {
+            for (let i = filtered.length - 1; i >= 0; i--) {
+                if (lowerPart.includes(filtered[i].toLowerCase())) {
+                    filtered.splice(i, 1);
+                }
+            }
+            filtered.push(part);
+        }
+    }
 
     const cityParts = [
         clean(addr.cityName),
@@ -51,10 +58,10 @@ const formatFullAddress = (addr) => {
     const pin = clean(addr.postalCode);
 
     return {
-        street: uniqueStreet.join(', '),
+        street: filtered.join(', ').replace(/\s*,\s*,\s*/g, ', '),
         cityState: cityParts.join(', '),
         postalCode: pin,
-        hasDetails: uniqueStreet.length > 0 || cityParts.length > 0
+        hasDetails: filtered.length > 0 || cityParts.length > 0
     };
 };
 
@@ -71,7 +78,15 @@ export default function ReligiousConfirmPage() {
     const { token, isAuthenticated } = useAuth();
 
     // Address from session storage (selected in previous step - standardized key)
-    const [selectedAddress, setSelectedAddress] = useState(null);
+    const [selectedAddress, setSelectedAddress] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            const savedAddress = sessionStorage.getItem('religious_booking_address') || sessionStorage.getItem('selected_address');
+            return savedAddress ? JSON.parse(savedAddress) : null;
+        } catch {
+            return null;
+        }
+    });
 
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
@@ -79,29 +94,24 @@ export default function ReligiousConfirmPage() {
     const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failure' | null
-    const [mounted, setMounted] = useState(false);
+    const mounted = useMounted();
     const [locationMismatch, setLocationMismatch] = useState(null);
-
-    // Prevent hydration mismatch from new Date() during SSR
-    useEffect(() => { setMounted(true); }, []);
 
     // On mount: check if returning from Easebuzz payment gateway
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');
         if (status === 'success') {
-            setPaymentStatus('success');
             clearCart();
 
             let pendingBooking = {};
             try {
                 pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
-            } catch (e) {}
+            } catch {}
             if (!pendingBooking.bookedDate) {
                 try {
                     pendingBooking = JSON.parse(localStorage.getItem('religious_last_booking') || '{}');
-                } catch (e) {}
+                } catch {}
             }
 
             const orderId = urlParams.get('orderId') || pendingBooking.orderId || '';
@@ -115,7 +125,6 @@ export default function ReligiousConfirmPage() {
             toast.success('Payment successful! Booking confirmed.');
             router.push(`/religious-services/thank-you?orderId=${encodeURIComponent(orderId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`);
         } else if (status === 'failure' || status === 'cancelled' || status === 'cancel') {
-            setPaymentStatus('failure');
             toast.error('Payment was cancelled or could not be completed. You can try again or choose Pay After Service.');
             if (typeof window !== 'undefined') {
                 window.history.replaceState({}, '', window.location.pathname);
@@ -124,20 +133,11 @@ export default function ReligiousConfirmPage() {
     }, [clearCart, router]);
     const [technicianPreference, setTechnicianPreference] = useState('any');
 
-    // Load address - check session storage first, otherwise fetch default user address from API
+    // Load address - fetch default user address from API if not already in session storage
     useEffect(() => {
-        const savedAddress = sessionStorage.getItem('religious_booking_address') || sessionStorage.getItem('selected_address');
-        if (savedAddress) {
-            try {
-                setSelectedAddress(JSON.parse(savedAddress));
-                return;
-            } catch (e) {
-                console.error("Failed to parse saved address:", e);
-            }
-        }
-
-        // If no address in session storage, fetch user's saved default address
+        if (selectedAddress) return;
         if (token) {
+            let active = true;
             fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/app/useraddress/getuseraddress`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -145,15 +145,16 @@ export default function ReligiousConfirmPage() {
             })
             .then(res => res.json())
             .then(data => {
-                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                if (active && data.success && Array.isArray(data.data) && data.data.length > 0) {
                     const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
                     setSelectedAddress(defaultAddr);
                     sessionStorage.setItem('religious_booking_address', JSON.stringify(defaultAddr));
                 }
             })
             .catch(err => console.error("Error fetching default address:", err));
+            return () => { active = false; };
         }
-    }, [token]);
+    }, [token, selectedAddress]);
 
     // Check authentication on mount
     useEffect(() => {
@@ -166,7 +167,6 @@ export default function ReligiousConfirmPage() {
     }, [isAuthenticated]);
 
     // Service window: 9 AM to 9 PM (9:00 to 21:00)
-    const SERVICE_START_HOUR = 9;
     const SERVICE_END_HOUR = 21;
     const BUFFER_HOURS = 3;
 
@@ -174,27 +174,34 @@ export default function ReligiousConfirmPage() {
     const getAvailableDates = () => {
         const now = new Date();
         const dates = [];
-        let startDate = new Date(now);
 
         const todayCutoff = new Date();
         todayCutoff.setHours(SERVICE_END_HOUR - BUFFER_HOURS, 0, 0, 0);
 
-        if (now > todayCutoff) {
-            startDate.setDate(startDate.getDate() + 1);
-        }
+        const startOffset = now > todayCutoff ? 1 : 0;
 
-        for (let i = (now > todayCutoff ? 1 : 0); i < 7; i++) {
-            const date = new Date(startDate);
-            date.setDate(date.getDate() + i);
+        for (let i = 0; i < 7; i++) {
+            const offset = startOffset + i;
+            const date = new Date();
+            date.setDate(now.getDate() + offset);
+
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const value = `${yyyy}-${mm}-${dd}`;
+
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const dayLabel = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : dayName;
+            const dateLabel = monthDay;
+            const fullLabel = offset === 0 ? `Today, ${monthDay}` : offset === 1 ? `Tomorrow, ${monthDay}` : `${dayName}, ${monthDay}`;
+
             dates.push({
-                value: date.toISOString().split('T')[0],
-                dayLabel: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short' }),
-                dateLabel: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric'
-                }),
+                value,
+                dayLabel,
+                dateLabel,
+                label: fullLabel,
             });
         }
         return dates;
@@ -203,7 +210,10 @@ export default function ReligiousConfirmPage() {
     // Smart time slot availability (Exact match to PG)
     const getAvailableTimes = (selectedDateValue) => {
         const now = new Date();
-        const selectedDate = new Date(selectedDateValue);
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
 
         const allTimeSlots = [
             { label: '09:00 AM - 11:00 AM', value: '09:00', startHour: 9, endHour: 11 },
@@ -214,7 +224,7 @@ export default function ReligiousConfirmPage() {
             { label: '07:00 PM - 09:00 PM', value: '19:00', startHour: 19, endHour: 21 },
         ];
 
-        if (selectedDate.toDateString() === now.toDateString()) {
+        if (selectedDateValue === todayStr) {
             const currentHour = now.getHours();
             const cutoffHour = SERVICE_END_HOUR - BUFFER_HOURS;
 
@@ -222,7 +232,7 @@ export default function ReligiousConfirmPage() {
                 return [];
             }
 
-            return allTimeSlots.filter(slot => slot.startHour > currentHour);
+            return allTimeSlots.filter(slot => slot.startHour >= currentHour + BUFFER_HOURS);
         }
 
         return allTimeSlots;
@@ -237,16 +247,15 @@ export default function ReligiousConfirmPage() {
         return mounted ? getAvailableTimes(bookedDate) : [];
     }, [mounted, bookedDate]);
 
-    // Auto-select first available date
-    useEffect(() => {
-        if (!bookedDate && availableDates.length > 0) {
-            setBookedDate(availableDates[0].value);
-        }
-    }, [availableDates, bookedDate]);
-
-    useEffect(() => {
+    // Auto-select first available date & reset time when date changes
+    if (!bookedDate && availableDates.length > 0) {
+        setBookedDate(availableDates[0].value);
+    }
+    const [prevBookedDate, setPrevBookedDate] = useState(bookedDate);
+    if (prevBookedDate !== bookedDate) {
+        setPrevBookedDate(bookedDate);
         setBookedTime('');
-    }, [bookedDate]);
+    }
 
     const handleCheckout = async () => {
         if (!isAuthenticated) {
@@ -291,22 +300,38 @@ export default function ReligiousConfirmPage() {
         setLoading(true);
         try {
             let endpoint = '';
-            const currentCheckoutUrl = typeof window !== 'undefined'
-                ? `${window.location.protocol}//${window.location.host}${window.location.pathname}`
-                : '';
+            const origin = typeof window !== 'undefined'
+                ? `${window.location.protocol}//${window.location.host}`
+                : 'https://doorstephub.com';
+            const currentCheckoutPath = typeof window !== 'undefined' ? window.location.pathname : '/religious-services/booking/confirm';
+            const cleanBaseUrl = `${origin}${currentCheckoutPath}`;
+
+            try {
+                sessionStorage.setItem('last_checkout_url', currentCheckoutPath + (typeof window !== 'undefined' ? window.location.search : ''));
+            } catch {}
 
             let payload = {
-                serviceAddressId: selectedAddress._id,
+                serviceAddressId: selectedAddress._id || selectedAddress.id,
                 bookedDate,
                 bookedTime,
                 paymentMethod,
                 paymentOption,
-                ...(paymentOption === 'ADVANCE' ? { adv: true } : {}),
+                ...(paymentOption === 'ADVANCE' ? { adv: true } : { adv: false }),
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
-                returnUrl: currentCheckoutUrl,
-                surl: `${currentCheckoutUrl}?status=success&date=${encodeURIComponent(bookedDate)}&time=${encodeURIComponent(bookedTime)}`,
-                furl: `${currentCheckoutUrl}?status=cancelled`
+                returnUrl: cleanBaseUrl,
+                surl: `${cleanBaseUrl}?status=success`,
+                furl: `${origin}/services/payment-failed`,
+                udf1: String(selectedAddress._id || selectedAddress.id || '').slice(0, 50),
+                udf2: String(bookedDate || '').replace(/[^0-9-]/g, '').slice(0, 20),
+                udf3: String(bookedTime || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 20),
+                udf4: String(paymentOption || 'FULL').slice(0, 20),
+                udf5: String(checkoutProviderType || 'regular').slice(0, 20),
+                udf6: 'website',
+                udf7: 'doorstephub',
+                udf8: 'religious',
+                udf9: 'online',
+                udf10: 'none'
             };
 
             if (paymentMethod === 'ONLINE') {
@@ -347,8 +372,11 @@ export default function ReligiousConfirmPage() {
                     }
                     try {
                         localStorage.setItem('religious_last_booking', JSON.stringify(pendingData));
-                    } catch (e) {}
+                    } catch {}
 
+                    try {
+                        sessionStorage.setItem('last_checkout_url', currentCheckoutPath);
+                    } catch {}
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = easebuzzUrl;
@@ -613,20 +641,25 @@ export default function ReligiousConfirmPage() {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <p className="text-xs font-semibold text-gray-800 mb-0.5">
+                                                <p className="text-xs font-bold text-gray-900 mb-0.5">
                                                     {selectedAddress.name}
                                                     {selectedAddress.phone && (
-                                                        <span className="text-gray-500 font-normal"> • {selectedAddress.phone}</span>
+                                                        <span className="text-gray-700 font-semibold"> • {selectedAddress.phone}</span>
                                                     )}
                                                 </p>
                                                 {street && (
-                                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-1">
+                                                    <p className="text-xs sm:text-[13px] text-gray-800 font-medium leading-relaxed break-words mb-1.5">
                                                         {street}
                                                     </p>
                                                 )}
                                                 {(cityState || postalCode) && (
-                                                    <p className="text-[11px] text-gray-500 font-medium">
-                                                        {cityState} {postalCode ? `- ${postalCode}` : ''}
+                                                    <p className="text-xs text-gray-800 font-semibold flex items-center gap-1.5">
+                                                        <span>{cityState}</span>
+                                                        {postalCode && (
+                                                            <span className="font-bold bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 rounded text-[10px]">
+                                                                PIN: {postalCode}
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 )}
                                             </div>
@@ -760,6 +793,49 @@ export default function ReligiousConfirmPage() {
                                         {paymentMethod === 'COD' && <Check className="w-3 h-3 stroke-[3]" />}
                                     </div>
                                 </div>
+
+                                {/* Online Payment Option Selection */}
+                                {paymentMethod === 'ONLINE' && (
+                                    <div className="pt-3 border-t border-gray-100">
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                                            Online Payment Choice
+                                        </label>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => setPaymentOption('ADVANCE')}
+                                                className={`p-3 rounded-xl border text-left transition-all ${paymentOption === 'ADVANCE'
+                                                    ? 'border-[var(--saffron)] bg-amber-50/60 ring-1 ring-[var(--saffron)]/30'
+                                                    : 'border-gray-200 bg-white hover:bg-gray-50'}`}
+                                            >
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-xs font-bold text-gray-900">Pay Advance</span>
+                                                    {paymentOption === 'ADVANCE' && <Check className="w-4 h-4 text-[var(--saffron)]" />}
+                                                </div>
+                                                <p className="text-[11px] text-gray-500 mb-1.5">Platform advance fee to confirm booking</p>
+                                                <p className="text-base font-extrabold text-[var(--saffron)]">
+                                                    ₹{(cartData?.advPayment ?? 0).toFixed(2)}
+                                                </p>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setPaymentOption('FULL')}
+                                                className={`p-3 rounded-xl border text-left transition-all ${paymentOption === 'FULL'
+                                                    ? 'border-[var(--saffron)] bg-amber-50/60 ring-1 ring-[var(--saffron)]/30'
+                                                    : 'border-gray-200 bg-white hover:bg-gray-50'}`}
+                                            >
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-xs font-bold text-gray-900">Full Payment</span>
+                                                    {paymentOption === 'FULL' && <Check className="w-4 h-4 text-[var(--saffron)]" />}
+                                                </div>
+                                                <p className="text-[11px] text-gray-500 mb-1.5">Pay complete ritual amount upfront online</p>
+                                                <p className="text-base font-extrabold text-gray-900">
+                                                    ₹{(cartData?.finalAmount ?? 0).toFixed(2)}
+                                                </p>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     </div>

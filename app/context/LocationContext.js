@@ -7,7 +7,14 @@ import { LOCATION_CONFIG } from '@/config/locationConfig';
 const LocationContext = createContext(null);
 
 export function LocationProvider({ children }) {
-    const [location, setLocation] = useState(null);
+    const [location, setLocation] = useState(() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            return locationManager.getSavedLocation() || null;
+        } catch {
+            return null;
+        }
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isMapsLoaded, setIsMapsLoaded] = useState(false);
@@ -71,7 +78,7 @@ export function LocationProvider({ children }) {
                 const ipLocation = await locationManager.detectWithIP();
                 setLocation(ipLocation);
                 return ipLocation;
-            } catch (ipErr) {
+            } catch {
                 throw err;
             }
         } finally {
@@ -116,7 +123,6 @@ export function LocationProvider({ children }) {
             // First check if user already has a valid saved location
             const existingSaved = locationManager.getSavedLocation();
             if (existingSaved && existingSaved.city) {
-                setLocation(existingSaved);
                 return existingSaved;
             }
 
@@ -126,7 +132,7 @@ export function LocationProvider({ children }) {
                     if (perm.state === 'granted') {
                         return await detectWithGPS();
                     }
-                } catch (e) {
+                } catch {
                     // permissions.query not supported in all browsers
                 }
             }
@@ -173,13 +179,13 @@ export function LocationProvider({ children }) {
             window.addEventListener('google-maps-loaded', initMaps);
         }
 
-        // 2. Check localStorage first (instant, 0ms)
+        // 2. Check localStorage / detect
         const savedLocation = locationManager.getSavedLocation();
-        if (savedLocation) {
-            setLocation(savedLocation);
-        } else {
+        if (!savedLocation) {
             // Automatically detect location silently via IP/GPS
-            detectLocation();
+            Promise.resolve().then(() => {
+                detectLocation();
+            });
         }
 
         // 3. Listen to cross-component location updates

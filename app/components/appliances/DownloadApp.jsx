@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Smartphone, CheckCircle2 } from 'lucide-react';
 
@@ -81,7 +82,7 @@ export function DownloadApp() {
                 className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-11 bg-[#DEF2EF] rounded-full shadow-md hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                 title="Download on the App Store"
               >
-                <img src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
+                <Image src="/apple2.png" alt="App Store" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity"  width={500} height={300} />
               </a>
 
               <a
@@ -91,7 +92,7 @@ export function DownloadApp() {
                 className="flex items-center justify-center w-32 sm:w-36 h-10 sm:h-11 bg-[#DEF2EF] rounded-full shadow-md hover:shadow-xl transition-all hover:-translate-y-0.5 overflow-hidden border border-[#9ecbc3]"
                 title="Get it on Google Play"
               >
-                <img src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" loading="lazy" decoding="async" />
+                <Image src="/andriod1.png" alt="Google Play" className="h-full w-full object-cover brightness-0 invert opacity-90 hover:opacity-100 transition-opacity"  width={500} height={300} />
               </a>
             </div>
           </motion.div>
@@ -119,11 +120,11 @@ export function DownloadApp() {
               <div className="absolute inset-4 bg-gradient-to-t from-[#037166]/40 via-[#04a99d]/25 to-transparent blur-3xl" />
 
               {/* Real Doorstep Hub Customer App Mockup */}
-              <img
+              <Image
                 src="/apps/customer-app-mockup.png"
                 alt="Doorstep Hub Customer App"
                 className="relative z-10 w-full h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none"
-              />
+               width={500} height={300} />
             </motion.div>
           </motion.div>
         </div>

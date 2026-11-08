@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CityWiseCenters } from './CityWiseCenters';
-import { FranchiseSection } from './FranchiseSection';
 import { cities as mockCities } from './data';
 import { fetchCities } from '@/lib/api';
 import { getImageUrl } from '@/config/env';
@@ -14,7 +13,7 @@ export function ApplianceBookingFlow() {
   const [selectedCity, setSelectedCity] = useState(null);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -83,7 +82,8 @@ export function ApplianceBookingFlow() {
 
     if (city.domain && slug) {
       const base = city.domain.endsWith('/') ? city.domain.slice(0, -1) : city.domain;
-      window.location.href = `${base}${publicPath}`;
+      const targetUrl = base.startsWith('http') ? `${base}${publicPath}` : `https://${base}${publicPath}`;
+      window.location.assign(targetUrl);
     } else {
       router.push(publicPath);
     }

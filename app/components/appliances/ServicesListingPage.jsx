@@ -872,9 +872,26 @@ export function ServicesListingPage({ category, subCategory, subCategoryId, chil
 
             {/* Content Switcher: Nearby Centers vs All Services */}
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-64 rounded-2xl bg-gray-50 border border-gray-100 animate-pulse" />
+                  <div
+                    key={i}
+                    className="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs flex flex-col justify-between space-y-4 animate-pulse"
+                  >
+                    <div className="w-full h-44 rounded-xl bg-gray-200/80" />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="h-5 w-3/5 bg-gray-200/80 rounded-md" />
+                        <div className="h-4 w-12 bg-gray-200/80 rounded-full" />
+                      </div>
+                      <div className="h-3.5 w-full bg-gray-200/80 rounded-md" />
+                      <div className="h-3.5 w-4/5 bg-gray-200/80 rounded-md" />
+                    </div>
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <div className="h-5 w-20 bg-gray-200/80 rounded-md" />
+                      <div className="h-8 w-24 bg-gray-200/80 rounded-xl" />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : activeTab === 'centers' ? (

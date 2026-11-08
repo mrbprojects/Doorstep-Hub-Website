@@ -1,0 +1,5 @@
+import { ServiceDetailSkeleton } from '@/components/skeletons';
+
+export default function Loading() {
+  return <ServiceDetailSkeleton />;
+}

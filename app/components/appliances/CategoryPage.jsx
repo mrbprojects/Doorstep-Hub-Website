@@ -42,14 +42,22 @@ const defaultTheme = {
 // Skeleton Loader Component
 function CategorySkeleton() {
   return (
-    <div className="relative h-[160px] rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f1614] border-2 border-white/10 overflow-hidden flex items-stretch animate-pulse">
+    <div className="relative rounded-2xl bg-white border border-gray-200/80 p-4 shadow-xs overflow-hidden flex flex-col justify-between space-y-3.5 animate-pulse">
       {/* Image area skeleton */}
-      <div className="flex-shrink-0 w-28 md:w-40 bg-white/5" />
+      <div className="w-full aspect-[4/3] rounded-xl bg-gray-200/80" />
       {/* Content area skeleton */}
-      <div className="flex-1 p-4 md:p-6 flex flex-col justify-center space-y-3">
-        <div className="h-6 w-3/4 bg-white/10 rounded" />
-        <div className="h-4 w-full bg-white/5 rounded" />
-        <div className="h-4 w-24 bg-white/10 rounded mt-2" />
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="h-5 w-3/5 bg-gray-200/80 rounded-md" />
+          <div className="h-4 w-12 bg-gray-200/80 rounded-full" />
+        </div>
+        <div className="h-3.5 w-full bg-gray-200/80 rounded-md" />
+        <div className="h-3.5 w-4/5 bg-gray-200/80 rounded-md" />
+      </div>
+      {/* Action row skeleton */}
+      <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+        <div className="h-4 w-24 bg-gray-200/80 rounded-md" />
+        <div className="h-7 w-20 bg-gray-200/80 rounded-lg" />
       </div>
     </div>
   );

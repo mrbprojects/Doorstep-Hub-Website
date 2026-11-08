@@ -5,7 +5,6 @@ import { CategoryPage } from '@/components/appliances/CategoryPage';
 import { ServicesListingPage } from '@/components/appliances/ServicesListingPage';
 import { ServiceDetailsPage } from '@/components/appliances/ServiceDetailsPage';
 import { StoreDetailPage } from '@/components/appliances/StoreDetailPage';
-import { Loader2 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Animated404 } from '@/components/ui/Animated404';
 import { Header } from '@/components/layout/Header';
@@ -13,6 +12,7 @@ import { Footer } from '@/components/layout/Footer';
 import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
 import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
 import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
+import { SubCategoryPageSkeleton } from '@/components/skeletons';
 
 const appliancesTheme = {
     bgScrolled: 'bg-white/80',
@@ -299,11 +299,7 @@ export function CategoryOrListingPage({ slug, categorySlug, onBack }) {
     }, [slug, categorySlug, queryServiceId, router]);
 
     if (viewType === 'loading') {
-        return (
-            <div className="appliance-global min-h-screen flex items-center justify-center bg-white">
-                <Loader2 className="w-8 h-8 text-[#037166] animate-spin" />
-            </div>
-        );
+        return <SubCategoryPageSkeleton />;
     }
 
     if (viewType === 'category') {

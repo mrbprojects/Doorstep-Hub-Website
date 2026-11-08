@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import { CategoryOrListingPage } from '@/components/appliances/CategoryOrListingPage';
+import { SubCategoryPageSkeleton } from '@/components/skeletons';
 
 export default function RootCatchAllPageClient() {
     const params = useParams();
@@ -13,13 +14,13 @@ export default function RootCatchAllPageClient() {
     const lastSlug = Array.isArray(slugParts) ? slugParts[slugParts.length - 1] : slugParts;
 
     if (!lastSlug) {
-        return <div className="min-h-screen bg-transparent" />;
+        return <SubCategoryPageSkeleton />;
     }
 
     const parentSlug = Array.isArray(slugParts) && slugParts.length > 1 ? slugParts[slugParts.length - 2] : null;
 
     return (
-        <Suspense fallback={<div className="min-h-screen bg-transparent" />}>
+        <Suspense fallback={<SubCategoryPageSkeleton />}>
             <CategoryOrListingPage slug={lastSlug} categorySlug={parentSlug} />
         </Suspense>
     );

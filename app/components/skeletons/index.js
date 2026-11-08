@@ -10,3 +10,4 @@ export { SellBuyAdDetailSkeleton } from './SellBuyAdDetailSkeleton';
 export { HelpCenterHomeSkeleton } from './HelpCenterHomeSkeleton';
 export { HelpCenterCategorySkeleton } from './HelpCenterCategorySkeleton';
 export { HelpCenterArticleSkeleton } from './HelpCenterArticleSkeleton';
+export { ProfilePageSkeleton } from './ProfilePageSkeleton';

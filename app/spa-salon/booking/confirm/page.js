@@ -12,6 +12,7 @@ import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 import { useMounted } from '@/hooks/useMounted';
+import { evaluatePaymentSafety } from '@/lib/paymentSafety';
 
 // Service window: 9 AM to 9 PM
 const SERVICE_END_HOUR = 21; // Spa might need less buffer than rituals
@@ -231,13 +232,29 @@ export default function SpaConfirmPage() {
                 sessionStorage.setItem('last_checkout_url', currentCheckoutPath + (typeof window !== 'undefined' ? window.location.search : ''));
             } catch {}
 
+            // Strict Payment Safety Evaluation
+            const safety = evaluatePaymentSafety({
+                cartData,
+                paymentMethod,
+                paymentOption
+            });
+
+            if (!safety.valid || safety.blockCheckout) {
+                toast.error(safety.error || 'Invalid payment or order details. Payment blocked.');
+                setLoading(false);
+                return;
+            }
+
+            const effectivePaymentOption = safety.effectivePaymentOption;
+            const finalPaymentMethod = safety.finalPaymentMethod;
+
             let payload = {
                 serviceAddressId: selectedAddress._id || selectedAddress.id,
                 bookedDate,
                 bookedTime,
-                paymentMethod,
-                paymentOption,
-                ...(paymentOption === 'ADVANCE' ? { adv: true } : { adv: false }),
+                paymentMethod: finalPaymentMethod,
+                paymentOption: effectivePaymentOption,
+                adv: safety.adv,
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 returnUrl: cleanBaseUrl,
@@ -246,7 +263,7 @@ export default function SpaConfirmPage() {
                 udf1: String(selectedAddress._id || selectedAddress.id || '').slice(0, 50),
                 udf2: String(bookedDate || '').replace(/[^0-9-]/g, '').slice(0, 20),
                 udf3: String(bookedTime || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 20),
-                udf4: String(paymentOption || 'FULL').slice(0, 20),
+                udf4: String(effectivePaymentOption).slice(0, 20),
                 udf5: String(checkoutProviderType || 'regular').slice(0, 20),
                 udf6: 'website',
                 udf7: 'doorstephub',
@@ -255,7 +272,7 @@ export default function SpaConfirmPage() {
                 udf10: 'none'
             };
 
-            const endpoint = paymentMethod === 'ONLINE'
+            const endpoint = safety.endpointType === 'initiate-payment'
                 ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
                 : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 
@@ -317,7 +334,7 @@ export default function SpaConfirmPage() {
                     toast.success('Booking created successfully!');
                     trackBookingCompleted(data.bookingId || data.orderId, { vertical: 'spa-salon' });
                     clearCart();
-                    if (paymentMethod === 'COD') {
+                    if (finalPaymentMethod === 'COD') {
                         router.push(`/spa-salon/thank-you-cod?date=${bookedDate}&time=${bookedTime}`);
                     } else {
                         router.push(`/spa-salon/thank-you?date=${bookedDate}&time=${bookedTime}&paid=${paid}&remaining=${remaining}`);

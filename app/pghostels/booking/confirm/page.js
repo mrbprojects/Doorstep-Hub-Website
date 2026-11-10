@@ -15,6 +15,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { useRef } from 'react';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
+import { evaluatePaymentSafety } from '@/lib/paymentSafety';
 
 // Safely convert any value (including nested objects) to a primitive for rendering
 const safeStr = (val, fallback = '') => {
@@ -180,13 +181,29 @@ function PGConfirmContent() {
                 sessionStorage.setItem('last_checkout_url', currentCheckoutPath + (typeof window !== 'undefined' ? window.location.search : ''));
             } catch {}
 
+            // Strict Payment Safety Evaluation
+            const safety = evaluatePaymentSafety({
+                cartData,
+                paymentMethod,
+                paymentOption: 'FULL' // PG / Hostel bookings only support full payment
+            });
+
+            if (!safety.valid || safety.blockCheckout) {
+                toast.error(safety.error || 'Invalid payment or order details. Payment blocked.');
+                setLoading(false);
+                return;
+            }
+
+            const effectivePaymentOption = safety.effectivePaymentOption;
+            const finalPaymentMethod = safety.finalPaymentMethod;
+
             const payload = {
                 serviceAddressId: selectedAddress._id || selectedAddress.id,
                 bookedDate,
                 bookedTime: '10:00',
-                paymentMethod,
-                paymentOption,
-                ...(paymentOption === 'ADVANCE' ? { adv: true } : { adv: false }),
+                paymentMethod: finalPaymentMethod,
+                paymentOption: effectivePaymentOption,
+                adv: safety.adv,
                 sourceOfLead: 'website',
                 providerType: 'professional',
                 returnUrl: cleanBaseUrl,
@@ -195,7 +212,7 @@ function PGConfirmContent() {
                 udf1: String(selectedAddress._id || selectedAddress.id || '').slice(0, 50),
                 udf2: String(bookedDate || '').replace(/[^0-9-]/g, '').slice(0, 20),
                 udf3: '1000',
-                udf4: String(paymentOption || 'FULL').slice(0, 20),
+                udf4: String(effectivePaymentOption).slice(0, 20),
                 udf5: 'professional',
                 udf6: 'website',
                 udf7: 'doorstephub',
@@ -204,7 +221,7 @@ function PGConfirmContent() {
                 udf10: 'none'
             };
 
-            const endpoint = paymentMethod === 'ONLINE'
+            const endpoint = safety.endpointType === 'initiate-payment'
                 ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
                 : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 

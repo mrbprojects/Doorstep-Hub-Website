@@ -23,7 +23,7 @@ const CITY_ICONS = {
 
 const FALLBACK_CITIES = [
     { name: 'Hyderabad', icon: '/Hyderabad.png' },
-    { name: 'Bangalore', icon: '/Banglore.png' },
+    { name: 'Bengaluru', icon: '/Banglore.png' },
     { name: 'Mumbai', icon: '/Mumbai.png' },
     { name: 'Chennai', icon: '/chennai.png' },
     { name: 'Vijayawada', icon: '/Vijayawada.png' },
@@ -50,8 +50,12 @@ export function LocationBar() {
                 if (isCancelled) return;
                 setLoadingCities(false);
                 if (citiesData && citiesData.length > 0) {
+                    // Filter out legacy duplicate "Bangalore" in favor of "Bengaluru"
+                    const uniqueCities = citiesData.filter(
+                        c => c.name && c.name.trim().toLowerCase() !== 'bangalore'
+                    );
                     // Map API response with authoritative getImageUrl helper
-                    const mapped = citiesData.map((c) => ({
+                    const mapped = uniqueCities.map((c) => ({
                         id: c._id,
                         name: c.name,
                         icon: c.image

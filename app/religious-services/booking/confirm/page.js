@@ -14,6 +14,7 @@ import { useMounted } from '@/hooks/useMounted';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
 import { LocationMismatchModal, areCitiesMatching } from '@/components/shared/LocationMismatchModal';
+import { evaluatePaymentSafety } from '@/lib/paymentSafety';
 
 const clean = (v) => {
     if (!v) return null;
@@ -91,7 +92,7 @@ export default function ReligiousConfirmPage() {
     const [bookedDate, setBookedDate] = useState('');
     const [bookedTime, setBookedTime] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
-    const [paymentOption, setPaymentOption] = useState('ADVANCE'); // 'ADVANCE' or 'FULL'
+    const [paymentOption, setPaymentOption] = useState('FULL'); // Default to 'FULL' to ensure valid non-zero gateway amounts
     const [loading, setLoading] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const mounted = useMounted();
@@ -310,13 +311,29 @@ export default function ReligiousConfirmPage() {
                 sessionStorage.setItem('last_checkout_url', currentCheckoutPath + (typeof window !== 'undefined' ? window.location.search : ''));
             } catch {}
 
+            // Strict Payment Safety Evaluation
+            const safety = evaluatePaymentSafety({
+                cartData,
+                paymentMethod,
+                paymentOption
+            });
+
+            if (!safety.valid || safety.blockCheckout) {
+                toast.error(safety.error || 'Invalid payment or order details. Payment blocked.');
+                setLoading(false);
+                return;
+            }
+
+            const effectivePaymentOption = safety.effectivePaymentOption;
+            const finalPaymentMethod = safety.finalPaymentMethod;
+
             let payload = {
                 serviceAddressId: selectedAddress._id || selectedAddress.id,
                 bookedDate,
                 bookedTime,
-                paymentMethod,
-                paymentOption,
-                ...(paymentOption === 'ADVANCE' ? { adv: true } : { adv: false }),
+                paymentMethod: finalPaymentMethod,
+                paymentOption: effectivePaymentOption,
+                adv: safety.adv,
                 sourceOfLead: 'website',
                 providerType: checkoutProviderType,
                 returnUrl: cleanBaseUrl,
@@ -325,7 +342,7 @@ export default function ReligiousConfirmPage() {
                 udf1: String(selectedAddress._id || selectedAddress.id || '').slice(0, 50),
                 udf2: String(bookedDate || '').replace(/[^0-9-]/g, '').slice(0, 20),
                 udf3: String(bookedTime || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 20),
-                udf4: String(paymentOption || 'FULL').slice(0, 20),
+                udf4: String(effectivePaymentOption).slice(0, 20),
                 udf5: String(checkoutProviderType || 'regular').slice(0, 20),
                 udf6: 'website',
                 udf7: 'doorstephub',
@@ -334,7 +351,7 @@ export default function ReligiousConfirmPage() {
                 udf10: 'none'
             };
 
-            if (paymentMethod === 'ONLINE') {
+            if (safety.endpointType === 'initiate-payment') {
                 endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`;
             } else {
                 endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
@@ -387,7 +404,7 @@ export default function ReligiousConfirmPage() {
                         sessionStorage.setItem('religious_booking_address', JSON.stringify(selectedAddress));
                     }
                     clearCart();
-                    if (paymentMethod === 'COD') {
+                    if (finalPaymentMethod === 'COD') {
                         router.push(`/religious-services/thank-you-cod?date=${bookedDate}&time=${bookedTime}`);
                     } else {
                         router.push(`/religious-services/thank-you?date=${bookedDate}&time=${bookedTime}`);
@@ -803,16 +820,25 @@ export default function ReligiousConfirmPage() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                             <button
                                                 type="button"
-                                                onClick={() => setPaymentOption('ADVANCE')}
-                                                className={`p-3 rounded-xl border text-left transition-all ${paymentOption === 'ADVANCE'
-                                                    ? 'border-[var(--saffron)] bg-amber-50/60 ring-1 ring-[var(--saffron)]/30'
-                                                    : 'border-gray-200 bg-white hover:bg-gray-50'}`}
+                                                onClick={() => (cartData?.advPayment ?? 0) > 0 && setPaymentOption('ADVANCE')}
+                                                disabled={(cartData?.advPayment ?? 0) <= 0}
+                                                className={`p-3 rounded-xl border text-left transition-all ${
+                                                    (cartData?.advPayment ?? 0) <= 0
+                                                        ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                                                        : paymentOption === 'ADVANCE'
+                                                        ? 'border-[var(--saffron)] bg-amber-50/60 ring-1 ring-[var(--saffron)]/30'
+                                                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                                                }`}
                                             >
                                                 <div className="flex items-center justify-between mb-1">
                                                     <span className="text-xs font-bold text-gray-900">Pay Advance</span>
-                                                    {paymentOption === 'ADVANCE' && <Check className="w-4 h-4 text-[var(--saffron)]" />}
+                                                    {paymentOption === 'ADVANCE' && (cartData?.advPayment ?? 0) > 0 && <Check className="w-4 h-4 text-[var(--saffron)]" />}
                                                 </div>
-                                                <p className="text-[11px] text-gray-500 mb-1.5">Platform advance fee to confirm booking</p>
+                                                <p className="text-[11px] text-gray-500 mb-1.5">
+                                                    {(cartData?.advPayment ?? 0) > 0
+                                                        ? 'Platform advance fee to confirm booking'
+                                                        : 'Advance payment not applicable for this ritual'}
+                                                </p>
                                                 <p className="text-base font-extrabold text-[var(--saffron)]">
                                                     ₹{(cartData?.advPayment ?? 0).toFixed(2)}
                                                 </p>

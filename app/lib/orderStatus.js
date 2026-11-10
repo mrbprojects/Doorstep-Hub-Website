@@ -15,6 +15,7 @@ export const ORDER_STATUS_LABELS = {
     workIsCompleted: 'Completed',
     cancelledByUser: 'User Cancelled',
     cancelledByProvider: 'Provider Cancelled',
+    cancelled: 'Cancelled',
     rescheduleByProvider: 'Rescheduled',
     missed: 'Missed',
     sendQuotation: 'Quoted',
@@ -33,7 +34,7 @@ export const ACTIVE_STATUSES = [
 ];
 
 export const COMPLETED_STATUSES = ['workIsCompleted', 'quotationRejected'];
-export const CANCELLED_STATUSES = ['cancelledByUser', 'cancelledByProvider', 'rejectedByProvider'];
+export const CANCELLED_STATUSES = ['cancelledByUser', 'cancelledByProvider', 'rejectedByProvider', 'cancelled'];
 
 export function getStatusLabel(status) {
     return ORDER_STATUS_LABELS[status] || 'Pending';
@@ -48,6 +49,7 @@ export function getStatusStyle(status) {
         paymentReceived: 'bg-green-100 text-green-700',
         cancelledByUser: 'bg-red-100 text-red-700',
         cancelledByProvider: 'bg-red-100 text-red-700',
+        cancelled: 'bg-red-100 text-red-700',
         rejectedByProvider: 'bg-red-100 text-red-700',
         missed: 'bg-red-100 text-red-700',
     };

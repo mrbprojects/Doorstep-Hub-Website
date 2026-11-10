@@ -119,12 +119,26 @@ export function isValidCitySlug(slug = '') {
     return KNOWN_CITIES.has(s);
 }
 
-/** Compare city objects or strings by normalized slug/name */
+/** Canonicalize city slug aliases (e.g. bangalore -> bengaluru) */
+export function canonicalizeCitySlug(slug = '') {
+    const s = normalizeCitySlug(slug);
+    if (!s) return '';
+    if (s === 'bangalore') return 'bengaluru';
+    if (s === 'secunderabad' || s === 'cyberabad') return 'hyderabad';
+    if (s === 'visakhapatnam' || s === 'waltair') return 'vizag';
+    if (s === 'bezawada' || s === 'nunna') return 'vijayawada';
+    if (s === 'bombay') return 'mumbai';
+    if (s === 'madras') return 'chennai';
+    if (s === 'poona' || s === 'pimpri') return 'pune';
+    return s;
+}
+
+/** Compare city objects or strings by normalized canonical slug/name */
 export function citiesMatchBySlugOrName(cityA, cityB) {
-    const a = normalizeCitySlug(
+    const a = canonicalizeCitySlug(
         typeof cityA === 'string' ? cityA : (cityA?.slug || cityA?.name || '')
     );
-    const b = normalizeCitySlug(
+    const b = canonicalizeCitySlug(
         typeof cityB === 'string' ? cityB : (cityB?.slug || cityB?.name || '')
     );
     if (!a || !b) return true;

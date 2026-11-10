@@ -12,6 +12,7 @@ import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 import { AnimatePresence } from 'motion/react';
 import { verifyBookingPaymentStatus } from '@/lib/accountApi';
 import { useMounted } from '@/hooks/useMounted';
+import { evaluatePaymentSafety } from '@/lib/paymentSafety';
 
 function areCitiesMatching(cityA, cityB) {
   if (!cityA || !cityB) return true;
@@ -319,7 +320,21 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
 
         setLoading(true);
         try {
-            const endpoint = paymentMethod === 'ONLINE'
+            // Strict Payment Safety Evaluation
+            const safety = evaluatePaymentSafety({
+                cartData,
+                paymentMethod,
+                paymentOption: 'FULL'
+            });
+
+            if (!safety.valid || safety.blockCheckout) {
+                toast.error(safety.error || 'Invalid payment or order details. Payment blocked.');
+                setLoading(false);
+                return;
+            }
+
+            const finalPaymentMethod = safety.finalPaymentMethod;
+            const endpoint = safety.endpointType === 'initiate-payment'
                 ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/initiate-payment`
                 : `${process.env.NEXT_PUBLIC_API_BASE_URL}/app/service-cart/checkout`;
 
@@ -337,7 +352,7 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                 serviceAddressId: selectedAddress._id || selectedAddress.id,
                 bookedDate: selectedBookedDate,
                 bookedTime: selectedBookedTime,
-                paymentMethod,
+                paymentMethod: finalPaymentMethod,
                 paymentOption: 'FULL',
                 providerType: checkoutProviderType,
                 sourceOfLead: 'website',

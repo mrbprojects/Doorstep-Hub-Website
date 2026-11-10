@@ -442,6 +442,7 @@ export function AppDownload() {
                           src="/Bharath.png"
                           alt="Technician"
                           fill
+                          sizes="64px"
                           className="object-contain object-bottom"
                         />
                       </div>

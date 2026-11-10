@@ -398,6 +398,7 @@ export function PartnerAppDownload({
                           src="/Bharath.png"
                           alt="Partner Technician"
                           fill
+                          sizes="64px"
                           className="object-contain object-bottom"
                         />
                       </div>

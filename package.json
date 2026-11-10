@@ -82,7 +82,7 @@
     "seo:validate-sitemaps": "node scripts/validate-sitemaps.js",
     "seo:audit-url-counts": "node scripts/audit-url-counts.js",
     "seo:audit-images": "node scripts/audit-images.js",
-    "test": "node --test tests/seo.test.js",
+    "test": "node --test tests/*.test.js",
     "test:seo": "node --test tests/seo.test.js"
   }
 }

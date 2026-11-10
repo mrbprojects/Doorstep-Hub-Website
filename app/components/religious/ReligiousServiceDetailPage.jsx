@@ -373,6 +373,7 @@ export default function ReligiousServiceDetailPage({ slugOverride = null }) {
                                 src={serviceData.mainImage || serviceData.logo}
                                 alt={serviceData.name}
                                 fill
+                                sizes="(max-width: 768px) 100vw, 420px"
                                 className="object-cover blur-lg opacity-40 scale-110"
                                 aria-hidden="true"
                             />

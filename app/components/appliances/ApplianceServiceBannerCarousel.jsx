@@ -62,6 +62,7 @@ export function ApplianceServiceBannerCarousel({
                   aria-hidden="true"
                   fill
                   unoptimized
+                  sizes="100vw"
                   className="object-cover blur-2xl opacity-35 scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-[#f0fbf9]/30 to-white/70" />

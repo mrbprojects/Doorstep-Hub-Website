@@ -382,6 +382,7 @@ export default function HelpCenterPage() {
                   alt="Doorstep Hub Verified Professional Technician"
                   fill
                   priority
+                  sizes="(max-width: 1024px) 100vw, 480px"
                   className="object-cover object-center"
                 />
 
@@ -648,6 +649,7 @@ export default function HelpCenterPage() {
                     src="/help-center/faq-avatar.png"
                     alt="Doorstep Hub Customer Support FAQ Assistant"
                     fill
+                    sizes="(max-width: 640px) 192px, (max-width: 1024px) 224px, 240px"
                     className="object-contain drop-shadow-lg"
                   />
                 </div>

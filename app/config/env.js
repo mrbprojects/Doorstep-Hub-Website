@@ -40,6 +40,11 @@ export function getImageUrl(path, fallback = DEFAULT_PLACEHOLDER_IMAGE) {
     cleanUrl = cleanUrl.replace(/https?:\/\/devapis\.doorstephub\.com/g, IMAGE_BASE_URL);
   }
 
+  // Safe asset recovery mapping: Map historical database reference to verified live uploaded asset
+  if (cleanUrl.includes('uploads/ondemandsubcategory/Laptop_Repair.webp')) {
+    cleanUrl = cleanUrl.replace('Laptop_Repair.webp', '1751895490326-laptop.jpg');
+  }
+
   if (cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
     return cleanUrl;
   }

@@ -7,13 +7,13 @@ export default function LogoTest() {
             <div className="p-10 bg-white border">
                 <h2 className="text-black mb-4">On White Background:</h2>
                 <div className="relative w-48 h-14 bg-gray-100">
-                    <Image src="/d-hub-logo.png" alt="test" fill className="object-contain" />
+                    <Image src="/d-hub-logo.png" alt="test" fill sizes="192px" className="object-contain" />
                 </div>
             </div>
             <div className="p-10 bg-black border">
                 <h2 className="text-white mb-4">On Black Background:</h2>
                 <div className="relative w-48 h-14 bg-gray-900">
-                    <Image src="/d-hub-logo.png" alt="test" fill className="object-contain" />
+                    <Image src="/d-hub-logo.png" alt="test" fill sizes="192px" className="object-contain" />
                 </div>
             </div>
         </div>

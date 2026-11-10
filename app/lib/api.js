@@ -1,4 +1,4 @@
-import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl as resolveMediaUrl } from '@/config/env';
+import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl as resolveMediaUrl } from '../config/env.js';
 
 const SERVICES_ENDPOINT = '/app/applience-repairs-website/all-services';
 
@@ -182,10 +182,13 @@ export function getServiceSlug(serviceName) {
  */
 export function imageLoader({ src }) {
     if (!src) return 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400';
-    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('blob:')) {
-        return src;
+    let cleanSrc = String(src).replace(/^\/+/, '');
+    if (cleanSrc.includes('uploads/ondemandsubcategory/Laptop_Repair.webp')) {
+        cleanSrc = cleanSrc.replace('Laptop_Repair.webp', '1751895490326-laptop.jpg');
     }
-    const cleanSrc = String(src).replace(/^\/+/, '');
+    if (cleanSrc.startsWith('http://') || cleanSrc.startsWith('https://') || cleanSrc.startsWith('blob:')) {
+        return cleanSrc;
+    }
     const base = (IMAGE_BASE_URL || process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'https://api.doorstephub.com').replace(/\/+$/, '');
     return `${base}/${cleanSrc}`;
 }

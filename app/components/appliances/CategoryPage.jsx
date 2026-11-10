@@ -24,6 +24,7 @@ import { ADSENSE_CONFIG } from '@/config/adsense';
 import { ApplianceHowItWorks } from '@/components/appliances/ApplianceHowItWorks';
 import { ApplianceComparison } from '@/components/appliances/ApplianceComparison';
 import { PaymentMethodsSection } from '@/components/appliances/PaymentMethodsSection';
+import { getImageUrl } from '@/config/env';
 
 // Default theme settings
 const defaultTheme = {
@@ -323,7 +324,7 @@ export function CategoryPage({ slug, initialData }) {
         {categoryImage && (
           <div className="absolute inset-0 z-0">
             <Image
-              src={`https://api.doorstephub.com/${categoryImage}`}
+              src={getImageUrl(categoryImage)}
               alt={categoryMetadata.categoryName}
               className="w-full h-full object-cover opacity-10"
              width={500} height={300} />
@@ -486,7 +487,7 @@ export function CategoryPage({ slug, initialData }) {
                           <div className="relative w-28 sm:w-36 md:w-40 shrink-0 h-full overflow-hidden bg-slate-100">
                             {subCategory.image ? (
                               <Image
-                                src={`https://api.doorstephub.com/${subCategory.image}`}
+                                src={getImageUrl(subCategory.image)}
                                 alt={subCategory.name}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                width={500} height={300} />

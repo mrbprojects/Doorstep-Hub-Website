@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
 import { useServiceCart } from '@/context/ServiceCartContext';
+import { useGlobalSettings } from '@/context/GlobalSettingsContext';
 import { BookingSteps, FLOW_TYPES } from '@/components/shared/BookingSteps';
 import { generateIdempotencyKey, formatDateTimeWithTimezone, validatePrice } from '@/utils/security';
 import { inferVertical, trackBookingCompleted, trackPaymentStarted } from '@/lib/leadTracking';
@@ -298,9 +299,17 @@ export function BookingConfirmationPage({
     [directBookingItems, contextCartItems]
   );
 
-  // Use the platform fees once per booking (not summed per item)
-  const rawBookingCost = cartItems.length > 0 ? Number(cartItems[0].bookingCost || 0) : 0;
-  const inspectionCost = cartItems.length > 0 ? Number(cartItems[0].inspectionCost || 0) : 0;
+  const { onlineBookingFee, doorstepInspectionFee } = useGlobalSettings() || {};
+  const defaultBookingFee = Number(onlineBookingFee ?? 99);
+  const defaultInspectionFee = Number(doorstepInspectionFee ?? 175);
+
+  // Use the platform fees once per booking (not summed per item) with ₹99 guarantee
+  const rawBookingCost = cartItems.length > 0 && Number(cartItems[0].bookingCost) > 0
+    ? Number(cartItems[0].bookingCost)
+    : defaultBookingFee;
+  const inspectionCost = cartItems.length > 0 && Number(cartItems[0].inspectionCost) > 0
+    ? Number(cartItems[0].inspectionCost)
+    : defaultInspectionFee;
 
   const amcServiceId = useMemo(() => {
     if (typeof window === 'undefined') return cartItems[0]?.serviceId || cartItems[0]?.id || cartItems[0]?._id || '';

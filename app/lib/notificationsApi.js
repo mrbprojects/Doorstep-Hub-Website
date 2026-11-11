@@ -49,11 +49,18 @@ export async function fetchNotifications({ token, category = 'all', page = 1, li
 
     if (token) {
         try {
-            const res = await fetch(`${API_BASE_URL}/app/notifications?page=${page}&limit=${limit}`, {
+            let res = await fetch(`${API_BASE_URL}/app/notification/get-notifications?page=${page}&limit=${limit}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
+            if (!res.ok && res.status === 404) {
+                res = await fetch(`${API_BASE_URL}/app/notifications?page=${page}&limit=${limit}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            }
             if (res.ok) {
                 const data = await res.json();
                 if (data.success && Array.isArray(data.notifications)) {

@@ -37,15 +37,32 @@ export function PaymentFailurePage() {
             } catch {}
         }
 
-        // 3. Fallback based on deepType or type query params
-        const type = searchParams.get('type') || searchParams.get('serviceType');
-        const deepType = searchParams.get('deepType') || searchParams.get('servicedeeptype');
-        if (deepType === 'PG Hostels') return '/pghostels/booking/confirm';
-        if (deepType === 'Spa Saloons') return '/spa-salon/booking/confirm';
-        if (deepType === 'Religious Services') return '/religious-services/booking/confirm';
-        if (type === 'service-center') return '/appliances/checkout';
-        if (type === 'verified-partner' || type === 'professional') return '/appliances/booking';
-        if (type === 'crm') return '/book-appointment';
+        // 3. Fallback based on deepType or type query params, or txnid prefix
+        const type = (searchParams.get('type') || searchParams.get('serviceType') || '').toLowerCase();
+        const deepType = (searchParams.get('deepType') || searchParams.get('servicedeeptype') || '').toLowerCase();
+        const txnid = (searchParams.get('txnid') || searchParams.get('orderId') || '').toLowerCase();
+
+        if (txnid.includes('wlt') || type.includes('wallet') || deepType.includes('wallet')) {
+            return '/account/wallet';
+        }
+        if (deepType.includes('hostel') || deepType.includes('pg') || type.includes('hostel') || type.includes('pg')) {
+            return '/pghostels/booking/confirm';
+        }
+        if (deepType.includes('spa') || deepType.includes('saloon') || deepType.includes('salon') || type.includes('spa')) {
+            return '/spa-salon/booking/confirm';
+        }
+        if (deepType.includes('religio') || deepType.includes('puja') || deepType.includes('pandit') || type.includes('religio')) {
+            return '/religious-services/booking/confirm';
+        }
+        if (type === 'crm' || type.includes('crm') || searchParams.get('channel') === 'book_appointment') {
+            return '/book-appointment';
+        }
+        if (type === 'service-center') {
+            return '/appliances/checkout';
+        }
+        if (type === 'professional' || type === 'verified-partner') {
+            return '/appliances/booking';
+        }
 
         // 4. Default to appliances checkout screen — never homepage
         return '/appliances/checkout';

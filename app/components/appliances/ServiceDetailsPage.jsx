@@ -353,8 +353,8 @@ export function ServiceDetailsPage({
         serviceName: storeData.name || 'Professional Service',
         packageName: card.title,
         price: cleanPrice,
-        bookingCost: storeData.serviceBookingCost || storeData.minFare || 0,
-        inspectionCost: storeData.inspectionCost || 0,
+        bookingCost: Number(storeData.serviceBookingCost || storeData.minFare || 99),
+        inspectionCost: Number(storeData.inspectionCost || 175),
         quantity: 1
       };
     });

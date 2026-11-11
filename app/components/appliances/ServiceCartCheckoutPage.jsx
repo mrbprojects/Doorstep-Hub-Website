@@ -755,34 +755,6 @@ export function ServiceCartCheckoutPage({ selectedAddress, onBack, onSuccess }) 
                                     </div>
                                 </button>
 
-                                {/* Pay After Service (Cash on Service Delivery) */}
-                                <button
-                                    type="button"
-                                    onClick={() => setPaymentMethod('COD')}
-                                    className={`p-3.5 rounded-xl text-left transition-all border flex flex-col justify-between ${paymentMethod === 'COD'
-                                        ? 'bg-[#f0fbf9] border-[#037166] text-[#037166] ring-1 ring-[#037166]'
-                                        : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentMethod === 'COD' ? 'bg-[#037166] text-white' : 'bg-gray-100 text-gray-600'}`}>
-                                                <Banknote className="w-4 h-4" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-xs sm:text-sm font-bold text-gray-900">Pay After Service</h4>
-                                                <span className="text-[10px] text-emerald-600 font-semibold">Cash / UPI at Doorstep</span>
-                                            </div>
-                                        </div>
-                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'COD' ? 'border-[#037166] bg-[#037166]' : 'border-gray-300'}`}>
-                                            {paymentMethod === 'COD' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                        </div>
-                                    </div>
-                                    <p className="text-[10px] text-gray-500 pt-2 border-t border-gray-100">
-                                        Pay full payment directly to technician after service
-                                    </p>
-                                </button>
-
                                 {/* Wallet Pay Card */}
                                 <button
                                     type="button"

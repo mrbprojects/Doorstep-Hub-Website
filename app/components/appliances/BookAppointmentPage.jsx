@@ -695,12 +695,24 @@ export function BookAppointmentPage() {
             trackBookingCompleted(null, { vertical: 'crm' });
             toast.success('Payment successful! We will contact you to confirm your appointment.');
             window.history.replaceState({}, '', '/book-appointment');
-        } else if (status === 'failure') {
+        } else if (status === 'failure' || status === 'cancelled') {
             trackPaymentFailed({
                 vertical: 'crm',
-                eventData: { reason: 'gateway_return_failure', channel: 'book_appointment' },
+                eventData: { reason: status === 'cancelled' ? 'gateway_user_cancelled' : 'gateway_return_failure', channel: 'book_appointment' },
             });
-            toast.error('Payment failed or cancelled. Your details are preserved — please try again.');
+            toast.error('Payment was not completed. Your details are preserved — please retry whenever ready.');
+            try {
+                const saved = sessionStorage.getItem('crm_pending_booking');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    setFormData(prev => ({
+                        ...prev,
+                        bookingDate: parsed.date || prev.bookingDate,
+                        bookingTime: parsed.time || prev.bookingTime,
+                    }));
+                    setCurrentStep(2);
+                }
+            } catch {}
             window.history.replaceState({}, '', '/book-appointment');
         }
     }, []);

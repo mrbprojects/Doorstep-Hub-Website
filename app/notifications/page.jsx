@@ -22,6 +22,8 @@ import {
     markNotificationAsRead,
     markAllNotificationsAsRead
 } from '@/lib/notificationsApi';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 
 const CATEGORIES = [
     { key: 'all', label: 'All', icon: Bell },
@@ -150,9 +152,11 @@ export default function NotificationsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pt-20 sm:pt-24 pb-20">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6">
-                {/* Header */}
+        <div className="min-h-screen flex flex-col bg-[#f8fafc]">
+            <Header />
+            <main className="flex-1 pt-24 sm:pt-28 pb-16">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6">
+                    {/* Header */}
                 <div className="mb-6">
                     <button
                         type="button"
@@ -334,6 +338,8 @@ export default function NotificationsPage() {
                     </div>
                 )}
             </div>
+            </main>
+            <Footer />
         </div>
     );
 }

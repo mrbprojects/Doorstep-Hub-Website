@@ -108,11 +108,11 @@ export default function ReligiousConfirmPage() {
             let pendingBooking = {};
             try {
                 pendingBooking = JSON.parse(sessionStorage.getItem('pending_booking') || '{}');
-            } catch {}
+            } catch { }
             if (!pendingBooking.bookedDate) {
                 try {
                     pendingBooking = JSON.parse(localStorage.getItem('religious_last_booking') || '{}');
-                } catch {}
+                } catch { }
             }
 
             const orderId = urlParams.get('orderId') || pendingBooking.orderId || '';
@@ -144,15 +144,15 @@ export default function ReligiousConfirmPage() {
                     'Authorization': `Bearer ${token}`
                 }
             })
-            .then(res => res.json())
-            .then(data => {
-                if (active && data.success && Array.isArray(data.data) && data.data.length > 0) {
-                    const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
-                    setSelectedAddress(defaultAddr);
-                    sessionStorage.setItem('religious_booking_address', JSON.stringify(defaultAddr));
-                }
-            })
-            .catch(err => console.error("Error fetching default address:", err));
+                .then(res => res.json())
+                .then(data => {
+                    if (active && data.success && Array.isArray(data.data) && data.data.length > 0) {
+                        const defaultAddr = data.data.find(a => a.defaultAddress) || data.data[0];
+                        setSelectedAddress(defaultAddr);
+                        sessionStorage.setItem('religious_booking_address', JSON.stringify(defaultAddr));
+                    }
+                })
+                .catch(err => console.error("Error fetching default address:", err));
             return () => { active = false; };
         }
     }, [token, selectedAddress]);
@@ -309,7 +309,7 @@ export default function ReligiousConfirmPage() {
 
             try {
                 sessionStorage.setItem('last_checkout_url', currentCheckoutPath + (typeof window !== 'undefined' ? window.location.search : ''));
-            } catch {}
+            } catch { }
 
             // Strict Payment Safety Evaluation
             const safety = evaluatePaymentSafety({
@@ -389,11 +389,11 @@ export default function ReligiousConfirmPage() {
                     }
                     try {
                         localStorage.setItem('religious_last_booking', JSON.stringify(pendingData));
-                    } catch {}
+                    } catch { }
 
                     try {
                         sessionStorage.setItem('last_checkout_url', currentCheckoutPath);
-                    } catch {}
+                    } catch { }
                     const easebuzzUrl = `https://pay.easebuzz.in/pay/${data.access_key}`;
                     toast.success('Redirecting to payment gateway...');
                     window.location.href = easebuzzUrl;
@@ -485,16 +485,14 @@ export default function ReligiousConfirmPage() {
                                 return (
                                     <React.Fragment key={step}>
                                         <div className="flex items-center gap-1.5 shrink-0">
-                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                                                isCompleted ? 'bg-white text-[var(--saffron)] shadow-xs' :
-                                                isCurrent ? 'bg-amber-300 text-gray-900 ring-2 ring-white/40 font-extrabold shadow-sm' :
-                                                'bg-white/20 text-white/60'
-                                            }`}>
+                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isCompleted ? 'bg-white text-[var(--saffron)] shadow-xs' :
+                                                    isCurrent ? 'bg-amber-300 text-gray-900 ring-2 ring-white/40 font-extrabold shadow-sm' :
+                                                        'bg-white/20 text-white/60'
+                                                }`}>
                                                 {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : index + 1}
                                             </div>
-                                            <span className={`text-[11px] font-bold uppercase tracking-wider transition-all hidden md:inline ${
-                                                isCurrent ? 'text-white' : 'text-white/70'
-                                            }`}>
+                                            <span className={`text-[11px] font-bold uppercase tracking-wider transition-all hidden md:inline ${isCurrent ? 'text-white' : 'text-white/70'
+                                                }`}>
                                                 {step}
                                             </span>
                                         </div>
@@ -540,15 +538,13 @@ export default function ReligiousConfirmPage() {
                                                 key={date.value}
                                                 type="button"
                                                 onClick={() => setBookedDate(date.value)}
-                                                className={`p-3 rounded-xl flex flex-col items-center justify-center transition-all border ${
-                                                    isSelected
+                                                className={`p-3 rounded-xl flex flex-col items-center justify-center transition-all border ${isSelected
                                                         ? 'bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white shadow-md border-transparent ring-2 ring-[var(--saffron)]/25'
                                                         : 'bg-white border-gray-200 text-gray-700 hover:border-[var(--saffron)]/40 hover:bg-amber-50/20'
-                                                }`}
+                                                    }`}
                                             >
-                                                <span className={`text-[10px] uppercase font-bold tracking-wider ${
-                                                    isSelected ? 'text-white/80' : 'text-gray-400'
-                                                }`}>
+                                                <span className={`text-[10px] uppercase font-bold tracking-wider ${isSelected ? 'text-white/80' : 'text-gray-400'
+                                                    }`}>
                                                     {date.dayLabel || date.label}
                                                 </span>
                                                 <span className="text-sm font-extrabold mt-0.5">
@@ -598,11 +594,10 @@ export default function ReligiousConfirmPage() {
                                                 key={time.value}
                                                 type="button"
                                                 onClick={() => setBookedTime(time.value)}
-                                                className={`py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-between transition-all border ${
-                                                    isSelected
+                                                className={`py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-between transition-all border ${isSelected
                                                         ? 'bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white shadow-md border-transparent ring-2 ring-[var(--saffron)]/25'
                                                         : 'bg-white border-gray-200 text-gray-700 hover:border-[var(--saffron)]/40 hover:bg-amber-50/20'
-                                                }`}
+                                                    }`}
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-gray-400'}`} />
@@ -719,11 +714,10 @@ export default function ReligiousConfirmPage() {
                                             key={option.value}
                                             type="button"
                                             onClick={() => setTechnicianPreference(option.value)}
-                                            className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all border flex items-center justify-center gap-1.5 ${
-                                                isSelected
+                                            className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all border flex items-center justify-center gap-1.5 ${isSelected
                                                     ? 'bg-[var(--saffron)] text-white border-[var(--saffron)] shadow-xs'
                                                     : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
-                                            }`}
+                                                }`}
                                         >
                                             {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                                             <span>{option.label}</span>
@@ -745,22 +739,20 @@ export default function ReligiousConfirmPage() {
                                 <span>Payment Method</span>
                             </h3>
                             <p className="text-xs text-gray-500 mb-3.5">Choose your preferred payment method</p>
-                            
+
                             <div className="space-y-3">
                                 {/* Option 1: Instant Online Payment */}
                                 <div
                                     onClick={() => setPaymentMethod('ONLINE')}
-                                    className={`p-3.5 rounded-xl flex items-center gap-3.5 cursor-pointer transition-all border ${
-                                        paymentMethod === 'ONLINE'
+                                    className={`p-3.5 rounded-xl flex items-center gap-3.5 cursor-pointer transition-all border ${paymentMethod === 'ONLINE'
                                             ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-[var(--saffron)] shadow-xs ring-1 ring-[var(--saffron)]/40'
                                             : 'bg-white hover:bg-gray-50/80 border-gray-200'
-                                    }`}
+                                        }`}
                                 >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                                        paymentMethod === 'ONLINE'
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${paymentMethod === 'ONLINE'
                                             ? 'bg-[var(--saffron)] text-white shadow-xs'
                                             : 'bg-gray-100 text-gray-500'
-                                    }`}>
+                                        }`}>
                                         <CreditCard className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -770,11 +762,10 @@ export default function ReligiousConfirmPage() {
                                         </div>
                                         <p className="text-[11px] text-gray-600 mt-0.5">Pay securely via UPI (GPay, PhonePe, Paytm), Credit/Debit Card, or Net Banking</p>
                                     </div>
-                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
-                                        paymentMethod === 'ONLINE'
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${paymentMethod === 'ONLINE'
                                             ? 'border-[var(--saffron)] bg-[var(--saffron)] text-white'
                                             : 'border-gray-300 bg-white'
-                                    }`}>
+                                        }`}>
                                         {paymentMethod === 'ONLINE' && <Check className="w-3 h-3 stroke-[3]" />}
                                     </div>
                                 </div>
@@ -782,17 +773,15 @@ export default function ReligiousConfirmPage() {
                                 {/* Option 2: Pay After Service (Cash on Service Delivery) */}
                                 <div
                                     onClick={() => setPaymentMethod('COD')}
-                                    className={`p-3.5 rounded-xl flex items-center gap-3.5 cursor-pointer transition-all border ${
-                                        paymentMethod === 'COD'
+                                    className={`p-3.5 rounded-xl flex items-center gap-3.5 cursor-pointer transition-all border ${paymentMethod === 'COD'
                                             ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-[var(--saffron)] shadow-xs ring-1 ring-[var(--saffron)]/40'
                                             : 'bg-white hover:bg-gray-50/80 border-gray-200'
-                                    }`}
+                                        }`}
                                 >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                                        paymentMethod === 'COD'
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${paymentMethod === 'COD'
                                             ? 'bg-[var(--saffron)] text-white shadow-xs'
                                             : 'bg-gray-100 text-gray-500'
-                                    }`}>
+                                        }`}>
                                         <Banknote className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -802,11 +791,10 @@ export default function ReligiousConfirmPage() {
                                         </div>
                                         <p className="text-[11px] text-gray-600 mt-0.5">Pay full payment with cash or UPI directly to priest after ritual completion</p>
                                     </div>
-                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
-                                        paymentMethod === 'COD'
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${paymentMethod === 'COD'
                                             ? 'border-[var(--saffron)] bg-[var(--saffron)] text-white'
                                             : 'border-gray-300 bg-white'
-                                    }`}>
+                                        }`}>
                                         {paymentMethod === 'COD' && <Check className="w-3 h-3 stroke-[3]" />}
                                     </div>
                                 </div>
@@ -822,21 +810,20 @@ export default function ReligiousConfirmPage() {
                                                 type="button"
                                                 onClick={() => (cartData?.advPayment ?? 0) > 0 && setPaymentOption('ADVANCE')}
                                                 disabled={(cartData?.advPayment ?? 0) <= 0}
-                                                className={`p-3 rounded-xl border text-left transition-all ${
-                                                    (cartData?.advPayment ?? 0) <= 0
+                                                className={`p-3 rounded-xl border text-left transition-all ${(cartData?.advPayment ?? 0) <= 0
                                                         ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
                                                         : paymentOption === 'ADVANCE'
-                                                        ? 'border-[var(--saffron)] bg-amber-50/60 ring-1 ring-[var(--saffron)]/30'
-                                                        : 'border-gray-200 bg-white hover:bg-gray-50'
-                                                }`}
+                                                            ? 'border-[var(--saffron)] bg-amber-50/60 ring-1 ring-[var(--saffron)]/30'
+                                                            : 'border-gray-200 bg-white hover:bg-gray-50'
+                                                    }`}
                                             >
                                                 <div className="flex items-center justify-between mb-1">
-                                                    <span className="text-xs font-bold text-gray-900">Pay Advance</span>
+                                                    <span className="text-xs font-bold text-gray-900">Booking Confirmation Fee</span>
                                                     {paymentOption === 'ADVANCE' && (cartData?.advPayment ?? 0) > 0 && <Check className="w-4 h-4 text-[var(--saffron)]" />}
                                                 </div>
                                                 <p className="text-[11px] text-gray-500 mb-1.5">
                                                     {(cartData?.advPayment ?? 0) > 0
-                                                        ? 'Platform advance fee to confirm booking'
+                                                        ? 'Pay Platform Fee to Confirm Service Booking'
                                                         : 'Advance payment not applicable for this ritual'}
                                                 </p>
                                                 <p className="text-base font-extrabold text-[var(--saffron)]">
@@ -979,11 +966,10 @@ export default function ReligiousConfirmPage() {
                                 <button
                                     onClick={handleCheckout}
                                     disabled={loading || !bookedDate || !bookedTime}
-                                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ${
-                                        loading || !bookedDate || !bookedTime
+                                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ${loading || !bookedDate || !bookedTime
                                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                             : 'bg-gradient-to-r from-[var(--saffron)] to-[var(--temple-red)] text-white shadow-md hover:shadow-lg hover:shadow-[var(--saffron)]/30 active:scale-98'
-                                    }`}
+                                        }`}
                                 >
                                     {loading ? (
                                         <>

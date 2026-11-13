@@ -15,8 +15,8 @@ export const LOCATION_CONFIG = {
     // Why: Prevent constant cache eviction and blank location states for returning users
     CACHE_DURATION: 24 * 60 * 60 * 1000,
 
-    // GPS timeout: 8 seconds
-    GPS_TIMEOUT: 8000,
+    // GPS timeout: 12 seconds (indoor mobile users on weak signal need longer)
+    GPS_TIMEOUT: 12000,
 
     // Primary IP geolocation service
     IP_API_URL: 'https://ipwho.is/',

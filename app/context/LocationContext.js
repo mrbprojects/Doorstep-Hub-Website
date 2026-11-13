@@ -120,24 +120,34 @@ export function LocationProvider({ children }) {
      */
     const detectLocation = useCallback(async () => {
         try {
-            // First check if user already has a valid saved location
+            // First check if user already has a valid fresh location from manual choice or verified GPS
             const existingSaved = locationManager.getSavedLocation();
-            if (existingSaved && existingSaved.city) {
+            if (
+                existingSaved &&
+                existingSaved.city &&
+                !existingSaved.isStale &&
+                (existingSaved.source === LOCATION_CONFIG.SOURCES.MANUAL || existingSaved.source === LOCATION_CONFIG.SOURCES.GPS)
+            ) {
                 return existingSaved;
             }
 
-            if (typeof window !== 'undefined' && navigator.permissions?.query) {
-                try {
-                    const perm = await navigator.permissions.query({ name: 'geolocation' });
-                    if (perm.state === 'granted') {
-                        return await detectWithGPS();
+            if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+                if (navigator.permissions?.query) {
+                    try {
+                        const perm = await navigator.permissions.query({ name: 'geolocation' });
+                        if (perm.state === 'denied') {
+                            // Permission explicitly blocked by user: fallback to IP
+                            return await detectWithIP();
+                        }
+                    } catch {
+                        // permissions.query not supported in all browsers
                     }
-                } catch {
-                    // permissions.query not supported in all browsers
                 }
+                // When permission is 'granted' or 'prompt', request GPS so user can approve and get real location
+                return await detectWithGPS();
             }
 
-            // Unset or denied permission: Use non-intrusive IP detection without browser prompt
+            // Unset or denied permission: Use silent IP detection
             return await detectWithIP();
         } catch (err) {
             console.warn('Initial location detection fallback:', err);
@@ -179,10 +189,10 @@ export function LocationProvider({ children }) {
             window.addEventListener('google-maps-loaded', initMaps);
         }
 
-        // 2. Check localStorage / detect
+        // 2. Check localStorage / detect (re-detect if stale or default fallback, e.g. user traveled)
         const savedLocation = locationManager.getSavedLocation();
-        if (!savedLocation) {
-            // Automatically detect location silently via IP/GPS
+        if (!savedLocation || savedLocation.isStale || savedLocation.source === LOCATION_CONFIG.SOURCES.DEFAULT) {
+            // Automatically detect location via GPS/IP
             Promise.resolve().then(() => {
                 detectLocation();
             });

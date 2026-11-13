@@ -139,6 +139,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'api.doorstephub.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.qrserver.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'quickchart.io',
+      },
     ],
   },
   typescript: {

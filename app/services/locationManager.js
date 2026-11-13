@@ -101,9 +101,10 @@ class LocationManager {
                 return parsed;
             }
 
-            // If stale but valid, renew timestamp to avoid sudden UI jarring
+            // Stale but valid: return for immediate display, flagged as stale
+            // so LocationContext triggers background re-detection
             if (parsed && parsed.city && parsed.lat && parsed.lng) {
-                return this.saveLocation(parsed, parsed.source || LOCATION_CONFIG.SOURCES.STORAGE);
+                return { ...parsed, isStale: true };
             }
 
             return null;
@@ -116,8 +117,15 @@ class LocationManager {
     isLocationFresh(locationData) {
         if (!locationData || !locationData.timestamp) return false;
         if (locationData.source === LOCATION_CONFIG.SOURCES.MANUAL) return true;
+        // Default fallback (Hyderabad) should always re-detect — it's just a guess
+        if (locationData.source === LOCATION_CONFIG.SOURCES.DEFAULT) return false;
 
         const age = Date.now() - locationData.timestamp;
+        // IP-based locations: cache for 1 hour only (ISP routing can be inaccurate)
+        if (locationData.source === LOCATION_CONFIG.SOURCES.IP) {
+            return age < Math.min(LOCATION_CONFIG.CACHE_DURATION, 60 * 60 * 1000);
+        }
+        // GPS/storage: full 24-hour cache
         return age < LOCATION_CONFIG.CACHE_DURATION;
     }
 
@@ -183,8 +191,7 @@ class LocationManager {
                 });
 
                 let city = '';
-                
-                
+                let district = '';
                 let postalCode = '';
                 let state = '';
                 const areaParts = [];
@@ -196,6 +203,9 @@ class LocationManager {
 
                     if (types.includes('locality')) {
                         city = name;
+                    }
+                    if (types.includes('administrative_area_level_2')) {
+                        district = name;
                     }
                     if (types.includes('sublocality') || types.includes('neighborhood') || types.includes('route')) {
                         if (!areaParts.includes(name)) areaParts.push(name);
@@ -211,9 +221,31 @@ class LocationManager {
                     }
                 }
 
+                // Match against supported cities with robust fallback hierarchy
+                let matched = matchCityByName(city);
+                if (!matched && district) {
+                    matched = matchCityByName(district);
+                    if (matched) city = matched.name;
+                }
+                if (!matched) {
+                    for (const area of areaParts) {
+                        const areaMatch = matchCityByName(area);
+                        if (areaMatch) {
+                            matched = areaMatch;
+                            city = matched.name;
+                            break;
+                        }
+                    }
+                }
+                // Fallback to geometric closest supported operating city based on GPS coordinates
+                if (!matched) {
+                    const closestCity = findClosestSupportedCity(lat, lng);
+                    matched = closestCity;
+                    city = closestCity.name;
+                }
+
                 const finalHouse = houseParts.join(', ');
                 const finalArea = Array.from(new Set(areaParts)).join(', ');
-                const matched = matchCityByName(city);
                 const resolvedCity = matched ? matched.name : (city || '');
                 const shortAddress = finalArea ? `${finalArea.split(',')[0]}, ${resolvedCity || city}` : (resolvedCity || city);
 
@@ -240,6 +272,7 @@ class LocationManager {
             lat,
             lng,
             city: closest.name,
+            isServiceable: true,
             area: closest.name,
             flat: '',
             postalCode: '',
@@ -273,6 +306,7 @@ class LocationManager {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             city: closest.name,
+                            isServiceable: true,
                             area: closest.name,
                             shortAddress: closest.name,
                             address: `${closest.name}, ${closest.state}, India`,
@@ -330,6 +364,7 @@ class LocationManager {
                     lat: Number(data.latitude) || 17.3850,
                     lng: Number(data.longitude) || 78.4867,
                     city,
+                    isServiceable: Boolean(matched),
                     area: data.region || city,
                     postalCode: data.postal || '',
                     state: data.region || '',
@@ -351,6 +386,26 @@ class LocationManager {
                     lat,
                     lng,
                     city,
+                    isServiceable: Boolean(matched),
+                    area: data.region || city,
+                    postalCode: data.postal || '',
+                    state: data.region || '',
+                    address: `${city}, ${data.region || ''}, India`,
+                    shortAddress: city
+                };
+            },
+            async () => {
+                const res = await fetchWithTimeout('https://ipapi.co/json/', 3500);
+                if (!res.ok) throw new Error('ipapi.co HTTP error');
+                const data = await res.json();
+                if (!data || data.error || !data.city) throw new Error('ipapi.co unsuccessful');
+                const matched = matchCityByName(data.city);
+                const city = matched ? matched.name : (data.city || findClosestSupportedCity(data.latitude, data.longitude).name);
+                return {
+                    lat: Number(data.latitude) || 17.3850,
+                    lng: Number(data.longitude) || 78.4867,
+                    city,
+                    isServiceable: Boolean(matched),
                     area: data.region || city,
                     postalCode: data.postal || '',
                     state: data.region || '',

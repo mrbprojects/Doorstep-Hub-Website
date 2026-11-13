@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Crosshair, Search, Loader2, X } from 'lucide-react';
@@ -9,11 +9,15 @@ import { useLocationContext } from '@/context/LocationContext';
 export function InitialLocationModal() {
     const { location, detectWithGPS, isMapsLoaded, setManualLocation, searchLocation } = useLocationContext();
     const [isOpen, setIsOpen] = useState(() => !location);
-    const [prevLocation, setPrevLocation] = useState(location);
-    if (prevLocation !== location) {
-        setPrevLocation(location);
-        setIsOpen(!location);
-    }
+    const userInteractedRef = useRef(false);
+
+    React.useEffect(() => {
+        // Only auto-close from background detection if user hasn't interacted with the modal.
+        // Prevents the modal from disappearing while the user is actively selecting GPS/city/search.
+        if (!userInteractedRef.current && location) {
+            setIsOpen(false);
+        }
+    }, [location]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -41,6 +45,7 @@ export function InitialLocationModal() {
 
 
     const handleDetect = async () => {
+        userInteractedRef.current = true;
         setIsDetecting(true);
         try {
             await detectWithGPS();
@@ -80,6 +85,7 @@ export function InitialLocationModal() {
     };
 
     const handleSelectCity = async (cityName) => {
+        userInteractedRef.current = true;
         setIsSearching(true);
         try {
             const results = await searchLocation(cityName);
@@ -164,7 +170,7 @@ export function InitialLocationModal() {
                                     </button>
 
                                     <button
-                                        onClick={() => setView('search')}
+                                        onClick={() => { userInteractedRef.current = true; setView('search'); }}
                                         disabled={!isMapsLoaded}
                                         className="text-gray-400 hover:text-white text-xs font-medium transition-colors mb-2 block mx-auto"
                                     >

@@ -10,6 +10,7 @@ import { SellBuyFooter } from '@/components/sell-buy/layout/SellBuyFooter';
 import { SellBuyHeader } from '@/components/sell-buy/layout/SellBuyHeader';
 import { SellBuyHowItWorks } from '@/components/sell-buy/SellBuyHowItWorks';
 import { KnowledgeSection } from '@/components/landing/KnowledgeSection';
+import { AppDownload } from '@/components/landing/AppDownload';
 import {
   fetchSellBuyCategories,
   fetchSellBuyListings,
@@ -458,6 +459,9 @@ export default function SellBuyHomePage() {
 
       {/* Full Marketplace Footer */}
       <KnowledgeSection vertical="sell-buy" showNewsletter={false} />
+
+      {/* Mobile App Download Section */}
+      <AppDownload />
 
       <SellBuyFooter />
 

@@ -8,26 +8,8 @@ import { X, ExternalLink, Download, Smartphone, QrCode } from 'lucide-react';
 import { getAppPromotionForRoute, resolveDeepLinkUrls } from '@/config/appPromotionConfig';
 import { trackAppPromotionEvent, PROMOTION_EVENTS } from '@/services/appPromotionAnalytics';
 import { GooglePlayLogo, AppleLogo } from './StoreLogos';
+import { SimpleQrCode } from './SimpleQrCode';
 import { useMounted } from '@/hooks/useMounted';
-
-/**
- * Clean QR Code representation pointing to the app's smart link
- */
-function SimpleQrCode({ value, size = 140 }) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&margin=1`;
-
-  return (
-    <div className="bg-white p-3 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-center">
-      <Image
-        src={qrUrl}
-        alt="Scan to Download App"
-        width={size}
-        height={size}
-        className="rounded-lg"
-      />
-    </div>
-  );
-}
 
 export function AppInstallBanner() {
   const pathname = usePathname();

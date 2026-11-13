@@ -1,32 +1,12 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { QrCode, Smartphone } from 'lucide-react';
 import { getAppPromotionForRoute } from '@/config/appPromotionConfig';
 import { trackAppPromotionEvent, PROMOTION_EVENTS } from '@/services/appPromotionAnalytics';
 import { GooglePlayLogo, AppleLogo } from './StoreLogos';
-
-/**
- * Generates an SVG QR Code representation pointing to the target URL
- */
-function SimpleQrCode({ value, size = 120 }) {
-  // Uses authoritative Google Charts API / quickchart for clean reliable QR rendering
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&margin=1`;
-
-  return (
-    <div className="bg-white p-2 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-center">
-      <Image
-        src={qrUrl}
-        alt="Scan to Download App"
-        width={size}
-        height={size}
-        className="rounded-lg"
-      />
-    </div>
-  );
-}
+import { SimpleQrCode } from './SimpleQrCode';
 
 export function DesktopAppDownloadCard({ forcedAppType = null, className = '' }) {
   const pathname = usePathname();

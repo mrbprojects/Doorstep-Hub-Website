@@ -255,7 +255,11 @@ export function Hero({ onViewServices, onBookService }) {
                 src="/appliance-hero-main.png"
                 alt="Doorstep Hub Verified Appliance Repair Technician & Appliances"
                 className="w-full h-full object-contain drop-shadow-[0_16px_32px_rgba(3,113,102,0.12)] hover:scale-[1.02] transition-transform duration-500 select-none"
-               width={500} height={300} />
+                width={560}
+                height={560}
+                priority
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 560px"
+              />
             </motion.div>
           </div>
 

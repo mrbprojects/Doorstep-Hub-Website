@@ -550,6 +550,7 @@ export function HeroSection() {
                     src="/hero-technician.png"
                     alt="Doorstep Hub technician"
                     fill
+                    priority
                     className="object-contain object-bottom"
                     sizes="150px"
                   />
@@ -561,6 +562,7 @@ export function HeroSection() {
                     src="/hero-customer.png"
                     alt="Customer booking home and lifestyle services on mobile"
                     fill
+                    priority
                     className="object-contain object-bottom"
                     sizes="150px"
                   />

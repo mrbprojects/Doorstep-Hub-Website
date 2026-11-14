@@ -54,15 +54,15 @@ export function ApplianceServiceBannerCarousel({
         <div className="flex h-full">
           {banners.map((banner, idx) => (
             <div key={banner.id || idx} className="relative h-full min-w-0 shrink-0 grow-0 basis-full overflow-hidden">
-              {/* Soft ambient backdrop matching the banner palette so sides blend seamlessly */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+              {/* Soft ambient backdrop matching the banner palette so sides blend seamlessly on wide screens */}
+              <div className="hidden md:block absolute inset-0 overflow-hidden pointer-events-none select-none">
                 <Image
                   src={banner.imageUrl}
                   alt=""
                   aria-hidden="true"
                   fill
                   unoptimized
-                  sizes="100vw"
+                  sizes="(min-width: 768px) 100vw, 1px"
                   className="object-cover blur-2xl opacity-35 scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-[#f0fbf9]/30 to-white/70" />
@@ -77,7 +77,7 @@ export function ApplianceServiceBannerCarousel({
                     fill
                     unoptimized
                     priority={idx === 0}
-                    sizes="(max-width: 1300px) 100vw, 1300px"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1300px) 95vw, 1240px"
                     className="object-contain object-center rounded-xl sm:rounded-2xl transition-transform duration-500 hover:scale-[1.01]"
                   />
                 </div>

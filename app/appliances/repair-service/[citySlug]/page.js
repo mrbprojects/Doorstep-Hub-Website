@@ -98,7 +98,12 @@ function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onAct
           }`}
         >
           {bannerLoading ? (
-            <div className="h-full w-full animate-pulse bg-gradient-to-r from-[#e6f4f1] via-[#d0ebe6] to-[#e6f4f1]" />
+            <div className="flex h-full w-full flex-col items-center justify-center px-4 text-center bg-gradient-to-br from-[#f0fdfa] via-white to-[#e6f7f5]">
+              <h1 className="text-xl font-black text-[#037166] sm:text-2xl md:text-3xl tracking-tight">
+                Appliance Repair Services
+              </h1>
+              <p className="mt-1.5 text-xs font-semibold text-gray-600 sm:text-sm">in {cityLabel}</p>
+            </div>
           ) : banners.length > 0 ? (
             <ApplianceServiceBannerCarousel
               banners={banners}

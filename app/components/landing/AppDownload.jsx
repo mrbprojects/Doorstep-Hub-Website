@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
+import { getQrCodePath } from '@/lib/qrCode';
 import {
   Smartphone,
   Zap,
@@ -28,6 +29,7 @@ import {
 export function AppDownload() {
   const googlePlayUrl = "https://play.google.com/store/apps/details?id=com.doorstephub.customer&pcampaignid=web_share";
   const appStoreUrl = "https://apps.apple.com/in/app/doorstep-hub/id6475340236";
+  const qrCode = useMemo(() => getQrCodePath('https://doorstephub.com/app?type=customer', 2), []);
 
   return (
     <section
@@ -186,52 +188,20 @@ export function AppDownload() {
 
               {/* QR Code Container */}
               <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-slate-200 p-1 bg-white shadow-2xs flex items-center justify-center shrink-0 relative">
-                  {/* Crisp SVG QR code representation with D-hub logo in center */}
-                  <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-                    {/* Corner Position Detection Squares */}
-                    <rect x="6" y="6" width="26" height="26" rx="4" fill="#101828"/>
-                    <rect x="11" y="11" width="16" height="16" rx="2" fill="white"/>
-                    <rect x="15" y="15" width="8" height="8" rx="1.5" fill="#008C80"/>
-
-                    <rect x="68" y="6" width="26" height="26" rx="4" fill="#101828"/>
-                    <rect x="73" y="11" width="16" height="16" rx="2" fill="white"/>
-                    <rect x="77" y="15" width="8" height="8" rx="1.5" fill="#008C80"/>
-
-                    <rect x="6" y="68" width="26" height="26" rx="4" fill="#101828"/>
-                    <rect x="11" y="73" width="16" height="16" rx="2" fill="white"/>
-                    <rect x="15" y="77" width="8" height="8" rx="1.5" fill="#008C80"/>
-
-                    {/* QR Matrix Dots */}
-                    <rect x="38" y="8" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="48" y="8" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="58" y="14" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="38" y="24" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="48" y="24" width="5" height="5" rx="1" fill="#008C80"/>
-                    <rect x="58" y="28" width="5" height="5" rx="1" fill="#101828"/>
-
-                    <rect x="8" y="38" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="22" y="38" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="8" y="48" width="5" height="5" rx="1" fill="#008C80"/>
-                    <rect x="18" y="56" width="5" height="5" rx="1" fill="#101828"/>
-
-                    <rect x="72" y="38" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="86" y="38" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="76" y="48" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="86" y="56" width="5" height="5" rx="1" fill="#008C80"/>
-
-                    <rect x="38" y="72" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="48" y="72" width="5" height="5" rx="1" fill="#008C80"/>
-                    <rect x="58" y="78" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="38" y="86" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="48" y="86" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="78" y="82" width="5" height="5" rx="1" fill="#101828"/>
-                    <rect x="86" y="88" width="5" height="5" rx="1" fill="#101828"/>
-
-                    {/* Central Brand Pill */}
-                    <rect x="33" y="38" width="34" height="24" rx="4" fill="white" stroke="#008C80" strokeWidth="1.5"/>
-                    <text x="50" y="54" textAnchor="middle" fill="#008C80" fontSize="9" fontWeight="900" fontFamily="sans-serif">D-hub</text>
-                  </svg>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-slate-200 p-1 bg-white shadow-2xs flex items-center justify-center shrink-0 relative overflow-hidden">
+                  {qrCode.success && qrCode.pathD ? (
+                    <svg
+                      viewBox={`0 0 ${qrCode.total} ${qrCode.total}`}
+                      className="w-full h-full"
+                      shapeRendering="crispEdges"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect width={qrCode.total} height={qrCode.total} fill="#FFFFFF" rx="2" />
+                      <path d={qrCode.pathD} fill="#101828" />
+                    </svg>
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 rounded-md" />
+                  )}
                 </div>
                 <div className="flex flex-col text-left leading-snug">
                   <span className="text-xs sm:text-sm font-bold text-[#101828]">Scan QR Code</span>

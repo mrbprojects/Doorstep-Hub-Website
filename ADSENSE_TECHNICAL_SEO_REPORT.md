@@ -26,7 +26,6 @@ export default function robots() {
       allow: '/',
       disallow: [
         '/api/',
-        '/_next/',
         '/admin/',
       ],
     },
@@ -37,8 +36,9 @@ export default function robots() {
 
 ### Analysis of Directives:
 1. **Zero Crawl/Index Conflicts**: In strict accordance with Google Search Central guidance, private, transactional, and auth routes are **not** blocked in `robots.txt`. This guarantees Googlebot can freely crawl the URLs and read their `<meta name="robots" content="noindex, nofollow" />` directives, permanently preventing the dreaded "Indexed, though blocked by robots.txt" warning in Google Search Console.
-2. **Technical Endpoints Protected**: Pure non-HTML / backend proxy routes (`/_next/`, `/api/`, `/admin/`) are disallowed.
-3. **Public Subcategories Unblocked**: Public service subcategory routes (`/subcategory/*`) are fully accessible to search crawlers.
+2. **Googlebot Full Render Access (`/_next/` Unrestricted)**: The broad `Disallow: /_next/` rule was deliberately removed in accordance with Google Webmaster and Search Central rendering specifications. This ensures Googlebot can render client-side JavaScript, fetch CSS stylesheets, fonts, and optimized images without restriction.
+3. **Backend & Admin Endpoints Protected**: Pure non-HTML / backend proxy and administrative routes (`/api/`, `/admin/`) are disallowed.
+4. **Public Subcategories Unblocked**: Public service subcategory routes (`/subcategory/*`) are fully accessible to search crawlers.
 
 ---
 

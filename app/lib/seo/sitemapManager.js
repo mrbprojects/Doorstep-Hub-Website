@@ -15,12 +15,18 @@ const STATIC_ROUTES = [
     { url: `${BASE_URL}/contact-us`, priority: 0.8, changeFrequency: 'monthly' },
     { url: `${BASE_URL}/careers`, priority: 0.8, changeFrequency: 'monthly' },
     { url: `${BASE_URL}/faqs`, priority: 0.7, changeFrequency: 'monthly' },
+    { url: `${BASE_URL}/help-center`, priority: 0.9, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/help-center/appliance-repair`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/help-center/salon-beauty-services`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/help-center/pet-care-services`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/help-center/pg-hostel`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/help-center/pooja-religious-services`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/help-center/buy-sell-old-things`, priority: 0.8, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/knowledge`, priority: 0.9, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/blog`, priority: 0.9, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/privacy-policy`, priority: 0.5, changeFrequency: 'yearly' },
     { url: `${BASE_URL}/terms-conditions`, priority: 0.5, changeFrequency: 'yearly' },
-    { url: `${BASE_URL}/refund-policy`, priority: 0.3, changeFrequency: 'yearly' },
-    { url: `${BASE_URL}/deletion-requests`, priority: 0.3, changeFrequency: 'yearly' },
+    { url: `${BASE_URL}/refund-policy`, priority: 0.5, changeFrequency: 'yearly' },
     { url: `${BASE_URL}/appliances`, priority: 0.9, changeFrequency: 'daily' },
     { url: `${BASE_URL}/appliances/categories`, priority: 0.8, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/appliances/centers`, priority: 0.8, changeFrequency: 'weekly' },
@@ -33,9 +39,14 @@ const STATIC_ROUTES = [
     { url: `${BASE_URL}/pghostels`, priority: 0.9, changeFrequency: 'daily' },
     { url: `${BASE_URL}/spa-salon`, priority: 0.9, changeFrequency: 'daily' },
     { url: `${BASE_URL}/religious-services`, priority: 0.9, changeFrequency: 'daily' },
+    { url: `${BASE_URL}/sell-buy`, priority: 0.9, changeFrequency: 'daily' },
+    { url: `${BASE_URL}/sell-buy/categories`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/sell-buy/about`, priority: 0.7, changeFrequency: 'monthly' },
+    { url: `${BASE_URL}/sell-buy/safety`, priority: 0.7, changeFrequency: 'monthly' },
+    { url: `${BASE_URL}/sell-buy/help`, priority: 0.7, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/sell-buy/contact-us`, priority: 0.7, changeFrequency: 'monthly' },
     { url: `${BASE_URL}/amc`, priority: 0.8, changeFrequency: 'weekly' },
-    { url: `${BASE_URL}/book-appointment`, priority: 0.8, changeFrequency: 'weekly' },
-    { url: `${BASE_URL}/appliance-repairs/services-centers`, priority: 0.8, changeFrequency: 'daily' }
+    { url: `${BASE_URL}/book-appointment`, priority: 0.8, changeFrequency: 'weekly' }
 ];
 
 /**

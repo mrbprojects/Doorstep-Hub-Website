@@ -52,16 +52,8 @@ export default function CategoryPageClient({
 
     // Filter articles belonging strictly to this category
     const categoryArticles = useMemo(() => {
-        return allArticles.filter((art) => {
-            if (art.categorySlug === categorySlug) return true;
-            const matchesService = art.serviceName?.toLowerCase().includes(category?.shortName?.toLowerCase());
-            const matchesKeyword = category?.serviceKeywords?.some((kw) =>
-                art.title.toLowerCase().includes(kw) ||
-                art.category.toLowerCase().includes(kw)
-            );
-            return Boolean(matchesService || matchesKeyword);
-        });
-    }, [allArticles, category, categorySlug]);
+        return allArticles.filter((art) => art.categorySlug === categorySlug);
+    }, [allArticles, categorySlug]);
 
     // Apply search filter
     const searchedArticles = useMemo(() => {

@@ -42,7 +42,7 @@ async function validateSitemaps() {
             if (
                 url.includes('/appliances/repair-service/') ||
                 url.includes('/appliances/brand/') ||
-                url.includes('/pg-hostel') ||
+                (url.includes('/pg-hostel') && !url.includes('/help-center/')) ||
                 url.endsWith('/religious')
             ) {
                 legacyUrlsCount++;

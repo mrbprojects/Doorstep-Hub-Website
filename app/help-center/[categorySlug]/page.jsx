@@ -54,22 +54,10 @@ async function fetchCategoryData(categorySlug) {
     });
 
     allArticles.forEach(art => {
-        // Match against category serviceKeywords or serviceId
-        let matched = false;
-        for (const cat of HELP_CATEGORIES) {
-            const matchesService = art.serviceName?.toLowerCase().includes(cat.shortName.toLowerCase());
-            const matchesKeyword = cat.serviceKeywords.some(kw =>
-                art.title.toLowerCase().includes(kw) ||
-                art.category.toLowerCase().includes(kw)
-            );
-            if (matchesService || matchesKeyword) {
-                categoryCounts[cat.slug] = (categoryCounts[cat.slug] || 0) + 1;
-                matched = true;
-                break;
-            }
-        }
-        if (!matched) {
-            // Default to appliance-repair if appliance related
+        const catSlug = art.categorySlug || 'appliance-repair';
+        if (categoryCounts[catSlug] !== undefined) {
+            categoryCounts[catSlug] += 1;
+        } else {
             categoryCounts['appliance-repair'] = (categoryCounts['appliance-repair'] || 0) + 1;
         }
     });

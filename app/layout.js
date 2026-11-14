@@ -110,6 +110,13 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://api.dicebear.com" />
 
+        {/* Google AdSense Site Verification & Ad Serving */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9096117264343047"
+          crossOrigin="anonymous"
+        />
+
         {/*
           Define the Maps callback function BEFORE the Maps script loads.
           This is tiny (<50 bytes), synchronous, and required so the Maps

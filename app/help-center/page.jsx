@@ -214,10 +214,7 @@ export default function HelpCenterPage() {
 
           // Calculate dynamic category counts
           const dynamicCategories = BASELINE_HELP_CATEGORIES.map(cat => {
-            const matches = normalizedList.filter(art => {
-              const text = `${art.title} ${art.category} ${art.serviceName}`.toLowerCase();
-              return cat.keywords.some(kw => text.includes(kw));
-            });
+            const matches = normalizedList.filter(art => art.categorySlug === cat.id);
             // Show real count if greater than baseline, otherwise preserve baseline
             const count = Math.max(cat.baselineCount, matches.length);
             return {

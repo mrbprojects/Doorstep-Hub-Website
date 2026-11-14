@@ -6,8 +6,9 @@ import { getImageSitemapChunks } from '../../lib/seo/imageInventory.js';
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
 
-export async function GET(request, { params }) {
-    let rawGroup = params.group || '';
+export async function GET(request, context) {
+    const resolvedParams = (context?.params && typeof context.params.then === 'function') ? await context.params : (context?.params || {});
+    let rawGroup = resolvedParams.group || '';
     if (rawGroup.endsWith('.xml')) {
         rawGroup = rawGroup.replace(/\.xml$/, '');
     }

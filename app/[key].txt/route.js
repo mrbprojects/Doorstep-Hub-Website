@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request, { params }) {
-    const keyParam = params?.key || '';
+export async function GET(request, context) {
+    const resolvedParams = (context?.params && typeof context.params.then === 'function') ? await context.params : (context?.params || {});
+    const keyParam = resolvedParams.key || '';
     const configuredKey = process.env.INDEXNOW_KEY;
 
     if (configuredKey && keyParam === configuredKey) {

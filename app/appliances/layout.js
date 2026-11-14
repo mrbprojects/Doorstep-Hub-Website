@@ -4,6 +4,9 @@ import { Footer } from '@/components/layout/Footer';
 export const metadata = {
     title: 'Home Appliance Repair & Services',
     description: 'Book professional home appliance repair services online. Expert technicians for AC, Refrigerator, Washing Machine, Geyser, TV repair & service.',
+    alternates: {
+        canonical: 'https://doorstephub.com/appliances',
+    },
 };
 
 export default function AppliancesLayout({ children }) {

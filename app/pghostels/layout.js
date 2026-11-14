@@ -4,8 +4,11 @@ import { NetworkStatus } from '@/components/ui/NetworkStatus';
 import { SessionManager } from '@/components/auth/SessionManager';
 
 export const metadata = {
-    title: 'PG & Hostels Booking | DoorstepHub',
+    title: 'PG & Hostels Booking',
     description: 'Find verified PGs, co-living spaces, and hostels near your college or office. Book instantly with zero brokerage.',
+    alternates: {
+        canonical: 'https://doorstephub.com/pghostels',
+    },
 };
 
 export default function PGHostelsLayout({ children }) {

@@ -2,8 +2,11 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export const metadata = {
-    title: 'Spa & Salon Services | DoorstepHub',
+    title: 'Spa & Salon Services',
     description: 'Book premium spa, salon, and wellness services at home or nearby.',
+    alternates: {
+        canonical: 'https://doorstephub.com/spa-salon',
+    },
 };
 
 export default function SpaSalonLayout({ children }) {

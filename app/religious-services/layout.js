@@ -2,8 +2,11 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export const metadata = {
-    title: 'Religious & Spiritual Services | DoorstepHub',
-    description: 'Book improved pandits, pujas, and spiritual services. Experience divine connection at your doorstep.',
+    title: 'Religious & Spiritual Services',
+    description: 'Book verified pandits, pujas, and spiritual services. Experience divine connection at your doorstep.',
+    alternates: {
+        canonical: 'https://doorstephub.com/religious-services',
+    },
 };
 
 export default function ReligiousServicesLayout({ children }) {

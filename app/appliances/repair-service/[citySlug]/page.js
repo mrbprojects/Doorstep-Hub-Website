@@ -91,11 +91,7 @@ function ApplianceServiceHero({ banners, bannerLoading, cityLabel, onBack, onAct
     <section className="relative z-10 w-full bg-[#eef2f1] pt-24 sm:pt-28 md:pt-32 pb-3">
       <div className="mx-auto w-full max-w-[1300px] px-3 sm:px-6 lg:px-8">
         <div
-          className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#037166]/20 bg-gradient-to-br from-[#f0fdfa] via-white to-[#e6f7f5] shadow-lg transition-all duration-300 ${
-            bannerLoading
-              ? 'h-[180px] sm:h-[240px] md:h-[300px]'
-              : 'h-[180px] min-[480px]:h-[220px] sm:h-[260px] md:h-[300px] lg:h-[330px]'
-          }`}
+          className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#037166]/20 bg-gradient-to-br from-[#f0fdfa] via-white to-[#e6f7f5] shadow-lg h-[180px] min-[480px]:h-[220px] sm:h-[260px] md:h-[300px] lg:h-[330px]"
         >
           {bannerLoading ? (
             <div className="flex h-full w-full flex-col items-center justify-center px-4 text-center bg-gradient-to-br from-[#f0fdfa] via-white to-[#e6f7f5]">

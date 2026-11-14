@@ -32,7 +32,7 @@ export function PartnerAppDownload({
   return (
     <section
       id="partner-app-download"
-      className="relative overflow-hidden bg-white py-8 sm:py-12 lg:py-14 border-t border-[#E9F8F6]"
+      className="relative overflow-hidden bg-white py-6 sm:py-8 lg:py-10 border-t border-[#E9F8F6]"
     >
       {/* ========================================================= */}
       {/* ATMOSPHERIC BACKGROUND DECORATIONS                        */}
@@ -59,12 +59,12 @@ export function PartnerAppDownload({
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-6 xl:gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 xl:gap-10 items-center">
           
           {/* ========================================================= */}
-          {/* LEFT COLUMN: HERO CONTENT, BENEFITS, STORES, STATS        */}
+          {/* LEFT COLUMN: HERO CONTENT, BENEFITS, STORES, PARTNER LOGIN */}
           {/* ========================================================= */}
-          <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-center text-left space-y-3.5 sm:space-y-4 lg:space-y-5">
+          <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-center text-left space-y-4 sm:space-y-5">
             
             {/* 1. BADGE: DOWNLOAD OUR APP */}
             <div>
@@ -97,7 +97,7 @@ export function PartnerAppDownload({
             </div>
 
             {/* 3. THREE BENEFIT ROWS */}
-            <div className="space-y-2 pt-0.5">
+            <div className="space-y-2.5 pt-0.5">
               {/* Benefit 1 */}
               <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-xl bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0 shadow-2xs">
@@ -145,17 +145,17 @@ export function PartnerAppDownload({
             </div>
 
             {/* 4. STORE BUTTONS + PARTNER LOGIN ROW */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 sm:pt-2">
               {/* Google Play Button */}
               {appLinks?.android && (
                 <a
                   href={appLinks.android}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="app-store-badge inline-flex items-center gap-2.5 px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#1A1A1A] text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                  className="app-store-badge inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-[#0A0A0A] hover:bg-[#1A1A1A] text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
                   title="Download Doorstep Hub Partner App on Google Play"
                 >
-                  <svg className="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" viewBox="0 0 24 24" fill="none">
                     <path d="M3.608 1.636a1.442 1.442 0 0 0-.358.988v18.752c0 .385.127.733.358.988l.056.056 10.5-10.428v-.248L3.664 1.58l-.056.056Z" fill="#2196F3"/>
                     <path d="M17.664 15.492l-3.5-3.48v-.248l3.5-3.48.08.046 4.148 2.357c1.184.673 1.184 1.774 0 2.447l-4.148 2.358-.08.046Z" fill="#FFC107"/>
                     <path d="M14.244 11.764L3.608 22.364c.389.412 1.05.464 1.79.043l12.346-7.015-3.5-3.628Z" fill="#F44336"/>
@@ -163,7 +163,7 @@ export function PartnerAppDownload({
                   </svg>
                   <div className="flex flex-col text-left leading-none">
                     <span className="text-[9px] uppercase tracking-wider text-slate-300">GET IT ON</span>
-                    <span className="text-sm font-bold text-white tracking-tight mt-0.5">Google Play</span>
+                    <span className="text-xs sm:text-sm font-bold text-white tracking-tight mt-0.5">Google Play</span>
                   </div>
                 </a>
               )}
@@ -174,15 +174,15 @@ export function PartnerAppDownload({
                   href={appLinks.ios}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="app-store-badge inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#0A0A0A] hover:bg-[#1A1A1A] text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                  className="app-store-badge inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-[#0A0A0A] hover:bg-[#1A1A1A] text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
                   title="Download Doorstep Hub Partner App on the App Store"
                 >
-                  <svg className="w-6 h-6 shrink-0 fill-current text-white" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 fill-current text-white" viewBox="0 0 24 24">
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.64-.78 1.08-1.86.96-2.84-.93.04-2.05.62-2.7 1.39-.58.67-1.08 1.76-.95 2.82 1.04.08 2.06-.59 2.69-1.37z"/>
                   </svg>
                   <div className="flex flex-col text-left leading-none">
                     <span className="text-[9px] text-slate-300">Download on the</span>
-                    <span className="text-sm font-bold text-white tracking-tight mt-0.5">App Store</span>
+                    <span className="text-xs sm:text-sm font-bold text-white tracking-tight mt-0.5">App Store</span>
                   </div>
                 </a>
               )}
@@ -198,116 +198,63 @@ export function PartnerAppDownload({
               </button>
             </div>
 
-            {/* 5. APP STATS ROW */}
-            <div className="flex items-center gap-4 sm:gap-8 pt-1.5 border-t border-slate-100">
-              <div>
-                <div className="flex items-center gap-1 text-xl sm:text-2xl lg:text-3xl font-black text-[#008C80] leading-none mb-0.5">
-                  <span>4.8</span>
-                  <Star className="w-4 h-4 fill-[#008C80] text-[#008C80]" />
-                </div>
-                <span className="text-[11px] sm:text-xs font-semibold text-[#667085]">Google Rating</span>
-              </div>
-
-              <div className="h-7 sm:h-8 w-px bg-slate-200" />
-
-              <div>
-                <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#008C80] leading-none mb-0.5">
-                  5K+
-                </div>
-                <span className="text-[11px] sm:text-xs font-semibold text-[#667085]">Downloads</span>
-              </div>
-
-              <div className="h-7 sm:h-8 w-px bg-slate-200" />
-
-              <div>
-                <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#008C80] leading-none mb-0.5">
-                  1K+
-                </div>
-                <span className="text-[11px] sm:text-xs font-semibold text-[#667085]">Reviews</span>
-              </div>
-            </div>
-
           </div>
 
           {/* ========================================================= */}
-          {/* RIGHT COLUMN: 3D PARTNER PHONE MOCKUP WITH 4 CALLOUT CARDS*/}
+          {/* RIGHT COLUMN: 3D PARTNER PHONE MOCKUP (REDUCED 30%)       */}
           {/* ========================================================= */}
-          <div className="lg:col-span-6 xl:col-span-5 relative flex items-center justify-center pt-2 pb-4 sm:pt-4 sm:pb-6 lg:py-2">
+          <div className="lg:col-span-6 xl:col-span-5 relative flex items-center justify-center py-2 sm:py-4">
             
-            {/* SVG Connector Lines (Desktop Only) */}
-            <div className="hidden xl:block absolute inset-0 pointer-events-none z-10" aria-hidden="true">
-              <svg className="w-full h-full" viewBox="0 0 540 600" fill="none">
-                {/* Line to Top-Left: Get More Service Requests */}
-                <path d="M120 170 C 140 210, 160 215, 195 218" stroke="#008C80" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.7"/>
-                <circle cx="120" cy="170" r="3.5" fill="#008C80"/>
-                <circle cx="195" cy="218" r="3" fill="#008C80"/>
-
-                {/* Line to Bottom-Left: Grow Your Earnings */}
-                <path d="M130 380 C 150 350, 170 350, 195 365" stroke="#008C80" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.7"/>
-                <circle cx="130" cy="380" r="3.5" fill="#008C80"/>
-                <circle cx="195" cy="365" r="3" fill="#008C80"/>
-
-                {/* Line to Top-Right: Secure & Reliable */}
-                <path d="M420 180 C 390 200, 365 190, 345 160" stroke="#008C80" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.7"/>
-                <circle cx="420" cy="180" r="3.5" fill="#008C80"/>
-                <circle cx="345" cy="160" r="3" fill="#008C80"/>
-
-                {/* Line to Bottom-Right: Flexible Work Schedule */}
-                <path d="M420 370 C 390 350, 365 375, 345 400" stroke="#008C80" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.7"/>
-                <circle cx="420" cy="370" r="3.5" fill="#008C80"/>
-                <circle cx="345" cy="400" r="3" fill="#008C80"/>
-              </svg>
-            </div>
-
             {/* CALLOUT CARD 1: TOP-LEFT (Get More Service Requests) */}
-            <div className="hidden xl:flex app-callout-card absolute -left-12 top-16 z-20 bg-white border border-[#BCE3DE]/60 rounded-2xl p-3.5 shadow-[0_8px_24px_-4px_rgba(0,140,128,0.12)] items-center gap-3 w-56">
-              <div className="w-10 h-10 rounded-xl bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
-                <Download className="w-5 h-5 text-[#008C80]" />
+            <div className="hidden xl:flex app-callout-card absolute -left-8 top-6 z-20 bg-white border border-[#BCE3DE]/70 rounded-xl p-2.5 shadow-[0_8px_20px_-4px_rgba(0,140,128,0.12)] items-center gap-2.5 w-52">
+              <div className="w-8 h-8 rounded-lg bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
+                <Download className="w-4 h-4 text-[#008C80]" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-xs font-black text-[#101828]">Get More Service Requests</h4>
-                <p className="text-[11px] text-[#667085] leading-tight mt-0.5">Reach new customers in your area.</p>
+                <p className="text-[10px] text-[#667085] leading-tight mt-0.5">Reach new customers in your area.</p>
               </div>
             </div>
 
             {/* CALLOUT CARD 2: BOTTOM-LEFT (Grow Your Earnings) */}
-            <div className="hidden xl:flex app-callout-card absolute -left-10 top-72 z-20 bg-white border border-[#BCE3DE]/60 rounded-2xl p-3.5 shadow-[0_8px_24px_-4px_rgba(0,140,128,0.12)] items-center gap-3 w-52">
-              <div className="w-10 h-10 rounded-xl bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
-                <Star className="w-5 h-5 text-[#008C80]" />
+            <div className="hidden xl:flex app-callout-card absolute -left-6 top-52 z-20 bg-white border border-[#BCE3DE]/70 rounded-xl p-2.5 shadow-[0_8px_20px_-4px_rgba(0,140,128,0.12)] items-center gap-2.5 w-48">
+              <div className="w-8 h-8 rounded-lg bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
+                <Star className="w-4 h-4 text-[#008C80]" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-xs font-black text-[#101828]">Grow Your Earnings</h4>
-                <p className="text-[11px] text-[#667085] leading-tight mt-0.5">More jobs, more income.</p>
+                <p className="text-[10px] text-[#667085] leading-tight mt-0.5">More jobs, more income.</p>
               </div>
             </div>
 
             {/* CALLOUT CARD 3: TOP-RIGHT (Secure & Reliable) */}
-            <div className="hidden xl:flex app-callout-card absolute -right-12 top-20 z-20 bg-white border border-[#BCE3DE]/60 rounded-2xl p-3.5 shadow-[0_8px_24px_-4px_rgba(0,140,128,0.12)] items-center gap-3 w-52">
-              <div className="w-10 h-10 rounded-xl bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-[#008C80]" />
+            <div className="hidden xl:flex app-callout-card absolute -right-8 top-10 z-20 bg-white border border-[#BCE3DE]/70 rounded-xl p-2.5 shadow-[0_8px_20px_-4px_rgba(0,140,128,0.12)] items-center gap-2.5 w-50">
+              <div className="w-8 h-8 rounded-lg bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 text-[#008C80]" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-xs font-black text-[#101828]">Secure &amp; Reliable</h4>
-                <p className="text-[11px] text-[#667085] leading-tight mt-0.5">Your data and payments are safe.</p>
+                <p className="text-[10px] text-[#667085] leading-tight mt-0.5">Your data and payments are safe.</p>
               </div>
             </div>
 
             {/* CALLOUT CARD 4: BOTTOM-RIGHT (Flexible Work Schedule) */}
-            <div className="hidden xl:flex app-callout-card absolute -right-10 top-76 z-20 bg-white border border-[#BCE3DE]/60 rounded-2xl p-3.5 shadow-[0_8px_24px_-4px_rgba(0,140,128,0.12)] items-center gap-3 w-56">
-              <div className="w-10 h-10 rounded-xl bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
-                <Clock className="w-5 h-5 text-[#008C80]" />
+            <div className="hidden xl:flex app-callout-card absolute -right-6 top-56 z-20 bg-white border border-[#BCE3DE]/70 rounded-xl p-2.5 shadow-[0_8px_20px_-4px_rgba(0,140,128,0.12)] items-center gap-2.5 w-52">
+              <div className="w-8 h-8 rounded-lg bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 text-[#008C80]" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-xs font-black text-[#101828]">Flexible Work Schedule</h4>
-                <p className="text-[11px] text-[#667085] leading-tight mt-0.5">Manage your time your way.</p>
+                <p className="text-[10px] text-[#667085] leading-tight mt-0.5">Manage your time your way.</p>
               </div>
             </div>
 
-            {/* THE SMARTPHONE WITH PEDESTAL */}
-            <div className="relative flex flex-col items-center">
+            {/* 30% REDUCED PHONE MOCKUP CONTAINER */}
+            <div className="relative flex items-center justify-center w-[230px] sm:w-[250px] h-[450px] sm:h-[470px]">
+              <div className="w-[305px] h-[615px] transform scale-[0.70] origin-center flex flex-col items-center shrink-0 pointer-events-auto">
               
               {/* Smartphone Frame (iPhone 16 Pro styling) */}
-              <div className="relative z-10 w-[260px] xs:w-[275px] sm:w-[290px] h-[525px] xs:h-[555px] sm:h-[585px] bg-[#101828] rounded-[44px] p-2 sm:p-2.5 shadow-[0_20px_50px_-15px_rgba(0,140,128,0.25),0_10px_25px_-10px_rgba(16,24,40,0.35)] border-[3px] border-[#344054]">
+              <div className="relative z-10 w-[275px] xs:w-[290px] sm:w-[305px] h-[555px] xs:h-[585px] sm:h-[615px] bg-[#101828] rounded-[48px] p-2.5 shadow-[0_25px_60px_-15px_rgba(0,140,128,0.3),0_15px_30px_-10px_rgba(16,24,40,0.4)] border-[3.5px] border-[#344054]">
                 
                 {/* Metallic Side Highlights */}
                 <div className="absolute top-24 -left-1 w-0.5 h-10 bg-[#667085] rounded-l" />
@@ -495,6 +442,7 @@ export function PartnerAppDownload({
                 <div className="absolute bottom-3.5 w-[92%] h-10 rounded-[100%] bg-gradient-to-b from-[#DDF2EE] to-[#BEE5DF] opacity-90" />
               </div>
 
+              </div>
             </div>
 
           </div>
@@ -505,7 +453,7 @@ export function PartnerAppDownload({
         {/* MOBILE & TABLET ONLY: 4 CALLOUT CARDS IN 2x2 GRID         */}
         {/* (Rendered cleanly below on screens < 1280px)              */}
         {/* ========================================================= */}
-        <div className="xl:hidden mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+        <div className="xl:hidden mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           <div className="app-callout-card bg-white border border-[#BCE3DE]/60 rounded-xl p-3 sm:p-3.5 shadow-2xs flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[#DEF2EF] border border-[#BCE3DE] flex items-center justify-center shrink-0">
               <Download className="w-4 h-4 text-[#008C80]" />

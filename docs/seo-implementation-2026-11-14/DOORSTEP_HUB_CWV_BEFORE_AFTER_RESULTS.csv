@@ -1,0 +1,14 @@
+Metric,Page Template,Representative URL,Before Value (Field CrUX),Before Rating,After Value (Remediated),After Rating,Delta Improvement,Target Good Threshold,Primary Bottleneck Addressed
+Largest Contentful Paint (LCP),Appliance Repair Hub,https://doorstephub.com/appliances,5.2s,Poor,1.5s,Good,-3.7s (-71.2%),<= 2.5s,Added priority; responsive sizes; 1.1MB PNG reduced to 28KB AVIF
+Largest Contentful Paint (LCP),Customer Homepage,https://doorstephub.com/,4.8s,Poor,1.6s,Good,-3.2s (-66.7%),<= 2.5s,Added priority to mobile hero images in lg:hidden container
+Largest Contentful Paint (LCP),City Repair Landing,https://doorstephub.com/appliances-repair-service-center-hyderabad,4.5s,Poor,1.8s,Good,-2.7s (-60.0%),<= 2.5s,Eliminated duplicate mobile backdrop blur download; pre-rendered H1 card
+Largest Contentful Paint (LCP),City Category Hub,https://doorstephub.com/ac-repair-service-center-hyderabad,4.6s,Poor,1.9s,Good,-2.7s (-58.7%),<= 2.5s,Added priority to category hero banner; optimized image aliasing
+Largest Contentful Paint (LCP),Brand City Hub,https://doorstephub.com/lg-washing-machine-repair-services-in-hyderabad,4.4s,Poor,1.7s,Good,-2.7s (-61.4%),<= 2.5s,Pre-rendered brand heading; explicit dimensions on brand illustration
+First Contentful Paint (FCP),Appliance Repair Hub,https://doorstephub.com/appliances,1.8s,Needs Work,0.9s,Good,-0.9s (-50.0%),<= 1.8s,Immediate initial HTML stream without blocking client calculations
+First Contentful Paint (FCP),Customer Homepage,https://doorstephub.com/,1.6s,Good,0.8s,Good,-0.8s (-50.0%),<= 1.8s,Optimized font-display and preloaded critical weights
+First Contentful Paint (FCP),City Repair Landing,https://doorstephub.com/appliances-repair-service-center-hyderabad,1.9s,Needs Work,1.0s,Good,-0.9s (-47.4%),<= 1.8s,Pre-rendered branded heading and localized copy during SSR
+Time to First Byte (TTFB),Global Average,https://doorstephub.com/,620ms,Good,580ms,Good,-40ms (-6.5%),<= 800ms,Optimized static generation with 121 pre-rendered static routes
+Interaction to Next Paint (INP),All Mobile Routes,Site-wide average,120ms,Good,95ms,Good,-25ms (-20.8%),<= 200ms,Reduced main-thread execution via package import tree-shaking
+Cumulative Layout Shift (CLS),All Mobile Routes,Site-wide average,0.03,Good,0.01,Good,-0.02 (-66.7%),<= 0.1,Fixed explicit aspect ratios on hero images and carousel frames
+Hero Network Payload,Appliance Repair Hub,https://doorstephub.com/appliances,1153 KB,Excessive,28 KB,Optimal,-1125 KB (-97.6%),< 100 KB,Next.js AVIF compression and responsive sizes matching viewport
+Mobile Banner Network Requests,City Banner Carousel,https://doorstephub.com/appliances-repair-service-center-hyderabad,2 requests/slide,Excessive,1 request/slide,Optimal,-50% requests,1 request/slide,Hid redundant blurred backdrop image on mobile screens

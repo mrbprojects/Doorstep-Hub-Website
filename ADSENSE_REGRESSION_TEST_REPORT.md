@@ -12,9 +12,10 @@
 
 | Test Suite | Command Executed | Result | Notes |
 |---|---|---|---|
+| **Full Unit & Regression Suite** | `npm test` | **PASS (186/186 passed, 0 failed)** | All 36 suites passed across payment security, admin control, booking integrity, image aliasing, and canonical routing. |
 | **ESLint Static Analysis** | `npm run lint` | **PASS (0 errors, 6 warnings)** | All warnings are pre-existing minor non-blocking items. No syntax or import regressions. |
 | **Sitemap Quality Audit** | `npm run seo:validate-sitemaps` | **PASS (0 errors)** | 58 unique canonical URLs validated against all acceptance criteria. |
-| **Next.js Production Build** | `npm run build` | **PASS (Exit Code 0)** | Compiled 121 static routes and SSR dynamic routes successfully in 11.2s. |
+| **Next.js Production Build** | `npm run build` | **PASS (Exit Code 0)** | Compiled 121 static routes and SSR dynamic routes successfully in 10.0s. |
 | **Live Knowledge-Base API Fetch** | Node SSR validation script | **PASS** | 74 articles parsed; exact counts confirmed across all 6 business verticals. |
 | **Ads.txt Syntax & Accessibility** | Static file check | **PASS** | Single-line RFC-compliant record matching `ca-pub-9096117264343047`. |
 

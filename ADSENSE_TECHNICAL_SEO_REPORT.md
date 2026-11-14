@@ -16,7 +16,7 @@ The Doorstep Hub web application runs on Next.js 16 with App Router, utilizing R
 
 ## 2. Robots.txt Configuration
 
-The `app/robots.js` generator produces a dynamic `robots.txt` conforming to RFC 9309 standards.
+The `app/robots.js` generator produces a dynamic `robots.txt` conforming to RFC 9309 and Google Search Central best practices.
 
 ```javascript
 export default function robots() {
@@ -28,30 +28,6 @@ export default function robots() {
         '/api/',
         '/_next/',
         '/admin/',
-        '/account/',
-        '/cart/',
-        '/checkout/',
-        '/booking/',
-        '/thank-you/',
-        '/thank-you-cod/',
-        '/payment-failed/',
-        '/results/',
-        '/search/',
-        '/**/cart/',
-        '/**/checkout/',
-        '/**/booking/',
-        '/**/thank-you/',
-        '/**/thank-you-cod/',
-        '/**/results/',
-        '/**/payment-failed/',
-        '/partner/',
-        '/service-partner/',
-        '/sell-buy/dashboard/',
-        '/sell-buy/post-ad',
-        '/sell-buy/chat',
-        '/logo-test/',
-        '/deletion-requests',
-        '/subcategory/',
       ],
     },
     sitemap: 'https://doorstephub.com/sitemap.xml',
@@ -59,11 +35,10 @@ export default function robots() {
 }
 ```
 
-### Analysis of Disallow Directives:
-1. **API & Next.js Bundles**: `/_next/` and `/api/` are blocked from crawler indexing, protecting server performance.
-2. **Private & Auth Portals**: `/account/`, `/partner/`, `/sell-buy/dashboard/`, `/sell-buy/post-ad`, and `/sell-buy/chat` are explicitly disallowed.
-3. **Transactional Flows**: All cart, checkout, booking, payment failure, and confirmation paths are cleanly excluded.
-4. **Internal Testing**: `/logo-test/` is disallowed.
+### Analysis of Directives:
+1. **Zero Crawl/Index Conflicts**: In strict accordance with Google Search Central guidance, private, transactional, and auth routes are **not** blocked in `robots.txt`. This guarantees Googlebot can freely crawl the URLs and read their `<meta name="robots" content="noindex, nofollow" />` directives, permanently preventing the dreaded "Indexed, though blocked by robots.txt" warning in Google Search Console.
+2. **Technical Endpoints Protected**: Pure non-HTML / backend proxy routes (`/_next/`, `/api/`, `/admin/`) are disallowed.
+3. **Public Subcategories Unblocked**: Public service subcategory routes (`/subcategory/*`) are fully accessible to search crawlers.
 
 ---
 

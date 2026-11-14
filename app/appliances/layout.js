@@ -2,7 +2,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export const metadata = {
-    title: 'Home Appliance Repair & Services | Doorstep Hub',
+    title: 'Home Appliance Repair & Services',
     description: 'Book professional home appliance repair services online. Expert technicians for AC, Refrigerator, Washing Machine, Geyser, TV repair & service.',
 };
 

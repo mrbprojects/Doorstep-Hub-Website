@@ -35,7 +35,7 @@ export default async function Home() {
     }
 
     if (!showHomeScreen) {
-        redirect('/appliance-repair-services');
+        redirect('/appliances');
     }
 
     const organizationSchema = {

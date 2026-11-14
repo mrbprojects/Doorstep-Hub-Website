@@ -1,0 +1,18 @@
+Entity Category,Audit Baseline Count,Verified Database Count,Indexable Status,Canonical Target,Sitemap Group,SSR Pre-rendering,Metadata Resolution,Validation Result
+Main Services Directory,4,4,Indexable (200 OK),Canonical Flat,services-1.xml,Server Pre-rendered,100% Unique Metadata,PASSED
+Operational City Hubs,26,23 (3 Draft excluded),Indexable (200 OK),Canonical Flat (/appliances-repair-service-center-[city]),cities-1.xml,Server Pre-rendered (SSR H1 + JSON-LD),100% Unique Localized Metadata,PASSED
+Core Appliance Categories,8,8,Indexable (200 OK),Canonical Flat,categories-1.xml,Server Pre-rendered,100% Unique Category Metadata,PASSED
+Appliance Subcategories,23,23,Indexable (200 OK),Canonical /appliances/listing/[slug],subcategories-1.xml,Dynamic Server Layout,100% Dynamic Metadata,PASSED
+Nationwide Brand Hubs,37,38,Indexable (200 OK),Canonical Flat (/[brand]-repair-center),brands-1.xml,Server Pre-rendered,100% Brand Metadata + Logo Asset,PASSED
+City-Category Pages,208,184 (23 cities * 8 categories),Indexable (200 OK),Canonical Flat (/[cat]-service-center-[city]),city-categories-1.xml,Dynamic Server Layout,100% Localized Dynamic Metadata,PASSED
+City-Brand Repair Hubs,962,874 (23 cities * 38 brands),Indexable (200 OK),Canonical Flat (/[brand]-repair-center/[city]),city-brands-1.xml,Dynamic Server Layout,100% Localized Brand Metadata,PASSED
+City-Service Discovery,130,92 (23 cities * 4 services),Indexable (200 OK),Canonical Flat (/nearby/[service]/[city]),city-services-1.xml,Dynamic Server Layout,100% Localized Service Metadata,PASSED
+PG & Hostel Stays & Types,58,14 (hostels) + 4 (types) + 37 (subcats),Indexable (200 OK),Canonical /pghostels/*,pghostels-1.xml,Dynamic Server Layout,100% Dynamic Accommodation Metadata,PASSED
+Spa & Salon Home Services,11,6 (stores) + 5 (categories),Indexable (200 OK),Canonical /spa-salon/*,spa-salon-1.xml,Dynamic Server Layout,100% Dynamic Salon Metadata,PASSED
+Religious & Pooja Rituals,11,6 (rituals) + 5 (categories),Indexable (200 OK),Canonical /religious-services/*,religious-1.xml,Dynamic Server Layout,100% Dynamic Devotional Metadata,PASSED
+AMC Maintenance Contracts,3,"3 (AC, Appliances, Electronic)",Indexable (200 OK),Canonical /amc/*,amc-1.xml,Dynamic Server Layout,100% Dynamic Contract Metadata,PASSED
+Help Center Troubleshooting,24,24 (appliance repair guides),Indexable (200 OK),Canonical /help-center/*,help-center.xml,Server Component SSR,100% Article Metadata + JSON-LD,PASSED
+Knowledge Base Articles,3,3 (comprehensive guides),Indexable (200 OK),Canonical /knowledge/*,knowledge.xml,Server Component SSR,100% Article Metadata + JSON-LD,PASSED
+Buy & Sell Marketplace Ads,40,40 (active listings + hubs),Indexable (200 OK),Canonical /sell-buy/*,sell-buy-1.xml,Server Component SSR,100% Product Metadata + JSON-LD,PASSED
+Static Public Routes,59,40 (indexed) + 19 (utility),Indexable (200 OK),Canonical Exact,static-pages-1.xml,Server Pre-rendered,100% Static Metadata Verified,PASSED
+Private / Transactional URLs,57,57,NOINDEX (200 OK),Excluded from Sitemaps,Excluded,Client Interactive,"Robots: noindex, nofollow",PASSED (PROTECTED)

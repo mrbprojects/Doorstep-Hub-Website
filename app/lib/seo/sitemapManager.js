@@ -23,7 +23,6 @@ const STATIC_ROUTES = [
     { url: `${BASE_URL}/help-center/pooja-religious-services`, priority: 0.8, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/help-center/buy-sell-old-things`, priority: 0.8, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/knowledge`, priority: 0.9, changeFrequency: 'weekly' },
-    { url: `${BASE_URL}/blog`, priority: 0.9, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/privacy-policy`, priority: 0.5, changeFrequency: 'yearly' },
     { url: `${BASE_URL}/terms-conditions`, priority: 0.5, changeFrequency: 'yearly' },
     { url: `${BASE_URL}/refund-policy`, priority: 0.5, changeFrequency: 'yearly' },
@@ -46,7 +45,10 @@ const STATIC_ROUTES = [
     { url: `${BASE_URL}/sell-buy/help`, priority: 0.7, changeFrequency: 'weekly' },
     { url: `${BASE_URL}/sell-buy/contact-us`, priority: 0.7, changeFrequency: 'monthly' },
     { url: `${BASE_URL}/amc`, priority: 0.8, changeFrequency: 'weekly' },
-    { url: `${BASE_URL}/book-appointment`, priority: 0.8, changeFrequency: 'weekly' }
+    { url: `${BASE_URL}/book-appointment`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/service-partner`, priority: 0.8, changeFrequency: 'monthly' },
+    { url: `${BASE_URL}/offers`, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${BASE_URL}/app`, priority: 0.8, changeFrequency: 'monthly' }
 ];
 
 /**

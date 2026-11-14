@@ -14,6 +14,36 @@ const nextConfig = {
         destination: 'https://doorstephub.com/:path*',
         permanent: true,
       },
+      {
+        source: '/pg-hostel',
+        destination: '/pghostels',
+        permanent: true,
+      },
+      {
+        source: '/religious',
+        destination: '/religious-services',
+        permanent: true,
+      },
+      {
+        source: '/appliance-repair-services',
+        destination: '/appliances',
+        permanent: true,
+      },
+      {
+        source: '/appliance-repairs',
+        destination: '/appliances',
+        permanent: true,
+      },
+      {
+        source: '/blog',
+        destination: '/knowledge',
+        permanent: true,
+      },
+      {
+        source: '/blog/:slug*',
+        destination: '/knowledge/:slug*',
+        permanent: true,
+      },
     ];
   },
 

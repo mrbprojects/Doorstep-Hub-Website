@@ -265,7 +265,7 @@ export function ServiceDetailsPage({
   // Redirection fallback if service not found
   useEffect(() => {
     if (!loading && !serviceDetails?.storeData) {
-      router.replace('/appliance-repair-services');
+      router.replace('/appliances');
     }
   }, [loading, serviceDetails, router]);
 

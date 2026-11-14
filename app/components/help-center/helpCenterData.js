@@ -61,7 +61,7 @@ export const HELP_CATEGORIES = [
         heroImage: '/categories-hero-bg.jpg',
         badge: 'PG & HOSTEL',
         iconName: 'Building2',
-        bookingRoute: '/pg-hostel',
+        bookingRoute: '/pghostels',
         serviceKeywords: ['pg', 'hostel', 'coliving', 'rent', 'room'],
     },
     {

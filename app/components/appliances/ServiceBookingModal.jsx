@@ -107,7 +107,7 @@ export function ServiceBookingModal({ isOpen, onClose }) {
         if (subCategorySlug) {
             router.push(`/${subCategorySlug}`);
         } else {
-            router.push('/appliance-repair-services');
+            router.push('/appliances');
         }
         onClose();
     };

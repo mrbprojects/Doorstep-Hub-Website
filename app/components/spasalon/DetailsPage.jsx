@@ -572,7 +572,7 @@ export function DetailsPage() {
                                         <Image
                                             src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`}
                                             className="w-full h-full object-cover"
-                                            alt=""
+                                            alt={viewingRateCard?.title ? `${viewingRateCard.title} rate card thumbnail ${idx + 1}` : `Salon rate card ${idx + 1}`}
                                          width={500} height={300} />
                                     </button>
                                 ))}

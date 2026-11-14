@@ -9,10 +9,10 @@ import { Ticket, Search, Copy, Check, ArrowRight, ShieldCheck, Info, X } from 'l
 import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
 
 const SERVICE_ID_ROUTES = {
-  '683daaa8f261c1548bdf7442': { name: 'Appliance Service', path: '/appliance-repair-services' },
+  '683daaa8f261c1548bdf7442': { name: 'Appliance Service', path: '/appliances' },
   '695250aa57bb211ca094e5fd': { name: 'Religious Services', path: '/religious-services' },
   '69524fb157bb211ca094e5ee': { name: 'PG & Hostels', path: '/pghostels' },
-  '69524f4a57bb211ca094e5e6': { name: 'Unisex & Pet Saloons', path: '/spa-salon' },
+  '69524f4a57bb211ca094e5e6': { name: 'Unisex & Pet Salons', path: '/spa-salon' },
   '6a7db000a9d92694336007a0': { name: 'Sell & Buy', path: '/sell-buy' },
 };
 
@@ -42,14 +42,14 @@ function getServiceDestination(offer) {
 
   for (const sName of rawServiceNames) {
     const cleanName = String(sName || '').toLowerCase().trim();
-    if (cleanName.includes('appliance') || cleanName.includes('repair')) return '/appliance-repair-services';
+    if (cleanName.includes('appliance') || cleanName.includes('repair')) return '/appliances';
     if (cleanName.includes('religious') || cleanName.includes('pooja') || cleanName.includes('pandit')) return '/religious-services';
     if (cleanName.includes('pg') || cleanName.includes('hostel')) return '/pghostels';
     if (cleanName.includes('spa') || cleanName.includes('salon') || cleanName.includes('saloon') || cleanName.includes('pet')) return '/spa-salon';
     if (cleanName.includes('sell') || cleanName.includes('buy')) return '/sell-buy';
   }
 
-  return '/appliance-repair-services';
+  return '/appliances';
 }
 
 function getEligibleDestinations(offer) {
@@ -68,14 +68,14 @@ function getEligibleDestinations(offer) {
   const rawServiceNames = Array.isArray(offer?.serviceName) ? offer.serviceName : offer?.serviceName ? [offer.serviceName] : [];
   for (const sName of rawServiceNames) {
     const cleanName = String(sName || '').toLowerCase().trim();
-    if (cleanName.includes('appliance')) destinations.push({ name: 'Appliance Service', path: '/appliance-repair-services' });
+    if (cleanName.includes('appliance')) destinations.push({ name: 'Appliance Service', path: '/appliances' });
     else if (cleanName.includes('religious')) destinations.push({ name: 'Religious Services', path: '/religious-services' });
     else if (cleanName.includes('pg') || cleanName.includes('hostel')) destinations.push({ name: 'PG & Hostels', path: '/pghostels' });
     else if (cleanName.includes('spa') || cleanName.includes('salon') || cleanName.includes('pet')) destinations.push({ name: 'Spa & Salon', path: '/spa-salon' });
     else if (cleanName.includes('sell') || cleanName.includes('buy')) destinations.push({ name: 'Sell & Buy', path: '/sell-buy' });
   }
 
-  return destinations.length > 0 ? destinations : [{ name: 'Appliance Service', path: '/appliance-repair-services' }];
+  return destinations.length > 0 ? destinations : [{ name: 'Appliance Service', path: '/appliances' }];
 }
 
 function formatDate(dateStr) {

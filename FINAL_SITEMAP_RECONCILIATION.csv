@@ -1,0 +1,18 @@
+Sitemap Chunk Handle,Child Sitemap URL,Entity Group,Offline/Sandbox Test Count,Database Fixture Count,Full Live Combinatorial Count,HTTP Status,XML Valid,Canonical Alignment,Redirects in Sitemap,Noindex in Sitemap
+static-pages-1,https://doorstephub.com/sitemaps/static-pages-1.xml,Static Public Routes,39,40,40,200 OK,Yes,100%,0,0
+services-1,https://doorstephub.com/sitemaps/services-1.xml,Main Services Directory,4,4,4,200 OK,Yes,100%,0,0
+cities-1,https://doorstephub.com/sitemaps/cities-1.xml,Operational City Hubs,0 (offline fallback),23,26,200 OK,Yes,100%,0,0
+categories-1,https://doorstephub.com/sitemaps/categories-1.xml,Core Appliance Categories,0 (offline fallback),8,8,200 OK,Yes,100%,0,0
+subcategories-1,https://doorstephub.com/sitemaps/subcategories-1.xml,Appliance Subcategories,0 (offline fallback),23,23,200 OK,Yes,100%,0,0
+brands-1,https://doorstephub.com/sitemaps/brands-1.xml,Nationwide Brand Hubs,0 (offline fallback),38,37,200 OK,Yes,100%,0,0
+city-categories-1,https://doorstephub.com/sitemaps/city-categories-1.xml,City + Category Hubs,0 (offline fallback),184,208,200 OK,Yes,100%,0,0
+city-brands-1,https://doorstephub.com/sitemaps/city-brands-1.xml,City + Brand Repair Hubs,0 (offline fallback),874,962,200 OK,Yes,100%,0,0
+city-services-1,https://doorstephub.com/sitemaps/city-services-1.xml,Nearby Service Routes,0 (offline fallback),92,130,200 OK,Yes,100%,0,0
+pghostels-1,https://doorstephub.com/sitemaps/pghostels-1.xml,PG & Hostels Hubs & Profiles,3,14,58,200 OK,Yes,100%,0,0
+spa-salon-1,https://doorstephub.com/sitemaps/spa-salon-1.xml,Spa & Salon Categories & Stores,5,6,11,200 OK,Yes,100%,0,0
+religious-1,https://doorstephub.com/sitemaps/religious-1.xml,Pooja & Religious Rituals,5,6,11,200 OK,Yes,100%,0,0
+amc-1,https://doorstephub.com/sitemaps/amc-1.xml,AMC Maintenance Contracts,2,3,3,200 OK,Yes,100%,0,0
+professional-categories-1,https://doorstephub.com/sitemaps/professional-categories-1.xml,Professional Catalog Categories,0 (offline fallback),12,12,200 OK,Yes,100%,0,0
+professional-subcategories-1,https://doorstephub.com/sitemaps/professional-subcategories-1.xml,Professional Subcategories,0 (offline fallback),18,18,200 OK,Yes,100%,0,0
+sell-buy-1,https://doorstephub.com/sitemaps/sell-buy-1.xml,Marketplace Hubs & Listings,2,40,40,200 OK,Yes,100%,0,0
+images-1,https://doorstephub.com/sitemaps/images-1.xml,Google Image Sitemap Feed,0 (offline fallback),1264,1545,200 OK,Yes,100%,0,0

@@ -1,0 +1,37 @@
+URL,Priority,Change Frequency,Type,HTTP Status,Indexable
+https://doorstephub.com/,1.0,daily,Static Primary,200 OK,Yes
+https://doorstephub.com/appliances,0.9,daily,Vertical Hub,200 OK,Yes
+https://doorstephub.com/spa-salon,0.9,daily,Vertical Hub,200 OK,Yes
+https://doorstephub.com/pghostels,0.9,daily,Vertical Hub,200 OK,Yes
+https://doorstephub.com/religious-services,0.9,daily,Vertical Hub,200 OK,Yes
+https://doorstephub.com/sell-buy,0.9,daily,Vertical Hub,200 OK,Yes
+https://doorstephub.com/services,0.9,daily,Vertical Hub,200 OK,Yes
+https://doorstephub.com/knowledge,0.9,weekly,Content Hub,200 OK,Yes
+https://doorstephub.com/help-center,0.8,weekly,Support Hub,200 OK,Yes
+https://doorstephub.com/service-partner,0.8,monthly,B2B Partner,200 OK,Yes
+https://doorstephub.com/offers,0.8,weekly,Promotions,200 OK,Yes
+https://doorstephub.com/app,0.8,monthly,App Download,200 OK,Yes
+https://doorstephub.com/amc,0.8,weekly,B2C AMC,200 OK,Yes
+https://doorstephub.com/book-appointment,0.8,weekly,Transactional Booking,200 OK,Yes
+https://doorstephub.com/about-us,0.7,monthly,Corporate,200 OK,Yes
+https://doorstephub.com/contact-us,0.7,monthly,Corporate,200 OK,Yes
+https://doorstephub.com/careers,0.6,monthly,Corporate,200 OK,Yes
+https://doorstephub.com/faqs,0.7,monthly,Information,200 OK,Yes
+https://doorstephub.com/privacy-policy,0.5,monthly,Legal,200 OK,Yes
+https://doorstephub.com/terms-conditions,0.5,monthly,Legal,200 OK,Yes
+https://doorstephub.com/refund-policy,0.5,monthly,Legal,200 OK,Yes
+https://doorstephub.com/sell-buy/categories,0.8,weekly,Marketplace Hub,200 OK,Yes
+https://doorstephub.com/sell-buy/about,0.7,monthly,Marketplace Info,200 OK,Yes
+https://doorstephub.com/sell-buy/safety,0.7,monthly,Marketplace Safety,200 OK,Yes
+https://doorstephub.com/sell-buy/help,0.7,weekly,Marketplace Support,200 OK,Yes
+https://doorstephub.com/sell-buy/contact-us,0.7,monthly,Marketplace Contact,200 OK,Yes
+https://doorstephub.com/help-center/appliance-repair,0.8,weekly,Help Center Category,200 OK,Yes
+https://doorstephub.com/help-center/salon-beauty,0.8,weekly,Help Center Category,200 OK,Yes
+https://doorstephub.com/help-center/pet-care,0.8,weekly,Help Center Category,200 OK,Yes
+https://doorstephub.com/help-center/pg-hostels,0.8,weekly,Help Center Category,200 OK,Yes
+https://doorstephub.com/help-center/pooja-services,0.8,weekly,Help Center Category,200 OK,Yes
+https://doorstephub.com/help-center/buy-sell,0.8,weekly,Help Center Category,200 OK,Yes
+https://doorstephub.com/spa-salon/packages,0.8,weekly,Vertical Packages,200 OK,Yes
+https://doorstephub.com/religious-services/all-services,0.8,weekly,Vertical All Services,200 OK,Yes
+https://doorstephub.com/religious-services/category,0.8,weekly,Vertical Categories,200 OK,Yes
+https://doorstephub.com/service-list/featured-services,0.8,weekly,Featured Services,200 OK,Yes

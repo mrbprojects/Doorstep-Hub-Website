@@ -1,0 +1,12 @@
+Source URL Pattern,Target Destination,HTTP Status,Enforcement Layer,Source Inbound References,Canonical Status,Testing Result,Notes
+http://doorstephub.com/:path*,https://doorstephub.com/:path*,308 Permanent,next.config.js (Edge),Global Protocol,Canonical,PASSED,Global HTTPS enforcement across all routes
+/appliance-repair-services,/appliances,308 Permanent,next.config.js (Edge),10 Internal Links Updated,Canonical Destination,PASSED,Consolidated duplicate appliance landing page; eliminated cannibalization
+/appliance-repairs,/appliances,308 Permanent,next.config.js (Edge),Legacy Sitemaps / Backlinks,Canonical Destination,PASSED,Redirects legacy plural path into canonical /appliances hub
+/pg-hostel,/pghostels,308 Permanent,next.config.js (Edge),Legacy Navigation / Bookmarks,Canonical Destination,PASSED,Replaced client-only soft-404 redirect with server 308 header
+/religious,/religious-services,308 Permanent,next.config.js (Edge),Legacy Navigation / Bookmarks,Canonical Destination,PASSED,Replaced client-only soft-404 redirect with server 308 header
+/blog,/knowledge,308 Permanent,next.config.js (Edge),Sitemap Static Route / Header,Canonical Destination,PASSED,Eliminated duplicated route; removed /blog from XML sitemaps
+/blog/:slug*,/knowledge/:slug*,308 Permanent,next.config.js (Edge),Legacy Knowledge Base URLs,Canonical Destination,PASSED,Consolidates all blog article slugs into /knowledge/:slug*
+/appliances/repair-service/:city,/appliances-repair-service-center-:city,308 via Canonical,canonicalManager.js,Internal Navigation,Canonical Flat URL,PASSED,Emits flat canonical URL in HTML headers & sitemaps
+/:city/:brand,/:brand-appliance-repair-service-center/:city,308 via Canonical,canonicalManager.js,Legacy URLs,Canonical Flat URL,PASSED,Resolves legacy two-segment brand paths to flat canonical URLs
+/service-list/book-now/:service?city=:city,/nearby/:service/:city,308 via Canonical,canonicalManager.js,Legacy Search Queries,Canonical Flat URL,PASSED,Flat nearby local service discovery canonical format
+/knowledge/:slug -> /help-center/appliance-repair/:slug,PENDING 1:1 SLUG MAPPING,N/A (Retained),Codebase Separation,Help Center & Knowledge,Dual Active Entities,PENDING,Preserved both /knowledge and /help-center as distinct active endpoints to prevent content loss

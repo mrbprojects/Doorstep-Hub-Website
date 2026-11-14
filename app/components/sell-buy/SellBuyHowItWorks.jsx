@@ -2,14 +2,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  PlusCircle, 
-  MessageSquare, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Lightbulb, 
+import {
+  PlusCircle,
+  MessageSquare,
+  ShieldCheck,
+  CheckCircle2,
+  Lightbulb,
   ArrowRight,
-  Sparkles } from 'lucide-react';
+  Sparkles
+} from 'lucide-react';
 
 const steps = [
   {
@@ -69,7 +70,7 @@ export function SellBuyHowItWorks() {
       <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[#04a99d]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Header Section */}
         <div className="text-center max-w-7xl mx-auto mb-10 md:mb-14">
           <motion.div
@@ -90,7 +91,7 @@ export function SellBuyHowItWorks() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
           >
-            Buy What You Need. Sell What You Don’t.
+            Buy Used Things, Sell Unused Things, All in One Place.
           </motion.h2>
 
           <motion.p
@@ -100,7 +101,7 @@ export function SellBuyHowItWorks() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-3 text-base sm:text-lg md:text-xl text-slate-600 font-medium"
           >
-            A simple way to connect buyers and sellers through Doorstep Hub.
+            Buy and Sell used items with Doorstep Hub. Discover Second Hand Furniture, Electronics, Appliances and more Near you. list Unused Items and Connect with Local Buyers..
           </motion.p>
 
           {/* Bottom Process Line / Flow Tracker */}
@@ -129,7 +130,7 @@ export function SellBuyHowItWorks() {
 
         {/* 4 Steps Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6 relative">
-          
+
           {/* Connector Line for Desktop */}
           <div className="hidden lg:block absolute top-[72px] left-[12%] right-[12%] h-[2px] bg-gradient-to-r from-[#037166]/20 via-[#0284c7]/20 to-[#059669]/20 -z-0" />
 

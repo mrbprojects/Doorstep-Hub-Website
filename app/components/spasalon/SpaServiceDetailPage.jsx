@@ -753,7 +753,7 @@ export default function SpaServiceDetailPage({ slugOverride = null }) {
                                             onClick={() => setRateCardImageIndex(idx)}
                                             className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${rateCardImageIndex === idx ? 'ring-2 ring-[#6D1357] scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
                                         >
-                                            <Image src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} className="w-full h-full object-cover" alt=""  width={500} height={300} />
+                                            <Image src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${img}`} className="w-full h-full object-cover" alt={viewingRateCard?.title ? `${viewingRateCard.title} rate card thumbnail ${idx + 1}` : `Spa rate card ${idx + 1}`}  width={500} height={300} />
                                         </button>
                                     ))}
                                 </div>

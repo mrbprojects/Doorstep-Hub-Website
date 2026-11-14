@@ -1,0 +1,35 @@
+Template Route Pattern,Template Type,Client/Server Rendering,SSR Metadata Source,Pre-rendered H1,Canonical Strategy,Schema.org Type,Robots Directive,Validation Status
+/,Static Homepage,Server Component,app/layout.js & page.jsx,Doorstep Hub | India's Trusted Services,https://doorstephub.com,"Organization, WebSite","index, follow",VERIFIED
+/appliances,Static Vertical Hub,Server Component,app/appliances/layout.js,Home Appliance Repair & Services,https://doorstephub.com/appliances,"Service, AggregateRating","index, follow",VERIFIED
+/appliances/[...slug],Dynamic Catch-All,Client Component,app/appliances/[...slug]/layout.js,Dynamic Service Title,Dynamic Flat Canonical,Service,"index, follow",VERIFIED
+/appliances/listing/[slug],Dynamic Listing,Client Component,app/appliances/listing/[slug]/layout.js,Dynamic Category Listing,Dynamic Flat Canonical,"Service, OfferCatalog","index, follow",VERIFIED
+/appliances/detail/[serviceId],Dynamic Detail,Client Component,app/appliances/detail/[serviceId]/layout.js,Service Detail Name,Dynamic Flat Canonical,"Service, Offer","index, follow",VERIFIED
+/appliances/repair-service/[citySlug],Dynamic City Hub,Client Component with SSR Shell,app/appliances/repair-service/[citySlug]/layout.js & page.js,Appliance Repair in [City],https://doorstephub.com/appliances-repair-service-center-[city],"Service, City, OfferCatalog","index, follow",VERIFIED
+/appliances/repair-service/[citySlug]/[categorySlug],Dynamic City Category,Client Component,app/appliances/repair-service/[citySlug]/[categorySlug]/layout.js,[Category] in [City],https://doorstephub.com/[category]-service-center-[city],Service,"index, follow",VERIFIED
+/app,Static App Download,Client Component,app/app/layout.js,Download Doorstep Hub App,https://doorstephub.com/app,"MobileApplication, Organization","index, follow",VERIFIED
+/service-partner,Static B2B Portal,Client Component,app/service-partner/layout.js,Partner With Doorstep Hub,https://doorstephub.com/service-partner,"Organization, ContactPoint","index, follow",VERIFIED
+/offers,Static Promotions,Client Component,app/offers/layout.js,Exclusive Offers & Coupons,https://doorstephub.com/offers,OfferCatalog,"index, follow",VERIFIED
+/knowledge,Static Knowledge Base,Server Component,app/knowledge/page.js,Knowledge Base & Home Guides,https://doorstephub.com/knowledge,CollectionPage,"index, follow",VERIFIED
+/knowledge/[slug],Dynamic Article,Server Component,app/knowledge/[slug]/page.js,[Article Headline],https://doorstephub.com/knowledge/[slug],"Article, Organization","index, follow",VERIFIED
+/help-center,Static Support Hub,Server Component,app/help-center/layout.js,Doorstep Hub Help Center,https://doorstephub.com/help-center,FAQPage,"index, follow",VERIFIED
+/help-center/[categorySlug],Dynamic Category,Server Component,app/help-center/[categorySlug]/page.jsx,[Category] Help & FAQs,https://doorstephub.com/help-center/[category],FAQPage,"index, follow",VERIFIED
+/help-center/[categorySlug]/[articleSlug],Dynamic Guide,Server Component,app/help-center/[categorySlug]/[articleSlug]/page.jsx,[Article Title],https://doorstephub.com/help-center/[category]/[article],Article,"index, follow",VERIFIED
+/pghostels,Static PG Hub,Client Component,app/pghostels/layout.js,Find Best PG & Hostels Near You,https://doorstephub.com/pghostels,RealEstateListing,"index, follow",VERIFIED
+/pghostels/listings/[type],Dynamic PG Type,Client Component,app/pghostels/listings/[type]/layout.js,Best [Type] Near You,https://doorstephub.com/pghostels/listings/[type],ItemList,"index, follow",VERIFIED
+/pghostels/subcategory/[slug],Dynamic PG Subcat,Client Component,app/pghostels/subcategory/[slug]/layout.js,[Subcategory] Stays,https://doorstephub.com/pghostels/subcategory/[slug],ItemList,"index, follow",VERIFIED
+/pghostels/hostel/[slug],Dynamic PG Property,Client Component,app/pghostels/hostel/[slug]/layout.js,[Hostel Name],https://doorstephub.com/pghostels/hostel/[slug],Accommodation,"index, follow",VERIFIED
+/religious-services,Static Pooja Hub,Client Component,app/religious-services/layout.js,Book Pandits & Puja Online,https://doorstephub.com/religious-services,Service,"index, follow",VERIFIED
+/religious-services/category/[slug],Dynamic Ritual Cat,Client Component,app/religious-services/category/[slug]/layout.js,[Ritual Category],https://doorstephub.com/religious-services/category/[slug],Service,"index, follow",VERIFIED
+/religious-services/subcategory/[slug],Dynamic Puja Ritual,Client Component,app/religious-services/subcategory/[slug]/layout.js,[Puja Name],https://doorstephub.com/religious-services/subcategory/[slug],Service,"index, follow",VERIFIED
+/religious-services/service/[slug],Dynamic Detail,Client Component,app/religious-services/service/[slug]/layout.js,[Service Name],https://doorstephub.com/religious-services/service/[slug],"Service, Offer","index, follow",VERIFIED
+/spa-salon,Static Salon Hub,Client Component,app/spa-salon/layout.js,Premium Spa & Salon at Home,https://doorstephub.com/spa-salon,HealthAndBeautyBusiness,"index, follow",VERIFIED
+/spa-salon/category/[slug],Dynamic Beauty Cat,Client Component,app/spa-salon/category/[slug]/layout.js,[Beauty Category] at Home,https://doorstephub.com/spa-salon/category/[slug],Service,"index, follow",VERIFIED
+/spa-salon/subcategory/[slug],Dynamic Treatment,Client Component,app/spa-salon/subcategory/[slug]/layout.js,[Treatment Name] Services,https://doorstephub.com/spa-salon/subcategory/[slug],Service,"index, follow",VERIFIED
+/spa-salon/service/[slug],Dynamic Detail,Client Component,app/spa-salon/service/[slug]/layout.js,[Beauty Service Name],https://doorstephub.com/spa-salon/service/[slug],"Service, Offer","index, follow",VERIFIED
+/amc,Static AMC Hub,Server Component,app/amc/layout.js,Book AMC Services for Appliances,https://doorstephub.com/amc,Service,"index, follow",VERIFIED
+/amc/[slug],Dynamic AMC Plan,Client Component,app/amc/[slug]/layout.js,[Plan Name] Maintenance Contract,https://doorstephub.com/amc/[slug],"Service, Offer","index, follow",VERIFIED
+/sell-buy,Static Marketplace,Server Component,app/sell-buy/layout.js,"Buy Used Things, Sell Unused",https://doorstephub.com/sell-buy,OnlineStore,"index, follow",VERIFIED
+/sell-buy/ad/[slug],Dynamic Ad Detail,Server Component,app/sell-buy/ad/[slug]/page.jsx,[Listing Title],https://doorstephub.com/sell-buy/ad/[slug],"Product, IndividualProduct","index, follow",VERIFIED
+/account/*,Transactional Account,Client Component,app/account/layout.js,Account Dashboard,https://doorstephub.com/account,N/A,"noindex, nofollow",EXCLUDED (SAFE)
+/partner/dashboard/*,B2B Partner Portal,Client Component,app/partner/layout.js,Partner Dashboard,https://doorstephub.com/partner/dashboard,N/A,"noindex, nofollow",EXCLUDED (SAFE)
+/appliances/cart & checkout,Checkout Flows,Client Component,app/appliances/layout.js,Cart & Checkout,https://doorstephub.com,N/A,"noindex, nofollow",EXCLUDED (SAFE)

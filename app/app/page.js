@@ -195,18 +195,18 @@ function AppDownloadContent() {
             {/* Main Content with clean clearance for 80px fixed Header */}
             <main className="relative z-10 pt-24 sm:pt-28 pb-14 sm:pb-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-14 lg:space-y-16">
-                    
+
                     {/* ============================================================ */}
                     {/* PANEL 1: CUSTOMER APP PROMOTION */}
                     {/* ============================================================ */}
                     <section id="customer-app" className="relative rounded-[24px] sm:rounded-[36px] bg-gradient-to-br from-[#EEFAF6] via-[#F4FBF9] to-[#E8F8F3] border border-[#CDEAE2] p-5 sm:p-8 lg:p-10 shadow-sm overflow-hidden">
-                        
+
                         {/* Decorative background mint blobs */}
                         <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#008C80]/5 rounded-full blur-3xl pointer-events-none" />
                         <div className="absolute bottom-0 left-10 w-64 h-64 bg-[#00A896]/5 rounded-full blur-3xl pointer-events-none" />
 
                         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                            
+
                             {/* Left Column: Copy, Actions & Metrics */}
                             <motion.div
                                 initial={{ opacity: 0, y: 15 }}
@@ -360,7 +360,7 @@ function AppDownloadContent() {
                     {/* SECTION: HOW IT WORKS (FOUR SIMPLE STEPS) */}
                     {/* ============================================================ */}
                     <section className="relative py-4 sm:py-6">
-                        
+
                         {/* Section Header */}
                         <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
                             {/* Badge */}
@@ -480,13 +480,13 @@ function AppDownloadContent() {
                     {/* PANEL 2: SERVICE PARTNER APP PROMOTION */}
                     {/* ============================================================ */}
                     <section id="partner-app" className="relative rounded-[24px] sm:rounded-[36px] bg-gradient-to-br from-[#FCFAF4] via-[#FDF9ED] to-[#FAF6EA] border border-[#EFE5D2] p-5 sm:p-8 lg:p-10 shadow-sm overflow-hidden">
-                        
+
                         {/* Decorative background warm blobs */}
                         <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#D97706]/5 rounded-full blur-3xl pointer-events-none" />
                         <div className="absolute bottom-0 left-10 w-64 h-64 bg-[#008C80]/5 rounded-full blur-3xl pointer-events-none" />
 
                         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                            
+
                             {/* Left Column: Copy, Actions & Metrics */}
                             <motion.div
                                 initial={{ opacity: 0, y: 15 }}
@@ -570,7 +570,7 @@ function AppDownloadContent() {
                                             <IndianRupee className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <div className="text-sm sm:text-base font-extrabold text-[#101828] leading-tight">₹25K+</div>
+                                            <div className="text-sm sm:text-base font-extrabold text-[#101828] leading-tight">₹74K+</div>
                                             <div className="text-[10px] text-[#667085] leading-tight">Avg. Income</div>
                                         </div>
                                     </div>

@@ -559,7 +559,7 @@ export function HeroSection() {
                 <div className="relative w-[120px] sm:w-[150px] h-full">
                   <Image
                     src="/hero-customer.png"
-                    alt="Customer using phone"
+                    alt="Customer booking home and lifestyle services on mobile"
                     fill
                     className="object-contain object-bottom"
                     sizes="150px"

@@ -10,7 +10,7 @@ export function Animated404() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            router.replace('/appliance-repair-services');
+            router.replace('/appliances');
         }, 5000);
         return () => clearTimeout(timer);
     }, [router]);

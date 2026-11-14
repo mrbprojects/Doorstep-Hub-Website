@@ -211,7 +211,10 @@ function CategoryPageContent() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search] = useState('');
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(() => ({
+    name: citySlug ? citySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Your City',
+    slug: citySlug,
+  }));
   const [faqActiveIndex, setFaqActiveIndex] = useState(null);
   const [banners, setBanners] = useState([]);
   const [bannerLoading, setBannerLoading] = useState(true);
@@ -361,19 +364,11 @@ function CategoryPageContent() {
         itemOffered: {
           '@type': 'Service',
           name: `${cat.name} Repair in ${selectedCity?.name || citySlug}`,
-          url: `https://doorstephub.com/appliances/repair-service/${citySlug}/${cat.slug}`,
+          url: `https://doorstephub.com${buildApplianceCategoryCityPublicPath(cat.slug, citySlug) || `/appliances/repair-service/${citySlug}/${cat.slug}`}`,
         },
       })),
     },
   };
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f0f0f0]">
-        <Loader2 size={32} className="animate-spin text-[#037166]" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#eef2f1] pb-8 sm:pb-16">
@@ -386,7 +381,7 @@ function CategoryPageContent() {
         banners={banners}
         bannerLoading={bannerLoading}
         cityLabel={cityLabel}
-        onBack={() => router.push('/appliance-repair-services')}
+        onBack={() => router.push('/appliances')}
         onActiveBannerChange={handleActiveBannerChange}
       />
 
@@ -428,44 +423,53 @@ function CategoryPageContent() {
           </div> */}
 
           <div className="grid grid-cols-2 gap-x-3 gap-y-5 pt-6 min-[400px]:grid-cols-3 sm:gap-x-4 sm:gap-y-6 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
-            {filtered.map((cat) => (
-              <button
-                key={cat.slug}
-                type="button"
-                onClick={() => {
-                  const publicPath = buildApplianceCategoryCityPublicPath(cat.slug, citySlug);
-                  router.push(publicPath || `/appliances/repair-service/${citySlug}/${cat.slug}`);
-                }}
-                className="group w-full text-left focus:outline-none"
-              >
-                <div className="relative mx-auto mb-4 w-full max-w-[180px] sm:mb-5">
-                  <div className="overflow-hidden rounded-[16px] bg-[#f3f6f5] shadow-md ring-1 ring-black/5 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-xl group-hover:ring-[#037166]/25 sm:rounded-[22px]">
-                    <div className="aspect-square w-full overflow-hidden">
-                      {cat.image ? (
-                        <Image
-                          src={cat.image}
-                          alt={cat.name}
-                          className="h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
-                         width={500} height={300} />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-[#eef3f1]">
-                          <Wrench size={32} className="text-[#037166]/30 group-hover:rotate-12 transition-transform duration-300 ease-out" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <CategoryIconBadge slug={cat.slug} />
+            {loading && categories.length === 0 ? (
+              Array.from({ length: 9 }).map((_, idx) => (
+                <div key={`skel-${idx}`} className="w-full animate-pulse">
+                  <div className="relative mx-auto mb-4 w-full max-w-[180px] aspect-square rounded-[16px] sm:rounded-[22px] bg-[#eef3f1]" />
+                  <div className="h-3.5 bg-gray-200 rounded-md w-3/4 mx-auto" />
                 </div>
-                <p className="px-0.5 text-center text-xs font-black leading-snug text-gray-800 sm:text-sm group-hover:text-[#037166] transition-colors duration-300 ease-out">
-                  {cat.name}
-                </p>
-                {cat.description ? (
-                  <p className="mt-1 line-clamp-2 px-1 text-center text-[10px] font-medium leading-snug text-gray-500 sm:text-xs">
-                    {/* {cat.description} */}
+              ))
+            ) : (
+              filtered.map((cat) => (
+                <button
+                  key={cat.slug}
+                  type="button"
+                  onClick={() => {
+                    const publicPath = buildApplianceCategoryCityPublicPath(cat.slug, citySlug);
+                    router.push(publicPath || `/appliances/repair-service/${citySlug}/${cat.slug}`);
+                  }}
+                  className="group w-full text-left focus:outline-none"
+                >
+                  <div className="relative mx-auto mb-4 w-full max-w-[180px] sm:mb-5">
+                    <div className="overflow-hidden rounded-[16px] bg-[#f3f6f5] shadow-md ring-1 ring-black/5 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-xl group-hover:ring-[#037166]/25 sm:rounded-[22px]">
+                      <div className="aspect-square w-full overflow-hidden">
+                        {cat.image ? (
+                          <Image
+                            src={cat.image}
+                            alt={cat.name}
+                            className="h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
+                           width={500} height={300} />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-[#eef3f1]">
+                            <Wrench size={32} className="text-[#037166]/30 group-hover:rotate-12 transition-transform duration-300 ease-out" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <CategoryIconBadge slug={cat.slug} />
+                  </div>
+                  <p className="px-0.5 text-center text-xs font-black leading-snug text-gray-800 sm:text-sm group-hover:text-[#037166] transition-colors duration-300 ease-out">
+                    {cat.name}
                   </p>
-                ) : null}
-              </button>
-            ))}
+                  {cat.description ? (
+                    <p className="mt-1 line-clamp-2 px-1 text-center text-[10px] font-medium leading-snug text-gray-500 sm:text-xs">
+                      {/* {cat.description} */}
+                    </p>
+                  ) : null}
+                </button>
+              ))
+            )}
 
             <div className="group w-full text-left">
               <div className="relative mx-auto mb-4 w-full max-w-[180px] sm:mb-5">

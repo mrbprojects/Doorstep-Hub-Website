@@ -1,0 +1,26 @@
+ID,Category,Item / Page,File(s) Modified,Change Description,SEO Impact,Status
+1,Phase 1: Safe Baseline,Root Metadata Typos,app/layout.js,"Fixed 'Spa & Saloon' -> 'Spa & Salon', 'Booking Sytem' -> 'Booking System'",SERP Trust & Click-Through Rate,Verified
+2,Phase 1: Safe Baseline,Viewport Accessibility,app/layout.js,Removed maximumScale: 1 and userScalable: false,Mobile Usability & Accessibility Compliance,Verified
+3,Phase 1: Safe Baseline,Brand Duplication,app/appliances/layout.js,Removed redundant '| Doorstep Hub' from layout title,Eliminates double-brand title penalty,Verified
+4,Phase 1: Safe Baseline,Legacy 308 Redirects,next.config.js,Added server HTTP 308 redirects for /pg-hostel and /religious,Eliminates soft-404 and redirect hops,Verified
+5,Phase 2: Dynamic Metadata,App Download Page,app/app/layout.js,Created Server Layout with complete metadata export,"Gives /app dedicated title, description, and OG image",Verified
+6,Phase 2: Dynamic Metadata,Appliance Listing,app/appliances/listing/[slug]/layout.js,Server layout with dynamic slugToTitle metadata,Unique titles for all appliance service listings,Verified
+7,Phase 2: Dynamic Metadata,Appliance Details,app/appliances/detail/[serviceId]/layout.js,Server layout with dedicated service detail metadata,Prevents fallback to generic homepage metadata,Verified
+8,Phase 2: Dynamic Metadata,PG Listings,app/pghostels/listings/[type]/layout.js,Dynamic metadata layout for mens/womens/coliving stays,High-intent local PG search visibility,Verified
+9,Phase 2: Dynamic Metadata,PG Subcategories,app/pghostels/subcategory/[slug]/layout.js,Dynamic metadata layout for PG subcategory pages,Long-tail room sharing search rankings,Verified
+10,Phase 2: Dynamic Metadata,PG Hostels Profile,app/pghostels/hostel/[slug]/layout.js,Dynamic property metadata with amenities,Rich SERP snippets for hostel properties,Verified
+11,Phase 2: Dynamic Metadata,Religious Categories,app/religious-services/category/[slug]/layout.js,Dynamic pooja category metadata with Vedic pandit terms,Top-10 ranking potential for pooja keywords,Verified
+12,Phase 2: Dynamic Metadata,Religious Rituals,app/religious-services/subcategory/[slug]/layout.js,Dynamic ritual metadata with auspicious muhurat terms,Targeted long-tail ritual search queries,Verified
+13,Phase 2: Dynamic Metadata,Religious Service,app/religious-services/service/[slug]/layout.js,Dynamic specific pooja service metadata,Transactional booking intent capture,Verified
+14,Phase 2: Dynamic Metadata,Spa & Salon Categories,app/spa-salon/category/[slug]/layout.js,Dynamic beauty category metadata for home services,Competitive rankings for salon at home terms,Verified
+15,Phase 2: Dynamic Metadata,Spa Subcategories,app/spa-salon/subcategory/[slug]/layout.js,Dynamic treatment metadata with hygienic care terms,Increased local beauty enquiries,Verified
+16,Phase 2: Dynamic Metadata,Spa Services,app/spa-salon/service/[slug]/layout.js,Dynamic specific beauty treatment metadata,Conversion-oriented search traffic,Verified
+17,Phase 2: Dynamic Metadata,AMC Plans,app/amc/[slug]/layout.js,Dynamic appliance maintenance plan metadata,B2C annual maintenance enquiry growth,Verified
+18,Phase 3: Heading Hierarchy,City Appliance Hubs,app/appliances/repair-service/[citySlug]/page.js,Pre-rendered SSR H1 + JSON-LD; eliminated Loader2,100% crawlability across all 26 cities,Verified
+19,Phase 3: Heading Hierarchy,Knowledge Articles,app/knowledge/[slug]/page.js,Fixed Next.js 16 Promise resolution on params.slug,Eliminates empty schema and runtime warnings,Verified
+20,Phase 4: Canonical Consolidation,Appliance Hub Redirect,next.config.js,308 permanent redirect for /appliance-repair-services -> /appliances,Consolidates PageRank; eliminates cannibalization,Verified
+21,Phase 4: Canonical Consolidation,Promotional Banner Links,"app/components/landing/HomeExclusiveOffersSection.jsx, app/offers/page.jsx",Updated 10 internal promo links to /appliances,Zero redirect hops from homepage,Verified
+22,Phase 4: Canonical Consolidation,Blog to Knowledge Redirect,"next.config.js, app/lib/seo/sitemapManager.js",308 redirect /blog -> /knowledge; removed /blog from sitemap,100% sitemap canonical purity,Verified
+23,Phase 5: Image SEO,Hero Image Accessibility,app/components/landing/HeroSection.jsx,Descriptive ALT text on customer hero graphic,Enhanced screen-reader and image SEO,Verified
+24,Phase 5: Image SEO,Rate Card Alt Tags,"app/components/spasalon/DetailsPage.jsx, app/components/spasalon/SpaServiceDetailPage.jsx, app/components/religious/ReligiousServiceDetailPage.jsx",Replaced empty alt='' with dynamic rate card thumbnails,Eliminated accessibility & SEO validation errors,Verified
+25,Phase 6: Sitemaps & Submission,Runtime Sitemap Validator,scripts/validate-sitemaps.js,Validated 60 unique canonical URLs (0 errors),Immediate submission readiness for GSC & Bing,Verified

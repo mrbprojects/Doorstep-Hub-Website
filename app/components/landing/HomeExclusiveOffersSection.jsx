@@ -12,7 +12,7 @@ import { API_BASE_URL, IMAGE_BASE_URL, getImageUrl } from '@/config/env';
  * Authoritative Service IDs mapped directly to live website routes
  */
 export const SERVICE_ID_ROUTES = {
-  '683daaa8f261c1548bdf7442': { name: 'Appliance Service', path: '/appliance-repair-services' },
+  '683daaa8f261c1548bdf7442': { name: 'Appliance Service', path: '/appliances' },
   '695250aa57bb211ca094e5fd': { name: 'Religious Services', path: '/religious-services' },
   '69524fb157bb211ca094e5ee': { name: 'PG & Hostels', path: '/pghostels' },
   '69524f4a57bb211ca094e5e6': { name: 'Unisex & Pet Saloons', path: '/spa-salon' },
@@ -53,7 +53,7 @@ export function getServiceDestination(offer) {
   for (const sName of rawServiceNames) {
     const cleanName = String(sName || '').toLowerCase().trim();
     if (cleanName.includes('appliance') || cleanName.includes('repair')) {
-      return '/appliance-repair-services';
+      return '/appliances';
     }
     if (cleanName.includes('religious') || cleanName.includes('pooja') || cleanName.includes('pandit')) {
       return '/religious-services';
@@ -70,7 +70,7 @@ export function getServiceDestination(offer) {
   }
 
   // Fallback to primary services portal
-  return '/appliance-repair-services';
+  return '/appliances';
 }
 
 /**
@@ -92,14 +92,14 @@ export function getEligibleDestinations(offer) {
   const rawServiceNames = Array.isArray(offer?.serviceName) ? offer.serviceName : offer?.serviceName ? [offer.serviceName] : [];
   for (const sName of rawServiceNames) {
     const cleanName = String(sName || '').toLowerCase().trim();
-    if (cleanName.includes('appliance')) destinations.push({ name: 'Appliance Service', path: '/appliance-repair-services' });
+    if (cleanName.includes('appliance')) destinations.push({ name: 'Appliance Service', path: '/appliances' });
     else if (cleanName.includes('religious')) destinations.push({ name: 'Religious Services', path: '/religious-services' });
     else if (cleanName.includes('pg') || cleanName.includes('hostel')) destinations.push({ name: 'PG & Hostels', path: '/pghostels' });
     else if (cleanName.includes('spa') || cleanName.includes('salon') || cleanName.includes('pet')) destinations.push({ name: 'Spa & Salon', path: '/spa-salon' });
     else if (cleanName.includes('sell') || cleanName.includes('buy')) destinations.push({ name: 'Sell & Buy', path: '/sell-buy' });
   }
 
-  return destinations.length > 0 ? destinations : [{ name: 'Appliance Service', path: '/appliance-repair-services' }];
+  return destinations.length > 0 ? destinations : [{ name: 'Appliance Service', path: '/appliances' }];
 }
 
 /**

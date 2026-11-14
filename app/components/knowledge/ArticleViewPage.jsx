@@ -79,7 +79,7 @@ export function ArticleViewPage({ slug, initialArticle = null, initialRelated = 
 
     useEffect(() => {
         if (!loading && !article) {
-            router.replace('/appliance-repair-services');
+            router.replace('/knowledge');
         }
     }, [loading, article, router]);
 

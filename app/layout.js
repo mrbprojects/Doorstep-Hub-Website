@@ -34,7 +34,7 @@ export const metadata = {
     default: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
     template: '%s | Doorstep Hub'
   },
-  description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.',
+  description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Salon, PG & Hostel Booking System Lifestyle and Religious services across India.',
   authors: [{ name: 'D-Hub' }],
   robots: {
     index: true,
@@ -49,7 +49,7 @@ export const metadata = {
   },
   openGraph: {
     title: 'Doorstep Hub | One-Stop Home & Lifestyle Services in India',
-    description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Saloon, PG & Hostel Booking Sytem Lifestyle and Religious services across India.',
+    description: 'Doorstep Hub Delivers Professional Appliance Repair, Spa & Salon, PG & Hostel Booking System Lifestyle and Religious services across India.',
     url: 'https://doorstephub.com',
     siteName: 'Doorstep Hub',
     images: [
@@ -81,8 +81,6 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({ children }) {

@@ -385,7 +385,7 @@ export default function NewHostelDetailPage({ slugOverride = null }) {
     // Redirection if not found
     useEffect(() => {
         if (!loading && (fetchError || !hostelData)) {
-            router.replace('/appliance-repair-services');
+            router.replace('/pghostels');
         }
     }, [loading, fetchError, hostelData, router]);
 

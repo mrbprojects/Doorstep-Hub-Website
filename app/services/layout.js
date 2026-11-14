@@ -3,7 +3,7 @@ import { Footer } from '@/components/layout/Footer';
 
 export const metadata = {
     title: 'Home & Professional Doorstep Services | Doorstep Hub',
-    description: 'Book professional doorstep services in India. On-demand services for appliance repair, cleaning, spa, beauty & saloon, and religious services.',
+    description: 'Book professional doorstep services in India. On-demand services for appliance repair, cleaning, spa, beauty & salon, and religious services.',
 };
 
 export default function ServicesLayout({ children }) {

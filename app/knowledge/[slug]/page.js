@@ -135,7 +135,7 @@ export default async function KnowledgeArticle({ params }) {
         },
         mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': `https://doorstephub.com/knowledge/${params.slug}`
+            '@id': `https://doorstephub.com/knowledge/${slug}`
         }
     };
 
@@ -146,7 +146,7 @@ export default async function KnowledgeArticle({ params }) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
             />
             <ArticleViewPage
-                slug={params.slug}
+                slug={slug}
                 initialArticle={article}
                 initialRelated={related}
             />

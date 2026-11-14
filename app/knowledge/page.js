@@ -3,7 +3,7 @@ import { KnowledgeListingPage } from '@/components/knowledge/KnowledgeListingPag
 export const revalidate = 3600;
 
 export const metadata = {
-    title: 'Knowledge Base & Appliance Care Guides | Doorstep Hub',
+    title: 'Knowledge Base & Appliance Care Guides',
     description: 'Explore comprehensive expert guides, appliance repair tips, maintenance checklists, and home service advice from Doorstep Hub professionals.',
     alternates: {
         canonical: 'https://doorstephub.com/knowledge',

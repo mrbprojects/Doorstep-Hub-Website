@@ -8,7 +8,7 @@ import { ServiceTypeSelectionModal } from '@/components/appliances/ServiceTypeSe
 import { TopCategories } from '@/components/appliances/TopCategories';
 import { FeaturedServices } from '@/components/appliances/FeaturedServices';
 import { RecentlyBooked } from '@/components/appliances/RecentlyBooked';
-import { DownloadApp } from '@/components/appliances/DownloadApp';
+import { AppDownload } from '@/components/landing/AppDownload';
 import { NearbyServiceCenters } from '@/components/landing/NearbyServiceCenters';
 
 
@@ -141,7 +141,7 @@ export function ApplianceHomePage() {
                     onServiceClick={handleServiceClick}
                     onViewAll={() => router.push(`/${serviceSlugs.recentlyBooked}`)}
                 />
-                <DownloadApp />
+                <AppDownload />
                 {/* parked like customer app — not using service centers */}
                 {/* <NearbyStores onViewAll={() => router.push(`/${serviceSlugs.serviceCenter}`)} />
                 <PopularCenters onStoreClick={(storeSlug, storeId) => {
